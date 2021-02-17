@@ -1,7 +1,7 @@
-|Travis|_ |Coveralls|_ |pypi_version|_ |downloads|_ |black|_ |doi|_
+|Actions|_ |Coveralls|_ |pypi_version|_ |downloads|_ |black|_ |doi|_
 
-.. |Travis| image:: https://travis-ci.org/pyxem/pyxem.svg?branch=master
-.. _Travis: https://travis-ci.org/pyxem/pyxem
+.. |Actions| image:: https://github.com/pyxem/pyxem/workflows/build/badge.svg
+.. _Actions: https://github.com/pyxem/pyxem/actions
 
 .. |Coveralls| image:: https://coveralls.io/repos/github/pyxem/pyxem/badge.svg?branch=master
 .. _Coveralls: https://coveralls.io/github/pyxem/pyxem?branch=master
@@ -22,9 +22,9 @@ pyxem is an open-source python library for multi-dimensional diffraction microsc
 
 The package defines objects and functions for the analysis of numerous diffraction patterns. It has been primarily developed as a platform for hybrid diffraction-microscopy based on 4D scanning diffraction microscopy data in which a 2D diffraction pattern is recorded at every position in a 2D scan of a specimen.
 
-pyxem is an extension of the hyperspy library for multi-dimensional data analysis and defines diffraction specific Signal classes.
+pyxem is an extension of the hyperspy library for multi-dimensional data analysis and defines diffraction specific `Signal` classes.
 
-**Installation instructions, documentation and tutorial examples are available** `here <https://pyxem.github.io/pyxem-website>`__ .
+**Installation instructions and tutorial examples are available** `here <https://github.com/pyxem/pyxem-demos>`__ .
 
 If analysis using pyxem forms a part of published work please cite the DOI at the top of this page.
 

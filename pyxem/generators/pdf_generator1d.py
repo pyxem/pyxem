@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -19,8 +19,9 @@
 """PDF generator and associated tools."""
 
 import numpy as np
-from pyxem.signals.pair_distribution_function1d import PairDistributionFunction1D
-from pyxem.signals import transfer_navigation_axes
+
+from pyxem.signals import PairDistributionFunction1D
+from pyxem.utils.signal import transfer_navigation_axes
 
 
 class PDFGenerator1D:

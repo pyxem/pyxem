@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -25,10 +25,9 @@ import pytest
 import diffpy.structure
 import numpy as np
 
-from pyxem.signals.diffraction2d import Diffraction2D
-from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
-from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
 from diffsims.libraries.vector_library import DiffractionVectorLibrary
+
+from pyxem.signals import ElectronDiffraction1D, ElectronDiffraction2D
 
 # a straight lift from
 # https://docs.pytest.org/en/latest/example/simple.html#control-skipping-of-tests-according-to-command-line-option--
@@ -48,16 +47,19 @@ def pytest_collection_modifyitems(config, items):
     if config.getoption("--runslow"):
         # --runslow given in cli: do not skip slow tests
         return
-    skip_slow = pytest.mark.skip(reason="need --runslow option to run")
-    for item in items:
-        if "slow" in item.keywords:
-            item.add_marker(skip_slow)
+    else:  # pragma: no cover
+        skip_slow = pytest.mark.skip(reason="need --runslow option to run")
+        for item in items:
+            if "slow" in item.keywords:
+                item.add_marker(skip_slow)
+
+
+# End of the code lift, it's regular code from here on out
 
 
 @pytest.fixture
 def default_structure():
-    """An atomic structure represented using diffpy
-    """
+    """An atomic structure represented using diffpy"""
     latt = diffpy.structure.lattice.Lattice(3, 3, 5, 90, 90, 120)
     atom = diffpy.structure.atom.Atom(atype="Ni", xyz=[0, 0, 0], lattice=latt)
     hexagonal_structure = diffpy.structure.Structure(atoms=[atom], lattice=latt)
@@ -66,7 +68,7 @@ def default_structure():
 
 @pytest.fixture
 def z():
-    return np.array(
+    z = np.array(
         [
             [
                 [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
@@ -110,6 +112,7 @@ def z():
             ],
         ]
     ).reshape(2, 2, 8, 8)
+    return z
 
 
 @pytest.fixture
@@ -159,16 +162,28 @@ def electron_diffraction1d():
 
     return ElectronDiffraction1D(data)
 
+
 @pytest.fixture
 def vector_match_peaks():
-    return np.array([[1, 0.1, 0], [0, 2, 0], [1, 2, 3],])
+    return np.array(
+        [
+            [1, 0.1, 0],
+            [0, 2, 0],
+            [1, 2, 3],
+        ]
+    )
+
 
 @pytest.fixture
 def vector_library():
     library = DiffractionVectorLibrary()
     library["A"] = {
         "indices": np.array(
-            [[[0, 2, 0], [1, 0, 0]], [[1, 2, 3], [0, 2, 0]], [[1, 2, 3], [1, 0, 0]],]
+            [
+                [[0, 2, 0], [1, 0, 0]],
+                [[1, 2, 3], [0, 2, 0]],
+                [[1, 2, 3], [1, 0, 0]],
+            ]
         ),
         "measurements": np.array(
             [

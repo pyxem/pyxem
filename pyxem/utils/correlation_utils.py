@@ -29,7 +29,9 @@ def _correlation(z, axis=0, mask=None, wrap=True, normalize=True):
         # is a power of 2.  Based on the numpy implementation.  Not terribly
         # faster I think..
         padder[axis] = (pad, pad)
-        slicer = [slice(None), ] * len(z_shape)
+        slicer = [
+            slice(None),
+        ] * len(z_shape)
         slicer[axis] = slice(0, -2 * pad)  # creating the proper slices
         if mask is None:
             mask = np.zeros(shape=np.shape(z))
@@ -52,7 +54,7 @@ def _correlation(z, axis=0, mask=None, wrap=True, normalize=True):
         ).real
         number_unmasked[
             number_unmasked < 1
-            ] = 1  # get rid of divide by zero error for completely masked rows
+        ] = 1  # get rid of divide by zero error for completely masked rows
         z[m] = 0
 
     # fast method uses a FFT and is a process which is O(n) = n log(n)

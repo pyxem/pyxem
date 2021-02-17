@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -18,49 +18,96 @@
 
 import pytest
 import numpy as np
+import hyperspy.api as hs
+import dask.array as da
 
 from hyperspy._signals.signal2d import Signal2D
-
-from pyxem import ElectronDiffraction2D
-from pyxem.signals.indexation_results import TemplateMatchingResults
-from pyxem.generators.indexation_generator import (
-    TemplateIndexationGenerator,
-    ProfileIndexationGenerator,
-    VectorIndexationGenerator)
-
-
 from diffsims.libraries.vector_library import DiffractionVectorLibrary
-from diffsims.libraries.diffraction_library import DiffractionLibrary
 from diffsims.sims.diffraction_simulation import ProfileSimulation
-from pyxem.signals.diffraction_vectors import DiffractionVectors
-
-
 from diffsims.generators.diffraction_generator import DiffractionGenerator
 from diffsims.generators.library_generator import DiffractionLibraryGenerator
-from diffsims.libraries.diffraction_library import DiffractionLibrary
 from diffsims.libraries.structure_library import StructureLibrary
 
+from pyxem.generators import (
+    IndexationGenerator,
+    TemplateIndexationGenerator,
+    ProfileIndexationGenerator,
+    VectorIndexationGenerator,
+    AcceleratedIndexationGenerator,
+)
+from pyxem.signals import (
+    ElectronDiffraction2D,
+    TemplateMatchingResults,
+    DiffractionVectors,
+)
 from pyxem.utils.indexation_utils import OrientationResult
+from unittest.mock import Mock
 
-@pytest.mark.parametrize("method",['fast_correlation',
-                        'zero_mean_normalized_correlation'])
-def test_TemplateIndexationGenerator(default_structure,method):
+def generate_library(good_library):
+    """Here we're testing the __init__ so we focus on 0 being the first entry of the orientations"""
+    mock_sim_1 = Mock()
+    mock_sim_1.calibrated_coordinates = np.array(
+            [
+                [0, 1, 0],
+                [1, 0, 0],
+            ]
+        )
+    mock_sim_1.intensities = np.array([2, 3,])
+    simlist = [mock_sim_1, mock_sim_1]
+
+    lead_number = 0 if good_library else 1
+    orientations = np.array(
+            [
+                [0, 2, 3],
+                [lead_number, 4, 5],
+            ]
+        )
+    library = {}
+    library["dummyphase"] = {"simulations": simlist, "orientations": orientations}
+    return library
+
+def test_old_indexer_routine():
+    with pytest.raises(ValueError):
+        _ = IndexationGenerator("a", "b")
+
+@pytest.mark.parametrize("good_library",[True,False])
+def test_AcceleratedIndexationGenerator(good_library):
+    signal = ElectronDiffraction2D((np.ones((2,2,256,256)))).as_lazy()
+    library = generate_library(good_library=good_library)
+
+    if good_library:
+        acgen = AcceleratedIndexationGenerator(signal,library)
+        d = acgen.correlate(n_largest=2)
+
+    elif not good_library:
+        with pytest.raises(ValueError):
+            acgen = AcceleratedIndexationGenerator(signal,library)
+
+    return None
+
+@pytest.mark.parametrize(
+    "method", ["fast_correlation", "zero_mean_normalized_correlation"]
+)
+def test_TemplateIndexationGenerator(default_structure, method):
     identifiers = ["a", "b"]
     structures = [default_structure, default_structure]
-    orientations = [[(0, 0, 0), (0,1,0),(1,0,0)],
-                    [(0, 0, 1),(0, 0, 2),(0, 0, 3)]]
+    orientations = [
+        [(0, 0, 0), (0, 1, 0), (1, 0, 0)],
+        [(0, 0, 1), (0, 0, 2), (0, 0, 3)],
+    ]
     structure_library = StructureLibrary(identifiers, structures, orientations)
     libgen = DiffractionLibraryGenerator(DiffractionGenerator(300))
     library = libgen.get_diffraction_library(
-                    structure_library,0.017, 0.02, (100, 100), False
+        structure_library, 0.017, 0.02, (100, 100), False
     )
 
-    edp = ElectronDiffraction2D(np.random.rand(2,2,200,200))
-    indexer = TemplateIndexationGenerator(edp,library)
+    edp = ElectronDiffraction2D(np.random.rand(2, 2, 200, 200))
+    indexer = TemplateIndexationGenerator(edp, library)
 
-    z = indexer.correlate(method=method,n_largest=2)
-    assert isinstance(z,TemplateMatchingResults)
-    assert isinstance(z.data,Signal2D)
+    mask_signal = hs.signals.Signal2D(np.array([[1, 0], [1, 1]])).T
+    z = indexer.correlate(method=method, n_largest=2, mask=mask_signal)
+    assert isinstance(z, TemplateMatchingResults)
+    assert isinstance(z.data, Signal2D)
     assert z.data.data.shape[0:2] == edp.data.shape[0:2]
     assert z.data.data.shape[3] == 5
 
@@ -156,6 +203,7 @@ def test_profile_indexation_generator_single_indexation(profile_simulation):
     )
     indexation = pig.index_peaks(tolerance=0.02)
     np.testing.assert_almost_equal(indexation[0][0], 0.3189193164369)
+
 
 def test_vector_indexation_generator_init():
     vectors = DiffractionVectors([[1], [2]])

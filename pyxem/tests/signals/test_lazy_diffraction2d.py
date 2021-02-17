@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-from pyxem.signals.diffraction2d import Diffraction2D, LazyDiffraction2D
+from pyxem.signals import Diffraction2D, LazyDiffraction2D
 
 
 class TestDecomposition:

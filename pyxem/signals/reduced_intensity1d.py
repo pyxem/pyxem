@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -19,9 +19,7 @@
 
 from hyperspy.signals import Signal1D
 
-from pyxem.components.reduced_intensity_correction_component import (
-    ReducedIntensityCorrectionComponent,
-)
+from pyxem.components import ReducedIntensityCorrectionComponent
 from pyxem.utils.ri_utils import (
     damp_ri_exponential,
     damp_ri_lorch,

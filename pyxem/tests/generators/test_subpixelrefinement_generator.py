@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -19,15 +19,14 @@
 import pytest
 import numpy as np
 
+from skimage import draw
+
+from pyxem.generators import SubpixelrefinementGenerator
 from pyxem.generators.subpixelrefinement_generator import (
-    SubpixelrefinementGenerator,
     get_simulated_disc,
     get_experimental_square,
-    get_simulated_disc,
 )
-from pyxem.signals.diffraction_vectors import DiffractionVectors
-from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
-from skimage import draw
+from pyxem.signals import DiffractionVectors, ElectronDiffraction2D
 
 
 @pytest.fixture()
@@ -51,12 +50,12 @@ def test_experimental_square_size(exp_disc):
 
 def test_failure_for_non_even_entry_to_get_simulated_disc():
     with pytest.raises(ValueError, match="'square_size' must be an even number"):
-        disc = get_simulated_disc(61, 5)
+        _ = get_simulated_disc(61, 5)
 
 
 def test_failure_for_non_even_errors_get_experimental_square(exp_disc):
     with pytest.raises(ValueError, match="'square_size' must be an even number"):
-        square = get_experimental_square(exp_disc, [17, 19], 7)
+        _ = get_experimental_square(exp_disc, [17, 19], 7)
 
 
 class Test_init_xfails:
@@ -70,7 +69,7 @@ class Test_init_xfails:
             ValueError,
             match="Some of your vectors do not lie within your diffraction pattern",
         ):
-            sprg = SubpixelrefinementGenerator(dp, vector)
+            _ = SubpixelrefinementGenerator(dp, vector)
 
     def test_out_of_range_vectors_DiffractionVectors(self):
         """Test that putting vectors that lie outside of the
@@ -82,7 +81,7 @@ class Test_init_xfails:
             ValueError,
             match="Some of your vectors do not lie within your diffraction pattern",
         ):
-            sprg = SubpixelrefinementGenerator(dp, vectors)
+            _ = SubpixelrefinementGenerator(dp, vectors)
 
     def test_wrong_navigation_dimensions(self):
         """Tests that navigation dimensions must be appropriate too."""
@@ -96,7 +95,7 @@ class Test_init_xfails:
             ValueError,
             match=r"Vectors with shape .* must have the same navigation shape as .*",
         ):
-            sprg = SubpixelrefinementGenerator(dp, vectors)
+            _ = SubpixelrefinementGenerator(dp, vectors)
 
 
 class set_up_for_subpixelpeakfinders:
@@ -131,9 +130,9 @@ class set_up_for_subpixelpeakfinders:
 
 
 class Test_subpixelpeakfinders:
-    """ Tests the various peak finders have the correct x,y conventions for
+    """Tests the various peak finders have the correct x,y conventions for
     both the vectors and the shifts, in both the numpy and the DiffractionVectors
-    cases as well as confirming we have avoided 'off by one' errors """
+    cases as well as confirming we have avoided 'off by one' errors"""
 
     set_up = set_up_for_subpixelpeakfinders()
 
@@ -170,7 +169,8 @@ class Test_subpixelpeakfinders:
 
     def test_log(self, diffraction_vectors):
         with pytest.raises(
-            NotImplementedError, match="This functionality was removed in v.0.13.0",
+            NotImplementedError,
+            match="This functionality was removed in v.0.13.0",
         ):
             _ = self.get_spr(diffraction_vectors).local_gaussian_method(12)
 

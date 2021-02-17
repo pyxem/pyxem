@@ -20,9 +20,7 @@ import pytest
 import numpy as np
 import dask.array as da
 
-from hyperspy.signals import Signal2D
-
-from pyxem.signals.power2d import Power2D, LazyPower2D
+from pyxem.signals import Power2D, LazyPower2D
 
 
 class TestComputeAndAsLazy2D:

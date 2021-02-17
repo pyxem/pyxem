@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -19,19 +19,20 @@
 import pytest
 import numpy as np
 import dask.array as da
-import hyperspy.api as hs
 
-from hyperspy.signals import Signal1D, Signal2D
+from hyperspy.signals import Signal2D
 
-from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
-from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
-from pyxem.signals.polar_diffraction2d import PolarDiffraction2D
-from pyxem.signals.electron_diffraction2d import LazyElectronDiffraction2D
+from pyxem.signals import (
+    ElectronDiffraction1D,
+    ElectronDiffraction2D,
+    PolarDiffraction2D,
+    LazyElectronDiffraction2D,
+)
 
 
 def test_init():
     z = np.zeros((2, 2, 2, 2))
-    dp = ElectronDiffraction2D(
+    _ = ElectronDiffraction2D(
         z, metadata={"Acquisition_instrument": {"SEM": "Expensive-SEM"}}
     )
 
@@ -101,15 +102,6 @@ class TestSimpleMaps:
 
         assert transformed_dp.data.dtype == "uint8"
 
-    methods = ["average", "nan"]
-
-    @pytest.mark.parametrize("method", methods)
-    def test_remove_dead_pixels(self, diffraction_pattern, method):
-        dpr = diffraction_pattern.remove_deadpixels(
-            [[1, 2], [5, 6]], method, inplace=False
-        )
-        assert isinstance(dpr, ElectronDiffraction2D)
-
 
 class TestSimpleHyperspy:
     # Tests functions that assign to hyperspy metadata
@@ -131,7 +123,18 @@ class TestSimpleHyperspy:
         assert isinstance(diffraction_pattern, ElectronDiffraction2D)
 
     @pytest.mark.parametrize(
-        "calibration, center", [(1, (4, 4),), (0.017, (3, 3)), (0.5, None,),]
+        "calibration, center",
+        [
+            (
+                1,
+                (4, 4),
+            ),
+            (0.017, (3, 3)),
+            (
+                0.5,
+                None,
+            ),
+        ],
     )
     def test_set_diffraction_calibration(
         self, diffraction_pattern, calibration, center
@@ -153,7 +156,12 @@ class TestSimpleHyperspy:
 
 class TestGainNormalisation:
     @pytest.mark.parametrize(
-        "dark_reference, bright_reference", [(-1, 1), (0, 1), (0, 256),]
+        "dark_reference, bright_reference",
+        [
+            (-1, 1),
+            (0, 1),
+            (0, 256),
+        ],
     )
     def test_apply_gain_normalisation(
         self, diffraction_pattern, dark_reference, bright_reference
@@ -191,105 +199,6 @@ class TestDirectBeamMethods:
         mask_calculated = diffraction_pattern.get_direct_beam_mask(2)
         assert isinstance(mask_calculated, Signal2D)
         assert np.equal(mask_calculated, mask_expected)
-
-
-class TestBackgroundMethods:
-    @pytest.mark.parametrize(
-        "method, kwargs",
-        [
-            ("h-dome", {"h": 1,}),
-            ("gaussian_difference", {"sigma_min": 0.5, "sigma_max": 1,}),
-            ("median", {"footprint": 4,}),
-            ("reference_pattern", {"bg": np.ones((8, 8)),}),
-        ],
-    )
-    def test_remove_background(self, diffraction_pattern, method, kwargs):
-        bgr = diffraction_pattern.remove_background(method=method, **kwargs)
-        assert bgr.data.shape == diffraction_pattern.data.shape
-        assert bgr.max() <= diffraction_pattern.max()
-
-    def test_no_kwarg(self, diffraction_pattern):
-        with pytest.raises(
-            TypeError, match="missing 1 required positional argument: 'h'",
-        ):
-            bgr = diffraction_pattern.remove_background(method="h-dome")
-
-
-class TestPeakFinding:
-    # This is assertion free testing
-
-    @pytest.fixture
-    def ragged_peak(self):
-        """
-        A small selection of peaks in an ElectronDiffraction2D, to allow
-        flexibilty of test building here.
-        """
-        pattern = np.zeros((2, 2, 128, 128))
-        pattern[:, :, 40:42, 45] = 1
-        pattern[:, :, 110, 30:32] = 1
-        pattern[1, 0, 71:73, 21:23] = 1
-        dp = ElectronDiffraction2D(pattern)
-        dp.set_diffraction_calibration(1)
-        return dp
-
-    methods = [
-        "zaefferer",
-        "laplacian_of_gaussians",
-        "difference_of_gaussians",
-        "stat",
-        "xc",
-    ]
-
-    @pytest.mark.parametrize("method", methods)
-    # skimage internals
-    @pytest.mark.filterwarnings("ignore::DeprecationWarning")
-    def test_findpeaks_ragged(self, ragged_peak, method):
-        if method == "xc":
-            disc = np.ones((2, 2))
-            output = ragged_peak.find_peaks(
-                method="xc", disc_image=disc, min_distance=3
-            )
-        else:
-            output = ragged_peak.find_peaks(method=method, show_progressbar=False)
-
-
-class TestsAssertionless:
-    @pytest.mark.filterwarnings("ignore::DeprecationWarning")
-    # we don't want to use xc in this bit
-    @pytest.mark.filterwarnings("ignore::UserWarning")
-    def test_find_peaks_interactive(self, diffraction_pattern):
-        from matplotlib import pyplot as plt
-
-        plt.ion()  # to make plotting non-blocking
-        diffraction_pattern.find_peaks_interactive()
-        plt.close("all")
-
-
-class TestNotImplemented:
-    def test_failing_run(self, diffraction_pattern):
-        # Note - uses regex via re.search()
-        with pytest.raises(
-            NotImplementedError,
-            match=r"The method .* is not implemented. See documentation for available implementations",
-        ):
-            diffraction_pattern.find_peaks(method="no_such_method_exists")
-
-    def test_remove_dead_pixels_failing(self, diffraction_pattern):
-        with pytest.raises(
-            NotImplementedError,
-            match="The method specified is not implemented. See documentation for available implementations",
-        ):
-            dpr = diffraction_pattern.remove_deadpixels(
-                [[1, 2], [5, 6]], "fake_method", inplace=False, progress_bar=False
-            )
-
-    def test_remove_background_fake_method(self, diffraction_pattern):
-        # Note - uses regex via re.search()
-        with pytest.raises(
-            NotImplementedError,
-            match=r"The method .* is not implemented. See documentation for available implementations",
-        ):
-            bgr = diffraction_pattern.remove_background(method="fake_method")
 
 
 class TestComputeAndAsLazyElectron2D:

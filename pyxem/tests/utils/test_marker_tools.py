@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -20,7 +20,8 @@ import pytest
 import numpy as np
 from numpy.testing import assert_equal
 import dask.array as da
-from pyxem.signals.diffraction2d import Diffraction2D
+
+from pyxem.signals import Diffraction2D
 import pyxem.utils.marker_tools as mt
 
 
@@ -45,7 +46,6 @@ class TestGet4DMarkerList:
         for iy, ix in np.ndindex(peak_array.shape[:2]):
             peak = peak_array[iy, ix]
             s.axes_manager.indices = (ix, iy)
-            print(peak, (iy, ix), marker)
             assert marker.get_data_position("x1") == peak[0][1]
             assert marker.get_data_position("y1") == peak[0][0]
 
@@ -74,6 +74,32 @@ class TestGet4DMarkerList:
             peak_array, s.axes_manager.signal_axes
         )
         assert len(marker_list) == 3
+
+    def test_bool_array(self):
+        peak_array = np.empty((2, 3), dtype=np.object)
+        bool_array = np.empty((2, 3), dtype=np.object)
+        for ix, iy in np.ndindex(peak_array.shape):
+            peak_array[ix, iy] = np.random.randint(9, size=(1, 2))
+            bool_array[ix, iy] = np.random.randint(0, 2, size=1, dtype=np.bool)
+
+        s = Diffraction2D(np.zeros(shape=(2, 3, 10, 10)))
+        marker_list = mt._get_4d_points_marker_list(
+            peak_array, s.axes_manager.signal_axes, color="red", bool_array=bool_array
+        )
+        mt._add_permanent_markers_to_signal(s, marker_list)
+        marker = marker_list[0]
+        s.plot()
+
+        for iy, ix in np.ndindex(peak_array.shape[:2]):
+            peak = peak_array[iy, ix][0]
+            boolean = bool_array[iy, ix][0]
+            s.axes_manager.indices = (ix, iy)
+            if boolean:
+                assert marker.get_data_position("x1") == peak[1]
+                assert marker.get_data_position("y1") == peak[0]
+            else:
+                assert marker.get_data_position("x1") == -1000.0
+                assert marker.get_data_position("y1") == -1000.0
 
     def test_several_markers_different_peak_array_size(self):
         peak_array = np.empty((2, 3), dtype=np.object)
@@ -153,29 +179,6 @@ class TestAddPeakArrayToSignalAsMarkers:
         s.add_peak_array_as_markers(peak_array_computed)
 
 
-def test_peak_finding_to_marker():
-    data = np.zeros(shape=(3, 2, 10, 12))
-    data[0, 0, 2, 7] = 1
-    data[0, 1, 7, 3] = 1
-    data[1, 0, 4, 6] = 1
-    data[1, 1, 2, 3] = 1
-    data[2, 0, 3, 6] = 1
-    data[2, 1, 2, 2] = 1
-    s = Diffraction2D(data)
-    peak_array = s.find_peaks_lazy(
-        min_sigma=0.1, max_sigma=2, threshold=0.01, lazy_result=False
-    )
-    marker_list = mt._get_4d_points_marker_list(peak_array, s.axes_manager.signal_axes)
-    assert len(marker_list) == 1
-    marker = marker_list[0]
-    mt._add_permanent_markers_to_signal(s, marker_list)
-    s.plot()
-    for ix, iy in s.axes_manager:
-        px, py = marker.get_data_position("x1"), marker.get_data_position("y1")
-        value = s.inav[ix, iy].isig[int(px), int(py)].data[0]
-        assert value == 1.0
-
-
 class TestPixelToScaledValue:
     def test_simple(self):
         s = Diffraction2D(np.zeros((50, 60)))
@@ -204,3 +207,29 @@ class TestPixelToScaledValue:
         axis.offset = 6
         value = mt._pixel_to_scaled_value(axis, 4.5)
         assert value == 8.25
+
+
+class TestCheckLineSegmentInside:
+    @pytest.mark.parametrize(
+        "line",
+        [
+            [-10, 20, 30, 40],
+            [60, 20, 30, 40],
+            [10, -20, 30, 40],
+            [10, 60, 30, 40],
+            [10, 20, -30, 40],
+            [10, 20, 60, 40],
+            [10, 20, 30, -40],
+            [10, 20, 30, 60],
+        ],
+    )
+    def test_outside(self, line):
+        s = Diffraction2D(np.zeros((2, 3, 50, 50), dtype=np.uint16))
+        signal_axes = s.axes_manager.signal_axes
+        assert not mt._check_line_segment_inside(signal_axes, line)
+
+    @pytest.mark.parametrize("line", [[10, 20, 30, 40], [20, 20, 40, 40]])
+    def test_inside(self, line):
+        s = Diffraction2D(np.zeros((2, 3, 50, 50), dtype=np.uint16))
+        signal_axes = s.axes_manager.signal_axes
+        assert mt._check_line_segment_inside(signal_axes, line)

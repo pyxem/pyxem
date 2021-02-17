@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -19,9 +19,11 @@
 import pytest
 import numpy as np
 import dask.array as da
-from pyxem.signals.diffraction2d import Diffraction2D
-import pyxem.utils.pixelated_stem_tools as pst
+
 from hyperspy.signals import Signal2D
+
+from pyxem.signals import Diffraction2D
+import pyxem.utils.pixelated_stem_tools as pst
 
 
 class TestRadialIntegrationDaskArray:
@@ -449,28 +451,3 @@ class TestAxesManagerMetadataCopying:
             pst._copy_signal_all_axes_metadata(s0, s1)
         with pytest.raises(ValueError):
             pst._copy_signal_all_axes_metadata(s0, s2)
-
-
-class TestFindAndRemoveDeadPixels:
-    def test_no_changes(self):
-        s = Diffraction2D(np.ones((10, 10, 10, 10)))
-        s_orig = s.deepcopy()
-        pst.find_and_remove_dead_pixels(s)
-        assert (s.data == s_orig.data).all()
-
-    def test_some_dead_pixels(self):
-        s = Diffraction2D(np.ones((10, 10, 10, 10)))
-        s.data[:, :, 5, 2] = 0
-        s.data[:, :, 2, 4] = 0
-        pst.find_and_remove_dead_pixels(s)
-        assert len(np.where(s.data == 0)[0]) == 0
-
-    def test_dead_pixel_camera_edge(self):
-        s = Diffraction2D(np.ones((10, 10, 10, 10)))
-        s.data[:, :, 0, 5] = 0
-        s.data[:, :, 2, 0] = 0
-        s.data[:, :, 2, -1] = 0
-        s.data[:, :, -1, 7] = 0
-        s_orig = s.deepcopy()
-        pst.find_and_remove_dead_pixels(s)
-        assert (s.data == s_orig.data).all()

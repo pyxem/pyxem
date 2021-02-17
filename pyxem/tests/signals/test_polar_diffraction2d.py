@@ -22,10 +22,13 @@ import dask.array as da
 
 from hyperspy.signals import Signal2D, Signal1D
 
-from pyxem.signals.polar_diffraction2d import PolarDiffraction2D, LazyPolarDiffraction2D
-from pyxem.signals.correlation2d import Correlation2D
-from pyxem.signals.symmetry1d import Symmetry1D
-from pyxem.signals.power2d import Power2D
+from pyxem.signals import (
+    PolarDiffraction2D,
+    LazyPolarDiffraction2D,
+    Correlation2D,
+    Power2D,
+    Symmetry1D,
+)
 
 
 class TestComputeAndAsLazy2D:

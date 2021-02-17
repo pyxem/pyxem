@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -17,7 +17,7 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import pytest
-import pyxem.dummy_data.dummy_data as dd
+import pyxem.dummy_data as dd
 
 
 @pytest.mark.slow
@@ -61,33 +61,41 @@ class TestDummyDataModule:
     def test_get_square_dpc_signal(self):
         s = dd.get_square_dpc_signal()
         assert hasattr(s, "plot")
-        s_ramp = dd.get_square_dpc_signal(add_ramp=True)
-        s_ramp.plot()
+        _ = dd.get_square_dpc_signal(add_ramp=True)
+        assert hasattr(s, "plot")
 
     def test_get_dead_pixel_signal(self):
-        s = dd.get_dead_pixel_signal()
+        s = dd.get_dead_pixel_signal(lazy=True)
+        assert hasattr(s, "compute")
+        s = dd.get_dead_pixel_signal(lazy=False)
         assert hasattr(s, "plot")
         assert (s.data == 0).any()
 
+    def test_get_hot_pixel_signal(self):
+        s = dd.get_hot_pixel_signal(lazy=True)
+        assert hasattr(s, "compute")
+        s = dd.get_hot_pixel_signal(lazy=False)
+        assert hasattr(s, "plot")
+        assert (s.data == 50000).any()
+
     def test_get_cbed_signal(self):
         s = dd.get_cbed_signal()
-        s.plot()
+        assert hasattr(s, "plot")
 
     def test_get_fem_signal(self):
         s = dd.get_fem_signal()
-        s.plot()
+        assert hasattr(s, "plot")
 
     def test_get_simple_fem_signal(self):
         s = dd.get_simple_fem_signal()
-        s.plot()
+        assert hasattr(s, "plot")
 
     def test_get_nanobeam_electron_diffraction_signal(self):
         s = dd.get_nanobeam_electron_diffraction_signal()
-        s.plot()
+        assert hasattr(s, "plot")
 
     def test_get_generic_fem_signal(self):
         s = dd.get_generic_fem_signal(probe_x=2, probe_y=3, image_x=20, image_y=25)
-        s.plot()
         assert s.axes_manager.shape == (2, 3, 20, 25)
         assert hasattr(s, "plot")
 

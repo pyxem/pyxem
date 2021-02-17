@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -21,16 +21,17 @@
 import numpy as np
 from scipy.optimize import curve_fit
 from math import sin, cos
-from hyperspy.roi import CircleROI, Line2DROI
-from hyperspy.misc.utils import stack as stack_method
 import matplotlib.pyplot as plt
 
-from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
-from pyxem.utils.calibration_utils import (
+from hyperspy.roi import CircleROI, Line2DROI
+from hyperspy.misc.utils import stack as stack_method
+from diffsims.utils.ring_pattern_utils import (
     call_ring_pattern,
     calc_radius_with_distortion,
     generate_ring_pattern,
 )
+
+from pyxem.signals import ElectronDiffraction2D
 from pyxem.utils.pyfai_utils import get_azimuthal_integrator, _get_setup
 
 
@@ -44,10 +45,9 @@ class CalibrationGenerator:
 
     """
 
-    def __init__(self,
-                 diffraction_pattern=None,
-                 grating_image=None,
-                 calibration_standard=None):
+    def __init__(
+        self, diffraction_pattern=None, grating_image=None, calibration_standard=None
+    ):
         """
         Parameters
         ------------
@@ -57,7 +57,7 @@ class CalibrationGenerator:
         grating_image : array_like
             Some 2 dimensional signal or numpy array of some
             standard sample used for calibration
-        calibration_standard : diffpy.structure.Structure 
+        calibration_standard : diffpy.structure.Structure
             for calculating the polycrystalline ring spacing
         """
         # Assign attributes
@@ -74,10 +74,18 @@ class CalibrationGenerator:
         self.navigation_calibration = None
 
     def __str__(self):
-        information_string = ("\n|Calibration Data|\n" + "=================\n" +
-                              "Affine Matrix: " + str(self.affine_matrix) + "\n" +
-                              "Rotation Angle:" + str(self.rotation_angle) + "\n" +
-                              "Center: " + str(self.center))
+        information_string = (
+            "\n|Calibration Data|\n"
+            + "=================\n"
+            + "Affine Matrix: "
+            + str(self.affine_matrix)
+            + "\n"
+            + "Rotation Angle:"
+            + str(self.rotation_angle)
+            + "\n"
+            + "Center: "
+            + str(self.center)
+        )
         return information_string
 
     def to_ai(self, wavelength, **kwargs):
@@ -160,13 +168,13 @@ class CalibrationGenerator:
         standard_dp = self.diffraction_pattern
         image_size = standard_dp.data.shape[0]
         if center is None:
-            center = [(image_size -1)/2, (image_size -1)/2]
+            center = [(image_size - 1) / 2, (image_size - 1) / 2]
         # Set diffraction pattern variable
         x, y = np.mgrid[0:image_size, 0:image_size]
         radius_map = calc_radius_with_distortion(x, y, center[0], center[1], 1, 0)
         mask = radius_map < mask_radius
         ref = standard_dp.data[~mask]
-        fullx,fully = [x,y]
+        fullx, fully = [x, y]
         pts = np.array([fully[~mask], fullx[~mask]]).ravel()
         # Set initial parameters for fitting
         x0 = [scale, amplitude, spread, direct_beam_amplitude, asymmetry, rotation]
@@ -296,9 +304,7 @@ class CalibrationGenerator:
             circ = CircleROI(cx=size / 2, cy=size / 2, r=size / 5, r_inner=0)
             circ.add_widget(dpegm)
 
-    def get_diffraction_calibration(self,
-                                    mask_length,
-                                    linewidth):
+    def get_diffraction_calibration(self, mask_length, linewidth):
         """Determine the diffraction pattern pixel size calibration in units of
         reciprocal Angstroms per pixel.
 

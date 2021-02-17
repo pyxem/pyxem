@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -21,11 +21,14 @@ import numpy as np
 import dask.array as da
 import hyperspy.api as hs
 from matplotlib import pyplot as plt
+from numpy.random import default_rng
 
-from pyxem.signals.diffraction2d import Diffraction2D, LazyDiffraction2D
-from pyxem.signals.polar_diffraction2d import PolarDiffraction2D
-from pyxem.detectors.generic_flat_detector import GenericFlatDetector
-from pyxem.signals.diffraction1d import Diffraction1D
+from pyxem.signals import (
+    Diffraction1D,
+    Diffraction2D,
+    LazyDiffraction2D,
+    PolarDiffraction2D,
+)
 
 
 class TestComputeAndAsLazy2D:
@@ -120,7 +123,9 @@ class TestAzimuthalIntegral1d:
     def test_1d_azimuthal_integral_inplace(self, ones):
         ones.set_ai()
         az = ones.get_azimuthal_integral1d(
-            npt=10, correctSolidAngle=False, inplace=True,
+            npt=10,
+            correctSolidAngle=False,
+            inplace=True,
         )
         assert isinstance(ones, Diffraction1D)
         np.testing.assert_array_equal(ones.data[0:8], np.ones((8)))
@@ -130,7 +135,10 @@ class TestAzimuthalIntegral1d:
         ones.unit = "2th_rad"
         ones.set_ai(center=(5.5, 5.5))
         az = ones.get_azimuthal_integral1d(
-            npt=10, method="BBox", correctSolidAngle=False, radial_range=[0.0, 1.0],
+            npt=10,
+            method="BBox",
+            correctSolidAngle=False,
+            radial_range=[0.0, 1.0],
         )
         np.testing.assert_array_equal(az.data[0:7], np.ones(7))
 
@@ -141,7 +149,9 @@ class TestAzimuthalIntegral1d:
         ones.unit = unit
         ones.set_ai(center=(5.5, 5.5), wavelength=1e-9)
         az1 = ones.get_azimuthal_integral1d(
-            npt=10, radial_range=[0.0, 1.0], method="splitpixel",
+            npt=10,
+            radial_range=[0.0, 1.0],
+            method="splitpixel",
         )
         assert np.allclose(az1.axes_manager.signal_axes[0].scale, 0.1)
 
@@ -150,7 +160,12 @@ class TestAzimuthalIntegral1d:
     @pytest.mark.parametrize("center", [None, [9, 9]])
     @pytest.mark.parametrize("affine", [None, [[1, 0, 0], [0, 1, 0], [0, 0, 1]]])
     def test_1d_integration(
-        self, ones, radial_range, azimuth_range, center, affine,
+        self,
+        ones,
+        radial_range,
+        azimuth_range,
+        center,
+        affine,
     ):
         ones.set_ai(center=center, affine=affine, radial_range=radial_range)
         az = ones.get_azimuthal_integral1d(
@@ -186,6 +201,227 @@ class TestAzimuthalIntegral1d:
         )
         # 5^2*pi = 78.5
         np.testing.assert_almost_equal(integration.data.sum(), 78.5, decimal=0)
+
+    @pytest.mark.parametrize(
+        "shape", [(20, 16), (3, 20, 16), (4, 3, 20, 16), (6, 4, 3, 20, 16)]
+    )
+    def test_lazy_input_lazy_output_different_shapes(self, shape):
+        chunks = [5] * len(shape)
+        s = LazyDiffraction2D(da.ones(shape, chunks=chunks))
+        s.unit = "2th_deg"
+        s.set_ai()
+        npt = 10
+        s_a = s.get_azimuthal_integral1d(npt=npt)
+        output_signal_shape = s.axes_manager.shape[:-2] + (npt,)
+        output_data_shape = shape[:-2] + (npt,)
+        assert s_a.axes_manager.shape == output_signal_shape
+        assert s_a.data.shape == output_data_shape
+        s_a.compute()
+        assert s_a.axes_manager.shape == output_signal_shape
+        assert s_a.data.shape == output_data_shape
+
+    @pytest.mark.parametrize(
+        "shape", [(20, 16), (3, 20, 16), (4, 3, 20, 16), (6, 4, 3, 20, 16)]
+    )
+    def test_non_lazy_input_lazy_output(self, shape):
+        s = Diffraction2D(np.ones(shape))
+        s.unit = "2th_deg"
+        s.set_ai()
+        npt = 10
+        s_a = s.get_azimuthal_integral1d(npt=npt, lazy_result=True)
+        output_signal_shape = s.axes_manager.shape[:-2] + (npt,)
+        output_data_shape = shape[:-2] + (npt,)
+        assert s_a.axes_manager.shape == output_signal_shape
+        assert s_a.data.shape == output_data_shape
+        s_a.compute()
+        assert s_a.axes_manager.shape == output_signal_shape
+        assert s_a.data.shape == output_data_shape
+
+    @pytest.mark.parametrize(
+        "shape", [(20, 16), (3, 20, 16), (4, 3, 20, 16), (6, 4, 3, 20, 16)]
+    )
+    def test_lazy_input_non_lazy_output(self, shape):
+        chunks = [5] * len(shape)
+        s = LazyDiffraction2D(da.ones(shape, chunks=chunks))
+        s.unit = "2th_deg"
+        s.set_ai()
+        npt = 10
+        s_a = s.get_azimuthal_integral1d(npt=npt, lazy_result=False)
+        output_signal_shape = s.axes_manager.shape[:-2] + (npt,)
+        output_data_shape = shape[:-2] + (npt,)
+        assert s_a.axes_manager.shape == output_signal_shape
+        assert s_a.data.shape == output_data_shape
+
+    @pytest.mark.parametrize(
+        "shape", [(20, 16), (3, 20, 16), (4, 3, 20, 16), (6, 4, 3, 20, 16)]
+    )
+    def test_lazy_input_lazy_result_inplace(self, shape):
+        chunks = [5] * len(shape)
+        s = LazyDiffraction2D(da.ones(shape, chunks=chunks))
+        s.unit = "2th_deg"
+        s.set_ai()
+        npt = 10
+        output_signal_shape = s.axes_manager.shape[:-2] + (npt,)
+        output_data_shape = shape[:-2] + (npt,)
+        s.get_azimuthal_integral1d(npt=npt, inplace=True, lazy_result=True)
+        assert s.axes_manager.shape == output_signal_shape
+        assert s.data.shape == output_data_shape
+        s.compute()
+        assert s.axes_manager.shape == output_signal_shape
+        assert s.data.shape == output_data_shape
+
+    @pytest.mark.parametrize(
+        "shape", [(20, 16), (3, 20, 16), (4, 3, 20, 16), (6, 4, 3, 20, 16)]
+    )
+    def test_lazy_input_non_lazy_result_inplace(self, shape):
+        chunks = [5] * len(shape)
+        s = LazyDiffraction2D(da.ones(shape, chunks=chunks))
+        s.unit = "2th_deg"
+        s.set_ai()
+        npt = 10
+        output_signal_shape = s.axes_manager.shape[:-2] + (npt,)
+        output_data_shape = shape[:-2] + (npt,)
+        s.get_azimuthal_integral1d(npt=npt, inplace=True, lazy_result=False)
+        assert s.axes_manager.shape == output_signal_shape
+        assert s.data.shape == output_data_shape
+
+    @pytest.mark.parametrize(
+        "shape", [(20, 16), (3, 20, 16), (4, 3, 20, 16), (6, 4, 3, 20, 16)]
+    )
+    def test_non_lazy_input_lazy_result_inplace(self, shape):
+        s = Diffraction2D(np.ones(shape))
+        s.unit = "2th_deg"
+        s.set_ai()
+        npt = 10
+        output_signal_shape = s.axes_manager.shape[:-2] + (npt,)
+        output_data_shape = shape[:-2] + (npt,)
+        s.get_azimuthal_integral1d(npt=npt, inplace=True, lazy_result=True)
+        assert s.axes_manager.shape == output_signal_shape
+        assert s.data.shape == output_data_shape
+        s.compute()
+        assert s.axes_manager.shape == output_signal_shape
+        assert s.data.shape == output_data_shape
+
+
+class TestVariance:
+    @pytest.fixture
+    def ones(self):
+        ones_diff = Diffraction2D(data=np.ones(shape=(10, 10, 10, 10)))
+        ones_diff.axes_manager.signal_axes[0].scale = 0.1
+        ones_diff.axes_manager.signal_axes[1].scale = 0.1
+        ones_diff.axes_manager.signal_axes[0].name = "kx"
+        ones_diff.axes_manager.signal_axes[1].name = "ky"
+        ones_diff.unit = "2th_deg"
+        ones_diff.set_ai()
+        return ones_diff
+
+    @pytest.fixture
+    def ones_zeros(self):
+        data = np.ones(shape=(10, 10, 10, 10))
+        data[0:10:2, :, :, :] = 2
+        ones_diff = Diffraction2D(data=data)
+        ones_diff.axes_manager.signal_axes[0].scale = 0.1
+        ones_diff.axes_manager.signal_axes[1].scale = 0.1
+        ones_diff.axes_manager.signal_axes[0].name = "kx"
+        ones_diff.axes_manager.signal_axes[1].name = "ky"
+        ones_diff.unit = "2th_deg"
+        ones_diff.set_ai()
+        return ones_diff
+
+    @pytest.fixture
+    def bulls_eye_noisy(self):
+        x, y = np.mgrid[-25:25, -25:25]
+        data = (x ** 2 + y ** 2) ** 0.5
+        data = np.tile(data, (5, 5, 1, 1))
+        # Electron is equal to 1 count in image
+        rng = default_rng(seed=1)
+        data = rng.poisson(lam=data)
+        ones_diff = Diffraction2D(data=data)
+        ones_diff.axes_manager.signal_axes[0].scale = 0.1
+        ones_diff.axes_manager.signal_axes[1].scale = 0.1
+        ones_diff.axes_manager.signal_axes[0].name = "kx"
+        ones_diff.axes_manager.signal_axes[1].name = "ky"
+        ones_diff.unit = "2th_deg"
+        ones_diff.set_ai()
+        return ones_diff
+
+    def test_FEM_Omega(self, ones, ones_zeros):
+        ones_variance = ones.get_variance(npt=5, method="Omega")
+        # assert ones_variance.axes_manager[0].units == "2th_deg"
+        np.testing.assert_array_almost_equal(ones_variance.data, np.zeros(5), decimal=3)
+        ones_zeros_variance = ones_zeros.get_variance(5, method="Omega")
+        np.testing.assert_array_almost_equal(
+            ones_zeros_variance.data, np.ones(5) * 0.1111, decimal=3
+        )
+
+    def test_FEM_Omega_poisson_noise(self, bulls_eye_noisy):
+        bulls_eye_variance = bulls_eye_noisy.get_variance(25, method="Omega", dqe=1)
+        # We exclude small radii
+        np.testing.assert_array_almost_equal(
+            bulls_eye_variance.data[5:], np.zeros(20), decimal=2
+        )
+        # Testing for non dqe=1
+        bulls_eye_variance = (bulls_eye_noisy * 10).get_variance(
+            25, method="Omega", dqe=10
+        )
+        # This fails at small radii and might still fail because it is random...
+        np.testing.assert_array_almost_equal(
+            bulls_eye_variance.data[6:], np.zeros(19), decimal=2
+        )
+
+    def test_FEM_r(self, ones, ones_zeros, bulls_eye_noisy):
+        ones_variance = ones.get_variance(npt=5, method="r")
+        # assert ones_variance.axes_manager[0].units == "2th_deg"
+        np.testing.assert_array_almost_equal(ones_variance.data, np.zeros(5), decimal=3)
+        ones_zeros_variance = ones_zeros.get_variance(5, method="r")
+        np.testing.assert_array_almost_equal(
+            ones_zeros_variance.data, np.zeros(5), decimal=3
+        )
+        bulls_eye_variance = bulls_eye_noisy.get_variance(25, method="r", dqe=1)
+        # We exclude small radii
+        np.testing.assert_array_almost_equal(
+            bulls_eye_variance.data[5:], np.zeros(20), decimal=2
+        )
+        # Testing for non dqe=1
+        bulls_eye_variance = (bulls_eye_noisy * 10).get_variance(25, method="r", dqe=10)
+        # We exclude small radii
+        np.testing.assert_array_almost_equal(
+            bulls_eye_variance.data[6:], np.zeros(19), decimal=2
+        )
+
+    def test_FEM_r_spatial_kwarg(self, ones, ones_zeros, bulls_eye_noisy):
+        v, fv = ones.get_variance(npt=5, method="r", spatial=True)
+
+    @pytest.mark.parametrize("dqe_choice", [None, 0.3])
+    def test_FEM_VImage(self, ones, dqe_choice):
+        v = ones.get_variance(npt=5, method="VImage", dqe=dqe_choice)
+        if dqe_choice is None:
+            np.testing.assert_array_almost_equal(v.data, np.zeros(5), decimal=3)
+
+    def test_FEM_re(self, ones, ones_zeros, bulls_eye_noisy):
+        ones_variance = ones.get_variance(npt=5, method="re")
+        np.testing.assert_array_almost_equal(ones_variance.data, np.zeros(5), decimal=3)
+        ones_zeros_variance = ones_zeros.get_variance(5, method="re")
+        np.testing.assert_array_almost_equal(
+            ones_zeros_variance.data, np.ones(5) * 0.1111, decimal=3
+        )
+        bulls_eye_variance = bulls_eye_noisy.get_variance(25, method="re", dqe=1)
+        # This fails at small radii and might still fail because it is random...
+        np.testing.assert_array_almost_equal(
+            bulls_eye_variance.data[5:], np.zeros(20), decimal=2
+        )
+        # Testing for non dqe=1
+        bulls_eye_variance = (bulls_eye_noisy * 10).get_variance(
+            25, method="re", dqe=10
+        )
+        # This fails at small radii and might still fail because it is random...
+        np.testing.assert_array_almost_equal(
+            bulls_eye_variance.data[6:], np.zeros(19), decimal=1
+        )
+
+    def test_not_existing_method(self, ones):
+        with pytest.raises(ValueError):
+            ones.get_variance(npt=5, method="magic")
 
 
 class TestAzimuthalIntegral2d:
@@ -224,14 +460,21 @@ class TestAzimuthalIntegral2d:
         ones.unit = unit
         ones.set_ai(wavelength=1e-9, center=(5.5, 5.5))
         az1 = ones.get_azimuthal_integral2d(
-            npt=10, npt_azim=20, radial_range=[0.0, 1.0], method="splitpixel",
+            npt=10,
+            npt_azim=20,
+            radial_range=[0.0, 1.0],
+            method="splitpixel",
         )
         assert np.allclose(az1.axes_manager.signal_axes[1].scale, 0.1)
 
     def test_2d_azimuthal_integral_inplace(self, ones):
         ones.set_ai()
         az = ones.get_azimuthal_integral2d(
-            npt=10, npt_azim=10, correctSolidAngle=False, inplace=True, method="BBox",
+            npt=10,
+            npt_azim=10,
+            correctSolidAngle=False,
+            inplace=True,
+            method="BBox",
         )
         assert isinstance(ones, PolarDiffraction2D)
         np.testing.assert_array_equal(ones.data[0:8, :], np.ones((8, 10)))
@@ -267,7 +510,11 @@ class TestAzimuthalIntegral2d:
         mask = np.zeros((10, 10))
         mask_bs = BaseSignal(data=mask)
         ones.get_azimuthal_integral2d(
-            npt=10, npt_azim=10, method="BBox", correctSolidAngle=False, mask=mask_bs,
+            npt=10,
+            npt_azim=10,
+            method="BBox",
+            correctSolidAngle=False,
+            mask=mask_bs,
         )
 
     def test_2d_azimuthal_integral_sum(self, ones):
@@ -281,7 +528,6 @@ class TestAzimuthalIntegral2d:
         integration2 = ones.get_azimuthal_integral2d(
             npt=10, npt_azim=15, radial_range=[0, 0.5], sum=True, mask=mask
         )
-        print(integration2.sum((-1, -2)).data)
 
 
 class TestPyFAIIntegration:
@@ -298,11 +544,18 @@ class TestPyFAIIntegration:
     def test_integrate_radial(self, ones):
         ones.set_ai(center=(5.5, 5.5), wavelength=1e-9)
         integration = ones.get_radial_integral(
-            npt=10, npt_rad=100, method="BBox", correctSolidAngle=False,
+            npt=10,
+            npt_rad=100,
+            method="BBox",
+            correctSolidAngle=False,
         )
         np.testing.assert_array_equal(integration, np.ones(10))
         integration = ones.get_radial_integral(
-            npt=10, npt_rad=100, method="BBox", correctSolidAngle=False, sum=True,
+            npt=10,
+            npt_rad=100,
+            method="BBox",
+            correctSolidAngle=False,
+            sum=True,
         )
         integration = ones.get_radial_integral(
             npt=10, npt_rad=100, method="BBox", correctSolidAngle=False, inplace=True
@@ -346,21 +599,21 @@ class TestPyFAIIntegration:
 class TestVirtualImaging:
     # Tests that virtual imaging runs without failure
 
-    @pytest.mark.parametrize("stack", [False])
-    def test_plot_integrated_intensity(self, stack, diffraction_pattern):
-        if stack:
-            diffraction_pattern = hs.stack([diffraction_pattern] * 3)
+    def test_plot_integrated_intensity(self, diffraction_pattern):
         roi = hs.roi.CircleROI(3, 3, 5)
         plt.ion()  # to make plotting non-blocking
         diffraction_pattern.plot_integrated_intensity(roi)
         plt.close("all")
 
-    def test_get_integrated_intensity(self, diffraction_pattern):
+    @pytest.mark.parametrize('has_nan', [True, False])
+    def test_get_integrated_intensity(self, diffraction_pattern, has_nan):
         roi = hs.roi.CircleROI(3, 3, 5)
+        if has_nan:
+            diffraction_pattern.isig[:2] = np.nan
         vi = diffraction_pattern.get_integrated_intensity(roi)
-        assert vi.data.shape == (2, 2)
         assert vi.axes_manager.signal_dimension == 2
         assert vi.axes_manager.navigation_dimension == 0
+        np.testing.assert_allclose(vi.data, np.array([[ 6.,  6.], [ 8., 10.]]))
 
     @pytest.mark.parametrize("out_signal_axes", [None, (0, 1), (1, 2), ("x", "y")])
     def test_get_integrated_intensity_stack(self, diffraction_pattern, out_signal_axes):
@@ -389,7 +642,7 @@ class TestVirtualImaging:
         assert vi.axes_manager.navigation_dimension == 0
         assert vi.metadata.General.title == "Integrated intensity"
         assert (
-            vi.metadata.Diffraction.intergrated_range
+            vi.metadata.Diffraction.integrated_range
             == "CircleROI(cx=3, cy=3, r=5) of Stack of "
         )
 
@@ -408,7 +661,7 @@ class TestVirtualImaging:
         assert vi.data.shape == (2,)
         assert vi.axes_manager.signal_dimension == 1
         assert vi.axes_manager.navigation_dimension == 0
-        assert vi.metadata.Diffraction.intergrated_range == "CircleROI(cx=3, cy=3, r=5)"
+        assert vi.metadata.Diffraction.integrated_range == "CircleROI(cx=3, cy=3, r=5)"
 
 
 class TestAzimuthalIntegrator:
@@ -423,14 +676,16 @@ class TestAzimuthalIntegrator:
         ones_diff.unit = "2th_deg"
         return ones_diff
 
+    @pytest.mark.xfail()
     def test_set_ai_fail(self, ones):
+        # Not enough parameters fed into .set_ai()
         ones.unit = "k_nm^-1"
         ai = ones.set_ai()
-        assert ai is None
 
+    @pytest.mark.xfail()
     def test_return_ai_fail(self, ones):
+        # .ai hasn't been set
         ai = ones.ai
-        assert ai is None
 
 
 class TestGetDirectBeamPosition:
@@ -503,6 +758,14 @@ class TestGetDirectBeamPosition:
         assert hasattr(s_shift.data, "compute")
         s_shift.compute()
 
+    def test_non_uniform_chunks(self):
+        s = LazyDiffraction2D(da.from_array(self.s.data, chunks=(8, 7, 10, 12)))
+        s_shift = s.get_direct_beam_position(method="blur", sigma=1, lazy_result=True)
+        shift_data_shape = s.data.shape[:-2] + (2,)
+        assert s_shift.data.shape == shift_data_shape
+        s_shift.compute()
+        assert s_shift.data.shape == shift_data_shape
+
 
 class TestCenterDirectBeam:
     def setup_method(self):
@@ -558,6 +821,18 @@ class TestCenterDirectBeam:
         assert (s_lazy.data[:, :, 10, 8] == 9).all()
         s_lazy.data[:, :, 10, 8] = 0
         assert not s_lazy.data.any()
+
+    def test_non_uniform_chunks(self):
+        s_lazy = self.s_lazy
+        s_lazy.data = s_lazy.data.rechunk((5, 4, 12, 14))
+        s_lazy_shape = s_lazy.axes_manager.shape
+        data_lazy_shape = s_lazy.data.shape
+        s_lazy.center_direct_beam(method="blur", sigma=1, lazy_result=True)
+        assert s_lazy.axes_manager.shape == s_lazy_shape
+        assert s_lazy.data.shape == data_lazy_shape
+        s_lazy.compute()
+        assert s_lazy.axes_manager.shape == s_lazy_shape
+        assert s_lazy.data.shape == data_lazy_shape
 
     def test_return_shifts_non_lazy(self):
         s = self.s
@@ -631,13 +906,21 @@ class TestCenterDirectBeam:
         assert s.data.shape == shape
 
     def test_half_square_width(self):
-        s = self.s.isig[:, 2:-2]
+        # Generating a larger dataset to check that half_square_width
+        # works properly with the automatic chunking in dask_tools._get_dask_array
+        s = Diffraction2D(np.zeros((10, 10, 200, 200)))
+        x_pos_list = np.random.randint(100 - 2, 100 + 2, 10, dtype=np.int16)
+        y_pos_list = np.random.randint(100 - 2, 100 + 2, 10, dtype=np.int16)
+        for ix in range(len(x_pos_list)):
+            for iy in range(len(y_pos_list)):
+                s.data[iy, ix, y_pos_list[iy], x_pos_list[ix]] = 9
         s.data[:, :, 1, -1] = 1000
+
         s1 = s.deepcopy()
         s.center_direct_beam(method="blur", sigma=1)
-        assert (s.data[:, :, 8, 8] == 1000).all()
+        assert (s.data[:, :, 100, 100] == 1000).all()
         s1.center_direct_beam(method="blur", sigma=1, half_square_width=5)
-        assert (s1.data[:, :, 8, 8] == 9).all()
+        assert (s1.data[:, :, 100, 100] == 9).all()
 
     def test_align_kwargs(self):
         s = self.s
@@ -665,6 +948,361 @@ class TestCenterDirectBeam:
         s = self.s
         with pytest.raises(ValueError):
             s.center_direct_beam()
+
+
+class TestDiffraction2DFindPeaksLazy:
+
+    method1 = ["dog", "log"]
+
+    @pytest.mark.parametrize("methods", method1)
+    @pytest.mark.xfail(reason="Non-lazy input")
+    def test_simple(self, methods):
+        s = Diffraction2D(np.random.randint(100, size=(3, 2, 10, 20)))
+        _ = s.find_peaks_lazy(method=methods)
+
+    def test_not_existing_method(self):
+        s = LazyDiffraction2D(da.zeros((2, 2, 5, 5), chunks=(1, 1, 5, 5)))
+        with pytest.raises(ValueError):
+            s.find_peaks_lazy(method="magic")
+
+    @pytest.mark.parametrize("methods", method1)
+    def test_lazy_input(self, methods):
+        data = np.random.randint(100, size=(3, 2, 10, 20))
+        s = LazyDiffraction2D(da.from_array(data, chunks=(1, 1, 5, 10)))
+        peak_array = s.find_peaks_lazy(method=methods)
+        assert s.data.shape[:2] == peak_array.shape
+        assert hasattr(peak_array, "compute")
+
+    @pytest.mark.parametrize("methods", method1)
+    def test_lazy_output(self, methods):
+        data = np.random.randint(100, size=(3, 2, 10, 20))
+        s = LazyDiffraction2D(da.from_array(data, chunks=(1, 1, 5, 10)))
+        peak_array = s.find_peaks_lazy(method=methods, lazy_result=False)
+        assert s.data.shape[:2] == peak_array.shape
+        assert not hasattr(peak_array, "compute")
+
+    @pytest.mark.parametrize("nav_dims", [0, 1, 2, 3, 4])
+    @pytest.mark.parametrize("methods", method1)
+    def test_different_dimensions(self, nav_dims, methods):
+        shape = list(np.random.randint(2, 6, size=nav_dims))
+        shape.extend([50, 50])
+        s = Diffraction2D(np.random.random(size=shape)).as_lazy()
+        peak_array = s.find_peaks_lazy(method=methods, lazy_result=False)
+        assert peak_array.shape == tuple(shape[:-2])
+
+
+class TestDiffraction2DIntensityPeaks:
+    def test_non_lazy(self):
+        s = Diffraction2D(np.random.rand(3, 2, 10, 20))
+        peak_array = s.find_peaks(interactive=False)
+        intensity_array = s.intensity_peaks(peak_array.data)
+        assert s.data.shape[:2] == intensity_array.shape
+        assert hasattr(intensity_array, "compute")
+
+    def test_lazy_input(self):
+        data = np.random.randint(100, size=(3, 2, 10, 20))
+        s = LazyDiffraction2D(da.from_array(data, chunks=(1, 1, 5, 10)))
+        peak_array = s.find_peaks_lazy()
+        intensity_array = s.intensity_peaks(peak_array)
+        assert s.data.shape[:2] == intensity_array.shape
+        assert hasattr(intensity_array, "compute")
+
+    def test_lazy_output(self):
+        data = np.random.randint(100, size=(3, 2, 10, 20))
+        s = LazyDiffraction2D(da.from_array(data, chunks=(1, 1, 5, 10)))
+        peak_array = s.find_peaks_lazy()
+        intensity_array = s.intensity_peaks(peak_array, lazy_result=False)
+        assert s.data.shape[:2] == intensity_array.shape
+        assert not hasattr(intensity_array, "compute")
+
+    @pytest.mark.parametrize("nav_dims", [0, 1, 2, 3, 4])
+    def test_different_dimensions(self, nav_dims):
+        shape = list(np.random.randint(2, 6, size=nav_dims))
+        shape.extend([50, 50])
+        s = Diffraction2D(np.random.random(size=shape)).as_lazy()
+        peak_array = s.find_peaks_lazy()
+        intensity_array = s.intensity_peaks(peak_array, disk_r=1)
+        assert intensity_array.shape == tuple(shape[:-2])
+
+
+class TestDiffraction2DPeakPositionRefinement:
+    def test_non_lazy(self):
+        s = Diffraction2D(np.random.rand(3, 2, 10, 20))
+        peak_array = s.find_peaks(interactive=False)
+        refined_peak_array = s.peak_position_refinement_com(peak_array.data, 4)
+        assert s.data.shape[:2] == refined_peak_array.shape
+        assert hasattr(refined_peak_array, "compute")
+
+    def test_wrong_square_size(self):
+        s = Diffraction2D(np.random.randint(100, size=(3, 2, 10, 20)))
+        peak_array = s.find_peaks(interactive=False)
+        with pytest.raises(ValueError):
+            s.peak_position_refinement_com(peak_array, square_size=5)
+
+    def test_lazy_input(self):
+        data = np.random.randint(100, size=(3, 2, 10, 20))
+        s = LazyDiffraction2D(da.from_array(data, chunks=(1, 1, 5, 10)))
+        peak_array = s.find_peaks_lazy()
+        refined_peak_array = s.peak_position_refinement_com(peak_array, 4)
+        assert s.data.shape[:2] == refined_peak_array.shape
+        assert hasattr(refined_peak_array, "compute")
+
+    def test_lazy_output(self):
+        data = np.random.randint(100, size=(3, 2, 10, 20))
+        s = LazyDiffraction2D(da.from_array(data, chunks=(1, 1, 5, 10)))
+        peak_array = s.find_peaks_lazy()
+        refined_peak_array = s.peak_position_refinement_com(
+            peak_array, 4, lazy_result=False
+        )
+        assert s.data.shape[:2] == refined_peak_array.shape
+        assert not hasattr(refined_peak_array, "compute")
+
+    @pytest.mark.parametrize("nav_dims", [0, 1, 2, 3, 4])
+    def test_different_dimensions(self, nav_dims):
+        shape = list(np.random.randint(2, 6, size=nav_dims))
+        shape.extend([50, 50])
+        s = Diffraction2D(np.random.random(size=shape)).as_lazy()
+        peak_array = s.find_peaks_lazy()
+        refined_peak_array = s.peak_position_refinement_com(
+            peak_array, 4, lazy_result=False
+        )
+        assert refined_peak_array.shape == tuple(shape[:-2])
+
+
+class TestSubtractingDiffractionBackground:
+
+    method1 = ["difference of gaussians", "median kernel", "radial median"]
+
+    def test_simple_hdome(self):
+        s = Diffraction2D(np.random.rand(3, 2, 200, 150))
+        s_rem = s.subtract_diffraction_background(method="h-dome", h=0.25)
+        assert s_rem.data.shape == s.data.shape
+        assert not hasattr(s_rem.data, "compute")
+
+    @pytest.mark.parametrize("methods", method1)
+    def test_simple(self, methods):
+        s = Diffraction2D(np.random.randint(100, size=(3, 2, 200, 150)))
+        s_rem = s.subtract_diffraction_background(method=methods)
+        assert s_rem.data.shape == s.data.shape
+        assert hasattr(s_rem.data, "compute")
+
+    @pytest.mark.parametrize("methods", method1)
+    def test_lazy_input(self, methods):
+        data = np.random.randint(100, size=(3, 2, 200, 150))
+        s = LazyDiffraction2D(da.from_array(data, chunks=(1, 1, 20, 10)))
+        s_rem = s.subtract_diffraction_background(method=methods)
+        assert s.data.shape == s_rem.data.shape
+        assert hasattr(s_rem.data, "compute")
+
+    @pytest.mark.parametrize("methods", method1)
+    def test_lazy_output(self, methods):
+        data = np.random.randint(100, size=(3, 2, 200, 150))
+        s = LazyDiffraction2D(da.from_array(data, chunks=(1, 1, 20, 20)))
+        s_rem = s.subtract_diffraction_background(method=methods, lazy_result=False)
+        assert s.data.shape == s_rem.data.shape
+        assert not hasattr(s_rem.data, "compute")
+
+    @pytest.mark.parametrize("methods", method1)
+    def test_axes_manager_copy(self, methods):
+        s = Diffraction2D(np.random.randint(100, size=(5, 5, 200, 200)))
+        ax_sa = s.axes_manager.signal_axes
+        ax_na = s.axes_manager.navigation_axes
+        ax_sa[0].name, ax_sa[1].name = "Detector x", "Detector y"
+        ax_sa[0].scale, ax_sa[1].scale = 0.2, 0.2
+        ax_sa[0].offset, ax_sa[1].offset = 10, 20
+        ax_sa[0].units, ax_sa[1].units = "mrad", "mrad"
+        ax_na[0].name, ax_na[1].name = "Probe x", "Probe y"
+        ax_na[0].scale, ax_na[1].scale = 35, 35
+        ax_na[0].offset, ax_na[1].offset = 54, 12
+        ax_na[0].units, ax_na[1].units = "nm", "nm"
+        s_temp = s.subtract_diffraction_background(method=methods)
+        assert s.data.shape == s_temp.data.shape
+        ax_sa_t = s_temp.axes_manager.signal_axes
+        ax_na_t = s_temp.axes_manager.navigation_axes
+        assert ax_sa[0].name == ax_sa_t[0].name
+        assert ax_sa[1].name == ax_sa_t[1].name
+        assert ax_sa[0].scale == ax_sa_t[0].scale
+        assert ax_sa[1].scale == ax_sa_t[1].scale
+        assert ax_sa[0].offset == ax_sa_t[0].offset
+        assert ax_sa[1].offset == ax_sa_t[1].offset
+        assert ax_sa[0].units == ax_sa_t[0].units
+        assert ax_sa[1].units == ax_sa_t[1].units
+
+        assert ax_na[0].name == ax_na_t[0].name
+        assert ax_na[1].name == ax_na_t[1].name
+        assert ax_na[0].scale == ax_na_t[0].scale
+        assert ax_na[1].scale == ax_na_t[1].scale
+        assert ax_na[0].offset == ax_na_t[0].offset
+        assert ax_na[1].offset == ax_na_t[1].offset
+        assert ax_na[0].units == ax_na_t[0].units
+        assert ax_na[1].units == ax_na_t[1].units
+
+    @pytest.mark.parametrize("nav_dims", [0, 1, 2, 3, 4])
+    @pytest.mark.parametrize("methods", method1)
+    def test_different_dimensions(self, nav_dims, methods):
+        shape = list(np.random.randint(2, 6, size=nav_dims))
+        shape.extend([200, 200])
+        s = Diffraction2D(np.random.random(size=shape))
+        st = s.subtract_diffraction_background(method=methods)
+        assert st.data.shape == tuple(shape)
+
+    def test_exception_not_implemented_method(self):
+        s = Diffraction2D(np.zeros((2, 2, 10, 10)))
+        with pytest.raises(NotImplementedError):
+            s.subtract_diffraction_background(method="magic")
+
+
+@pytest.mark.slow
+class TestFindHotPixels:
+    @pytest.fixture()
+    def hot_pixel_data_2d(self):
+        """Values are 50, except [21, 11] and [5, 38]
+        being 50000 (to represent a "hot pixel").
+        """
+        data = np.ones((40, 50)) * 50
+        data[21, 11] = 50000
+        data[5, 38] = 50000
+        dask_array = da.from_array(data, chunks=(5, 5))
+        return LazyDiffraction2D(dask_array)
+
+    @pytest.mark.parametrize("lazy_case", (True, False))
+    def test_2d(self, hot_pixel_data_2d, lazy_case):
+        if not lazy_case:
+            hot_pixel_data_2d.compute()
+        s_hot_pixels = hot_pixel_data_2d.find_hot_pixels(lazy_result=False)
+        assert not s_hot_pixels._lazy
+        assert s_hot_pixels.data.shape == hot_pixel_data_2d.data.shape
+        assert s_hot_pixels.data[21, 11]
+        assert s_hot_pixels.data[5, 38]
+        s_hot_pixels.data[21, 11] = False
+        s_hot_pixels.data[5, 38] = False
+        assert not s_hot_pixels.data.any()
+
+    def test_3d(self):
+        data = np.ones((5, 40, 50)) * 50
+        data[2, 21, 11] = 50000
+        data[1, 5, 38] = 50000
+        dask_array = da.from_array(data, chunks=(5, 5, 5))
+        s = LazyDiffraction2D(dask_array)
+        s_hot_pixels = s.find_hot_pixels()
+        assert s_hot_pixels.data.shape == s.data.shape
+
+    def test_4d(self):
+        data = np.ones((10, 5, 40, 50)) * 50
+        data[4, 2, 21, 11] = 50000
+        data[6, 1, 5, 38] = 50000
+        dask_array = da.from_array(data, chunks=(5, 5, 5, 5))
+        s = LazyDiffraction2D(dask_array)
+        s_hot_pixels = s.find_hot_pixels()
+        assert s_hot_pixels.data.shape == s.data.shape
+
+    def test_lazy_result(self, hot_pixel_data_2d):
+        s_hot_pixels = hot_pixel_data_2d.find_hot_pixels(lazy_result=True)
+        assert s_hot_pixels._lazy
+
+    def test_threshold_multiplier(self, hot_pixel_data_2d):
+        s_hot_pixels = hot_pixel_data_2d.find_hot_pixels(threshold_multiplier=1000000)
+        assert not s_hot_pixels.data.any()
+
+    def test_mask_array(self, hot_pixel_data_2d):
+        mask_array = np.ones_like(hot_pixel_data_2d.data, dtype=np.bool)
+        s_hot_pixels = hot_pixel_data_2d.find_hot_pixels(mask_array=mask_array)
+        assert not s_hot_pixels.data.any()
+
+
+class TestFindDeadPixels:
+    @pytest.fixture()
+    def dead_pixel_data_2d(self):
+        """Values are 50, except [14, 42] and [2, 12]
+        being 0 (to represent a "dead pixel").
+        """
+        data = np.ones((40, 50)) * 50
+        data[14, 42] = 0
+        data[2, 12] = 0
+        dask_array = da.from_array(data, chunks=(5, 5))
+        return LazyDiffraction2D(dask_array)
+
+    @pytest.mark.parametrize("lazy_case", (True, False))
+    def test_2d(self, dead_pixel_data_2d, lazy_case):
+        if not lazy_case:
+            dead_pixel_data_2d.compute()
+        s_dead_pixels = dead_pixel_data_2d.find_dead_pixels(lazy_result=False)
+        assert not s_dead_pixels._lazy
+        assert s_dead_pixels.data.shape == dead_pixel_data_2d.data.shape
+        assert s_dead_pixels.data[14, 42]
+        assert s_dead_pixels.data[2, 12]
+        s_dead_pixels.data[14, 42] = False
+        s_dead_pixels.data[2, 12] = False
+        assert not s_dead_pixels.data.any()
+
+    def test_3d(self):
+        data = np.ones((5, 40, 50)) * 50
+        data[:, 14, 42] = 0
+        data[:, 2, 12] = 0
+        dask_array = da.from_array(data, chunks=(5, 5, 5))
+        s = LazyDiffraction2D(dask_array)
+        s_dead_pixels = s.find_dead_pixels()
+        assert s_dead_pixels.data.shape == s.data.shape[-2:]
+
+    def test_4d(self):
+        data = np.ones((10, 5, 40, 50)) * 50
+        data[:, :, 14, 42] = 0
+        data[:, :, 2, 12] = 0
+        dask_array = da.from_array(data, chunks=(5, 5, 5, 5))
+        s = LazyDiffraction2D(dask_array)
+        s_dead_pixels = s.find_dead_pixels()
+        assert s_dead_pixels.data.shape == s.data.shape[-2:]
+
+    def test_lazy_result(self, dead_pixel_data_2d):
+        s_dead_pixels = dead_pixel_data_2d.find_dead_pixels(lazy_result=True)
+        assert s_dead_pixels._lazy
+
+    def test_dead_pixel_value(self, dead_pixel_data_2d):
+        s_dead_pixels = dead_pixel_data_2d.find_dead_pixels(dead_pixel_value=-10)
+        assert not s_dead_pixels.data.any()
+
+    def test_mask_array(self, dead_pixel_data_2d):
+        mask_array = np.ones_like(dead_pixel_data_2d.data, dtype=np.bool)
+        s_dead_pixels = dead_pixel_data_2d.find_dead_pixels(mask_array=mask_array)
+        assert not s_dead_pixels.data.any()
+
+
+class TestCorrectBadPixel:
+    @pytest.fixture()
+    def data(self):
+        data = np.ones((2, 2, 100, 90))
+        data[:, :, 9, 81] = 50000
+        data[:, :, 41, 21] = 0
+        return data
+
+    @pytest.fixture()
+    def bad_pixels(self):
+        return np.asarray([[41, 21], [9, 81]])
+
+    @pytest.mark.xfail(reason="This array shape is not currently supported")
+    def test_lazy(self, data, bad_pixels):
+        s_lazy = Diffraction2D(data).as_lazy()
+        s_lazy.correct_bad_pixels(bad_pixels, lazy_result=True)
+
+    def test_nonlazy(self, data, bad_pixels):
+        s = Diffraction2D(data)
+        s.correct_bad_pixels(bad_pixels, inplace=True)
+        assert np.isclose(s.data[0, 0, 9, 81], 1)
+        assert np.isclose(s.data[0, 0, 41, 21], 1)
+
+    @pytest.mark.parametrize("lazy_result", (True, False))
+    def test_lazy_with_bad_pixel_finders(self, data, lazy_result):
+        s_lazy = Diffraction2D(data).as_lazy()
+        hot = s_lazy.find_hot_pixels(lazy_result=True)
+        dead = s_lazy.find_dead_pixels(lazy_result=True)
+        bad = hot + dead
+        assert s_lazy._lazy == True
+        s_lazy = s_lazy.correct_bad_pixels(bad, lazy_result=lazy_result)
+        assert s_lazy._lazy == lazy_result
+        if lazy_result:
+            s_lazy.compute()
+        assert np.isclose(s_lazy.data[0, 0, 9, 81], 1)
+        assert np.isclose(s_lazy.data[0, 0, 41, 21], 1)
 
 
 class TestMakeProbeNavigation:
@@ -722,14 +1360,13 @@ class TestMakeProbeNavigation:
             s.make_probe_navigation(method="fast")
 
 
+@pytest.mark.slow
 class TestPlotNavigator:
     @pytest.mark.parametrize(
         "shape", [(9, 8), (5, 9, 8), (4, 5, 9, 8), (8, 4, 5, 9, 8), (9, 8, 4, 5, 9, 8)]
     )
     def test_non_lazy(self, shape):
         s = Diffraction2D(np.random.randint(0, 256, shape), dtype=np.uint8)
-        plt.ion()  # To make plotting non-blocking
-        s.plot()
         s.plot()
         plt.close("all")
 
@@ -738,22 +1375,18 @@ class TestPlotNavigator:
     )
     def test_lazy(self, shape):
         s = LazyDiffraction2D(da.random.randint(0, 256, shape), dtype=np.uint8)
-        plt.ion()  # To make plotting non-blocking
-        s.plot()
         s.plot()
         plt.close("all")
 
     def test_navigator_kwarg(self):
         s = Diffraction2D(np.random.randint(0, 256, (8, 9, 10, 30), dtype=np.uint8))
-        plt.ion()  # To make plotting non-blocking
         s_nav = Diffraction2D(np.zeros((8, 9)))
         s.plot(navigator=s_nav)
         plt.close("all")
 
+    @pytest.mark.xfail(reason="Designed failure")
     def test_wrong_navigator_shape_kwarg(self):
         s = Diffraction2D(np.random.randint(0, 256, (8, 9, 10, 30), dtype=np.uint8))
-        plt.ion()  # To make plotting non-blocking
         s_nav = Diffraction2D(np.zeros((2, 19)))
         s._navigator_probe = s_nav
-        with pytest.raises(ValueError):
-            s.plot()
+        s.plot()

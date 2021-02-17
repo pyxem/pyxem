@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -18,7 +18,7 @@
 
 """Signal class for two-dimensional diffraction data in polar coordinates."""
 
-from hyperspy.signals import Signal2D, BaseSignal
+from hyperspy.signals import Signal2D
 from hyperspy._signals.lazy import LazySignal
 
 import numpy as np
@@ -41,8 +41,6 @@ class Power2D(Signal2D):
             Passed to the __init__ of Signal2D
         """
         super().__init__(*args, **kwargs)
-
-        self.decomposition.__func__.__doc__ = BaseSignal.decomposition.__doc__
 
     def get_map(self, k_region=None, symmetry=None):
         """Creates a 2 dimensional map of from the power spectrum.

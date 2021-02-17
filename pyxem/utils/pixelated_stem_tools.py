@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -199,13 +199,6 @@ def _fit_ramp_to_image(signal, corner_size=0.05):
     return zz
 
 
-def normalize_array(np_array, max_number=1.0):
-    np_array = copy.deepcopy(np_array)
-    np_array -= np_array.min()
-    np_array /= np_array.max()
-    return np_array * max_number
-
-
 def _get_limits_from_array(data, sigma=4, ignore_zeros=False, ignore_edges=False):
     if ignore_edges:
         x_lim = int(data.shape[0] * 0.05)
@@ -285,7 +278,12 @@ def _get_rgb_phase_magnitude_array(
 
 
 def _find_longest_distance(
-    imX, imY, centreX_min, centreY_min, centreX_max, centreY_max,
+    imX,
+    imY,
+    centreX_min,
+    centreY_min,
+    centreX_max,
+    centreY_max,
 ):
     max_value = max(
         int(((imX - centreX_min) ** 2 + (imY - centreY_min) ** 2) ** 0.5),
@@ -312,28 +310,6 @@ def _make_centre_array_from_signal(signal, x=None, y=None):
     if not isiterable(centre_y_array):
         centre_y_array = np.array([centre_y_array])
     return (centre_x_array, centre_y_array)
-
-
-def _get_lowest_index_radial_array(radial_array):
-    """Returns the lowest index of in a radial array.
-
-    Parameters
-    ----------
-    radial_array : 3-D numpy array
-        The last dimension must be the reciprocal dimension.
-
-    Returns
-    -------
-    Number, lowest index.
-    """
-    lowest_index = radial_array.shape[-1]
-    for x in range(radial_array.shape[0]):
-        for y in range(radial_array.shape[1]):
-            radial_data = radial_array[x, y, :]
-            lowest_index_in_image = np.where(radial_data == 0)[0][0]
-            if lowest_index_in_image < lowest_index:
-                lowest_index = lowest_index_in_image
-    return lowest_index
 
 
 def _get_radial_profile_of_diff_image(
@@ -451,11 +427,6 @@ def _get_angle_sector_mask(
             elif angle1 < angle0:
                 bool_array[indices] = (t > angle0) * (t <= (2 * np.pi))
                 bool_array[indices] += (t >= 0) * (t < angle1)
-            else:
-                raise ValueError(
-                    "Not able to process with angle0: {0}, and angle1: {1}. "
-                    "This error should not happen..."
-                )
     return bool_array
 
 
@@ -485,48 +456,3 @@ def _copy_signal_all_axes_metadata(signal_original, signal_new):
         ax_o = signal_original.axes_manager[iax]
         ax_n = signal_new.axes_manager[iax]
         _copy_axes_object_metadata(ax_o, ax_n)
-
-
-def find_and_remove_dead_pixels(s):
-    """Find and remove zero values from a signal.
-
-    Parameters
-    ----------
-    s : HyperSpy-like signal
-        Does not work for lazy signals.
-
-    Examples
-    --------
-    >>> s = ps.dummy_data.get_dead_pixel_signal()
-    >>> import pyxem.utils.pixelated_stem_tools as pst
-    >>> pst.find_and_remove_dead_pixels(s)
-
-    """
-    if s._lazy:
-        raise NotImplementedError("Not implemented for lazy signals.")
-    s_dif = s.sum(s.axes_manager.navigation_axes)
-    sig_x_max, sig_y_max = s.axes_manager.signal_shape
-    sig_x_max, sig_y_max = sig_x_max - 1, sig_y_max - 1
-    y_dead_list, x_dead_list = np.where(s_dif.data == 0)
-    x_list, y_list, value_list = [], [], []
-    for ix, iy in zip(x_dead_list, y_dead_list):
-        if ix == 0:
-            pass
-        elif ix == sig_x_max:
-            pass
-        elif iy == 0:
-            pass
-        elif iy == sig_y_max:
-            pass
-        else:
-            p0 = s.data[..., iy + 1, ix]
-            p1 = s.data[..., iy - 1, ix]
-            p2 = s.data[..., iy, ix + 1]
-            p3 = s.data[..., iy, ix - 1]
-            value = ((p0 + p1 + p2 + p3) * 0.25).astype(s.data.dtype)
-            value_list.append(value)
-            x_list.append(ix)
-            y_list.append(iy)
-
-    for ix, iy, value in zip(x_list, y_list, value_list):
-        s.data[..., iy, ix] = value

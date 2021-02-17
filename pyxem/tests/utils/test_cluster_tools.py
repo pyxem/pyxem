@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -19,7 +19,7 @@
 import pytest
 import numpy as np
 from numpy.random import randint
-from pyxem.signals.diffraction2d import Diffraction2D
+from pyxem.signals import Diffraction2D
 import pyxem.utils.cluster_tools as ct
 
 
@@ -315,7 +315,15 @@ class TestGetClusterDict:
     def test_three_clusters(self):
         peak_array0 = randint(6, size=(100, 2)) + 80
         peak_array1 = randint(6, size=(100, 2))
-        peak_array = np.vstack((peak_array0, peak_array1, [[54, 21],]))
+        peak_array = np.vstack(
+            (
+                peak_array0,
+                peak_array1,
+                [
+                    [54, 21],
+                ],
+            )
+        )
         cluster_dict = ct._get_cluster_dict(peak_array, min_samples=2)
         labels = sorted(list(cluster_dict.keys()))
         assert labels == [-1, 0, 1]
@@ -354,6 +362,20 @@ class TestClusterAndSortPeakArray:
         peak_dict = ct._cluster_and_sort_peak_array(peak_array)
         assert len(peak_dict["centre"][0, 0]) == 10
         assert len(peak_dict["rest"][0, 0]) == 5
+        assert len(peak_dict["none"][0, 0]) == 1
+
+    def test_only_centre(self):
+        peak_array = randint(124, 132, size=(3, 4, 10, 2))
+        peak_dict = ct._cluster_and_sort_peak_array(peak_array)
+        assert len(peak_dict["centre"][0, 0]) == 10
+        assert len(peak_dict["rest"][0, 0]) == 0
+        assert len(peak_dict["none"][0, 0]) == 0
+
+    def test_only_none(self):
+        peak_array = randint(201, 203, size=(3, 4, 1, 2))
+        peak_dict = ct._cluster_and_sort_peak_array(peak_array)
+        assert len(peak_dict["centre"][0, 0]) == 0
+        assert len(peak_dict["rest"][0, 0]) == 0
         assert len(peak_dict["none"][0, 0]) == 1
 
     def test_eps(self):
@@ -455,11 +477,13 @@ class TestSortedClusterDictToMarkerList:
         sorted_cluster_dict["centre"] = randint(10, size=(3, 4, 2, 2))
         sorted_cluster_dict["rest"] = randint(50, 60, size=(3, 4, 3, 2))
         sorted_cluster_dict["none"] = randint(90, size=(3, 4, 1, 2))
+        sorted_cluster_dict["magic"] = randint(40, size=(3, 4, 1, 2))
         marker_list = ct._sorted_cluster_dict_to_marker_list(
             sorted_cluster_dict,
             color_rest=marker_color,
             color_centre=marker_color,
             color_none=marker_color,
         )
-        for marker in marker_list:
+        for marker in marker_list[:-1]:
             assert marker.marker_properties["color"] == marker_color
+        assert marker_list[-1].marker_properties["color"] == "cyan"

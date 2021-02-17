@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -404,18 +404,9 @@ def _cluster_and_sort_peak_array(
         sorted_cluster_dict = _sort_cluster_dict(
             cluster_dict, centre_x=centre_x, centre_y=centre_y
         )
-        if "centre" in sorted_cluster_dict:
-            peak_centre_array[islice] = sorted_cluster_dict["centre"]
-        else:
-            peak_centre_array[islice] = []
-        if "rest" in sorted_cluster_dict:
-            peak_rest_array[islice] = sorted_cluster_dict["rest"]
-        else:
-            peak_rest_array[islice] = []
-        if "none" in sorted_cluster_dict:
-            peak_none_array[islice] = sorted_cluster_dict["none"]
-        else:
-            peak_rest_array[islice] = []
+        peak_centre_array[islice] = sorted_cluster_dict["centre"]
+        peak_rest_array[islice] = sorted_cluster_dict["rest"]
+        peak_none_array[islice] = sorted_cluster_dict["none"]
 
     peak_dicts = {}
     peak_dicts["centre"] = peak_centre_array
@@ -449,7 +440,7 @@ def _add_peak_dicts_to_signal(
     >>> peak_dicts['centre'] = np.random.randint(99, size=(2, 3, 10, 2))
     >>> peak_dicts['rest'] = np.random.randint(99, size=(2, 3, 3, 2))
     >>> peak_dicts['none'] = np.random.randint(99, size=(2, 3, 2, 2))
-    >>> s = pxm.Diffraction2D(np.random.random((2, 3, 100, 100)))
+    >>> s = pxm.signals.Diffraction2D(np.random.random((2, 3, 100, 100)))
     >>> import pyxem.utils.cluster_tools as ct
     >>> ct._add_peak_dicts_to_signal(s, peak_dicts)
     >>> s.plot()
@@ -502,7 +493,7 @@ def _sorted_cluster_dict_to_marker_list(
     >>> marker_list = ct._sorted_cluster_dict_to_marker_list(
     ...     sorted_cluster_dict)
     >>> import pyxem.utils.marker_tools as mt
-    >>> s = pxm.Diffraction2D(np.random.random((3, 4, 100, 100)))
+    >>> s = pxm.signals.Diffraction2D(np.random.random((3, 4, 100, 100)))
     >>> mt._add_permanent_markers_to_signal(s, marker_list)
 
     Different colors

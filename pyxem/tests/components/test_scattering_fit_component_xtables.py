@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -18,10 +18,9 @@
 
 import pytest
 import numpy as np
-from pyxem.signals.reduced_intensity1d import ReducedIntensity1D
-from pyxem.components.scattering_fit_component_xtables import (
-    ScatteringFitComponentXTables,
-)
+
+from pyxem.signals import ReducedIntensity1D
+from pyxem.components import ScatteringFitComponentXTables
 
 
 def test_scattering_component_init_xtables():

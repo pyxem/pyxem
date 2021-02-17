@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -16,21 +16,19 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-import hyperspy.api as hs
-from hyperspy.signal import BaseSignal
-from hyperspy.signals import Signal2D
 from warnings import warn
 import numpy as np
-from operator import attrgetter
+from transforms3d.euler import mat2euler
 
-from pyxem.signals import transfer_navigation_axes
-from pyxem.signals.diffraction_vectors import generate_marker_inputs_from_peaks
-from pyxem.utils.indexation_utils import get_nth_best_solution
-
+import hyperspy.api as hs
+from hyperspy.signal import BaseSignal
 from orix.quaternion import Rotation
 from orix.crystal_map import CrystalMap
 
-from transforms3d.euler import mat2euler
+from pyxem.signals.diffraction_vectors import generate_marker_inputs_from_peaks
+from pyxem.utils.signal import transfer_navigation_axes
+from pyxem.utils.indexation_utils import get_nth_best_solution
+
 
 def crystal_from_vector_matching(z_matches):
     """Takes vector matching results for a single navigation position and
@@ -71,58 +69,9 @@ def crystal_from_vector_matching(z_matches):
     metrics["ehkls"] = best_match.error_hkls
     metrics["total_error"] = best_match.total_error
 
-    # get second highest correlation phase for phase_reliability (if present)
-    other_phase_matches = [
-        match for match in z_matches if match.phase_index != best_match.phase_index
-    ]
-
-    if other_phase_matches:
-        second_best_phase = sorted(
-            other_phase_matches, key=attrgetter("total_error"), reverse=False
-        )[0]
-
-        metrics["phase_reliability"] = 100 * (
-            1 - best_match.total_error / second_best_phase.total_error
-        )
-
-        # get second best matching orientation for orientation_reliability
-        same_phase_matches = [
-            match for match in z_matches if match.phase_index == best_match.phase_index
-        ]
-        second_match = sorted(
-            same_phase_matches, key=attrgetter("total_error"), reverse=False
-        )[1]
-    else:
-        # get second best matching orientation for orientation_reliability
-        second_match = get_nth_best_solution(
-            z_matches, "vector", rank=1, key="total_error", descending=False
-        )
-
-    metrics["orientation_reliability"] = 100 * (
-        1 - best_match.total_error / (second_match.total_error or 1.0)
-    )
-
     results_array[2] = metrics
 
     return results_array
-
-
-def get_phase_name_and_index(library):
-    """Get a dictionary of phase names and its corresponding index value in library.keys().
-
-    Parameters
-    ----------
-    library : DiffractionLibrary
-        Diffraction library containing the phases and rotations
-
-    Returns
-    -------
-    phase_name_index_dict : Dictionary {str : int}
-    typically on the form {'phase_name 1' : 0, 'phase_name 2': 1, ...}
-    """
-
-    phase_name_index_dict = dict([(y, x) for x, y in enumerate(list(library.keys()))])
-    return phase_name_index_dict
 
 
 def _peaks_from_best_template(single_match_result, library, rank=0):
@@ -148,13 +97,16 @@ def _peaks_from_best_template(single_match_result, library, rank=0):
     phase_names = list(library.keys())
     phase_index = int(best_fit[0])
     phase = phase_names[phase_index]
-    simulation = library.get_library_entry(phase=phase, angle=tuple(best_fit[1]))["Sim"]
+    simulation = library.get_library_entry(phase=phase, angle=tuple(best_fit[1:4]))[
+        "Sim"
+    ]
 
     peaks = simulation.coordinates[:, :2]  # cut z
     return peaks
 
+
 def _get_best_match(z):
-    """ Returns the match with the highest score for a given navigation pixel
+    """Returns the match with the highest score for a given navigation pixel
 
     Parameters
     ----------
@@ -166,10 +118,11 @@ def _get_best_match(z):
     z_best : np.array
         array with shape (5,)
     """
-    return z[:,np.argmax(z[-1,:])]
+    return z[:, np.argmax(z[-1, :])]
 
-class GenericMatchingResults():
-    def __init__(self,data):
+
+class GenericMatchingResults:
+    def __init__(self, data):
         self.data = hs.signals.Signal2D(data)
 
     def to_crystal_map(self):
@@ -181,7 +134,7 @@ class GenericMatchingResults():
         -------
         orix.CrystalMap
         """
-        _s = self.data.map(_get_best_match,inplace=False)
+        _s = self.data.map(_get_best_match, inplace=False)
 
         """ Gets properties """
         phase_id = _s.isig[0].data.flatten()
@@ -196,18 +149,15 @@ class GenericMatchingResults():
         y = xy[0].flatten()
 
         """ Tidies up so we can put these things into CrystalMap """
-        euler = np.vstack((alpha,beta,gamma)).T
-        rotations = Rotation.from_euler(euler,convention="bunge", direction="crystal2lab")
-        properties = {"score":score}
-
+        euler = np.vstack((alpha, beta, gamma)).T
+        rotations = Rotation.from_euler(
+            euler, convention="bunge", direction="crystal2lab"
+        )
+        properties = {"score": score}
 
         return CrystalMap(
-                rotations=rotations,
-                phase_id=phase_id,
-                x=x,
-                y=y,
-                prop=properties)
-
+            rotations=rotations, phase_id=phase_id, x=x, y=y, prop=properties
+        )
 
 
 class TemplateMatchingResults(GenericMatchingResults):
@@ -244,12 +194,15 @@ class TemplateMatchingResults(GenericMatchingResults):
         **kwargs :
             Keyword arguments passed to signal.plot()
         """
-        match_peaks = self.map(_peaks_from_best_template, library=library, inplace=False)
+        match_peaks = self.data.map(
+            _peaks_from_best_template, library=library, inplace=False
+        )
         mmx, mmy = generate_marker_inputs_from_peaks(match_peaks)
         signal.plot(*args, **kwargs)
         for mx, my in zip(mmx, mmy):
             m = hs.markers.point(x=mx, y=my, color="red", marker="x")
             signal.add_marker(m, plot_marker=True, permanent=permanent_markers)
+
 
 class VectorMatchingResults(BaseSignal):
     """Vector matching results containing the top n best matching crystal
@@ -272,60 +225,31 @@ class VectorMatchingResults(BaseSignal):
         self.vectors = None
         self.hkls = None
 
-    def to_crystal_map(self):
+    def get_crystallographic_map(self, *args, **kwargs):
         """Obtain a crystallographic map specifying the best matching phase and
         orientation at each probe position with corresponding metrics.
 
-        Raises
+        Returns
         -------
-        ValueError("Currently under development")
+        cryst_map : Signal2D
+            Crystallographic mapping results containing the best matching phase
+            and orientation at each navigation position with associated metrics.
+            The Signal at each navigation position is an array of,
+                            [phase, np.array((z,x,z)), dict(metrics)]
+            which defines the phase, orientation as Euler angles in the zxz
+            convention and metrics associated with the matching.
+            Metrics for template matching results are
+                'match_rate'
+                'total_error'
+                'orientation_reliability'
+                'phase_reliability'
         """
+        crystal_map = self.map(
+            crystal_from_vector_matching, inplace=False, *args, **kwargs
+        )
 
-        raise ValueError("Currently under development")
-
-        _s = self.map(
-            crystal_from_vector_matching, inplace=False)
-
-        """ Gets phase, the easy bit """
-        phase_id = _s.isig[0].data.flatten()
-
-        """ Deals with the properties, hard coded as of v0.13 """
-        # need to invert an array of dicts into a dict of arrays
-        def _map_to_get_property(prop):
-            return d[prop]
-
-        # assume same properties at every point of the signal
-        key_list = []
-        for key in _s.inav[0,0].isig[2]:
-            key_list.append(key)
-
-        properties = {}
-        for key in key_list:
-            _key_signal = _s.isig[2].map(_map_to_get_property,prop=key,inplace=False)
-            properties[key] = _key_signal
-
-        """ Deal with the rotations """
-        def _map_for_alpha_beta_gamma(ix):
-            return z[ix]
-
-        alpha = _s.isig[1].map(_map_for_alpha_beta_gamma,ix=0,inplace=False)
-        beta =  _s.isig[1].map(_map_for_alpha_beta_gamma,ix=1,inplace=False)
-        gamma = _s.isig[1].map(_map_for_alpha_beta_gamma,ix=2,inplace=False)
-
-        euler = np.vstack((alpha,beta,gamma)).T
-        rotations = Rotation.from_euler(euler,convention="bunge", direction="crystal2lab")
-
-        """ Gets navigation placements """
-        xy = np.indices(_s.data.shape[:2])
-        x = xy[1].flatten()
-        y = xy[0].flatten()
-
-        return CrystalMap(
-                rotations=rotations,
-                phase_id=phase_id,
-                x=x,
-                y=y,
-                prop=properties)
+        crystal_map = transfer_navigation_axes(crystal_map, self)
+        return crystal_map
 
     def get_indexed_diffraction_vectors(
         self, vectors, overwrite=False, *args, **kwargs
