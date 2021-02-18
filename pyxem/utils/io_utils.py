@@ -836,11 +836,13 @@ def _STEM_flag_dict(exp_times_list):
             scan_X = lines[0]
             frames_to_skip = peaks[0]
         else:
-            # Assuming the last element to be the line length
+            # Assuming theprint(scan_X) last element to be the line length
             scan_X = lines[-1]
             check = np.ravel(np.where(lines == scan_X, True, False))
             # Checking line lengths
-            start_ind = np.where(check is False)[0][-1] + 2
+            check = list(check)
+            start_ind = check.index(True)
+            
             frames_to_skip = peaks[start_ind]
 
         flyback_times = list(times_set)
