@@ -130,19 +130,19 @@ class PolarDiffraction2D(Signal2D):
         fourier_axis.scale = 1
         return power
 
-    def get_pearson_correlation(self, mask = None, selectk=False, kmin=0, kmax=0, inplace=False, **kwargs):
+    def get_pearson_correlation(self, mask=None, kmin=None, kmax=None, inplace=False, **kwargs):
         """Returns the pearson rotational correlation in the form of a Signal2D class.
 
         Parameters
         ----------
         mask: Numpy array
             A bool mask of values to ignore of shape equal to the signal shape.
-        selectk: bool
-            Select k range for correlation over a ring segment
         kmin: float
-            minimum k value in corresponding unit for segment correlation
+            minimum k value in corresponding unit for segment correlation (None if use
+            the entire pattern)
         kmax: float
-            maximum k value in corresponding unit for segment correlation
+            maximum k value in corresponding unit for segment correlation (None if use
+            the entire pattern)
         inplace: bool
             From hyperspy.signal.map(). inplace=True means the signal is
             overwritten.
@@ -151,7 +151,7 @@ class PolarDiffraction2D(Signal2D):
         -------
         correlation: Signal2D
         """
-        if selectk is True:
+        if kmin is not None:
             self_slice = self.isig[:, kmin:kmax]
             if mask is not None:
                 mask_signal = Signal2D(mask)
@@ -169,7 +169,7 @@ class PolarDiffraction2D(Signal2D):
         else:
             correlation.set_signal_type("symmetry")
             rho_axis = correlation.axes_manager.signal_axes[0]
-        correlation.axes_manager.navigation_axes = self.axes_manager.navigation_axes
+            correlation.axes_manager.navigation_axes = self.axes_manager.navigation_axes
         rho_axis.name = "Radians"
         rho_axis.units = 'rad'
         rho_axis.scale = self.axes_manager[-2].scale

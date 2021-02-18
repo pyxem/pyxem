@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -153,12 +153,18 @@ class TestPearsonCorrelation:
         pd.axes_manager.signal_axes[1].name = "k"
         return pd
 
-    @pytest.mark.parametrize("selectk", [False, True])
     @pytest.mark.parametrize("kmin", [0, 1])
     @pytest.mark.parametrize("kmax", [4, 5])
-    def test_pcorrelation_signal(self, flat_pattern, selectk, kmin, kmax):
-        rho = flat_pattern.get_pearson_correlation(selectk=selectk, kmin=kmin, kmax=kmax)
+    def test_pcorrelation_signal(self, flat_pattern, kmin, kmax):
+        rho_w = flat_pattern.get_pearson_correlation()
+        assert isinstance(rho_w, Symmetry1D)
+        rho = flat_pattern.get_pearson_correlation(kmin=kmin, kmax=kmax)
         assert isinstance(rho, Symmetry1D)
+
+    def test_pcorrelation_inplace(self, flat_pattern):
+        rho = flat_pattern.get_pearson_correlation(inplace=True)
+        assert rho is None
+        assert isinstance(flat_pattern, Symmetry1D)
 
     def test_axes_transfer(self, flat_pattern):
         rho = flat_pattern.get_pearson_correlation()
@@ -174,7 +180,7 @@ class TestPearsonCorrelation:
         rho_0 = flat_pattern.get_pearson_correlation(mask=mask)
         print(rho_0)
         assert isinstance(rho_0, Symmetry1D)
-        rho = flat_pattern.get_pearson_correlation(mask=mask, selectk=True, kmin=0, kmax=4)
+        rho = flat_pattern.get_pearson_correlation(mask=mask, kmin=0, kmax=4)
         print(rho)
         assert isinstance(rho, Symmetry1D)
 
