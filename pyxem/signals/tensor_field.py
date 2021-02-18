@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -16,16 +16,16 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-from hyperspy.signals import Signal2D
 import numpy as np
 from scipy.linalg import polar
-from hyperspy.utils import stack
 import math
-from pyxem.signals.strain_map import StrainMap
 
-"""
-Signal class for Tensor Fields
-"""
+from hyperspy.signals import Signal2D
+from hyperspy.utils import stack
+
+from pyxem.signals import StrainMap
+
+"""Signal class for Tensor Fields."""
 
 
 def _polar_decomposition(image, side):
@@ -81,7 +81,6 @@ class DisplacementGradientMap(Signal2D):
         -------
         R : TensorField
             The orthogonal matrix describing the rotation field.
-
         U : TensorField
             The strain tensor field.
 
@@ -95,7 +94,6 @@ class DisplacementGradientMap(Signal2D):
 
         Returns
         -------
-
         strain_results : BaseSignal
             Signal of shape < 4 | , > , navigation order is e11,e22,e12,theta
         """

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -26,14 +26,13 @@ from tqdm import tqdm
 
 from hyperspy.signals import Signal2D
 
+from pyxem.signals import DiffractionVectors, ElectronDiffraction2D
+from pyxem.utils.signal import transfer_signal_axes
 from pyxem.utils.segment_utils import (
     norm_cross_corr,
     separate_watershed,
     get_gaussian2d,
 )
-from pyxem.signals.diffraction_vectors import DiffractionVectors
-from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
-from pyxem.signals import transfer_signal_axes
 
 
 class LearningSegment:
@@ -484,7 +483,7 @@ class VDFSegment:
         return vdfseg
 
     def get_virtual_electron_diffraction(self, calibration, shape, sigma):
-        """ Obtain a virtual electron diffraction signal that consists
+        """Obtain a virtual electron diffraction signal that consists
         of one virtual diffraction pattern for each segment. The virtual
         diffraction pattern is composed of Gaussians centered at each
         vector position. If given, the integrated intensities of each

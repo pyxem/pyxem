@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -16,24 +16,20 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""
-Signal class for two-dimensional diffraction data in polar coordinates.
-"""
+"""Signal class for two-dimensional diffraction data in polar coordinates."""
 
-from hyperspy.signals import Signal2D, BaseSignal
+from hyperspy.signals import Signal2D
 from hyperspy._signals.lazy import LazySignal
 
 from pyxem.utils.correlation_utils import corr_to_power
 from pyxem.signals.common_diffraction import CommonDiffraction
-import numpy as np
 
 
 class Correlation2D(Signal2D, CommonDiffraction):
     _signal_type = "correlation"
 
     def __init__(self, *args, **kwargs):
-        """
-        Create a PolarDiffraction2D object from a numpy.ndarray.
+        """Create a PolarDiffraction2D object from a numpy.ndarray.
 
         Parameters
         ----------
@@ -45,18 +41,16 @@ class Correlation2D(Signal2D, CommonDiffraction):
         """
         super().__init__(*args, **kwargs)
 
-        self.decomposition.__func__.__doc__ = BaseSignal.decomposition.__doc__
-
     def get_angular_power(self, inplace=False, **kwargs):
-        """ Returns the power spectrum of the angular auto-correlation function
-         in the form of a Signal2D class.
+        """Returns the power spectrum of the angular auto-correlation function
+        in the form of a Signal2D class.
 
-         This gives the fourier decomposition of the radial correlation. Due to
-         nyquist sampling the number of fourier coefficients will be equal to the
-         angular range.
+        This gives the fourier decomposition of the radial correlation. Due to
+        nyquist sampling the number of fourier coefficients will be equal to the
+        angular range.
 
-         Parameters
-         ---------------
+        Parameters
+        ----------
         mask: Numpy array or Signal2D
             A bool mask of values to ignore of shape equal to the signal shape.  If the mask
             is a BaseSignal than it is iterated with the polar signal
@@ -65,17 +59,19 @@ class Correlation2D(Signal2D, CommonDiffraction):
         inplace: bool
             From hyperspy.signal.map(). inplace=True means the signal is
             overwritten.
-         Returns
-         --------------
-         power: Signal2D
-             The power spectrum of the Signal2D"""
+
+        Returns
+        -------
+        power: Signal2D
+            The power spectrum of the Signal2D
+        """
         power = self.map(corr_to_power, inplace=inplace, **kwargs)
         if inplace:
             self.set_signal_type("power")
-            fourier_axis = self.axes_manager.signal_axes[1]
+            fourier_axis = self.axes_manager.signal_axes[0]
         else:
             power.set_signal_type("power")
-            fourier_axis = self.axes_manager.signal_axes[1]
+            fourier_axis = self.axes_manager.signal_axes[0]
         fourier_axis.name = "Fourier Coefficient"
         fourier_axis.units = "a.u"
         fourier_axis.offset = 0.5
@@ -86,22 +82,24 @@ class Correlation2D(Signal2D, CommonDiffraction):
         """Returns the power spectrum of the summed angular auto-correlation function
         over all real space positions.  Averages the angular correlation.
 
-         Parameters
-         ---------------
+        Parameters
+        ----------
         inplace: bool
             From hyperspy.signal.map(). inplace=True means the signal is
             overwritten.
-         Returns
-         --------------
-         power: Power2D
-             The power spectrum of summed angular correlation"""
-        power = self.sum().map(corr_to_power, inplace=inplace, **kwargs)
+
+        Returns
+        -------
+        power: Power2D
+            The power spectrum of summed angular correlation
+        """
+        power = self.nansum().map(corr_to_power, inplace=inplace, **kwargs)
         if inplace:
             self.set_signal_type("power")
-            fourier_axis = self.axes_manager.signal_axes[1]
+            fourier_axis = self.axes_manager.signal_axes[0]
         else:
             power.set_signal_type("power")
-            fourier_axis = self.axes_manager.signal_axes[1]
+            fourier_axis = self.axes_manager.signal_axes[0]
         fourier_axis.name = "Fourier Coefficient"
         fourier_axis.units = "a.u"
         fourier_axis.offset = 0.5

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -70,9 +70,7 @@ def _centre_comparison(s, steps, step_size, crop_radial_signal=None, angleN=8):
 
 
 def get_coordinate_of_min(s):
-    """
-    Returns the x and y values of the minimum in a signal.
-    """
+    """Returns the x and y values of the minimum in a signal."""
     z = s.data
     idx = np.argwhere(z == np.min(z))
     x = s.axes_manager[0].index2value(idx[0][1])
@@ -148,8 +146,7 @@ def get_optimal_centre_position(
 
     Examples
     --------
-    >>> import pyxem.dummy_data.dummy_data as dd
-    >>> s = dd.get_single_ring_diffraction_signal()
+    >>> s = pxm.dummy_data.get_single_ring_diffraction_signal()
     >>> s.axes_manager.signal_axes[0].offset = -105
     >>> s.axes_manager.signal_axes[1].offset = -67
     >>> import pyxem.utils.radial_utils as ra
@@ -201,15 +198,14 @@ def refine_signal_centre_position(
     **kwargs
         Passed to get_optimal_centre_position
 
-    See also
+    See Also
     --------
     get_optimal_centre_position : finds the centre positions for a step_size
 
     Example
     -------
-    >>> import pyxem.dummy_data.dummy_data as dd
     >>> import pyxem.utils.radial_utils as ra
-    >>> s = dd.get_single_ring_diffraction_signal()
+    >>> s = pxm.dummy_data.get_single_ring_diffraction_signal()
     >>> s.axes_manager[0].offset, s.axes_manager[1].offset = -103, -69
     >>> ra.refine_signal_centre_position(s, (32., 48.), angleN=4)
     >>> x, y = s.axes_manager[0].offset, s.axes_manager[1].offset
@@ -348,8 +344,7 @@ def get_radius_vs_angle(
 
     Examples
     --------
-    >>> import pyxem.dummy_data.dummy_data as dd
-    >>> s = dd.get_single_ring_diffraction_signal()
+    >>> s = pxm.dummy_data.get_single_ring_diffraction_signal()
     >>> s.axes_manager.signal_axes[0].offset = -105
     >>> s.axes_manager.signal_axes[1].offset = -67
     >>> import pyxem.utils.radial_utils as ra
@@ -398,7 +393,7 @@ def get_angle_image_comparison(s0, s1, angleN=12, mask_radius=None):
 
     Examples
     --------
-    >>> from pyxem.dummy_data.make_diffraction_test_data import MakeTestData
+    >>> from pyxem.dummy_data import MakeTestData
     >>> test_data0 = MakeTestData(300, 300)
     >>> test_data0.add_ring(150, 150, 40)
     >>> test_data1 = MakeTestData(300, 300)
@@ -660,8 +655,8 @@ def fit_single_ellipse_to_signal(
 
     Examples
     --------
-    >>> import pyxem.dummy_data.make_diffraction_test_data as mdtd
-    >>> s = pxm.Diffraction2D(np.zeros((200, 220)))
+    >>> import pyxem.dummy_data import make_diffraction_test_data as mdtd
+    >>> s = pxm.signals.Diffraction2D(np.zeros((200, 220)))
     >>> s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -110
     >>> xx, yy = np.meshgrid(s.axes_manager[0].axis, s.axes_manager[1].axis)
     >>> ellipse_ring = mdtd._get_elliptical_ring(xx, yy, 0, 0, 50, 70, 0.8)
@@ -720,7 +715,7 @@ def fit_ellipses_to_signal(
 
     Examples
     --------
-    >>> import pyxem.dummy_data.make_diffraction_test_data as mdtd
+    >>> import pyxem.dummy_data import make_diffraction_test_data as mdtd
     >>> s = ps.PixelatedSTEM(np.zeros((200, 220)))
     >>> s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -110
     >>> xx, yy = np.meshgrid(s.axes_manager[0].axis, s.axes_manager[1].axis)

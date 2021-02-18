@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -16,37 +16,248 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Indexation generator and associated tools.
-
-"""
+"""Indexation generator and associated tools."""
 
 import numpy as np
+import lmfit
+from transforms3d.euler import mat2euler, euler2mat
 
-from pyxem.signals.indexation_results import TemplateMatchingResults
-from pyxem.signals.indexation_results import VectorMatchingResults
+from diffsims.utils.sim_utils import get_electron_wavelength
 
-from pyxem.signals import transfer_navigation_axes
-from pyxem.signals import select_method_from_method_dict
-
+from pyxem.signals import TemplateMatchingResults, VectorMatchingResults
 from pyxem.utils.indexation_utils import (
-    correlate_library,
     zero_mean_normalized_correlation,
     fast_correlation,
     index_magnitudes,
     match_vectors,
     OrientationResult,
     get_nth_best_solution,
+    index_dataset_with_template_rotation,
+)
+from pyxem.utils.vector_utils import detector_to_fourier
+from pyxem.utils.signal import (
+    select_method_from_method_dict,
+    transfer_navigation_axes,
 )
 
-
-from transforms3d.euler import mat2euler, euler2mat
-from pyxem.utils.vector_utils import detector_to_fourier
-from diffsims.utils.sim_utils import get_electron_wavelength
-
-import lmfit
-
-
 class IndexationGenerator:
+    """Generates an indexer for data using a number of methods.
+
+    Parameters
+    ----------
+    signal : ElectronDiffraction2D
+        The signal of electron diffraction patterns to be indexed.
+    diffraction_library : DiffractionLibrary
+        The library of simulated diffraction patterns for indexation.
+
+    Returns
+    -------
+    ValueError : "use TemplateIndexationGenerator or VectorIndexationGenerator"
+    """
+
+    def __init__(self, signal, diffraction_library):
+        raise ValueError("use TemplateIndexationGenerator or VectorIndexationGenerator")
+
+
+def _correlate_templates(image, library, n_largest, method, mask):
+    r"""Correlates all simulated diffraction templates in a DiffractionLibrary
+    with a particular experimental diffraction pattern (image).
+
+    Calculated using the normalised (see return type documentation) dot
+    product, or cosine distance,
+
+    .. math:: fast_correlation
+        \\frac{\\sum_{j=1}^m P(x_j, y_j) T(x_j, y_j)}{\\sqrt{\\sum_{j=1}^m T^2(x_j, y_j)}}
+
+    .. math:: zero_mean_normalized_correlation
+        \\frac{\\sum_{j=1}^m P(x_j, y_j) T(x_j, y_j)- avg(P)avg(T)}{\\sqrt{\\sum_{j=1}^m (T(x_j, y_j)-avg(T))^2+\sum_{j=1}^m P(x_j,y_j)-avg(P)}}
+        for a template T and an experimental pattern P.
+
+    Parameters
+    ----------
+    image : numpy.array
+        The experimental diffraction pattern of interest.
+    library : DiffractionLibrary
+        The library of diffraction simulations to be correlated with the
+        experimental data.
+    n_largest : int
+        The number of well correlated simulations to be retained per phase
+    method : str
+        Name of method used to compute correlation between templates and diffraction patterns. Can be
+        'fast_correlation' or 'zero_mean_normalized_correlation'.
+    mask : bool
+        A mask for navigation axes. 1 indicates positions to be indexed.
+
+
+    Returns
+    -------
+    top_matches : numpy.array
+        Array of shape (<num phases>*n_largest, 5) containing the top n
+        correlated simulations for the experimental pattern of interest, where
+        each entry is on the form [phase index,alpha,beta,gamma,correlation].
+
+
+    References
+    ----------
+    E. F. Rauch and L. Dupuy, “Rapid Diffraction Patterns identification through
+       template matching,” vol. 50, no. 1, pp. 87–99, 2005.
+
+    """
+    phase_count = len(library.keys())
+    top_matches = np.zeros((n_largest * phase_count, 5))
+
+    # return for the masked data
+    if mask != 1:
+        return top_matches
+
+    if method == "zero_mean_normalized_correlation":
+        nb_pixels = image.shape[0] * image.shape[1]
+        average_image_intensity = np.average(image)
+        image_std = np.linalg.norm(image - average_image_intensity)
+
+    for phase_number, phase in enumerate(library.keys()):
+        saved_results = np.zeros((n_largest, 5))
+        saved_results[:, 0] = phase_number
+
+        for entry_number in np.arange(len(library[phase]["orientations"])):
+            orientations = library[phase]["orientations"][entry_number]
+            pixel_coords = library[phase]["pixel_coords"][entry_number]
+            intensities = library[phase]["intensities"][entry_number]
+
+            # Extract experimental intensities from the diffraction image
+            image_intensities = image[pixel_coords[:, 1], pixel_coords[:, 0]]
+
+            if method == "zero_mean_normalized_correlation":
+                corr_local = zero_mean_normalized_correlation(
+                    nb_pixels,
+                    image_std,
+                    average_image_intensity,
+                    image_intensities,
+                    intensities,
+                )
+
+            elif method == "fast_correlation":
+                corr_local = fast_correlation(
+                    image_intensities,
+                    intensities,
+                    library[phase]["pattern_norms"][entry_number],
+                )
+
+            if corr_local > np.min(saved_results[:, 4]):
+                row_index = np.argmin(saved_results[:, 4])
+                saved_results[row_index, 1:4] = orientations
+                saved_results[row_index, 4] = corr_local
+
+        phase_sorted = saved_results[saved_results[:, 4].argsort()]
+        start_slot = phase_number * n_largest
+        end_slot = (phase_number + 1) * n_largest
+        top_matches[start_slot:end_slot, :] = phase_sorted
+    return top_matches
+
+
+class AcceleratedIndexationGenerator:
+    """
+    Generates a template-based indexer that also calculates relative
+    rotation of templates.
+
+    Parameters
+    ----------
+    signal : ElectronDiffraction2D
+        The signal of electron diffraction patterns to be indexed.
+    diffraction_library : DiffractionLibrary
+        The library of simulated diffraction patterns for indexation.
+
+    Notes
+    -----
+    To be used with minimal template libraries whereby the first euler
+    angle is 0. It is this angle that is optimized during indexation.
+    """
+    def __init__(self,signal,diffraction_library):
+        # test that the first euler angle is always 0
+
+        for phase in diffraction_library:
+            if not np.allclose(np.sum(diffraction_library[phase]["orientations"][:,0]), 0):
+                raise ValueError("Invalid diffraction library! Templates must be generated from orientations where "
+                        "the first Euler angle is 0")
+        self.signal = signal
+        self.library = diffraction_library
+
+
+    def correlate(self,
+                  n_largest=5,
+                  include_phases=None,
+                  **kwargs,
+                  ):
+        """
+        Correlates the library of simulated diffraction patterns with the
+        electron diffraction signal.
+
+        Parameters
+        ----------
+        n_largest : int, optional
+            Number of best solutions to return, in order of descending match
+        include_phases : list, optional
+            Names of phases in the library to do an indexation for. By default this is
+            all phases in the library.
+        n_keep : int, optional
+            Number of templates to do a full matching on in the second matching step
+        frac_keep : float, optional
+            Fraction (between 0-1) of templates to do a full matching on. When set
+            n_keep will be ignored
+        delta_r : float, optional
+            The sampling interval of the radial coordinate in pixels
+        delta_theta : float, optional
+            The sampling interval of the azimuthal coordinate in degrees
+        max_r : float, optional
+            Maximum radius to consider in pixel units. By default it is the
+            distance from the center of the image to a corner
+        intensity_transform_function : Callable, optional
+            Function to apply to both image and template intensities on an
+            element by element basis prior to comparison
+        find_direct_beam : bool, optional
+            Whether to optimize the direct beam, otherwise the center of the image
+            is chosen
+        direct_beam_positions : 2-tuple of floats or 3D numpy array of shape (scan_x, scan_y, 2), optional
+            (x, y) coordinates of the direct beam in pixel units. Overrides other
+            settings for finding the direct beam
+        normalize_images : bool, optional
+            normalize the images to calculate the correlation coefficient
+        normalize_templates : bool, optional
+            normalize the templates to calculate the correlation coefficient
+        parallelize_polar_conversion : bool, optional
+            use multiple workers for converting the dataset to polar coordinates. Overhead
+            could make this slower on some hardware and for some datasets.
+        chunks : string or 4-tuple, optional
+            internally the work is done on dask datasets and this parameter determines
+            the chunking. If set to None then no re-chunking will happen if the dataset
+            was loaded lazily. If set to "auto" then dask attempts to find the optimal
+            chunk size. If None, no changes will be made to the chunking.
+        parallel_workers: int, optional
+            the number of workers to use in parallel. If set to "auto", the number
+            will be determined from os.cpu_count()
+
+        Returns
+        -------
+        result : dict
+
+        Notes
+        -----
+        Internally, this code is compiled to LLVM machine code, so stack traces are often hard to follow on failure. As such it is
+        important to be careful with your parameters selection.
+        """
+        result =  index_dataset_with_template_rotation(self.signal,
+                                                    self.library,
+                                                    phases=include_phases,
+                                                    n_best=n_largest,
+                                                    **kwargs)
+        return result
+
+
+
+
+
+
+class TemplateIndexationGenerator:
     """Generates an indexer for data using a number of methods.
 
     Parameters
@@ -67,7 +278,6 @@ class IndexationGenerator:
         method="fast_correlation",
         mask=None,
         print_help=False,
-        *args,
         **kwargs,
     ):
         """Correlates the library of simulated diffraction patterns with the
@@ -76,26 +286,20 @@ class IndexationGenerator:
         Parameters
         ----------
         n_largest : int
-            The n orientations with the highest correlation values are returned.
+            The n orientations with the highest correlation values for each phase are returned.
         method : str
             Name of method used to compute correlation between templates and diffraction patterns. Can be
             'fast_correlation' or 'zero_mean_normalized_correlation'.
-        mask : Array
-            Array with the same size as signal (in navigation) or None
+        mask : hs.BaseSignal or None
+            Only apply the method a unmasked (value=1) pixel, default is None (index all pixels)
         print_help : bool
             Display information about the method used.
-        *args : arguments
-            Arguments passed to map().
         **kwargs : arguments
             Keyword arguments passed map().
 
         Returns
         -------
         matching_results : TemplateMatchingResults
-            Navigation axes of the electron diffraction signal containing
-            correlation results for each diffraction pattern, in the form
-            [Library Number , [z, x, z], Correlation Score]
-
         """
         signal = self.signal
         library = self.library
@@ -109,25 +313,20 @@ class IndexationGenerator:
             # Index at all real space pixels
             mask = 1
 
-        # tests if selected method is a valid argument, and can print help for selected method.
-        chosen_function = select_method_from_method_dict(
-            method, method_dict, print_help
-        )
+        # tests if selected method is valid and can print help for selected method.
+        _ = select_method_from_method_dict(method, method_dict, print_help)
 
-        # adds a normalisation to library
+        # adds a normalisation to library #TODO: Port to diffsims
         for phase in library.keys():
-            norm_array = np.ones(
-                library[phase]["intensities"].shape[0]
-            )  # will store the norms
+            # initialise a container for the norms
+            norm_array = np.ones(library[phase]["intensities"].shape[0])
 
             for i, intensity_array in enumerate(library[phase]["intensities"]):
                 norm_array[i] = np.linalg.norm(intensity_array)
-            library[phase][
-                "pattern_norms"
-            ] = norm_array  # puts this normalisation into the library
+                library[phase]["pattern_norms"] = norm_array
 
         matches = signal.map(
-            correlate_library,
+            _correlate_templates,
             library=library,
             n_largest=n_largest,
             method=method,
@@ -137,7 +336,6 @@ class IndexationGenerator:
         )
 
         matching_results = TemplateMatchingResults(matches)
-        matching_results = transfer_navigation_axes(matching_results, signal)
 
         return matching_results
 
@@ -553,8 +751,6 @@ class VectorIndexationGenerator:
             Navigation axes of the diffraction vectors signal containing vector
             indexation results for each probe position.
         """
-        vectors = self.vectors
-        library = self.library
 
         return self.refine_n_best_orientations(
             orientations,

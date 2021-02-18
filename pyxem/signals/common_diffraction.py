@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -21,6 +21,12 @@ import numpy as np
 from hyperspy.api import interactive
 
 from traits.trait_base import Undefined
+
+
+OUT_SIGNAL_AXES_DOCSTRING = """out_signal_axes : None, iterable of int or string
+            Specify which navigation axes to use as signal axes in the virtual
+            image. If None, the two first navigation axis are used.
+        """
 
 
 class CommonDiffraction:
@@ -53,7 +59,7 @@ class CommonDiffraction:
 
     @staticmethod
     def _get_sum_signal(signal, out_signal_axes=None):
-        out = signal.sum(signal.axes_manager.signal_axes)
+        out = signal.nansum(signal.axes_manager.signal_axes)
         if out_signal_axes is None:
             out_signal_axes = list(
                 np.arange(min(signal.axes_manager.navigation_dimension, 2))
@@ -110,7 +116,7 @@ class CommonDiffraction:
 
         # Create the interactive signal
         interactive(
-            sliced_signal.sum,
+            sliced_signal.nansum,
             axis=sliced_signal.axes_manager.signal_axes,
             event=roi.events.changed,
             recompute_out_event=None,
@@ -128,9 +134,7 @@ class CommonDiffraction:
         ----------
         roi : :obj:`hyperspy.roi.BaseInteractiveROI`
             Any interactive ROI detailed in HyperSpy.
-        out_signal_axes : None, iterable of int or string
-            Specify which navigation axes to use as signal axes in the virtual
-            image. If None, the two first navigation axis are used.
+        %s
 
         Returns
         -------
@@ -159,6 +163,30 @@ class CommonDiffraction:
         roi_info = f"{roi}"
         if self.metadata.get_item("General.title") not in ("", None):
             roi_info += f" of {self.metadata.General.title}"
-        dark_field_sum.metadata.set_item("Diffraction.intergrated_range", roi_info)
+        dark_field_sum.metadata.set_item("Diffraction.integrated_range", roi_info)
 
         return dark_field_sum
+
+    get_integrated_intensity.__doc__ %= OUT_SIGNAL_AXES_DOCSTRING
+
+    def add_navigation_signal(self, data, name="nav1", unit=None, nav_plot=False):
+        """Adds in a navigation signal to the metadata.  Any type of navigation signal is acceptable.
+
+        Parameters
+        -------------------
+        data: np.array
+            The data for the navigation signal.  Should be the same size as the navigation axis.
+        name: str
+            The name of the axis.
+        unit: str
+            The units for the intensity of the plot. e.g 'nm' for thickness.
+        """
+        dict_signal = {}
+        dict_signal[name] = {
+            "data": data,
+            "unit": unit,
+            "use_as_navigation_plot": nav_plot,
+        }
+        if not self.metadata.has_item("Navigation_signals"):
+            self.metadata.add_node("Navigation_signals")
+        self.metadata.Navigation_signals.add_dictionary(dict_signal)

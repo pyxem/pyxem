@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -51,7 +51,7 @@ def _get_4d_points_marker_list(
 
     Example
     -------
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> peak_array = s.find_peaks(lazy_result=False, show_progressbar=False)
     >>> import pyxem.utils.marker_tools as mt
     >>> marker_list = mt._get_4d_points_marker_list(
@@ -128,13 +128,9 @@ def _filter_peak_array_with_bool_array(peak_array, bool_array, bool_invert=False
     for ix, iy in np.ndindex(peak_array.shape[:2]):
         peak_list = np.array(peak_array[ix, iy])
         bool_list = np.array(bool_array[ix, iy], dtype=np.bool)
-        if bool_list is None:
-            if bool_invert:
-                peak_list = []
-        else:
-            if bool_invert:
-                bool_list = ~bool_list
-            peak_list = peak_list[bool_list]
+        if bool_invert:
+            bool_list = ~bool_list
+        peak_list = peak_list[bool_list]
         peak_array_filter[ix, iy] = peak_list
     return peak_array_filter
 
@@ -232,39 +228,6 @@ def _check_line_segment_inside(signal_axes, line):
     return True
 
 
-def _get_2d_line_segment_list(
-    lines_list, signal_axes=None, color="red", linewidth=1, linestyle="solid"
-):
-    """Get a list of 2d dimensional line segments markers.
-
-    The markers will be displayed on the signal dimensions.
-
-    Parameters
-    ----------
-    lines_list : list
-        In form [[x01, y01, x02, y02], [x11, y11, x12, y12], ...]
-    signal_axes : HyperSpy axes_manager object
-    color : string, optional
-        Color of point marker. Default 'red'.
-    linewidth : scalar, optional
-        Default 2
-    linestyle : string, optional
-        Default 'solid'
-
-    Returns
-    -------
-    marker_list : list of HyperSpy marker objects
-
-    """
-    marker_list = []
-    for x1, y1, x2, y2 in lines_list:
-        marker = hm.line_segment(
-            x1, y1, x2, y2, color=color, linewidth=linewidth, linestyle=linestyle
-        )
-        marker_list.append(marker)
-    return marker_list
-
-
 def _add_permanent_markers_to_signal(signal, marker_list):
     """Add a list of markers to a signal.
 
@@ -275,7 +238,7 @@ def _add_permanent_markers_to_signal(signal, marker_list):
 
     Example
     -------
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> peak_array = s.find_peaks(lazy_result=False, show_progressbar=False)
     >>> import pyxem.utils.marker_tools as mt
     >>> marker_list = mt._get_4d_points_marker_list(
@@ -312,7 +275,7 @@ def add_peak_array_to_signal_as_markers(
 
     Example
     -------
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> peak_array = s.find_peaks(lazy_result=False, show_progressbar=False)
     >>> import pyxem.utils.marker_tools as mt
     >>> mt.add_peak_array_to_signal_as_markers(s, peak_array)

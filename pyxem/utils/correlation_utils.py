@@ -2,11 +2,12 @@ import numpy as np
 
 
 def _correlation(z, axis=0, mask=None, wrap=True, normalize=True):
-    """A generic function for applying a correlation with a mask.
+    r"""A generic function for applying a correlation with a mask.
 
-     Takes a nd image and then preforms a auto-correlation on some axis.
-     Used in the electron correlation and angular correlation codes. Uses
-     the fft to speed up the correlation.
+    Takes a nd image and then preforms a auto-correlation on some axis.
+    Used in the electron correlation and angular correlation codes. Uses
+    the fft to speed up the correlation.
+
     Parameters
     ----------
     z: np.array
@@ -24,11 +25,13 @@ def _correlation(z, axis=0, mask=None, wrap=True, normalize=True):
     if wrap is False:
         z_shape = np.shape(z)
         padder = [(0, 0)] * len(z_shape)
-        pad = z_shape[axis]  #  This will be faster if the length of the axis
+        pad = z_shape[axis]  # This will be faster if the length of the axis
         # is a power of 2.  Based on the numpy implementation.  Not terribly
         # faster I think..
         padder[axis] = (pad, pad)
-        slicer = [slice(None),] * len(z_shape)
+        slicer = [
+            slice(None),
+        ] * len(z_shape)
         slicer[axis] = slice(0, -2 * pad)  # creating the proper slices
         if mask is None:
             mask = np.zeros(shape=np.shape(z))
@@ -81,7 +84,7 @@ def _power(z, axis=0, mask=None, wrap=True, normalize=True):
     during the calculations.
 
     Parameters
-    ----------------
+    ----------
     z: np.array
         Some n-d array to get the power spectrum from.
     axis: int
@@ -95,7 +98,7 @@ def _power(z, axis=0, mask=None, wrap=True, normalize=True):
         Choose to normalize the function by the mean.
 
     Returns
-    -----------------
+    -------
     power: np.array
         The power spectrum along some axis
     """
@@ -112,4 +115,4 @@ def _power(z, axis=0, mask=None, wrap=True, normalize=True):
 
 
 def corr_to_power(z):
-    return np.fft.rfft(z, axis=1).real
+    return np.power(np.fft.rfft(z, axis=1), 2).real

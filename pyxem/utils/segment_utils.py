@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -30,8 +30,6 @@ from skimage.filters import sobel, threshold_li
 from skimage.morphology import watershed, disk
 
 from sklearn.cluster import DBSCAN
-
-import warnings
 
 
 def norm_cross_corr(image, template):
@@ -177,9 +175,11 @@ def separate_watershed(
     # cluster, only the maximum closest to the average maxima position is
     # used as a marker.
     if min_distance > 1 and np.shape(maxi_coord1)[1] > 1:
-        clusters = DBSCAN(eps=min_distance, metric="euclidean", min_samples=1,).fit(
-            np.transpose(maxi_coord1)
-        )
+        clusters = DBSCAN(
+            eps=min_distance,
+            metric="euclidean",
+            min_samples=1,
+        ).fit(np.transpose(maxi_coord1))
         local_maxi = np.zeros_like(local_maxi)
         for n in np.arange(clusters.labels_.max() + 1):
             maxi_coord1_n = np.transpose(maxi_coord1)[clusters.labels_ == n]
@@ -247,11 +247,12 @@ def separate_watershed(
             labels = np.zeros(np.shape(labels))
 
         seps_img_sum = np.zeros_like(vdf_temp).astype("float64")
-        for l, vdf in zip(np.arange(1, np.max(labels) + 1), vdf_sep):
+        for lbl, vdf in zip(np.arange(1, np.max(labels) + 1), vdf_sep):
             mask_l = np.zeros_like(labels).astype("bool")
-            mask_l[np.where(labels == l)] = 1
-            seps_img_sum += vdf_temp * mask_l / np.max(vdf_temp[np.where(labels == l)])
-            seps_img_sum[np.where(labels == l)] += l
+            _idx = np.where(labels == lbl)
+            mask_l[_idx] = 1
+            seps_img_sum += vdf_temp * mask_l / np.max(vdf_temp[_idx])
+            seps_img_sum[_idx] += lbl
 
         maxi_coord = np.where(local_maxi)
 
@@ -289,7 +290,7 @@ def separate_watershed(
 
 
 def get_gaussian2d(a, xo, yo, x, y, sigma):
-    """ Obtain a 2D Gaussian of amplitude a and standard deviation
+    """Obtain a 2D Gaussian of amplitude a and standard deviation
     sigma, centred at (xo, yo), on a grid given by x and y.
 
     Parameters

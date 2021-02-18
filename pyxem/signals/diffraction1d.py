@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -15,9 +15,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
-"""Signal class for Electron Diffraction radial profiles
-
-"""
+"""Signal class for Electron Diffraction radial profiles."""
 
 from hyperspy.signals import Signal1D
 from hyperspy._signals.lazy import LazySignal

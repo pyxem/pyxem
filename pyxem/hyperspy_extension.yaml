@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -101,24 +101,18 @@ signals:
     dtype: real
     lazy: False
     module: pyxem.signals.indexation_results
-  CrystallographicMap:
-    signal_type: crystallographic_map
-    signal_dimension: 1
-    dtype: real
-    lazy: False
-    module: pyxem.signals.crystallographic_map
   DisplacementGradientMap:
     signal_type: tensor_field
     signal_dimension: 2
     dtype: real
     lazy: False
     module: pyxem.signals.tensor_field
-  VDFImage:
-    signal_type: vdf_image
+  VirtualDarkFieldImage:
+    signal_type: virtual_dark_field
     signal_dimension: 2
     dtype: real
     lazy: False
-    module: pyxem.signals.vdf_image
+    module: pyxem.signals.virtual_dark_field_image
   ReducedIntensity1D:
     signal_type: reduced_intensity
     signal_dimension: 1
@@ -145,7 +139,7 @@ signals:
     module: pyxem.signals.diffraction_variance2d
   DPCBaseSignal:
     signal_type: "dpc"
-    signal_dimension: 2
+    signal_dimension: 0
     dtype: real
     lazy: False
     module: pyxem.signals.differential_phase_contrast
@@ -160,6 +154,24 @@ signals:
     signal_dimension: 2
     dtype: real
     lazy: False
+    module: pyxem.signals.differential_phase_contrast
+  LazyDPCBaseSignal:
+    signal_type: "dpc"
+    signal_dimension: 0
+    dtype: real
+    lazy: True
+    module: pyxem.signals.differential_phase_contrast
+  LazyDPCSignal1D:
+    signal_type: "dpc"
+    signal_dimension: 1
+    dtype: real
+    lazy: True
+    module: pyxem.signals.differential_phase_contrast
+  LazyDPCSignal2D:
+    signal_type: "dpc"
+    signal_dimension: 2
+    dtype: real
+    lazy: True
     module: pyxem.signals.differential_phase_contrast
   Correlation2D:
     signal_type: correlation
@@ -185,14 +197,6 @@ signals:
     dtype: real
     lazy: True
     module: pyxem.signals.power2d
-
-components2D:
-    DiffractionComponent:
-      module: pyxem.components.diffraction_component
-      class: DiffractionComponent
-    ScalableReferencePattern:
-      module: pyxem.components.scalable_reference_component
-      class: ScalableReferencePattern
 
 components1D:
     ReducedIntensityCorrectionComponent:
