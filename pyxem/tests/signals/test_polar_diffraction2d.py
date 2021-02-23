@@ -153,12 +153,9 @@ class TestPearsonCorrelation:
         pd.axes_manager.signal_axes[1].name = "k"
         return pd
 
-    @pytest.mark.parametrize("kmin", [0, 1])
-    @pytest.mark.parametrize("kmax", [4, 5])
-    def test_pcorrelation_signal(self, flat_pattern, kmin, kmax):
-        rho_w = flat_pattern.get_pearson_correlation()
-        assert isinstance(rho_w, Symmetry1D)
-        rho = flat_pattern.get_pearson_correlation(kmin=kmin, kmax=kmax)
+    @pytest.mark.parametrize("krange", [None, (0, 4),(1., 5.)])
+    def test_pcorrelation_signal(self, flat_pattern, krange):
+        rho = flat_pattern.get_pearson_correlation(krange=krange)
         assert isinstance(rho, Symmetry1D)
 
     def test_pcorrelation_inplace(self, flat_pattern):
@@ -178,10 +175,8 @@ class TestPearsonCorrelation:
     )
     def test_masking_pcorrelation(self, flat_pattern, mask):
         rho_0 = flat_pattern.get_pearson_correlation(mask=mask)
-        print(rho_0)
         assert isinstance(rho_0, Symmetry1D)
-        rho = flat_pattern.get_pearson_correlation(mask=mask, kmin=0, kmax=4)
-        print(rho)
+        rho = flat_pattern.get_pearson_correlation(mask=mask, krange=(0, 4))
         assert isinstance(rho, Symmetry1D)
 
 class TestDecomposition:

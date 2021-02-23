@@ -19,7 +19,6 @@
 """Signal class for pearson correlation and symmetry coefficient."""
 
 from hyperspy.signals import Signal2D, BaseSignal, Signal1D
-#from hyperspy._signals.lazy import LazySignal
 import numpy as np
 
 
