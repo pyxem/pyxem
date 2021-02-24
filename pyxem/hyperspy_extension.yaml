@@ -197,6 +197,12 @@ signals:
     dtype: real
     lazy: True
     module: pyxem.signals.power2d
+  Symmetry1D:
+    signal_type: symmetry
+    signal_dimension: 1
+    dtype: real
+    lazy: False
+    module: pyxem.signals.symmetry1d
 
 components1D:
     ReducedIntensityCorrectionComponent:

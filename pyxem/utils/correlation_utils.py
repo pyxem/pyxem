@@ -114,5 +114,42 @@ def _power(z, axis=0, mask=None, wrap=True, normalize=True):
         ).real
 
 
+def _pearson_correlation(z, mask=None):
+    """
+    Calculate Pearson cross-correlation of the image with itself
+    after rotation as a function of rotation
+
+     Parameters
+    ----------
+    z: np.array
+        Input image in 2D array
+    mask: np.array
+        A boolean mask to be applied.
+
+    Returns
+    -------
+    p_correlation: np.array
+        Pearson correlation of the input image
+
+    """
+    if mask is not None:
+        # this is to determine how many of the elements were unmasked for normalization
+        m = np.array(mask, dtype=bool)
+        mask_bool = ~m
+        mask_fft = np.fft.fft(mask_bool, axis=1)
+        n_unmasked = np.fft.ifft(mask_fft * mask_fft.conj()).real
+        n_unmasked[n_unmasked < 1] = 1  # avoid dividing by zero for completely masked rows
+        z[m] = 0  # set masked pixels to zero
+        fft_intensity = np.divide(np.fft.fft(z, axis=1), n_unmasked)
+        a = np.multiply(np.fft.ifft(fft_intensity * fft_intensity.conj()).real, n_unmasked)
+    else:
+        z_length = np.shape(z)[1]
+        fft_intensity = np.fft.fft(z, axis=1) / z_length
+        a = np.fft.ifft(fft_intensity * fft_intensity.conj(), axis=1).real * z_length
+
+    p_correlation = (np.mean(a, axis=0) - np.mean(z) ** 2) / (np.mean(z ** 2) - np.mean(z) ** 2)
+    return p_correlation
+
+
 def corr_to_power(z):
     return np.power(np.fft.rfft(z, axis=1), 2).real
