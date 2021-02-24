@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - Getting and plot integrated intensity now support signals containing nan (#722)
+- Add Symmetry1D signal class and symmetry analysis methods (#724)
 
 ### Removed
 - lazy_* virtual imaging has been removed, use get_integrated_intensity (#722)
