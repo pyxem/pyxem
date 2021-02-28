@@ -2050,6 +2050,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         method="splitpixel",
         sum=False,
         correctSolidAngle=True,
+        lazy_result=None,
+        show_progressbar=True,
         **kwargs,
     ):
         """Creates a polar reprojection using pyFAI's azimuthal integrate 2d. This method is designed
@@ -2128,39 +2130,55 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> det = Detector(pixel1=1e-4, pixel2=1e-4)
         >>> ds.get_azimuthal_integral2d(npt_rad=100, detector_dist=.2, detector= det, wavelength=2.508e-12)
         """
+        if lazy_result is None:
+            lazy_result = self._lazy
         sig_shape = self.axes_manager.signal_shape
         unit = self.unit
         if radial_range is None:
-            radial_range = _get_radial_extent(
-                ai=self.ai, shape=sig_shape, unit=self.unit
-            )
+            radial_range = _get_radial_extent(ai=self.ai, shape=sig_shape, unit=unit)
             radial_range[0] = 0
-        integration = self.map(
+
+        data_dask_array = _get_dask_array(self)
+        chunks = data_dask_array.chunks[:-2] + (npt, npt_azim)
+        drop_axis = (len(self.axes_manager.shape) - 2, len(self.axes_manager.shape) - 1)
+        new_axis = (
+            self.axes_manager.navigation_dimension, self.axes_manager.navigation_dimension + 1
+        )
+
+        integration_dask_array = _process_dask_array(
+            data_dask_array,
             azimuthal_integrate2d,
+            drop_axis=drop_axis,
+            new_axis=new_axis,
+            chunks=chunks,
+            output_signal_size=(npt, npt_azim),
             azimuthal_integrator=self.ai,
             npt_rad=npt,
             npt_azim=npt_azim,
             azimuth_range=azimuth_range,
             radial_range=radial_range,
             method=method,
-            inplace=inplace,
             unit=self.unit,
             mask=mask,
             sum=sum,
             correctSolidAngle=correctSolidAngle,
+            dtype=np.float32,
             **kwargs,
         )
 
         # Dealing with axis changes
         if inplace:
-            t_axis = self.axes_manager.signal_axes[0]
-            k_axis = self.axes_manager.signal_axes[1]
-            self.set_signal_type("polar_diffraction")
+            result = self
+            result.data = integration_dask_array
+            result._lazy = True
         else:
-            transfer_navigation_axes(integration, self)
-            integration.set_signal_type("polar_diffraction")
-            t_axis = integration.axes_manager.signal_axes[0]
-            k_axis = integration.axes_manager.signal_axes[1]
+            result = LazySignal2D(integration_dask_array)
+            transfer_navigation_axes(result, self)
+
+        result.set_signal_type("polar_diffraction")
+        t_axis = result.axes_manager.signal_axes[0]
+        k_axis = result.axes_manager.signal_axes[1]
+
         t_axis.name = "Radians"
         if azimuth_range is None:
             t_axis.scale = np.pi * 2 / npt_azim
@@ -2173,7 +2191,11 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         k_axis.units = unit
         k_axis.offset = radial_range[0]
 
-        return integration
+        if not lazy_result:
+            result.compute(show_progressbar=show_progressbar)
+
+        if not inplace:
+            return result
 
     def get_radial_integral(
         self,
