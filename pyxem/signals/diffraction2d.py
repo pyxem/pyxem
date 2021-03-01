@@ -600,17 +600,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         find_hot_pixels
 
         """
-        if not self._lazy:
-            return self.map(
-                remove_dead,
-                deadpixels=bad_pixel_array,
-                inplace=inplace,
-                show_progressbar=show_progressbar,
-                *args,
-                **kwargs,
-            )
-
-        # working on the lazy case
         dask_array = self.data
         bad_pixel_removed = dt._remove_bad_pixels(dask_array, bad_pixel_array.data)
         s_bad_pixel_removed = LazyDiffraction2D(bad_pixel_removed)
