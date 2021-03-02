@@ -9,9 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - load_mib (#734)
 - correct_bad_pixels now returns the same result when lazy/not-lazy (bug #723, fix #735)
+- bug in .to_crystal_map() 
 
 ### Deprecated
-- lazy_virtual_bright_field, use get_integrated_intensity instead 
+- lazy_virtual_bright_field, use get_integrated_intensity instead
 - lazy_virtual_dark_field, use get_integrated_intensity instead
 
 
