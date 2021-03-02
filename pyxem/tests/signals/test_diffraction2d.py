@@ -1336,6 +1336,10 @@ class TestCorrectBadPixel:
         data[:, :, 41, 21] = 0
         return data
 
+    @pytest.fixture()
+    def bad_pixels(self):
+        return np.asarray([[41, 21], [9, 81]])
+
     @pytest.mark.xfail(reason="This array shape is not currently supported")
     def test_lazy(self, data, bad_pixels):
         s_lazy = Diffraction2D(data).as_lazy()
