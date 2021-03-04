@@ -22,6 +22,7 @@ import dask.array as da
 import hyperspy.api as hs
 from matplotlib import pyplot as plt
 from numpy.random import default_rng
+from skimage.draw import circle_perimeter_aa
 
 from pyxem.signals import (
     Diffraction1D,
@@ -435,12 +436,35 @@ class TestAzimuthalIntegral2d:
         ones_diff.unit = "2th_deg"
         return ones_diff
 
+    @pytest.fixture
+    def ring(self):
+        ring_pattern = Diffraction2D(data=np.ones(shape=(100, 100)))
+        rr, cc, val = circle_perimeter_aa(r=50, c=50, radius=30, shape=(100, 100))
+        ring_pattern.data[rr, cc] = val * 100
+        ring_pattern.axes_manager.signal_axes[0].scale = 0.1
+        ring_pattern.axes_manager.signal_axes[1].scale = 0.1
+        ring_pattern.axes_manager.signal_axes[0].name = "kx"
+        ring_pattern.axes_manager.signal_axes[1].name = "ky"
+        ring_pattern.unit = "k_nm^-1"
+        return ring_pattern
+
     def test_2d_azimuthal_integral(self, ones):
         ones.set_ai()
         az = ones.get_azimuthal_integral2d(
             npt=10, npt_azim=10, method="BBox", correctSolidAngle=False
         )
         np.testing.assert_array_equal(az.data[0:8, :], np.ones((8, 10)))
+
+    def test_2d_azimuthal_integral_scale(self,ring):
+        ring.set_ai(wavelength=2.5e-12)
+        az = ring.get_azimuthal_integral2d(npt=50)
+        peak = np.argmax(az.sum(axis=0)).data * az.axes_manager[1].scale
+        np.testing.assert_almost_equal(peak[0], 3,decimal=1)
+        ring.unit="k_A^-1"
+        ring.set_ai(wavelength=2.5e-12)
+        az = ring.get_azimuthal_integral2d(npt=50)
+        peak = np.argmax(az.sum(axis=0)).data * az.axes_manager[1].scale
+        np.testing.assert_almost_equal(peak[0], 3,decimal=1)
 
     def test_2d_azimuthal_integral_fast_slicing(self, ones):
         ones.set_ai(center=(5.5, 5.5))
