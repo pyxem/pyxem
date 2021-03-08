@@ -56,7 +56,9 @@ def get_template_polar_coordinates(
         r = r[condition]
         theta = theta[condition]
         intensities = intensities[condition]
-    return r / delta_r, theta / delta_theta, intensities
+    return ((r / delta_r).astype(np.int32),
+            (theta / delta_theta).astype(np.int32),
+            (intensities).astype(np.float32))
 
 
 def get_template_cartesian_coordinates(
