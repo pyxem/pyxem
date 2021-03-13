@@ -552,7 +552,7 @@ def _match_polar_to_polar_template(
     for i in range(n):
         column = polar_image[:, r_template[i]].copy()  # extract column at r for each spot
         match_matrix[:, i] = np.roll(column, -theta_template[i])  # shift column over by theta and put in array
-    correlation = np.dot(match_matrix, intensities)/(image_norm * template_norm)  # all in-plane angles are encoded in the matrix
+    correlation = np.dot(match_matrix, intensities.astype(np.float64)) / (image_norm * template_norm)  # all in-plane angles are encoded in the matrix
     return correlation
 
 
