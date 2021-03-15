@@ -76,18 +76,18 @@ def test_image_to_polar(delta_r, delta_theta, max_r, fdb, db, expected_shape):
 
 
 @pytest.mark.parametrize(
-    "beam_positions, parallelize, expected_shape",
+    "beam_positions, expected_shape",
     [
-        (None, False, (3, 2, 360, 7)),
-        (None, True, (3, 2, 360, 7)),
-        ((2, 3), True, (3, 2, 360, 7)),
-        (np.ones((3, 2, 2)), True, (3, 2, 360, 7)),
+        (None, (3, 2, 360, 7)),
+        (None, (3, 2, 360, 7)),
+        ((2, 3), (3, 2, 360, 7)),
+        (np.ones((3, 2, 2)), (3, 2, 360, 7)),
     ],
 )
-def test_chunk_polar(beam_positions, parallelize, expected_shape):
+def test_chunk_polar(beam_positions, expected_shape):
     chunk = np.ones((3, 2, 10, 7))
     polar_chunk = ptu.chunk_to_polar(
-        chunk, direct_beam_positions=beam_positions, parallelize=parallelize
+        chunk, direct_beam_positions=beam_positions,
     )
     np.testing.assert_array_almost_equal(polar_chunk.shape, expected_shape)
 

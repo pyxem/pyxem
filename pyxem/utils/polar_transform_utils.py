@@ -142,6 +142,7 @@ def image_to_polar(
     max_r=None,
     find_direct_beam=False,
     direct_beam_position=None,
+    warp_function=warp_polar,
 ):
     """Convert a single image to polar coordinates including the option to
     find the direct beam and take this as the center.
@@ -167,6 +168,9 @@ def image_to_polar(
     direct_beam_position : 2-tuple
         (x, y) position of the central beam in pixel units. This overrides
         the automatic find_maximum parameter if set to True.
+    warp_function: Callable
+        The function to use to convert to polar coordinates. Defaults to
+        the `warp_polar` function in `skimage.transform`
 
     Returns
     -------
@@ -184,7 +188,7 @@ def image_to_polar(
     output_shape = get_polar_pattern_shape(
         image.shape, delta_r, delta_theta, max_r=max_r
     )
-    return warp_polar(
+    return warp_function(
         image,
         center=(c_y, c_x),
         output_shape=output_shape,
@@ -242,20 +246,17 @@ def _chunk_to_polar_njit(
 
 def _chunk_to_polar(
     images,
-    pimage_shape,
+    polar_chunk,
     delta_r,
     delta_theta,
     max_r,
     find_maximum,
     direct_beam_positions,
+    warp_function,
 ):
     if direct_beam_positions is None:
         direct_beam_positions = np.empty(images.shape[:-2], dtype=object)
         direct_beam_positions.fill(None)
-    polar_chunk = np.empty(
-        (images.shape[0], images.shape[1], pimage_shape[0], pimage_shape[1]),
-        dtype=np.float64,
-    )
     for idx, idy in np.ndindex(images.shape[:-2]):
         image = images[idx, idy]
         dbp = direct_beam_positions[idx, idy]
@@ -266,9 +267,9 @@ def _chunk_to_polar(
             max_r=max_r,
             find_direct_beam=find_maximum,
             direct_beam_position=dbp,
+            warp_function=warp_function,
         )
         polar_chunk[idx, idy] = polar_image
-    return polar_chunk
 
 
 def chunk_to_polar(
@@ -278,14 +279,14 @@ def chunk_to_polar(
     max_r=None,
     find_direct_beam=False,
     direct_beam_positions=None,
-    parallelize=False,
+    target="cpu",
 ):
     """
     Convert a chunk of images to polar coordinates
 
     Parameters
     ----------
-    images : (scan_x, scan_y, x, y) np.ndarray
+    images : (scan_x, scan_y, x, y) np.ndarray or cp.ndarray
         diffraction patterns
     delta_r : float, optional
         size of pixels in r-direction of converted image, in units of
@@ -303,14 +304,17 @@ def chunk_to_polar(
         The (x, y) positions for the direct beam in each diffraction pattern.
         If only one (x, y) position is supplied, this will be mapped to all
         images. Overrides the find_maximum parameter
-    parallelize : bool
-        Convert the images in parallel. Due to overhead, this may be slower
-        depending on the size of the dataset and your hardware.
+    target : string
+        Whether to calculate the polar transforms on cpu or gpu. The
+        interpolation order on gpu is lower than on cpu. Parallelize is
+        ignored if the target is gpu. If on gpu, images must be provided as
+        cuda array.
 
     Returns
     -------
-    polar_chunk : (scan_x, scan_y, max_r/delta_theta, 360/delta_theta) np.ndarray
-        diffraction patterns in polar coordinates
+    polar_chunk : (scan_x, scan_y, max_r/delta_theta, 360/delta_theta) np.ndarray or cp.ndarray
+        diffraction patterns in polar coordinates. Returns a cuda or numpy array depending
+        on the device
     """
     if direct_beam_positions is None:
         pass
@@ -326,17 +330,29 @@ def chunk_to_polar(
     pimage_shape = get_polar_pattern_shape(
         images.shape[-2:], delta_r, delta_theta, max_r=max_r
     )
-    if parallelize:
-        conversion_function = _chunk_to_polar_njit
-    else:
-        conversion_function = _chunk_to_polar
-    polar_chunk = conversion_function(
+    polar_chunk = np.empty(
+        (images.shape[0], images.shape[1], pimage_shape[0], pimage_shape[1]),
+        dtype=np.float64,
+    )
+    warp_function = warp_polar
+    if target == "gpu":
+        import cupy as cp
+        from pyxem.utils.cuda_utils import warp_polar_gpu
+        polar_chunk = cp.empty(
+            (images.shape[0], images.shape[1], pimage_shape[0], pimage_shape[1]),
+            dtype=np.float32,
+        )
+        warp_function = warp_polar_gpu
+        # transfer images to gpu
+        images = cp.asarray(images)
+    _chunk_to_polar(
         images,
-        pimage_shape,
+        polar_chunk,
         delta_r,
         delta_theta,
         max_r,
         find_direct_beam,
         direct_beam_positions,
+        warp_function,
     )
     return polar_chunk

@@ -671,7 +671,7 @@ def _match_polar_to_polar_library(
             polar_image, r_templates, theta_templates, intensities_templates,
             polar_image_norm, template_norms)
     correlations_mirror = _correlate_polar_to_library_cpu(
-            polar_image, r_templates, 359-theta_templates, intensities_templates,
+            polar_image, r_templates, polar_image.shape[0]-theta_templates-1, intensities_templates,
             polar_image_norm, template_norms)
     best_angles = np_apply_along_axis(np.argmax, 1, correlations)
     best_correlations = np_apply_along_axis(np.amax, 1, correlations)
@@ -1548,6 +1548,7 @@ def index_dataset_with_template_rotation(
     parallelize_polar_conversion=False,
     chunks="auto",
     parallel_workers="auto",
+    target="cpu",
 ):
     """
     Index a dataset with template_matching while simultaneously optimizing in-plane rotation angle of the templates
@@ -1577,7 +1578,8 @@ def index_dataset_with_template_rotation(
         distance from the center of the image to a corner
     intensity_transform_function : Callable, optional
         Function to apply to both image and template intensities on an
-        element by element basis prior to comparison
+        element by element basis prior to comparison. Note that when using the
+        gpu, the function should be gpu compatible.
     find_direct_beam : bool, optional
         Whether to optimize the direct beam, otherwise the center of the image
         is chosen
@@ -1588,9 +1590,6 @@ def index_dataset_with_template_rotation(
         normalize the images to calculate the correlation coefficient
     normalize_templates : bool, optional
         normalize the templates to calculate the correlation coefficient
-    parallelize_polar_conversion : bool, optional
-        use multiple workers for converting the dataset to polar coordinates. Overhead
-        could make this slower on some hardware and for some datasets.
     chunks : string or 4-tuple, optional
         internally the work is done on dask datasets and this parameter determines
         the chunking. If set to None then no re-chunking will happen if the dataset
@@ -1599,6 +1598,9 @@ def index_dataset_with_template_rotation(
     parallel_workers: int, optional
         the number of workers to use in parallel. If set to "auto", the number
         will be determined from os.cpu_count()
+    target: string, optional
+        Use "cpu" or "gpu". If "gpu" is selected, the majority of the calculation
+        intensive work will be performed on the GPU.
 
     Returns
     -------
@@ -1606,6 +1608,12 @@ def index_dataset_with_template_rotation(
         Results dictionary containing keys [template_index, orientation], with
         values numpy arrays of shape (scan_x, scan_y, n_best) and (scan_x, scan_y, n_best, 3)
         respectively
+
+    Notes
+    -----
+    For running the calculation on the GPU, note that the calculation is performed
+    on the entire template library (full matching) and all arguments related to
+    frac_keep and n_keep are ignored.
     """
     result = {}
     # calculate number of workers
@@ -1642,7 +1650,7 @@ def index_dataset_with_template_rotation(
         max_r,
         find_direct_beam,
         direct_beam_positions,
-        parallelize_polar_conversion,
+        target,
         dtype=np.float32,
         drop_axis=signal.axes_manager.signal_indices_in_array,
         chunks=polar_chunking,
@@ -1659,10 +1667,10 @@ def index_dataset_with_template_rotation(
         positions, intensities = _simulations_to_arrays(
             phase_library["simulations"], max_radius
         )
-        if intensity_transform_function is not None:
-            intensities = intensity_transform_function(intensities)
         x = positions[:, 0]
         y = positions[:, 1]
+        if intensity_transform_function is not None:
+            intensities = intensity_transform_function(intensities)
         r, theta = _cartesian_positions_to_polar(
             x, y, delta_r=delta_r, delta_theta=delta_theta
         )
@@ -1677,32 +1685,54 @@ def index_dataset_with_template_rotation(
             integrated_template_norms = _get_row_norms(integrated_templates)
             template_norms = _get_row_norms(intensities)
         else:
-            integrated_template_norms = np.ones(N, dtype=np.float64)
-            template_norms = np.ones(N, dtype=np.float64)
-        # map the indexation to the blocks
-        indexation = polar_data.map_blocks(
-            _index_chunk,
-            integrated_templates,
-            integrated_template_norms,
-            r,
-            theta,
-            intensities,
-            template_norms,
-            fraction,
-            n_best,
-            normalize_images,
-            dtype=np.float32,
-            drop_axis=signal.axes_manager.signal_indices_in_array,
-            chunks=(polar_data.chunks[0], polar_data.chunks[1], n_best, 4),
-            new_axis=(2, 3),
-        )
-        # wrangle data to (template_index), (orientation), (correlation)
+            integrated_template_norms = np.ones(N, dtype=np.float32)
+            template_norms = np.ones(N, dtype=np.float32)
+        if target == "gpu":
+            import cupy as cp
+            from pyxem.utils.cuda_utils import _index_chunk_gpu
+
+            r = cp.asarray(r)
+            theta = cp.asarray(theta)
+            intensities = cp.asarray(intensities)
+            template_norms = cp.asarray(template_norms)
+
+            indexation = polar_data.map_blocks(
+                _index_chunk_gpu,
+                r,
+                theta,
+                intensities,
+                template_norms,
+                n_best,
+                normalize_images,
+                dtype=np.float32,
+                drop_axis=signal.axes_manager.signal_indices_in_array,
+                chunks=(polar_data.chunks[0], polar_data.chunks[1], n_best, 4),
+                new_axis=(2, 3),
+            )
+        else:
+            indexation = polar_data.map_blocks(
+                _index_chunk,
+                integrated_templates,
+                integrated_template_norms,
+                r,
+                theta,
+                intensities,
+                template_norms,
+                fraction,
+                n_best,
+                normalize_images,
+                dtype=np.float32,
+                drop_axis=signal.axes_manager.signal_indices_in_array,
+                chunks=(polar_data.chunks[0], polar_data.chunks[1], n_best, 4),
+                new_axis=(2, 3),
+            )
         # TODO: there is some duplication here as the polar transform is re-calculated for each loop iteration
         # over the phases
         with ProgressBar():
             res_index = indexation.compute(
                 scheduler="threads", num_workers=parallel_workers, optimize_graph=True
             )
+        # wrangle data to (template_index), (orientation), (correlation)
         result[phase_key] = {}
         result[phase_key]["template_index"] = res_index[:, :, :, 0].astype(np.uint64)
         oris = phase_library["orientations"]
