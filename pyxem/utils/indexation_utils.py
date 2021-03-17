@@ -1689,7 +1689,7 @@ def index_dataset_with_template_rotation(
             template_norms = np.ones(N, dtype=np.float32)
         if target == "gpu":
             import cupy as cp
-            from pyxem.utils.cuda_utils import _index_chunk_gpu
+            from pyxem.utils.cuda_utils import _index_block_gpu
 
             r = cp.asarray(r)
             theta = cp.asarray(theta)
@@ -1697,7 +1697,7 @@ def index_dataset_with_template_rotation(
             template_norms = cp.asarray(template_norms)
 
             indexation = polar_data.map_blocks(
-                _index_chunk_gpu,
+                _index_block_gpu,
                 r,
                 theta,
                 intensities,
