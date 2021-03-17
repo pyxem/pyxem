@@ -59,8 +59,6 @@ class StrainMap(Signal2D):
     - Positive rotations are anticlockwise.
     """
 
-    _signal_type = "strain_map"
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

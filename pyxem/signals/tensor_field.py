@@ -65,7 +65,7 @@ def _get_rotation_angle(matrix):
 
 
 class DisplacementGradientMap(Signal2D):
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Check that the signal dimensions are (3,3) for it to be a valid

@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - load_mib (#734)
 - correct_bad_pixels now returns the same result when lazy/not-lazy (bug #723, fix #735)
+- mirrored templates now correctly dealt with in radial template matching (#740)
+- a k-space error effecting azimuthal integration (#738)
 - bug in .to_crystal_map() 
 
 ### Deprecated
