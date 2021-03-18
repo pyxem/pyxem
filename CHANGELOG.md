@@ -6,7 +6,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
-## 2021-03-03 - version 0.13.1
 ### Fixed
 - load_mib (#734)
 - correct_bad_pixels now returns the same result when lazy/not-lazy (bug #723, fix #735)
