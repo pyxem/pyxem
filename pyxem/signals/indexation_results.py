@@ -118,8 +118,7 @@ def _get_best_match(z):
     z_best : np.array
         array with shape (5,)
     """
-    return z[:, np.argmax(z[-1, :])]
-
+    return z[np.argmax(z[:, -1]),:] 
 
 class GenericMatchingResults:
     def __init__(self, data):

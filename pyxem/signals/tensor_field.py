@@ -65,7 +65,6 @@ def _get_rotation_angle(matrix):
 
 
 class DisplacementGradientMap(Signal2D):
-    _signal_type = "tensor_field"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

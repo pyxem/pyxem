@@ -1495,24 +1495,11 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         -------
         virtual_bf_signal : HyperSpy 2D signal
 
-        Examples
+        See Also
         --------
-        >>> s = pxm.dummy_data.get_holz_heterostructure_test_signal()
-        >>> s_bf = s.virtual_bright_field(show_progressbar=False)
-        >>> s_bf.plot()
-
-        Sum a subset of the diffraction pattern
-
-        >>> s_bf = s.virtual_bright_field(40, 40, 10, show_progressbar=False)
-        >>> s_bf.plot()
-
-        Get a lazy signal, then compute
-
-        >>> s_bf = s.virtual_bright_field(
-        ...     lazy_result=True, show_progressbar=False)
-        >>> s_bf.compute(progressbar=False)
-
+        get_integrated_intensity
         """
+        warnings.warn("This method is depreacted and will be removed in the next version",FutureWarning)
         det_shape = self.axes_manager.signal_shape
         if (cx is None) or (cy is None) or (r is None):
             mask_array = np.zeros(det_shape[::-1], dtype=np.bool)
@@ -1552,21 +1539,12 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         -------
         virtual_adf_signal : HyperSpy 2D signal
 
-        Examples
+        See Also
         --------
-        >>> s = pxm.dummy_data.get_holz_heterostructure_test_signal()
-        >>> s_adf = s.virtual_annular_dark_field(
-        ...     40, 40, 20, 40, show_progressbar=False)
-        >>> s_adf.plot()
-
-        Get a lazy signal, then compute
-
-        >>> s_adf = s.virtual_annular_dark_field(
-        ...     40, 40, 20, 40, lazy_result=True, show_progressbar=False)
-        >>> s_adf.compute(progressbar=False)
-        >>> s_adf.plot()
-
+        get_integrated_intensity
         """
+        warnings.warn("This method is depreacted and will be removed in the next version",FutureWarning)
+
         if r_inner > r:
             raise ValueError(
                 "r_inner must be higher than r. The argument order is "
