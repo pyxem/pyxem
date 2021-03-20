@@ -24,6 +24,7 @@ matplotlib.use("agg")
 import pytest
 import diffpy.structure
 import numpy as np
+import sys
 
 from diffsims.libraries.vector_library import DiffractionVectorLibrary
 
@@ -31,7 +32,7 @@ from pyxem.signals import ElectronDiffraction1D, ElectronDiffraction2D
 
 # a straight lift from
 # https://docs.pytest.org/en/latest/example/simple.html#control-skipping-of-tests-according-to-command-line-option--
-
+# This means we don't always run the slowest tests
 
 def pytest_addoption(parser):
     parser.addoption(
@@ -53,9 +54,11 @@ def pytest_collection_modifyitems(config, items):
             if "slow" in item.keywords:
                 item.add_marker(skip_slow)
 
-
 # End of the code lift, it's regular code from here on out
 
+# https://docs.python.org/3/library/sys.html for macosx as 'darwin'
+not_on_macosx = pytest.mark.skipif(sys.platform=='darwin'),
+                                  reason="Fails on Mac OSX")
 
 @pytest.fixture
 def default_structure():

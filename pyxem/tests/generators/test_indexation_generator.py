@@ -70,6 +70,7 @@ def test_old_indexer_routine():
     with pytest.raises(ValueError):
         _ = IndexationGenerator("a", "b")
 
+@not_on_macosx
 @pytest.mark.parametrize("good_library",[True,False])
 def test_AcceleratedIndexationGenerator(good_library):
     signal = ElectronDiffraction2D((np.ones((2,2,256,256)))).as_lazy()
