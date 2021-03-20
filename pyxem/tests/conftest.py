@@ -57,8 +57,7 @@ def pytest_collection_modifyitems(config, items):
 # End of the code lift, it's regular code from here on out
 
 # https://docs.python.org/3/library/sys.html for macosx as 'darwin'
-not_on_macosx = pytest.mark.skipif(sys.platform=='darwin'),
-                                  reason="Fails on Mac OSX")
+not_on_macosx = pytest.mark.skipif(sys.platform=='darwin',reason="Fails on Mac OSX")
 
 @pytest.fixture
 def default_structure():
