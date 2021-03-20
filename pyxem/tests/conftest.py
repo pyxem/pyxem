@@ -24,7 +24,6 @@ matplotlib.use("agg")
 import pytest
 import diffpy.structure
 import numpy as np
-import sys
 
 from diffsims.libraries.vector_library import DiffractionVectorLibrary
 
@@ -55,9 +54,6 @@ def pytest_collection_modifyitems(config, items):
                 item.add_marker(skip_slow)
 
 # End of the code lift, it's regular code from here on out
-
-# https://docs.python.org/3/library/sys.html for macosx as 'darwin'
-not_on_macosx = pytest.mark.skipif(sys.platform=='darwin',reason="Fails on Mac OSX")
 
 @pytest.fixture
 def default_structure():
