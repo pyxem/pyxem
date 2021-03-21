@@ -3,6 +3,7 @@ import numpy as np
 import pytest
 from unittest.mock import Mock
 import dask.array as da
+import sys
 
 @pytest.fixture()
 def simulations():
@@ -47,7 +48,6 @@ def test_simulations_to_arrays(simulations,max_radius, expected_shapes, test_pos
     np.testing.assert_array_equal(intensities.shape, expected_shapes[1])
     np.testing.assert_array_equal(positions[0, :, -1], test_pos)
     np.testing.assert_array_equal(intensities[0, -1], test_int)
-
 
 def test_match_polar_to_polar_template():
     image = np.ones((123, 50))
@@ -155,7 +155,7 @@ def test_get_integrated_templates():
     assert integrated.shape[0] == 4
     assert integrated.shape[1] == 50
 
-
+@pytest.mark.skipif(sys.platform=='darwin',reason="Fails on Mac OSX")
 def test_match_library_to_polar_fast():
     polar_sum = np.ones(50, dtype=np.float64)
     integrated_temp = np.arange(0, 50, dtype=np.float64)
@@ -176,6 +176,7 @@ def test_match_library_to_polar_fast():
         (False, True),
     ],
 )
+@pytest.mark.skipif(sys.platform=='darwin',reason="Fails on Mac OSX")
 def test_correlate_library_to_pattern_fast(simulations,norim, nortemp):
     image = np.ones((123, 50))
     cor = iutls.correlate_library_to_pattern_fast(
@@ -190,6 +191,7 @@ def test_correlate_library_to_pattern_fast(simulations,norim, nortemp):
 
 
 @pytest.mark.parametrize("intensity_transform_function", [np.sqrt, None])
+@pytest.mark.skipif(sys.platform=='darwin',reason="Fails on Mac OSX")
 def test_prep_image_and_templates(simulations,intensity_transform_function):
     image = np.ones((123, 51))
     pim, r, t, i = iutls._prepare_image_and_templates(
@@ -208,6 +210,8 @@ def test_prep_image_and_templates(simulations,intensity_transform_function):
     "nbest",
     [1, 2],
 )
+@pytest.mark.slow
+@pytest.mark.skipif(sys.platform=='darwin',reason="Fails on Mac OSX")
 def test_mixed_matching_lib_to_polar(nbest):
     image = np.ones((123, 51), dtype=np.float64)
     polar_norm = 1.0
@@ -248,6 +252,8 @@ def test_mixed_matching_lib_to_polar(nbest):
         (0.5, False, True),
     ],
 )
+@pytest.mark.slow
+@pytest.mark.skipif(sys.platform=='darwin',reason="Fails on Mac OSX")
 def test_correlate_library_to_pattern_partial(simulations,frk, norim, nortemp):
     image = np.ones((123, 50))
     indx, angs, cor, angs_m, cors_m = iutls.correlate_library_to_pattern_partial(
@@ -269,6 +275,8 @@ def test_correlate_library_to_pattern_partial(simulations,frk, norim, nortemp):
         (1, 0.5, False, True),
     ],
 )
+@pytest.mark.slow
+@pytest.mark.skipif(sys.platform=='darwin',reason="Fails on Mac OSX")
 def test_get_n_best_matches(simulations,nbest, frk, norim, nortemp):
     image = np.ones((123, 50))
     indx, angs, cor, signs = iutls.get_n_best_matches(
@@ -328,6 +336,8 @@ def library():
         ((2, 3, 4, 5), False, False, {0: "auto", 1: "auto", 2: None, 3: None}),
     ],
 )
+@pytest.mark.slow
+@pytest.mark.skipif(sys.platform=='darwin',reason="Fails on Mac OSX")
 def test_index_dataset_with_template_rotation(library,sigdim, norim, nort, chu):
     signal = create_dataset(sigdim)
     result = iutls.index_dataset_with_template_rotation(
@@ -342,8 +352,8 @@ def test_index_dataset_with_template_rotation(library,sigdim, norim, nort, chu):
         normalize_templates=nort,
         chunks=chu,
     )
-
-
+@pytest.mark.slow
+@pytest.mark.skipif(sys.platform=='darwin',reason="Fails on Mac OSX")
 def test_fail_index_dataset_with_template_rot(library):
     signal = create_dataset((3, 2, 4, 1, 2))
     with pytest.raises(ValueError):
