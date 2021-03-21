@@ -22,6 +22,7 @@ import dask.array as da
 import hyperspy.api as hs
 from matplotlib import pyplot as plt
 from numpy.random import default_rng
+from skimage.draw import circle_perimeter_aa
 
 from pyxem.signals import (
     Diffraction1D,
@@ -435,12 +436,35 @@ class TestAzimuthalIntegral2d:
         ones_diff.unit = "2th_deg"
         return ones_diff
 
+    @pytest.fixture
+    def ring(self):
+        ring_pattern = Diffraction2D(data=np.ones(shape=(100, 100)))
+        rr, cc, val = circle_perimeter_aa(r=50, c=50, radius=30, shape=(100, 100))
+        ring_pattern.data[rr, cc] = val * 100
+        ring_pattern.axes_manager.signal_axes[0].scale = 0.1
+        ring_pattern.axes_manager.signal_axes[1].scale = 0.1
+        ring_pattern.axes_manager.signal_axes[0].name = "kx"
+        ring_pattern.axes_manager.signal_axes[1].name = "ky"
+        ring_pattern.unit = "k_nm^-1"
+        return ring_pattern
+
     def test_2d_azimuthal_integral(self, ones):
         ones.set_ai()
         az = ones.get_azimuthal_integral2d(
             npt=10, npt_azim=10, method="BBox", correctSolidAngle=False
         )
         np.testing.assert_array_equal(az.data[0:8, :], np.ones((8, 10)))
+
+    def test_2d_azimuthal_integral_scale(self,ring):
+        ring.set_ai(wavelength=2.5e-12)
+        az = ring.get_azimuthal_integral2d(npt=500)
+        peak = np.argmax(az.sum(axis=0)).data * az.axes_manager[1].scale
+        np.testing.assert_almost_equal(peak[0], 3,decimal=1)
+        ring.unit="k_A^-1"
+        ring.set_ai(wavelength=2.5e-12)
+        az = ring.get_azimuthal_integral2d(npt=500)
+        peak = np.argmax(az.sum(axis=0)).data * az.axes_manager[1].scale
+        np.testing.assert_almost_equal(peak[0], 3,decimal=1)
 
     def test_2d_azimuthal_integral_fast_slicing(self, ones):
         ones.set_ai(center=(5.5, 5.5))
@@ -1284,25 +1308,23 @@ class TestCorrectBadPixel:
         s_lazy = Diffraction2D(data).as_lazy()
         s_lazy.correct_bad_pixels(bad_pixels, lazy_result=True)
 
-    def test_nonlazy(self, data, bad_pixels):
-        s = Diffraction2D(data)
-        s.correct_bad_pixels(bad_pixels, inplace=True)
+    @pytest.mark.parametrize("lazy_input", (True, False))
+    @pytest.mark.parametrize("lazy_result", (True, False))
+    def test_lazy_with_bad_pixel_finders(self, data, lazy_input,lazy_result):
+        s = Diffraction2D(data).as_lazy()
+        if not lazy_input:
+            s.compute()
+
+        hot = s.find_hot_pixels(lazy_result=True)
+        dead = s.find_dead_pixels(lazy_result=True)
+        bad = hot + dead
+
+        s = s.correct_bad_pixels(bad, lazy_result=lazy_result)
+        assert s._lazy == lazy_result
+        if lazy_result:
+            s.compute()
         assert np.isclose(s.data[0, 0, 9, 81], 1)
         assert np.isclose(s.data[0, 0, 41, 21], 1)
-
-    @pytest.mark.parametrize("lazy_result", (True, False))
-    def test_lazy_with_bad_pixel_finders(self, data, lazy_result):
-        s_lazy = Diffraction2D(data).as_lazy()
-        hot = s_lazy.find_hot_pixels(lazy_result=True)
-        dead = s_lazy.find_dead_pixels(lazy_result=True)
-        bad = hot + dead
-        assert s_lazy._lazy == True
-        s_lazy = s_lazy.correct_bad_pixels(bad, lazy_result=lazy_result)
-        assert s_lazy._lazy == lazy_result
-        if lazy_result:
-            s_lazy.compute()
-        assert np.isclose(s_lazy.data[0, 0, 9, 81], 1)
-        assert np.isclose(s_lazy.data[0, 0, 41, 21], 1)
 
 
 class TestMakeProbeNavigation:

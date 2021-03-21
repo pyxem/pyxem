@@ -12,9 +12,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - lazy_* virtual imaging has been removed, use get_integrated_intensity (#722)
 
+## 2021-03-21 - version 0.13.1
+### Fixed
+- load_mib (#734)
+- correct_bad_pixels now returns the same result when lazy/not-lazy (bug #723, fix #735)
+- mirrored templates now correctly dealt with in radial template matching (#740)
+- further bugfixs for AcceleratedIndexationGenerator (#744)
+- a k-space error effecting azimuthal integration (#738)
+- bug in .to_crystal_map()
+
+### Deprecated
+- lazy_virtual_bright_field, use get_integrated_intensity instead
+- lazy_virtual_dark_field, use get_integrated_intensity instead
+
 ## 2021-01-13 - version 0.13.0
 ### Added
-- Faster rotation indexing, using in place speeds up, added as AcceleratedIndexationGenerator (#673)
+- Faster rotation indexing, using in plane speeds up, added as AcceleratedIndexationGenerator (#673)
 - get_direct_beam_position now supports lazy proccessing (#648)
 - center_direct_beam now supports lazy processing (#658)
 - Several functions for processing large datasets using dask (#648, #658)

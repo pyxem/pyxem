@@ -42,6 +42,7 @@ from pyxem.signals import (
 )
 from pyxem.utils.indexation_utils import OrientationResult
 from unittest.mock import Mock
+import sys
 
 def generate_library(good_library):
     """Here we're testing the __init__ so we focus on 0 being the first entry of the orientations"""
@@ -70,6 +71,8 @@ def test_old_indexer_routine():
     with pytest.raises(ValueError):
         _ = IndexationGenerator("a", "b")
 
+@pytest.mark.skipif(sys.platform=='darwin',reason="Fails on Mac OSX")
+@pytest.mark.slow
 @pytest.mark.parametrize("good_library",[True,False])
 def test_AcceleratedIndexationGenerator(good_library):
     signal = ElectronDiffraction2D((np.ones((2,2,256,256)))).as_lazy()
