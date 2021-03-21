@@ -21,7 +21,7 @@
 from hyperspy.signals import Signal2D
 from hyperspy._signals.lazy import LazySignal
 
-from pyxem.utils.correlation_utils import _correlation, _power
+from pyxem.utils.correlation_utils import _correlation, _power, _pearson_correlation
 
 
 class PolarDiffraction2D(Signal2D):
@@ -129,6 +129,49 @@ class PolarDiffraction2D(Signal2D):
         fourier_axis.offset = 0.5
         fourier_axis.scale = 1
         return power
+
+    def get_pearson_correlation(self, mask=None, krange=None, inplace=False, **kwargs):
+        """Returns the pearson rotational correlation in the form of a Signal2D class.
+
+        Parameters
+        ----------
+        mask: Numpy array
+            A bool mask of values to ignore of shape equal to the signal shape. True for
+            elements masked, False for elements unmasked
+        krange: tuple
+            The range of k values in corresponding unit for segment correlation (None if use
+            the entire pattern)
+        inplace: bool
+            From hyperspy.signal.map(). inplace=True means the signal is
+            overwritten.
+
+        Returns
+        -------
+        correlation: Signal2D
+        """
+        if krange is None:
+            correlation = self._map_iterate(_pearson_correlation, mask=mask, inplace=inplace, **kwargs)
+        else:
+            self_slice = self.isig[:, krange[0]:krange[1]]
+            if mask is not None:
+                mask_signal = Signal2D(mask)
+                mask_signal.axes_manager.signal_axes[1].scale = self.axes_manager[-1].scale
+                mask_slice = mask_signal.isig[:, krange[0]:krange[1]]
+                correlation = self_slice._map_iterate(_pearson_correlation, mask=mask_slice, inplace=inplace, **kwargs)
+            else:
+                correlation = self_slice._map_iterate(_pearson_correlation, inplace=inplace, **kwargs)
+
+        if inplace:
+            self.set_signal_type("symmetry")
+            rho_axis = self.axes_manager.signal_axes[0]
+        else:
+            correlation.set_signal_type("symmetry")
+            rho_axis = correlation.axes_manager.signal_axes[0]
+            correlation.axes_manager.navigation_axes = self.axes_manager.navigation_axes
+        rho_axis.name = "Radians"
+        rho_axis.units = 'rad'
+        rho_axis.scale = self.axes_manager[-2].scale
+        return correlation
 
 
 class LazyPolarDiffraction2D(LazySignal, PolarDiffraction2D):
