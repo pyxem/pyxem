@@ -698,7 +698,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             )
             shifts = origin_coordinates - centers
 
-        s_shifts = LazySignal1D(shifts)
+        s_shifts = LazyBeamShift(shifts)
 
         if not lazy_result:
             s_shifts.compute()
