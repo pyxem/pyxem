@@ -231,6 +231,10 @@ class DPCSignal2D(Signal2D):
         if out is None:
             return output
 
+    def to_beamshift(self):
+        s_beam_shift = self.T
+        s_beam_shift.set_signal_type("beam_shift")
+
     def get_magnitude_signal(self, autolim=True, autolim_sigma=4):
         """Get DPC magnitude image visualized as greyscale.
 
