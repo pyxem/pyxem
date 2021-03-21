@@ -1634,7 +1634,7 @@ def index_dataset_with_template_rotation(
     theta_dim, r_dim = get_polar_pattern_shape(
         data.shape[-2:], delta_r, delta_theta, max_r=max_r
     )
-    polar_chunking = (*data.chunks[0], *data.chunks[1], theta_dim, r_dim)
+    polar_chunking = (data.chunks[0], data.chunks[1], theta_dim, r_dim)
     polar_data = data.map_blocks(
         chunk_to_polar,
         delta_r,
@@ -1706,10 +1706,10 @@ def index_dataset_with_template_rotation(
         result[phase_key] = {}
         result[phase_key]["template_index"] = res_index[:, :, :, 0].astype(np.uint64)
         oris = phase_library["orientations"]
-        orimap = oris[res_index[:, :, :, 0].astype(np.uint64)] 
+        orimap = oris[res_index[:, :, :, 0].astype(np.uint64)]
         orimap[:, :, :, 1] = orimap[:, :, :, 1] * res_index[:,:,:,3]  # multiply by the sign
         orimap[:, :, :, 2] = orimap[:, :, :, 2] * res_index[:,:,:,3]  # multiply by the sign
-        orimap[:, :, :, 0] = res_index[:, :, :, 2]
+        orimap[:, :, :, 0] = res_index[:, :, :, 2] * delta_r
         result[phase_key]["orientation"] = orimap
         result[phase_key]["correlation"] = res_index[:, :, :, 1]
     return result

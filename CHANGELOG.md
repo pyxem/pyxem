@@ -4,14 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
 
+## 2021-03-21 - version 0.13.1
 ### Fixed
 - load_mib (#734)
 - correct_bad_pixels now returns the same result when lazy/not-lazy (bug #723, fix #735)
 - mirrored templates now correctly dealt with in radial template matching (#740)
+- further bugfixs for AcceleratedIndexationGenerator (#744)
 - a k-space error effecting azimuthal integration (#738)
-- bug in .to_crystal_map() 
+- bug in .to_crystal_map()
 
 ### Deprecated
 - lazy_virtual_bright_field, use get_integrated_intensity instead
