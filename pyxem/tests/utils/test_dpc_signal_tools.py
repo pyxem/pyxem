@@ -233,7 +233,7 @@ class TestGetCornerValues:
             pst._get_corner_values(s)
 
 
-class TestFitRampToImage:
+class TestGetLinearPlaneFromSignal2d:
     def test_zero_values(self):
         data = np.zeros((100, 100))
         s = hs.signals.Signal2D(data)
@@ -279,13 +279,13 @@ class TestFitRampToImage:
     def test_wrong_input_dimensions(self):
         s = hs.signals.Signal2D(np.ones((2, 10, 10)))
         with pytest.raises(ValueError):
-            pst._fit_ramp_to_image(s)
+            pst._get_linear_plane_from_signal2d(s)
         s = hs.signals.Signal2D(np.ones((2, 2, 10, 10)))
         with pytest.raises(ValueError):
-            pst._fit_ramp_to_image(s)
+            pst._get_linear_plane_from_signal2d(s)
         s = hs.signals.Signal1D(np.ones(10))
         with pytest.raises(ValueError):
-            pst._fit_ramp_to_image(s)
+            pst._get_linear_plane_from_signal2d(s)
 
 
 class TestGetSignalMeanPositionAndValue:
