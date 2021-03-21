@@ -139,16 +139,13 @@ def _get_signal_mean_position_and_value(signal):
     return (x_mean, y_mean, value_mean)
 
 
-def _get_corner_values(s, corner_size=0.05):
-    """Get the corner positions and mean values from a 2D signal.
+def _get_corner_slices(s, corner_size=0.05):
+    """Get signal slices for the corner positions for a Signal2D.
 
     Returns
     -------
-    corner_array : NumPy array
-        corner_array[:, 0] top left corner,
-        corner_array[:, 1] bottom left corner,
-        corner_array[:, 2] top right corner,
-        corner_array[:, 3] bottom right corner.
+    corner_array : slice tuple
+        Tuple with the corner slices.
 
     """
     if len(s.axes_manager.navigation_axes) != 0:
@@ -160,43 +157,74 @@ def _get_corner_values(s, corner_size=0.05):
     a1_range = (am[1].high_index - am[1].low_index) * corner_size
     a0_range, a1_range = int(a0_range), int(a1_range)
 
-    s_corner00 = s.isig[: a0_range + 1, : a1_range + 1]
-    s_corner01 = s.isig[: a0_range + 1, am[1].high_index - a1_range :]
-    s_corner10 = s.isig[am[0].high_index - a0_range :, : a1_range + 1]
-    s_corner11 = s.isig[am[0].high_index - a0_range :, am[1].high_index - a1_range :]
+    corner00_slice = np.s_[: a0_range + 1, : a1_range + 1]
+    corner01_slice = np.s_[: a0_range + 1, am[1].high_index - a1_range :]
+    corner10_slice = np.s_[am[0].high_index - a0_range :, : a1_range + 1]
+    corner11_slice = np.s_[am[0].high_index - a0_range :, am[1].high_index - a1_range :]
 
-    corner00 = _get_signal_mean_position_and_value(s_corner00)
-    corner01 = _get_signal_mean_position_and_value(s_corner01)
-    corner10 = _get_signal_mean_position_and_value(s_corner10)
-    corner11 = _get_signal_mean_position_and_value(s_corner11)
-
-    return np.array((corner00, corner01, corner10, corner11)).T
+    return (corner00_slice, corner01_slice, corner10_slice, corner11_slice)
 
 
 def _f_min(X, p):
     plane_xyz = p[0:3]
-    distance = (plane_xyz * X.T).sum(axis=1) + p[3]
+    distance = (plane_xyz * X).sum(axis=1) + p[3]
     return distance / np.linalg.norm(plane_xyz)
 
 
-def _residuals(params, signal, X):
+def _residuals(params, X):
     return _f_min(X, params)
 
 
-def _fit_ramp_to_image(signal, corner_size=0.05):
-    if len(signal.axes_manager.navigation_axes) != 0:
-        raise ValueError("s need to have 0 navigation dimensions")
-    if len(signal.axes_manager.signal_axes) != 2:
-        raise ValueError("s need to have 2 signal dimensions")
-    corner_values = _get_corner_values(signal, corner_size=corner_size)
-    p0 = [0.1, 0.1, 0.1, 0.1]
+def _plane_parameters_to_image(p, xaxis, yaxis):
+    """Get a plane 2D array from plane parameters.
 
-    p = leastsq(_residuals, p0, args=(None, corner_values))[0]
+    Assumes a regularly spaced grid.
+
+    Parameters
+    ----------
+    p : list
+        4 values, like [0.1, 0.1, 0.1, 0.1]
+    xaxis, yaxis : array-like
+        List of x- and y-positions. For example via the axes_manager.
+        s.axes_manager.signal_axes[0].axis
+
+    Returns
+    -------
+    plane_image : 2D NumPy array
+
+    Example
+    -------
+    >>> plane = _plane_parameters_to_image([1.2, 0.2, 3.2, 0.5], range(50), range(60))
+
+    """
+    x, y = np.meshgrid(xaxis, yaxis)
+    z = (-p[0] * x - p[1] * y - p[3]) / p[2]
+    return z
+
+
+def _get_linear_plane_from_signal2d(signal, mask=None, initial_values=None):
+    if len(signal.axes_manager.navigation_axes) != 0:
+        raise ValueError("signal need to have 0 navigation dimensions")
+    if len(signal.axes_manager.signal_axes) != 2:
+        raise ValueError("signal need to have 2 signal dimensions")
+    if initial_values is None:
+        initial_values = [0.1, 0.1, 0.1, 0.1]
 
     sam = signal.axes_manager.signal_axes
-    xx, yy = np.meshgrid(sam[0].axis, sam[1].axis)
-    zz = (-p[0] * xx - p[1] * yy - p[3]) / p[2]
-    return zz
+    xaxis, yaxis = sam[0].axis, sam[1].axis
+    x, y = np.meshgrid(xaxis, yaxis)
+    xx, yy = x.flatten(), y.flatten()
+    values = signal.data.flatten()
+    points = np.stack((xx, yy, values)).T
+    if mask is not None:
+        if mask.__array__().shape != signal.__array__().shape:
+            raise ValueError("signal and mask need to have the same shape")
+        points = points[np.invert(mask).flatten()]
+
+    p = leastsq(_residuals, initial_values, args=points)[0]
+
+    plane = _plane_parameters_to_image(p, xaxis, yaxis)
+    return plane
 
 
 def _get_limits_from_array(data, sigma=4, ignore_zeros=False, ignore_edges=False):
