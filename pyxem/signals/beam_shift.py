@@ -18,6 +18,8 @@
 
 """Signal class for working with shift of the direct beam."""
 
+import numpy as np
+import pyxem.utils.pixelated_stem_tools as pst
 from hyperspy._signals.lazy import LazySignal
 from hyperspy._signals.signal1d import Signal1D
 
@@ -34,10 +36,10 @@ class BeamShift(Signal1D):
             )
         s_shift_x = self.isig[0].T
         s_shift_y = self.isig[1].T
-        plane_image_x = _get_linear_plane_from_signal2d(s_shift_x, mask=mask)
-        plane_image_y = _get_linear_plane_from_signal2d(s_shift_y, mask=mask)
+        plane_image_x = pst._get_linear_plane_from_signal2d(s_shift_x, mask=mask)
+        plane_image_y = pst._get_linear_plane_from_signal2d(s_shift_y, mask=mask)
         plane_image = np.stack((plane_image_x, plane_image_y), -1)
-        self.data[:] = plane_image
+        self.data = plane_image
         self.events.data_changed.trigger(None)
 
     def to_dpcsignal(self):

@@ -45,6 +45,7 @@ from pyxem.signals import (
     LazyDPCBaseSignal,
     LazyDPCSignal1D,
     LazyDPCSignal2D,
+    LazyBeamShift,
 )
 from pyxem.utils.pyfai_utils import (
     get_azimuthal_integrator,
@@ -810,7 +811,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             else:
                 align_kwargs["order"] = 0
 
-        shifts_dask_array = _get_dask_array(shifts)
+        nav_dims = self.axes_manager.navigation_dimension
+        nav_chunks = data_dask_array.chunks[:nav_dims]
+        shifts_dask_array = _get_dask_array(shifts, chunk_shape=nav_chunks)
 
         output_dask_array = _process_dask_array(
             data_dask_array,

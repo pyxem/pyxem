@@ -73,6 +73,34 @@ class TestDpcSignal2dCreate:
         LazyDPCSignal2D(data)
 
 
+class TestToBeamShift:
+    def test_dpc_signal2d(self):
+        probe_x, probe_y = 100, 200
+        s = pxm.signals.DPCSignal2D(np.zeros((2, probe_y, probe_x)))
+        s_beam_shift = s.to_beamshift()
+        assert s_beam_shift.axes_manager.shape == (probe_x, probe_y, 2)
+
+    def test_dpc_signal1d(self):
+        probe_x = 200
+        s = pxm.signals.DPCSignal1D(np.zeros((2, probe_x)))
+        s_beam_shift = s.to_beamshift()
+        assert s_beam_shift.axes_manager.shape == (probe_x, 2)
+
+    def test_lazy_dpc_signal2d(self):
+        probe_x, probe_y = 100, 200
+        s = pxm.signals.LazyDPCSignal2D(da.zeros((2, probe_y, probe_x)))
+        s_beam_shift = s.to_beamshift()
+        assert s_beam_shift._lazy
+        assert s_beam_shift.axes_manager.shape == (probe_x, probe_y, 2)
+
+    def test_lazy_dpc_signal1d(self):
+        probe_x = 200
+        s = pxm.signals.LazyDPCSignal1D(da.zeros((2, probe_x)))
+        s_beam_shift = s.to_beamshift()
+        assert s_beam_shift._lazy
+        assert s_beam_shift.axes_manager.shape == (probe_x, 2)
+
+
 class TestDpcSignal2dCorrectRamp:
     def test_correct_ramp_flat(self):
         data0 = np.ones(shape=(2, 64, 64))
