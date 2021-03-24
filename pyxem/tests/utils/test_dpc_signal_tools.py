@@ -271,8 +271,8 @@ class TestGetLinearPlaneFromSignal2d:
         with pytest.raises(ValueError):
             pst._get_linear_plane_from_signal2d(s)
 
-    def test_wrong_map_dimensions(self):
-        s = hs.signals.Signal2D(np.ones((2, 10, 10)))
+    def test_wrong_mask_dimensions(self):
+        s = hs.signals.Signal2D(np.ones((10, 10)))
         mask = np.zeros((11, 9), dtype=np.bool)
         with pytest.raises(ValueError):
             pst._get_linear_plane_from_signal2d(s, mask=mask)
