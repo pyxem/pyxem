@@ -1023,7 +1023,8 @@ def _mixed_matching_lib_to_polar(
         of the best fitting template, where factor is 1 if the direct template is
         matched and -1 if the mirror template is matched
     """
-    template_indexes = np.arange(theta_templates.shape[0])
+    dispatcher = get_array_module(polar_image)
+    template_indexes = dispatcher.arange(theta_templates.shape[0])
 
     # filter based on azimuthal matches if necessary
     if fraction<1:
@@ -1031,7 +1032,7 @@ def _mixed_matching_lib_to_polar(
         coors = _match_library_to_polar_fast(
             polar_sum, integrated_templates, polar_sum_norm, integrated_template_norms
         )
-        lowest = np.percentile(coors, fraction * 100)
+        lowest = dispatcher.percentile(coors, fraction * 100)
         condition = coors >= lowest
         r_templates_filter = r_templates[condition]
         theta_templates_filter = theta_templates[condition]
@@ -1060,7 +1061,6 @@ def _mixed_matching_lib_to_polar(
                                                 blockspergrid,
                                                 threadsperblock
                                                 )
-        dispatcher = cp
     else:
         correlation, correlation_m = _match_polar_to_polar_library_cpu(
                                                 polar_image,
@@ -1070,7 +1070,6 @@ def _mixed_matching_lib_to_polar(
                                                 polar_norm,
                                                 template_norms_filter,
                                                 )
-        dispatcher = np
 
     # find the best in-plane angles and correlations
     best_in_plane_shift, best_in_plane_shift_m, best_in_plane_corr, best_in_plane_corr_m = _get_best_correlations_and_angles(correlation, correlation_m)
