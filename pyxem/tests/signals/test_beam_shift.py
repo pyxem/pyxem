@@ -136,20 +136,29 @@ class TestFullDirectBeamCentering:
 
     def test_mask(self):
         s = self.s
+        s.data[1, 2, 2, 3] = 1000
+        mask = np.zeros((3, 3), dtype=np.bool)
+        mask[1, 2] = True
         s_beam_shift = s.get_direct_beam_position(method="blur", sigma=1)
-        s_beam_shift.make_linear_plane()
+        s_beam_shift.make_linear_plane(mask=mask)
         s.center_direct_beam(shifts=s_beam_shift)
         assert (s.data[:, :, 8, 8] == 10).all()
         s.data[:, :, 8, 8] = 0
-        np.testing.assert_almost_equal(s.data, 0.0, decimal=7)
+        s.data[1, 2, 3, 2] = 0
+        np.testing.assert_almost_equal(s.data, 0.0, decimal=5)
 
     def test_mask_lazy(self):
+        s = self.s
+        s.data[1, 2, 2, 3] = 1000
         s = self.s.as_lazy()
+        mask = np.zeros((3, 3), dtype=np.bool)
+        mask[1, 2] = True
         s_beam_shift = s.get_direct_beam_position(method="blur", sigma=1)
         s_beam_shift.compute()
-        s_beam_shift.make_linear_plane()
+        s_beam_shift.make_linear_plane(mask=mask)
         s.center_direct_beam(shifts=s_beam_shift)
         s.compute()
         assert (s.data[:, :, 8, 8] == 10).all()
         s.data[:, :, 8, 8] = 0
-        np.testing.assert_almost_equal(s.data, 0.0, decimal=7)
+        s.data[1, 2, 3, 2] = 0
+        np.testing.assert_almost_equal(s.data, 0.0, decimal=5)
