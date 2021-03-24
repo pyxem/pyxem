@@ -35,14 +35,14 @@ class TestToDPCSignal:
         s_dpc = s.to_dpcsignal()
         assert s_dpc.axes_manager.shape == (2, probe_x)
 
-    def test_to_dpcsignal2d(self):
+    def test_to_dpcsignal2d_lazy(self):
         probe_x, probe_y = 100, 200
         s = LazyBeamShift(da.zeros((probe_y, probe_x, 2)))
         s_dpc = s.to_dpcsignal()
         assert s_dpc._lazy
         assert s_dpc.axes_manager.shape == (2, probe_x, probe_y)
 
-    def test_to_dpcsignal1d(self):
+    def test_to_dpcsignal1d_lazy(self):
         probe_x = 200
         s = LazyBeamShift(da.zeros((probe_x, 2)))
         s_dpc = s.to_dpcsignal()
