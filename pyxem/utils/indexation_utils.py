@@ -25,6 +25,12 @@ import numpy as np
 from pyxem.utils.expt_utils import _cart2polar
 from pyxem.utils.vector_utils import get_rotation_matrix_between_vectors
 from pyxem.utils.vector_utils import get_angle_cartesian
+from pyxem.utils.cuda_utils import (
+    is_cupy_array,
+    to_numpy,
+    get_array_module,
+    _match_polar_to_polar_library_gpu,
+)
 
 from transforms3d.euler import mat2euler
 
@@ -44,6 +50,11 @@ from pyxem.utils.polar_transform_utils import (
     chunk_to_polar,
 )
 
+try:
+    import cupy as cp
+    CUPY_INSTALLED=True
+except ImportError:
+    CUPY_INSTALLED=False
 
 
 # container for OrientationResults
@@ -556,12 +567,7 @@ def _match_polar_to_polar_template(
     return correlation
 
 
-@njit
-def _norm_array(ar):
-    return ar / np.sqrt(np.sum(ar ** 2))
-
-
-@njit(parallel=True)
+@njit(parallel=True, nogil=True)
 def _correlate_polar_to_library_cpu(
     polar_image,
     r_templates,
@@ -595,7 +601,7 @@ def _correlate_polar_to_library_cpu(
     """
     correlation = np.empty((r_templates.shape[0], polar_image.shape[0]), dtype=np.float32)
     for template in prange(r_templates.shape[0]):
-        for shift in range(polar_image.shape[0]):
+        for shift in prange(polar_image.shape[0]):
             tmp = 0
             for spot in range(r_templates.shape[1]):
                 tmp += (polar_image[(theta_templates[template, spot]+shift)%polar_image.shape[0],
@@ -623,7 +629,74 @@ def np_apply_along_axis(func1d, axis, arr):
     return result
 
 
-@njit(nogil=True)
+def _match_polar_to_polar_library_cpu(
+    polar_image,
+    r_templates,
+    theta_templates,
+    intensities_templates,
+    polar_image_norm,
+    template_norms,
+):
+    """
+    Correlates a polar pattern to all polar templates on CPU
+
+    Parameters
+    ----------
+    polar_image : 2D numpy.ndarray
+        The image converted to polar coordinates
+    r_templates : 2D numpy.ndarray
+        r-coordinates of diffraction spots in templates.
+    theta_templates : 2D numpy ndarray
+        theta-coordinates of diffraction spots in templates.
+    intensities_templates : 2D numpy.ndarray
+        intensities of the spots in each template
+    polar_image_norm : float
+        norm of the polar image
+    template_norms : 1D numpy.ndarray
+        norms of each template
+
+    Returns
+    -------
+    correlations : 2D numpy.ndarray
+        The correlation of the image with all the templates (rows) at all in-plane angles
+        (columns)
+    correlations_mirrored : 2D numpy.ndarray
+        The correlation of the image with all the mirrored templates (rows) at all in-plane angles
+        (columns)
+
+    Notes
+    -----
+    The dimensions of r_templates and theta_templates should be (N, R) where
+    N is the number of templates and R the number of spots in the template
+    with the maximum number of spots
+    """
+    correlations = _correlate_polar_to_library_cpu(
+            polar_image, r_templates, theta_templates, intensities_templates,
+            polar_image_norm, template_norms)
+    correlations_mirror = _correlate_polar_to_library_cpu(
+            polar_image, r_templates,
+            (polar_image.shape[0]-theta_templates)%polar_image.shape[0],
+            intensities_templates,
+            polar_image_norm, template_norms)
+    return correlations, correlations_mirror
+
+
+def _get_best_correlations_and_angles(correlations, correlations_m):
+    """
+    Get the best correlations and in-plane angles from a set of correlation
+    matrices obtained from _match_polar_to_polar_library_cpu and
+    _match_polar_to_polar_library_gpu
+    """
+    dispatcher = get_array_module(correlations)
+    # find the best in-plane angles and correlations
+    best_in_plane_shift = dispatcher.argmax(correlations, axis=1)
+    best_in_plane_shift_m = dispatcher.argmax(correlations_m, axis=1)
+    rows = dispatcher.arange(best_in_plane_shift.shape[0])
+    best_in_plane_corr = correlations[rows, best_in_plane_shift]
+    best_in_plane_corr_m = correlations[rows, best_in_plane_shift_m]
+    return best_in_plane_shift, best_in_plane_shift_m, best_in_plane_corr, best_in_plane_corr_m
+
+
 def _match_polar_to_polar_library(
     polar_image,
     r_templates,
@@ -667,20 +740,19 @@ def _match_polar_to_polar_library(
     N is the number of templates and R the number of spots in the template
     with the maximum number of spots
     """
-    correlations = _correlate_polar_to_library_cpu(
-            polar_image, r_templates, theta_templates, intensities_templates,
-            polar_image_norm, template_norms)
-    correlations_mirror = _correlate_polar_to_library_cpu(
-            polar_image, r_templates, polar_image.shape[0]-theta_templates-1, intensities_templates,
-            polar_image_norm, template_norms)
-    best_angles = np_apply_along_axis(np.argmax, 1, correlations)
-    best_correlations = np_apply_along_axis(np.amax, 1, correlations)
-    best_angles_mirrored = np_apply_along_axis(np.argmax, 1, correlations_mirror)
-    best_correlations_mirrored = np_apply_along_axis(np.amax, 1, correlations_mirror)
-    return (best_correlations,
-            best_angles,
-            best_correlations_mirrored,
-            best_angles_mirrored)
+    correlations, correlations_mirror = _match_polar_to_polar_library_cpu(
+                                                polar_image,
+                                                r_templates,
+                                                theta_templates,
+                                                intensities_templates,
+                                                polar_image_norm,
+                                                template_norms,
+                                                )
+    best_in_plane_shift, best_in_plane_shift_m, best_in_plane_corr, best_in_plane_corr_m = _get_best_correlations_and_angles(correlations, correlations_mirror)
+    return (best_in_plane_corr,
+            best_in_plane_shift,
+            best_in_plane_corr_m,
+            best_in_plane_shift_m)
 
 
 @njit
@@ -790,7 +862,6 @@ def _get_integrated_polar_templates(r_max, r_templates, intensities_templates):
     return integrated_templates
 
 
-@njit
 def _match_library_to_polar_fast(
     polar_sum, integrated_templates, polar_norm, template_norms
 ):
@@ -799,29 +870,25 @@ def _match_library_to_polar_fast(
 
     Parameters
     ----------
-    polar_sum : 1D numpy array
+    polar_sum : 1D numpy array or cupy array
         the image in polar coordinates integrated along the azimuthal axis
         (shape = (r_max,))
-    integrated_templates : 2D numpy array
+    integrated_templates : 2D numpy array or cupy array
         azimuthally integrated templates of shape (N, r_max) with N
         the number of templates and r_max the width of the polar image
     polar_norm : float
         norm of the integrated polar template
-    template_norm : 1D numpy array
+    template_norms : 1D numpy array or cupy array
         norms of all the integrated templates (shape = (N,))
 
     Returns
     -------
-    correlations : 1D numpy array
+    correlations : 1D numpy array or cupy array
         the correlation between the integrated image and the integrated
         templates. (shape = (N,))
     """
-    coors = np.zeros(integrated_templates.shape[0], dtype=np.float32)
-    for i in range(integrated_templates.shape[0]):
-        intensity = integrated_templates[i]
-        template_norm = template_norms[i]
-        coors[i] = _simple_correlation(polar_sum, intensity, polar_norm, template_norm)
-    return coors
+    coors = (integrated_templates*polar_sum).sum(axis=1)
+    return coors/template_norms/polar_norm
 
 
 def _prepare_image_and_templates(
@@ -898,7 +965,6 @@ def _prepare_image_and_templates(
             intensities.astype(np.float32))
 
 
-@njit
 def _mixed_matching_lib_to_polar(
     polar_image,
     polar_norm,
@@ -912,6 +978,7 @@ def _mixed_matching_lib_to_polar(
     template_norms,
     fraction,
     n_best,
+    threadsperblock=(16, 16),
 ):
     """
     Match a polar image to a filtered subset of polar templates
@@ -946,6 +1013,8 @@ def _mixed_matching_lib_to_polar(
         fraction of N templates to throw away
     n_best : int
         number of solutions to return in decending order of fit
+    threadsperblock : 2-tuple of ints
+        threads per block, only relevant for GPU implementation
 
     Return
     ------
@@ -954,52 +1023,88 @@ def _mixed_matching_lib_to_polar(
         of the best fitting template, where factor is 1 if the direct template is
         matched and -1 if the mirror template is matched
     """
-    coors = _match_library_to_polar_fast(
-        polar_image, integrated_templates, polar_sum_norm, integrated_template_norms
-    )
     template_indexes = np.arange(theta_templates.shape[0])
-    lowest = np.percentile(coors, fraction * 100)
-    condition = coors >= lowest
-    r_templates_filter = r_templates[condition]
-    theta_templates_filter = theta_templates[condition]
-    intensities_templates_filter = intensities_templates[condition]
-    template_indexes_filter = template_indexes[condition]
-    template_norms_filter = template_norms[condition]
-    full_cors, full_angles, full_cors_m, full_angles_m = _match_polar_to_polar_library(
-        polar_image,
-        r_templates_filter,
-        theta_templates_filter,
-        intensities_templates_filter,
-        polar_norm,
-        template_norms_filter,
-    )
+
+    # filter based on azimuthal matches if necessary
+    if fraction<1:
+        # match azimuthally integrated templates and patterns
+        coors = _match_library_to_polar_fast(
+            polar_sum, integrated_templates, polar_sum_norm, integrated_template_norms
+        )
+        lowest = np.percentile(coors, fraction * 100)
+        condition = coors >= lowest
+        r_templates_filter = r_templates[condition]
+        theta_templates_filter = theta_templates[condition]
+        intensities_templates_filter = intensities_templates[condition]
+        template_indexes_filter = template_indexes[condition]
+        template_norms_filter = template_norms[condition]
+    else:
+        r_templates_filter = r_templates
+        theta_templates_filter = theta_templates
+        intensities_templates_filter = intensities_templates
+        template_indexes_filter = template_indexes
+        template_norms_filter = template_norms
+
+    # get a full match on the filtered data - we must branch for CPU/GPU
+    if is_cupy_array(polar_image):
+        blockspergrid_x = int(np.ceil(polar_image.shape[0] / threadsperblock[0]))
+        blockspergrid_y = int(np.ceil(polar_image.shape[1] / threadsperblock[1]))
+        blockspergrid = (blockspergrid_x, blockspergrid_y)    
+        correlation, correlation_m = _match_polar_to_polar_library_gpu(
+                                                polar_image,
+                                                r_templates_filter,
+                                                theta_templates_filter,
+                                                intensities_templates_filter,
+                                                polar_norm,
+                                                template_norms_filter,
+                                                blockspergrid,
+                                                threadsperblock
+                                                )
+        dispatcher = cp
+    else:
+        correlation, correlation_m = _match_polar_to_polar_library_cpu(
+                                                polar_image,
+                                                r_templates_filter,
+                                                theta_templates_filter,
+                                                intensities_templates_filter,
+                                                polar_norm,
+                                                template_norms_filter,
+                                                )
+        dispatcher = np
+
+    # find the best in-plane angles and correlations
+    best_in_plane_shift, best_in_plane_shift_m, best_in_plane_corr, best_in_plane_corr_m = _get_best_correlations_and_angles(correlation, correlation_m)
     # compare positive and negative templates and combine
-    positive_is_best = full_cors > full_cors_m
-    best_angles = positive_is_best*full_angles + np.invert(positive_is_best)*full_angles_m
-    best_sign = positive_is_best*1 + np.invert(positive_is_best)*(-1)
-    best_cors = positive_is_best*full_cors + np.invert(positive_is_best)*full_cors_m
-    answer = np.empty((n_best, 4), dtype=np.float64)
+    positive_is_best = best_in_plane_corr > best_in_plane_corr_m
+    negative_is_best = dispatcher.invert(positive_is_best)
+    best_sign = positive_is_best*1 + negative_is_best*(-1)
+    best_cors = positive_is_best*best_in_plane_corr + negative_is_best*best_in_plane_corr_m
+    best_angles = positive_is_best*best_in_plane_shift + negative_is_best*best_in_plane_shift
+    answer = dispatcher.empty((n_best, 4), dtype=np.float32)
+    if n_best >= best_cors.shape[0]:
+        n_best = best_cors.shape[0] - 1  #otherwise argpartition below doesn't work
     if n_best == 1:
-        max_index_filter = np.argmax(best_cors)
+        max_index_filter = dispatcher.argmax(best_cors)
         max_cor = best_cors[max_index_filter]
         max_angle = best_angles[max_index_filter]
         max_index = template_indexes_filter[max_index_filter]
         max_sign = best_sign[max_index_filter]
-        answer[0] = np.array((max_index, max_cor, max_angle, max_sign))
+        answer[0] = dispatcher.array((max_index, max_cor, max_angle, max_sign))
     else:
-        # at this time numba does not support np.argpartition which could speed up
-        # and avoid full sort
-        indices_sorted = np.argsort(-best_cors)
-        n_best_indices = indices_sorted[:n_best]
-        for i in range(n_best):
-            answer[i, 0] = template_indexes_filter[n_best_indices[i]]
-            answer[i, 1] = best_cors[n_best_indices[i]]
-            answer[i, 2] = best_angles[n_best_indices[i]]
-            answer[i, 3] = best_sign[n_best_indices[i]]
+        # a partial sort
+        indices_nbest = dispatcher.argpartition(-best_cors, n_best)[:n_best]
+        nbest_cors = best_cors[indices_nbest]
+        # a full sort on this subset
+        indices_sorted = dispatcher.argsort(-nbest_cors)
+        n_best_indices = indices_nbest[indices_sorted]
+        for j, i in enumerate(n_best_indices):
+            answer[j, 0] = template_indexes_filter[i]
+            answer[j, 1] = best_cors[i]
+            answer[j, 2] = best_angles[i]
+            answer[j, 3] = best_sign[i]
     return answer
 
 
-@njit(nogil=True, parallel=True)
 def _index_chunk(
     polar_images,
     integrated_templates,
@@ -1010,49 +1115,43 @@ def _index_chunk(
     template_norms,
     fraction,
     n_best,
-    nim,
+    norm_images,
+    threadsperblock=(16, 16),
 ):
-    """Function to map indexation over chunks"""
-    indexation_result_chunk = np.empty(
-        (polar_images.shape[0], polar_images.shape[1], n_best, 4), dtype=np.float32
+    dispatcher = get_array_module(polar_images)
+    # prepare an empty results chunk
+    indexation_result_chunk = dispatcher.empty(
+        (polar_images.shape[0], polar_images.shape[1], n_best, 4), dtype=dispatcher.float32
     )
-    for idx in prange(polar_images.shape[0]):
-        for idy in prange(polar_images.shape[1]):
-            pattern = polar_images[idx, idy]
-            integrated_pattern = pattern.sum(axis=0)
-            # calculate norms, if norm_images = True then it's the norm, else it's 1
-            # this is to avoid if statement
-            polar_norm = np.linalg.norm(pattern) * nim + (1.0 - nim)
-            integrated_pattern_norm = np.linalg.norm(integrated_pattern) * nim + (
-                1.0 - nim
-            )
-            indexresult = _mixed_matching_lib_to_polar(
-                pattern,
-                polar_norm,
-                integrated_pattern,
-                integrated_pattern_norm,
-                integrated_templates,
-                integrated_template_norms,
-                r_templates,
-                theta_templates,
-                intensities_templates,
-                template_norms,
-                fraction,
-                n_best,
-            )
-            indexation_result_chunk[idx, idy] = indexresult
+    # norm of the images
+    if norm_images:
+        pattern_norms = dispatcher.linalg.norm(polar_images, axis = (2, 3))
+    else:
+        pattern_norms = dispatcher.ones(polar_images.shape[:2])
+
+    for index in np.ndindex(polar_images.shape[:2]):
+        pattern = polar_images[index]
+        integrated_pattern = pattern.sum(axis=0)
+        polar_norm = float(pattern_norms[index])
+        integrated_pattern_norm = dispatcher.linalg.norm(integrated_pattern)
+
+        indexresult = _mixed_matching_lib_to_polar(
+            pattern,
+            polar_norm,
+            integrated_pattern,
+            integrated_pattern_norm,
+            integrated_templates,
+            integrated_template_norms,
+            r_templates,
+            theta_templates,
+            intensities_templates,
+            template_norms,
+            fraction,
+            n_best,
+            threadsperblock,
+        )
+        indexation_result_chunk[index] = indexresult
     return indexation_result_chunk
-
-
-@njit
-def _renormalize_polar_block(polar_chunk):
-    normed_polar = np.zeros_like(polar_chunk)
-    for i in np.ndindex(polar_chunk.shape[:-2]):
-        polar_image = polar_chunk[i]
-        polar_image = polar_image - np.mean(polar_image)
-        polar_image = _norm_array(polar_image)
-        normed_polar[i] = polar_image
-    return normed_polar
 
 
 def get_in_plane_rotation_correlation(
@@ -1549,6 +1648,8 @@ def index_dataset_with_template_rotation(
     chunks="auto",
     parallel_workers="auto",
     target="cpu",
+    threadsperblock=(16,16),
+    scheduler="processes",
 ):
     """
     Index a dataset with template_matching while simultaneously optimizing in-plane rotation angle of the templates
@@ -1601,6 +1702,11 @@ def index_dataset_with_template_rotation(
     target: string, optional
         Use "cpu" or "gpu". If "gpu" is selected, the majority of the calculation
         intensive work will be performed on the GPU.
+    threadsperblock: 2-tuple of ints
+        Only relevant when using GPU, determines how many threads in a block
+        the cuda kernel is executed over when indexing patterns
+    scheduler: string
+        The scheduler used by dask to compute the result
 
     Returns
     -------
@@ -1615,10 +1721,6 @@ def index_dataset_with_template_rotation(
     on the entire template library (full matching) and all arguments related to
     frac_keep and n_keep are ignored.
     """
-    result = {}
-    # calculate number of workers
-    if parallel_workers == "auto":
-        parallel_workers = os.cpu_count()
     # get the dataset as a dask array
     data = _get_dask_array(signal)
     # check if we have a 4D dataset, and if not, make it
@@ -1638,6 +1740,14 @@ def index_dataset_with_template_rotation(
         data = data.rechunk({0: "auto", 1: "auto", 2: None, 3: None})
     else:
         data = data.rechunk(chunks)
+
+    if target == "gpu":
+        from pyxem.utils.cuda_utils import dask_array_to_gpu
+        data = dask_array_to_gpu(data)
+        dispatcher = cp
+    else:
+        dispatcher = np
+
     # convert to polar dataset
     theta_dim, r_dim = get_polar_pattern_shape(
         data.shape[-2:], delta_r, delta_theta, max_r=max_r
@@ -1650,18 +1760,24 @@ def index_dataset_with_template_rotation(
         max_r,
         find_direct_beam,
         direct_beam_positions,
-        target,
         dtype=np.float32,
         drop_axis=signal.axes_manager.signal_indices_in_array,
         chunks=polar_chunking,
         new_axis=(2, 3),
     )
+
     # apply the intensity transform function to the images
     if intensity_transform_function is not None:
         polar_data = polar_data.map_blocks(intensity_transform_function)
     if phases is None:
         phases = library.keys()
     max_radius = r_dim * delta_r
+
+    result = {}
+
+    # calculate number of workers
+    if parallel_workers == "auto":
+        parallel_workers = os.cpu_count()
     for phase_key in phases:
         phase_library = library[phase_key]
         positions, intensities = _simulations_to_arrays(
@@ -1676,6 +1792,7 @@ def index_dataset_with_template_rotation(
         )
         # integrated intensity library for fast comparison
         integrated_templates = _get_integrated_polar_templates(r_dim, r, intensities)
+        # determining the number of patterns to do a full indexation on
         N = r.shape[0]
         fraction = max((N - abs(n_keep)) / N, 0.0)
         if frac_keep is not None:
@@ -1687,51 +1804,40 @@ def index_dataset_with_template_rotation(
         else:
             integrated_template_norms = np.ones(N, dtype=np.float32)
             template_norms = np.ones(N, dtype=np.float32)
+        # copy relevant data to GPU memory if necessary
         if target == "gpu":
-            import cupy as cp
-            from pyxem.utils.cuda_utils import _index_block_gpu
-
+            integrated_templates = cp.asarray(integrated_templates)
+            integrated_template_norms = cp.asarray(integrated_template_norms)
             r = cp.asarray(r)
             theta = cp.asarray(theta)
             intensities = cp.asarray(intensities)
             template_norms = cp.asarray(template_norms)
 
-            indexation = polar_data.map_blocks(
-                _index_block_gpu,
-                r,
-                theta,
-                intensities,
-                template_norms,
-                n_best,
-                normalize_images,
-                dtype=np.float32,
-                drop_axis=signal.axes_manager.signal_indices_in_array,
-                chunks=(polar_data.chunks[0], polar_data.chunks[1], n_best, 4),
-                new_axis=(2, 3),
-            )
-        else:
-            indexation = polar_data.map_blocks(
-                _index_chunk,
-                integrated_templates,
-                integrated_template_norms,
-                r,
-                theta,
-                intensities,
-                template_norms,
-                fraction,
-                n_best,
-                normalize_images,
-                dtype=np.float32,
-                drop_axis=signal.axes_manager.signal_indices_in_array,
-                chunks=(polar_data.chunks[0], polar_data.chunks[1], n_best, 4),
-                new_axis=(2, 3),
-            )
+        indexation = polar_data.map_blocks(
+            _index_chunk,
+            integrated_templates,
+            integrated_template_norms,
+            r,
+            theta,
+            intensities,
+            template_norms,
+            fraction,
+            n_best,
+            normalize_images,
+            threadsperblock,
+            dtype=np.float32,
+            drop_axis=signal.axes_manager.signal_indices_in_array,
+            chunks=(polar_data.chunks[0], polar_data.chunks[1], n_best, 4),
+            new_axis=(2, 3),
+        )
         # TODO: there is some duplication here as the polar transform is re-calculated for each loop iteration
         # over the phases
         with ProgressBar():
             res_index = indexation.compute(
-                scheduler="threads", num_workers=parallel_workers, optimize_graph=True
+                scheduler=scheduler, num_workers=parallel_workers, optimize_graph=True
             )
+        # in case the data is on the GPU
+        res_index = to_numpy(res_index)
         # wrangle data to (template_index), (orientation), (correlation)
         result[phase_key] = {}
         result[phase_key]["template_index"] = res_index[:, :, :, 0].astype(np.uint64)
@@ -1742,4 +1848,5 @@ def index_dataset_with_template_rotation(
         orimap[:, :, :, 0] = res_index[:, :, :, 2] * delta_r
         result[phase_key]["orientation"] = orimap
         result[phase_key]["correlation"] = res_index[:, :, :, 1]
+        result[phase_key]["mirrored_template"] = res_index[:,:,:,3] == -1
     return result

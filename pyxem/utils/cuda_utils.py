@@ -1,56 +1,87 @@
 from numba import cuda
 import numpy as np
-import cupy as cp
-import cupyx.scipy.ndimage as ndigpu
+
+try:
+    import cupy as cp
+    CUPY_INSTALLED=True
+except ImportError:
+    CUPY_INSTALLED=False
 
 
-def warp_polar_gpu(image, center=None, radius=None, output_shape=None, **kwargs):
+def dask_array_to_gpu(dask_array):
     """
-    Function to emulate warp_polar in skimage.transform on the GPU. Not all
-    parameters are supported
-    
+    Copy a dask array to the GPU chunk by chunk
+    """
+    if not CUPY_INSTALLED:
+        raise BaseException("cupy is required")
+    return dask_array.map_blocks(cp.asarray)
+
+
+def dask_array_from_gpu(dask_array):
+    """
+    Copy a dask array from the GPU chunk by chunk
+    """
+    if not CUPY_INSTALLED:
+        raise BaseException("cupy is required")
+    return dask_array.map_blocks(cp.asnumpy)
+
+
+def to_numpy(array):
+    """
+    Returns the array as an numpy array
     Parameters
     ----------
-    image: cupy.ndarray
-        Input image. Only 2-D arrays are accepted.         
-    center: tuple (row, col), optional
-        Point in image that represents the center of the transformation
-        (i.e., the origin in cartesian space). Values can be of type float.
-        If no value is given, the center is assumed to be the center point of the image.
-    radius: float, optional
-        Radius of the circle that bounds the area to be transformed.
-    output_shape: tuple (row, col), optional
-
+    array : numpy or cupy array
+        Array to determine whether numpy or cupy should be used
     Returns
     -------
-    polar: cupy.ndarray
-        polar image
-
-    Notes
-    -----
-    Speed gains on the GPU will depend on the size of your problem.
-    On a Tesla V100 a 10x speed up was achieved with a 256x256 image:
-    from 5 ms to 400 microseconds. For a 4000x4000 image a 1000x speed up
-    was achieved: from 180 ms to 400 microseconds. However, this does not
-    count the time to transfer data from the CPU to the GPU and back.
+    array : numpy.ndarray
     """
-    if radius is None:
-        radius = int(np.ceil(np.sqrt((image.shape[0] / 2)**2 + (image.shape[1] / 2)**2)))
-    cx, cy = image.shape[1] // 2, image.shape[0] // 2
-    if center is not None:
-        cx, cy = center
-    if output_shape is None:
-        output_shape = (360, radius)
-    delta_theta = 360 / output_shape[0]
-    delta_r = radius / output_shape[1]
-    t = cp.arange(output_shape[0])
-    r = cp.arange(output_shape[1])
-    R, T = cp.meshgrid(r, t)
-    X = R * delta_r * cp.cos(cp.deg2rad(T * delta_theta)) + cx
-    Y = R * delta_r * cp.sin(cp.deg2rad(T * delta_theta)) + cy
-    coordinates = cp.stack([Y, X])
-    polar = ndigpu.map_coordinates(image, coordinates, order=1)
-    return polar
+    if is_cupy_array(array):
+        import cupy as cp
+        array = cp.asnumpy(array)
+    return array
+
+
+def get_array_module(array):
+    """
+    Returns the array module for the given array
+    Parameters
+    ----------
+    array : numpy or cupy array
+        Array to determine whether numpy or cupy should be used
+    Returns
+    -------
+    module : module
+    """
+    module = np
+    try:
+        import cupy as cp
+        if isinstance(array, cp.ndarray):
+            module = cp
+    except ImportError:
+        pass
+    return module
+
+
+def is_cupy_array(array):
+    """
+    Convenience function to determine if an array is a cupy array
+
+    Parameters
+    ----------
+    array : array
+        The array to determine whether it is a cupy array or not.
+    Returns
+    -------
+    bool
+        True if it is cupy array, False otherwise.
+    """
+    try:
+        import cupy as cp
+        return isinstance(array, cp.ndarray)
+    except ImportError:
+        return False
 
 
 @cuda.jit
@@ -97,6 +128,39 @@ def _correlate_polar_image_to_library_gpu(polar_image, sim_r, sim_t, sim_i, imag
                 tmp += (polar_image[(sim_t[template, spot] + shift) % polar_image.shape[0],
                                     sim_r[template, spot]] * sim_i[template, spot])
             correlation[template, shift] = tmp / (image_norm * template_norms[template])
+
+
+def _match_polar_to_polar_library_gpu(
+    pattern,
+    r_templates,
+    theta_templates,
+    intensities_templates,
+    polar_norm,
+    template_norms,
+    blockspergrid,
+    threadsperblock,
+):
+    correlation = cp.empty((r_templates.shape[0], pattern.shape[0]), dtype=cp.float32)
+    _correlate_polar_image_to_library_gpu[blockspergrid, threadsperblock](
+        pattern,
+        r_templates,
+        theta_templates,
+        intensities_templates,
+        polar_norm,
+        template_norms,
+        correlation,
+    )
+    correlation_m = cp.empty((r_templates.shape[0], pattern.shape[0]), dtype=cp.float32)
+    _correlate_polar_image_to_library_gpu[blockspergrid, threadsperblock](
+        pattern,
+        r_templates,
+        (pattern.shape[0] - theta_templates) % pattern.shape[0],
+        intensities_templates,
+        polar_norm,
+        template_norms,
+        correlation_m,
+    )
+    return correlation, correlation_m
 
 
 def _index_block_gpu(
