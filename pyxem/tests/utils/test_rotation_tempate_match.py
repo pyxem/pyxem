@@ -402,3 +402,58 @@ def test_index_dataset_with_template_rotation_gpu(library,sigdim, n_best, frac_k
         chunks=chu,
         target="gpu",
     )
+
+
+def run_index_chunk(di, n_best, fraction):
+    max_r = 4
+    max_theta = 5
+    di.random.seed(1001)
+    data = di.random.random((2, 3, max_theta, max_r))
+    lib_n = 4
+    lib_spots = 5
+    r = di.random.randint(0, max_r, size=(lib_n, lib_spots))
+    theta = di.random.randint(0, max_theta, size=(lib_n, lib_spots))
+    intensities = di.random.random((lib_n, lib_spots))
+    integrated_templates = di.random.random((lib_n, max_r))
+    integrated_template_norms = di.random.random((lib_n))
+    template_norms = di.random.random((lib_n))
+    answer = iutls._index_chunk(
+            data,
+            integrated_templates,
+            integrated_template_norms,
+            r,
+            theta,
+            intensities,
+            template_norms,
+            fraction,
+            n_best,
+            True,
+            )
+    assert answer.shape == (2, 3, n_best, 4)
+
+
+
+@pytest.mark.parametrize(
+    "n_best, fraction",
+    [
+        (1, 1),
+        (2, 0),
+        (3, 0.5),
+    ],
+)
+def test_index_chunk(n_best, fraction):
+    run_index_chunk(np, n_best, fraction)
+
+
+@pytest.mark.parametrize(
+    "n_best, fraction",
+    [
+        (1, 1),
+        (2, 0),
+        (3, 0.5),
+    ],
+)
+@skip_cupy
+def test_index_chunk_gpu(n_best, fraction):
+    import cupy as cp
+    run_index_chunk(cp, n_best, fraction)
