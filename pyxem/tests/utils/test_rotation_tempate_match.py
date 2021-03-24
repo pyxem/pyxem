@@ -5,6 +5,16 @@ from unittest.mock import Mock
 import dask.array as da
 import sys
 
+
+try:
+    import cupy as cp
+    CUPY_INSTALLED = True
+except ImportError:
+    CUPY_INSTALLED = False
+
+skip_cupy = pytest.mark.skipif(not CUPY_INSTALLED, reason="cupy is required")
+
+
 @pytest.fixture()
 def simulations():
     mock_sim_1 = Mock()
@@ -329,21 +339,23 @@ def library():
 
 
 @pytest.mark.parametrize(
-    "sigdim, norim, nort, chu",
+    "sigdim, n_best, frac_keep, norim, nort, chu",
     [
-        ((2, 3), True, False, None),
-        ((2, 3, 4), False, True, "auto"),
-        ((2, 3, 4, 5), False, False, {0: "auto", 1: "auto", 2: None, 3: None}),
+        ((2, 3), 1, 0.5, True, False, None),
+        ((2, 3, 4), 1, 0.5, False, True, "auto"),
+        ((2, 3, 4, 5), 2, 0.5, False, False, {0: "auto", 1: "auto", 2: None, 3: None}),
+        ((2, 3, 4, 5), 1, 1, False, False, {0: "auto", 1: "auto", 2: None, 3: None}),
     ],
 )
 @pytest.mark.slow
 @pytest.mark.skipif(sys.platform=='darwin',reason="Fails on Mac OSX")
-def test_index_dataset_with_template_rotation(library,sigdim, norim, nort, chu):
+def test_index_dataset_with_template_rotation(library,sigdim, n_best, frac_keep, norim, nort, chu):
     signal = create_dataset(sigdim)
     result = iutls.index_dataset_with_template_rotation(
         signal,
         library,
-        frac_keep=0.5,
+        n_best=n_best,
+        frac_keep=frac_keep,
         delta_r=0.5,
         delta_theta=36,
         max_r=None,
@@ -352,6 +364,8 @@ def test_index_dataset_with_template_rotation(library,sigdim, norim, nort, chu):
         normalize_templates=nort,
         chunks=chu,
     )
+
+
 @pytest.mark.slow
 @pytest.mark.skipif(sys.platform=='darwin',reason="Fails on Mac OSX")
 def test_fail_index_dataset_with_template_rot(library):
@@ -361,3 +375,30 @@ def test_fail_index_dataset_with_template_rot(library):
         signal,
         library,
         )
+
+
+@pytest.mark.parametrize(
+    "sigdim, n_best, frac_keep, norim, nort, chu",
+    [
+        ((2, 3, 4, 5), 1, 1, False, False, {0: "auto", 1: "auto", 2: None, 3: None}),
+        ((2, 3, 4, 5), 2, 1, False, False, {0: "auto", 1: "auto", 2: None, 3: None}),
+    ],
+)
+@pytest.mark.slow
+@skip_cupy
+def test_index_dataset_with_template_rotation_gpu(library,sigdim, n_best, frac_keep, norim, nort, chu):
+    signal = create_dataset(sigdim)
+    result = iutls.index_dataset_with_template_rotation(
+        signal,
+        library,
+        n_best=n_best,
+        frac_keep=frac_keep,
+        delta_r=0.5,
+        delta_theta=36,
+        max_r=None,
+        intensity_transform_function=np.sqrt,
+        normalize_images=norim,
+        normalize_templates=nort,
+        chunks=chu,
+        target="gpu",
+    )

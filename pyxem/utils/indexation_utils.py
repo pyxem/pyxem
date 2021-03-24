@@ -1644,7 +1644,6 @@ def index_dataset_with_template_rotation(
     direct_beam_positions=None,
     normalize_images=True,
     normalize_templates=True,
-    parallelize_polar_conversion=False,
     chunks="auto",
     parallel_workers="auto",
     target="cpu",
