@@ -1647,7 +1647,7 @@ def index_dataset_with_template_rotation(
     parallel_workers="auto",
     target="cpu",
     threadsperblock=(16,16),
-    scheduler="processes",
+    scheduler="threads",
 ):
     """
     Index a dataset with template_matching while simultaneously optimizing in-plane rotation angle of the templates
