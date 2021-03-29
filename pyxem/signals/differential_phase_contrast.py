@@ -160,6 +160,14 @@ class DPCSignal1D(Signal1D):
         return s_hist
 
     def to_beamshift(self):
+        """Get BeamShift signal from the DPCSignal.
+
+        The BeamShift signal is a utility signal focused on correcting the shift of the
+        center beam in the Diffraction2D signal.
+
+        In practice, the signal and navigation dimensions are switched.
+
+        """
         s_beam_shift = self.T
         s_beam_shift.set_signal_type("beam_shift")
         return s_beam_shift
@@ -184,7 +192,8 @@ class DPCSignal2D(Signal2D):
     def correct_ramp(self, corner_size=0.05, only_offset=False, out=None):
         """Subtract a plane from the signal by fitting a plane to the corners.
 
-        Useful for removing the effects of d-scan in a STEM beam shift dataset.
+        Useful for removing the effects of the center of the diffraction
+        pattern shifting as a function of scan position.
 
         The plane is calculated by fitting a plane to the corner values
         of the signal. This will only work well when the property one
@@ -223,7 +232,9 @@ class DPCSignal2D(Signal2D):
         else:
             output = out
 
-        corner_slice_list = pst._get_corner_slices(self.inav[0], corner_size=corner_size)
+        corner_slice_list = pst._get_corner_slices(
+            self.inav[0], corner_size=corner_size
+        )
         mask = np.ones_like(self.inav[0].data, dtype=np.bool)
         for corner_slice in corner_slice_list:
             mask[corner_slice] = False
@@ -237,6 +248,14 @@ class DPCSignal2D(Signal2D):
             return output
 
     def to_beamshift(self):
+        """Get BeamShift signal from the DPCSignal.
+
+        The BeamShift signal is a utility signal focused on correcting the shift of the
+        center beam in the Diffraction2D signal.
+
+        In practice, the signal and navigation dimensions are switched.
+
+        """
         s_beam_shift = self.T
         s_beam_shift.set_signal_type("beam_shift")
         return s_beam_shift

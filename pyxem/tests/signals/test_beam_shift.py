@@ -19,6 +19,7 @@
 import pytest
 import numpy as np
 import dask.array as da
+from hyperspy.signals import Signal2D
 from pyxem.signals import BeamShift, LazyBeamShift, Diffraction2D
 
 
@@ -69,12 +70,13 @@ class TestMakeLinearPlane:
         data = np.stack((data_y, data_x), -1)
         mask = np.zeros_like(data[:, :, 0], dtype=np.bool)
         mask[45:50, 36:41] = True
+        s_mask = Signal2D(mask)
         s = BeamShift(data)
         s.change_dtype("float32")
         s_orig = s.deepcopy()
         s.data[45:50, 36:41, 0] = 100000
         s.data[45:50, 36:41, 1] = -100000
-        s.make_linear_plane(mask=mask)
+        s.make_linear_plane(mask=s_mask)
         np.testing.assert_almost_equal(s.data, s_orig, decimal=7)
 
     def test_lazy_input_error(self):
@@ -139,8 +141,9 @@ class TestFullDirectBeamCentering:
         s.data[1, 2, 2, 3] = 1000
         mask = np.zeros((3, 3), dtype=np.bool)
         mask[1, 2] = True
+        s_mask = Signal2D(mask)
         s_beam_shift = s.get_direct_beam_position(method="blur", sigma=1)
-        s_beam_shift.make_linear_plane(mask=mask)
+        s_beam_shift.make_linear_plane(mask=s_mask)
         s.center_direct_beam(shifts=s_beam_shift)
         assert (s.data[:, :, 8, 8] == 10).all()
         s.data[:, :, 8, 8] = 0
@@ -153,9 +156,10 @@ class TestFullDirectBeamCentering:
         s = self.s.as_lazy()
         mask = np.zeros((3, 3), dtype=np.bool)
         mask[1, 2] = True
+        s_mask = Signal2D(mask)
         s_beam_shift = s.get_direct_beam_position(method="blur", sigma=1)
         s_beam_shift.compute()
-        s_beam_shift.make_linear_plane(mask=mask)
+        s_beam_shift.make_linear_plane(mask=s_mask)
         s.center_direct_beam(shifts=s_beam_shift)
         s.compute()
         assert (s.data[:, :, 8, 8] == 10).all()
