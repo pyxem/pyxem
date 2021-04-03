@@ -18,6 +18,7 @@
 
 from .common_diffraction import CommonDiffraction
 from .correlation2d import Correlation2D, LazyCorrelation2D
+from .beam_shift import BeamShift, LazyBeamShift
 from .differential_phase_contrast import (
     DPCBaseSignal,
     DPCSignal1D,
@@ -49,6 +50,8 @@ __all__ = [
     "CommonDiffraction",
     "Correlation2D",
     "LazyCorrelation2D",
+    "BeamShift",
+    "LazyBeamShift",
     "DPCBaseSignal",
     "DPCSignal1D",
     "DPCSignal2D",
