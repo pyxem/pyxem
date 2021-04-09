@@ -32,12 +32,14 @@ def _centered(arr, newshape, axes):
     return arr[tuple(slices)]
 
 
-def _cross_correlate_unmasked(z1,
-                             z2,
-                             mode="full",
-                             axis=(-1),
-                             pad_axis=(-1),
-                             complex=False):
+def cross_correlate(z1,
+                    z2,
+                    mask1=None,
+                    mask2=None,
+                    mode="full",
+                    axis=(-1),
+                    pad_axis=(-1),
+                    overlap_ratio=0.3):
     """
         Masked normalized cross-correlation between two arrays.
         Parameters
@@ -77,111 +79,19 @@ def _cross_correlate_unmasked(z1,
                Pattern Recognition, pp. 2918-2925 (2010).
                :DOI:`10.1109/CVPR.2010.5540032`
         """
-    if mode not in {'full', 'same'}:
-        raise ValueError("Correlation mode '{}' is not valid.".format(mode))
-    fixed_image = np.array(z1, dtype=float)
-    moving_image = np.array(z2, dtype=float)
-    eps = np.finfo(float).eps
+    if mask1 is None:
+        mask1 = np.ones(np.shape(z1))
+    if mask2 is None:
+        mask2 = np.ones(np.shape(z2))
+    return _cross_correlate_masked(z1,
+                                   z2,
+                                   mask1,
+                                   mask2,
+                                   mode,
+                                   axis,
+                                   pad_axis,
+                                   overlap_ratio)
 
-    # Array dimensions along non-transformation axes should be equal.
-    all_axes = set(range(fixed_image.ndim))
-    for ax in (all_axes - set(axis)):
-        if fixed_image.shape[ax] != moving_image.shape[ax]:
-            raise ValueError(
-                "Array shapes along non-transformation axes should be "
-                "equal, but dimensions along axis {a} are not".format(a=axis))
-
-    # Determine final size along transformation axes
-    # Note that it might be faster to compute Fourier transform in a slightly
-    # larger shape (`fast_shape`). Then, after all fourier transforms are done,
-    # we slice back to`final_shape` using `final_slice`.
-    if pad_axis is not None:
-        final_shape = list(z1.shape)
-        for ax in axis:
-            if ax in pad_axis:
-                final_shape[axis] = (fixed_image.shape[ax] +
-                                     moving_image.shape[ax] - 1)
-        final_shape = tuple(final_shape)
-        final_slice = tuple([slice(0, int(sz)) for sz in final_shape])
-        # Extent transform axes to the next fast length (i.e. multiple of 3, 5, or 7)
-        fast_shape = tuple([next_fast_len(final_shape[ax]) for ax in axis if ax in pad_axis])
-        # We use numpy.fft or the new scipy.fft because they allow leaving the
-        # transform axes unchanged which was not possible with scipy.fftpack's
-        # fftn/ifftn in older versions of SciPy.
-        # E.g. arr shape (2, 3, 7), transform along axes (0, 1) with shape (4, 4)
-        # results in arr_fft shape (4, 4, 7)
-        fft = partial(fftmodule.fftn, s=fast_shape, axes=axis)
-        ifft = partial(fftmodule.ifftn, s=fast_shape, axes=axis)
-    else:
-        fft = partial(fftmodule.fftn, axes=axis)
-        ifft = partial(fftmodule.ifftn, axes=axis)
-    # N-dimensional analog to rotation by 180deg is flip over all relevant axes.
-    # See [1] for discussion.
-    rotated_moving_image = _flip(moving_image, axes=axis)
-
-    fixed_fft = fft(fixed_image)
-    rotated_moving_fft = fft(rotated_moving_image)
-
-    # Calculate overlap of masks at every point in the convolution.
-    # Locations with high overlap should not be taken into account.
-
-    number_overlap_masked_px[:] = np.round(number_overlap_masked_px)
-    number_overlap_masked_px[:] = np.fmax(number_overlap_masked_px, eps)
-    masked_correlated_fixed_fft = ifft(rotated_moving_mask_fft * fixed_fft)
-    masked_correlated_rotated_moving_fft = ifft(
-        fixed_mask_fft * rotated_moving_fft)
-
-    numerator = ifft(rotated_moving_fft * fixed_fft)
-    numerator -= (fixed_image*rotated_moving_image)/number_overlap_masked_px
-
-    fixed_squared_fft = fft(np.square(fixed_image))
-    fixed_denom = ifft(rotated_moving_mask_fft * fixed_squared_fft)
-    fixed_denom -= np.square(masked_correlated_fixed_fft) / \
-                   number_overlap_masked_px
-    fixed_denom[:] = np.fmax(fixed_denom, 0.0)
-
-    rotated_moving_squared_fft = fft(np.square(rotated_moving_image))
-    moving_denom = ifft(fixed_mask_fft * rotated_moving_squared_fft)
-    moving_denom -= np.square(masked_correlated_rotated_moving_fft) / \
-                    number_overlap_masked_px
-    moving_denom[:] = np.fmax(moving_denom, 0.0)
-
-    denom = np.sqrt(fixed_denom * moving_denom)
-
-    # Slice back to expected convolution shape.
-    if pad_axis is not None:
-        numerator = numerator[final_slice]
-        denom = denom[final_slice]
-        number_overlap_masked_px = number_overlap_masked_px[final_slice]
-
-    if mode == 'same':
-        _centering = partial(_centered,
-                             newshape=fixed_image.shape,
-                             axes=axis)
-        denom = _centering(denom)
-        numerator = _centering(numerator)
-        number_overlap_masked_px = _centering(number_overlap_masked_px)
-
-    # Pixels where `denom` is very small will introduce large
-    # numbers after division. To get around this problem,
-    # we zero-out problematic pixels.
-    tol = 1e3 * eps * np.max(np.abs(denom), axis=axes, keepdims=True)
-    nonzero_indices = denom > tol
-
-    out = np.zeros_like(denom)
-    out[nonzero_indices] = numerator[nonzero_indices] / denom[nonzero_indices]
-    np.clip(out, a_min=-1, a_max=1, out=out)
-
-    # Apply overlap ratio threshold
-    number_px_threshold = overlap_ratio * np.max(number_overlap_masked_px,
-                                                 axis=axis,
-                                                 keepdims=True)
-    out[number_overlap_masked_px < number_px_threshold] = 0.0
-
-    if complex:
-        return out
-    else:
-        return out.real
 
 def _cross_correlate_masked(z1,
                             z2,
@@ -190,8 +100,7 @@ def _cross_correlate_masked(z1,
                             mode="full",
                             axis=(0,1),
                             pad_axis=(-1),
-                            overlap_ratio=0.3,
-                            complex=False):
+                            overlap_ratio=0.3):
     """
         Masked normalized cross-correlation between two arrays.
         Parameters
@@ -359,18 +268,14 @@ def _cross_correlate_masked(z1,
                                                  keepdims=True)
     out[number_overlap_masked_px < number_px_threshold] = 0.0
 
-    if complex:
-        return out
-    else:
-        return out.real
+    return out.real
 
 
 def _autocorrelation_masked(z,
                             mask,
                             axis=(-1,),
                             pad_axes=None,
-                            overlap_ratio=0.3,
-                            complex=False):
+                            overlap_ratio=0.3):
     """
     Masked normalized cross-correlation between arrays.
     Parameters
@@ -413,8 +318,7 @@ def _autocorrelation_masked(z,
                                    mode="full",
                                    axis=axis,
                                    pad_axis=pad_axes,
-                                   overlap_ratio=overlap_ratio,
-                                   complex=complex)
+                                   overlap_ratio=overlap_ratio)
 
 def _correlation(z, axis=0, mask=None, wrap=True, normalize=True):
     r"""A generic function for applying a correlation with a mask.
