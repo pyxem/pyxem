@@ -31,13 +31,65 @@ def _centered(arr, newshape, axes):
 
     return arr[tuple(slices)]
 
-
+def autocorrelate(z,
+                  mask=None,
+                  mode="full",
+                  axs=(-1),
+                  pad_axis=None,
+                  overlap_ratio=0.3):
+    """
+        Masked normalized cross-correlation between two arrays.
+        Parameters
+        ----------
+        z1 : ndarray
+            The stationary array for the correlation
+        z2 : ndarray
+            The moving array for the correaltion
+        mode : {'full', 'same'}, optional
+            'full':
+                This returns the convolution at each point of overlap. At
+                the end-points of the convolution, the signals do not overlap
+                completely, and boundary effects may be seen.
+            'same':
+                The output is the same size as `arr1`, centered with respect
+                to the `‘full’` output. Boundary effects are less prominent.
+        axis : tuple of ints, optional
+            Axes along which to compute the cross-correlation.
+        pad_axis : tuple of ints, optional
+            Axes along which pad the correlation (won't perform circular correlation)
+        complex : bool
+            If true then the complex value is returned otherwise only the real part is returned.
+        Returns
+        -------
+        out : ndarray
+            Masked normalized cross-correlation.
+        Raises
+        ------
+        ValueError : if correlation `mode` is not valid, or array dimensions along
+            non-transformation axes are not equal.
+        References
+        ----------
+        .. [1] Dirk Padfield. Masked Object Registration in the Fourier Domain.
+               IEEE Transactions on Image Processing, vol. 21(5),
+               pp. 2706-2718 (2012). :DOI:`10.1109/TIP.2011.2181402`
+        .. [2] D. Padfield. "Masked FFT registration". In Proc. Computer Vision and
+               Pattern Recognition, pp. 2918-2925 (2010).
+               :DOI:`10.1109/CVPR.2010.5540032`
+        """
+    if mask is None:
+        mask = np.ones(np.shape(z))
+    return _autocorrelation_masked(z=z,
+                                   mask=mask,
+                                   mode=mode,
+                                   axis=axs,
+                                   pad_axis=pad_axis,
+                                   overlap_ratio=overlap_ratio)
 def cross_correlate(z1,
                     z2,
                     mask1=None,
                     mask2=None,
                     mode="full",
-                    axis=(-1),
+                    axs=(-1),
                     pad_axis=(-1),
                     overlap_ratio=0.3):
     """
@@ -79,6 +131,7 @@ def cross_correlate(z1,
                Pattern Recognition, pp. 2918-2925 (2010).
                :DOI:`10.1109/CVPR.2010.5540032`
         """
+    axis=axs
     if mask1 is None:
         mask1 = np.ones(np.shape(z1))
     if mask2 is None:
@@ -155,6 +208,8 @@ def _cross_correlate_masked(z1,
         """
     if isinstance(axis,int):
         axis = (axis,)
+    if isinstance(pad_axis, int):
+        pad_axis = (pad_axis,)
     if mode not in {'full', 'same'}:
         raise ValueError("Correlation mode '{}' is not valid.".format(mode))
     fixed_image = np.array(z1, dtype=float)
@@ -274,7 +329,8 @@ def _cross_correlate_masked(z1,
 def _autocorrelation_masked(z,
                             mask,
                             axis=(-1,),
-                            pad_axes=None,
+                            pad_axis=None,
+                            mode="full",
                             overlap_ratio=0.3):
     """
     Masked normalized cross-correlation between arrays.
@@ -315,9 +371,9 @@ def _autocorrelation_masked(z,
                                    z2=z,
                                    mask1=mask,
                                    mask2=mask,
-                                   mode="full",
+                                   mode=mode,
                                    axis=axis,
-                                   pad_axis=pad_axes,
+                                   pad_axis=pad_axis,
                                    overlap_ratio=overlap_ratio)
 
 def _correlation(z, axis=0, mask=None, wrap=True, normalize=True):
