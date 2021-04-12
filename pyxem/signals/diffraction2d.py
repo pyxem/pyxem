@@ -56,7 +56,6 @@ from pyxem.utils.expt_utils import (
     azimuthal_integrate1d,
     azimuthal_integrate2d,
     gain_normalise,
-    remove_dead,
     regional_filter,
     circular_mask,
     find_beam_offset_cross_correlation,
@@ -201,8 +200,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             shift_x, shift_y = pst._make_centre_array_from_signal(
                 self, x=shift_x, y=shift_y
             )
-        shift_x = shift_x.flatten()
-        shift_y = shift_y.flatten()
+        if not isinstance(self, LazySignal):
+            shift_x = shift_x.flatten()
+            shift_y = shift_y.flatten()
         iterating_kwargs = [("shift_x", shift_x), ("shift_y", shift_y)]
 
         s_shift = self._map_iterate(
