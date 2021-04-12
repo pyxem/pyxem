@@ -29,7 +29,7 @@ from tqdm import tqdm
 import warnings
 
 import hyperspy.api as hs
-from hyperspy.signals import Signal2D
+from hyperspy.signals import Signal2D, BaseSignal
 from hyperspy._signals.lazy import LazySignal
 from hyperspy._signals.signal1d import LazySignal1D
 from hyperspy._signals.signal2d import LazySignal2D
@@ -201,18 +201,18 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             shift_x, shift_y = pst._make_centre_array_from_signal(
                 self, x=shift_x, y=shift_y
             )
-        shift_x = shift_x.flatten()
-        shift_y = shift_y.flatten()
-        iterating_kwargs = [("shift_x", shift_x), ("shift_y", shift_y)]
+        s_shift_x = BaseSignal(shift_x).T
+        s_shift_y = BaseSignal(shift_y).T
 
-        s_shift = self._map_iterate(
+        s_shift = self.map(
             pst._shift_single_frame,
-            iterating_kwargs=iterating_kwargs,
             inplace=inplace,
             ragged=False,
             parallel=parallel,
             show_progressbar=show_progressbar,
             interpolation_order=interpolation_order,
+            shift_x=s_shift_x,
+            shift_y=s_shift_y,
         )
         if not inplace:
             return s_shift
