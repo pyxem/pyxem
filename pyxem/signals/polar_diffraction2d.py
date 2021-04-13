@@ -40,6 +40,18 @@ class PolarDiffraction2D(Signal2D):
         """
         super().__init__(*args, **kwargs)
 
+    def cross_correlate(self,
+                        kernel,
+                        mask1=None,
+                        kernel_mask=None,
+                        axes=(-1, -2),
+                        pad_axes=(-1, -2),
+                        **kwargs):
+        """Returns some signal cross_correlated with some kernel.  This is a useful tool for identifying
+        some feature in a diffraction pattern or
+        """
+        return
+    
     def get_angular_correlation(
         self, mask=None, normalize=True, inplace=False, **kwargs
     ):
