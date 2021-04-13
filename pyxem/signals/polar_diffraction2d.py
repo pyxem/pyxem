@@ -51,7 +51,7 @@ class PolarDiffraction2D(Signal2D):
         some feature in a diffraction pattern or
         """
         return
-    
+
     def get_angular_correlation(
         self, mask=None, normalize=True, inplace=False, **kwargs
     ):
