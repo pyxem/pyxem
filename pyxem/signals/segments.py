@@ -239,7 +239,7 @@ class LearningSegment:
                 threshold=threshold,
                 exclude_border=exclude_border,
             ),
-            dtype=np.object,
+            dtype=object,
         )
 
         segments, factors_of_segments = [], []

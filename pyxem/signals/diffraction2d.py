@@ -29,7 +29,7 @@ from tqdm import tqdm
 import warnings
 
 import hyperspy.api as hs
-from hyperspy.signals import Signal2D
+from hyperspy.signals import Signal2D, BaseSignal
 from hyperspy._signals.lazy import LazySignal
 from hyperspy._signals.signal1d import LazySignal1D
 from hyperspy._signals.signal2d import LazySignal2D
@@ -200,18 +200,18 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             shift_x, shift_y = pst._make_centre_array_from_signal(
                 self, x=shift_x, y=shift_y
             )
-        shift_x = shift_x.flatten()
-        shift_y = shift_y.flatten()
-        iterating_kwargs = [("shift_x", shift_x), ("shift_y", shift_y)]
+        s_shift_x = BaseSignal(shift_x).T
+        s_shift_y = BaseSignal(shift_y).T
 
-        s_shift = self._map_iterate(
+        s_shift = self.map(
             pst._shift_single_frame,
-            iterating_kwargs=iterating_kwargs,
             inplace=inplace,
             ragged=False,
             parallel=parallel,
             show_progressbar=show_progressbar,
             interpolation_order=interpolation_order,
+            shift_x=s_shift_x,
+            shift_y=s_shift_y,
         )
         if not inplace:
             return s_shift
@@ -465,7 +465,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         Using a mask array
 
         >>> import numpy as np
-        >>> mask_array = np.zeros((128, 128), dtype=np.bool)
+        >>> mask_array = np.zeros((128, 128), dtype=bool)
         >>> mask_array[:, 100:] = True
         >>> s = pxm.dummy_data.get_dead_pixel_signal()
         >>> s_dead_pixels = s.find_dead_pixels(
@@ -528,7 +528,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         Using a mask array
 
         >>> import numpy as np
-        >>> mask_array = np.zeros((128, 128), dtype=np.bool)
+        >>> mask_array = np.zeros((128, 128), dtype=bool)
         >>> mask_array[:, 100:] = True
         >>> s = pxm.dummy_data.get_hot_pixel_signal()
         >>> s_hot_pixels = s.find_hot_pixels(
@@ -1064,8 +1064,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         edge = r_outer - r_inner
         edge_slice = np.s_[edge:-edge, edge:-edge]
 
-        ring_inner = morphology.disk(r_inner, dtype=np.bool)
-        ring = morphology.disk(r_outer, dtype=np.bool)
+        ring_inner = morphology.disk(r_inner, dtype=bool)
+        ring = morphology.disk(r_outer, dtype=bool)
         ring[edge_slice] = ring[edge_slice] ^ ring_inner
         s = self.template_match_with_binary_image(
             ring, lazy_result=lazy_result, show_progressbar=show_progressbar
@@ -1502,7 +1502,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         warnings.warn("This method is depreacted and will be removed in the next version",FutureWarning)
         det_shape = self.axes_manager.signal_shape
         if (cx is None) or (cy is None) or (r is None):
-            mask_array = np.zeros(det_shape[::-1], dtype=np.bool)
+            mask_array = np.zeros(det_shape[::-1], dtype=bool)
         else:
             mask_array = pst._make_circular_mask(cx, cy, det_shape[0], det_shape[1], r)
             mask_array = np.invert(mask_array)
