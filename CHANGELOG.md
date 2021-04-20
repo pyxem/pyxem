@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Getting and plot integrated intensity now support signals containing nan (#722)
 - Add Symmetry1D signal class and symmetry analysis methods (#724)
 - BeamShift class, which includes the `make_linear_plane` method for better correction of the beam shift when scanning large regions in STEM (#746)
+- Add unit testing of docstring examples (#766)
 
 ### Removed
 - lazy_* virtual imaging has been removed, use get_integrated_intensity (#722)
