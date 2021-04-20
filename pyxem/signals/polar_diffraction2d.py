@@ -46,11 +46,52 @@ class PolarDiffraction2D(Signal2D):
                         kernel_mask=None,
                         axes=(-1, -2),
                         pad_axes=(-1, -2),
+                        inplace=False,
                         **kwargs):
-        """Returns some signal cross_correlated with some kernel.  This is a useful tool for identifying
-        some feature in a diffraction pattern or
-        """
-        return
+        r"""Returns cross correlation.
+        Parameters
+        ----------
+        mask: Numpy array or Signal2D
+            A bool mask of values to ignore of shape equal to the signal shape.  If the mask
+                    is a BaseSignal than it is iterated with the polar signal
+                normalize: bool
+                    Normalize the radial correlation by the average value at some radius.
+                kwargs: dict
+                    Any additional options for the hyperspy.BaseSignal.map() function
+                inplace: bool
+                    From hyperspy.signal.map(). inplace=True means the signal is
+                    overwritten.
+
+                Returns
+                -------
+                correlation: Signal2D
+                    The radial correlation for the signal2D
+
+                Examples
+                --------
+                Basic example, no mask applied and normalization applied.
+                >polar.get_angular_correlation()
+                Angular correlation with a static matst for
+
+                """
+        correlation = self.map(_correlation,
+                               z2=kernel,
+                               axs=axes,
+                               mask1=mask1,
+                               mask2=kernel_mask,
+                               pad_axes=pad_axes,
+                               inplace=inplace,
+                               **kwargs
+        )
+        if inplace:
+            self.set_signal_type("correlation")
+            correlation_axis = self.axes_manager.signal_axes[0]
+        else:
+            correlation.set_signal_type("correlation")
+            correlation_axis = correlation.axes_manager.signal_axes[0]
+        correlation_axis.name = "Correlation, $/phi$"
+        return correlation
+
 
     def get_angular_correlation(
         self, mask=None, normalize=True, inplace=False, **kwargs
