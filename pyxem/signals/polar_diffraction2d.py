@@ -79,7 +79,7 @@ class PolarDiffraction2D(Signal2D):
                                axs=axes,
                                mask1=mask1,
                                mask2=kernel_mask,
-                               pad_axes=pad_axes,
+                               pad_axis=pad_axes,
                                inplace=inplace,
                                **kwargs
         )
