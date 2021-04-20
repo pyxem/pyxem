@@ -21,7 +21,7 @@
 from hyperspy.signals import Signal2D
 from hyperspy._signals.lazy import LazySignal
 
-from pyxem.utils.correlation_utils import _correlation, _power, _pearson_correlation, autocorrelate
+from pyxem.utils.correlation_utils import cross_correlate, _power, _pearson_correlation, autocorrelate
 
 
 class PolarDiffraction2D(Signal2D):
@@ -74,7 +74,7 @@ class PolarDiffraction2D(Signal2D):
                 Angular correlation with a static matst for
 
                 """
-        correlation = self.map(_correlation,
+        correlation = self.map(cross_correlate,
                                z2=kernel,
                                axs=axes,
                                mask1=mask1,
