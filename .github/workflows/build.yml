@@ -22,7 +22,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Display versions
         run: python -V; pip -V
-      - name: Install depedencies and package
+      - name: Install dependencies and package
         shell: bash
         run: pip install -U -e .'[tests]'
       - name: Run docstring tests
