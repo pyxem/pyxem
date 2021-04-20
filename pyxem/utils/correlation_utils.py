@@ -219,14 +219,6 @@ def _cross_correlate_masked(z1,
     eps = np.finfo(float).eps
 
     # Array dimensions along non-transformation axes should be equal.
-    all_axes = set(range(fixed_image.ndim))
-
-    for ax in (all_axes - set(axis)):
-        if fixed_image.shape[ax] != moving_image.shape[ax]:
-            raise ValueError(
-                "Array shapes along non-transformation axes should be "
-                "equal, but dimensions along axis {a} are not".format(a=axis))
-
     # Determine final size along transformation axes
     # Note that it might be faster to compute Fourier transform in a slightly
     # larger shape (`fast_shape`). Then, after all fourier transforms are done,
@@ -240,12 +232,13 @@ def _cross_correlate_masked(z1,
         final_shape = tuple(final_shape)
         final_slice = tuple([slice(0, int(sz)) for sz in final_shape])
         # Extent transform axes to the next fast length (i.e. multiple of 3, 5, or 7)
-        fast_shape = tuple([next_fast_len(final_shape[ax]) for ax in axis if ax in pad_axis])
+        fast_shape = tuple([next_fast_len(final_shape[ax]) if ax in pad_axis else final_shape[ax] for ax in axis])
         # We use numpy.fft or the new scipy.fft because they allow leaving the
         # transform axes unchanged which was not possible with scipy.fftpack's
         # fftn/ifftn in older versions of SciPy.
         # E.g. arr shape (2, 3, 7), transform along axes (0, 1) with shape (4, 4)
         # results in arr_fft shape (4, 4, 7)
+        print(fast_shape)
         fft = partial(fftmodule.fftn, s=fast_shape, axes=axis)
         ifft = partial(fftmodule.ifftn, s=fast_shape, axes=axis)
     else:

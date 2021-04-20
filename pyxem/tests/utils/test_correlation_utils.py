@@ -19,7 +19,7 @@
 import pytest
 import numpy as np
 
-from pyxem.utils.correlation_utils import _correlation
+from pyxem.utils.correlation_utils import _correlation, cross_correlate, autocorrelate
 
 
 class TestCorrelations:
@@ -84,3 +84,12 @@ class TestCorrelations:
         result[0::2, :] = 2.26087665
         result[1::2, :] = -0.93478899
         np.testing.assert_array_almost_equal(c, result)
+
+    def test_cross_correlation(self, ones_hundred):
+        cross_correlate(z1=ones_hundred,
+                        z2=ones_hundred)
+        cross_correlate(z1=ones_hundred,
+                        z2=ones_hundred[0:5, :], axs=(0), pad_axis=(0))
+        cross_correlate(z1=ones_hundred,
+                        z2=ones_hundred[0:5, :], axs=(0,1), pad_axis=(0))
+
