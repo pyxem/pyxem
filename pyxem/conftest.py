@@ -11,6 +11,7 @@ import pyxem as pxm
 def doctest_setup_teardown(request):
     plt.ioff()
     tmp_dir = TemporaryDirectory()
+    hs.preferences.General.show_progressbar = False
     org_dir = os.getcwd()
     os.chdir(tmp_dir.name)
     yield
@@ -21,7 +22,6 @@ def doctest_setup_teardown(request):
 
 @pytest.fixture(autouse=True)
 def add_np_am(doctest_namespace):
-    hs.preferences.General.nb_progressbar = False
     doctest_namespace["np"] = numpy
     doctest_namespace["hs"] = hs
     doctest_namespace["pxm"] = pxm
