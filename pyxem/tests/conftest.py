@@ -66,7 +66,7 @@ def default_structure():
 
 @pytest.fixture
 def z():
-    return np.array(
+    z = np.array(
         [
             [
                 [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
@@ -110,6 +110,7 @@ def z():
             ],
         ]
     ).reshape(2, 2, 8, 8)
+    return z
 
 
 @pytest.fixture

@@ -45,6 +45,7 @@ from pyxem.signals import (
     LazyDPCBaseSignal,
     LazyDPCSignal1D,
     LazyDPCSignal2D,
+    LazyBeamShift,
 )
 from pyxem.utils.pyfai_utils import (
     get_azimuthal_integrator,
@@ -687,7 +688,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             )
             shifts = origin_coordinates - centers
 
-        s_shifts = LazySignal1D(shifts)
+        s_shifts = LazyBeamShift(shifts)
 
         if not lazy_result:
             s_shifts.compute()
@@ -799,7 +800,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             else:
                 align_kwargs["order"] = 0
 
-        shifts_dask_array = _get_dask_array(shifts)
+        nav_dims = self.axes_manager.navigation_dimension
+        nav_chunks = data_dask_array.chunks[:nav_dims]
+        shifts_dask_array = _get_dask_array(shifts, chunk_shape=nav_chunks)
 
         output_dask_array = _process_dask_array(
             data_dask_array,
@@ -1469,104 +1472,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         )
 
         mt._add_permanent_markers_to_signal(self, marker_list)
-
-    def lazy_virtual_bright_field(
-        self, cx=None, cy=None, r=None, lazy_result=False, show_progressbar=True
-    ):
-        """Get a virtual bright field signal.
-
-        Can be sum the whole diffraction plane, or a circle subset.
-        If any of the parameters are None, it will sum the whole diffraction
-        plane.
-
-        Parameters
-        ----------
-        cx, cy : floats, optional
-            x- and y-centre positions.
-        r : float, optional
-            Outer radius.
-        lazy_result : bool, optional
-            If True, will not compute the data directly, but
-            return a lazy signal. Default False
-        show_progressbar : bool, optional
-            Default True.
-
-        Returns
-        -------
-        virtual_bf_signal : HyperSpy 2D signal
-
-        See Also
-        --------
-        get_integrated_intensity
-        """
-        warnings.warn("This method is depreacted and will be removed in the next version",FutureWarning)
-        det_shape = self.axes_manager.signal_shape
-        if (cx is None) or (cy is None) or (r is None):
-            mask_array = np.zeros(det_shape[::-1], dtype=bool)
-        else:
-            mask_array = pst._make_circular_mask(cx, cy, det_shape[0], det_shape[1], r)
-            mask_array = np.invert(mask_array)
-        data = dt._mask_array(self.data, mask_array=mask_array).sum(axis=(-2, -1))
-        s_bf = LazySignal2D(data)
-        if not lazy_result:
-            s_bf.compute(progressbar=show_progressbar)
-        for nav_axes, sig_axes in zip(
-            self.axes_manager.navigation_axes, s_bf.axes_manager.signal_axes
-        ):
-            pst._copy_axes_object_metadata(nav_axes, sig_axes)
-
-        return s_bf
-
-    def lazy_virtual_annular_dark_field(
-        self, cx, cy, r_inner, r, lazy_result=False, show_progressbar=True
-    ):
-        """Get a virtual annular dark field signal.
-
-        Parameters
-        ----------
-        cx, cy : floats
-            x- and y-centre positions.
-        r_inner : float
-            Inner radius.
-        r : float
-            Outer radius.
-        lazy_result : bool, optional
-            If True, will not compute the data directly, but
-            return a lazy signal. Default False
-        show_progressbar : bool, default True
-
-        Returns
-        -------
-        virtual_adf_signal : HyperSpy 2D signal
-
-        See Also
-        --------
-        get_integrated_intensity
-        """
-        warnings.warn("This method is depreacted and will be removed in the next version",FutureWarning)
-
-        if r_inner > r:
-            raise ValueError(
-                "r_inner must be higher than r. The argument order is "
-                + "(cx, cy, r_inner, r)"
-            )
-        det_shape = self.axes_manager.signal_shape
-
-        mask_array0 = pst._make_circular_mask(cx, cy, det_shape[0], det_shape[1], r)
-        mask_array1 = pst._make_circular_mask(
-            cx, cy, det_shape[0], det_shape[1], r_inner
-        )
-        mask_array = mask_array0 == mask_array1
-
-        data = dt._mask_array(self.data, mask_array=mask_array).sum(axis=(-2, -1))
-        s_adf = LazySignal2D(data)
-        if not lazy_result:
-            s_adf.compute(progressbar=show_progressbar)
-        for nav_axes, sig_axes in zip(
-            self.axes_manager.navigation_axes, s_adf.axes_manager.signal_axes
-        ):
-            pst._copy_axes_object_metadata(nav_axes, sig_axes)
-        return s_adf
 
     def angular_mask(self, angle0, angle1, centre_x_array=None, centre_y_array=None):
         """Get a bool array with True values between angle0 and angle1.

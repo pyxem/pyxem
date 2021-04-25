@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -20,13 +20,14 @@ import pytest
 import numpy as np
 import dask.array as da
 
-from hyperspy.signals import Signal2D
+from hyperspy.signals import Signal2D, Signal1D
 
 from pyxem.signals import (
     PolarDiffraction2D,
     LazyPolarDiffraction2D,
     Correlation2D,
     Power2D,
+    Symmetry1D,
 )
 
 
@@ -142,6 +143,41 @@ class TestCorrelations:
         assert ac is None
         assert isinstance(flat_pattern, Power2D)
 
+class TestPearsonCorrelation:
+    @pytest.fixture
+    def flat_pattern(self):
+        pd = PolarDiffraction2D(data=np.ones(shape=(2, 2, 5, 5)))
+        pd.axes_manager.signal_axes[0].scale = 0.5
+        pd.axes_manager.signal_axes[0].name = "theta"
+        pd.axes_manager.signal_axes[1].scale = 2
+        pd.axes_manager.signal_axes[1].name = "k"
+        return pd
+
+    @pytest.mark.parametrize("krange", [None, (0, 4),(1., 5.)])
+    def test_pcorrelation_signal(self, flat_pattern, krange):
+        rho = flat_pattern.get_pearson_correlation(krange=krange)
+        assert isinstance(rho, Symmetry1D)
+
+    def test_pcorrelation_inplace(self, flat_pattern):
+        rho = flat_pattern.get_pearson_correlation(inplace=True)
+        assert rho is None
+        assert isinstance(flat_pattern, Symmetry1D)
+
+    def test_axes_transfer(self, flat_pattern):
+        rho = flat_pattern.get_pearson_correlation()
+        assert (
+            rho.axes_manager.signal_axes[0].scale
+            == flat_pattern.axes_manager.signal_axes[0].scale
+        )
+
+    @pytest.mark.parametrize(
+        "mask", [None, np.zeros(shape=(5, 5))]
+    )
+    def test_masking_pcorrelation(self, flat_pattern, mask):
+        rho_0 = flat_pattern.get_pearson_correlation(mask=mask)
+        assert isinstance(rho_0, Symmetry1D)
+        rho = flat_pattern.get_pearson_correlation(mask=mask, krange=(0, 4))
+        assert isinstance(rho, Symmetry1D)
 
 class TestDecomposition:
     def test_decomposition_is_performed(self, diffraction_pattern):

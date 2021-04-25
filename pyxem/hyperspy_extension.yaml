@@ -137,6 +137,18 @@ signals:
     dtype: real
     lazy: False
     module: pyxem.signals.diffraction_variance2d
+  BeamShift:
+    signal_type: beam_shift
+    signal_dimension: 1
+    dtype: real
+    lazy: False
+    module: pyxem.signals.beam_shift
+  LazyBeamShift:
+    signal_type: beam_shift
+    signal_dimension: 1
+    dtype: real
+    lazy: True
+    module: pyxem.signals.beam_shift
   DPCBaseSignal:
     signal_type: "dpc"
     signal_dimension: 0
@@ -197,14 +209,12 @@ signals:
     dtype: real
     lazy: True
     module: pyxem.signals.power2d
-
-components2D:
-    DiffractionComponent:
-      module: pyxem.components.diffraction_component
-      class: DiffractionComponent
-    ScalableReferencePattern:
-      module: pyxem.components.scalable_reference_component
-      class: ScalableReferencePattern
+  Symmetry1D:
+    signal_type: symmetry
+    signal_dimension: 1
+    dtype: real
+    lazy: False
+    module: pyxem.signals.symmetry1d
 
 components1D:
     ReducedIntensityCorrectionComponent:
