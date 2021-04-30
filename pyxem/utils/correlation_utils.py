@@ -238,7 +238,6 @@ def _cross_correlate_masked(z1,
         # fftn/ifftn in older versions of SciPy.
         # E.g. arr shape (2, 3, 7), transform along axes (0, 1) with shape (4, 4)
         # results in arr_fft shape (4, 4, 7)
-        print(fast_shape)
         fft = partial(fftmodule.fftn, s=fast_shape, axes=axis)
         ifft = partial(fftmodule.ifftn, s=fast_shape, axes=axis)
     else:
