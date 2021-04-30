@@ -134,6 +134,8 @@ class TestCorrelations:
         np.testing.assert_array_almost_equal(auto, ans)
 
     def test_correlation_padded(self, ones_hundred):
+        mask = np.ones((10, 20), dtype=bool)
+        mask[0:3, :] = 0
         auto = cross_correlate(ones_hundred,
                                ones_hundred,
                                mask1=mask,
