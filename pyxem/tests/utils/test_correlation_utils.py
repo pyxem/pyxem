@@ -112,21 +112,36 @@ class TestCorrelations:
         ans[5:15:2] = 1
         np.testing.assert_array_almost_equal(auto, ans)
 
-
     def test_cross_correlation(self, ones_hundred):
         c = cross_correlate(z1=ones_hundred,
-                            z2=ones_hundred)
-        plt.imshow(ones_hundred)
-        np.testing.assert_array_equal(c, np.zeros((10, 20)))
+                            z2=ones_hundred,
+                            axs=0,
+                            pad_axis=None)
+        ans = np.ones((10, 20))
+        ans[0::2] = -1
+        np.testing.assert_array_almost_equal(c, ans)
 
+    def test_cross_correlation_mask(self, ones_hundred):
+        mask = np.ones((10, 20), dtype=bool)
+        mask[0:3, :] = 0
+        auto = cross_correlate(ones_hundred,
+                               ones_hundred,
+                               mask1=mask,
+                               mask2=mask,
+                               axs=0)
+        ans = np.ones((10, 20))
+        ans[0::2] = -1
+        np.testing.assert_array_almost_equal(auto, ans)
 
-        cross_correlate(z1=ones_hundred,
-                        z2=ones_hundred[0:5, :],
-                        axs=0,
-                        pad_axis=0,
-                        )
-        cross_correlate(z1=ones_hundred,
-                        z2=ones_hundred[0:5, :],
-                        axs=(0, 1),
-                        pad_axis=0)
+    def test_correlation_padded(self, ones_hundred):
+        auto = cross_correlate(ones_hundred,
+                               ones_hundred,
+                               mask1=mask,
+                               mask2=mask,
+                               axs=0,
+                               pad_axis=0)
+        ans = np.zeros((19, 20))
+        ans[6:14:2] = -1
+        ans[5:15:2] = 1
+        np.testing.assert_array_almost_equal(auto, ans)
 
