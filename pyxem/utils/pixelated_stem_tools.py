@@ -374,7 +374,7 @@ def _get_angle_sector_mask(
     --------
     >>> import numpy as np
     >>> import pyxem.utils.pixelated_stem_tools as pst
-    >>> s = ps.PixelatedSTEM(np.arange(100).reshape(10, 10))
+    >>> s = pxm.signals.Diffraction2D(np.arange(100).reshape(10, 10))
     >>> s.axes_manager.signal_axes[0].offset = -5
     >>> s.axes_manager.signal_axes[1].offset = -5
     >>> mask = pst._get_angle_sector_mask(s, 0.5*np.pi, np.pi)
