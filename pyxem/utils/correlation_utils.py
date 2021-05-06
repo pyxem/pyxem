@@ -6,13 +6,9 @@ from functools import partial
 def _flip(arr, axes=None):
     """ Reverse array over many axes. Generalization of arr[::-1] for many
     dimensions. If `axes` is `None`, flip along all axes. """
-    if axes is None:
-        reverse = [slice(None, None, -1)] * arr.ndim
-    else:
-        reverse = [slice(None, None, None)] * arr.ndim
-        for axis in axes:
-            reverse[axis] = slice(None, None, -1)
-
+    reverse = [slice(None, None, None)] * arr.ndim
+    for axis in axes:
+        reverse[axis] = slice(None, None, -1)
     return arr[tuple(reverse)]
 
 

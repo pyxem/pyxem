@@ -147,3 +147,24 @@ class TestCorrelations:
         ans[5:15:2] = 1
         np.testing.assert_array_almost_equal(auto, ans)
 
+    def test_correlation_padded_same(self, ones_hundred):
+        auto = cross_correlate(ones_hundred,
+                               ones_hundred,
+                               axs=0,
+                               mode="same",
+                               pad_axis=0)
+        ans = np.zeros((10, 20))
+        ans[::2] = -1
+        ans[1::2] = 1
+        np.testing.assert_array_almost_equal(auto, ans)
+
+    def test_correlation_axes_none(self, ones_hundred):
+        auto = cross_correlate(ones_hundred,
+                               ones_hundred,
+                               axs=0,
+                               mode="same",
+                               pad_axis=0)
+        ans = np.zeros((10, 20))
+        ans[::2] = -1
+        ans[1::2] = 1
+        np.testing.assert_array_almost_equal(auto, ans)
