@@ -648,6 +648,7 @@ def determine_ellipse(signal,
                             mask=mask,
                             num_points=num_points)
     if guess_starting_params:
+        print("starting center", np.mean(pos[:, 0]),np.mean(pos[:, 1]))
         el, _ = get_ellipse_model_ransac_single_frame(pos,
                                               xf=np.mean(pos[:, 0]),
                                               yf=np.mean(pos[:, 1]),
@@ -662,4 +663,19 @@ def determine_ellipse(signal,
     else:
         el, _ = get_ellipse_model_ransac_single_frame(pos,
                                                      **kwargs)
-        return el
+    if el is not None:
+        affine = ellipse_to_affine(el.params[3],el.params[2], el.params[4])
+        center = (el.params[0],el.params[1])
+        return center, affine
+    else:
+        print("Ransac Ellipse detection did not converge")
+        return None
+def ellipse_to_affine(major, minor, rot):
+    Q = [[np.cos(rot), -np.sin(rot), 0],
+         [np.sin(rot), np.cos(rot), 0],
+         [0, 0, 1]]
+    S = [[(major / minor), 0, 0],
+         [0, major / minor, 0],
+         [0, 0, 1]]
+    C = np.matmul(np.matmul(Q, S), np.transpose(Q))
+    return C
