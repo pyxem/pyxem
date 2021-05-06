@@ -168,3 +168,11 @@ class TestCorrelations:
         ans[::2] = -1
         ans[1::2] = 1
         np.testing.assert_array_almost_equal(auto, ans)
+
+    def test_correlation_axes_fail(self, ones_hundred):
+        with pytest.raises(ValueError):
+            auto = cross_correlate(ones_hundred,
+                                   ones_hundred,
+                                   axs=0,
+                                   mode="asd",
+                                   pad_axis=0)
