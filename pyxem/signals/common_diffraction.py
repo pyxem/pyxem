@@ -59,7 +59,7 @@ class CommonDiffraction:
 
     @staticmethod
     def _get_sum_signal(signal, out_signal_axes=None):
-        out = signal.nansum(signal.axes_manager.signal_axes)
+        out = signal.sum(signal.axes_manager.signal_axes)
         if out_signal_axes is None:
             out_signal_axes = list(
                 np.arange(min(signal.axes_manager.navigation_dimension, 2))
@@ -116,7 +116,7 @@ class CommonDiffraction:
 
         # Create the interactive signal
         interactive(
-            sliced_signal.nansum,
+            sliced_signal.sum,
             axis=sliced_signal.axes_manager.signal_axes,
             event=roi.events.changed,
             recompute_out_event=None,

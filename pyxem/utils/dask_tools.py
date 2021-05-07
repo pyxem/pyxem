@@ -21,7 +21,6 @@ import dask.array as da
 from skimage.feature import match_template, blob_dog, blob_log
 import scipy.ndimage as ndi
 from skimage import morphology
-from hyperspy.misc.utils import isiterable
 
 
 def align_single_frame(image, shifts, **kwargs):
@@ -125,16 +124,13 @@ def _get_chunking(signal, chunk_shape=None, chunk_bytes=None):
         chunk_bytes = "30MiB"
     nav_dim = signal.axes_manager.navigation_dimension
     sig_dim = signal.axes_manager.signal_dimension
-    if chunk_shape is not None:
-        if not isiterable(chunk_shape):
-            chunk_shape = [chunk_shape] * nav_dim
-    
+
     chunks_dict = {}
     for i in range(nav_dim):
         if chunk_shape is None:
             chunks_dict[i] = "auto"
         else:
-            chunks_dict[i] = chunk_shape[i]
+            chunks_dict[i] = chunk_shape
     for i in range(nav_dim, nav_dim + sig_dim):
         chunks_dict[i] = -1
 

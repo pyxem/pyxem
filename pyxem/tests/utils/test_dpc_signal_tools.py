@@ -117,163 +117,250 @@ class TestMakeBivariateHistogram:
         assert not s.data.any()
 
 
-class TestGetCornerSlices:
-    @pytest.mark.parametrize("corner_size", [0.02, 0.05, 0.20, 0.23])
-    def test_corner_size(self, corner_size):
-        size = 100
-        s = hs.signals.Signal2D(np.zeros((size, size)))
-        corner_slice_list = pst._get_corner_slices(s, corner_size=corner_size)
-        corner_shape = (round(size * corner_size), round(size * corner_size))
-        for corner_slice in corner_slice_list:
-            s_corner = s.isig[corner_slice]
-            assert s_corner.axes_manager.shape == corner_shape
-
-    def test_signal_slice_values(self):
-        data = np.zeros((100, 200), dtype=np.uint16)
-        data[:20, :20] = 2
-        data[:20, -20:] = 5
-        data[-20:, :20] = 10
-        data[-20:, -20:] = 8
-        s = hs.signals.Signal2D(data)
-        corner_slice_list = pst._get_corner_slices(s, corner_size=0.05)
-        assert (s.isig[corner_slice_list[0]].data == 2).all()
-        assert (s.isig[corner_slice_list[1]].data == 10).all()
-        assert (s.isig[corner_slice_list[2]].data == 5).all()
-        assert (s.isig[corner_slice_list[3]].data == 8).all()
-
-    def test_non_square_signal(self):
-        corner_size = 0.05
-        size_x, size_y = 100, 200
-        s = hs.signals.Signal2D(np.zeros((size_y, size_x)))
-        corner_slice_list = pst._get_corner_slices(s, corner_size=0.05)
-        corner_shape = (round(size_x * corner_size), round(size_y * corner_size))
-        for corner_slice in corner_slice_list:
-            s_corner = s.isig[corner_slice]
-            assert s_corner.axes_manager.shape == corner_shape
-
-    def test_wrong_input_dimensions(self):
-        s = hs.signals.Signal2D(np.ones((2, 10, 10)))
-        with pytest.raises(ValueError):
-            pst._get_corner_slices(s)
-        s = hs.signals.Signal2D(np.ones((2, 2, 10, 10)))
-        with pytest.raises(ValueError):
-            pst._get_corner_slices(s)
-        s = hs.signals.Signal1D(np.ones(10))
-        with pytest.raises(ValueError):
-            pst._get_corner_slices(s)
-
-
-class TestPlaneParametersToImage:
+class TestGetCornerValues:
     def test_simple(self):
-        p = [0, 0, 1, 0]
-        xaxis, yaxis = range(100), range(110)
-        image = pst._plane_parameters_to_image(p, xaxis, yaxis)
-        assert_allclose(image, 0)
+        s = hs.signals.Signal2D(np.zeros((101, 101)))
+        corner_values = pst._get_corner_values(s)
+        assert corner_values.shape == (3, 4)
+        # tl: top left, bl: bottom right, tr: top right, br: bottom right
+        corner_tl, corner_bl = corner_values[:, 0], corner_values[:, 1]
+        corner_tr, corner_br = corner_values[:, 2], corner_values[:, 3]
+        assert (corner_tl == (2.5, 2.5, 0.0)).all()
+        assert (corner_bl == (2.5, 97.5, 0.0)).all()
+        assert (corner_tr == (97.5, 2.5, 0.0)).all()
+        assert (corner_br == (97.5, 97.5, 0.0)).all()
+
+    def test_non_square_shape(self):
+        s = hs.signals.Signal2D(np.zeros((201, 101)))
+        corner_values = pst._get_corner_values(s)
+        corner_tl, corner_bl = corner_values[:, 0], corner_values[:, 1]
+        corner_tr, corner_br = corner_values[:, 2], corner_values[:, 3]
+        assert (corner_tl == (2.5, 5.0, 0.0)).all()
+        assert (corner_bl == (2.5, 195.0, 0.0)).all()
+        assert (corner_tr == (97.5, 5.0, 0.0)).all()
+        assert (corner_br == (97.5, 195.0, 0.0)).all()
+
+    def test_corner_size_parameters(self):
+        s = hs.signals.Signal2D(np.zeros((101, 101)))
+        corner_values = pst._get_corner_values(s, corner_size=0.1)
+        corner_tl, corner_bl = corner_values[:, 0], corner_values[:, 1]
+        corner_tr, corner_br = corner_values[:, 2], corner_values[:, 3]
+        assert (corner_tl == (5.0, 5.0, 0.0)).all()
+        assert (corner_bl == (5.0, 95.0, 0.0)).all()
+        assert (corner_tr == (95.0, 5.0, 0.0)).all()
+        assert (corner_br == (95.0, 95.0, 0.0)).all()
+
+    def test_different_corner_values(self):
+        s = hs.signals.Signal2D(np.zeros((100, 100)))
+        s.data[:5, :5] = 10
+        s.data[-5:, :5] = 20
+        s.data[:5, -5:] = 30
+        s.data[-5:, -5:] = 40
+        corner_values = pst._get_corner_values(s)
+        assert (corner_values[2] == (10, 20, 30, 40)).all()
+        corner_values = pst._get_corner_values(s, corner_size=0.1)
+        assert (corner_values[2] == (2.5, 5.0, 7.5, 10.0)).all()
+
+    def test_different_corner_values_non_square(self):
+        s = hs.signals.Signal2D(np.zeros((200, 100)))
+        s.data[:10, :5] = 10
+        s.data[-10:, :5] = 20
+        s.data[:10, -5:] = 30
+        s.data[-10:, -5:] = 40
+        corner_values = pst._get_corner_values(s)
+        assert (corner_values[2] == (10, 20, 30, 40)).all()
+        corner_values = pst._get_corner_values(s, corner_size=0.1)
+        assert (corner_values[2] == (2.5, 5.0, 7.5, 10.0)).all()
 
     def test_offset(self):
-        p = [0, 0, 1, 3]
-        xaxis, yaxis = range(100), range(110)
-        image = pst._plane_parameters_to_image(p, xaxis, yaxis)
-        assert_allclose(image, -3)
+        s = hs.signals.Signal2D(np.zeros((101, 101)))
+        s.axes_manager[0].offset = 10
+        s.axes_manager[1].offset = -10
+        corner_values = pst._get_corner_values(s)
+        corner_tl, corner_bl = corner_values[:, 0], corner_values[:, 1]
+        corner_tr, corner_br = corner_values[:, 2], corner_values[:, 3]
+        assert (corner_tl == (12.5, -7.5, 0.0)).all()
+        assert (corner_bl == (12.5, 87.5, 0.0)).all()
+        assert (corner_tr == (107.5, -7.5, 0.0)).all()
+        assert (corner_br == (107.5, 87.5, 0.0)).all()
 
-    def test_x_plane(self):
-        p = [1, 0, 1, 0]
-        xaxis, yaxis = range(100), range(110)
-        image = pst._plane_parameters_to_image(p, xaxis, yaxis)
-        assert image[0, 0] > image[0, -1]
+    def test_scale(self):
+        s = hs.signals.Signal2D(np.zeros((101, 101)))
+        s.axes_manager[0].scale = 0.5
+        s.axes_manager[1].scale = 2
+        corner_values = pst._get_corner_values(s)
+        corner_tl, corner_bl = corner_values[:, 0], corner_values[:, 1]
+        corner_tr, corner_br = corner_values[:, 2], corner_values[:, 3]
+        assert (corner_tl == (1.25, 5.0, 0.0)).all()
+        assert (corner_bl == (1.25, 195.0, 0.0)).all()
+        assert (corner_tr == (48.75, 5.0, 0.0)).all()
+        assert (corner_br == (48.75, 195.0, 0.0)).all()
 
-    def test_y_plane(self):
-        p = [0, 1, 1, 0]
-        xaxis, yaxis = range(100), range(110)
-        image = pst._plane_parameters_to_image(p, xaxis, yaxis)
-        assert image[0, 0] > image[-1, 0]
+    def test_crop_square(self):
+        s = hs.signals.Signal2D(np.zeros((200, 200))).isig[50:150, 50:150]
+        corner_values = pst._get_corner_values(s)
+        corner_tl, corner_bl = corner_values[:, 0], corner_values[:, 1]
+        corner_tr, corner_br = corner_values[:, 2], corner_values[:, 3]
+        assert (corner_tl == (52.0, 52, 0.0)).all()
+        assert (corner_bl == (52.0, 147.0, 0.0)).all()
+        assert (corner_tr == (147.0, 52.0, 0.0)).all()
+        assert (corner_br == (147.0, 147.0, 0.0)).all()
 
-    def test_last_parameter(self):
-        p = [0, 0, 2, 4]
-        xaxis, yaxis = range(100), range(110)
-        image = pst._plane_parameters_to_image(p, xaxis, yaxis)
-        assert_allclose(image, -2)
-
-
-class TestGetLinearPlaneFromSignal2d:
-    def test_linear_ramp(self):
-        s0, s1 = hs.signals.Signal2D(np.meshgrid(range(100), range(110)))
-        s0.change_dtype("float64")
-        s1.change_dtype("float64")
-        s0_plane = pst._get_linear_plane_from_signal2d(s0)
-        s1_plane = pst._get_linear_plane_from_signal2d(s1)
-        np.testing.assert_almost_equal(s0_plane.data, s0.data)
-        np.testing.assert_almost_equal(s1_plane.data, s1.data)
-
-    def test_zeros_values(self):
-        s = hs.signals.Signal2D(np.zeros((100, 200), dtype=np.float32))
-        s_plane = pst._get_linear_plane_from_signal2d(s)
-        np.testing.assert_almost_equal(s_plane.data, s.data)
-
-    def test_ones_values(self):
-        s = hs.signals.Signal2D(np.ones((100, 200), dtype=np.float32))
-        s_plane = pst._get_linear_plane_from_signal2d(s)
-        np.testing.assert_almost_equal(s_plane.data, s.data)
-
-    def test_negative_values(self):
-        data = np.ones((110, 100)) * -10
-        s = hs.signals.Signal2D(data)
-        s_plane = pst._get_linear_plane_from_signal2d(s)
-        np.testing.assert_almost_equal(s_plane.data, s.data)
-
-    def test_mask(self):
-        data = np.ones((110, 200), dtype=np.float32)
-        mask = np.zeros_like(data, dtype=np.bool)
-        data[50, 51] = 10000
-        mask[50, 51] = True
-        s = hs.signals.Signal2D(data)
-        plane_no_mask = pst._get_linear_plane_from_signal2d(s)
-        plane_mask = pst._get_linear_plane_from_signal2d(s, mask=mask)
-        assert plane_no_mask != approx(1.0)
-        assert plane_mask == approx(1.0)
-
-    def test_offest_and_scale(self):
-        s, _ = hs.signals.Signal2D(np.meshgrid(range(100), range(110)))
-        s.axes_manager[0].offset = -40
-        s.axes_manager[1].offset = 50
-        s.axes_manager[0].scale = -0.22
-        s.axes_manager[1].scale = 5.2
-        s_orig = s.deepcopy()
-        mask = np.zeros_like(s.data, dtype=np.bool)
-        s.data[50, 51] = 10000
-        mask[50, 51] = True
-        plane_mask = pst._get_linear_plane_from_signal2d(s, mask=mask)
-        np.testing.assert_almost_equal(plane_mask, s_orig.data)
-
-    def test_crop_signal(self):
-        s, _ = hs.signals.Signal2D(np.meshgrid(range(100), range(110)))
-        s.change_dtype("float32")
-        s.axes_manager[0].offset = -40
-        s.axes_manager[1].offset = 50
-        s.axes_manager[0].scale = -0.22
-        s.axes_manager[1].scale = 5.2
-        s_crop = s.isig[10:-20, 21:-11]
-        s_crop_orig = s_crop.deepcopy()
-        s_crop.data[50, 51] = 10000
-        mask = np.zeros_like(s_crop.data, dtype=np.bool)
-        mask[50, 51] = True
-        plane = pst._get_linear_plane_from_signal2d(s_crop, mask=mask)
-        np.testing.assert_almost_equal(plane, s_crop_orig.data, decimal=6)
+    def test_crop_square_values(self):
+        s = hs.signals.Signal2D(np.zeros((200, 200)))
+        s.data[50:60, 50:60] = 10
+        s.data[140:150, 50:60] = 20
+        s.data[50:60, 140:150] = 30
+        s.data[140:150, 140:150] = 40
+        s = s.isig[50:150, 50:150]
+        corner_values = pst._get_corner_values(s)
+        corner_tl, corner_bl = corner_values[:, 0], corner_values[:, 1]
+        corner_tr, corner_br = corner_values[:, 2], corner_values[:, 3]
+        assert (corner_tl == (52.0, 52, 10.0)).all()
+        assert (corner_bl == (52.0, 147.0, 20.0)).all()
+        assert (corner_tr == (147.0, 52.0, 30.0)).all()
+        assert (corner_br == (147.0, 147.0, 40.0)).all()
 
     def test_wrong_input_dimensions(self):
         s = hs.signals.Signal2D(np.ones((2, 10, 10)))
         with pytest.raises(ValueError):
-            pst._get_linear_plane_from_signal2d(s)
+            pst._get_corner_values(s)
         s = hs.signals.Signal2D(np.ones((2, 2, 10, 10)))
         with pytest.raises(ValueError):
-            pst._get_linear_plane_from_signal2d(s)
+            pst._get_corner_values(s)
         s = hs.signals.Signal1D(np.ones(10))
         with pytest.raises(ValueError):
-            pst._get_linear_plane_from_signal2d(s)
+            pst._get_corner_values(s)
 
-    def test_wrong_mask_dimensions(self):
-        s = hs.signals.Signal2D(np.ones((10, 10)))
-        mask = np.zeros((11, 9), dtype=np.bool)
+
+class TestFitRampToImage:
+    def test_zero_values(self):
+        data = np.zeros((100, 100))
+        s = hs.signals.Signal2D(data)
+        ramp = pst._fit_ramp_to_image(s, corner_size=0.05)
+        assert_allclose(ramp, data, atol=1e-15)
+
+    def test_ones_values(self):
+        data = np.ones((100, 100))
+        s = hs.signals.Signal2D(data)
+        ramp = pst._fit_ramp_to_image(s, corner_size=0.05)
+        assert_allclose(ramp, data, atol=1e-30)
+
+    def test_negative_values(self):
+        data = np.ones((100, 100)) * -10
+        s = hs.signals.Signal2D(data)
+        ramp = pst._fit_ramp_to_image(s, corner_size=0.05)
+        assert_allclose(ramp, data, atol=1e-30)
+
+    def test_large_values_in_middle(self):
+        data = np.zeros((100, 100))
+        data[5:95, :] = 10
+        data[:, 5:95] = 10
+        s = hs.signals.Signal2D(data)
+        ramp05 = pst._fit_ramp_to_image(s, corner_size=0.05)
+        assert_allclose(ramp05, np.zeros((100, 100)), atol=1e-15)
+        ramp10 = pst._fit_ramp_to_image(s, corner_size=0.1)
+        assert (ramp05 != ramp10).all()
+
+    def test_different_corner_values(self):
+        data = np.zeros((100, 100))
+        data[:5, :5], data[:5, -5:] = -10, 10
+        data[-5:, :5] = 10
+        data[-5:, -5:] = 30
+        s = hs.signals.Signal2D(data)
+        ramp = pst._fit_ramp_to_image(s, corner_size=0.05)
+        s.data = s.data - ramp
+        assert approx(s.data[:5, :5].mean()) == 0.0
+        assert approx(s.data[:5, -5:].mean()) == 0.0
+        assert approx(s.data[-5:, :5].mean()) == 0.0
+        assert approx(s.data[-5:, -5:].mean()) == 0.0
+        assert s.data[5:95, 5:95].mean() != 0
+
+    def test_wrong_input_dimensions(self):
+        s = hs.signals.Signal2D(np.ones((2, 10, 10)))
         with pytest.raises(ValueError):
-            pst._get_linear_plane_from_signal2d(s, mask=mask)
+            pst._fit_ramp_to_image(s)
+        s = hs.signals.Signal2D(np.ones((2, 2, 10, 10)))
+        with pytest.raises(ValueError):
+            pst._fit_ramp_to_image(s)
+        s = hs.signals.Signal1D(np.ones(10))
+        with pytest.raises(ValueError):
+            pst._fit_ramp_to_image(s)
 
+
+class TestGetSignalMeanPositionAndValue:
+    def test_simple(self):
+        s = hs.signals.Signal2D(np.zeros((10, 10)))
+        # s has the values 0 to 9, so middle position will be 4.5
+        output = pst._get_signal_mean_position_and_value(s)
+        assert len(output) == 3
+        assert output[0] == 4.5  # x-position
+        assert output[1] == 4.5  # y-position
+        assert output[2] == 0.0  # Mean value
+
+    def test_mean_value(self):
+        s = hs.signals.Signal2D(np.ones((10, 10)) * 9)
+        output = pst._get_signal_mean_position_and_value(s)
+        assert output[2] == 9.0
+
+    def test_non_square_shape(self):
+        s = hs.signals.Signal2D(np.zeros((10, 5)))
+        # s gets the shape 5, 10. Due to the axes being reversed
+        output = pst._get_signal_mean_position_and_value(s)
+        assert output[0] == 2.0
+        assert output[1] == 4.5
+
+    def test_wrong_input_dimensions(self):
+        s = hs.signals.Signal2D(np.ones((2, 10, 10)))
+        with pytest.raises(ValueError):
+            pst._get_signal_mean_position_and_value(s)
+        s = hs.signals.Signal2D(np.ones((2, 2, 10, 10)))
+        with pytest.raises(ValueError):
+            pst._get_signal_mean_position_and_value(s)
+        s = hs.signals.Signal1D(np.ones(10))
+        with pytest.raises(ValueError):
+            pst._get_signal_mean_position_and_value(s)
+
+    def test_origin(self):
+        s = hs.signals.Signal2D(np.zeros((20, 10)))
+        output = pst._get_signal_mean_position_and_value(s)
+        assert output == (4.5, 9.5, 0)
+        s.axes_manager[0].offset = 10
+        output = pst._get_signal_mean_position_and_value(s)
+        assert output == (14.5, 9.5, 0)
+        s.axes_manager[1].offset = 6
+        output = pst._get_signal_mean_position_and_value(s)
+        assert output == (14.5, 15.5, 0)
+        s.axes_manager[1].offset = -5
+        output = pst._get_signal_mean_position_and_value(s)
+        assert output == (14.5, 4.5, 0)
+        s.axes_manager[1].offset = -50
+        output = pst._get_signal_mean_position_and_value(s)
+        assert output == (14.5, -40.5, 0)
+
+    def test_scale(self):
+        s = hs.signals.Signal2D(np.ones((20, 10)))
+        output = pst._get_signal_mean_position_and_value(s)
+        assert output == (4.5, 9.5, 1)
+        s.axes_manager[0].scale = 2
+        output = pst._get_signal_mean_position_and_value(s)
+        assert output == (9, 9.5, 1)
+        s.axes_manager[0].scale = 0.5
+        output = pst._get_signal_mean_position_and_value(s)
+        assert output == (2.25, 9.5, 1)
+        s.axes_manager[1].scale = 10
+        output = pst._get_signal_mean_position_and_value(s)
+        assert output == (2.25, 95.0, 1)
+
+    def test_origin_and_scale(self):
+        s = hs.signals.Signal2D(np.zeros((30, 10)))
+        output = pst._get_signal_mean_position_and_value(s)
+        assert output == (4.5, 14.5, 0)
+        s.axes_manager[0].offset = 10
+        s.axes_manager[0].scale = 0.5
+        output = pst._get_signal_mean_position_and_value(s)
+        assert output == (12.25, 14.5, 0)
+        s.axes_manager[1].offset = -50
+        s.axes_manager[1].scale = 2
+        output = pst._get_signal_mean_position_and_value(s)
+        assert output == (12.25, -21.0, 0)
