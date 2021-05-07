@@ -100,13 +100,55 @@ def _make_circular_mask(centerX, centerY, imageSizeX, imageSizeY, radius):
     return mask
 
 
-def _get_corner_slices(s, corner_size=0.05):
-    """Get signal slices for the corner positions for a Signal2D.
+def _get_signal_mean_position_and_value(signal):
+    """Get the scaled position and mean data value from a signal.
+
+    Note: due to how HyperSpy numbers the axis values, the results
+    can sometimes be not as expected. For example, the signal
+    initialized Signal2D(np.zeros((10, 10))) will the output of this
+    function will be (4.5, 4.5, 0), due to the axis values being
+    from 0 to 9 (see example).
+
+    Parameters
+    ----------
+    signal : HyperSpy signal
+        Must have 2 signal dimensions and 0 navigation dimensions.
 
     Returns
     -------
-    corner_array : slice tuple
-        Tuple with the corner slices.
+    output_values : tuple (x_mean, y_mean, value_mean)
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import hyperspy.api as hs
+    >>> import pyxem.utils.pixelated_stem_tools as pst
+    >>> s = hs.signals.Signal2D(np.zeros((10, 10)))
+    >>> pst._get_signal_mean_position_and_value(s)
+    (4.5, 4.5, 0.0)
+
+    """
+    if len(signal.axes_manager.navigation_axes) != 0:
+        raise ValueError("signal need to have 0 navigation dimensions")
+    if len(signal.axes_manager.signal_axes) != 2:
+        raise ValueError("signal need to have 2 signal dimensions")
+    sam = signal.axes_manager.signal_axes
+    x_mean = sam[0].axis.mean()
+    y_mean = sam[1].axis.mean()
+    value_mean = signal.data.mean()
+    return (x_mean, y_mean, value_mean)
+
+
+def _get_corner_values(s, corner_size=0.05):
+    """Get the corner positions and mean values from a 2D signal.
+
+    Returns
+    -------
+    corner_array : NumPy array
+        corner_array[:, 0] top left corner,
+        corner_array[:, 1] bottom left corner,
+        corner_array[:, 2] top right corner,
+        corner_array[:, 3] bottom right corner.
 
     """
     if len(s.axes_manager.navigation_axes) != 0:
@@ -118,74 +160,43 @@ def _get_corner_slices(s, corner_size=0.05):
     a1_range = (am[1].high_index - am[1].low_index) * corner_size
     a0_range, a1_range = int(a0_range), int(a1_range)
 
-    corner00_slice = np.s_[: a0_range + 1, : a1_range + 1]
-    corner01_slice = np.s_[: a0_range + 1, am[1].high_index - a1_range :]
-    corner10_slice = np.s_[am[0].high_index - a0_range :, : a1_range + 1]
-    corner11_slice = np.s_[am[0].high_index - a0_range :, am[1].high_index - a1_range :]
+    s_corner00 = s.isig[: a0_range + 1, : a1_range + 1]
+    s_corner01 = s.isig[: a0_range + 1, am[1].high_index - a1_range :]
+    s_corner10 = s.isig[am[0].high_index - a0_range :, : a1_range + 1]
+    s_corner11 = s.isig[am[0].high_index - a0_range :, am[1].high_index - a1_range :]
 
-    return (corner00_slice, corner01_slice, corner10_slice, corner11_slice)
+    corner00 = _get_signal_mean_position_and_value(s_corner00)
+    corner01 = _get_signal_mean_position_and_value(s_corner01)
+    corner10 = _get_signal_mean_position_and_value(s_corner10)
+    corner11 = _get_signal_mean_position_and_value(s_corner11)
+
+    return np.array((corner00, corner01, corner10, corner11)).T
 
 
 def _f_min(X, p):
     plane_xyz = p[0:3]
-    distance = (plane_xyz * X).sum(axis=1) + p[3]
+    distance = (plane_xyz * X.T).sum(axis=1) + p[3]
     return distance / np.linalg.norm(plane_xyz)
 
 
-def _residuals(params, X):
+def _residuals(params, signal, X):
     return _f_min(X, params)
 
 
-def _plane_parameters_to_image(p, xaxis, yaxis):
-    """Get a plane 2D array from plane parameters.
-
-    Assumes a regularly spaced grid.
-
-    Parameters
-    ----------
-    p : list
-        4 values, like [0.1, 0.1, 0.1, 0.1]
-    xaxis, yaxis : array-like
-        List of x- and y-positions. For example via the axes_manager.
-        s.axes_manager.signal_axes[0].axis
-
-    Returns
-    -------
-    plane_image : 2D NumPy array
-
-    Example
-    -------
-    >>> plane = _plane_parameters_to_image([1.2, 0.2, 3.2, 0.5], range(50), range(60))
-
-    """
-    x, y = np.meshgrid(xaxis, yaxis)
-    z = (-p[0] * x - p[1] * y - p[3]) / p[2]
-    return z
-
-
-def _get_linear_plane_from_signal2d(signal, mask=None, initial_values=None):
+def _fit_ramp_to_image(signal, corner_size=0.05):
     if len(signal.axes_manager.navigation_axes) != 0:
-        raise ValueError("signal need to have 0 navigation dimensions")
+        raise ValueError("s need to have 0 navigation dimensions")
     if len(signal.axes_manager.signal_axes) != 2:
-        raise ValueError("signal need to have 2 signal dimensions")
-    if initial_values is None:
-        initial_values = [0.1, 0.1, 0.1, 0.1]
+        raise ValueError("s need to have 2 signal dimensions")
+    corner_values = _get_corner_values(signal, corner_size=corner_size)
+    p0 = [0.1, 0.1, 0.1, 0.1]
+
+    p = leastsq(_residuals, p0, args=(None, corner_values))[0]
 
     sam = signal.axes_manager.signal_axes
-    xaxis, yaxis = sam[0].axis, sam[1].axis
-    x, y = np.meshgrid(xaxis, yaxis)
-    xx, yy = x.flatten(), y.flatten()
-    values = signal.data.flatten()
-    points = np.stack((xx, yy, values)).T
-    if mask is not None:
-        if mask.__array__().shape != signal.__array__().shape:
-            raise ValueError("signal and mask need to have the same shape")
-        points = points[np.invert(mask).flatten()]
-
-    p = leastsq(_residuals, initial_values, args=points)[0]
-
-    plane = _plane_parameters_to_image(p, xaxis, yaxis)
-    return plane
+    xx, yy = np.meshgrid(sam[0].axis, sam[1].axis)
+    zz = (-p[0] * xx - p[1] * yy - p[3]) / p[2]
+    return zz
 
 
 def _get_limits_from_array(data, sigma=4, ignore_zeros=False, ignore_edges=False):
