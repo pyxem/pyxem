@@ -338,6 +338,7 @@ def get_ellipse_model_ransac_single_frame(
             if is_model_valid(model_ransac, None):
                 break
             else:
+                print("Model is outside of parameters:", model_ransac.params)
                 model_ransac, inliers = None, None
         else:
             break
@@ -647,19 +648,19 @@ def determine_ellipse(signal,
     pos = get_max_positions(signal,
                             mask=mask,
                             num_points=num_points)
+    import matplotlib.pyplot as plt
+    plt.scatter(pos[:,0], pos[:,1])
     if guess_starting_params:
-        print("starting center", np.mean(pos[:, 0]),np.mean(pos[:, 1]))
         el, _ = get_ellipse_model_ransac_single_frame(pos,
                                               xf=np.mean(pos[:, 0]),
                                               yf=np.mean(pos[:, 1]),
-                                              rf_lim=np.shape(signal.data)[0]/10,
+                                              rf_lim=np.shape(signal.data)[0]/5,
                                               semi_len_min=np.std(pos[:, 1]),
                                               semi_len_max=np.std(pos[:, 1])*2,
                                               semi_len_ratio_lim=1.2,
                                               min_samples=6,
-                                              residual_threshold=10,
-                                              max_trails=500)
-        return el
+                                              residual_threshold=20,
+                                              max_trails=1000)
     else:
         el, _ = get_ellipse_model_ransac_single_frame(pos,
                                                      **kwargs)
@@ -670,11 +671,12 @@ def determine_ellipse(signal,
     else:
         print("Ransac Ellipse detection did not converge")
         return None
+
 def ellipse_to_affine(major, minor, rot):
     Q = [[np.cos(rot), -np.sin(rot), 0],
          [np.sin(rot), np.cos(rot), 0],
          [0, 0, 1]]
-    S = [[(major / minor), 0, 0],
+    S = [[1, 0, 0],
          [0, major / minor, 0],
          [0, 0, 1]]
     C = np.matmul(np.matmul(Q, S), np.transpose(Q))
