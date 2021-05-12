@@ -1,9 +1,7 @@
 import numpy as np
-from numba import njit, prange, objmode
-from skimage.transform import warp_polar
 from pyxem.utils.expt_utils import find_beam_center_blur
 from scipy import ndimage
-from pyxem.utils.cuda_utils import is_cupy_array
+from pyxem.utils.cuda_utils import get_array_module
 
 
 try:
@@ -12,9 +10,38 @@ try:
     CUPY_INSTALLED = True
 except ImportError:
     CUPY_INSTALLED = False
+    cp = None
+    ndigpu = None
 
 
 """ These are designed to be fast and used for indexation, for data correction, see radial_utils"""
+
+
+def _cartesian_positions_to_polar(x, y, delta_r=1, delta_theta=1):
+    """
+    Convert 2D cartesian image coordinates to polar image coordinates
+
+    Parameters
+    ----------
+    x : 1D numpy.ndarray
+        x coordinates
+    y : 1D numpy.ndarray
+        y coordinates
+    delta_r : float
+        sampling interval in the r direction
+    delta_theta : float
+        sampling interval in the theta direction
+
+    Returns
+    -------
+    r : 1D numpy.ndarray
+        r coordinate or x coordinate in the polar image
+    theta : 1D numpy.ndarray
+        theta coordinate or y coordinate in the polar image
+    """
+    r = np.rint(np.sqrt(x**2 + y**2) / delta_r).astype(np.int32)
+    theta = np.rint(np.mod(np.rad2deg(np.arctan2(y, x)), 360) / delta_theta).astype(np.int32)
+    return r, theta
 
 
 def get_template_polar_coordinates(
@@ -43,7 +70,7 @@ def get_template_polar_coordinates(
         units of degrees.
     max_r : float, optional
         Maximum radial distance to consider. In units of pixels, not scaled
-        by delta_r.
+        by delta_r = the width of the polar image.
 
     Returns
     -------
@@ -54,21 +81,19 @@ def get_template_polar_coordinates(
         The theta coordinates of the diffraction spots in the template, scaled
         by delta_theta
     intensities : np.ndarray
-        The intensities of the diffraction spots
+        The intensities of the diffraction spots with dtype float
     """
     x = simulation.calibrated_coordinates[:, 0]
     y = simulation.calibrated_coordinates[:, 1]
-    intensities = simulation.intensities
-    imag = x + 1j * y
-    r = abs(imag)
-    theta = np.rad2deg(np.angle(imag))
-    theta = np.mod(theta + in_plane_angle, 360)
+    intensities = simulation.intensities.astype(np.float64)
+    r, theta = _cartesian_positions_to_polar(x, y, delta_r, delta_theta)
     if max_r is not None:
         condition = r < max_r
         r = r[condition]
         theta = theta[condition]
         intensities = intensities[condition]
-    return r / delta_r, theta / delta_theta, intensities
+    theta = np.mod(theta + in_plane_angle / delta_r, 360 / delta_r).astype(np.int32)
+    return r, theta, intensities
 
 
 def get_template_cartesian_coordinates(
@@ -89,8 +114,6 @@ def get_template_cartesian_coordinates(
     window_size : 2-tuple, optional
         Only return the reflections within the (width, height) in pixels
         of the image
-    intensities : np.ndarray
-        The intensities of the diffraction spots
 
     Returns
     -------
@@ -98,12 +121,17 @@ def get_template_cartesian_coordinates(
         x coordinates of the diffraction spots in the template in pixel units
     y : np.ndarray
         y coordinates of the diffraction spots in the template in pixel units
+    intensities: np.ndarray
+        intensities of the spots
     """
-    r, theta, intensities = get_template_polar_coordinates(
-        simulation, in_plane_angle, 1, 1
-    )
-    x = r * np.cos(np.deg2rad(theta)) + center[0]
-    y = r * np.sin(np.deg2rad(theta)) + center[1]
+    ox = simulation.calibrated_coordinates[:, 0]
+    oy = simulation.calibrated_coordinates[:, 1]
+    intensities = simulation.intensities
+    c = np.cos(np.deg2rad(in_plane_angle))
+    s = np.sin(np.deg2rad(in_plane_angle))
+    # rotate it
+    x = c*ox - s*oy + center[0]
+    y = s*ox + c*oy + center[1]
     if window_size is not None:
         condition = (x < window_size[0]) & (y < window_size[1]) & (y >= 0) & (x >= 0)
         x = x[condition]
@@ -147,7 +175,12 @@ def get_polar_pattern_shape(image_shape, delta_r, delta_theta, max_r=None):
     return (theta_dim, r_dim)
 
 
-def _warp_polar_custom(image, center=None, radius=None, output_shape=None):
+def _get_map_function(dispatcher):
+    return ndimage.map_coordinates if dispatcher == np else ndigpu.map_coordinates
+
+
+def _warp_polar_custom(image, center, radius, output_shape,
+                       order=1):
     """
     Function to emulate warp_polar in skimage.transform on both CPU and GPU. Not all
     parameters are supported
@@ -156,18 +189,20 @@ def _warp_polar_custom(image, center=None, radius=None, output_shape=None):
     ----------
     image: numpy.ndarray or cupy.ndarray
         Input image. Only 2-D arrays are accepted.         
-    center: tuple (row, col), optional
+    center: tuple (row, col)
         Point in image that represents the center of the transformation
         (i.e., the origin in cartesian space). Values can be of type float.
-        If no value is given, the center is assumed to be the center point of the image.
-    radius: float, optional
+    radius: float
         Radius of the circle that bounds the area to be transformed.
-    output_shape: tuple (row, col), optional
+    output_shape: tuple (row, col)
+        Shape of the output polar image
+    order: int
+        Order of interpolation between pixels
 
     Returns
     -------
     polar: numpy.ndarray or cupy.ndarray
-        polar image
+        polar image of dtype float64
 
     Notes
     -----
@@ -177,28 +212,19 @@ def _warp_polar_custom(image, center=None, radius=None, output_shape=None):
     was achieved: from 180 ms to 400 microseconds. However, this does not
     count the time to transfer data from the CPU to the GPU and back.
     """
-    if is_cupy_array(image):
-        dispatcher = cp
-        map_function = ndigpu.map_coordinates
-    else:
-        dispatcher = np
-        map_function = ndimage.map_coordinates
-    if radius is None:
-        radius = int(np.ceil(np.sqrt((image.shape[0] / 2)**2 + (image.shape[1] / 2)**2)))
-    cx, cy = image.shape[1] // 2, image.shape[0] // 2
-    if center is not None:
-        cx, cy = center
-    if output_shape is None:
-        output_shape = (360, radius)
+    dispatcher = get_array_module(image)
+    cy, cx = center
     delta_theta = 360 / output_shape[0]
     delta_r = radius / output_shape[1]
     t = dispatcher.arange(output_shape[0])
     r = dispatcher.arange(output_shape[1])
-    R, T = dispatcher.meshgrid(r, t)
+    # sparse speeds up grid calculation by factor 10
+    R, T = dispatcher.meshgrid(r, t, sparse=True)
     X = R * delta_r * dispatcher.cos(dispatcher.deg2rad(T * delta_theta)) + cx
     Y = R * delta_r * dispatcher.sin(dispatcher.deg2rad(T * delta_theta)) + cy
     coordinates = dispatcher.stack([Y, X])
-    polar = map_function(image, coordinates, order=1)
+    map_function = _get_map_function(dispatcher)
+    polar = map_function(image.astype(np.float64), coordinates, order=order)
     return polar
 
 
@@ -209,6 +235,7 @@ def image_to_polar(
     max_r=None,
     find_direct_beam=False,
     direct_beam_position=None,
+    order=1,
 ):
     """Convert a single image to polar coordinates including the option to
     find the direct beam and take this as the center.
@@ -234,10 +261,12 @@ def image_to_polar(
     direct_beam_position : 2-tuple
         (x, y) position of the central beam in pixel units. This overrides
         the automatic find_maximum parameter if set to True.
+    order : int
+        Order of interpolation for the polar transform
 
     Returns
     -------
-    polar_image : 2D numpy.ndarray
+    polar_image : 2D numpy.ndarray or cupy.ndarray
         Array representing the polar transform of the image with shape
         (360/delta_theta, max_r/delta_r)
     """
@@ -245,28 +274,28 @@ def image_to_polar(
     if direct_beam_position is not None:
         c_x, c_y = direct_beam_position
     elif find_direct_beam:
-        c_y, c_x = find_beam_center_blur(image, 1)
+        c_x, c_y = find_beam_center_blur(image, 1)
     else:
         c_x, c_y = half_x, half_y
     output_shape = get_polar_pattern_shape(
         image.shape, delta_r, delta_theta, max_r=max_r
     )
+    maximum_radius = output_shape[1] * delta_r
     return _warp_polar_custom(
         image,
         center=(c_y, c_x),
         output_shape=output_shape,
-        radius=max_r,
+        radius=maximum_radius,
+        order=order,
     )
 
 
-
-def chunk_to_polar(
+def _chunk_to_polar(
     images,
-    delta_r=1,
-    delta_theta=1,
-    max_r=None,
-    find_direct_beam=False,
-    direct_beam_positions=None,
+    center,
+    radius,
+    output_shape,
+    precision = np.float64,
 ):
     """
     Convert a chunk of images to polar coordinates
@@ -275,22 +304,14 @@ def chunk_to_polar(
     ----------
     images : (scan_x, scan_y, x, y) np.ndarray or cp.ndarray
         diffraction patterns
-    delta_r : float, optional
-        size of pixels in r-direction of converted image, in units of
-        cartesian pixels
-    delta_theta : float, optional
-        size of pixels in the theta direction of converted image, in degrees
-    max_r : float, optional
-        The maximum radial distance to include, in units of pixels. By default
-        this is the distance from the center of the image to a corner in pixel
-        units and rounded up to the nearest integer
-    find_direct_beam : bool, optional
-        optimize the direct beam position and take this as center for the
-        transform. If false, the center of the image will be taken.
-    direct_beam_positions : np.ndarray of shape (2,) or (scan_x, scan_y, 2)
-        The (x, y) positions for the direct beam in each diffraction pattern.
-        If only one (x, y) position is supplied, this will be mapped to all
-        images. Overrides the find_maximum parameter
+    center : 2-Tuple of float 
+        center of the images in pixels (row, col) = (c_y, c_x)
+    radius : float
+        maximum radius to consider in the image. This gets mapped onto
+        output_shape[1]
+    output_shape : 2-Tuple of int
+        (height, width) of the output polar images
+    precision : np.float32 or np.float64
 
     Returns
     -------
@@ -298,40 +319,16 @@ def chunk_to_polar(
         diffraction patterns in polar coordinates. Returns a cuda or numpy array depending
         on the device
     """
-    if is_cupy_array(images):
-        dispatcher = cp
-    else:
-        dispatcher = np
-
-    if direct_beam_positions is None:
-        direct_beam_positions = np.empty(images.shape[:-2], dtype=object)
-        direct_beam_positions.fill(None)
-    elif len(direct_beam_positions) == 2:
-        direct_beam_positions = np.array(direct_beam_positions).flatten()
-        direct_beam_positions = np.tile(
-            direct_beam_positions[np.newaxis, np.newaxis, ...], (*images.shape[:-2], 1)
-        )
-    else:
-        if direct_beam_positions.ndim != 3:
-            raise ValueError("direct_beam_positions must be 3-dimensional")
-
-    pimage_shape = get_polar_pattern_shape(
-        images.shape[-2:], delta_r, delta_theta, max_r=max_r
-    )
+    dispatcher = get_array_module(images)
     polar_chunk = dispatcher.empty(
-        (images.shape[0], images.shape[1], pimage_shape[0], pimage_shape[1]),
-        dtype=np.float32,
+        (images.shape[0], images.shape[1], output_shape[0], output_shape[1]),
+        dtype=precision,
     )
     for idx, idy in np.ndindex(images.shape[:-2]):
-        image = images[idx, idy]
-        dbp = direct_beam_positions[idx, idy]
-        polar_image = image_to_polar(
-            image,
-            delta_r=delta_r,
-            delta_theta=delta_theta,
-            max_r=max_r,
-            find_direct_beam=find_direct_beam,
-            direct_beam_position=dbp,
+        polar_chunk[idx, idy] = _warp_polar_custom(
+            images[idx, idy],
+            center=center,
+            radius=radius,
+            output_shape=output_shape,
         )
-        polar_chunk[idx, idy] = polar_image
     return polar_chunk

@@ -28,6 +28,17 @@ from skimage.registration import phase_cross_correlation
 from tqdm import tqdm
 
 from pyxem.utils.pyfai_utils import get_azimuthal_integrator
+from pyxem.utils.cuda_utils import is_cupy_array
+
+
+try:
+    import cupy as cp
+    import cupyx.scipy.ndimage as ndigpu
+    CUPY_INSTALLED = True
+except ImportError:
+    CUPY_INSTALLED = False
+    cp = None
+    ndigpu = None
 
 
 """
@@ -575,10 +586,16 @@ def find_beam_center_blur(z, sigma):
     Returns
     -------
     center : np.array
-        np.array [y, x] containing indices of estimated direct beam positon.
+        np.array [x, y] containing indices of estimated direct beam positon.
     """
-    blurred = ndi.gaussian_filter(z, sigma, mode="wrap")
-    center = np.unravel_index(blurred.argmax(), blurred.shape)[::-1]
+    if is_cupy_array(z):
+        gaus = ndigpu.gaussian_filter
+        dispatcher = cp
+    else:
+        gaus = ndi.gaussian_filter
+        dispatcher = np
+    blurred = gaus(z, sigma, mode="wrap")
+    center = dispatcher.unravel_index(blurred.argmax(), blurred.shape)[::-1]
     return np.array(center)
 
 

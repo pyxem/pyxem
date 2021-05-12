@@ -4,6 +4,17 @@ import numpy as np
 from unittest.mock import Mock
 
 
+try:
+    import cupy as cp
+    CUPY_INSTALLED = True
+except ImportError:
+    CUPY_INSTALLED = False
+    cp = np
+
+
+skip_cupy = pytest.mark.skipif(not CUPY_INSTALLED, reason="cupy is required")
+
+
 @pytest.fixture()
 def mock_simulation():
     mock_sim = Mock()
@@ -14,6 +25,17 @@ def mock_simulation():
     return mock_sim
 
 
+@skip_cupy
+@pytest.fixture()
+def mock_simulation_gpu():
+    mock_sim = Mock()
+    mock_sim.calibrated_coordinates = cp.array(
+        [[3, 4, 0], [5, 12, 0], [8, 15, 0], [7, 24, 0]]  # 5  # 13  # 17
+    )  # 25
+    mock_sim.intensities = cp.array([1, 2, 3, 4])
+    return mock_sim
+
+
 @pytest.mark.parametrize(
     "max_r, expected_r",
     [
@@ -21,9 +43,22 @@ def mock_simulation():
         (15, np.array([5, 13])),
     ],
 )
-def test_template_to_polar(mock_simulation,max_r, expected_r):
+def test_template_to_polar(mock_simulation, max_r, expected_r):
     r, theta, _ = ptu.get_template_polar_coordinates(mock_simulation, max_r=max_r)
     np.testing.assert_array_almost_equal(r, expected_r)
+
+
+@skip_cupy
+@pytest.mark.parametrize(
+    "max_r, expected_r",
+    [
+        (None, cp.array([5, 13, 17, 25])),
+        (15, cp.array([5, 13])),
+    ],
+)
+def test_template_to_polar_gpu(mock_simulation_gpu, max_r, expected_r):
+    r, theta, _ = ptu.get_template_polar_coordinates(mock_simulation_gpu, max_r=max_r)
+    np.testing.assert_allclose(r, expected_r)
 
 
 @pytest.mark.parametrize(
@@ -40,6 +75,23 @@ def test_get_template_cartesian_coordinates(mock_simulation,angle, window, expec
     )
     np.testing.assert_array_almost_equal(x, expected_x)
     np.testing.assert_array_almost_equal(y, expected_y)
+
+
+@skip_cupy
+@pytest.mark.parametrize(
+    "angle, window, expected_x, expected_y",
+    [
+        (0, None, cp.array([3, 5, 8, 7]), cp.array([4, 12, 15, 24])),
+        (90, None, -cp.array([4, 12, 15, 24]), cp.array([3, 5, 8, 7])),
+        (90, (7, 7), cp.array([]), cp.array([])),
+    ],
+)
+def test_get_template_cartesian_coordinates_gpu(mock_simulation_gpu,angle, window, expected_x, expected_y):
+    x, y, _ = ptu.get_template_cartesian_coordinates(
+        mock_simulation_gpu, in_plane_angle=angle, window_size=window
+    )
+    cp.testing.assert_array_almost_equal(x, expected_x)
+    cp.testing.assert_array_almost_equal(y, expected_y)
 
 
 @pytest.mark.parametrize(
@@ -75,23 +127,54 @@ def test_image_to_polar(delta_r, delta_theta, max_r, fdb, db, expected_shape):
     np.testing.assert_array_almost_equal(result.shape, expected_shape)
 
 
+@skip_cupy
 @pytest.mark.parametrize(
-    "beam_positions, expected_shape",
+    "delta_r, delta_theta, max_r, fdb, db, expected_shape",
     [
-        (None, (3, 2, 360, 7)),
-        (None, (3, 2, 360, 7)),
-        ((2, 3), (3, 2, 360, 7)),
-        (np.ones((3, 2, 2)), (3, 2, 360, 7)),
+        (1, 1, None, False, None, (360, 126)),
+        (3, 2, None, False, (110, 80), (180, 42)),
+        (1, 1, 200, True, None, (360, 200)),
     ],
 )
-def test_chunk_polar(beam_positions, expected_shape):
+def test_image_to_polar_gpu(delta_r, delta_theta, max_r, fdb, db, expected_shape):
+    image = cp.ones((200, 151))
+    result = ptu.image_to_polar(
+        image,
+        delta_r=delta_r,
+        delta_theta=delta_theta,
+        max_r=max_r,
+        find_direct_beam=fdb,
+        direct_beam_position=db,
+    )
+    cp.testing.assert_array_almost_equal(result.shape, expected_shape)
+
+
+@pytest.mark.parametrize(
+    "center, radius, output_shape, expected_shape",
+    [
+        ((1, 1), 1, (360, 7), (3, 2, 360, 7)),
+        ((5, 8), 10, (10, 10), (3, 2, 10, 10)),
+    ],
+)
+def test_chunk_polar(center, radius, output_shape, expected_shape):
     chunk = np.ones((3, 2, 10, 7))
-    polar_chunk = ptu.chunk_to_polar(
-        chunk, direct_beam_positions=beam_positions,
+    polar_chunk = ptu._chunk_to_polar(
+        chunk, center, radius, output_shape
     )
     np.testing.assert_array_almost_equal(polar_chunk.shape, expected_shape)
 
-def test_chunk_polar_fail():
-    chunk = np.ones((3, 2, 10, 7))
-    with pytest.raises(ValueError):
-        polar_chunk = ptu.chunk_to_polar(chunk, direct_beam_positions=np.ones((1, 2, 3, 4)))
+
+@skip_cupy
+@pytest.mark.parametrize(
+    "center, radius, output_shape, expected_shape",
+    [
+        ((1, 1), 1, (360, 7), (3, 2, 360, 7)),
+        ((5, 8), 10, (10, 10), (3, 2, 10, 10)),
+    ],
+)
+def test_chunk_polar_gpu(center, radius, output_shape, expected_shape):
+    chunk = cp.ones((3, 2, 10, 7))
+    polar_chunk = ptu._chunk_to_polar(
+        chunk, center, radius, output_shape
+    )
+    cp.testing.assert_array_almost_equal(polar_chunk.shape, expected_shape)
