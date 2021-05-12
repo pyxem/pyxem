@@ -3,9 +3,10 @@ import numpy as np
 
 try:
     import cupy as cp
-    CUPY_INSTALLED=True
+
+    CUPY_INSTALLED = True
 except ImportError:
-    CUPY_INSTALLED=False
+    CUPY_INSTALLED = False
 
 
 def dask_array_to_gpu(dask_array):
@@ -39,6 +40,7 @@ def to_numpy(array):
     """
     if is_cupy_array(array):
         import cupy as cp
+
         array = cp.asnumpy(array)
     return array
 
@@ -57,6 +59,7 @@ def get_array_module(array):
     module = np
     try:
         import cupy as cp
+
         if isinstance(array, cp.ndarray):
             module = cp
     except ImportError:
@@ -79,13 +82,16 @@ def is_cupy_array(array):
     """
     try:
         import cupy as cp
+
         return isinstance(array, cp.ndarray)
     except ImportError:
         return False
 
 
 @cuda.jit
-def _correlate_polar_image_to_library_gpu(polar_image, sim_r, sim_t, sim_i, correlation):
+def _correlate_polar_image_to_library_gpu(
+    polar_image, sim_r, sim_t, sim_i, correlation
+):
     """
     Custom cuda kernel for calculating the correlation for each template
     in a library at all in-plane angles with a polar image
@@ -117,9 +123,14 @@ def _correlate_polar_image_to_library_gpu(polar_image, sim_r, sim_t, sim_i, corr
     for template in range(start_template, sim_r.shape[0], stride_template):
         # loop over all in-plane angles
         for shift in range(start_shift, polar_image.shape[0], stride_shift):
-            tmp = 0.
+            tmp = 0.0
             # add up all contributions to the correlation from spots
             for spot in range(sim_r.shape[1]):
-                tmp += (polar_image[(sim_t[template, spot] + shift) % polar_image.shape[0],
-                                    sim_r[template, spot]] * sim_i[template, spot])
+                tmp += (
+                    polar_image[
+                        (sim_t[template, spot] + shift) % polar_image.shape[0],
+                        sim_r[template, spot],
+                    ]
+                    * sim_i[template, spot]
+                )
             correlation[template, shift] = tmp
