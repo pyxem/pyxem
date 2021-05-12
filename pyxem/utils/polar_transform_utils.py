@@ -7,6 +7,7 @@ from pyxem.utils.cuda_utils import get_array_module
 try:
     import cupy as cp
     import cupyx.scipy.ndimage as ndigpu
+
     CUPY_INSTALLED = True
 except ImportError:
     CUPY_INSTALLED = False
@@ -39,8 +40,10 @@ def _cartesian_positions_to_polar(x, y, delta_r=1, delta_theta=1):
     theta : 1D numpy.ndarray
         theta coordinate or y coordinate in the polar image
     """
-    r = np.rint(np.sqrt(x**2 + y**2) / delta_r).astype(np.int32)
-    theta = np.rint(np.mod(np.rad2deg(np.arctan2(y, x)), 360) / delta_theta).astype(np.int32)
+    r = np.rint(np.sqrt(x ** 2 + y ** 2) / delta_r).astype(np.int32)
+    theta = np.rint(np.mod(np.rad2deg(np.arctan2(y, x)), 360) / delta_theta).astype(
+        np.int32
+    )
     return r, theta
 
 
@@ -130,8 +133,8 @@ def get_template_cartesian_coordinates(
     c = np.cos(np.deg2rad(in_plane_angle))
     s = np.sin(np.deg2rad(in_plane_angle))
     # rotate it
-    x = c*ox - s*oy + center[0]
-    y = s*ox + c*oy + center[1]
+    x = c * ox - s * oy + center[0]
+    y = s * ox + c * oy + center[1]
     if window_size is not None:
         condition = (x < window_size[0]) & (y < window_size[1]) & (y >= 0) & (x >= 0)
         x = x[condition]
@@ -179,16 +182,15 @@ def _get_map_function(dispatcher):
     return ndimage.map_coordinates if dispatcher == np else ndigpu.map_coordinates
 
 
-def _warp_polar_custom(image, center, radius, output_shape,
-                       order=1):
+def _warp_polar_custom(image, center, radius, output_shape, order=1):
     """
     Function to emulate warp_polar in skimage.transform on both CPU and GPU. Not all
     parameters are supported
-    
+
     Parameters
     ----------
     image: numpy.ndarray or cupy.ndarray
-        Input image. Only 2-D arrays are accepted.         
+        Input image. Only 2-D arrays are accepted.
     center: tuple (row, col)
         Point in image that represents the center of the transformation
         (i.e., the origin in cartesian space). Values can be of type float.
@@ -295,7 +297,7 @@ def _chunk_to_polar(
     center,
     radius,
     output_shape,
-    precision = np.float64,
+    precision=np.float64,
 ):
     """
     Convert a chunk of images to polar coordinates
@@ -304,7 +306,7 @@ def _chunk_to_polar(
     ----------
     images : (scan_x, scan_y, x, y) np.ndarray or cp.ndarray
         diffraction patterns
-    center : 2-Tuple of float 
+    center : 2-Tuple of float
         center of the images in pixels (row, col) = (c_y, c_x)
     radius : float
         maximum radius to consider in the image. This gets mapped onto

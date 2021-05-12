@@ -9,9 +9,11 @@ import sys
 
 try:
     import cupy as cp
+
     CUPY_INSTALLED = True
 except ImportError:
     CUPY_INSTALLED = False
+    cp = np
 
 skip_cupy = pytest.mark.skipif(not CUPY_INSTALLED, reason="cupy is required")
 
@@ -68,21 +70,54 @@ def mock_sim():
 )
 def test_match_image_to_template(mock_sim, rot, dr, dt, nim, nt):
     # serves to actually validate the correctness
-    x, y, i = ptutls.get_template_cartesian_coordinates(mock_sim,
-                                                        in_plane_angle=rot,
-                                                        center = (20, 20))
+    x, y, i = ptutls.get_template_cartesian_coordinates(
+        mock_sim, in_plane_angle=rot, center=(20, 20)
+    )
     # generate an image from the template
     tim = np.zeros((40, 40))
-    tim[np.rint(y).astype(np.int32), np.rint(x).astype(np.int32)] = 1.
+    tim[np.rint(y).astype(np.int32), np.rint(x).astype(np.int32)] = 1.0
     # compare image and template and retrieve the same angle
-    a, c = iutls.get_in_plane_rotation_correlation(tim, mock_sim, 
-                                                  find_direct_beam=False,
-                                                  delta_r = dr,
-                                                  delta_theta = dt,
-                                                  normalize_image=nim,
-                                                  normalize_template=nt,
-                                                  )
-    assert abs(a[np.argmax(c)] - rot) % 180 < 2.
+    a, c = iutls.get_in_plane_rotation_correlation(
+        tim,
+        mock_sim,
+        find_direct_beam=False,
+        delta_r=dr,
+        delta_theta=dt,
+        normalize_image=nim,
+        normalize_template=nt,
+    )
+    assert abs(a[np.argmax(c)] - rot) % 180 < 2.0
+
+
+@pytest.mark.parametrize(
+    "rot, dr, dt, nim, nt",
+    [
+        (20, 1, 1, True, True),
+        (50, 0.1, 1, False, True),
+        (180, 0.1, 0.1, True, False),
+        (270, 0.1, 0.1, False, False),
+    ],
+)
+@skip_cupy
+def test_match_image_to_template_gpu(mock_sim, rot, dr, dt, nim, nt):
+    # serves to actually validate the correctness
+    x, y, i = ptutls.get_template_cartesian_coordinates(
+        mock_sim, in_plane_angle=rot, center=(20, 20)
+    )
+    # generate an image from the template
+    tim = cp.zeros((40, 40))
+    tim[np.rint(y).astype(np.int32), np.rint(x).astype(np.int32)] = 1.0
+    # compare image and template and retrieve the same angle
+    a, c = iutls.get_in_plane_rotation_correlation(
+        tim,
+        mock_sim,
+        find_direct_beam=False,
+        delta_r=dr,
+        delta_theta=dt,
+        normalize_image=nim,
+        normalize_template=nt,
+    )
+    assert abs(a[np.argmax(c)] - rot) % 180 < 2.0
 
 
 @pytest.mark.parametrize(
@@ -92,7 +127,9 @@ def test_match_image_to_template(mock_sim, rot, dr, dt, nim, nt):
         (15, ((3, 2, 4), (3, 4)), np.array((0, 0)), 0),
     ],
 )
-def test_simulations_to_arrays(simulations,max_radius, expected_shapes, test_pos, test_int):
+def test_simulations_to_arrays(
+    simulations, max_radius, expected_shapes, test_pos, test_int
+):
     positions, intensities = iutls._simulations_to_arrays(
         simulations, max_radius=max_radius
     )
@@ -101,15 +138,24 @@ def test_simulations_to_arrays(simulations,max_radius, expected_shapes, test_pos
     np.testing.assert_array_equal(positions[0, :, -1], test_pos)
     np.testing.assert_array_equal(intensities[0, -1], test_int)
 
+
 def test_match_polar_to_polar_template():
     image = np.ones((123, 50))
     r = np.linspace(2, 40, 30, dtype=np.int32)
     theta = np.linspace(10, 110, 30, dtype=np.int32)
     intensities = np.ones(30, dtype=np.float64)
-    cor = iutls._match_polar_to_polar_template(
-        image, r, theta, intensities
-    )
+    cor = iutls._match_polar_to_polar_template(image, r, theta, intensities)
     np.testing.assert_array_almost_equal(cor, np.ones(123, dtype=np.float64) * 30)
+
+
+@skip_cupy
+def test_match_polar_to_polar_template_gpu():
+    image = cp.ones((123, 50))
+    r = cp.linspace(2, 40, 30, dtype=np.int32)
+    theta = cp.linspace(10, 110, 30, dtype=np.int32)
+    intensities = cp.ones(30, dtype=np.float64)
+    cor = iutls._match_polar_to_polar_template(image, r, theta, intensities)
+    cp.testing.assert_array_almost_equal(cor, cp.ones(123, dtype=np.float64) * 30)
 
 
 @pytest.mark.parametrize(
@@ -119,8 +165,32 @@ def test_match_polar_to_polar_template():
         (np.sqrt, False, True),
     ],
 )
-def test_get_in_plane_rotation_correlation(simulations,itf, norim, nortemp):
+def test_get_in_plane_rotation_correlation(simulations, itf, norim, nortemp):
     image = np.ones((123, 50))
+    simulation = simulations[0]
+    ang, cor = iutls.get_in_plane_rotation_correlation(
+        image,
+        simulation,
+        intensity_transform_function=itf,
+        delta_r=2.6,
+        delta_theta=1.3,
+        normalize_image=norim,
+        normalize_template=nortemp,
+    )
+    assert ang.shape[0] == 277
+    assert cor.shape[0] == 277
+
+
+@skip_cupy
+@pytest.mark.parametrize(
+    "itf, norim, nortemp",
+    [
+        (None, True, False),
+        (cp.sqrt, False, True),
+    ],
+)
+def test_get_in_plane_rotation_correlation_gpu(simulations, itf, norim, nortemp):
+    image = cp.ones((123, 50))
     simulation = simulations[0]
     ang, cor = iutls.get_in_plane_rotation_correlation(
         image,
@@ -164,7 +234,11 @@ def test_match_polar_to_polar_library(dtype):
     intensities = np.ones(30, dtype=dtype)
     intensities = np.repeat(intensities[np.newaxis, ...], 4, axis=0)
     angles, cor, angles_m, cor_m = iutls._get_full_correlations(
-        image, r, theta, intensities, None,
+        image,
+        r,
+        theta,
+        intensities,
+        None,
     )
     assert cor.shape[0] == 4
     assert angles.shape[0] == 4
@@ -183,14 +257,14 @@ def test_match_polar_to_polar_library(dtype):
         (False, True),
     ],
 )
-def test_correlate_library_to_pattern(simulations,norim, nortemp):
+def test_correlate_library_to_pattern(simulations, norim, nortemp):
     image = np.ones((123, 50))
     index, ang, cor, ang_m, cor_m = iutls.correlate_library_to_pattern(
         image,
         simulations,
         delta_r=2.6,
         delta_theta=1.3,
-        frac_keep=1.,
+        frac_keep=1.0,
         normalize_image=norim,
         normalize_templates=nortemp,
     )
@@ -206,9 +280,9 @@ def test_correlate_library_to_pattern(simulations,norim, nortemp):
 
 
 @pytest.mark.parametrize(
-        "normed",
-        [True, False],
-        )
+    "normed",
+    [True, False],
+)
 def test_get_integrated_templates(normed):
     rmax = 50
     r = np.linspace(2, 40, 30, dtype=np.uint64)
@@ -226,13 +300,14 @@ def test_match_library_to_polar_fast():
     integrated_temp = np.arange(0, 50, dtype=np.float64)
     integrated_temp = np.repeat(integrated_temp[np.newaxis, ...], 5, axis=0)
     coors = iutls._match_library_to_polar_fast(
-        polar_sum, integrated_temp,
+        polar_sum,
+        integrated_temp,
     )
     assert coors.shape[0] == 5
     assert coors.ndim == 1
 
 
-#@pytest.mark.skipif(sys.platform=='darwin',reason="Fails on Mac OSX")
+# @pytest.mark.skipif(sys.platform=='darwin',reason="Fails on Mac OSX")
 @pytest.mark.parametrize(
     "norim, nortemp",
     [
@@ -240,7 +315,7 @@ def test_match_library_to_polar_fast():
         (False, True),
     ],
 )
-def test_correlate_library_to_pattern_fast(simulations,norim, nortemp):
+def test_correlate_library_to_pattern_fast(simulations, norim, nortemp):
     image = np.ones((123, 50))
     cor = iutls.correlate_library_to_pattern_fast(
         image,
@@ -253,12 +328,43 @@ def test_correlate_library_to_pattern_fast(simulations,norim, nortemp):
     assert cor.shape[0] == 3
 
 
-#@pytest.mark.skipif(sys.platform=='darwin',reason="Fails on Mac OSX")
+@pytest.mark.parametrize(
+    "norim, nortemp",
+    [
+        (True, False),
+        (False, True),
+    ],
+)
+@skip_cupy
+def test_correlate_library_to_pattern_fast_gpu(simulations, norim, nortemp):
+    image = cp.ones((123, 50))
+    cor = iutls.correlate_library_to_pattern_fast(
+        image,
+        simulations,
+        delta_r=2.6,
+        delta_theta=1.3,
+        normalize_image=norim,
+        normalize_templates=nortemp,
+    )
+    assert cor.shape[0] == 3
+    assert is_cupy_array(cor)
+
+
+# @pytest.mark.skipif(sys.platform=='darwin',reason="Fails on Mac OSX")
 @pytest.mark.parametrize("intensity_transform_function", [np.sqrt, None])
-def test_prep_image_and_templates(simulations,intensity_transform_function):
+def test_prep_image_and_templates(simulations, intensity_transform_function):
     image = np.ones((123, 51))
     pim, r, t, i = iutls._prepare_image_and_templates(
-        image, simulations, 2.1, 3.2, 33.3, intensity_transform_function, True, None, True, True,
+        image,
+        simulations,
+        2.1,
+        3.2,
+        33.3,
+        intensity_transform_function,
+        True,
+        None,
+        True,
+        True,
     )
     assert pim.shape[0] == 112
     assert pim.shape[1] == 15
@@ -269,7 +375,32 @@ def test_prep_image_and_templates(simulations,intensity_transform_function):
     assert i.shape[1] == 4
 
 
-#@pytest.mark.skipif(sys.platform=='darwin',reason="Fails on Mac OSX")
+@skip_cupy
+@pytest.mark.parametrize("intensity_transform_function", [cp.sqrt, None])
+def test_prep_image_and_templates_gpu(simulations, intensity_transform_function):
+    image = rp.ones((123, 51))
+    pim, r, t, i = iutls._prepare_image_and_templates(
+        image,
+        simulations,
+        2.1,
+        3.2,
+        33.3,
+        intensity_transform_function,
+        True,
+        None,
+        True,
+        True,
+    )
+    assert pim.shape[0] == 112
+    assert pim.shape[1] == 15
+    assert r.max() <= 15
+    assert t.min() >= 0
+    assert t.max() < 112
+    assert i.shape[0] == 3
+    assert i.shape[1] == 4
+
+
+# @pytest.mark.skipif(sys.platform=='darwin',reason="Fails on Mac OSX")
 @pytest.mark.parametrize(
     "nbest",
     [1, 2],
@@ -297,7 +428,7 @@ def test_mixed_matching_lib_to_polar(nbest):
         theta,
         intensities,
         None,
-        1.,
+        1.0,
         nbest,
         None,
     )
@@ -305,7 +436,7 @@ def test_mixed_matching_lib_to_polar(nbest):
     assert answer.shape[1] == 4
 
 
-#@pytest.mark.skipif(sys.platform=='darwin',reason="Fails on Mac OSX")
+# @pytest.mark.skipif(sys.platform=='darwin',reason="Fails on Mac OSX")
 @pytest.mark.parametrize(
     "nbest, frk, norim, nortemp",
     [
@@ -314,8 +445,32 @@ def test_mixed_matching_lib_to_polar(nbest):
     ],
 )
 @pytest.mark.slow
-def test_get_n_best_matches(simulations,nbest, frk, norim, nortemp):
+def test_get_n_best_matches(simulations, nbest, frk, norim, nortemp):
     image = np.ones((123, 50))
+    indx, angs, cor, signs = iutls.get_n_best_matches(
+        image,
+        simulations,
+        n_best=nbest,
+        frac_keep=frk,
+        delta_r=2.6,
+        delta_theta=1.3,
+        normalize_image=norim,
+        normalize_templates=nortemp,
+    )
+    assert cor.shape[0] == indx.shape[0] == angs.shape[0] == nbest
+
+
+@skip_cupy
+@pytest.mark.parametrize(
+    "nbest, frk, norim, nortemp",
+    [
+        (3, None, True, False),
+        (1, 0.5, False, True),
+    ],
+)
+@pytest.mark.slow
+def test_get_n_best_matches_gpu(simulations, nbest, frk, norim, nortemp):
+    image = cp.ones((123, 50))
     indx, angs, cor, signs = iutls.get_n_best_matches(
         image,
         simulations,
@@ -337,6 +492,7 @@ def create_dataset(shape):
     dataset.axes_manager.navigation_dimension = len(shape) - 2
     dataset.axes_manager.signal_indices_in_array = (len(shape) - 2, len(shape) - 1)
     return dataset
+
 
 @pytest.fixture()
 def library():
@@ -365,7 +521,7 @@ def library():
     return library
 
 
-#@pytest.mark.skipif(sys.platform=='darwin',reason="Fails on Mac OSX")
+# @pytest.mark.skipif(sys.platform=='darwin',reason="Fails on Mac OSX")
 @pytest.mark.parametrize(
     "sigdim, n_best, frac_keep, norim, nort, chu",
     [
@@ -376,7 +532,9 @@ def library():
     ],
 )
 @pytest.mark.slow
-def test_index_dataset_with_template_rotation(library,sigdim, n_best, frac_keep, norim, nort, chu):
+def test_index_dataset_with_template_rotation(
+    library, sigdim, n_best, frac_keep, norim, nort, chu
+):
     signal = create_dataset(sigdim)
     result = iutls.index_dataset_with_template_rotation(
         signal,
@@ -391,16 +549,16 @@ def test_index_dataset_with_template_rotation(library,sigdim, n_best, frac_keep,
         normalize_templates=nort,
         chunks=chu,
     )
-    
 
-#@pytest.mark.skipif(sys.platform=='darwin',reason="Fails on Mac OSX")
+
+# @pytest.mark.skipif(sys.platform=='darwin',reason="Fails on Mac OSX")
 @pytest.mark.slow
 def test_fail_index_dataset_with_template_rot(library):
     signal = create_dataset((3, 2, 4, 1, 2))
     with pytest.raises(ValueError):
         result = iutls.index_dataset_with_template_rotation(
-        signal,
-        library,
+            signal,
+            library,
         )
 
 
@@ -414,7 +572,9 @@ def test_fail_index_dataset_with_template_rot(library):
 )
 @pytest.mark.slow
 @skip_cupy
-def test_index_dataset_with_template_rotation_gpu(library,sigdim, n_best, frac_keep, norim, nort, chu):
+def test_index_dataset_with_template_rotation_gpu(
+    library, sigdim, n_best, frac_keep, norim, nort, chu
+):
     signal = create_dataset(sigdim)
     result = iutls.index_dataset_with_template_rotation(
         signal,
@@ -444,18 +604,17 @@ def run_index_chunk(di, n_best, frac_keep):
     intensities = di.random.random((lib_n, lib_spots))
     integrated_templates = di.random.random((lib_n, max_r))
     answer = iutls._index_chunk(
-            data,
-            integrated_templates,
-            r,
-            theta,
-            intensities,
-            None,
-            frac_keep,
-            n_best,
-            True,
-            )
+        data,
+        integrated_templates,
+        r,
+        theta,
+        intensities,
+        None,
+        frac_keep,
+        n_best,
+        True,
+    )
     assert answer.shape == (2, 3, n_best, 4)
-
 
 
 @pytest.mark.parametrize(
@@ -480,5 +639,4 @@ def test_index_chunk(n_best, fraction):
 )
 @skip_cupy
 def test_index_chunk_gpu(n_best, fraction):
-    import cupy as cp
     run_index_chunk(cp, n_best, fraction)

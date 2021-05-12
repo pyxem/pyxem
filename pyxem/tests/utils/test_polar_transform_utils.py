@@ -6,6 +6,7 @@ from unittest.mock import Mock
 
 try:
     import cupy as cp
+
     CUPY_INSTALLED = True
 except ImportError:
     CUPY_INSTALLED = False
@@ -69,7 +70,9 @@ def test_template_to_polar_gpu(mock_simulation_gpu, max_r, expected_r):
         (90, (7, 7), np.array([]), np.array([])),
     ],
 )
-def test_get_template_cartesian_coordinates(mock_simulation,angle, window, expected_x, expected_y):
+def test_get_template_cartesian_coordinates(
+    mock_simulation, angle, window, expected_x, expected_y
+):
     x, y, _ = ptu.get_template_cartesian_coordinates(
         mock_simulation, in_plane_angle=angle, window_size=window
     )
@@ -86,7 +89,9 @@ def test_get_template_cartesian_coordinates(mock_simulation,angle, window, expec
         (90, (7, 7), cp.array([]), cp.array([])),
     ],
 )
-def test_get_template_cartesian_coordinates_gpu(mock_simulation_gpu,angle, window, expected_x, expected_y):
+def test_get_template_cartesian_coordinates_gpu(
+    mock_simulation_gpu, angle, window, expected_x, expected_y
+):
     x, y, _ = ptu.get_template_cartesian_coordinates(
         mock_simulation_gpu, in_plane_angle=angle, window_size=window
     )
@@ -158,9 +163,7 @@ def test_image_to_polar_gpu(delta_r, delta_theta, max_r, fdb, db, expected_shape
 )
 def test_chunk_polar(center, radius, output_shape, expected_shape):
     chunk = np.ones((3, 2, 10, 7))
-    polar_chunk = ptu._chunk_to_polar(
-        chunk, center, radius, output_shape
-    )
+    polar_chunk = ptu._chunk_to_polar(chunk, center, radius, output_shape)
     np.testing.assert_array_almost_equal(polar_chunk.shape, expected_shape)
 
 
@@ -174,7 +177,5 @@ def test_chunk_polar(center, radius, output_shape, expected_shape):
 )
 def test_chunk_polar_gpu(center, radius, output_shape, expected_shape):
     chunk = cp.ones((3, 2, 10, 7))
-    polar_chunk = ptu._chunk_to_polar(
-        chunk, center, radius, output_shape
-    )
+    polar_chunk = ptu._chunk_to_polar(chunk, center, radius, output_shape)
     cp.testing.assert_array_almost_equal(polar_chunk.shape, expected_shape)
