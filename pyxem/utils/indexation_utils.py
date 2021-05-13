@@ -513,7 +513,7 @@ def _match_polar_to_polar_template(
     dispatcher = get_array_module(polar_image)
     sli = polar_image[:, r_template]
     rows, column_indices = dispatcher.ogrid[: sli.shape[0], : sli.shape[1]]
-    rows = (rows + theta_template[None, :]) % polar_image.shape[0]
+    rows = dispatcher.mod(rows + theta_template[None, :], polar_image.shape[0])
     extr = sli[rows, column_indices].astype(intensities.dtype)
     correlation = dispatcher.dot(extr, intensities)
     return correlation
@@ -1079,13 +1079,20 @@ def get_in_plane_rotation_correlation(
         polar_image = polar_image / np.linalg.norm(polar_image)
     if normalize_template:
         intensity = intensity / np.linalg.norm(intensity)
+    if is_cupy_array(polar_image):
+        dispatcher = cp
+        r = cp.asarray(r)
+        theta = cp.asarray(theta)
+        intensity = cp.asarray(intensity)
+    else:
+        dispatcher = np
     correlation_array = _match_polar_to_polar_template(
         polar_image,
         r,
         theta,
         intensity,
     )
-    angle_array = np.arange(correlation_array.shape[0]) * delta_theta
+    angle_array = dispatcher.arange(correlation_array.shape[0]) * delta_theta
     return angle_array, correlation_array
 
 
