@@ -1072,13 +1072,6 @@ def get_in_plane_rotation_correlation(
         delta_theta=delta_theta,
         max_r=polar_image.shape[1],
     )
-    if intensity_transform_function is not None:
-        intensity = intensity_transform_function(intensity)
-        polar_image = intensity_transform_function(polar_image)
-    if normalize_image:
-        polar_image = polar_image / np.linalg.norm(polar_image)
-    if normalize_template:
-        intensity = intensity / np.linalg.norm(intensity)
     if is_cupy_array(polar_image):
         dispatcher = cp
         r = cp.asarray(r)
@@ -1086,6 +1079,13 @@ def get_in_plane_rotation_correlation(
         intensity = cp.asarray(intensity)
     else:
         dispatcher = np
+    if intensity_transform_function is not None:
+        intensity = intensity_transform_function(intensity)
+        polar_image = intensity_transform_function(polar_image)
+    if normalize_image:
+        polar_image = polar_image / dispatcher.linalg.norm(polar_image)
+    if normalize_template:
+        intensity = intensity / dispatcher.linalg.norm(intensity)
     correlation_array = _match_polar_to_polar_template(
         polar_image,
         r,
