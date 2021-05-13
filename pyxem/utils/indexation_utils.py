@@ -513,7 +513,7 @@ def _match_polar_to_polar_template(
     dispatcher = get_array_module(polar_image)
     sli = polar_image[:, r_template]
     rows, column_indices = dispatcher.ogrid[: sli.shape[0], : sli.shape[1]]
-    rows = (rows + theta_template[np.newaxis, :]) % polar_image.shape[0]
+    rows = (rows + theta_template[None, :]) % polar_image.shape[0]
     extr = sli[rows, column_indices].astype(intensities.dtype)
     correlation = dispatcher.dot(extr, intensities)
     return correlation

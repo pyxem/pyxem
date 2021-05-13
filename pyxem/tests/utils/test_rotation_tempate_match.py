@@ -5,6 +5,7 @@ import pytest
 from unittest.mock import Mock
 import dask.array as da
 import sys
+from pyxem.utils.cuda_utils import is_cupy_array
 
 
 try:
@@ -117,7 +118,7 @@ def test_match_image_to_template_gpu(mock_sim, rot, dr, dt, nim, nt):
         normalize_image=nim,
         normalize_template=nt,
     )
-    assert abs(a[np.argmax(c)] - rot) % 180 < 2.0
+    assert abs(a[cp.argmax(c)] - rot) % 180 < 2.0
 
 
 @pytest.mark.parametrize(
@@ -378,7 +379,7 @@ def test_prep_image_and_templates(simulations, intensity_transform_function):
 @skip_cupy
 @pytest.mark.parametrize("intensity_transform_function", [cp.sqrt, None])
 def test_prep_image_and_templates_gpu(simulations, intensity_transform_function):
-    image = rp.ones((123, 51))
+    image = cp.ones((123, 51))
     pim, r, t, i = iutls._prepare_image_and_templates(
         image,
         simulations,
