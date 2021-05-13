@@ -596,7 +596,7 @@ def find_beam_center_blur(z, sigma):
         dispatcher = np
     blurred = gaus(z, sigma, mode="wrap")
     center = dispatcher.unravel_index(blurred.argmax(), blurred.shape)[::-1]
-    return np.array(center)
+    return dispatcher.array(center)
 
 
 def find_beam_offset_cross_correlation(z, radius_start, radius_finish):
