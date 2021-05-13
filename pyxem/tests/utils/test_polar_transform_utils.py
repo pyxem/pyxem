@@ -59,7 +59,7 @@ def test_template_to_polar(mock_simulation, max_r, expected_r):
 )
 def test_template_to_polar_gpu(mock_simulation_gpu, max_r, expected_r):
     r, theta, _ = ptu.get_template_polar_coordinates(mock_simulation_gpu, max_r=max_r)
-    np.testing.assert_allclose(r, expected_r)
+    cp.testing.assert_allclose(r, expected_r)
 
 
 @pytest.mark.parametrize(
