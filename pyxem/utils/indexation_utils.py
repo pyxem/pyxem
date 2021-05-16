@@ -685,7 +685,7 @@ def _get_best_correlations_and_angles(correlations, correlations_m):
     best_in_plane_shift_m = dispatcher.argmax(correlations_m, axis=1).astype(np.int32)
     rows = dispatcher.arange(correlations.shape[0], dtype=np.int32)
     best_in_plane_corr = correlations[rows, best_in_plane_shift]
-    best_in_plane_corr_m = correlations[rows, best_in_plane_shift_m]
+    best_in_plane_corr_m = correlations_m[rows, best_in_plane_shift_m]
     return (
         best_in_plane_shift,
         best_in_plane_shift_m,
