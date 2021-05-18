@@ -1104,6 +1104,8 @@ def _get_fast_correlation_index(
     normalize_templates,
 ):
     integrated_polar = polar_image.sum(axis=0)
+    rrr = np.arange(integrated_polar.shape[0]) / integrated_polar.shape[0]
+    integrated_polar = integrated_polar * rrr
     integrated_templates = _get_integrated_polar_templates(
         integrated_polar.shape[0],
         r,
@@ -1215,6 +1217,8 @@ def _prefilter_templates(
     template_indexes = dispatcher.arange(r.shape[0], dtype=np.int32)
     if max_keep != r.shape[0]:
         polar_sum = polar_image.sum(axis=0)
+        rrr = np.arange(polar_sum.shape[0]) / polar_sum.shape[0]
+        polar_sum = polar_sum * rrr
         correlations_fast = _match_library_to_polar_fast(
             polar_sum,
             integrated_templates,
