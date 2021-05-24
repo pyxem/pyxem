@@ -106,9 +106,9 @@ def _get_chunking(signal, chunk_shape=None, chunk_bytes=None):
     Examples
     --------
     >>> import dask.array as da
-    >>> import pyxem as pxm
+    >>> from hyperspy.signals import Signal2D
     >>> import pyxem.utils.dask_tools as dt
-    >>> s = pxm.LazySignal2D(da.zeros((32, 32, 256, 256), chunks=(16, 16, 256, 256)))
+    >>> s = Signal2D(da.zeros((32, 32, 256, 256), chunks=(16, 16, 256, 256))).as_lazy()
     >>> chunks = dt._get_chunking(s)
 
     Limiting to 60 MiB per chunk
@@ -272,7 +272,8 @@ def _process_dask_array(
     ...     return image * value
     >>> dask_array = da.ones((4, 6, 10, 15), chunks=(2, 2, 2, 2))
     >>> iter_array = da.random.randint(0, 99, (4, 6), chunks=(2, 2))
-    >>> output_dask_array = _process_dask_array(dask_array, test_function2)
+    >>> output_dask_array = _process_dask_array(
+    ...     dask_array, test_function2, iter_array)
     >>> output_array = output_dask_array.compute()
 
     Getting output which is different shape than the input. For example
