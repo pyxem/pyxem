@@ -118,7 +118,7 @@ def _get_best_match(z):
     z_best : np.array
         array with shape (5,)
     """
-    return z[np.argmax(z[:, -1]),:] 
+    return z[np.argmax(z[:, -1]),:]
 
 class GenericMatchingResults:
     def __init__(self, data):
@@ -148,7 +148,7 @@ class GenericMatchingResults:
         y = xy[0].flatten()
 
         """ Tidies up so we can put these things into CrystalMap """
-        euler = np.vstack((alpha, beta, gamma)).T
+        euler = np.deg2rad(np.vstack((alpha, beta, gamma)).T)
         rotations = Rotation.from_euler(
             euler, convention="bunge", direction="crystal2lab"
         )
