@@ -115,7 +115,7 @@ def get_single_DisplacementGradientTensor(Vs, Vu=None, weights=None):
 
     L = np.linalg.lstsq(Vu, Vs, rcond=-1)[
         0
-    ]  # only need the return array, see np,linalg.lstsq docs
+    ]  # only need the return array, see np,linalg.lstsq doc
     # Put caculated matrix values into 3 x 3 matrix to be returned.
     D = np.eye(3)
     D[0:2, 0:2] = L

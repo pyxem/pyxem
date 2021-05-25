@@ -1144,7 +1144,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         show_progressbar : bool, optional
             Default True
         **kwargs :
-            Passed to the peakfinder, see skimage docs for details
+            Passed to the peakfinder, see skimage doc for details
 
         Returns
         -------

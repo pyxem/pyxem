@@ -617,6 +617,7 @@ def determine_ellipse(signal,
                       mask=None,
                       num_points=1000,
                       guess_starting_params=True,
+                      plot=True,
                       **kwargs,
                       ):
     """
@@ -635,6 +636,8 @@ def determine_ellipse(signal,
         The number of points to consider
     guess_starting_params: bool
         If True then the starting parameters will be guessed based on the points determined.
+    plot: bool
+        If true then the points chosen to fit the ellipse to are shown.
     **kwargs:
         Any other keywords for ` get_ellipse_model_ransac_single_frame`
 
@@ -648,8 +651,10 @@ def determine_ellipse(signal,
     pos = get_max_positions(signal,
                             mask=mask,
                             num_points=num_points)
-    import matplotlib.pyplot as plt
-    plt.scatter(pos[:,0], pos[:,1])
+    if plot:
+        import matplotlib.pyplot as plt
+        plt.scatter(pos[:,0], pos[:,1])
+        plt.show()
     if guess_starting_params:
         el, _ = get_ellipse_model_ransac_single_frame(pos,
                                               xf=np.mean(pos[:, 0]),
