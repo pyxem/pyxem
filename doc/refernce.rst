@@ -129,7 +129,6 @@ CommonDiffraction
 .. autoclass:: pyxem.signals.CommonDiffraction
     :members:
     :undoc-members:
-    :inherited-members:
     :show-inheritance:
 
 Correlation2D
@@ -140,18 +139,6 @@ Correlation2D
 .. autoclass:: pyxem.signals.Correlation2D
     :members:
     :undoc-members:
-    :inherited-members:
-    :show-inheritance:
-
-BeamShift
-------------------
-
-.. currentmodule:: pyxem.signals.BeamShift
-
-.. autoclass:: pyxem.signals.BeamShift
-    :members:
-    :undoc-members:
-    :inherited-members:
     :show-inheritance:
 
 DPCSignal1D
@@ -162,7 +149,6 @@ DPCSignal1D
 .. autoclass:: pyxem.signals.DPCSignal1D
     :members:
     :undoc-members:
-    :inherited-members:
     :show-inheritance:
 
 DPCSignal2D
@@ -173,7 +159,6 @@ DPCSignal2D
 .. autoclass:: pyxem.signals.DPCSignal2D
     :members:
     :undoc-members:
-    :inherited-members:
     :show-inheritance:
 
 DiffractionVariance1D
@@ -184,7 +169,6 @@ DiffractionVariance1D
 .. autoclass:: pyxem.signals.DiffractionVariance1D
     :members:
     :undoc-members:
-    :inherited-members:
     :show-inheritance:
 
 DiffractionVariance2D
@@ -195,7 +179,6 @@ DiffractionVariance2D
 .. autoclass:: pyxem.signals.DiffractionVariance2D
     :members:
     :undoc-members:
-    :inherited-members:
     :show-inheritance:
 
 Diffraction1D
@@ -206,7 +189,6 @@ Diffraction1D
 .. autoclass:: pyxem.signals.Diffraction1D
     :members:
     :undoc-members:
-    :inherited-members:
     :show-inheritance:
 
 Diffraction2D
@@ -217,8 +199,7 @@ Diffraction2D
 .. autoclass:: pyxem.signals.Diffraction2D
     :members:
     :undoc-members:
-    :inherited-members:
-    :show-inheritance:
+    :show-inheritance: False
 
 ElectronDiffraction1D
 ----------------------
@@ -228,7 +209,6 @@ ElectronDiffraction1D
 .. autoclass:: pyxem.signals.ElectronDiffraction1D
     :members:
     :undoc-members:
-    :inherited-members:
     :show-inheritance:
 
 ElectronDiffraction2D
@@ -239,7 +219,6 @@ ElectronDiffraction2D
 .. autoclass:: pyxem.signals.ElectronDiffraction2D
     :members:
     :undoc-members:
-    :inherited-members:
     :show-inheritance:
 
 TemplateMatchingResults
@@ -250,7 +229,6 @@ TemplateMatchingResults
 .. autoclass:: pyxem.signals.TemplateMatchingResults
     :members:
     :undoc-members:
-    :inherited-members:
     :show-inheritance:
 
 VectorMatchingResults
@@ -261,7 +239,6 @@ VectorMatchingResults
 .. autoclass:: pyxem.signals.VectorMatchingResults
     :members:
     :undoc-members:
-    :inherited-members:
     :show-inheritance:
 
 PairDistributionFunction1D
@@ -272,7 +249,6 @@ PairDistributionFunction1D
 .. autoclass:: pyxem.signals.PairDistributionFunction1D
     :members:
     :undoc-members:
-    :inherited-members:
     :show-inheritance:
 
 PolarDiffraction2D
@@ -283,7 +259,6 @@ PolarDiffraction2D
 .. autoclass:: pyxem.signals.PolarDiffraction2D
     :members:
     :undoc-members:
-    :inherited-members:
     :show-inheritance:
 
 Power2D
@@ -294,7 +269,6 @@ Power2D
 .. autoclass:: pyxem.signals.Power2D
     :members:
     :undoc-members:
-    :inherited-members:
     :show-inheritance:
 
 ReducedIntensity1D
@@ -305,7 +279,6 @@ ReducedIntensity1D
 .. autoclass:: pyxem.signals.ReducedIntensity1D
     :members:
     :undoc-members:
-    :inherited-members:
     :show-inheritance:
 
 LearningSegment
@@ -316,7 +289,6 @@ LearningSegment
 .. autoclass:: pyxem.signals.LearningSegment
     :members:
     :undoc-members:
-    :inherited-members:
     :show-inheritance:
 
 VDFSegment
@@ -327,7 +299,6 @@ VDFSegment
 .. autoclass:: pyxem.signals.VDFSegment
     :members:
     :undoc-members:
-    :inherited-members:
     :show-inheritance:
 
 StrainMap
@@ -338,18 +309,6 @@ StrainMap
 .. autoclass:: pyxem.signals.StrainMap
     :members:
     :undoc-members:
-    :inherited-members:
-    :show-inheritance:
-
-Symmetry1D
-------------------
-
-.. currentmodule:: pyxem.signals.symmetry1d.Symmetry1D
-
-.. autoclass:: pyxem.signals.symmetry1d.Symmetry1D
-    :members:
-    :undoc-members:
-    :inherited-members:
     :show-inheritance:
 
 DisplacementGradientMap
@@ -360,8 +319,6 @@ DisplacementGradientMap
 .. autoclass:: pyxem.signals.DisplacementGradientMap
     :members:
     :undoc-members:
-    :inherited-members:
-    :show-inheritance:
 
 VirtualDarkFieldImage
 ----------------------
@@ -371,5 +328,3 @@ VirtualDarkFieldImage
 .. autoclass:: pyxem.signals.VirtualDarkFieldImage
     :members:
     :undoc-members:
-    :inherited-members:
-    :show-inheritance:
