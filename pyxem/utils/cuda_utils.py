@@ -126,6 +126,8 @@ def _correlate_polar_image_to_library_gpu(
             tmp = 0.0
             # add up all contributions to the correlation from spots
             for spot in range(sim_r.shape[1]):
+                if sim_r[template, spot] == 0:
+                    break
                 tmp += (
                     polar_image[
                         (sim_t[template, spot] + shift) % polar_image.shape[0],

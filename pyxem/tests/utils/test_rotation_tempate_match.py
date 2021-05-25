@@ -564,27 +564,27 @@ def test_fail_index_dataset_with_template_rot(library):
 
 
 @pytest.mark.parametrize(
-    "sigdim, n_best, frac_keep, norim, nort, chu",
+    "sigdim, maxr, n_best, frac_keep, norim, nort, chu",
     [
-        ((2, 3, 4, 5), 1, 1, False, False, {0: "auto", 1: "auto", 2: None, 3: None}),
-        ((2, 3, 4, 5), 2, 1, False, False, {0: "auto", 1: "auto", 2: None, 3: None}),
-        ((2, 3, 4, 5), 3, 0.5, False, False, {0: "auto", 1: "auto", 2: None, 3: None}),
+        ((2, 3, 4, 5), None, 1, 1, False, False, {0: "auto", 1: "auto", 2: None, 3: None}),
+        ((2, 3, 4, 5), 3, 2, 1, False, False, {0: "auto", 1: "auto", 2: None, 3: None}),
+        ((2, 3, 4, 5), 9, 3, 0.5, False, False, {0: "auto", 1: "auto", 2: None, 3: None}),
     ],
 )
 @pytest.mark.slow
 @skip_cupy
 def test_index_dataset_with_template_rotation_gpu(
-    library, sigdim, n_best, frac_keep, norim, nort, chu
+    library, sigdim, maxr, n_best, frac_keep, norim, nort, chu
 ):
     signal = create_dataset(sigdim)
-    result = iutls.index_dataset_with_template_rotation(
+    result, dicto = iutls.index_dataset_with_template_rotation(
         signal,
         library,
         n_best=n_best,
         frac_keep=frac_keep,
         delta_r=0.5,
         delta_theta=36,
-        max_r=None,
+        max_r=maxr,
         intensity_transform_function=np.sqrt,
         normalize_images=norim,
         normalize_templates=nort,
@@ -597,15 +597,22 @@ def run_index_chunk(di, n_best, frac_keep):
     max_r = 4
     max_theta = 5
     di.random.seed(1001)
-    data = di.random.random((2, 3, max_theta, max_r))
+    data = di.random.random((2, 3, 10, 12))
     lib_n = 4
     lib_spots = 5
     r = di.random.randint(0, max_r, size=(lib_n, lib_spots))
     theta = di.random.randint(0, max_theta, size=(lib_n, lib_spots))
     intensities = di.random.random((lib_n, lib_spots))
     integrated_templates = di.random.random((lib_n, max_r))
+    center=(7, 4)
+    max_radius=max_r
+    precision=np.float32
     answer = iutls._index_chunk(
         data,
+        center,
+        max_radius,
+        (5, 4),
+        precision,
         integrated_templates,
         r,
         theta,

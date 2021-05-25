@@ -173,7 +173,7 @@ def get_polar_pattern_shape(image_shape, delta_r, delta_theta, max_r=None):
         half_x = image_shape[1] / 2
         r_dim = int(np.ceil(np.sqrt(half_x ** 2 + half_y ** 2)) / delta_r)
     else:
-        r_dim = int(max_r / delta_r)
+        r_dim = int(round(max_r / delta_r))
     theta_dim = int(round(360 / delta_theta))
     return (theta_dim, r_dim)
 
@@ -182,7 +182,7 @@ def _get_map_function(dispatcher):
     return ndimage.map_coordinates if dispatcher == np else ndigpu.map_coordinates
 
 
-def _warp_polar_custom(image, center, radius, output_shape, order=1):
+def _warp_polar_custom(image, center, radius, output_shape, order=1, precision=np.float64):
     """
     Function to emulate warp_polar in skimage.transform on both CPU and GPU. Not all
     parameters are supported
@@ -198,8 +198,10 @@ def _warp_polar_custom(image, center, radius, output_shape, order=1):
         Radius of the circle that bounds the area to be transformed.
     output_shape: tuple (row, col)
         Shape of the output polar image
-    order: int
+    order: int, optional
         Order of interpolation between pixels
+    precision: np.float64 or np.float32
+        Double or single precision output
 
     Returns
     -------
@@ -226,7 +228,7 @@ def _warp_polar_custom(image, center, radius, output_shape, order=1):
     Y = R * delta_r * dispatcher.sin(dispatcher.deg2rad(T * delta_theta)) + cy
     coordinates = dispatcher.stack([Y, X])
     map_function = _get_map_function(dispatcher)
-    polar = map_function(image.astype(np.float64), coordinates, order=order)
+    polar = map_function(image.astype(precision), coordinates, order=order)
     return polar
 
 

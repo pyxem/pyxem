@@ -48,6 +48,7 @@ from pyxem.utils.polar_transform_utils import (
     image_to_polar,
     get_template_polar_coordinates,
     _chunk_to_polar,
+    _warp_polar_custom,
 )
 
 try:
@@ -566,6 +567,7 @@ def _correlate_polar_to_library_cpu(
     return correlation
 
 
+@njit
 def _match_polar_to_library_cpu(
     polar_image,
     r_templates,
@@ -603,16 +605,32 @@ def _match_polar_to_library_cpu(
     N is the number of templates and R the number of spots in the template
     with the maximum number of spots
     """
-    correlations = _correlate_polar_to_library_cpu(
-        polar_image, r_templates, theta_templates, intensities_templates
-    )
-    correlations_mirror = _correlate_polar_to_library_cpu(
-        polar_image,
-        r_templates,
-        (polar_image.shape[0] - theta_templates) % polar_image.shape[0],
-        intensities_templates,
-    )
-    return _get_best_correlations_and_angles(correlations, correlations_mirror)
+    angle = np.empty(r_templates.shape[0], dtype=np.int32)
+    angle_m = np.empty(r_templates.shape[0], dtype=np.int32)
+    cor = np.empty(r_templates.shape[0], dtype=polar_image.dtype)
+    cor_m = np.empty(r_templates.shape[0], dtype=polar_image.dtype)
+    for template_index in prange(r_templates.shape[0]):
+        column = np.zeros(polar_image.shape[0], dtype=polar_image.dtype)
+        column_m = np.zeros(polar_image.shape[0], dtype=polar_image.dtype)
+        intensity = intensities_templates[template_index]
+        r = r_templates[template_index]
+        theta = theta_templates[template_index]
+        for spot in range(r.shape[0]):
+            if r[spot] == 0:
+                # no more spots in the template
+                break
+            # extract all columns corresponding to r with a spot, shift by theta of
+            # the spot, multiply by intensity of the spot and sum. This
+            # yields the same as looping over shift
+            column += np.roll(polar_image[:,r[spot]], -theta[spot]) * intensity[spot]
+            column_m += np.roll(polar_image[:,r[spot]], -(polar_image.shape[0]-theta[spot])) * intensity[spot]
+        best = np.argmax(column)
+        best_m = np.argmax(column_m)
+        cor[template_index] = column[best]
+        cor_m[template_index] = column_m[best_m]
+        angle[template_index] = best
+        angle_m[template_index] = best_m 
+    return angle, angle_m, cor, cor_m
 
 
 def _match_polar_to_polar_library_gpu(
@@ -905,7 +923,7 @@ def _mixed_matching_lib_to_polar(
         matched and -1 if the mirror template is matched
     """
     dispatcher = get_array_module(polar_image)
-    # b
+    # remove templates we don't care about with a fast match
     (
         template_indexes,
         r_templates,
@@ -971,7 +989,11 @@ def _mixed_matching_lib_to_polar(
 
 
 def _index_chunk(
-    polar_images,
+    images,
+    center,
+    max_radius,
+    output_shape,
+    precision,
     integrated_templates,
     r_templates,
     theta_templates,
@@ -981,21 +1003,26 @@ def _index_chunk(
     n_best,
     norm_images,
     threadsperblock=(16, 16),
+    order=1,
 ):
-    dispatcher = get_array_module(polar_images)
+    dispatcher = get_array_module(images)
     # prepare an empty results chunk
     indexation_result_chunk = dispatcher.empty(
-        (polar_images.shape[0], polar_images.shape[1], n_best, 4),
-        dtype=polar_images.dtype,
+        (images.shape[0], images.shape[1], n_best, 4),
+        dtype=precision,
     )
-    # norm the images if necessary
-    if norm_images:
-        pattern_norms = dispatcher.linalg.norm(polar_images, axis=(2, 3))
-        polar_images = polar_images / pattern_norms[:, :, np.newaxis, np.newaxis]
-
-    for index in np.ndindex(polar_images.shape[:2]):
+    for index in np.ndindex(images.shape[:2]):
+        polar_image = _warp_polar_custom(images[index],
+                                         center,
+                                         max_radius,
+                                         output_shape,
+                                         order=order,
+                                         precision=precision,
+                                         )
+        if norm_images:
+            polar_image = polar_image / dispatcher.linalg.norm(polar_image)
         indexation_result_chunk[index] = _mixed_matching_lib_to_polar(
-            polar_images[index],
+            polar_image,
             integrated_templates,
             r_templates,
             theta_templates,
@@ -1602,104 +1629,136 @@ def index_dataset_with_template_rotation(
 
     if target == "gpu":
         from pyxem.utils.cuda_utils import dask_array_to_gpu
-
         # an error will be raised if cupy is not available
         data = dask_array_to_gpu(data)
         dispatcher = cp
     else:
         dispatcher = np
 
-    # convert to polar dataset
+    # calculate the dimensions of the polar transform
     output_shape = get_polar_pattern_shape(
         data.shape[-2:], delta_r, delta_theta, max_r=max_r
     )
     theta_dim, r_dim = output_shape
     max_radius = r_dim * delta_r
     center = (data.shape[-2] / 2, data.shape[-1] / 2)
-    polar_chunking = (data.chunks[0], data.chunks[1], theta_dim, r_dim)
-    polar_data = data.map_blocks(
-        _chunk_to_polar,
-        center,
-        max_radius,
-        output_shape,
-        precision,
-        dtype=precision,
-        drop_axis=signal.axes_manager.signal_indices_in_array,
-        chunks=polar_chunking,
-        new_axis=(2, 3),
-    )
     # apply the intensity transform function to the images
     if intensity_transform_function is not None:
-        polar_data = polar_data.map_blocks(intensity_transform_function)
+        data = data.map_blocks(intensity_transform_function)
+    # combine the phases into a single library of templates to perform
+    # indexation in a single step
+    # TODO the library concatenation below is not memory efficient, some
+    # lazy iterator would be better
     if phases is None:
         phases = library.keys()
-
-    result = {}
-
-    # calculate number of workers
-    if parallel_workers == "auto":
-        parallel_workers = os.cpu_count()
-    for phase_key in phases:
+    r_list = []  # list of all r arrays of each phase
+    theta_list = []  # list of all theta arrays of each phase
+    intensity_list = []  # list of all intensity arrays of each phase
+    phase_index = []  # array to indicate the phase index of each template
+    original_index = []  # index of the template in that phase library
+    phase_key_dict = {}  # mapping the phase index to a phase name
+    maximum_spot_number = 0  # to know the number of columns in template arrays
+    total_template_number = 0  # to know number of rows in template arrays
+    for index, phase_key in enumerate(phases):
         phase_library = library[phase_key]
         positions, intensities = _simulations_to_arrays(
             phase_library["simulations"], max_radius
         )
-        x = positions[:, 0]
-        y = positions[:, 1]
-        if intensity_transform_function is not None:
-            intensities = intensity_transform_function(intensities)
         r, theta = _cartesian_positions_to_polar(
-            x, y, delta_r=delta_r, delta_theta=delta_theta
+                positions[:,0], positions[:,1], delta_r=delta_r, delta_theta=delta_theta
         )
-        # integrated intensity library for fast comparison
-        integrated_templates = _get_integrated_polar_templates(
-            r_dim, r, intensities, normalize_templates
-        )
-        # normalize the templates if required
-        if normalize_templates:
-            integrated_templates = _norm_rows(integrated_templates)
-            intensities = _norm_rows(intensities)
-        # copy relevant data to GPU memory if necessary
-        if target == "gpu":
-            integrated_templates = cp.asarray(integrated_templates)
-            r = cp.asarray(r)
-            theta = cp.asarray(theta)
-            intensities = cp.asarray(intensities)
+        # ensure we don't have any out of bounds which could occur from rounding
+        condition = r >= r_dim
+        r[condition] = r_dim - 1 
+        theta[condition] = 0
+        intensities[condition] = 0.
+        r_list.append(r)
+        theta_list.append(theta)
+        intensity_list.append(intensities.astype(precision))
+        # for reconstructing the appropriate phase index and template number later
+        phase_index.append(np.full((r.shape[0]), index, dtype=np.int8))
+        original_index.append(np.arange(r.shape[0]))
+        phase_key_dict[index] = phase_key
+        # update number of spots
+        if r.shape[1] > maximum_spot_number:
+            maximum_spot_number = r.shape[1]
+        # update number of templates
+        total_template_number += r.shape[0]
+    # allocate memory and concatenate arrays in list
+    r = np.zeros((total_template_number, maximum_spot_number), dtype=np.int32)
+    theta = np.zeros((total_template_number, maximum_spot_number), dtype=np.int32)
+    intensities = np.zeros((total_template_number, maximum_spot_number), dtype=precision)
+    position = 0
+    for rr, tt, ii in zip(r_list, theta_list, intensity_list):
+        r[position:position+rr.shape[0], :rr.shape[1]] = rr
+        theta[position:position+rr.shape[0], :rr.shape[1]] = tt
+        intensities[position:position+rr.shape[0], :rr.shape[1]] = ii
+        position += rr.shape[0]
+    # phase_index and original index are 1D we can just concatenate
+    phase_index = np.concatenate(phase_index)
+    original_index = np.concatenate(original_index)
 
-        # put a limit on n_best
-        max_n = _get_max_n(r.shape[0], n_keep, frac_keep)
-        if n_best > max_n:
-            n_best = max_n
-
-        indexation = polar_data.map_blocks(
-            _index_chunk,
-            integrated_templates,
-            r,
-            theta,
-            intensities,
-            n_keep,
-            frac_keep,
-            n_best,
-            normalize_images,
-            threadsperblock,
-            dtype=precision,
-            drop_axis=signal.axes_manager.signal_indices_in_array,
-            chunks=(polar_data.chunks[0], polar_data.chunks[1], n_best, 4),
-            new_axis=(2, 3),
+    if intensity_transform_function is not None:
+        intensities = intensity_transform_function(intensities)
+    # integrated intensity library for fast comparison
+    integrated_templates = _get_integrated_polar_templates(
+        r_dim, r, intensities, normalize_templates
+    )
+    # normalize the templates if required
+    if normalize_templates:
+        integrated_templates = _norm_rows(integrated_templates)
+        intensities = _norm_rows(intensities)
+    # copy relevant data to GPU memory if necessary
+    if target == "gpu":
+        integrated_templates = cp.asarray(integrated_templates)
+        r = cp.asarray(r)
+        theta = cp.asarray(theta)
+        intensities = cp.asarray(intensities)
+    # put a limit on n_best
+    max_n = _get_max_n(r.shape[0], n_keep, frac_keep)
+    if n_best > max_n:
+        n_best = max_n
+    indexation = data.map_blocks(
+        _index_chunk,
+        center,
+        max_radius,
+        output_shape,
+        precision,
+        integrated_templates,
+        r,
+        theta,
+        intensities,
+        n_keep,
+        frac_keep,
+        n_best,
+        normalize_images,
+        threadsperblock,
+        dtype=precision,
+        drop_axis=signal.axes_manager.signal_indices_in_array,
+        chunks=(data.chunks[0], data.chunks[1], n_best, 4),
+        new_axis=(2, 3),
+    )
+    # calculate number of workers
+    if parallel_workers == "auto":
+        parallel_workers = os.cpu_count()
+    with ProgressBar():
+        res_index = indexation.compute(
+            scheduler=scheduler, num_workers=parallel_workers, optimize_graph=True
         )
-        # TODO: there is some duplication here as the polar transform is re-calculated for each loop iteration
-        # over the phases
-        with ProgressBar():
-            res_index = indexation.compute(
-                scheduler=scheduler, num_workers=parallel_workers, optimize_graph=True
-            )
-        # in case the data is on the GPU, retrieve it
-        res_index = to_numpy(res_index)
-        # wrangle data to (template_index), (orientation), (correlation)
-        result[phase_key] = {}
-        result[phase_key]["template_index"] = res_index[:, :, :, 0].astype(np.int32)
-        oris = phase_library["orientations"]
-        orimap = oris[res_index[:, :, :, 0].astype(np.int32)]
+    # in case the data is on the GPU, retrieve it
+    res_index = to_numpy(res_index)
+    # wrangle data to (template_index), (orientation), (correlation)
+    result = {}
+    result["phase_index"] = phase_index[res_index[:, :, :, 0].astype(np.int32)]
+    result["template_index"] = original_index[res_index[:, :, :, 0].astype(np.int32)]
+    # initialize orientations because we merge partially filled arrays by addition
+    orients = 0
+    for index, phase in phase_key_dict.items():
+        oris = library[phase]["orientations"]
+        phasemask = result["phase_index"] == index
+        indices = result["template_index"] * phasemask  # everywhere false will get index 0 to ensure no out of bounds
+        orimap = oris[indices] * phasemask[..., np.newaxis]  # everywhere false should not get any orientation
+        # correct orientation maps with rescales and flips
         orimap[:, :, :, 1] = (
             orimap[:, :, :, 1] * res_index[:, :, :, 3]
         )  # multiply by the sign
@@ -1707,7 +1766,9 @@ def index_dataset_with_template_rotation(
             orimap[:, :, :, 2] * res_index[:, :, :, 3]
         )  # multiply by the sign
         orimap[:, :, :, 0] = res_index[:, :, :, 2] * delta_theta
-        result[phase_key]["orientation"] = orimap
-        result[phase_key]["correlation"] = res_index[:, :, :, 1]
-        result[phase_key]["mirrored_template"] = res_index[:, :, :, 3] == -1
-    return result
+        # add to orients, there should be no overlap on pixels or N
+        orients = orients + orimap
+    result["orientation"] = orients
+    result["correlation"] = res_index[:, :, :, 1]
+    result["mirrored_template"] = res_index[:, :, :, 3] == -1
+    return result, phase_key_dict
