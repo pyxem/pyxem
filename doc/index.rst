@@ -24,30 +24,30 @@ on some function then you can use the API reference or search the documentation.
 
 The Jupyter Notebooks should give you good workflows for analyzing your dataset
 
-What do I do if I get stuck?
------------------------------
-The first step is looking at the documentation. Often times there will be examples with
-the documentation which are good places to start.
+.. nbgallery::
+    :caption: User guide
+    :glob:
 
-If you are still confused after that you can submit an issue on GitHub.
-
-
-I published some work using pyxem
-----------------------------------
-If pyxem helped you in publishing some data citing pyxem is very helpful in keeping track
-of different papers.  If you are publishing any of the code associated with the project we
-would love to link that as further examples for workflows using pyxem.
+    00Importinglargemibdatasets.ipynb
+    01GaAsNanowireDataInspectionPreprocessingUnsupervisedMachineLearning.ipynb
+    02GaAsNanowirePhaseMappingOrientationMapping.ipynb
+    03ReferenceStandardsDimensionCalibrationsRotationCalibrations.ipynb
+    04SimulateDataPhaseMappingOrientationMapping.ipynb
+    05SimulateDataStrainMapping.ipynb
+    06NanocrystalSegmentationInSPEDDataDemonstrationOnPartlyOverlappingMgOcubes.ipynb
+    07AzimuthalIntegrationUsingpyFAIDetector.ipynb
+    08PairDistributionFunctionAnalysis.ipynb
+    09AngularCorrelationsofAmorphousMaterials.ipynb
 
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+    :maxdepth: 1
+    :caption: Help
 
+    reference.rst
+    bibliography.rst
+    contributing.rst
+    open_datasets.rst
+    cite.rst
+    related_projects.rst
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

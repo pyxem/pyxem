@@ -1,13 +1,13 @@
-=============
+===============
 API reference
-=============
+===============
 
 This reference manual details the public modules, classes, and functions in
 pyxem, as generated from their docstrings. Many of the docstrings contain
 examples and continued effort to improve these examples is on going.
 
 
-.. module:: pyxem
+.. currentmodule:: pyxem
 
 The list of top modules (and the load function):
 

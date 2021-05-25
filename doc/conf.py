@@ -20,6 +20,8 @@ import requests
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.append("../")
+sys.path.append("../../pyxem-demos/")
+
 
 # Project information
 project = "pyxem"
@@ -154,7 +156,7 @@ nbsphinx_prolog = (
 """
 )
 # https://nbsphinx.readthedocs.io/en/0.8.0/never-execute.html
-nbsphinx_execute = "always"  # auto, always, never
+nbsphinx_execute = "never"  # auto, always, never
 
 # sphinxcontrib-bibtex configuration
 bibtex_bibfiles = ["bibliography.bib"]
