@@ -884,7 +884,7 @@ def _make_4d_peak_array_test_data(xf, yf, semi0, semi1, rot, nt=20):
     >>> mt.add_peak_array_to_signal_as_markers(s, peak_array)
 
     """
-    peak_array = np.empty_like(xf, dtype=np.object)
+    peak_array = np.empty_like(xf, dtype=object)
     for iy, ix in np.ndindex(peak_array.shape):
         params = (xf[iy, ix], yf[iy, ix], semi0[iy, ix], semi1[iy, ix], rot[iy, ix], nt)
         ellipse_points = ret.make_ellipse_data_points(*params)
@@ -1115,7 +1115,7 @@ class DiffractionTestDataset:
         >>> di_rot = di.copy()
         >>> di_rot.rotation = 10
         >>> dtd = mdtd.DiffractionTestDataset(10, 10, 256, 256)
-        >>> position_array = np.ones((10, 10), dtype=np.bool)
+        >>> position_array = np.ones((10, 10), dtype=bool)
         >>> position_array[:5] = False
         >>> dtd.add_diffraction_image(di, position_array)
         >>> dtd.add_diffraction_image(di_rot, np.invert(position_array))
@@ -1150,7 +1150,7 @@ class DiffractionTestDataset:
         detector_x, detector_y = self.detector_x, self.detector_y
         image = diffraction_test_image.get_diffraction_test_image()
         if position_array is None:
-            position_array = np.ones((probe_x, probe_y), dtype=np.bool)
+            position_array = np.ones((probe_x, probe_y), dtype=bool)
         for ix, iy in np.ndindex(probe_x, probe_y):
             if position_array[ix, iy]:
                 self.data[ix, iy, :, :] = image

@@ -283,7 +283,7 @@ def match_vectors(
             [phase index, rotation matrix, match rate, error hkls, total error]
 
     """
-    if peaks.shape == (1,) and peaks.dtype == np.object:
+    if peaks.shape == (1,) and peaks.dtype == object:
         peaks = peaks[0]
 
     # Assign empty array to hold indexation results. The n_best best results
@@ -423,7 +423,7 @@ def match_vectors(
     # when the two tuple values have the same first dimension), we cannot
     # return a tuple directly, but instead have to format the result as an
     # array ourselves.
-    res = np.empty(2, dtype=np.object)
+    res = np.empty(2, dtype=object)
     res[0] = top_matches
     res[1] = np.asarray(res_rhkls)
     return res

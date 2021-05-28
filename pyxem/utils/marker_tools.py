@@ -63,7 +63,7 @@ def _get_4d_points_marker_list(
             peaks_list, bool_array, bool_invert=bool_invert
         )
     max_peaks = 0
-    if peaks_list.dtype == np.object:
+    if peaks_list.dtype == object:
         peaks_list_shape = peaks_list.shape
     else:
         peaks_list_shape = peaks_list.shape[:-2]
@@ -124,10 +124,10 @@ def _filter_peak_array_with_bool_array(peak_array, bool_array, bool_invert=False
             "bool_array {0} and peak_array {1} must have the"
             " same shape".format(bool_array.shape, peak_array.shape)
         )
-    peak_array_filter = np.empty(shape=(peak_array.shape[:2]), dtype=np.object)
+    peak_array_filter = np.empty(shape=(peak_array.shape[:2]), dtype=object)
     for ix, iy in np.ndindex(peak_array.shape[:2]):
         peak_list = np.array(peak_array[ix, iy])
-        bool_list = np.array(bool_array[ix, iy], dtype=np.bool)
+        bool_list = np.array(bool_array[ix, iy], dtype=bool)
         if bool_invert:
             bool_list = ~bool_list
         peak_list = peak_list[bool_list]

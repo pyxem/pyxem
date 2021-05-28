@@ -98,7 +98,7 @@ class VirtualDarkFieldImage(Signal2D):
         # TODO : Add aperture radius as an attribute of VDFImage?
 
         # Create an array of length equal to the number of vectors where each
-        # element is a np.object with shape (n: number of segments for this
+        # element is a object with shape (n: number of segments for this
         # VDFImage, VDFImage size x, VDFImage size y).
         vdfsegs = np.array(
             vdfs.map(
@@ -113,7 +113,7 @@ class VirtualDarkFieldImage(Signal2D):
                 threshold=threshold,
                 exclude_border=exclude_border,
             ),
-            dtype=np.object,
+            dtype=object,
         )
 
         segments, vectors_of_segments = [], []

@@ -709,7 +709,7 @@ def get_nanobeam_electron_diffraction_signal():
     di2 = di0.copy()
     di2.rotation = -10
 
-    position_array0 = np.zeros((50, 50), dtype=np.bool)
+    position_array0 = np.zeros((50, 50), dtype=bool)
     r = np.array([15, 15, 0, 0])
     c = np.array([0, 15, 31, 0])
     rr, cc = polygon(r, c)
@@ -720,7 +720,7 @@ def get_nanobeam_electron_diffraction_signal():
     rr, cc = polygon(r, c)
     position_array0[rr, cc] = True
 
-    position_array1 = np.zeros((50, 50), dtype=np.bool)
+    position_array1 = np.zeros((50, 50), dtype=bool)
     r = np.array([32, 41, 41, 49, 49])
     c = np.array([0, 18, 49, 49, 0])
     rr, cc = polygon(r, c)
