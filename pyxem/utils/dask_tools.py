@@ -21,6 +21,7 @@ import dask.array as da
 from skimage.feature import match_template, blob_dog, blob_log
 import scipy.ndimage as ndi
 from skimage import morphology
+from hyperspy.misc.utils import isiterable
 
 
 def align_single_frame(image, shifts, **kwargs):
@@ -106,9 +107,9 @@ def _get_chunking(signal, chunk_shape=None, chunk_bytes=None):
     Examples
     --------
     >>> import dask.array as da
-    >>> import pyxem as pxm
+    >>> from hyperspy.signals import Signal2D
     >>> import pyxem.utils.dask_tools as dt
-    >>> s = pxm.LazySignal2D(da.zeros((32, 32, 256, 256), chunks=(16, 16, 256, 256)))
+    >>> s = Signal2D(da.zeros((32, 32, 256, 256), chunks=(16, 16, 256, 256))).as_lazy()
     >>> chunks = dt._get_chunking(s)
 
     Limiting to 60 MiB per chunk
@@ -124,13 +125,16 @@ def _get_chunking(signal, chunk_shape=None, chunk_bytes=None):
         chunk_bytes = "30MiB"
     nav_dim = signal.axes_manager.navigation_dimension
     sig_dim = signal.axes_manager.signal_dimension
-
+    if chunk_shape is not None:
+        if not isiterable(chunk_shape):
+            chunk_shape = [chunk_shape] * nav_dim
+    
     chunks_dict = {}
     for i in range(nav_dim):
         if chunk_shape is None:
             chunks_dict[i] = "auto"
         else:
-            chunks_dict[i] = chunk_shape
+            chunks_dict[i] = chunk_shape[i]
     for i in range(nav_dim, nav_dim + sig_dim):
         chunks_dict[i] = -1
 
@@ -272,7 +276,8 @@ def _process_dask_array(
     ...     return image * value
     >>> dask_array = da.ones((4, 6, 10, 15), chunks=(2, 2, 2, 2))
     >>> iter_array = da.random.randint(0, 99, (4, 6), chunks=(2, 2))
-    >>> output_dask_array = _process_dask_array(dask_array, test_function2)
+    >>> output_dask_array = _process_dask_array(
+    ...     dask_array, test_function2, iter_array)
     >>> output_array = output_dask_array.compute()
 
     Getting output which is different shape than the input. For example

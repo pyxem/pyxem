@@ -18,6 +18,7 @@
 
 from .common_diffraction import CommonDiffraction
 from .correlation2d import Correlation2D, LazyCorrelation2D
+from .beam_shift import BeamShift, LazyBeamShift
 from .differential_phase_contrast import (
     DPCBaseSignal,
     DPCSignal1D,
@@ -40,6 +41,7 @@ from .power2d import Power2D, LazyPower2D
 from .reduced_intensity1d import ReducedIntensity1D
 from .segments import LearningSegment, VDFSegment
 from .strain_map import StrainMap
+from .symmetry1d import Symmetry1D
 from .tensor_field import DisplacementGradientMap
 from .virtual_dark_field_image import VirtualDarkFieldImage
 
@@ -48,6 +50,8 @@ __all__ = [
     "CommonDiffraction",
     "Correlation2D",
     "LazyCorrelation2D",
+    "BeamShift",
+    "LazyBeamShift",
     "DPCBaseSignal",
     "DPCSignal1D",
     "DPCSignal2D",
@@ -78,6 +82,7 @@ __all__ = [
     "LearningSegment",
     "VDFSegment",
     "StrainMap",
+    "Symmetry1D",
     "DisplacementGradientMap",
     "VirtualDarkFieldImage",
 ]
