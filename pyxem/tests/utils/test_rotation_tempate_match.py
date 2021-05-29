@@ -368,7 +368,7 @@ def test_prep_image_and_templates(simulations, intensity_transform_function):
         True,
     )
     assert pim.shape[0] == 112
-    assert pim.shape[1] == 15
+    assert pim.shape[1] == 16
     assert r.max() <= 15
     assert t.min() >= 0
     assert t.max() < 112
@@ -393,7 +393,7 @@ def test_prep_image_and_templates_gpu(simulations, intensity_transform_function)
         True,
     )
     assert pim.shape[0] == 112
-    assert pim.shape[1] == 15
+    assert pim.shape[1] == 16
     assert r.max() <= 15
     assert t.min() >= 0
     assert t.max() < 112
