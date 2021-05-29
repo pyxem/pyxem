@@ -555,6 +555,8 @@ def _correlate_polar_to_library_cpu(
         for shift in prange(polar_image.shape[0]):
             tmp = 0
             for spot in range(r_templates.shape[1]):
+                if r_templates[template, spot] == 0:
+                    break
                 tmp += (
                     polar_image[
                         (theta_templates[template, spot] + shift)
@@ -567,7 +569,6 @@ def _correlate_polar_to_library_cpu(
     return correlation
 
 
-@njit
 def _match_polar_to_library_cpu(
     polar_image,
     r_templates,
@@ -605,32 +606,16 @@ def _match_polar_to_library_cpu(
     N is the number of templates and R the number of spots in the template
     with the maximum number of spots
     """
-    angle = np.empty(r_templates.shape[0], dtype=np.int32)
-    angle_m = np.empty(r_templates.shape[0], dtype=np.int32)
-    cor = np.empty(r_templates.shape[0], dtype=polar_image.dtype)
-    cor_m = np.empty(r_templates.shape[0], dtype=polar_image.dtype)
-    for template_index in prange(r_templates.shape[0]):
-        column = np.zeros(polar_image.shape[0], dtype=polar_image.dtype)
-        column_m = np.zeros(polar_image.shape[0], dtype=polar_image.dtype)
-        intensity = intensities_templates[template_index]
-        r = r_templates[template_index]
-        theta = theta_templates[template_index]
-        for spot in range(r.shape[0]):
-            if r[spot] == 0:
-                # no more spots in the template
-                break
-            # extract all columns corresponding to r with a spot, shift by theta of
-            # the spot, multiply by intensity of the spot and sum. This
-            # yields the same as looping over shift
-            column += np.roll(polar_image[:,r[spot]], -theta[spot]) * intensity[spot]
-            column_m += np.roll(polar_image[:,r[spot]], -(polar_image.shape[0]-theta[spot])) * intensity[spot]
-        best = np.argmax(column)
-        best_m = np.argmax(column_m)
-        cor[template_index] = column[best]
-        cor_m[template_index] = column_m[best_m]
-        angle[template_index] = best
-        angle_m[template_index] = best_m 
-    return angle, angle_m, cor, cor_m
+    correlations = _correlate_polar_to_library_cpu(
+        polar_image, r_templates, theta_templates, intensities_templates
+    )
+    correlations_mirror = _correlate_polar_to_library_cpu(
+        polar_image,
+        r_templates,
+        (polar_image.shape[0] - theta_templates) % polar_image.shape[0],
+        intensities_templates,
+    )
+    return _get_best_correlations_and_angles(correlations, correlations_mirror)
 
 
 def _match_polar_to_polar_library_gpu(

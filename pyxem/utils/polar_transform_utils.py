@@ -53,6 +53,7 @@ def get_template_polar_coordinates(
     delta_r=1,
     delta_theta=1,
     max_r=None,
+    mirrored=False,
 ):
     """
     Convert a single simulation to polar coordinates
@@ -74,6 +75,8 @@ def get_template_polar_coordinates(
     max_r : float, optional
         Maximum radial distance to consider. In units of pixels, not scaled
         by delta_r = the width of the polar image.
+    mirrored : bool, optional
+        Whether to mirror the template
 
     Returns
     -------
@@ -95,12 +98,15 @@ def get_template_polar_coordinates(
         r = r[condition]
         theta = theta[condition]
         intensities = intensities[condition]
-    theta = np.mod(theta + in_plane_angle / delta_r, 360 / delta_r).astype(np.int32)
+    theta = np.mod(theta + in_plane_angle / delta_theta, 360 / delta_theta).astype(np.int32)
+    if mirrored:
+        theta = (360 / delta_theta - theta).astype(np.int32)
     return r, theta, intensities
 
 
 def get_template_cartesian_coordinates(
-    simulation, center=(0.0, 0.0), in_plane_angle=0.0, window_size=None
+    simulation, center=(0.0, 0.0), in_plane_angle=0.0, window_size=None,
+    mirrored=False,
 ):
     """
     Get the cartesian coordinates of the diffraction spots in a template
@@ -117,6 +123,8 @@ def get_template_cartesian_coordinates(
     window_size : 2-tuple, optional
         Only return the reflections within the (width, height) in pixels
         of the image
+    mirrored : bool, optional
+        Whether to mirror the template
 
     Returns
     -------
@@ -129,6 +137,8 @@ def get_template_cartesian_coordinates(
     """
     ox = simulation.calibrated_coordinates[:, 0]
     oy = simulation.calibrated_coordinates[:, 1]
+    if mirrored:
+        oy = -oy
     intensities = simulation.intensities
     c = np.cos(np.deg2rad(in_plane_angle))
     s = np.sin(np.deg2rad(in_plane_angle))
