@@ -1253,8 +1253,9 @@ def _get_full_correlations(
 ):
     # get a full match on the filtered data - we must branch for CPU/GPU
     if is_cupy_array(polar_image):
-        blockspergrid_x = int(np.ceil(polar_image.shape[0] / threadsperblock[0]))
-        blockspergrid_y = int(np.ceil(polar_image.shape[1] / threadsperblock[1]))
+        # we assume one thread per element
+        blockspergrid_x = int(np.ceil(r.shape[0] / threadsperblock[0]))
+        blockspergrid_y = int(np.ceil(polar_image.shape[0] / threadsperblock[1]))
         blockspergrid = (blockspergrid_x, blockspergrid_y)
         (
             best_in_plane_shift,

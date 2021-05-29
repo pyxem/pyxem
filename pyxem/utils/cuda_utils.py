@@ -113,26 +113,21 @@ def _correlate_polar_image_to_library_gpu(
         The output correlation matrix of shape (template number, theta), giving
         the correlation of each template at each in-plane angle
     """
-    # grid and stride for the output so that each cuda thread deals with more than one element at a time
-    start_template, start_shift = cuda.grid(2)
-    stride_template, stride_shift = cuda.gridsize(2)
+    # each cuda thread handles one element
+    template, shift = cuda.grid(2)
     # don't calculate for grid positions outside
-    if start_template >= sim_r.shape[0] or start_shift >= polar_image.shape[0]:
+    if template >= correlation.shape[0] or shift >= correlation.shape[1]:
         return
-    # loop over all templates
-    for template in range(start_template, sim_r.shape[0], stride_template):
-        # loop over all in-plane angles
-        for shift in range(start_shift, polar_image.shape[0], stride_shift):
-            tmp = 0.0
-            # add up all contributions to the correlation from spots
-            for spot in range(sim_r.shape[1]):
-                if sim_r[template, spot] == 0:
-                    break
-                tmp += (
-                    polar_image[
-                        (sim_t[template, spot] + shift) % polar_image.shape[0],
-                        sim_r[template, spot],
-                    ]
-                    * sim_i[template, spot]
-                )
-            correlation[template, shift] = tmp
+    tmp = 0.0
+    # add up all contributions to the correlation from spots
+    for spot in range(sim_r.shape[1]):
+        if sim_r[template, spot] == 0:
+            break
+        tmp += (
+            polar_image[
+                (sim_t[template, spot] + shift) % polar_image.shape[0],
+                sim_r[template, spot],
+            ]
+            * sim_i[template, spot]
+        )
+    correlation[template, shift] = tmp
