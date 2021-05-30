@@ -17,6 +17,11 @@ except ImportError:
 
 """ These are designed to be fast and used for indexation, for data correction, see radial_utils"""
 
+def _cartesian_positions_to_polar_nonround(x, y, delta_r=1., delta_theta=1.):
+    r = np.sqrt(x ** 2 + y ** 2) / delta_r
+    theta = np.mod(np.rad2deg(np.arctan2(y, x)), 360) / delta_theta 
+    return r, theta
+
 
 def _cartesian_positions_to_polar(x, y, delta_r=1, delta_theta=1):
     """
@@ -40,11 +45,12 @@ def _cartesian_positions_to_polar(x, y, delta_r=1, delta_theta=1):
     theta : 1D numpy.ndarray
         theta coordinate or y coordinate in the polar image
     """
-    r = np.rint(np.sqrt(x ** 2 + y ** 2) / delta_r).astype(np.int32)
-    theta = np.rint(np.mod(np.rad2deg(np.arctan2(y, x)), 360) / delta_theta).astype(
-        np.int32
-    )
+    r, theta = _cartesian_positions_to_polar_nonround(x, y, delta_r, delta_theta)
+    r = np.rint(r).astype(np.int32)
+    theta = np.rint(theta).astype(np.int32)
     return r, theta
+
+
 
 
 def get_template_polar_coordinates(
@@ -54,6 +60,7 @@ def get_template_polar_coordinates(
     delta_theta=1,
     max_r=None,
     mirrored=False,
+    rounded=True,
 ):
     """
     Convert a single simulation to polar coordinates
@@ -77,6 +84,8 @@ def get_template_polar_coordinates(
         by delta_r = the width of the polar image.
     mirrored : bool, optional
         Whether to mirror the template
+    rounded: bool, optional
+        Whether the coordinates should be rounded to integers
 
     Returns
     -------
@@ -92,15 +101,18 @@ def get_template_polar_coordinates(
     x = simulation.calibrated_coordinates[:, 0]
     y = simulation.calibrated_coordinates[:, 1]
     intensities = simulation.intensities.astype(np.float64)
-    r, theta = _cartesian_positions_to_polar(x, y, delta_r, delta_theta)
+    r, theta = _cartesian_positions_to_polar_nonround(x, y, delta_r, delta_theta)
     if max_r is not None:
         condition = r < max_r
         r = r[condition]
         theta = theta[condition]
         intensities = intensities[condition]
-    theta = np.mod(theta + in_plane_angle / delta_theta, 360 / delta_theta).astype(np.int32)
+    theta = np.mod(theta + in_plane_angle / delta_theta, 360 / delta_theta)
     if mirrored:
-        theta = (360 / delta_theta - theta).astype(np.int32)
+        theta = 360 / delta_theta - theta
+    if rounded:
+        theta = theta.astype(np.int32)
+        r = r.astype(np.int32)
     return r, theta, intensities
 
 
