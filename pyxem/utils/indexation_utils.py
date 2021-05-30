@@ -945,7 +945,7 @@ def _mixed_matching_lib_to_polar(
         positive_is_best * best_in_plane_corr + negative_is_best * best_in_plane_corr_m
     )
     best_angles = (
-        positive_is_best * best_in_plane_shift + negative_is_best * best_in_plane_shift
+        positive_is_best * best_in_plane_shift + negative_is_best * best_in_plane_shift_m
     )
     if n_best >= best_cors.shape[0]:
         n_best = best_cors.shape[0]
@@ -1727,12 +1727,12 @@ def index_dataset_with_template_rotation(
     # calculate number of workers
     if parallel_workers == "auto":
         parallel_workers = os.cpu_count()
+
+    indexation = indexation.map_blocks(to_numpy)
     with ProgressBar():
         res_index = indexation.compute(
             scheduler=scheduler, num_workers=parallel_workers, optimize_graph=True
         )
-    # in case the data is on the GPU, retrieve it
-    res_index = to_numpy(res_index)
     # wrangle data to (template_index), (orientation), (correlation)
     result = {}
     result["phase_index"] = phase_index[res_index[:, :, :, 0].astype(np.int32)]
