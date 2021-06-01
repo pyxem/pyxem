@@ -846,6 +846,11 @@ def _prepare_image_and_templates(
     r, theta = _cartesian_positions_to_polar(
         positions[:, 0], positions[:, 1], delta_r, delta_theta
     )
+    condition = r >= polar_image.shape[1]
+    # we don't set r to 0 because it may quit the loop in the matching early
+    r[condition] = polar_image.shape[1]  - 1 
+    theta[condition] = 0
+    intensities[condition] = 0.
     if is_cupy_array(polar_image):
         # send data to GPU
         r = cp.asarray(r)
