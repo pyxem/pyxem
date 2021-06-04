@@ -24,20 +24,14 @@ on some function then you can use the API reference or search the documentation.
 
 The Jupyter Notebooks should give you good workflows for analyzing your dataset
 
+User Guide and Workflows:
+-------
 .. nbgallery::
     :caption: User guide
     :glob:
+    :maxdepth: 1
 
-    00Importinglargemibdatasets.ipynb
-    01GaAsNanowireDataInspectionPreprocessingUnsupervisedMachineLearning.ipynb
-    02GaAsNanowirePhaseMappingOrientationMapping.ipynb
-    03ReferenceStandardsDimensionCalibrationsRotationCalibrations.ipynb
-    04SimulateDataPhaseMappingOrientationMapping.ipynb
-    05SimulateDataStrainMapping.ipynb
-    06NanocrystalSegmentationInSPEDDataDemonstrationOnPartlyOverlappingMgOcubes.ipynb
-    07AzimuthalIntegrationUsingpyFAIDetector.ipynb
-    08PairDistributionFunctionAnalysis.ipynb
-    09AngularCorrelationsofAmorphousMaterials.ipynb
+    pyxem-demos/0*
 
 
 .. toctree::
