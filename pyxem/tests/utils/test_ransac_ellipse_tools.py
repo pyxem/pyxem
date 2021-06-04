@@ -24,7 +24,7 @@ from numpy.testing import assert_allclose
 from scipy.signal import convolve2d
 from skimage import morphology
 
-from hyperspy.signals import Signal2D
+import hyperspy.api as hs
 from pyxem.dummy_data import make_diffraction_test_data as mdtd
 from pyxem.signals import Diffraction2D, ElectronDiffraction2D
 import pyxem.utils.ransac_ellipse_tools as ret
@@ -1038,3 +1038,15 @@ def test_determine_ellipse(ransac, mask):
                                           [0, 0, 1]],
                                          2)
     np.testing.assert_array_almost_equal(center, [45, 50], 0)
+
+def test_get_max_pos():
+    t = np.ones((100, 100))
+    x, y = np.ogrid[-45:55, -50:50]
+    t[x ** 2 + (y * 1.15) ** 2 < 40 ** 2] = 100
+    t[x ** 2 + (y * 1.15) ** 2 < 30 ** 2] = 1
+    t = t + np.random.random((100, 100))
+    s = hs.signals.Signal2D(t)
+    pos = ret.get_max_positions(s, num_points=100)
+    dist = np.array([((p[0]-45) ** 2+(p[1]-50) **2)**0.5 for p in pos])
+    np.testing.assert_array_less(dist, 40)
+
