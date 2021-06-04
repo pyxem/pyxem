@@ -17,14 +17,16 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 from pytest import approx, mark
+import pytest
 import math
 import numpy as np
 from numpy.testing import assert_allclose
 from scipy.signal import convolve2d
 from skimage import morphology
 
+from hyperspy.signals import Signal2D
 from pyxem.dummy_data import make_diffraction_test_data as mdtd
-from pyxem.signals import Diffraction2D
+from pyxem.signals import Diffraction2D, ElectronDiffraction2D
 import pyxem.utils.ransac_ellipse_tools as ret
 
 
@@ -1012,3 +1014,27 @@ def test_full_ellipse_ransac_processing():
     assert approx(np.max(y_list), abs=1) == yc + b
     assert approx(np.min(x_list), abs=1) == xc - a
     assert approx(np.min(y_list), abs=1) == yc - b
+
+
+@pytest.mark.parametrize("ransac", [True, False])
+@pytest.mark.parametrize("mask", [True, False])
+def test_determine_ellipse(ransac, mask):
+    if mask:
+        mask = np.zeros((100, 100), dtype=bool)
+        mask[40:50, :] = True
+    else:
+        mask = None
+    t = np.ones((100, 100))
+    x, y = np.ogrid[-45:55, -50:50]
+    t[x ** 2 + (y * 1.15) ** 2 < 40 ** 2] = 100
+    t[x ** 2 + (y * 1.15) ** 2 < 30 ** 2] = 1
+    t = t + np.random.random((100, 100))
+    center, affine = ret.determine_ellipse(t,
+                                           mask=mask,
+                                           use_ransac=ransac)
+    np.testing.assert_array_almost_equal(affine,
+                                         [[1.15, 0, 0],
+                                          [0, 1, 0],
+                                          [0, 0, 1]],
+                                         2)
+    np.testing.assert_array_almost_equal(center, [45, 50], 0)

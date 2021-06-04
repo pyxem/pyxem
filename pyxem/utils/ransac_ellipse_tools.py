@@ -605,7 +605,7 @@ def get_max_positions(signal,
 
     if mask is not None:
         flattened_mask = mask.flatten()
-        indexes = indexes[flattened_mask is False]
+        indexes = indexes[~flattened_mask]
     # take top 5000 points make sure exclude zero beam
 
     cords = np.array([np.floor_divide(indexes[-num_points:], i_shape[1]),
@@ -616,6 +616,7 @@ def get_max_positions(signal,
 def determine_ellipse(signal,
                       mask=None,
                       num_points=1000,
+                      use_ransac=True,
                       guess_starting_params=True,
                       **kwargs,
                       ):
@@ -650,20 +651,28 @@ def determine_ellipse(signal,
                             num_points=num_points)
     import matplotlib.pyplot as plt
     plt.scatter(pos[:,0], pos[:,1])
-    if guess_starting_params:
-        el, _ = get_ellipse_model_ransac_single_frame(pos,
-                                              xf=np.mean(pos[:, 0]),
-                                              yf=np.mean(pos[:, 1]),
-                                              rf_lim=np.shape(signal.data)[0]/5,
-                                              semi_len_min=np.std(pos[:, 1]),
-                                              semi_len_max=np.std(pos[:, 1])*2,
-                                              semi_len_ratio_lim=1.2,
-                                              min_samples=6,
-                                              residual_threshold=20,
-                                              max_trails=1000)
+    if use_ransac:
+        if guess_starting_params:
+            el, _ = get_ellipse_model_ransac_single_frame(pos,
+                                                  xf=np.mean(pos[:, 0]),
+                                                  yf=np.mean(pos[:, 1]),
+                                                  rf_lim=np.shape(signal.data)[0]/5,
+                                                  semi_len_min=np.std(pos[:, 1]),
+                                                  semi_len_max=np.std(pos[:, 1])*2,
+                                                  semi_len_ratio_lim=1.2,
+                                                  min_samples=6,
+                                                  residual_threshold=20,
+                                                  max_trails=1000)
+        else:
+            el, _ = get_ellipse_model_ransac_single_frame(pos,
+                                                        **kwargs)
     else:
-        el, _ = get_ellipse_model_ransac_single_frame(pos,
-                                                     **kwargs)
+        e = EllipseModel()
+        converge = e.estimate(data=pos)
+        if not converge:
+            print("No ellipse Detected")
+        else:
+            el = e
     if el is not None:
         affine = ellipse_to_affine(el.params[3],el.params[2], el.params[4])
         center = (el.params[0],el.params[1])
@@ -672,7 +681,15 @@ def determine_ellipse(signal,
         print("Ransac Ellipse detection did not converge")
         return None
 
+
 def ellipse_to_affine(major, minor, rot):
+    if major < minor:
+        print("major<minor")
+        temp = major
+        major = minor
+        minor = temp
+        rot=rot+(np.pi/2)
+
     Q = [[np.cos(rot), -np.sin(rot), 0],
          [np.sin(rot), np.cos(rot), 0],
          [0, 0, 1]]
