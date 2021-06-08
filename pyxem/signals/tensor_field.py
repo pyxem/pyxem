@@ -40,7 +40,7 @@ def _polar_decomposition(image, side):
 
     Returns
     -------
-    U, R : np.array()
+    R, U : np.array()
         Stretch and rotation matrices obtained by polar decomposition.
 
     """
