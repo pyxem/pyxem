@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+"""Detectors defined fro pyFAI integration"""
 
 from .generic_flat_detector import GenericFlatDetector
 from .medipix_256x256 import Medipix256x256Detector
