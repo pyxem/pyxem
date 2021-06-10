@@ -21,7 +21,7 @@
 from hyperspy.signals import Signal2D
 from hyperspy._signals.lazy import LazySignal
 
-from pyxem.utils.correlation_utils import _correlation, _power, _pearson_correlation
+from pyxem.utils.correlation_utils import cross_correlate, _power, _pearson_correlation, autocorrelate
 
 
 class PolarDiffraction2D(Signal2D):
@@ -39,6 +39,59 @@ class PolarDiffraction2D(Signal2D):
             Passed to the __init__ of Signal2D
         """
         super().__init__(*args, **kwargs)
+
+    def cross_correlate(self,
+                        kernel,
+                        mask1=None,
+                        kernel_mask=None,
+                        axes=(-1, -2),
+                        pad_axes=(-1, -2),
+                        inplace=False,
+                        **kwargs):
+        r"""Returns cross correlation.
+        Parameters
+        ----------
+        mask: Numpy array or Signal2D
+            A bool mask of values to ignore of shape equal to the signal shape.  If the mask
+                    is a BaseSignal than it is iterated with the polar signal
+                normalize: bool
+                    Normalize the radial correlation by the average value at some radius.
+                kwargs: dict
+                    Any additional options for the hyperspy.BaseSignal.map() function
+                inplace: bool
+                    From hyperspy.signal.map(). inplace=True means the signal is
+                    overwritten.
+
+                Returns
+                -------
+                correlation: Signal2D
+                    The radial correlation for the signal2D
+
+                Examples
+                --------
+                Basic example, no mask applied and normalization applied.
+                >polar.get_angular_correlation()
+                Angular correlation with a static matst for
+
+                """
+        correlation = self.map(cross_correlate,
+                               z2=kernel,
+                               axs=axes,
+                               mask1=mask1,
+                               mask2=kernel_mask,
+                               pad_axis=pad_axes,
+                               inplace=inplace,
+                               **kwargs
+        )
+        if inplace:
+            self.set_signal_type("correlation")
+            correlation_axis = self.axes_manager.signal_axes[0]
+        else:
+            correlation.set_signal_type("correlation")
+            correlation_axis = correlation.axes_manager.signal_axes[0]
+        correlation_axis.name = "Correlation, $/phi$"
+        return correlation
+
 
     def get_angular_correlation(
         self, mask=None, normalize=True, inplace=False, **kwargs
@@ -75,10 +128,9 @@ class PolarDiffraction2D(Signal2D):
 
         """
         correlation = self.map(
-            _correlation,
-            axis=1,
+            autocorrelate,
+            axs=0,
             mask=mask,
-            normalize=normalize,
             inplace=inplace,
             **kwargs
         )

@@ -18,8 +18,9 @@
 
 import pytest
 import numpy as np
+import matplotlib.pyplot as plt
 
-from pyxem.utils.correlation_utils import _correlation
+from pyxem.utils.correlation_utils import _correlation, cross_correlate, autocorrelate
 
 
 class TestCorrelations:
@@ -38,6 +39,7 @@ class TestCorrelations:
         ones = np.ones((10, 20))
         ones[0:20:2, :] = 100
         return ones
+
 
     def test_correlation_ones(self, ones_array):
         c = _correlation(ones_array)
@@ -79,8 +81,98 @@ class TestCorrelations:
         m = np.zeros((10, 20))
         m[2:4, :] = 1
         c = _correlation(ones_hundred, axis=0, normalize=True, wrap=False)
-        print(c)
         result = np.zeros((10, 20))
         result[0::2, :] = 2.26087665
         result[1::2, :] = -0.93478899
         np.testing.assert_array_almost_equal(c, result)
+
+    def test_auto_correlation(self, ones_hundred):
+        auto = autocorrelate(ones_hundred, axs=0)
+        ans = np.ones((10, 20))
+        ans[0::2] = -1
+        np.testing.assert_array_almost_equal(auto, ans)
+
+    def test_auto_correlation_mask(self, ones_hundred):
+        mask = np.ones((10, 20), dtype=bool)
+        mask[0:3, :] = 0
+        auto = autocorrelate(ones_hundred,mask=mask, axs=0)
+        ans = np.ones((10, 20))
+        ans[0::2] = -1
+        np.testing.assert_array_almost_equal(auto, ans)
+
+    def test_auto_correlation_padded(self, ones_hundred):
+        mask = np.ones((10, 20), dtype=bool)
+        mask[0:3, :] = 0
+        auto = autocorrelate(ones_hundred,
+                             mask=mask,
+                             axs=0,
+                             pad_axis=0)
+        ans = np.zeros((19, 20))
+        ans[6:14:2] = -1
+        ans[5:15:2] = 1
+        np.testing.assert_array_almost_equal(auto, ans)
+
+    def test_cross_correlation(self, ones_hundred):
+        c = cross_correlate(z1=ones_hundred,
+                            z2=ones_hundred,
+                            axs=0,
+                            pad_axis=None)
+        ans = np.ones((10, 20))
+        ans[0::2] = -1
+        np.testing.assert_array_almost_equal(c, ans)
+
+    def test_cross_correlation_mask(self, ones_hundred):
+        mask = np.ones((10, 20), dtype=bool)
+        mask[0:3, :] = 0
+        auto = cross_correlate(ones_hundred,
+                               ones_hundred,
+                               mask1=mask,
+                               mask2=mask,
+                               axs=0)
+        ans = np.ones((10, 20))
+        ans[0::2] = -1
+        np.testing.assert_array_almost_equal(auto, ans)
+
+    def test_correlation_padded(self, ones_hundred):
+        mask = np.ones((10, 20), dtype=bool)
+        mask[0:3, :] = 0
+        auto = cross_correlate(ones_hundred,
+                               ones_hundred,
+                               mask1=mask,
+                               mask2=mask,
+                               axs=0,
+                               pad_axis=0)
+        ans = np.zeros((19, 20))
+        ans[6:14:2] = -1
+        ans[5:15:2] = 1
+        np.testing.assert_array_almost_equal(auto, ans)
+
+    def test_correlation_padded_same(self, ones_hundred):
+        auto = cross_correlate(ones_hundred,
+                               ones_hundred,
+                               axs=0,
+                               mode="same",
+                               pad_axis=0)
+        ans = np.zeros((10, 20))
+        ans[::2] = -1
+        ans[1::2] = 1
+        np.testing.assert_array_almost_equal(auto, ans)
+
+    def test_correlation_axes_none(self, ones_hundred):
+        auto = cross_correlate(ones_hundred,
+                               ones_hundred,
+                               axs=0,
+                               mode="same",
+                               pad_axis=0)
+        ans = np.zeros((10, 20))
+        ans[::2] = -1
+        ans[1::2] = 1
+        np.testing.assert_array_almost_equal(auto, ans)
+
+    def test_correlation_axes_fail(self, ones_hundred):
+        with pytest.raises(ValueError):
+            auto = cross_correlate(ones_hundred,
+                                   ones_hundred,
+                                   axs=0,
+                                   mode="asd",
+                                   pad_axis=0)

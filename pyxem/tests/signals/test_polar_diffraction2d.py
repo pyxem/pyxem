@@ -143,6 +143,14 @@ class TestCorrelations:
         assert ac is None
         assert isinstance(flat_pattern, Power2D)
 
+    def test_cross_cor(self,flat_pattern):
+        ac = flat_pattern.cross_correlate(kernel=flat_pattern, inplace=False)
+        assert isinstance(ac, Correlation2D)
+        ac = flat_pattern.cross_correlate(kernel=flat_pattern, inplace=True)
+        assert ac is None
+        assert isinstance(flat_pattern, Correlation2D)
+
+
 class TestPearsonCorrelation:
     @pytest.fixture
     def flat_pattern(self):
