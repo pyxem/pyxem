@@ -1039,6 +1039,37 @@ def test_determine_ellipse(ransac, mask):
                                          2)
     np.testing.assert_array_almost_equal(center, [45, 50], 0)
 
+
+def test_determine_ellipse2():
+    t = np.ones((100, 100))
+    x, y = np.ogrid[-45:55, -50:50]
+    t[x ** 2 + (y * 1.15) ** 2 < 40 ** 2] = 100
+    t[x ** 2 + (y * 1.15) ** 2 < 30 ** 2] = 1
+    t = t + np.random.random((100, 100))
+    center, affine = ret.determine_ellipse(t,
+                                           guess_starting_params=False,
+                                           xf=45,
+                                           yf=50,
+                                           rf_lim=20,
+                                           semi_len_min=20,
+                                           semi_len_max=45,
+                                           semi_len_ratio_lim=1.2,
+                                           min_samples=6,
+                                           max_trails=1000)
+    np.testing.assert_array_almost_equal(affine,
+                                         [[1.15, 0, 0],
+                                          [0, 1, 0],
+                                          [0, 0, 1]],
+                                         2)
+    np.testing.assert_array_almost_equal(center, [45, 50], 0)
+
+def test_determine_ellipse_fail():
+    t = np.ones((100, 100))
+    w = ret.determine_ellipse(t, guess_starting_params=True)
+    assert w is None
+    w = ret.determine_ellipse(t, use_ransac=False)
+    assert w is None
+
 def test_get_max_pos():
     t = np.ones((100, 100))
     x, y = np.ogrid[-45:55, -50:50]
