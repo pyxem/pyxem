@@ -1063,12 +1063,12 @@ def test_determine_ellipse2():
                                          2)
     np.testing.assert_array_almost_equal(center, [45, 50], 0)
 
+
 def test_determine_ellipse_fail():
     t = np.ones((100, 100))
     w = ret.determine_ellipse(t, guess_starting_params=True)
     assert w is None
-    w = ret.determine_ellipse(t, use_ransac=False)
-    assert w is None
+
 
 def test_get_max_pos():
     t = np.ones((100, 100))
