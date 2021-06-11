@@ -49,6 +49,7 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Development Status :: 4 - Beta",
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
@@ -71,7 +72,7 @@ setup(
         "numba",
         "orix >= 0.3",
     ],
-    python_requires=">=3.0, <3.9",  # some dependencies do not currently support 3.9 (Jan 2020)
+    python_requires=">=3.7",
     package_data={
         "": ["LICENSE", "readme.rst"],
         "pyxem": ["*.py", "hyperspy_extension.yaml"],
