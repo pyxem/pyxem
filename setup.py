@@ -63,7 +63,7 @@ setup(
         "scikit-image >= 0.17.0",
         "matplotlib >= 3.1.1",  # 3.1.0 failed
         "scikit-learn >= 0.19",  # reason unknown
-        "hyperspy == 1.6.2",  # significant improvements
+        "hyperspy >= 1.6.2",
         "diffsims >= 0.4.0,<0.5",
         "lmfit >= 0.9.12",
         "pyfai",
