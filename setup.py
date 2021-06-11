@@ -49,6 +49,7 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Development Status :: 4 - Beta",
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
@@ -63,7 +64,7 @@ setup(
         "scikit-image >= 0.17.0",
         "matplotlib >= 3.1.1",  # 3.1.0 failed
         "scikit-learn >= 0.19",  # reason unknown
-        "hyperspy == 1.6.2",  # significant improvements
+        "hyperspy >= 1.6.2",
         "diffsims >= 0.4.0,<0.5",
         "lmfit >= 0.9.12",
         "pyfai",
@@ -71,7 +72,7 @@ setup(
         "numba",
         "orix >= 0.3",
     ],
-    python_requires=">=3.0, <3.9",  # some dependencies do not currently support 3.9 (Jan 2020)
+    python_requires=">=3.7",
     package_data={
         "": ["LICENSE", "readme.rst"],
         "pyxem": ["*.py", "hyperspy_extension.yaml"],
