@@ -54,6 +54,8 @@ def autocorrelate(z,
             Axes along which to compute the cross-correlation.
         pad_axis : tuple of ints, optional
             Axes along which pad the correlation (won't perform circular correlation)
+        overlap_ratio:
+            Values which are calculated from overlaps below this ratio are set to zero.
         Returns
         -------
         out : ndarray
@@ -79,6 +81,8 @@ def autocorrelate(z,
                                    axis=axs,
                                    pad_axis=pad_axis,
                                    overlap_ratio=overlap_ratio)
+
+
 def cross_correlate(z1,
                     z2,
                     mask1=None,
@@ -96,6 +100,10 @@ def cross_correlate(z1,
             The stationary array for the correlation
         z2 : ndarray
             The moving array for the correlation
+        mask1: ndarray or None
+            A boolean array of the same size as z1.  Values to be ignored
+        mask2: ndarray or None
+            A boolean array of the same size as z2. Values to be ignored
         mode : {'full', 'same'}, optional
             'full':
                 This returns the convolution at each point of overlap. At
@@ -104,12 +112,12 @@ def cross_correlate(z1,
             'same':
                 The output is the same size as `arr1`, centered with respect
                 to the `‘full’` output. Boundary effects are less prominent.
-        axis : tuple of ints, optional
+        axs : tuple of ints, optional
             Axes along which to compute the cross-correlation.
         pad_axis : tuple of ints, optional
             Axes along which pad the correlation (won't perform circular correlation)
-        complex : bool
-            If true then the complex value is returned otherwise only the real part is returned.
+        overlap_ratio:
+            Values which are calculated from overlaps below this ratio are set to zero.
         Returns
         -------
         out : ndarray
@@ -147,7 +155,7 @@ def _cross_correlate_masked(z1,
                             mask1,
                             mask2,
                             mode="full",
-                            axis=(0,1),
+                            axis=(0, 1),
                             pad_axis=(-1),
                             overlap_ratio=0.3):
     """
@@ -183,8 +191,6 @@ def _cross_correlate_masked(z1,
             maximum translation, while a higher `overlap_ratio` leads to greater
             robustness against spurious matches due to small overlap between
             masked images.
-        complex : bool
-            If true then the complex value is returned otherwise only the real part is returned.
         Returns
         -------
         out : ndarray
@@ -435,7 +441,6 @@ def _correlation(z, axis=0, mask=None, wrap=True, normalize=True):
         a = np.divide(np.subtract(a, row_mean), row_mean)
 
     if wrap is False:
-        print(slicer)
         a = a[slicer]
     return a
 

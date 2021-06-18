@@ -102,7 +102,6 @@ class PolarDiffraction2D(Signal2D):
         correlation_axis.name = "Correlation, $/phi$"
         return correlation
 
-
     def get_angular_correlation(
         self, mask=None, inplace=False, **kwargs
     ):
@@ -120,7 +119,7 @@ class PolarDiffraction2D(Signal2D):
         kwargs: dict
             Any additional options for the hyperspy.BaseSignal.map() function
         inplace: bool
-            From hyperspy.signal.map(). inplace=True means the signal is
+            From `hyperspy.signal.map()`. inplace=True means the signal is
             overwritten.
 
         Returns
@@ -130,7 +129,7 @@ class PolarDiffraction2D(Signal2D):
         """
         correlation = self.map(
             autocorrelate,
-            axs=0,
+            axs=1,
             mask=mask,
             inplace=inplace,
             **kwargs
