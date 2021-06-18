@@ -665,10 +665,7 @@ def determine_ellipse(signal,
     else:
         e = EllipseModel()
         converge = e.estimate(data=pos)
-        if not converge:
-            print("No ellipse Detected")
-        else:
-            el = e
+        el = e
     if el is not None:
         affine = ellipse_to_affine(el.params[3],el.params[2], el.params[4])
         center = (el.params[0],el.params[1])
