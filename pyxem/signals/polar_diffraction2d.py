@@ -42,42 +42,52 @@ class PolarDiffraction2D(Signal2D):
 
     def cross_correlate(self,
                         kernel,
-                        mask1=None,
+                        mask=None,
                         kernel_mask=None,
                         axes=(-1, -2),
                         pad_axes=(-1, -2),
                         inplace=False,
                         **kwargs):
-        r"""Returns cross correlation.
+        r"""Returns the normalized cross correlation (NCC) between some signal and a
+         kernel of size equal or less than the signal. N-dimensional correlations are
+         possible using the axes parameter.
+
+        The NNC is defined as:
+
+        $ C(\phi)= \frac{ <I_1(\theta)*I_2(\theta+\phi)>_\theta-<I_1(\theta)>_\theta*<I_2(\theta)>_\theta}
+        {<I_1(\theta)*(I_2(\theta>_\theta^2}$
+
+        The application of a mask is follows the references [1], [2]
+
         Parameters
         ----------
+        kernel: Numpy array or Signal2D
+            The kernel to cross correlate with the signal
         mask: Numpy array or Signal2D
-            A bool mask of values to ignore of shape equal to the signal shape.  If the mask
-                    is a BaseSignal than it is iterated with the polar signal
-                normalize: bool
-                    Normalize the radial correlation by the average value at some radius.
-                kwargs: dict
-                    Any additional options for the hyperspy.BaseSignal.map() function
-                inplace: bool
-                    From hyperspy.signal.map(). inplace=True means the signal is
-                    overwritten.
+            A bool mask of values to ignore of shape equal to the signal shape.
+            If the mask is a BaseSignal than it is iterated with the polar signal
+        kernel_mask: Numpy array or Signal2D
+            A bool mask of values to ignore of shape equal to the kernel shape.
+            If the mask is a BaseSignal than it is iterated with the signal
+        axes: tuple of ints, optional
+            Axes along which to compute the cross-correlation.
+        pad_axes: tuple of ints.
+            Axes along which pad the correlation (so it won't perform circular correlation)
+        kwargs: dict
+            Any additional options for the hyperspy.BaseSignal.map() function
+        inplace: bool
+            From hyperspy.signal.map(). inplace=True means the signal is
+            overwritten.
 
-                Returns
-                -------
-                correlation: Signal2D
-                    The radial correlation for the signal2D
-
-                Examples
-                --------
-                Basic example, no mask applied and normalization applied.
-                >polar.get_angular_correlation()
-                Angular correlation with a static matst for
-
-                """
+        Returns
+        -------
+        correlation: Signal2D
+            The radial correlation for the signal2D
+        """
         correlation = self.map(cross_correlate,
                                z2=kernel,
                                axs=axes,
-                               mask1=mask1,
+                               mask1=mask,
                                mask2=kernel_mask,
                                pad_axis=pad_axes,
                                inplace=inplace,
@@ -94,7 +104,7 @@ class PolarDiffraction2D(Signal2D):
 
 
     def get_angular_correlation(
-        self, mask=None, normalize=True, inplace=False, **kwargs
+        self, mask=None, inplace=False, **kwargs
     ):
         r"""Returns the angular auto-correlation function in the form of a Signal2D class.
 
@@ -107,8 +117,6 @@ class PolarDiffraction2D(Signal2D):
         mask: Numpy array or Signal2D
             A bool mask of values to ignore of shape equal to the signal shape.  If the mask
             is a BaseSignal than it is iterated with the polar signal
-        normalize: bool
-            Normalize the radial correlation by the average value at some radius.
         kwargs: dict
             Any additional options for the hyperspy.BaseSignal.map() function
         inplace: bool
@@ -119,13 +127,6 @@ class PolarDiffraction2D(Signal2D):
         -------
         correlation: Signal2D
             The radial correlation for the signal2D
-
-        Examples
-        --------
-        Basic example, no mask applied and normalization applied.
-        >polar.get_angular_correlation()
-        Angular correlation with a static matst for
-
         """
         correlation = self.map(
             autocorrelate,

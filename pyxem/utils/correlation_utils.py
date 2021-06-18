@@ -27,6 +27,7 @@ def _centered(arr, newshape, axes):
 
     return arr[tuple(slices)]
 
+
 def autocorrelate(z,
                   mask=None,
                   mode="full",
@@ -37,10 +38,10 @@ def autocorrelate(z,
         Masked normalized cross-correlation between two arrays.
         Parameters
         ----------
-        z1 : ndarray
-            The stationary array for the correlation
-        z2 : ndarray
-            The moving array for the correaltion
+        z : ndarray
+            The array to be autocorrelated
+        mask : ndarray
+            The mask to be applied to the correlation.
         mode : {'full', 'same'}, optional
             'full':
                 This returns the convolution at each point of overlap. At
@@ -49,12 +50,10 @@ def autocorrelate(z,
             'same':
                 The output is the same size as `arr1`, centered with respect
                 to the `‘full’` output. Boundary effects are less prominent.
-        axis : tuple of ints, optional
+        axs : tuple of ints, optional
             Axes along which to compute the cross-correlation.
         pad_axis : tuple of ints, optional
             Axes along which pad the correlation (won't perform circular correlation)
-        complex : bool
-            If true then the complex value is returned otherwise only the real part is returned.
         Returns
         -------
         out : ndarray
@@ -90,12 +89,13 @@ def cross_correlate(z1,
                     overlap_ratio=0.3):
     """
         Masked normalized cross-correlation between two arrays.
+
         Parameters
         ----------
         z1 : ndarray
             The stationary array for the correlation
         z2 : ndarray
-            The moving array for the correaltion
+            The moving array for the correlation
         mode : {'full', 'same'}, optional
             'full':
                 This returns the convolution at each point of overlap. At
@@ -363,6 +363,7 @@ def _autocorrelation_masked(z,
                                    axis=axis,
                                    pad_axis=pad_axis,
                                    overlap_ratio=overlap_ratio)
+
 
 def _correlation(z, axis=0, mask=None, wrap=True, normalize=True):
     r"""A generic function for applying a correlation with a mask.
