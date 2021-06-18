@@ -577,6 +577,7 @@ def _get_ellipse_markers(
         marker_list.extend(marker_out_list)
     return marker_list
 
+
 def get_max_positions(signal,
                       mask=None,
                       num_points=5000,
@@ -591,9 +592,6 @@ def get_max_positions(signal,
         A mask to be applied to the data for values to ignore
     num_points: int
         The number of points to be
-    :param num_points:
-    :param radius:
-    :return:
     """
     if isinstance(signal, BaseSignal):
         data = signal.data
@@ -601,13 +599,11 @@ def get_max_positions(signal,
         data = signal
     i_shape = np.shape(data)
     flattened_array = data.flatten()
-    indexes = np.argsort(flattened_array)
-
     if mask is not None:
         flattened_mask = mask.flatten()
-        indexes = indexes[~flattened_mask]
+        flattened_array[flattened_mask]=0
     # take top 5000 points make sure exclude zero beam
-
+    indexes = np.argsort(flattened_array)
     cords = np.array([np.floor_divide(indexes[-num_points:], i_shape[1]),
              np.remainder(indexes[-num_points:], i_shape[1])]) # [x axis (row),y axis (col)]
     return cords.T
@@ -650,7 +646,7 @@ def determine_ellipse(signal,
                             mask=mask,
                             num_points=num_points)
     import matplotlib.pyplot as plt
-    plt.scatter(pos[:,0], pos[:,1])
+    plt.scatter(pos[:, 0], pos[:, 1])
     if use_ransac:
         if guess_starting_params:
             el, _ = get_ellipse_model_ransac_single_frame(pos,
