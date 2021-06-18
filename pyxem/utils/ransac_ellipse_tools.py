@@ -667,8 +667,8 @@ def determine_ellipse(signal,
         converge = e.estimate(data=pos)
         el = e
     if el is not None:
-        affine = ellipse_to_affine(el.params[3],el.params[2], el.params[4])
-        center = (el.params[0],el.params[1])
+        affine = ellipse_to_affine(el.params[3], el.params[2], el.params[4])
+        center = (el.params[0], el.params[1])
         return center, affine
     else:
         print("Ransac Ellipse detection did not converge")
@@ -677,11 +677,10 @@ def determine_ellipse(signal,
 
 def ellipse_to_affine(major, minor, rot):
     if major < minor:
-        print("major<minor")
         temp = major
         major = minor
         minor = temp
-        rot=rot+(np.pi/2)
+        rot = rot+(np.pi/2)
 
     Q = [[np.cos(rot), -np.sin(rot), 0],
          [np.sin(rot), np.cos(rot), 0],
