@@ -35,8 +35,13 @@ from pyxem.utils.indexation_utils import OrientationResult
 
 
 def test_TemplateMatchingResults_to_crystal_map():
+    # multiphase
     t = TemplateMatchingResults(np.empty((10, 10, 10, 5)))
-    return t.to_crystal_map()
+    t.to_crystal_map()
+    # singlephase
+    t = TemplateMatchingResults(np.ones((10, 10, 10, 5)))
+    t.to_crystal_map()
+
 
 
 def test_TemplateMatchingResults_plot_best_results_on_signal(
