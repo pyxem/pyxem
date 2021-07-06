@@ -180,8 +180,8 @@ class GenericMatchingResults:
         )
 
         """ add various properties """
-        phase_reliabilty = self.data.map(_get_phase_reliability,inplace=False)
-        second_phase = self.data.map(_get_second_best_phase,inplace=False)
+        phase_reliabilty = self.data.map(_get_phase_reliability,inplace=False).data.flatten()
+        second_phase = self.data.map(_get_second_best_phase,inplace=False).data.flatten()
         properties = {"score": score,
                       "phase_reliabilty" : phase_reliabilty,
                       "second_phase" : second_phase}
