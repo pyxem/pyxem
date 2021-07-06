@@ -4,14 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## 2021-04-14 - version 0.13.2
 ### Added
-- Getting and plot integrated intensity now support signals containing nan (#722)
-- Add Symmetry1D signal class and symmetry analysis methods (#724)
-- BeamShift class, which includes the `make_linear_plane` method for better correction of the beam shift when scanning large regions in STEM (#746)
-
-### Removed
-- lazy_* virtual imaging has been removed, use get_integrated_intensity (#722)
+ - Code now support python 3.9 
+ - Code now runs on hyperspy 1.6.2
+### Fixed 
+ - np.bool replaced by bool
+ - np.object replaced by object
 
 ## 2021-03-21 - version 0.13.1
 ### Fixed
@@ -26,9 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - lazy_virtual_bright_field, use get_integrated_intensity instead
 - lazy_virtual_dark_field, use get_integrated_intensity instead
 
+
 ## 2021-01-13 - version 0.13.0
 ### Added
-- Faster rotation indexing, using in plane speeds up, added as AcceleratedIndexationGenerator (#673)
+- Faster rotation indexing, using in place speeds up, added as AcceleratedIndexationGenerator (#673)
 - get_direct_beam_position now supports lazy proccessing (#648)
 - center_direct_beam now supports lazy processing (#658)
 - Several functions for processing large datasets using dask (#648, #658)

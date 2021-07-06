@@ -16,21 +16,30 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
+from tempfile import TemporaryDirectory
 import pytest
-import numpy as np
+import numpy
+import matplotlib.pyplot as plt
+import hyperspy.api as hs
+import pyxem as pxm
 
-from hyperspy.signals import Signal1D
 
-from pyxem.signals.symmetry1d import Symmetry1D
+@pytest.fixture(autouse=True)
+def doctest_setup_teardown(request):
+    plt.ioff()
+    tmp_dir = TemporaryDirectory()
+    hs.preferences.General.show_progressbar = False
+    org_dir = os.getcwd()
+    os.chdir(tmp_dir.name)
+    yield
+    os.chdir(org_dir)
+    tmp_dir.cleanup()
+    plt.close("all")
 
-class TestSymmetry:
-    @pytest.fixture
-    def flat_pattern(self):
-        pd = Symmetry1D(data=np.ones(shape=(2, 2, 360)))
-        pd.axes_manager[2].scale = np.pi/180
-        return pd
 
-    def test_get_symmetry_coefficient(self, flat_pattern):
-        sn = flat_pattern.get_symmetry_coefficient()
-        assert isinstance(sn, Symmetry1D)
-        assert (sn.data.shape[-1] == 11)
+@pytest.fixture(autouse=True)
+def add_np_am(doctest_namespace):
+    doctest_namespace["np"] = numpy
+    doctest_namespace["hs"] = hs
+    doctest_namespace["pxm"] = pxm

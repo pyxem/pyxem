@@ -90,7 +90,7 @@ def _get_elliptical_ring(xx, yy, x, y, semi_len0, semi_len1, rotation, lw_r=1):
     Examples
     --------
     >>> from hyperspy.signals import Signal2D
-    >>> from pyxem.dummy_data importmake_diffraction_test_data as mdtd
+    >>> from pyxem.dummy_data import make_diffraction_test_data as mdtd
     >>> s = Signal2D(np.zeros((110, 130)))
     >>> s.axes_manager[0].offset, s.axes_manager[1].offset = -50, -80
     >>> xx, yy = np.meshgrid(

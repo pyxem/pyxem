@@ -573,11 +573,6 @@ class TestGetChunking:
         chunks = dt._get_chunking(s, chunk_shape=16)
         assert chunks == ((16, 16), (16, 16), (256,), (256,))
 
-    def test_chunk_shape_list(self):
-        s = LazyDiffraction2D(da.zeros((32, 32, 256, 256), dtype=np.uint16))
-        chunks = dt._get_chunking(s, chunk_shape=((20, 12), (15, 17)))
-        assert chunks == ((20, 12), (15, 17), (256,), (256,))
-
     def test_chunk_bytes(self):
         s = LazyDiffraction2D(da.zeros((32, 32, 256, 256), dtype=np.uint16))
         chunks = dt._get_chunking(s, chunk_bytes="15MiB")
