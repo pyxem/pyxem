@@ -161,7 +161,7 @@ class TestPearsonCorrelation:
         pd.axes_manager.signal_axes[1].name = "k"
         return pd
 
-    @pytest.mark.parametrize("krange", [None, (0, 4),(1., 5.)])
+    @pytest.mark.parametrize("krange", [None, (0, 4), (1., 5.)])
     def test_pcorrelation_signal(self, flat_pattern, krange):
         rho = flat_pattern.get_pearson_correlation(krange=krange)
         assert isinstance(rho, Symmetry1D)

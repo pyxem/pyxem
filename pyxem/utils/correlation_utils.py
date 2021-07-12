@@ -208,16 +208,16 @@ def _cross_correlate_masked(z1,
                Pattern Recognition, pp. 2918-2925 (2010).
                :DOI:`10.1109/CVPR.2010.5540032`
         """
-    if isinstance(axis,int):
+    if isinstance(axis, int):
         axis = (axis,)
     if isinstance(pad_axis, int):
         pad_axis = (pad_axis,)
     if mode not in {'full', 'same'}:
         raise ValueError("Correlation mode '{}' is not valid.".format(mode))
     fixed_image = np.array(z1, dtype=float)
-    fixed_mask = np.array(mask1, dtype=bool)
+    fixed_mask = ~np.array(mask1, dtype=bool)
     moving_image = np.array(z2, dtype=float)
-    moving_mask = np.array(mask2, dtype=bool)
+    moving_mask = ~np.array(mask2, dtype=bool)
     eps = np.finfo(float).eps
 
     # Array dimensions along non-transformation axes should be equal.
