@@ -25,13 +25,14 @@ on some function then you can use the API reference or search the documentation.
 The Jupyter Notebooks should give you good workflows for analyzing your dataset
 
 User Guide and Workflows:
--------
+--------------------------
 .. nbgallery::
     :caption: User guide
     :glob:
     :maxdepth: 1
 
-    pyxem-demos/0*
+    pyxem-demos/0[0-3]
+    pyxem-demos/0[5-9]
 
 
 .. toctree::

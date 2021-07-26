@@ -155,7 +155,7 @@ nbsphinx_prolog = (
 """
 )
 # https://nbsphinx.readthedocs.io/en/0.8.0/never-execute.html
-nbsphinx_execute = "never"  # auto, always, never
+nbsphinx_execute = "always"  # auto, always, never
 
 # sphinxcontrib-bibtex configuration
 bibtex_bibfiles = ["bibliography.bib"]
