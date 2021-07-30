@@ -9,14 +9,11 @@ examples and continued effort to improve these examples is on going.
 
 .. currentmodule:: pyxem
 
-The list of top modules (and the load function):
+The list of top modules:
 
 .. autosummary::
-    components
-    components
     detectors
     generators
-    libraries
     signals
     utils
 
