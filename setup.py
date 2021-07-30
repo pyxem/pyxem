@@ -25,15 +25,7 @@ exec(open("pyxem/release_info.py").read())  # grab version info
 # tests. From setuptools:
 # https://setuptools.readthedocs.io/en/latest/setuptools.html#declaring-extras-optional-features-with-their-own-dependencies
 extra_feature_requirements = {
-    "tests": ["pytest>=5.0", "pytest-cov>=2.8.1", "coveralls>=1.10", "coverage>=5.0"],
-    "build-doc": [
-        "furo",
-        "nbsphinx >= 0.7",
-        "sphinx >= 3.0.2",
-        "sphinx-copybutton >= 0.2.5",
-        "sphinx-autodoc-typehints >= 1.10.3",
-        "sphinx-gallery >= 0.6",
-        "sphinxcontrib-bibtex >= 1.0",]
+    "tests": ["pytest>=5.0", "pytest-cov>=2.8.1", "coveralls>=1.10", "coverage>=5.0"]
 }
 
 
@@ -57,6 +49,7 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Development Status :: 4 - Beta",
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
@@ -71,15 +64,15 @@ setup(
         "scikit-image >= 0.17.0",
         "matplotlib >= 3.1.1",  # 3.1.0 failed
         "scikit-learn >= 0.19",  # reason unknown
-        "hyperspy >= 1.6.2",  # earlier versions incompatible with numpy >= 1.17.0 and hyperspy == 1.6.0 has a histogram bug
-        "diffsims >= 0.4.0,<0.5",
+        "hyperspy == 1.6.2",  # significant improvements
+        "diffsims ~= 0.4",
         "lmfit >= 0.9.12",
         "pyfai",
         "ipywidgets",
         "numba",
         "orix >= 0.3",
     ],
-    python_requires=">=3.0, <3.9",  # some dependencies do not currently support 3.9 (Jan 2020)
+    python_requires=">=3.7",
     package_data={
         "": ["LICENSE", "readme.rst"],
         "pyxem": ["*.py", "hyperspy_extension.yaml"],

@@ -169,7 +169,7 @@ class TestProcessChunk:
 
     @pytest.mark.parametrize(
         "dtype",
-        [np.float16, np.float32, np.uint8, np.uint32, np.int8, np.int32, np.bool],
+        [np.float16, np.float32, np.uint8, np.uint32, np.int8, np.int32, bool],
     )
     def test_dtype(self, dtype):
         chunk_input = np.zeros((3, 4, 10, 8), dtype=np.int16)
@@ -300,7 +300,7 @@ class TestProcessDaskArray:
 
     @pytest.mark.parametrize(
         "dtype",
-        [np.float16, np.float32, np.uint8, np.uint32, np.int8, np.int32, np.bool],
+        [np.float16, np.float32, np.uint8, np.uint32, np.int8, np.int32, bool],
     )
     def test_dtype(self, dtype):
         dask_input = da.zeros((4, 6, 8, 10), chunks=(2, 2, 2, 2), dtype=np.uint16)
@@ -348,12 +348,12 @@ class TestProcessDaskArray:
             test_function,
             chunks=(2, 2),
             drop_axis=(2, 3),
-            dtype=np.object,
+            dtype=object,
             new_axis=None,
             output_signal_size=(),
         )
         array_output = dask_output.compute()
-        assert array_output.dtype == np.object
+        assert array_output.dtype == object
         for iy, ix in np.ndindex(array_output.shape):
             assert array_output[iy, ix] == list(range(11))
 
@@ -724,8 +724,8 @@ class TestThresholdArray:
         data = dt._threshold_array(dask_array, threshold_value=1)
         data = data.compute()
         assert data.shape == shape
-        assert data.dtype == np.bool
-        assert (data[slice_array] == np.ones((10, 12), dtype=np.bool)).all()
+        assert data.dtype == bool
+        assert (data[slice_array] == np.ones((10, 12), dtype=bool)).all()
         data[slice_array] = False
         assert (data == np.zeros(shape)).all()
 
@@ -1092,8 +1092,8 @@ class TestPeakPositionRefinementCOM:
         numpy_array = np.zeros(shape)
         numpy_array[:, :, 25, 25] = 1
 
-        peak_array = np.zeros((shape[0], shape[1], 1, 1), dtype=np.object)
-        real_array = np.zeros((shape[:-2]), dtype=np.object)
+        peak_array = np.zeros((shape[0], shape[1], 1, 1), dtype=object)
+        real_array = np.zeros((shape[:-2]), dtype=object)
         for index in np.ndindex(shape[:-2]):
             islice = np.s_[index]
             peak_array[islice][0, 0] = np.asarray([(27, 27)])
@@ -1116,8 +1116,8 @@ class TestPeakPositionRefinementCOM:
         numpy_array = np.zeros((10, 10, 50, 50))
         numpy_array[:, :, 25, 25] = 1
 
-        peak_array = np.zeros((numpy_array.shape[:-2]), dtype=np.object)
-        real_array = np.zeros((numpy_array.shape[:-2]), dtype=np.object)
+        peak_array = np.zeros((numpy_array.shape[:-2]), dtype=object)
+        real_array = np.zeros((numpy_array.shape[:-2]), dtype=object)
         for index in np.ndindex(numpy_array.shape[:-2]):
             islice = np.s_[index]
             peak_array[islice] = np.asarray([(27, 27)])
@@ -1142,7 +1142,7 @@ class TestPeakPositionRefinementCOM:
         chunks = [1] * nav_dims
         chunks.extend([25, 25])
         dask_array = da.random.random(size=shape, chunks=chunks)
-        peak_array = np.zeros((dask_array.shape[:-2]), dtype=np.object)
+        peak_array = np.zeros((dask_array.shape[:-2]), dtype=object)
         for index in np.ndindex(dask_array.shape[:-2]):
             islice = np.s_[index]
             peak_array[islice] = np.asarray([(27, 27)])
@@ -1373,7 +1373,7 @@ class TestIntensityArray:
         numpy_array[:, :, 27, 27] = 1
 
         peak_array = np.zeros(
-            (numpy_array.shape[0], numpy_array.shape[1]), dtype=np.object
+            (numpy_array.shape[0], numpy_array.shape[1]), dtype=object
         )
         for index in np.ndindex(numpy_array.shape[:-2]):
             islice = np.s_[index]
@@ -1393,7 +1393,7 @@ class TestIntensityArray:
         numpy_array[:, :, 27, 27] = 1
 
         peak_array = np.zeros(
-            (numpy_array.shape[0], numpy_array.shape[1]), dtype=np.object
+            (numpy_array.shape[0], numpy_array.shape[1]), dtype=object
         )
         for index in np.ndindex(numpy_array.shape[:-2]):
             islice = np.s_[index]
@@ -1414,7 +1414,7 @@ class TestIntensityArray:
         chunks = [1] * nav_dims
         chunks.extend([25, 25])
         dask_array = da.random.random(size=shape, chunks=chunks)
-        peak_array = np.zeros((dask_array.shape[:-2]), dtype=np.object)
+        peak_array = np.zeros((dask_array.shape[:-2]), dtype=object)
         for index in np.ndindex(dask_array.shape[:-2]):
             islice = np.s_[index]
             peak_array[islice] = np.asarray([(27, 27)])
@@ -1433,7 +1433,7 @@ class TestIntensityArray:
     def test_non_dask_array(self):
         data_array = np.ones((10, 10, 50, 50))
         data_array_dask = da.ones((10, 10, 50, 50), chunks=(2, 2, 25, 25))
-        peak_array = np.empty((10, 10), dtype=np.object)
+        peak_array = np.empty((10, 10), dtype=object)
         peak_array_dask = da.from_array(peak_array, chunks=(2, 2))
         with pytest.raises(ValueError):
             dt._intensity_peaks_image(data_array, peak_array_dask, 5)
@@ -1445,12 +1445,12 @@ class TestIntensityArray:
 
     def test_non_square_datasets(self):
         data_array_dask = da.ones((6, 16, 100, 50), chunks=(2, 2, 25, 25))
-        peak_array_dask = da.empty((6, 16), chunks=(2, 2), dtype=np.object)
+        peak_array_dask = da.empty((6, 16), chunks=(2, 2), dtype=object)
         dt._intensity_peaks_image(data_array_dask, peak_array_dask, 5)
 
     def test_different_chunks(self):
         data_array_dask = da.ones((6, 16, 100, 50), chunks=(6, 4, 50, 25))
-        peak_array_dask = da.empty((6, 16), chunks=(3, 2), dtype=np.object)
+        peak_array_dask = da.empty((6, 16), chunks=(3, 2), dtype=object)
         dt._intensity_peaks_image(data_array_dask, peak_array_dask, 5)
 
 

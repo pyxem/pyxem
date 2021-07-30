@@ -103,7 +103,7 @@ def _get_pixel_vectors(dp, vectors, calibration, center):
     """
 
     def _floor(vectors, calibration, center):
-        if vectors.shape == (1,) and vectors.dtype == np.object:
+        if vectors.shape == (1,) and vectors.dtype == object:
             vectors = vectors[0]
         return np.floor((vectors.astype(np.float64) / calibration) + center).astype(
             np.int
