@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Signal class for two-dimensional diffraction data in Cartesian coordinates."""
+
 
 import numpy as np
 from skimage import filters
@@ -85,6 +85,8 @@ import pyxem.utils.ransac_ellipse_tools as ret
 
 
 class Diffraction2D(Signal2D, CommonDiffraction):
+    """Signal class for two-dimensional diffraction data in Cartesian coordinates."""
+
     _signal_type = "diffraction"
 
     """ Methods that make geometrical changes to a diffraction pattern """

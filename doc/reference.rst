@@ -82,35 +82,24 @@ Signals
 .. currentmodule:: pyxem.signals
 
 .. autosummary::
-    CommonDiffraction
     Correlation2D
-    LazyCorrelation2D
     DPCBaseSignal
     DPCSignal1D
     DPCSignal2D
-    LazyDPCBaseSignal
-    LazyDPCSignal1D
-    LazyDPCSignal2D
     DiffractionVariance1D
     DiffractionVariance2D
     ImageVariance
     DiffractionVectors
     DiffractionVectors2D
     Diffraction1D
-    LazyDiffraction1D
     Diffraction2D
-    LazyDiffraction2D
     ElectronDiffraction1D
-    LazyElectronDiffraction1D
     ElectronDiffraction2D
-    LazyElectronDiffraction2D
     TemplateMatchingResults
     VectorMatchingResults
     PairDistributionFunction1D
     PolarDiffraction2D
-    LazyPolarDiffraction2D
     Power2D
-    LazyPower2D
     ReducedIntensity1D
     LearningSegment
     VDFSegment

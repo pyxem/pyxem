@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Signal class for two-dimensional diffraction data in polar coordinates."""
+
 
 from hyperspy.signals import Signal2D
 from hyperspy._signals.lazy import LazySignal
@@ -26,6 +26,7 @@ from hyperspy.drawing.utils import plot_images
 
 
 class Power2D(Signal2D):
+    """Signal class for the power spectrum of some Correlation"""
     _signal_type = "power"
 
     def __init__(self, *args, **kwargs):

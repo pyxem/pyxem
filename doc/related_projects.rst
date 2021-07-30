@@ -8,7 +8,7 @@ so it is important to see what project is best for your use case.
 
 In the Hyperspy ecosystem
 ___________________________________
-- `HyperSpy <https://hyperspy.org>`_: Python library with tools for multi-dimensional data analysis, which kikuchipy builds upon.
+- `HyperSpy <https://hyperspy.org>`_: Python library with tools for multi-dimensional data analysis, which pyxem builds upon.
 - `kikuchipy <https://kikuchipy.org/en/stable/>`_: Kikuchi py
 - `orix <https://github.com/pyxem/orix>`_: Python library for handling crystal
   orientation mapping data. Detailed example Jupyter Notebooks are available.

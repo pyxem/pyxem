@@ -7,7 +7,7 @@ Welcome to pyxem's documentation!
 =================================
 Pyxem is an open source project working to bring together tools for the analysis of
 data from pixilated electron detectors.  Based on the Hyperspy project, pyxem has an active
-community of users and developerrs who are interested in many different areas including:
+community of users and developers who are interested in many different areas including:
 
 - Orientation Mapping of Crystals
 - Strain Mapping

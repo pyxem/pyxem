@@ -25,7 +25,7 @@ from hyperspy.utils import stack
 
 from pyxem.signals import StrainMap
 
-"""Signal class for Tensor Fields."""
+
 
 
 def _polar_decomposition(image, side):
@@ -65,6 +65,7 @@ def _get_rotation_angle(matrix):
 
 
 class DisplacementGradientMap(Signal2D):
+    """Signal class for Tensor Fields."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
