@@ -45,6 +45,7 @@ extensions = [
     "sphinx_copybutton",
     "sphinx_gallery.load_style",
     "nbsphinx",
+    'sphinx.ext.viewcode',
 ]
 
 # Create links to references within kikuchipy's documentation to these packages.
@@ -156,6 +157,7 @@ nbsphinx_prolog = (
 )
 # https://nbsphinx.readthedocs.io/en/0.8.0/never-execute.html
 nbsphinx_execute = "always"  # auto, always, never
+nbsphinx_allow_errors = True
 
 # sphinxcontrib-bibtex configuration
 bibtex_bibfiles = ["bibliography.bib"]

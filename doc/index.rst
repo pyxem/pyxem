@@ -34,8 +34,14 @@ User Guide and Workflows:
     :glob:
     :maxdepth: 1
 
-    pyxem-demos/0[0-3]
-    pyxem-demos/0[5-9]
+    pyxem-demos/00*
+    pyxem-demos/01*
+    pyxem-demos/02*
+    pyxem-demos/03*
+    pyxem-demos/05*
+    pyxem-demos/07*
+    pyxem-demos/08*
+    pyxem-demos/09*
 
 
 .. toctree::

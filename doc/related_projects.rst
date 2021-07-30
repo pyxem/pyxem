@@ -6,9 +6,9 @@ This is a non-exhaustive list of related, open-source projects.  Each project ha
 so it is important to see what project is best for your use case.
 
 
-** In the hyperspy ecosystem **
-- `HyperSpy <https://hyperspy.org>`_: Python library with tools for
-  multi-dimensional data analysis, which kikuchipy builds upon.
+In the Hyperspy ecosystem
+___________________________________
+- `HyperSpy <https://hyperspy.org>`_: Python library with tools for multi-dimensional data analysis, which kikuchipy builds upon.
 - `kikuchipy <https://kikuchipy.org/en/stable/>`_: Kikuchi py
 - `orix <https://github.com/pyxem/orix>`_: Python library for handling crystal
   orientation mapping data. Detailed example Jupyter Notebooks are available.
@@ -18,15 +18,12 @@ so it is important to see what project is best for your use case.
   but the documentation for pixstem is still a great reference
 
 
-**Not in the Hyperspy ecosystem **
-- `abtem <https://github.com/jacobjma/abTEM>`_: Python library for simulating pixalated STEM images.
-  exports to hyperspy/pyxem for easy integration.
-- `py4dSTEM <https://github.com/py4dstem/py4DSTEM>`_: Python library for
-  4D-STEM microscopy.
+Not in the Hyperspy ecosystem
+____________________________________
+- `abtem <https://github.com/jacobjma/abTEM>`_: Python library for simulating pixalated STEM images,
+  Exports to hyperspy/pyxem for easy integration.
+- `py4dSTEM <https://github.com/py4dstem/py4DSTEM>`_: Python library for 4D-STEM microscopy.
 - `pycroscopy <https://pycroscopy.github.io/pycroscopy/>`_: Python library for
   scientific imaging and materials science
-
 - `libertem <https://libertem.github.io/LiberTEM/>`_: Python library for high-throughput distributed
   processing of large-scale binary data sets using a simplified MapReduce programming model.
-
-

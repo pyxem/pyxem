@@ -25,7 +25,15 @@ exec(open("pyxem/release_info.py").read())  # grab version info
 # tests. From setuptools:
 # https://setuptools.readthedocs.io/en/latest/setuptools.html#declaring-extras-optional-features-with-their-own-dependencies
 extra_feature_requirements = {
-    "tests": ["pytest>=5.0", "pytest-cov>=2.8.1", "coveralls>=1.10", "coverage>=5.0"]
+    "tests": ["pytest>=5.0", "pytest-cov>=2.8.1", "coveralls>=1.10", "coverage>=5.0"],
+    "build-doc": [
+        "furo",
+        "nbsphinx >= 0.7",
+        "sphinx >= 3.0.2",
+        "sphinx-copybutton >= 0.2.5",
+        "sphinx-autodoc-typehints >= 1.10.3",
+        "sphinx-gallery >= 0.6",
+        "sphinxcontrib-bibtex >= 1.0",]
 }
 
 

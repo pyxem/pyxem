@@ -248,7 +248,6 @@ class VectorMatchingResults(BaseSignal):
             'total_error'
             'orientation_reliability'
             'phase_reliability'
-
         """
         crystal_map = self.map(
             crystal_from_vector_matching, inplace=False, *args, **kwargs
