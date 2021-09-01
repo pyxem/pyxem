@@ -24,6 +24,7 @@ from unittest.mock import Mock
 
 try:
     import cupy as cp
+
     CUPY_INSTALLED = True
 except ImportError:
     CUPY_INSTALLED = False

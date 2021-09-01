@@ -29,6 +29,7 @@ from pyxem.utils.cuda_utils import is_cupy_array
 
 try:
     import cupy as cp
+
     CUPY_INSTALLED = True
 except ImportError:
     CUPY_INSTALLED = False
@@ -584,9 +585,25 @@ def test_fail_index_dataset_with_template_rot(library):
 @pytest.mark.parametrize(
     "sigdim, maxr, n_best, frac_keep, norim, nort, chu",
     [
-        ((2, 3, 4, 5), None, 1, 1, False, False, {0: "auto", 1: "auto", 2: None, 3: None}),
+        (
+            (2, 3, 4, 5),
+            None,
+            1,
+            1,
+            False,
+            False,
+            {0: "auto", 1: "auto", 2: None, 3: None},
+        ),
         ((2, 3, 4, 5), 3, 2, 1, False, False, {0: "auto", 1: "auto", 2: None, 3: None}),
-        ((2, 3, 4, 5), 9, 3, 0.5, False, False, {0: "auto", 1: "auto", 2: None, 3: None}),
+        (
+            (2, 3, 4, 5),
+            9,
+            3,
+            0.5,
+            False,
+            False,
+            {0: "auto", 1: "auto", 2: None, 3: None},
+        ),
     ],
 )
 @pytest.mark.slow
@@ -622,9 +639,9 @@ def run_index_chunk(di, n_best, frac_keep):
     theta = di.random.randint(0, max_theta, size=(lib_n, lib_spots))
     intensities = di.random.random((lib_n, lib_spots))
     integrated_templates = di.random.random((lib_n, max_r))
-    center=(7, 4)
-    max_radius=max_r
-    precision=np.float32
+    center = (7, 4)
+    max_radius = max_r
+    precision = np.float32
     answer = iutls._index_chunk(
         data,
         center,

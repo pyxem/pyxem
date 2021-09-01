@@ -22,6 +22,7 @@ import numpy as np
 
 try:
     import cupy as cp
+
     CUPY_INSTALLED = True
 except ImportError:
     CUPY_INSTALLED = False
