@@ -17,9 +17,10 @@ except ImportError:
 
 """ These are designed to be fast and used for indexation, for data correction, see radial_utils"""
 
-def _cartesian_positions_to_polar_nonround(x, y, delta_r=1., delta_theta=1.):
+
+def _cartesian_positions_to_polar_nonround(x, y, delta_r=1.0, delta_theta=1.0):
     r = np.sqrt(x ** 2 + y ** 2) / delta_r
-    theta = np.mod(np.rad2deg(np.arctan2(y, x)), 360) / delta_theta 
+    theta = np.mod(np.rad2deg(np.arctan2(y, x)), 360) / delta_theta
     return r, theta
 
 
@@ -49,8 +50,6 @@ def _cartesian_positions_to_polar(x, y, delta_r=1, delta_theta=1):
     r = np.rint(r).astype(np.int32)
     theta = np.rint(theta).astype(np.int32)
     return r, theta
-
-
 
 
 def get_template_polar_coordinates(
@@ -117,7 +116,10 @@ def get_template_polar_coordinates(
 
 
 def get_template_cartesian_coordinates(
-    simulation, center=(0.0, 0.0), in_plane_angle=0.0, window_size=None,
+    simulation,
+    center=(0.0, 0.0),
+    in_plane_angle=0.0,
+    window_size=None,
     mirrored=False,
 ):
     """
@@ -204,7 +206,9 @@ def _get_map_function(dispatcher):
     return ndimage.map_coordinates if dispatcher == np else ndigpu.map_coordinates
 
 
-def _warp_polar_custom(image, center, radius, output_shape, order=1, precision=np.float64):
+def _warp_polar_custom(
+    image, center, radius, output_shape, order=1, precision=np.float64
+):
     """
     Function to emulate warp_polar in skimage.transform on both CPU and GPU. Not all
     parameters are supported

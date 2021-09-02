@@ -34,6 +34,7 @@ from pyxem.utils.cuda_utils import is_cupy_array
 try:
     import cupy as cp
     import cupyx.scipy.ndimage as ndigpu
+
     CUPY_INSTALLED = True
 except ImportError:
     CUPY_INSTALLED = False

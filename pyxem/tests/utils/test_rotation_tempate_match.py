@@ -1,3 +1,22 @@
+# -*- coding: utf-8 -*-
+# Copyright 2016-2021 The pyXem developers
+#
+# This file is part of pyXem.
+#
+# pyXem is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# pyXem is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+
+
 from pyxem.utils import indexation_utils as iutls
 from pyxem.utils import polar_transform_utils as ptutls
 import numpy as np
@@ -566,9 +585,25 @@ def test_fail_index_dataset_with_template_rot(library):
 @pytest.mark.parametrize(
     "sigdim, maxr, n_best, frac_keep, norim, nort, chu",
     [
-        ((2, 3, 4, 5), None, 1, 1, False, False, {0: "auto", 1: "auto", 2: None, 3: None}),
+        (
+            (2, 3, 4, 5),
+            None,
+            1,
+            1,
+            False,
+            False,
+            {0: "auto", 1: "auto", 2: None, 3: None},
+        ),
         ((2, 3, 4, 5), 3, 2, 1, False, False, {0: "auto", 1: "auto", 2: None, 3: None}),
-        ((2, 3, 4, 5), 9, 3, 0.5, False, False, {0: "auto", 1: "auto", 2: None, 3: None}),
+        (
+            (2, 3, 4, 5),
+            9,
+            3,
+            0.5,
+            False,
+            False,
+            {0: "auto", 1: "auto", 2: None, 3: None},
+        ),
     ],
 )
 @pytest.mark.slow
@@ -604,9 +639,9 @@ def run_index_chunk(di, n_best, frac_keep):
     theta = di.random.randint(0, max_theta, size=(lib_n, lib_spots))
     intensities = di.random.random((lib_n, lib_spots))
     integrated_templates = di.random.random((lib_n, max_r))
-    center=(7, 4)
-    max_radius=max_r
-    precision=np.float32
+    center = (7, 4)
+    max_radius = max_r
+    precision = np.float32
     answer = iutls._index_chunk(
         data,
         center,

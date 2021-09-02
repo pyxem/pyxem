@@ -80,7 +80,9 @@ def plot_template_over_pattern(
             direct_beam_position=direct_beam_position,
         )
         x, y, intensities = get_template_polar_coordinates(
-            simulation, in_plane_angle=in_plane_angle, max_r=max_r,
+            simulation,
+            in_plane_angle=in_plane_angle,
+            max_r=max_r,
             mirrored=mirrored_template,
         )
     elif coordinate_system == "cartesian":

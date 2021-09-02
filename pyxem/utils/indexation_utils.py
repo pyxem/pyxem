@@ -848,9 +848,9 @@ def _prepare_image_and_templates(
     )
     condition = r >= polar_image.shape[1]
     # we don't set r to 0 because it may quit the loop in the matching early
-    r[condition] = polar_image.shape[1]  - 1 
+    r[condition] = polar_image.shape[1] - 1
     theta[condition] = 0
-    intensities[condition] = 0.
+    intensities[condition] = 0.0
     if is_cupy_array(polar_image):
         # send data to GPU
         r = cp.asarray(r)
@@ -950,7 +950,8 @@ def _mixed_matching_lib_to_polar(
         positive_is_best * best_in_plane_corr + negative_is_best * best_in_plane_corr_m
     )
     best_angles = (
-        positive_is_best * best_in_plane_shift + negative_is_best * best_in_plane_shift_m
+        positive_is_best * best_in_plane_shift
+        + negative_is_best * best_in_plane_shift_m
     )
     if n_best >= best_cors.shape[0]:
         n_best = best_cors.shape[0]
@@ -1002,13 +1003,14 @@ def _index_chunk(
         dtype=precision,
     )
     for index in np.ndindex(images.shape[:2]):
-        polar_image = _warp_polar_custom(images[index],
-                                         center,
-                                         max_radius,
-                                         output_shape,
-                                         order=order,
-                                         precision=precision,
-                                         )
+        polar_image = _warp_polar_custom(
+            images[index],
+            center,
+            max_radius,
+            output_shape,
+            order=order,
+            precision=precision,
+        )
         if norm_images:
             polar_image = polar_image / dispatcher.linalg.norm(polar_image)
         indexation_result_chunk[index] = _mixed_matching_lib_to_polar(
@@ -1620,6 +1622,7 @@ def index_dataset_with_template_rotation(
 
     if target == "gpu":
         from pyxem.utils.cuda_utils import dask_array_to_gpu
+
         # an error will be raised if cupy is not available
         data = dask_array_to_gpu(data)
         dispatcher = cp
@@ -1656,13 +1659,13 @@ def index_dataset_with_template_rotation(
             phase_library["simulations"], max_radius
         )
         r, theta = _cartesian_positions_to_polar(
-                positions[:,0], positions[:,1], delta_r=delta_r, delta_theta=delta_theta
+            positions[:, 0], positions[:, 1], delta_r=delta_r, delta_theta=delta_theta
         )
         # ensure we don't have any out of bounds which could occur from rounding
         condition = r >= r_dim
-        r[condition] = r_dim - 1 
+        r[condition] = r_dim - 1
         theta[condition] = 0
-        intensities[condition] = 0.
+        intensities[condition] = 0.0
         r_list.append(r)
         theta_list.append(theta)
         intensity_list.append(intensities.astype(precision))
@@ -1678,12 +1681,14 @@ def index_dataset_with_template_rotation(
     # allocate memory and concatenate arrays in list
     r = np.zeros((total_template_number, maximum_spot_number), dtype=np.int32)
     theta = np.zeros((total_template_number, maximum_spot_number), dtype=np.int32)
-    intensities = np.zeros((total_template_number, maximum_spot_number), dtype=precision)
+    intensities = np.zeros(
+        (total_template_number, maximum_spot_number), dtype=precision
+    )
     position = 0
     for rr, tt, ii in zip(r_list, theta_list, intensity_list):
-        r[position:position+rr.shape[0], :rr.shape[1]] = rr
-        theta[position:position+rr.shape[0], :rr.shape[1]] = tt
-        intensities[position:position+rr.shape[0], :rr.shape[1]] = ii
+        r[position : position + rr.shape[0], : rr.shape[1]] = rr
+        theta[position : position + rr.shape[0], : rr.shape[1]] = tt
+        intensities[position : position + rr.shape[0], : rr.shape[1]] = ii
         position += rr.shape[0]
     # phase_index and original index are 1D we can just concatenate
     phase_index = np.concatenate(phase_index)
@@ -1747,8 +1752,12 @@ def index_dataset_with_template_rotation(
     for index, phase in phase_key_dict.items():
         oris = library[phase]["orientations"]
         phasemask = result["phase_index"] == index
-        indices = result["template_index"] * phasemask  # everywhere false will get index 0 to ensure no out of bounds
-        orimap = oris[indices] * phasemask[..., np.newaxis]  # everywhere false should not get any orientation
+        indices = (
+            result["template_index"] * phasemask
+        )  # everywhere false will get index 0 to ensure no out of bounds
+        orimap = (
+            oris[indices] * phasemask[..., np.newaxis]
+        )  # everywhere false should not get any orientation
         # correct orientation maps with rescales and flips
         orimap[:, :, :, 1] = (
             orimap[:, :, :, 1] * res_index[:, :, :, 3]
