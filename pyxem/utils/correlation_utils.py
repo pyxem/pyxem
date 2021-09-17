@@ -74,7 +74,7 @@ def autocorrelate(z,
                :DOI:`10.1109/CVPR.2010.5540032`
         """
     if mask is None:
-        mask = np.ones(np.shape(z))
+        mask = np.zeros(np.shape(z))
     return _autocorrelation_masked(z=z,
                                    mask=mask,
                                    mode=mode,
@@ -137,9 +137,9 @@ def cross_correlate(z1,
         """
     axis=axs
     if mask1 is None:
-        mask1 = np.ones(np.shape(z1))
+        mask1 = np.zeros(np.shape(z1))
     if mask2 is None:
-        mask2 = np.ones(np.shape(z2))
+        mask2 = np.zeros(np.shape(z2))
     return _cross_correlate_masked(z1,
                                    z2,
                                    mask1,
