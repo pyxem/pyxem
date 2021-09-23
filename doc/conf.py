@@ -160,7 +160,7 @@ nbsphinx_execute = "always"  # auto, always, never
 nbsphinx_allow_errors = True
 
 # sphinxcontrib-bibtex configuration
-bibtex_bibfiles = ["bibliography.bib"]
+bibtex_bibfiles = ["bibliography.bib", "citing_papers.bib"]
 
 
 def linkcode_resolve(domain, info):

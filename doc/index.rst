@@ -39,9 +39,11 @@ User Guide and Workflows:
     pyxem-demos/02*
     pyxem-demos/03*
     pyxem-demos/05*
+    pyxem-demos/06*
     pyxem-demos/07*
     pyxem-demos/08*
     pyxem-demos/09*
+    pyxem-demos/10*
 
 
 .. toctree::
