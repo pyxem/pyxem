@@ -23,7 +23,6 @@ import numpy as np
 from skimage.measure import EllipseModel, ransac
 from hyperspy.misc.utils import isiterable
 import pyxem.utils.marker_tools as mt
-from hyperspy.signal import BaseSignal
 
 
 def is_ellipse_good(
@@ -338,7 +337,6 @@ def get_ellipse_model_ransac_single_frame(
             if is_model_valid(model_ransac, None):
                 break
             else:
-                print("Model is outside of parameters:", model_ransac.params)
                 model_ransac, inliers = None, None
         else:
             break
@@ -576,113 +574,3 @@ def _get_ellipse_markers(
         marker_list.extend(marker_in_list)
         marker_list.extend(marker_out_list)
     return marker_list
-
-def get_max_positions(signal,
-                      mask=None,
-                      num_points=5000,
-                      ):
-    """ Gets the top num_points pixels in the dataset.
-
-    Parameters
-    --------------
-    signal: BaseSignal
-        The signal which we want to find the max positions for.
-    mask: np.array
-        A mask to be applied to the data for values to ignore
-    num_points: int
-        The number of points to be
-    :param num_points:
-    :param radius:
-    :return:
-    """
-    if isinstance(signal, BaseSignal):
-        data = signal.data
-    else:
-        data = signal
-    i_shape = np.shape(data)
-    flattened_array = data.flatten()
-    indexes = np.argsort(flattened_array)
-
-    if mask is not None:
-        flattened_mask = mask.flatten()
-        indexes = indexes[flattened_mask is False]
-    # take top 5000 points make sure exclude zero beam
-
-    cords = np.array([np.floor_divide(indexes[-num_points:], i_shape[1]),
-             np.remainder(indexes[-num_points:], i_shape[1])]) # [x axis (row),y axis (col)]
-    return cords.T
-
-
-def determine_ellipse(signal,
-                      mask=None,
-                      num_points=1000,
-                      guess_starting_params=True,
-                      plot=True,
-                      **kwargs,
-                      ):
-    """
-    This method starts by taking some number of points which are the most intense
-    in the signal.  It then takes those points and guesses some starting parameters
-    for the `get_ellipse_model_ransac_single_frame` function. From there it will try
-    to determine the ellipse parameters.
-
-    Parameters
-    -----------
-    signal: Signal2D
-        The signal of interest
-    mask: Array-like
-        The mask to be applied to the data.  All of the masked values are ignored
-    num_points: int
-        The number of points to consider
-    guess_starting_params: bool
-        If True then the starting parameters will be guessed based on the points determined.
-    plot: bool
-        If true then the points chosen to fit the ellipse to are shown.
-    **kwargs:
-        Any other keywords for ` get_ellipse_model_ransac_single_frame`
-
-    Returns
-    -------
-    center: (x,y)
-        The center of the diffraction pattern
-    affine:
-        The affine transformation to make the diffraction pattern circular.
-    """
-    pos = get_max_positions(signal,
-                            mask=mask,
-                            num_points=num_points)
-    if plot:
-        import matplotlib.pyplot as plt
-        plt.scatter(pos[:,0], pos[:,1])
-        plt.show()
-    if guess_starting_params:
-        el, _ = get_ellipse_model_ransac_single_frame(pos,
-                                              xf=np.mean(pos[:, 0]),
-                                              yf=np.mean(pos[:, 1]),
-                                              rf_lim=np.shape(signal.data)[0]/5,
-                                              semi_len_min=np.std(pos[:, 1]),
-                                              semi_len_max=np.std(pos[:, 1])*2,
-                                              semi_len_ratio_lim=1.2,
-                                              min_samples=6,
-                                              residual_threshold=20,
-                                              max_trails=1000)
-    else:
-        el, _ = get_ellipse_model_ransac_single_frame(pos,
-                                                     **kwargs)
-    if el is not None:
-        affine = ellipse_to_affine(el.params[3],el.params[2], el.params[4])
-        center = (el.params[0],el.params[1])
-        return center, affine
-    else:
-        print("Ransac Ellipse detection did not converge")
-        return None
-
-def ellipse_to_affine(major, minor, rot):
-    Q = [[np.cos(rot), -np.sin(rot), 0],
-         [np.sin(rot), np.cos(rot), 0],
-         [0, 0, 1]]
-    S = [[1, 0, 0],
-         [0, major / minor, 0],
-         [0, 0, 1]]
-    C = np.matmul(np.matmul(Q, S), np.transpose(Q))
-    return C
