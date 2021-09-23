@@ -581,6 +581,7 @@ def _get_ellipse_markers(
 def get_max_positions(signal,
                       mask=None,
                       num_points=5000,
+                      plot=False,
                       ):
     """ Gets the top num_points pixels in the dataset.
 
@@ -606,6 +607,9 @@ def get_max_positions(signal,
     indexes = np.argsort(flattened_array)
     cords = np.array([np.floor_divide(indexes[-num_points:], i_shape[1]),
              np.remainder(indexes[-num_points:], i_shape[1])]) # [x axis (row),y axis (col)]
+    if plot:
+        import matplotlib.pyplot as plt
+        plt.scatter(cords.T[:, 0], cors.T[:, 1])
     return cords.T
 
 
@@ -614,6 +618,7 @@ def determine_ellipse(signal,
                       num_points=1000,
                       use_ransac=True,
                       guess_starting_params=True,
+                      return_params=False,
                       **kwargs,
                       ):
     """
@@ -645,8 +650,6 @@ def determine_ellipse(signal,
     pos = get_max_positions(signal,
                             mask=mask,
                             num_points=num_points)
-    import matplotlib.pyplot as plt
-    plt.scatter(pos[:, 0], pos[:, 1])
     if use_ransac:
         if guess_starting_params:
             el, _ = get_ellipse_model_ransac_single_frame(pos,
@@ -667,32 +670,23 @@ def determine_ellipse(signal,
         converge = e.estimate(data=pos)
         el = e
     if el is not None:
-        if el.params[4] > np.pi / 2:
-            el.params[4] =el.params[4] - np.pi / 2
-        affine = ellipse_to_affine(el.params[3], el.params[2], el.params[4])
-        center = (el.params[0], el.params[1])
-        return center, affine, el
+        affine = ellipse_to_affine(el.params[3],el.params[2], el.params[4])
+        center = (el.params[0],el.params[1])
+        if return_params:
+            return center, affine, el.params
+        else:
+            return center, affine
     else:
         print("Ransac Ellipse detection did not converge")
         return None
 
 
-def ellipse_to_affine(major, minor, rot):
-    if major < minor:
-        temp = major
-        major = minor
-        minor = temp
-        rot = rot+(np.pi/2)
-    if rot < 0:
-        rot = rot + np.pi
-
-
-
+def ellipse_to_affine(a, b, rot):
     Q = [[np.cos(rot), -np.sin(rot), 0],
          [np.sin(rot), np.cos(rot), 0],
          [0, 0, 1]]
     S = [[1, 0, 0],
-         [0, major/minor, 0],
+         [0, b / a, 0],
          [0, 0, 1]]
     C = np.matmul(np.matmul(Q, S), np.transpose(Q))
     return C

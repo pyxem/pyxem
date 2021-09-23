@@ -1057,7 +1057,7 @@ def test_determine_ellipse2():
                                            min_samples=6,
                                            max_trails=1000)
     np.testing.assert_array_almost_equal(affine,
-                                         [[1.15, 0, 0],
+                                         [[.871, 0, 0],
                                           [0, 1, 0],
                                           [0, 0, 1]],
                                          2)
