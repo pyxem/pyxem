@@ -21,4 +21,6 @@ python:
       - method: pip
         path: .
         extra_requirements:
-           - build-doc
+           - doc
+submodules:
+  include: all
