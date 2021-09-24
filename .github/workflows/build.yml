@@ -46,3 +46,25 @@ jobs:
       uses: AndreMiras/coveralls-python-action@develop
       with:
         parallel-finished: true
+
+  build_doc:
+    name: Build doc
+    runs-on: ubuntu-latest
+    env:
+      BUILD_DEPS: python3-dev build-essential graphviz
+      LATEX_DEPS: dvipng latexmk texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: ericpre/sphinx-action@latest_sphinx
+        with:
+
+          pre-build-command: "apt-get update -y && apt-get install -y ${{ env.BUILD_DEPS }} ${{ env.LATEX_DEPS }}  && pip install -e .[all,doc]"
+          build-command: make html
+          docs-folder: doc/
+
+      - uses: actions/upload-artifact@v2
+        with:
+          path: ./doc/_build/html/
+          name: doc_build
