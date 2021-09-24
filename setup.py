@@ -33,6 +33,7 @@ extra_feature_requirements = {
         "sphinx-autodoc-typehints >= 1.10.3",
         "sphinx-gallery >= 0.6",
         "sphinxcontrib-bibtex >= 1.0",
+        "sphinx_rtd_theme"
     ],
     "tests": ["pytest>=5.0",
               "pytest-cov>=2.8.1",
