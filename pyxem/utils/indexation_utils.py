@@ -33,12 +33,10 @@ from pyxem.utils.cuda_utils import (
     _correlate_polar_image_to_library_gpu,
 )
 
-from transforms3d.euler import mat2euler
-
 from collections import namedtuple
 
 from pyxem.utils.dask_tools import _get_dask_array
-import os
+import psutil
 from dask.diagnostics import ProgressBar
 from numba import njit, float64, float32, int32, prange
 
@@ -47,7 +45,6 @@ from pyxem.utils.polar_transform_utils import (
     get_polar_pattern_shape,
     image_to_polar,
     get_template_polar_coordinates,
-    _chunk_to_polar,
     _warp_polar_custom,
 )
 
@@ -1027,6 +1024,12 @@ def _index_chunk(
     return indexation_result_chunk
 
 
+def _index_chunk_gpu(images, *args, **kwargs):
+    gpu_im = cp.asarray(images)
+    indexed_chunk = _index_chunk(gpu_im, *args, **kwargs)
+    return cp.asnumpy(indexed_chunk)
+
+
 def get_in_plane_rotation_correlation(
     image,
     simulation,
@@ -1513,7 +1516,7 @@ def index_dataset_with_template_rotation(
     delta_theta=1.0,
     max_r=None,
     intensity_transform_function=None,
-    normalize_images=True,
+    normalize_images=False,
     normalize_templates=True,
     chunks="auto",
     parallel_workers="auto",
@@ -1545,26 +1548,28 @@ def index_dataset_with_template_rotation(
         The sampling interval of the radial coordinate in pixels.
     delta_theta : float, optional
         The sampling interval of the azimuthal coordinate in degrees. This will
-        determine the maximum accuracy of the in-plane correlation.
+        determine the maximum accuracy of the in-plane rotation angle.
     max_r : float, optional
         Maximum radius to consider in pixel units. By default it is the
         distance from the center of the patterns to a corner of the image.
     intensity_transform_function : Callable, optional
         Function to apply to both image and template intensities on an
-        element by element basis prior to comparison. Note that when using the
-        gpu, the function must be gpu compatible.
+        element by element basis prior to comparison. Note that the function
+        is performed on the CPU.
     normalize_images : bool, optional
         Normalize the images in the correlation coefficient calculation
     normalize_templates : bool, optional
         Normalize the templates in the correlation coefficient calculation
     chunks : string or 4-tuple, optional
         Internally the work is done on dask arrays and this parameter determines
-        the chunking. If set to None then no re-chunking will happen if the dataset
-        was loaded lazily. If set to "auto" then dask attempts to find the optimal
-        chunk size.
+        the chunking of the original dataset. If set to None then no
+        re-chunking will happen if the dataset was loaded lazily. If set to
+        "auto" then dask attempts to find the optimal chunk size.
     parallel_workers: int, optional
         The number of workers to use in parallel. If set to "auto", the number
-        will be determined from os.cpu_count()
+        of physical cores will be used when using the CPU. For GPU calculations
+        the workers is determined based on the VRAM capacity, but it is probably
+        better to choose a lower number.
     target: string, optional
         Use "cpu" or "gpu". If "gpu" is selected, the majority of the calculation
         intensive work will be performed on the CUDA enabled GPU. Fails if no
@@ -1573,18 +1578,27 @@ def index_dataset_with_template_rotation(
         Only relevant when using GPU, determines how many threads in a block
         the cuda kernel is executed over when indexing patterns
     scheduler: string
-        The scheduler used by dask to compute the result
+        The scheduler used by dask to compute the result. "processes" is not
+        recommended.
     precision: np.float32 or np.float64
         The level of precision to work with on internal calculations
 
     Returns
     -------
     result : dict
-        Results dictionary containing for each phase a dictionary that contains
-        keys [template_index, orientation], each representing numpy arrays of
-        shape (scan_x, scan_y, n_best) and (scan_x, scan_y, n_best, 3)
-        respectively. Orientation is expressed in Bunge convention
-        Euler angles.
+        Results dictionary containing keys: phase_index, template_index,
+        orientation, correlation, and mirrored_template. phase_index is the
+        phase map, with each unique integer representing a phase. template_index
+        are the best matching templates for the respective phase. orientation is
+        the best matching orientations expressed in Bunge convention Euler angles.
+        Correlation is the matching correlation indices. mirrored template represents
+        whether the original template best fits (False) or the mirror image (True).
+        Each is a numpy array of shape (scan_x, scan_y, n_best) except orientation
+        is of shape (scan_x, scan_y, n_best, 3).
+    phase_key_dict: dictionary
+        A small dictionary to translate the integers in the phase_index array
+        to phase names in the original template library.
+
 
     Notes
     -----
@@ -1597,6 +1611,14 @@ def index_dataset_with_template_rotation(
     parameters can usually achieve the same answer faster, but it is also
     possible an incorrect match is found.
     """
+    if target == "gpu":
+        # an error will be raised if cupy is not available
+        if not CUPY_INSTALLED:
+            raise ValueError("There must be a CUDA enabled GPU and cupy must be installed.")
+        dispatcher = cp
+    else:
+        dispatcher = np
+
     # get the dataset as a dask array
     data = _get_dask_array(signal)
     # check if we have a 4D dataset, and if not, make it
@@ -1619,15 +1641,6 @@ def index_dataset_with_template_rotation(
         data = data.rechunk({0: "auto", 1: "auto", 2: None, 3: None})
     else:
         data = data.rechunk(chunks)
-
-    if target == "gpu":
-        from pyxem.utils.cuda_utils import dask_array_to_gpu
-
-        # an error will be raised if cupy is not available
-        data = dask_array_to_gpu(data)
-        dispatcher = cp
-    else:
-        dispatcher = np
 
     # calculate the dimensions of the polar transform
     output_shape = get_polar_pattern_shape(
@@ -1704,18 +1717,24 @@ def index_dataset_with_template_rotation(
     if normalize_templates:
         integrated_templates = _norm_rows(integrated_templates)
         intensities = _norm_rows(intensities)
+
+    # put a limit on n_best
+    max_n = _get_max_n(r.shape[0], n_keep, frac_keep)
+    if n_best > max_n:
+        n_best = max_n
+
     # copy relevant data to GPU memory if necessary
     if target == "gpu":
         integrated_templates = cp.asarray(integrated_templates)
         r = cp.asarray(r)
         theta = cp.asarray(theta)
         intensities = cp.asarray(intensities)
-    # put a limit on n_best
-    max_n = _get_max_n(r.shape[0], n_keep, frac_keep)
-    if n_best > max_n:
-        n_best = max_n
+        indexation_function = _index_chunk_gpu
+    else:
+        indexation_function = _index_chunk
+
     indexation = data.map_blocks(
-        _index_chunk,
+        indexation_function,
         center,
         max_radius,
         output_shape,
@@ -1734,16 +1753,36 @@ def index_dataset_with_template_rotation(
         chunks=(data.chunks[0], data.chunks[1], n_best, 4),
         new_axis=(2, 3),
     )
+
     # calculate number of workers
     if parallel_workers == "auto":
-        parallel_workers = os.cpu_count()
+        # upper boundary if using CPU
+        # only use number of physical cores, not logical
+        parallel_workers = psutil.cpu_count(logical=False)
+        if target == "gpu":
+            # let's base it on the size of the free GPU memory and array blocksize
+            # this is probably too many workers!
+            max_gpu_mem = 0.6*cp.cuda.Device().mem_info[0]
+            blocksize = data.nbytes / data.npartitions
+            max_workers = max_gpu_mem / blocksize
+            if max_workers < parallel_workers:
+                parallel_workers = max_workers
 
-    indexation = indexation.map_blocks(to_numpy)
     with ProgressBar():
         res_index = indexation.compute(
             scheduler=scheduler, num_workers=parallel_workers, optimize_graph=True
         )
-    # wrangle data to (template_index), (orientation), (correlation)
+
+    # cupy retains memory on the GPU even after garbage collection
+    # see https://docs.cupy.dev/en/stable/user_guide/memory.html
+    # We manually clear the memory here to not give the user the impression that
+    # their graphics card is going crazy
+    if target == "gpu":
+        cp.get_default_memory_pool().free_all_blocks()
+
+    # wrangle data to results dictionary
+    # we can't use a dask array to index into a dask array! Using a dask
+    # array as indices for a numpy array computes the dask array automatically.
     result = {}
     result["phase_index"] = phase_index[res_index[:, :, :, 0].astype(np.int32)]
     result["template_index"] = original_index[res_index[:, :, :, 0].astype(np.int32)]
