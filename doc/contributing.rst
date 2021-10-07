@@ -19,13 +19,18 @@ inquiries regarding the project? Feel free to
 `make a pull request <https://github.com/pyxem/pyxem/pulls>`_ in our GitHub
 repository.
 
-Code of Conduct
-===============
-
-pyxem has a Code of conduct that should be honoured
-by everyone who participates in the pyxem community.
 
 .. _setting-up-a-development-installation:
+
+First Time Contributing
+=======================
+One of the best things that first time contributors can do is help to improve our documentation, our
+`demos https://github.com/pyxem/pyxem-demos`_ or report a bug.
+
+If you have a workflow that you don't see covered in the demos feel free to submit an `issue
+<https://github.com/pyxem/pyxem-demos/issues>`_ and someone can help you with the process of adding
+to the demos.
+
 
 Setting up a development installation
 =====================================

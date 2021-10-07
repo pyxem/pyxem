@@ -45,10 +45,9 @@ extensions = [
     "sphinx_copybutton",
     "sphinx_gallery.load_style",
     "nbsphinx",
-    'sphinx.ext.viewcode',
 ]
 
-# Create links to references within kikuchipy's documentation to these packages.
+# Create links to references within pyxem's documentation to these packages.
 intersphinx_mapping = {
     "dask": ("https://docs.dask.org/en/latest", None),
     "diffpy.structure": ("https://www.diffpy.org/diffpy.structure", None),
@@ -72,23 +71,16 @@ templates_path = [
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files. This image also affects
 # html_static_path and html_extra_path.
-exclude_patterns = [
-    "_build",
-    "_static/v0.2.0/*.ipynb",
-]
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for a
 # list of builtin themes.
-html_theme = "sphinx_rtd_theme"
+html_theme = "furo"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files, so
 # a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = [
     "_static",
-]
-html_css_files = [
-    "style.css",
 ]
 
 # Syntax highlighting
@@ -115,7 +107,7 @@ numfig = True
 # nbsphinx configuration
 # Taken from nbsphinx' own nbsphinx configuration file, with slight
 # modification to point nbviewer and Binder to the GitHub master links
-# when the documentation is launched from a kikuchipy version with
+# when the documentation is launched from a pyxem version with
 # "dev" in the version.
 if "dev" in version:
     release_version = "master"
@@ -129,11 +121,11 @@ nbsphinx_prolog = (
     <style>a:hover { text-decoration: underline; }</style>
     <div class="admonition note">
       This page was generated from
-      <a class="reference external" href="https://github.com/pyxem/kikuchipy/blob/"""
+      <a class="reference external" href="https://github.com/pyxem/pyxem-demos/blob/"""
     + f"{release_version}"
     + r"""/{{ docname|e }}">{{ docname|e }}</a>.
       Interactive online version:
-      <span style="white-space: nowrap;"><a href="https://mybinder.org/v2/gh/pyxem/kikuchipy/"""
+      <span style="white-space: nowrap;"><a href="https://mybinder.org/v2/gh/pyxem/pyxem-demos/"""
     + f"{release_version}"
     + r"""?filepath={{ docname|e }}"><img alt="Binder badge" src="https://mybinder.org/badge_logo.svg" style="vertical-align:text-bottom"></a>.</span>
       <script>
@@ -156,11 +148,11 @@ nbsphinx_prolog = (
 """
 )
 # https://nbsphinx.readthedocs.io/en/0.8.0/never-execute.html
-nbsphinx_execute = "always"  # auto, always, never
+nbsphinx_execute = "auto"  # auto, always, never
 nbsphinx_allow_errors = True
 
 # sphinxcontrib-bibtex configuration
-bibtex_bibfiles = ["bibliography.bib", "citing_papers.bib"]
+bibtex_bibfiles = ["bibliography.bib"]
 
 
 def linkcode_resolve(domain, info):
@@ -212,7 +204,7 @@ def linkcode_resolve(domain, info):
 
     if fn.startswith("pyxem/"):
         m = re.match(r"^.*dev0\+([a-f0-9]+)$", pyxem.__version__)
-        pre_link = "https://github.com/pyxem/kikuchipy/blob/"
+        pre_link = "https://github.com/pyxem/pyxem/blob/"
         if m:
             return pre_link + "%s/%s%s" % (m.group(1), fn, linespec)
         elif "dev" in pyxem.__version__:
