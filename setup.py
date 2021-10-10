@@ -69,6 +69,7 @@ setup(
         "diffsims ~= 0.4",
         "lmfit >= 0.9.12",
         "pyfai",
+        "psutil",
         "ipywidgets",
         "numba",
         "orix >= 0.3",
