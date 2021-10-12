@@ -80,11 +80,7 @@ to our `black configuration
 <https://github.com/pyxem/pyxem/blob/master/pyproject.toml>`_.
 
 Note that ``black`` won't format `docstrings
-<https://www.python.org/dev/peps/pep-0257/>`_. We follow the `numpydoc
-<https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard>`_
-standard.
-
-Comment lines should preferably be limited to 72 characters.
+<https://www.python.org/dev/peps/pep-0257/>`_.
 
 Package imports should be structured into three blocks with blank lines between
 them (descending order): standard library (like ``os`` and ``typing``), third
