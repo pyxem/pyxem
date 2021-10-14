@@ -1692,37 +1692,39 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             )
             + 1
         )
-        centre_x = centre_x.flatten()
-        centre_y = centre_y.flatten()
-        iterating_kwargs = [("centre_x", centre_x), ("centre_y", centre_y)]
-        if mask_array is not None:
-            #  This line flattens the mask array, except for the two
-            #  last dimensions. This to make the mask array work for the
-            #  _map_iterate function.
-            mask_flat = mask_array.reshape(-1, *mask_array.shape[-2:])
-            iterating_kwargs.append(("mask", mask_flat))
-
         if self._lazy:
             data = pst._radial_average_dask_array(
                 self.data,
                 return_sig_size=radial_array_size,
-                centre_x=centre_x,
-                centre_y=centre_y,
+                centre_x=centre_x.flatten(),
+                centre_y=centre_y.flatten(),
                 mask_array=mask_array,
                 normalize=normalize,
                 show_progressbar=show_progressbar,
             )
             s_radial = hs.signals.Signal1D(data)
         else:
-            s_radial = self._map_iterate(
+            if mask_array is not None:
+                mask_array = Signal2D(mask_array)
+            if self.data.ndim == centre_x.ndim:
+                centre_x = Signal2D(centre_x)
+                centre_y = Signal2D(centre_y)
+            else:
+                centre_x = BaseSignal(centre_x).T
+                centre_y = BaseSignal(centre_y).T
+
+            s_radial = self.map(
                 pst._get_radial_profile_of_diff_image,
                 normalize=normalize,
-                iterating_kwargs=iterating_kwargs,
+                centre_x=centre_x,
+                centre_y=centre_y,
+                mask=mask_array,
                 inplace=False,
                 ragged=False,
                 parallel=parallel,
                 radial_array_size=radial_array_size,
                 show_progressbar=show_progressbar,
+                lazy_result=False,
             )
             data = s_radial.data
         s_radial = hs.signals.Signal1D(data)
