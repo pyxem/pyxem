@@ -1,4 +1,0 @@
-[submodule "doc/pyxem-demos"]
-	path = doc/pyxem-demos
-	url = https://github.com/pyxem/pyxem-demos.git
-	branch = master
