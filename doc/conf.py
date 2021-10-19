@@ -150,6 +150,7 @@ nbsphinx_prolog = (
 # https://nbsphinx.readthedocs.io/en/0.8.0/never-execute.html
 nbsphinx_execute = "never"  # auto, always, never
 nbsphinx_allow_errors = True
+exclude_patterns = ['_build', '**.ipynb_checkpoints']
 
 # sphinxcontrib-bibtex configuration
 bibtex_bibfiles = ["bibliography.bib"]

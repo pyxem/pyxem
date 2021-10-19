@@ -29,21 +29,22 @@ The following Jupyter Notebooks should give you good workflows for analyzing you
 
 User Guide and Workflows:
 --------------------------
+
 .. nbgallery::
     :caption: User guide
     :glob:
     :maxdepth: 1
 
-    pyxem-demos/00*
-    pyxem-demos/01*
-    pyxem-demos/02*
-    pyxem-demos/03*
-    pyxem-demos/05*
-    pyxem-demos/06*
-    pyxem-demos/07*
-    pyxem-demos/08*
-    pyxem-demos/09*
-    pyxem-demos/10*
+    demos/00*
+    demos/01*
+    demos/02*
+    demos/03*
+    demos/05*
+    demos/06*
+    demos/07*
+    demos/08*
+    demos/09*
+    demos/10*
 
 
 .. toctree::
@@ -56,4 +57,5 @@ User Guide and Workflows:
     open_datasets.rst
     cite.rst
     related_projects.rst
+    CHANGELOG.rst
 
