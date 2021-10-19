@@ -40,7 +40,8 @@ extra_feature_requirements = {
               "coverage>=5.0"],
     "dev": ["black",
             "pre-commit > =1.16"
-            ]
+            ],
+    "gpu": ["cupy>=9.0.0"],
 }
 
 
@@ -79,14 +80,14 @@ setup(
         "scikit-image >= 0.17.0",
         "matplotlib >= 3.1.1",  # 3.1.0 failed
         "scikit-learn >= 0.19",  # reason unknown
-        "hyperspy == 1.6.2",  # significant improvements
+        "hyperspy >= 1.6.2",  # significant improvements
         "diffsims ~= 0.4",
         "lmfit >= 0.9.12",
         "pyfai",
+        "psutil",
         "ipywidgets",
         "numba",
         "orix >= 0.3",
-
     ],
     python_requires=">=3.7",
     package_data={
