@@ -1,2 +1,2 @@
-# ignore commits to the demo files
-doc/demos/ -diff
+# ignore line additions  to notebooks
+.ipynb -diff
