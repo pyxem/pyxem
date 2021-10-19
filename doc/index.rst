@@ -48,7 +48,7 @@ User Guide and Workflows:
 
 
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 0
     :caption: Help
 
     reference.rst
