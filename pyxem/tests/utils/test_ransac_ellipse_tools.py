@@ -1016,28 +1016,55 @@ def test_full_ellipse_ransac_processing():
     assert approx(np.min(y_list), abs=1) == yc - b
 
 
-@pytest.mark.parametrize("ransac", [True, False])
-@pytest.mark.parametrize("mask", [True, False])
-def test_determine_ellipse(ransac, mask):
-    if mask:
-        mask = np.zeros((100, 100), dtype=bool)
-        mask[40:50, :] = True
-    else:
-        mask = None
-    t = np.ones((100, 100))
-    x, y = np.ogrid[-45:55, -50:50]
-    t[x ** 2 + (y * 1.15) ** 2 < 40 ** 2] = 100
-    t[x ** 2 + (y * 1.15) ** 2 < 30 ** 2] = 1
-    t = t + np.random.random((100, 100))
-    center, affine = ret.determine_ellipse(t,
-                                           mask=mask,
-                                           use_ransac=ransac)
-    np.testing.assert_array_almost_equal(affine,
-                                         [[1.15, 0, 0],
-                                          [0, 1, 0],
-                                          [0, 0, 1]],
-                                         2)
-    np.testing.assert_array_almost_equal(center, [45, 50], 0)
+class TestDetermineEllipse:
+    @pytest.mark.parametrize("ransac", [True, False])
+    @pytest.mark.parametrize("mask", [True, False])
+    def test_determine_ellipse(self, ransac, mask):
+        if mask:
+            mask = np.zeros((100, 100), dtype=bool)
+            mask[40:50, :] = True
+        else:
+            mask = None
+        t = np.ones((100, 100))
+        x, y = np.ogrid[-45:55, -50:50]
+        t[x ** 2 + (y * 1.15) ** 2 < 40 ** 2] = 100
+        t[x ** 2 + (y * 1.15) ** 2 < 30 ** 2] = 1
+        t = t + np.random.random((100, 100))
+        center, affine = ret.determine_ellipse(t,
+                                               mask=mask,
+                                               use_ransac=ransac)
+
+        np.testing.assert_array_almost_equal(affine,
+                                              [[1., 0, 0],
+                                              [0, 1.15, 0],
+                                              [0, 0, 1]],
+                                             2)
+        np.testing.assert_array_almost_equal(center, [45, 50], 0)
+
+    @pytest.mark.parametrize('execution_number', range(5))
+    def test_determine_ellipse_rotated(self, execution_number):
+        angle = np.random.random()*np.pi
+        print(angle)
+        test_data = mdtd.MakeTestData(200, 200, default=False)
+        test_data.add_disk(x0=100, y0=100, r=5, intensity=30)
+        test_data.add_ring_ellipse(x0=100, y0=100, semi_len0=64, semi_len1=70, rotation=angle)
+        s = test_data.signal
+        s.set_signal_type("electron_diffraction")
+
+        mask = np.zeros_like(s.data, dtype=np.bool)
+        mask[100 - 20:100 + 20, 100 - 20:100 + 20] = True
+        center, affine = ret.determine_ellipse(s, mask=mask, use_ransac=False, num_points=2000)
+        print(center)
+        print(affine)
+        s.unit = "k_nm^-1"
+        s.beam_energy = 200
+        s.axes_manager.signal_axes[0].scale = 0.1
+        s.axes_manager.signal_axes[1].scale = 0.1
+        s.set_ai(center=center, affine=affine)
+        s_az = s.get_azimuthal_integral2d(npt=100)
+        print(np.sum((s_az.sum(axis=0).isig[6:] > 1).data))
+        assert (np.sum((s_az.sum(axis=0).isig[6:] > 1).data)<11)
+
 
 
 def test_determine_ellipse2():
