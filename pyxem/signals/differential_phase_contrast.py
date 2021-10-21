@@ -309,7 +309,7 @@ class DPCSignal2D(Signal2D):
         Parameters
         ----------
         method : 'kottler', 'arnison' or 'frankot', optional
-            the formula to use, 'kottler'[1], 'arnison'[2] and 'frankot'[3]
+            the formula to use, kottler [1]_ , arnison [2]_ and frankot [3]_
             are available. The default is 'kottler'.
         mirroring : bool, optional
             whether to mirror the phase gradients before Fourier transformed.
@@ -323,7 +323,7 @@ class DPCSignal2D(Signal2D):
         Raises
         ------
         ValueError
-            if the method is not implemented
+            If the method is not implemented
 
         Returns
         -------
@@ -333,24 +333,24 @@ class DPCSignal2D(Signal2D):
         References
         ----------
         .. [1] Kottler, C., David, C., Pfeiffer, F. and Bunk, O., 2007. A
-        two-directional approach for grating based differential phase contrast
-        imaging using hard x-rays. Optics Express, 15(3), p.1175. (Equation 4)
+           two-directional approach for grating based differential phase contrast
+           imaging using hard x-rays. Optics Express, 15(3), p.1175. (Equation 4)
 
         .. [2] Arnison, M., Larkin, K., Sheppard, C., Smith, N. and
-        Cogswell, C., 2004. Linear phase imaging using differential
-        interference contrast microscopy. Journal of Microscopy, 214(1),
-        pp.7-12. (Equation 6)
+           Cogswell, C., 2004. Linear phase imaging using differential
+           interference contrast microscopy. Journal of Microscopy, 214(1),
+           pp.7-12. (Equation 6)
 
         .. [3] Frankot, R. and Chellappa, R., 1988. A method for enforcing
-        integrability in shape from shading algorithms.
-        IEEE Transactions on Pattern Analysis and Machine Intelligence,
-        10(4), pp.439-451. (Equation 21)
-
+           integrability in shape from shading algorithms.
+           IEEE Transactions on Pattern Analysis and Machine Intelligence,
+           10(4), pp.439-451. (Equation 21)
         Examples
         --------
         >>> s = pxm.dummy_data.get_square_dpc_signal()
         >>> s_phase = s.phase_retrieval()
         >>> s_phase.plot()
+
         """
 
         method = method.lower()
