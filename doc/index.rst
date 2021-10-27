@@ -5,6 +5,7 @@
 
 Welcome to pyxem's documentation!
 =================================
+
 Pyxem is an open source project working to bring together tools for the analysis of
 data from pixilated electron detectors.  Based on the Hyperspy project, pyxem has an active
 community of users and developers who are interested in many different areas including:
@@ -15,6 +16,10 @@ community of users and developers who are interested in many different areas inc
 - Differential Phase Contrast
 - Structural Characterization of Amorphous Materials
 - And much, much more!
+
+.. image:: figures/sped_scheme.png
+  :width: 400
+  :alt: Schematic of the uses of SPED
 
 Where do I start?
 ------------------
@@ -58,4 +63,3 @@ User Guide and Workflows:
     cite.rst
     related_projects.rst
     CHANGELOG.rst
-
