@@ -100,8 +100,12 @@ def generate_marker_inputs_from_peaks(peaks):
 
     """
     max_peak_len = _find_max_length_peaks(peaks)
-    pad = np.full((max_peak_len, *peaks.data.shape, 2), np.nan)
-    for coordinate in np.ndindex(peaks.data.shape):
+    if peaks.data.dtype == np.dtype("O"):
+        navshape = peaks.data.shape
+    else:
+        navshape = peaks.axes_manager.navigation_shape[::-1]
+    pad = np.full((max_peak_len, *navshape, 2), np.nan)
+    for coordinate in np.ndindex(navshape):
         array = peaks.data[coordinate]
         sl = (slice(0, array.shape[0]), *coordinate, slice(None))
         pad[sl] = array
