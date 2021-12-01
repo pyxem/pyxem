@@ -18,6 +18,11 @@ Removed
 ^^^^^^^
 - lazy_* virtual imaging has been removed, use get_integrated_intensity (#722)
 
+Fixed
+^^^^^
+- Generalized plotting diffraction vectors on ND stacks of images (#783)
+- Small bugfix with dask/cuda scheduler to prevent running out of VRAM (#779)
+
 2021-04-14 - version 0.13.2
 ---------------------------
 
