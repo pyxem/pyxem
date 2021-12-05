@@ -115,13 +115,13 @@ def filter_vectors_ragged(z, min_magnitude, max_magnitude):
     """
     # Calculate norms
     norms = []
-    for i in z[0]:
+    for i in z:
         norms.append(np.linalg.norm(i))
     norms = np.asarray(norms)
     # Filter based on norms
     norms[norms < min_magnitude] = 0
     norms[norms > max_magnitude] = 0
-    filtered_vectors = z[0][np.where(norms)]
+    filtered_vectors = z[np.where(norms)]
 
     return filtered_vectors
 

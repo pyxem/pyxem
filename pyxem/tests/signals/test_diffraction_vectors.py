@@ -109,7 +109,7 @@ def diffraction_vectors_single(request):
     ]
 )
 def diffraction_vectors_map(request):
-    dvm = DiffractionVectors(request.param)
+    dvm = DiffractionVectors(request.param, ragged=True)
     dvm.axes_manager.set_signal_dimension(0)
     dvm.axes_manager[0].name = "x"
     dvm.axes_manager[1].name = "y"
