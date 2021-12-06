@@ -85,6 +85,7 @@ def find_diffraction_calibration(
     return mean_cal,full_corrlines, found_cals
 
 def _calibration_iteration(images,calibration_guess,library_phases,stepsize,size,num_patterns,max_excitation_error,**kwargs):
+    
     corrlines = np.zeros((0,2,num_patterns))
     temp_line = np.zeros((1,2,num_patterns))
     cal_guess_greater = calibration_guess
@@ -107,7 +108,7 @@ def _create_check_diflib(images,cal_guess,library_phases,num_patterns,max_excita
     
     half_shape = (images.data.shape[-2]//2, images.data.shape[-1]//2)
     reciprocal_r = np.sqrt(half_shape[0]**2 + half_shape[1]**2)*cal_guess
-    diff_lib = lib_gen.get_diffraction_library(library_phases,calibration=cal_guess,reciprocal_radius=reciprocal_r,
+    diff_lib = get_diffraction_library(library_phases,calibration=cal_guess,reciprocal_radius=reciprocal_r,
                                                half_shape=half_shape,with_direct_beam=False,max_excitation_error=max_excitation_error)
 
     result, phasedict = index_dataset_with_template_rotation(images,
