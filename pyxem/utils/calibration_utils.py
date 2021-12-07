@@ -24,17 +24,20 @@ from diffsims.generators.library_generator import DiffractionLibraryGenerator
 def find_diffraction_calibration(
     patterns,calibration_guess,library_phases,lib_gen,size,max_excitation_error = 0.01, **kwargs
 ):
-    """Finds the diffraction calibration for a pattern or set of patterns by maximizing correlation scores.
+    """Finds the optimal diffraction calibration for a pattern or set of patterns by optimizing correlation scores.
     
     Parameters
     ----------
     patterns : hyperspy:Signal2D object
-        Diffration patterns to be iteratively matched to find maximum correlation scores.
+        Diffration patterns to be iteratively matched to find maximum correlation scores.  Should be of known phase.
     calibration_guess : float
-        Inital value for the diffraction calibration in inverse Angstoms per pixel
+        Inital value for the diffraction calibration in inverse Angstoms per pixel.
     library_phases : diffsims:StructureLibrary Object
         Dictionary of structures and associated orientations for which
-        electron diffraction is to be simulated.
+        electron diffraction is to be simulated.  Used to create the DiffractionLibrary.
+    lib_gen : diffsims:DiffractionLibraryGenerator Object
+        Computes a library of electron diffraction patterns for specified atomic
+        structures and orientations.  Used to create the DiffractionLibrary.
     size : integer
         How many different steps to test for the first two iterations.
     max_excitation_error : float
