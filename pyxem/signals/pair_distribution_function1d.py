@@ -15,9 +15,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
-"""Signal class for Pair Distribution Function (PDF) radial profiles
-as a function of distance r.
-"""
+
 
 from hyperspy.signals import Signal1D
 
@@ -25,6 +23,9 @@ from pyxem.utils.pdf_utils import normalise_pdf_signal_to_max
 
 
 class PairDistributionFunction1D(Signal1D):
+    """Signal class for Pair Distribution Function (PDF) radial profiles
+    as a function of distance r.
+    """
     _signal_type = "pair_distribution_function"
 
     def normalise_signal(self, s_min=0, inplace=False, *args, **kwargs):

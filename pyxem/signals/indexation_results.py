@@ -47,6 +47,7 @@ def crystal_from_vector_matching(z_matches):
     results_array : numpy.array
         Crystallographic mapping results in an array of shape (3) with entries
         [phase, np.array((z, x, z)), dict(metrics)]
+
     """
     if z_matches.shape == (1,):  # pragma: no cover
         z_matches = z_matches[0]
@@ -91,6 +92,7 @@ def _peaks_from_best_template(single_match_result, library, rank=0):
     -------
     peaks : array
         Coordinates of peaks in the matching results object in calibrated units.
+
     """
     best_fit = get_nth_best_solution(single_match_result, "template", rank=rank)
 
@@ -117,6 +119,7 @@ def _get_best_match(z):
     -------
     z_best : np.array
         array with shape (5,)
+
     """
     return z[np.argmax(z[:, -1]),:] 
 
@@ -132,6 +135,7 @@ class GenericMatchingResults:
         Returns
         -------
         orix.CrystalMap
+
         """
         _s = self.data.map(_get_best_match, inplace=False)
 
@@ -172,6 +176,7 @@ class TemplateMatchingResults(GenericMatchingResults):
     Exporting the best matches to a crystal map
 
     >>> xmap = TemplateMatchingResult.to_crystal_map()
+
     """
 
     def plot_best_matching_results_on_signal(
@@ -192,6 +197,7 @@ class TemplateMatchingResults(GenericMatchingResults):
             Arguments passed to signal.plot()
         **kwargs :
             Keyword arguments passed to signal.plot()
+
         """
         match_peaks = self.data.map(
             _peaks_from_best_template, library=library, inplace=False
@@ -234,14 +240,14 @@ class VectorMatchingResults(BaseSignal):
             Crystallographic mapping results containing the best matching phase
             and orientation at each navigation position with associated metrics.
             The Signal at each navigation position is an array of,
-                            [phase, np.array((z,x,z)), dict(metrics)]
+            [phase, np.array((z,x,z)), dict(metrics)]
             which defines the phase, orientation as Euler angles in the zxz
             convention and metrics associated with the matching.
             Metrics for template matching results are
-                'match_rate'
-                'total_error'
-                'orientation_reliability'
-                'phase_reliability'
+            'match_rate'
+            'total_error'
+            'orientation_reliability'
+            'phase_reliability'
         """
         crystal_map = self.map(
             crystal_from_vector_matching, inplace=False, *args, **kwargs
@@ -264,6 +270,7 @@ class VectorMatchingResults(BaseSignal):
         -------
         indexed_vectors : DiffractionVectors
             An indexed diffraction vectors object.
+
         """
         if overwrite is False:
             if vectors.hkls is not None:

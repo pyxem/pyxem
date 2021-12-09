@@ -15,13 +15,14 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
-"""Signal class for Electron Diffraction radial profiles."""
+
 from hyperspy._signals.lazy import LazySignal
 
 from pyxem.signals.diffraction1d import Diffraction1D
 
 
 class ElectronDiffraction1D(Diffraction1D):
+    """Signal class for Electron Diffraction radial profiles."""
     _signal_type = "electron_diffraction"
 
     def set_experimental_parameters(

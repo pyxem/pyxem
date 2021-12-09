@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+"""Classes to help with generating some more complicated analysis/workflow"""
+
 from .calibration_generator import CalibrationGenerator
 from .displacement_gradient_tensor_generator import (
     get_DisplacementGradientMap,

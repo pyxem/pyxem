@@ -15,12 +15,13 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
-"""Signal class for one-dimensional diffraction variance."""
+
 
 from pyxem.signals.diffraction1d import Diffraction1D
 
 
 class DiffractionVariance1D(Diffraction1D):
+    """Signal class for one-dimensional diffraction variance."""
     _signal_type = "diffraction_variance"
 
     pass

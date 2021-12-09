@@ -15,7 +15,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
-"""Signal class for virtual diffraction contrast images."""
+
 import numpy as np
 
 from hyperspy.signals import Signal2D
@@ -26,6 +26,7 @@ from pyxem.utils.segment_utils import separate_watershed
 
 
 class VirtualDarkFieldImage(Signal2D):
+    """Signal class for virtual diffraction contrast images."""
     _signal_type = "virtual_dark_field"
 
     def __init__(self, *args, **kwargs):
