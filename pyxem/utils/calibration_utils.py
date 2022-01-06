@@ -200,7 +200,7 @@ def _calibration_iteration(
 def _create_check_diflib(
     images, calibration_guess, library_phases, lib_gen, max_excitation_error, **kwargs
 ):
-    """For use in find_diffraction_calibration through _calibration_iteration.  Creates a new DiffractionLibrary from the inputs and then matches it the images.
+    """For use in find_diffraction_calibration via _calibration_iteration.  Creates a new DiffractionLibrary from the inputs and then matches it the images.
 
     Parameters
     ----------
@@ -235,5 +235,5 @@ def _create_check_diflib(
     )
 
     result, phasedict = index_dataset_with_template_rotation(images, diff_lib, **kwargs)
-    correlations = result["correlation"][0, :, 0]
+    correlations = result["correlation"][:, :, 0].flatten()
     return correlations
