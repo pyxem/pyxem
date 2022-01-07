@@ -137,6 +137,8 @@ class DiffractionVectors(BaseSignal):
         self.hkls = None
         self.detector_shape = None
         self.pixel_calibration = None
+        if self.data.dtype == object:
+            self.ragged = True
 
     @classmethod
     def from_peaks(cls, peaks, center, calibration):
@@ -651,16 +653,16 @@ class DiffractionVectors(BaseSignal):
         """
         if in_range:
             filtered = self.filter_magnitude(in_range[0], in_range[1])
-            xim = filtered.map(get_npeaks, inplace=False).as_signal2D((0, 1))
+            xim = filtered.map(get_npeaks, inplace=False, ragged=False)
         else:
-            xim = self.map(get_npeaks, inplace=False).as_signal2D((0, 1))
+            xim = self.map(get_npeaks, inplace=False, ragged=False)
+        xim.set_signal_type("")
+        xim = xim.as_signal2D((0, 1))
         # Make binary if specified
         if binary is True:
             xim = xim >= 1.0
         # Set properties
-        xim = transfer_navigation_axes_to_signal_axes(xim, self)
         xim.change_dtype("float")
-        xim.set_signal_type("signal2d")
         xim.metadata.General.title = "Diffracting Pixels Map"
 
         return xim
