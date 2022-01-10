@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -17,13 +17,14 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import pytest
+
 import diffpy
 import hyperspy.api as hs
 import numpy as np
 
-from diffsims.libraries.structure_library import StructureLibrary
 from diffsims.generators.diffraction_generator import DiffractionGenerator
 from diffsims.generators.library_generator import DiffractionLibraryGenerator
+from diffsims.libraries.structure_library import StructureLibrary
 from pyxem.utils import calibration_utils
 
 
