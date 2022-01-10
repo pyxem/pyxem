@@ -13,6 +13,7 @@ Added
 - Add Symmetry1D signal class and symmetry analysis methods (#724)
 - BeamShift class, which includes the `make_linear_plane` method for better correction of the beam shift when scanning large regions in STEM (#746)
 - Add unit testing of docstring examples (#766)
+- Add find_diffraction_calibration (#785)
 
 Removed
 ^^^^^^^
