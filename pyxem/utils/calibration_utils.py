@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -47,7 +47,7 @@ def find_diffraction_calibration(
         Computes a library of electron diffraction patterns for specified atomic
         structures and orientations.  Used to create the DiffractionLibrary.
     size : integer
-        How many different steps to test for the first two iterations.
+        How many different steps to test for the first two iterations. These steps have a size of 1% of the calibration guess.
     max_excitation_error : float
         Maximum exacitation error.  Default is 0.01.
     kwargs
