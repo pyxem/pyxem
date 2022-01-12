@@ -30,7 +30,7 @@ from skimage.morphology import disk
 from sklearn.cluster import DBSCAN
 
 from skimage import __version__ as skimage_version_str
-if Version(skimage_version_str) <= Version("0.19"):
+if Version(skimage_version_str) < Version("0.19"):
     from skimage.morphology import watershed
 else:
     from skimage.segmentation import watershed
