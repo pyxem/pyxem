@@ -35,7 +35,7 @@ class TestCalibrations:
             max_excitation_error=0.08,
         )
         np.testing.assert_allclose(
-            cals, np.array([0.0099, 0.0100, 0.0099]), atol=1e-4
+            cals, np.array([0.009991, 0.010088, 0.009991]), atol=1e-6
         )
 
     def test_calibration_iteration(
@@ -55,18 +55,18 @@ class TestCalibrations:
             [
                 [
                     [0.0097, 0.0097, 0.0097],
-                    [0.0486, 0.0304, 0.0],
+                    [0.048681, 0.030438, 0.0],
                 ],
                 [
                     [0.0097, 0.0097, 0.0097],
-                    [0.0486, 0.0304, 0.0],
+                    [0.048681, 0.030438, 0.0],
                 ],
             ]
         )
         np.testing.assert_allclose(
             test_corrlines,
             true_corrlines,
-            atol=1e-4,
+            atol=1e-6,
         )
 
     def test_create_check_diflib(
@@ -81,6 +81,6 @@ class TestCalibrations:
         )
         np.testing.assert_allclose(
             test_corrs,
-            np.array([0.0486, 0.0304, 0.0]),
-            atol=1e-4,
+            np.array([0.048681, 0.030438, 0.0]),
+            atol=1e-6,
         )
