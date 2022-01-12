@@ -1724,7 +1724,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 parallel=parallel,
                 radial_array_size=radial_array_size,
                 show_progressbar=show_progressbar,
-                lazy_result=False,
+                lazy_output=False,
             )
             data = s_radial.data
         s_radial = hs.signals.Signal1D(data)
