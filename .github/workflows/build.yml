@@ -28,6 +28,7 @@ jobs:
       - name: TEMP Install development version of HyperSpy, only for testing!
         shell: bash
         run: pip install https://github.com/hyperspy/hyperspy/archive/refs/heads/RELEASE_next_minor.tar.gz
+        run: pip install scikit-image==0.18.3
       - name: Run tests
         run: pytest --cov=pyxem --runslow --pyargs pyxem
       - name: Generate line coverage
