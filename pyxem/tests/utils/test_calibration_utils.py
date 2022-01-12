@@ -17,67 +17,12 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import pytest
-
-import diffpy
-import hyperspy.api as hs
 import numpy as np
 
-from diffsims.generators.diffraction_generator import DiffractionGenerator
-from diffsims.generators.library_generator import DiffractionLibraryGenerator
-from diffsims.libraries.structure_library import StructureLibrary
 from pyxem.utils import calibration_utils
 
 
 class TestCalibrations:
-    @pytest.fixture
-    def test_patterns(self):
-        patterns = hs.signals.Signal2D(np.zeros((3, 1, 128, 128)))
-        _001_indexs = (
-            np.array([31, 31, 31, 64, 64, 97, 97, 97]),
-            np.array([31, 64, 97, 31, 97, 31, 64, 97]),
-        )
-        _101_indexs = (
-            np.array([17, 17, 17, 64, 64, 111, 111, 111]),
-            np.array([31, 64, 97, 31, 97, 31, 64, 97]),
-        )
-        _111_indexs = (
-            np.array([23, 23, 64, 64, 105, 105]),
-            np.array([40, 88, 17, 111, 40, 88]),
-        )
-        for i in range(8):
-            patterns.inav[0, 0].isig[_001_indexs[1][i], _001_indexs[0][i]] = 24.0
-            patterns.inav[0, 1].isig[_101_indexs[1][i], _101_indexs[0][i]] = 24.0
-        for i in range(6):
-            patterns.inav[0, 2].isig[_111_indexs[1][i], _111_indexs[0][i]] = 24.0
-        return patterns
-
-    @pytest.fixture
-    def test_lib_gen(self):
-        diff_gen = DiffractionGenerator(
-            accelerating_voltage=200,
-            precession_angle=1,
-            scattering_params=None,
-            shape_factor_model="linear",
-            minimum_intensity=0.1,
-        )
-
-        lib_gen = DiffractionLibraryGenerator(diff_gen)
-        return lib_gen
-
-    @pytest.fixture
-    def test_library_phases(self):
-
-        latt = diffpy.structure.lattice.Lattice(3, 3, 3, 90, 90, 90)
-        atom = diffpy.structure.atom.Atom(atype="Ni", xyz=[0, 0, 0], lattice=latt)
-        structure = diffpy.structure.Structure(atoms=[atom], lattice=latt)
-
-        library_phases_test = StructureLibrary(
-            ["Test"],
-            [structure],
-            [np.array([(0, 0, 90), (0, 44, 90), (0, 54.735, 45)])],
-        )
-        return library_phases_test
-
     def test_find_diffraction_calibration(
         self, test_patterns, test_lib_gen, test_library_phases
     ):
@@ -89,7 +34,9 @@ class TestCalibrations:
             10,
             max_excitation_error=0.08,
         )
-        np.testing.assert_array_equal(cals, np.array([0.009991, 0.010088, 0.009991]))
+        np.testing.assert_allclose(
+            cals, np.array([0.0099, 0.0100, 0.0099]), atol=1e-4
+        )
 
     def test_calibration_iteration(
         self, test_patterns, test_lib_gen, test_library_phases
@@ -104,20 +51,22 @@ class TestCalibrations:
             3,
             max_excitation_error=0.08,
         )
-        np.testing.assert_array_equal(
-            test_corrlines,
-            np.array(
+        true_corrlines = np.array(
+            [
                 [
-                    [
-                        [0.0097, 0.0097, 0.0097],
-                        [0.04868166319084026, 0.030438239690292822, 0.0],
-                    ],
-                    [
-                        [0.0097, 0.0097, 0.0097],
-                        [0.048681663190840262, 0.030438239690292822, 0.0],
-                    ],
-                ]
-            ),
+                    [0.0097, 0.0097, 0.0097],
+                    [0.0486, 0.0304, 0.0],
+                ],
+                [
+                    [0.0097, 0.0097, 0.0097],
+                    [0.0486, 0.0304, 0.0],
+                ],
+            ]
+        )
+        np.testing.assert_allclose(
+            test_corrlines,
+            true_corrlines,
+            atol=1e-4,
         )
 
     def test_create_check_diflib(
@@ -130,6 +79,8 @@ class TestCalibrations:
             test_lib_gen,
             max_excitation_error=0.08,
         )
-        np.testing.assert_array_equal(
-            test_corrs, np.array([0.04868166319084026, 0.030438239690292822, 0.0])
+        np.testing.assert_allclose(
+            test_corrs,
+            np.array([0.0486, 0.0304, 0.0]),
+            atol=1e-4,
         )
