@@ -25,6 +25,9 @@ jobs:
       - name: Install dependencies and package
         shell: bash
         run: pip install -U -e .'[tests]'
+      - name: TEMP Install development version of HyperSpy, only for testing!
+        shell: bash
+        run: pip install https://github.com/hyperspy/hyperspy/archive/refs/heads/RELEASE_next_minor.tar.gz
       - name: Run docstring tests
         run: pytest --doctest-modules --ignore=pyxem/tests pyxem
       - name: Run tests
