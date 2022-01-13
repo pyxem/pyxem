@@ -28,7 +28,7 @@ credits = [
     "Mohsen Danaie",
     "Andrew Herzing",
     "Tim Poon",
-    "Shuoyan Huang",
+    "Shuoyuan Huang",
     "Tiarnan Doherty",
     "Affan Iqbal",
     "Jedrzej Morzy",
