@@ -16,19 +16,16 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+import matplotlib.pyplot as plt
 import numpy as np
 from numpy.ma import masked_where
-
-import matplotlib.pyplot as plt
-
 from scipy.ndimage import distance_transform_edt, label, binary_erosion
 from scipy.spatial import distance_matrix
 from scipy.signal import convolve2d
-
 from skimage.feature import peak_local_max
 from skimage.filters import sobel, threshold_li
-from skimage.morphology import watershed, disk
-
+from skimage.morphology import disk
+from skimage.segmentation import watershed
 from sklearn.cluster import DBSCAN
 
 
