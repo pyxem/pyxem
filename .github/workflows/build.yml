@@ -25,12 +25,13 @@ jobs:
       - name: Install dependencies and package
         shell: bash
         run: pip install -U -e .'[tests]'
+
       - name: TEMP Install development version of HyperSpy, only for testing!
         shell: bash
         run: pip install https://github.com/hyperspy/hyperspy/archive/refs/heads/RELEASE_next_minor.tar.gz
-      - name: TEMP Install older skimage version
-        shell: bash
-        run: pip install scikit-image==0.18.3
+      - name: Run docstring tests
+        continue-on-error: true
+        run: pytest --doctest-modules --ignore=pyxem/tests pyxem
       - name: Run tests
         run: pytest --cov=pyxem --runslow --pyargs pyxem
       - name: Generate line coverage
