@@ -231,7 +231,7 @@ def test_lib_gen():
     diff_gen = DiffractionGenerator(
         accelerating_voltage=200,
         precession_angle=1,
-        scattering_params=None,
+        scattering_params="lobato",
         shape_factor_model="linear",
         minimum_intensity=0.1,
     )
