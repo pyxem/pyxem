@@ -26,6 +26,8 @@ pyxem is an extension of the hyperspy library for multi-dimensional data analysi
 
 **Installation instructions and tutorial examples are available** `here <https://github.com/pyxem/pyxem-demos>`__ .
 
+**Basic Documentation is available** `here <https://pyxem.readthedocs.io/en/latest/>`__.
+
 If analysis using pyxem forms a part of published work please cite the DOI at the top of this page.
 
 pyxem is released under the GPL v3 license.
