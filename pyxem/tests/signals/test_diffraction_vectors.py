@@ -406,7 +406,7 @@ class TestDiffractionVectorsFromPeaks:
         vectors = np.empty(5, dtype=object)
         for i in range(len(vectors)):
             vectors[i] = np.array([[15, 7]])
-        peaks = hs.signals.BaseSignal(vectors, ragged=True)
+        peaks = BaseSignal(vectors, ragged=True)
         center = (10, 5)
         calibration = 0.1
         peaks_cali = DiffractionVectors.from_peaks(peaks, center, calibration)
