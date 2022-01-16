@@ -376,7 +376,7 @@ class TestDiffractionVectorsFromPeaks:
                 assert peak_x == peak_cali_y
                 assert peak_y == peak_cali_x
 
-    @pytest.mark.parametrize("center", [(5, 5), (10, 10), ])#(5, 10), (20, 4)])
+    @pytest.mark.parametrize("center", [(5, 5), (10, 10), (5, 10), (20, 4)])
     def test_center(self, center):
         peaks = self.peaks
         calibration = 1
@@ -401,3 +401,19 @@ class TestDiffractionVectorsFromPeaks:
                 peak_cali_x, peak_cali_y = peaks_cali.data[iy, ix][ipeak]
                 assert peak_x * calibration == peak_cali_y
                 assert peak_y * calibration == peak_cali_x
+
+    def test_center_calibration_1d(self):
+        vectors = np.empty(5, dtype=object)
+        for i in range(len(vectors)):
+            vectors[i] = np.array([[15, 7]])
+        peaks = hs.signals.BaseSignal(vectors, ragged=True)
+        center = (10, 5)
+        calibration = 0.1
+        peaks_cali = DiffractionVectors.from_peaks(peaks, center, calibration)
+        for i in np.ndindex(peaks.data.shape):
+            assert peaks.data[i].shape == peaks_cali.data[i].shape
+            for ipeak in range(len(peaks.data[i])):
+                peak_x, peak_y = peaks.data[i][ipeak]
+                peak_cali_x, peak_cali_y = peaks_cali.data[i][ipeak]
+                assert (peak_x - center[0]) * calibration == peak_cali_y
+                assert (peak_y - center[1]) * calibration == peak_cali_x
