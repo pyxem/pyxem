@@ -556,18 +556,16 @@ class DiffractionVectors(BaseSignal):
             Diffraction vectors within allowed magnitude tolerances.
         """
         # If ragged the signal axes will not be defined
-        if len(self.axes_manager.signal_axes) == 0:
+        if self.ragged:
             filtered_vectors = self.map(
                 filter_vectors_ragged,
                 min_magnitude=min_magnitude,
                 max_magnitude=max_magnitude,
                 inplace=False,
+                ragged=True,
                 *args,
                 **kwargs
             )
-            # Type assignment to DiffractionVectors for return
-            filtered_vectors = DiffractionVectors(filtered_vectors)
-            filtered_vectors.axes_manager.set_signal_dimension(0)
         # Otherwise easier to calculate.
         else:
             magnitudes = self.get_magnitudes()
@@ -610,18 +608,16 @@ class DiffractionVectors(BaseSignal):
             - self.pixel_calibration * exclude_width
         )
         # If ragged the signal axes will not be defined
-        if len(self.axes_manager.signal_axes) == 0:
+        if self.ragged:
             filtered_vectors = self.map(
                 filter_vectors_edge_ragged,
                 x_threshold=x_threshold,
                 y_threshold=y_threshold,
                 inplace=False,
+                ragged=True,
                 *args,
                 **kwargs
             )
-            # Type assignment to DiffractionVectors for return
-            filtered_vectors = DiffractionVectors(filtered_vectors)
-            filtered_vectors.axes_manager.set_signal_dimension(0)
         # Otherwise easier to calculate.
         else:
             x_inbounds = (
