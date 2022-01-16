@@ -29,11 +29,12 @@ from pyxem.signals import DiffractionVectors, ElectronDiffraction2D
 
 @pytest.mark.parametrize("radius, offset", [[1, 0], [2, 1], [3, 2]])
 def test_integration_generator(radius, offset):
-    pixel_positions = np.array([[0, 0], [15, -15], [-15, 15]])
-    pattern = np.zeros((50, 50))
-    center = np.array(pattern.shape) / 2
-    i, j = (pixel_positions + center + offset).T.astype(int)
-    pattern[i, j] = 1
+    pixel_positions = np.empty((1, ), dtype=object)
+    pixel_positions[0] = np.array([[0, 0], [15, -15], [-15, 15]])
+    pattern = np.zeros((1, 50, 50))
+    center = np.array(pattern[0].shape) / 2
+    i, j = (pixel_positions[0] + center + offset).T.astype(int)
+    pattern[0, i, j] = 1
 
     dv = DiffractionVectors(pixel_positions)
     dp = ElectronDiffraction2D(pattern)
@@ -47,11 +48,12 @@ def test_integration_generator(radius, offset):
 
 
 def test_integration_generator_summation_method():
-    pixel_positions = np.array([[0, 0], [25, -25], [-25, 25]])
-    pattern = np.zeros((100, 100))
-    center = np.array(pattern.shape) / 2
-    i, j = (pixel_positions + center).T.astype(int)
-    pattern[i, j] = 1.0
+    pixel_positions = np.empty((1, ), dtype=object)
+    pixel_positions[0] = np.array([[0, 0], [25, -25], [-25, 25]])
+    pattern = np.zeros((1, 100, 100))
+    center = np.array(pattern[0].shape) / 2
+    i, j = (pixel_positions[0] + center).T.astype(int)
+    pattern[0, i, j] = 1.0
     pattern = gaussian_filter(pattern, 2)
 
     dv = DiffractionVectors(pixel_positions)
@@ -62,8 +64,8 @@ def test_integration_generator_summation_method():
 
     vectors = ig.extract_intensities_summation_method()
 
-    assert np.allclose(pixel_positions, vectors.data, atol=0.05)
-    assert np.allclose(vectors.data, pixel_positions, atol=0.05)
+    assert np.allclose(pixel_positions[0], vectors.data[0], atol=0.05)
+    assert np.allclose(vectors.data[0], pixel_positions[0], atol=0.05)
     assert np.allclose(vectors.intensities.data[0], 1.0, atol=0.05)
     assert np.allclose(vectors.sigma.data[0], 0.0, atol=0.05)
     assert isinstance(vectors, DiffractionVectors)
