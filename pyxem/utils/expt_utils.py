@@ -660,20 +660,24 @@ def peaks_as_gvectors(z, center, calibration):
     Parameters
     ----------
     z : numpy array
-        peak postitions as array indices.
+        Peak positions as array indices, in the form [[x0, y0], [x1, y1], ...]
     center : numpy array
-        diffraction pattern center in array indices.
+        Diffraction pattern center in array indices.
     calibration : float
-        calibration in reciprocal Angstroms per pixels.
+        Calibration in reciprocal Angstroms per pixels.
 
     Returns
     -------
     g : numpy array
-        peak positions in calibrated units.
+        Peak positions in calibrated units.
 
     """
-    g = (z - center) * calibration
-    return np.array([g[0].T[1], g[0].T[0]]).T
+    z = z.copy()
+    z = z.astype(float)
+    z[:, 0] -= center[0]
+    z[:, 1] -= center[1]
+    z *= calibration
+    return np.fliplr(z)
 
 
 def investigate_dog_background_removal_interactive(

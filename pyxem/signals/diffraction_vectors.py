@@ -140,10 +140,11 @@ class DiffractionVectors(BaseSignal):
         if self.data.dtype == object:
             self.ragged = True
 
+
     @classmethod
     def from_peaks(cls, peaks, center, calibration):
         """Takes a list of peak positions (pixel coordinates) and returns
-        an instance of `Diffraction2D`
+        an instance of `DiffractionVectors`
 
         Parameters
         ----------
@@ -161,13 +162,15 @@ class DiffractionVectors(BaseSignal):
             List of diffraction vectors
         """
         gvectors = peaks.map(
-            peaks_as_gvectors, center=center, calibration=calibration, inplace=False
+            peaks_as_gvectors,
+            center=center,
+            calibration=calibration,
+            ragged=True,
+            inplace=False
         )
-
         vectors = cls(gvectors)
-        vectors.axes_manager.set_signal_dimension(0)
-
         return vectors
+
 
     def plot_diffraction_vectors(
         self,

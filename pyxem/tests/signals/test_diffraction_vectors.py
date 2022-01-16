@@ -20,7 +20,7 @@ import pytest
 import numpy as np
 from sklearn.cluster import DBSCAN
 
-from hyperspy.signals import Signal2D
+from hyperspy.signals import BaseSignal, Signal2D
 
 from pyxem.signals import DiffractionVectors
 
@@ -354,3 +354,50 @@ class TestDiffractingPixelsMap:
         answer = np.array([[1.0, 1.0], [1.0, 1.0]])
         xim = diffraction_vectors_map.get_diffracting_pixels_map(binary=True)
         assert np.allclose(xim, answer)
+
+
+class TestDiffractionVectorsFromPeaks:
+    def setup_method(self):
+        vectors = np.empty((1, 2), dtype=object)
+        vectors[0, 0] = np.array([[5, 10], [15, 7]])
+        vectors[0, 1] = np.array([[2, 1], [5, 3], [4, 20]])
+        self.peaks = BaseSignal(vectors).T
+
+    def test_simple(self):
+        peaks = self.peaks
+        center = (0, 0)
+        calibration = 1
+        peaks_cali = DiffractionVectors.from_peaks(peaks, center, calibration)
+        for iy, ix in np.ndindex(peaks.data.shape):
+            assert peaks.data[iy, ix].shape == peaks_cali.data[iy, ix].shape
+            for ipeak in range(len(peaks.data[iy, ix])):
+                peak_x, peak_y = peaks.data[iy, ix][ipeak]
+                peak_cali_x, peak_cali_y = peaks_cali.data[iy, ix][ipeak]
+                assert peak_x == peak_cali_y
+                assert peak_y == peak_cali_x
+
+    @pytest.mark.parametrize("center", [(5, 5), (10, 10), ])#(5, 10), (20, 4)])
+    def test_center(self, center):
+        peaks = self.peaks
+        calibration = 1
+        peaks_cali = DiffractionVectors.from_peaks(peaks, center, calibration)
+        for iy, ix in np.ndindex(peaks.data.shape):
+            assert peaks.data[iy, ix].shape == peaks_cali.data[iy, ix].shape
+            for ipeak in range(len(peaks.data[iy, ix])):
+                peak_x, peak_y = peaks.data[iy, ix][ipeak]
+                peak_cali_x, peak_cali_y = peaks_cali.data[iy, ix][ipeak]
+                assert peak_x - center[0] == peak_cali_y
+                assert peak_y - center[1] == peak_cali_x
+
+    @pytest.mark.parametrize("calibration", [0.5, 0.1, 10, 5.5])
+    def test_center(self, calibration):
+        peaks = self.peaks
+        center = (0, 0)
+        peaks_cali = DiffractionVectors.from_peaks(peaks, center, calibration)
+        for iy, ix in np.ndindex(peaks.data.shape):
+            assert peaks.data[iy, ix].shape == peaks_cali.data[iy, ix].shape
+            for ipeak in range(len(peaks.data[iy, ix])):
+                peak_x, peak_y = peaks.data[iy, ix][ipeak]
+                peak_cali_x, peak_cali_y = peaks_cali.data[iy, ix][ipeak]
+                assert peak_x * calibration == peak_cali_y
+                assert peak_y * calibration == peak_cali_x
