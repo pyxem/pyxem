@@ -261,7 +261,7 @@ def get_npeaks(found_peaks):
     len : int
         The number of peaks in the array.
     """
-    return len(found_peaks[0])
+    return len(found_peaks)
 
 
 def get_angle_cartesian_vec(a, b):
