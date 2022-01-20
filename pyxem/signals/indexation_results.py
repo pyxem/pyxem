@@ -121,7 +121,53 @@ def _get_best_match(z):
         array with shape (5,)
 
     """
-    return z[np.argmax(z[:, -1]),:] 
+    return z[np.argmax(z[:, -1]), :]
+
+
+def results_dict_to_crystal_map(results):
+    """
+    Exports an indexation result from index_dataset_with_template_rotation to
+    crystal map with n_best rotations, score, mirrors and one phase_id per data point.
+    Parameters
+    ----------
+    results : dict
+        Results dictionary obtained from index_dataset_with_template_rotation.
+
+    Returns
+    -------
+    orix.CrystalMap
+    """
+
+    """ Gets properties """
+
+    shape = results["phase_index"].data.shape
+
+    phase_id = results["phase_index"][:, :, 0].flatten()
+    alpha = results["orientation"][:, :, :, 0].flatten()
+    beta = results["orientation"][:, :, :, 1].flatten()
+    gamma = results["orientation"][:, :, :, 2].flatten()
+    score = results["correlation"][:, :, :].flatten()
+    mirrors = results["mirrored_template"][:, :, :].flatten()
+
+    """ Gets navigation placements """
+    xy = np.indices(shape[:2])
+    x = xy[1].flatten()
+    y = xy[0].flatten()
+
+    """ Tidies up so we can put these things into CrystalMap """
+    euler = np.vstack((alpha, beta, gamma)).T
+    rotations = Rotation.from_euler(
+        np.radians(euler), convention="bunge", direction="crystal2lab"
+    )
+
+    """ Reshape to fit proper rotations_per_point """
+    rotations = rotations.reshape(shape[0] * shape[1], shape[2])
+    score = score.reshape(shape[0] * shape[1], shape[2])
+    mirrors = mirrors.reshape(shape[0] * shape[1], shape[2])
+
+    properties = {"score": score, "mirrored_template": mirrors}
+    return CrystalMap(rotations=rotations, phase_id=phase_id, x=x, y=y, prop=properties)
+
 
 class GenericMatchingResults:
     def __init__(self, data):
