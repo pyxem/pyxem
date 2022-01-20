@@ -124,7 +124,7 @@ def _get_best_match(z):
     return z[np.argmax(z[:, -1]), :]
 
 
-def test_results_dict_to_crystal_map(results, phase_key_dict, diffraction_library=None):
+def results_dict_to_crystal_map(results, phase_key_dict, diffraction_library=None):
     """
     Exports an indexation result from index_dataset_with_template_rotation to
     crystal map with n_best rotations, score, mirrors and one phase_id per data point.
