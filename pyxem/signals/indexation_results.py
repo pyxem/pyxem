@@ -23,7 +23,7 @@ from transforms3d.euler import mat2euler
 import hyperspy.api as hs
 from hyperspy.signal import BaseSignal
 from orix.quaternion import Rotation
-from orix.crystal_map import CrystalMap
+from orix.crystal_map import CrystalMap, PhaseList
 
 from pyxem.signals.diffraction_vectors import generate_marker_inputs_from_peaks
 from pyxem.utils.signal import transfer_navigation_axes
@@ -124,49 +124,69 @@ def _get_best_match(z):
     return z[np.argmax(z[:, -1]), :]
 
 
-def results_dict_to_crystal_map(results):
+def test_results_dict_to_crystal_map(results, phase_key_dict, diffraction_library=None):
     """
     Exports an indexation result from index_dataset_with_template_rotation to
     crystal map with n_best rotations, score, mirrors and one phase_id per data point.
     Parameters
+
     ----------
     results : dict
         Results dictionary obtained from index_dataset_with_template_rotation.
+    phase_key_dict : dict
+        Phase_key_dict obtained from index_dataset_with_template_rotation.
+    diffraction_library : diffsims.libraries.DiffractionLibrary
+        Optional: Used for the structures to be passed to orix.crystal_map.PhaseList
 
     Returns
     -------
-    orix.CrystalMap
+    orix.crystal_map.CrystalMap
     """
 
     """ Gets properties """
 
     shape = results["phase_index"].data.shape
+    datashape = shape[0] * shape[1], shape[2]
 
-    phase_id = results["phase_index"][:, :, 0].flatten()
-    alpha = results["orientation"][:, :, :, 0].flatten()
-    beta = results["orientation"][:, :, :, 1].flatten()
-    gamma = results["orientation"][:, :, :, 2].flatten()
-    score = results["correlation"][:, :, :].flatten()
-    mirrors = results["mirrored_template"][:, :, :].flatten()
+    phase_id = results["phase_index"][:, :, 0].ravel()
+    alpha = results["orientation"][:, :, :, 0].ravel()
+    beta = results["orientation"][:, :, :, 1].ravel()
+    gamma = results["orientation"][:, :, :, 2].ravel()
+    score = results["correlation"][:, :, :].ravel()
+    mirrors = results["mirrored_template"][:, :, :].ravel()
+
+    if diffraction_library != None:
+        structures = diffraction_library.structures
+    else:
+        structures = None
 
     """ Gets navigation placements """
     xy = np.indices(shape[:2])
-    x = xy[1].flatten()
-    y = xy[0].flatten()
+    x = xy[1].ravel()
+    y = xy[0].ravel()
 
     """ Tidies up so we can put these things into CrystalMap """
-    euler = np.vstack((alpha, beta, gamma)).T
+    euler = np.column_stack((alpha, beta, gamma))
     rotations = Rotation.from_euler(
-        np.radians(euler), convention="bunge", direction="crystal2lab"
+        np.deg2rad(euler), convention="bunge", direction="crystal2lab"
     )
 
     """ Reshape to fit proper rotations_per_point """
-    rotations = rotations.reshape(shape[0] * shape[1], shape[2])
-    score = score.reshape(shape[0] * shape[1], shape[2])
-    mirrors = mirrors.reshape(shape[0] * shape[1], shape[2])
+    rotations = rotations.reshape(*datashape)
+    score = score.reshape(datashape)
+    mirrors = mirrors.reshape(datashape)
+
+    phase_list = PhaseList(names=phase_key_dict, structures=structures)
 
     properties = {"score": score, "mirrored_template": mirrors}
-    return CrystalMap(rotations=rotations, phase_id=phase_id, x=x, y=y, prop=properties)
+    return CrystalMap(
+        rotations=rotations,
+        phase_id=phase_id,
+        x=x,
+        y=y,
+        phase_list=phase_list,
+        prop=properties,
+    )
 
 
 class GenericMatchingResults:
@@ -180,7 +200,7 @@ class GenericMatchingResults:
 
         Returns
         -------
-        orix.CrystalMap
+        orix.crystal_map.CrystalMap
 
         """
         _s = self.data.map(_get_best_match, inplace=False)
@@ -198,7 +218,7 @@ class GenericMatchingResults:
         y = xy[0].flatten()
 
         """ Tidies up so we can put these things into CrystalMap """
-        euler = np.vstack((alpha, beta, gamma)).T
+        euler = np.column_stack((alpha, beta, gamma))
         rotations = Rotation.from_euler(
             euler, convention="bunge", direction="crystal2lab"
         )
