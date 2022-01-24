@@ -21,6 +21,7 @@ import pytest
 from matplotlib import pyplot as plt
 from transforms3d.euler import euler2mat
 
+from hyperspy.signals import Signal2D
 from diffsims.libraries.structure_library import StructureLibrary
 from diffsims.generators.diffraction_generator import DiffractionGenerator
 from diffsims.generators.library_generator import DiffractionLibraryGenerator
@@ -32,6 +33,8 @@ from pyxem.signals import (
     DiffractionVectors,
 )
 from pyxem.utils.indexation_utils import OrientationResult
+from pyxem.utils.indexation_utils import index_dataset_with_template_rotation
+from pyxem.signals.indexation_results import results_dict_to_crystal_map
 
 
 def test_TemplateMatchingResults_to_crystal_map():
@@ -42,7 +45,7 @@ def test_TemplateMatchingResults_to_crystal_map():
 def test_TemplateMatchingResults_plot_best_results_on_signal(
     diffraction_pattern, default_structure
 ):
-    """ Coverage testing """
+    """Coverage testing"""
     edc = DiffractionGenerator(300)
     half_side_length = 4
     rot_list = [[0, 1, 0], [1, 0, 0]]
@@ -62,6 +65,35 @@ def test_TemplateMatchingResults_plot_best_results_on_signal(
         diffraction_pattern, library=library
     )
     plt.close("all")
+
+
+def test_results_dict_to_crystal_map(test_library_phases, test_lib_gen):
+    library_phases_Ni = test_library_phases
+    lib_gen = test_lib_gen
+    diff_lib_Ni = lib_gen.get_diffraction_library(
+        library_phases_Ni,
+        calibration=0.015,
+        reciprocal_radius=1.182243629714282,
+        half_shape=64,
+        with_direct_beam=False,
+        max_excitation_error=0.07,
+    )
+    test_set = Signal2D(np.zeros((3, 128, 128)))
+    for i in range(3):
+        test_pattern = diff_lib_Ni["Test"]["simulations"][i].get_diffraction_pattern(
+            size=128, sigma=4
+        )
+        test_set.inav[i] = test_pattern
+
+    result, phasedict = index_dataset_with_template_rotation(
+        test_set,
+        diff_lib_Ni,
+        phases=["Test"],
+        n_best=3,
+    )
+    return results_dict_to_crystal_map(
+        result, phasedict, diffraction_library=diff_lib_Ni
+    )
 
 
 @pytest.fixture
