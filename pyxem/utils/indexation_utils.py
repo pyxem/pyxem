@@ -518,54 +518,6 @@ def _match_polar_to_polar_template(
 
 
 @njit(parallel=True, nogil=True)
-def _correlate_polar_to_library_cpu(
-    polar_image,
-    r_templates,
-    theta_templates,
-    intensities_templates,
-):
-    """
-    Correlates a polar pattern to all polar templates at all in_plane angles
-
-    This is a direct copy of the cuda kernel serving for comparison.
-
-    Parameters
-    ----------
-    polar_image : (T, R) 2D numpy.ndarray
-        The image converted to polar coordinates
-    r_templates : (N, D) 2D numpy.ndarray
-        r-coordinates of diffraction spots in templates.
-    theta_templates : (N, D) 2D numpy ndarray
-        theta-coordinates of diffraction spots in templates.
-    intensities_templates : (N, D) 2D numpy.ndarray
-        intensities of the spots in each template
-
-    Returns
-    -------
-    correlations : (N, T) 2D numpy.ndarray
-        the correlation index for each template at all in-plane angles with the image
-    """
-    correlation = np.empty(
-        (r_templates.shape[0], polar_image.shape[0]), dtype=polar_image.dtype
-    )
-    for template in prange(r_templates.shape[0]):
-        for shift in prange(polar_image.shape[0]):
-            tmp = 0
-            for spot in range(r_templates.shape[1]):
-                if r_templates[template, spot] == 0:
-                    break
-                tmp += (
-                    polar_image[
-                        (theta_templates[template, spot] + shift)
-                        % polar_image.shape[0],
-                        r_templates[template, spot],
-                    ]
-                    * intensities_templates[template, spot]
-                )
-            correlation[template, shift] = tmp
-    return correlation
-
-
 def _match_polar_to_library_cpu(
     polar_image,
     r_templates,
@@ -603,16 +555,42 @@ def _match_polar_to_library_cpu(
     N is the number of templates and R the number of spots in the template
     with the maximum number of spots
     """
-    correlations = _correlate_polar_to_library_cpu(
-        polar_image, r_templates, theta_templates, intensities_templates
+    N = r_templates.shape[0]
+    D = r_templates.shape[1]
+    n_shifts = polar_image.shape[0]
+    best_in_plane_shift = np.empty(N, dtype=np.int32)
+    best_in_plane_shift_m = np.empty(N, dtype=np.int32)
+    best_in_plane_corr = np.empty(N, dtype=polar_image.dtype)
+    best_in_plane_corr_m = np.empty(N, dtype=polar_image.dtype)
+
+    for template in prange(N):
+        inplane_cor = np.zeros(n_shifts)
+        inplane_cor_m = np.zeros(n_shifts)
+        for spot in range(D):
+            rsp = r_templates[template, spot]
+            if rsp == 0:
+                break
+            tsp = theta_templates[template, spot]
+            isp = intensities_templates[template, spot]
+            spl = n_shifts - tsp
+            inplane_cor[:spl] += polar_image[tsp:, rsp] * isp
+            inplane_cor[spl:] += polar_image[:tsp, rsp] * isp
+            inplane_cor_m[:tsp] += polar_image[spl:, rsp] * isp
+            inplane_cor_m[tsp:] += polar_image[:spl, rsp] * isp
+
+        best_shift = np.argmax(inplane_cor)
+        best_shift_m = np.argmax(inplane_cor_m)
+        best_in_plane_shift[template] = best_shift
+        best_in_plane_shift_m[template] = best_shift_m
+        best_in_plane_corr[template] = inplane_cor[best_shift]
+        best_in_plane_corr_m[template] = inplane_cor_m[best_shift_m]
+
+    return (
+        best_in_plane_shift,
+        best_in_plane_shift_m,
+        best_in_plane_corr,
+        best_in_plane_corr_m,
     )
-    correlations_mirror = _correlate_polar_to_library_cpu(
-        polar_image,
-        r_templates,
-        (polar_image.shape[0] - theta_templates) % polar_image.shape[0],
-        intensities_templates,
-    )
-    return _get_best_correlations_and_angles(correlations, correlations_mirror)
 
 
 def _match_polar_to_polar_library_gpu(
