@@ -31,6 +31,7 @@ from pyxem.utils.cuda_utils import (
     to_numpy,
     get_array_module,
     _correlate_polar_image_to_library_gpu,
+    TPB,
 )
 
 from collections import namedtuple
@@ -518,7 +519,7 @@ def _match_polar_to_polar_template(
 
 
 @njit(parallel=True, nogil=True)
-def _match_polar_to_library_cpu(
+def _match_polar_to_polar_library_cpu(
     polar_image,
     r_templates,
     theta_templates,
@@ -542,10 +543,10 @@ def _match_polar_to_library_cpu(
     -------
     best_in_plane_shift : (N) 1D numpy.ndarray
         Shift for all templates that yields best correlation
-    best_in_plane_shift_m : (N) 1D numpy.ndarray
-        Shift for all mirrored templates that yields best correlation
     best_in_plane_corr : (N) 1D numpy.ndarray
         Correlation at best match for each template
+    best_in_plane_shift_m : (N) 1D numpy.ndarray
+        Shift for all mirrored templates that yields best correlation
     best_in_plane_corr_m : (N) 1D numpy.ndarray
         Correlation at best match for each mirrored template
 
@@ -556,7 +557,7 @@ def _match_polar_to_library_cpu(
     with the maximum number of spots
     """
     N = r_templates.shape[0]
-    D = r_templates.shape[1]
+    R = r_templates.shape[1]
     n_shifts = polar_image.shape[0]
     best_in_plane_shift = np.empty(N, dtype=np.int32)
     best_in_plane_shift_m = np.empty(N, dtype=np.int32)
@@ -566,18 +567,18 @@ def _match_polar_to_library_cpu(
     for template in prange(N):
         inplane_cor = np.zeros(n_shifts)
         inplane_cor_m = np.zeros(n_shifts)
-        for spot in range(D):
+        for spot in range(R):
             rsp = r_templates[template, spot]
             if rsp == 0:
                 break
             tsp = theta_templates[template, spot]
             isp = intensities_templates[template, spot]
-            spl = n_shifts - tsp
+            split = n_shifts - tsp
             column = polar_image[:, rsp] * isp
-            inplane_cor[:spl] += column[tsp:]
-            inplane_cor[spl:] += column[:tsp]
-            inplane_cor_m[:tsp] += column[spl:]
-            inplane_cor_m[tsp:] += column[:spl]
+            inplane_cor[:split] += column[tsp:]
+            inplane_cor[split:] += column[:tsp]
+            inplane_cor_m[:tsp] += column[split:]
+            inplane_cor_m[tsp:] += column[:split]
 
         best_shift = np.argmax(inplane_cor)
         best_shift_m = np.argmax(inplane_cor_m)
@@ -588,19 +589,17 @@ def _match_polar_to_library_cpu(
 
     return (
         best_in_plane_shift,
-        best_in_plane_shift_m,
         best_in_plane_corr,
+        best_in_plane_shift_m,
         best_in_plane_corr_m,
     )
 
 
 def _match_polar_to_polar_library_gpu(
-    pattern,
+    polar_image,
     r_templates,
     theta_templates,
     intensities_templates,
-    blockspergrid,
-    threadsperblock,
 ):
     """
     Correlates a polar pattern to all polar templates on GPU
@@ -620,10 +619,10 @@ def _match_polar_to_polar_library_gpu(
     -------
     best_in_plane_shift : (N) 1D cupy.ndarray
         Shift for all templates that yields best correlation
-    best_in_plane_shift_m : (N) 1D cupy.ndarray
-        Shift for all mirrored templates that yields best correlation
     best_in_plane_corr : (N) 1D cupy.ndarray
         Correlation at best match for each template
+    best_in_plane_shift_m : (N) 1D cupy.ndarray
+        Shift for all mirrored templates that yields best correlation
     best_in_plane_corr_m : (N) 1D cupy.ndarray
         Correlation at best match for each mirrored template
 
@@ -633,42 +632,27 @@ def _match_polar_to_polar_library_gpu(
     N is the number of templates and R the number of spots in the template
     with the maximum number of spots
     """
-    correlation = cp.empty((r_templates.shape[0], pattern.shape[0]), dtype=cp.float32)
+    correlation = cp.empty((r_templates.shape[0], polar_image.shape[0]), dtype=cp.float32)
+    correlation_m = cp.empty((r_templates.shape[0], polar_image.shape[0]), dtype=cp.float32)
+    threadsperblock = (1, TPB)
+    blockspergrid = (r_templates.shape[0], int(np.ceil(polar_image.shape[0] / TPB)))
     _correlate_polar_image_to_library_gpu[blockspergrid, threadsperblock](
-        pattern,
+        polar_image,
         r_templates,
         theta_templates,
         intensities_templates,
         correlation,
-    )
-    correlation_m = cp.empty((r_templates.shape[0], pattern.shape[0]), dtype=cp.float32)
-    _correlate_polar_image_to_library_gpu[blockspergrid, threadsperblock](
-        pattern,
-        r_templates,
-        (pattern.shape[0] - theta_templates) % pattern.shape[0],
-        intensities_templates,
         correlation_m,
     )
-    return _get_best_correlations_and_angles(correlation, correlation_m)
-
-
-def _get_best_correlations_and_angles(correlations, correlations_m):
-    """
-    Get the best correlations and in-plane angles from a set of correlation
-    matrices obtained from _match_polar_to_polar_library_cpu and
-    _match_polar_to_polar_library_gpu
-    """
-    dispatcher = get_array_module(correlations)
-    # find the best in-plane angles and correlations
-    best_in_plane_shift = dispatcher.argmax(correlations, axis=1).astype(np.int32)
-    best_in_plane_shift_m = dispatcher.argmax(correlations_m, axis=1).astype(np.int32)
-    rows = dispatcher.arange(correlations.shape[0], dtype=np.int32)
-    best_in_plane_corr = correlations[rows, best_in_plane_shift]
-    best_in_plane_corr_m = correlations_m[rows, best_in_plane_shift_m]
+    best_in_plane_shift = cp.argmax(correlation, axis=1).astype(np.int32)
+    best_in_plane_shift_m = cp.argmax(correlation_m, axis=1).astype(np.int32)
+    rows = cp.arange(correlation.shape[0], dtype=np.int32)
+    best_in_plane_corr = correlation[rows, best_in_plane_shift]
+    best_in_plane_corr_m = correlation_m[rows, best_in_plane_shift_m]
     return (
         best_in_plane_shift,
-        best_in_plane_shift_m,
         best_in_plane_corr,
+        best_in_plane_shift_m,
         best_in_plane_corr_m,
     )
 
@@ -851,7 +835,6 @@ def _mixed_matching_lib_to_polar(
     n_keep,
     frac_keep,
     n_best,
-    threadsperblock=(16, 16),
 ):
     """
     Match a polar image to a filtered subset of polar templates
@@ -878,8 +861,6 @@ def _mixed_matching_lib_to_polar(
         number of templates to pass to the full indexation
     n_best : int
         number of solutions to return in decending order of fit
-    threadsperblock : 2-tuple of ints
-        threads per block, only relevant for GPU implementation
 
     Return
     ------
@@ -915,7 +896,6 @@ def _mixed_matching_lib_to_polar(
         r_templates,
         theta_templates,
         intensities_templates,
-        threadsperblock=threadsperblock,
     )
     # compare positive and negative templates and combine
     positive_is_best = best_in_plane_corr >= best_in_plane_corr_m
@@ -969,7 +949,6 @@ def _index_chunk(
     frac_keep,
     n_best,
     norm_images,
-    threadsperblock=(16, 16),
     order=1,
 ):
     dispatcher = get_array_module(images)
@@ -998,7 +977,6 @@ def _index_chunk(
             n_keep,
             frac_keep,
             n_best,
-            threadsperblock,
         )
     return indexation_result_chunk
 
@@ -1238,40 +1216,13 @@ def _get_full_correlations(
     r,
     theta,
     intensities,
-    threadsperblock=(16, 16),
 ):
     # get a full match on the filtered data - we must branch for CPU/GPU
     if is_cupy_array(polar_image):
-        # we assume one thread per element
-        blockspergrid_x = int(np.ceil(r.shape[0] / threadsperblock[0]))
-        blockspergrid_y = int(np.ceil(polar_image.shape[0] / threadsperblock[1]))
-        blockspergrid = (blockspergrid_x, blockspergrid_y)
-        (
-            best_in_plane_shift,
-            best_in_plane_shift_m,
-            best_in_plane_corr,
-            best_in_plane_corr_m,
-        ) = _match_polar_to_polar_library_gpu(
-            polar_image, r, theta, intensities, blockspergrid, threadsperblock
-        )
+        f = _match_polar_to_polar_library_gpu
     else:
-        (
-            best_in_plane_shift,
-            best_in_plane_shift_m,
-            best_in_plane_corr,
-            best_in_plane_corr_m,
-        ) = _match_polar_to_library_cpu(
-            polar_image,
-            r,
-            theta,
-            intensities,
-        )
-    return (
-        best_in_plane_shift,
-        best_in_plane_corr,
-        best_in_plane_shift_m,
-        best_in_plane_corr_m,
-    )
+        f = _match_polar_to_polar_library_cpu
+    return f(polar_image, r, theta, intensities)
 
 
 def correlate_library_to_pattern(
@@ -1287,7 +1238,6 @@ def correlate_library_to_pattern(
     direct_beam_position=None,
     normalize_image=True,
     normalize_templates=True,
-    threadsperblock=(16, 16),
 ):
     """
     Get the best angle and associated correlation values, as well as the correlation with the inverted templates
@@ -1324,9 +1274,6 @@ def correlate_library_to_pattern(
         normalize the image to calculate the correlation coefficient
     normalize_templates : bool, optional
         normalize the templates to calculate the correlation coefficient
-    threadsperblock : 2-Tuple of int
-        Determines how the code is executed on GPU, only relevant if
-        the polar image is a cupy array.
 
     Returns
     -------
@@ -1372,7 +1319,6 @@ def correlate_library_to_pattern(
         r,
         theta,
         intensities,
-        threadsperblock,
     )
     return (
         indexes,
@@ -1397,7 +1343,6 @@ def get_n_best_matches(
     direct_beam_position=None,
     normalize_image=True,
     normalize_templates=True,
-    threadsperblock=(16, 16),
 ):
     """
     Get the n templates best matching an image in descending order
@@ -1435,9 +1380,6 @@ def get_n_best_matches(
         normalize the image to calculate the correlation coefficient
     normalize_templates : bool, optional
         normalize the templates to calculate the correlation coefficient
-    threadsperblock : 2-Tuple of int
-        number of threads per block in the cuda matching operation. Only
-        important when using a gpu.
 
     Returns
     -------
@@ -1475,7 +1417,6 @@ def get_n_best_matches(
         n_keep,
         frac_keep,
         n_best,
-        threadsperblock,
     )
     indices = answer[:, 0].astype(np.int32)
     cors = answer[:, 1]
@@ -1500,7 +1441,6 @@ def index_dataset_with_template_rotation(
     chunks="auto",
     parallel_workers="auto",
     target="cpu",
-    threadsperblock=(16, 16),
     scheduler="threads",
     precision=np.float64,
 ):
@@ -1553,9 +1493,6 @@ def index_dataset_with_template_rotation(
         Use "cpu" or "gpu". If "gpu" is selected, the majority of the calculation
         intensive work will be performed on the CUDA enabled GPU. Fails if no
         such hardware is available.
-    threadsperblock: 2-tuple of ints
-        Only relevant when using GPU, determines how many threads in a block
-        the cuda kernel is executed over when indexing patterns
     scheduler: string
         The scheduler used by dask to compute the result. "processes" is not
         recommended.
@@ -1726,7 +1663,6 @@ def index_dataset_with_template_rotation(
         frac_keep,
         n_best,
         normalize_images,
-        threadsperblock,
         dtype=precision,
         drop_axis=signal.axes_manager.signal_indices_in_array,
         chunks=(data.chunks[0], data.chunks[1], n_best, 4),
