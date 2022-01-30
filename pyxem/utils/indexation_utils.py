@@ -573,10 +573,11 @@ def _match_polar_to_library_cpu(
             tsp = theta_templates[template, spot]
             isp = intensities_templates[template, spot]
             spl = n_shifts - tsp
-            inplane_cor[:spl] += polar_image[tsp:, rsp] * isp
-            inplane_cor[spl:] += polar_image[:tsp, rsp] * isp
-            inplane_cor_m[:tsp] += polar_image[spl:, rsp] * isp
-            inplane_cor_m[tsp:] += polar_image[:spl, rsp] * isp
+            column = polar_image[:, rsp] * isp
+            inplane_cor[:spl] += column[tsp:]
+            inplane_cor[spl:] += column[:tsp]
+            inplane_cor_m[:tsp] += column[spl:]
+            inplane_cor_m[tsp:] += column[:spl]
 
         best_shift = np.argmax(inplane_cor)
         best_shift_m = np.argmax(inplane_cor_m)
