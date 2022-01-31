@@ -67,32 +67,44 @@ def test_TemplateMatchingResults_plot_best_results_on_signal(
     plt.close("all")
 
 
-def test_results_dict_to_crystal_map(test_library_phases, test_lib_gen):
-    library_phases_Ni = test_library_phases
+def test_results_dict_to_crystal_map(test_library_phases_multi, test_lib_gen):
+    library_phases = test_library_phases_multi
     lib_gen = test_lib_gen
-    diff_lib_Ni = lib_gen.get_diffraction_library(
-        library_phases_Ni,
+    diff_lib = lib_gen.get_diffraction_library(
+        library_phases,
         calibration=0.015,
         reciprocal_radius=1.182243629714282,
-        half_shape=64,
+        half_shape=(64, 64),
         with_direct_beam=False,
         max_excitation_error=0.07,
     )
-    test_set = Signal2D(np.zeros((3, 128, 128)))
-    for i in range(3):
-        test_pattern = diff_lib_Ni["Test"]["simulations"][i].get_diffraction_pattern(
-            size=128, sigma=4
-        )
-        test_set.inav[i] = test_pattern
 
+    nav_shape = (2, 6)
+    sig_shape = (128, 128)
+    test_set = np.zeros(nav_shape + sig_shape)
+
+    phase_id = np.zeros(nav_shape, dtype=int)
+    phase_id[:, [1, 3, 5]] = 1
+    phase_names = list(diff_lib.keys())
+
+    for idx in np.ndindex(*nav_shape):
+        i = phase_id[idx]
+        
+        test_pattern = diff_lib[phase_names[i]]["simulations"][
+            int(idx[1] / 2)
+        ].get_diffraction_pattern(size=sig_shape[0], sigma=4)
+        
+        test_set[idx] = test_pattern
+        test_data = Signal2D(test_set)
     result, phasedict = index_dataset_with_template_rotation(
-        test_set,
-        diff_lib_Ni,
-        phases=["Test"],
+        test_data,
+        diff_lib,
+        phases=phase_names,
         n_best=3,
     )
-    return results_dict_to_crystal_map(
-        result, phasedict, diffraction_library=diff_lib_Ni
+    xmap = results_dict_to_crystal_map(result, phasedict, diffraction_library=diff_lib)
+    np.testing.assert_allclose(
+        xmap.phase_id.reshape(nav_shape), result["phase_index"][:, :, 0]
     )
 
 
