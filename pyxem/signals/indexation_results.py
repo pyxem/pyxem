@@ -183,6 +183,7 @@ def results_dict_to_crystal_map(results, phase_key_dict, diffraction_library=Non
             prop = results[key]
         except KeyError:
             warn(f"Property '{key}' was expected but not found in `results`")
+            continue
 
         if n_phases > 1:
             prop = prop[:, :, 0].ravel()  # Keep best match only
