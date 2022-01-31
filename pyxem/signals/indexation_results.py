@@ -16,18 +16,18 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-from warnings import warn
 import numpy as np
 from transforms3d.euler import mat2euler
+from warnings import warn
 
 import hyperspy.api as hs
 from hyperspy.signal import BaseSignal
-from orix.quaternion import Rotation
 from orix.crystal_map import CrystalMap, PhaseList
+from orix.quaternion import Rotation
 
 from pyxem.signals.diffraction_vectors import generate_marker_inputs_from_peaks
-from pyxem.utils.signal import transfer_navigation_axes
 from pyxem.utils.indexation_utils import get_nth_best_solution
+from pyxem.utils.signal import transfer_navigation_axes
 
 
 def crystal_from_vector_matching(z_matches):
@@ -125,67 +125,78 @@ def _get_best_match(z):
 
 
 def results_dict_to_crystal_map(results, phase_key_dict, diffraction_library=None):
-    """
-    Exports an indexation result from index_dataset_with_template_rotation to
-    crystal map with n_best rotations, score, mirrors and one phase_id per data point.
-    
+    """Export an indexation result from
+    :func:`index_dataset_with_template_rotation` to a crystal map with
+    `n_best` rotations, score, mirrors and one phase ID per data point.
+
     Parameters
     ----------
     results : dict
-        Results dictionary obtained from index_dataset_with_template_rotation.
+        Results dictionary obtained from
+        :func:`index_dataset_with_template_rotation`.
     phase_key_dict : dict
-        Phase_key_dict obtained from index_dataset_with_template_rotation.
-    diffraction_library : diffsims.libraries.DiffractionLibrary
-        Optional: Used for the structures to be passed to orix.crystal_map.PhaseList
+        Dictionary mapping phase ID to phase name, obtained from
+        :func:`index_dataset_with_template_rotation`.
+    diffraction_library : diffsims.libraries.DiffractionLibrary, optional
+        Used for the structures to be passed to
+        :class:`orix.crystal_map.PhaseList`.
 
     Returns
     -------
     orix.crystal_map.CrystalMap
+        Crystal map containing `results`. The map has multiple rotations
+        and properties ("correlation", "mirrored_template",
+        "template_index") per point only if `n_best` passed to
+        :func:`index_dataset_with_template_rotation` were more than one
+        and "phase_index" only has one phase.
+
+    Notes
+    -----
+    Phase's :attr:`~orix.crystal_map.Phase.point_group` must be set
+    manually to the correct :class:`~orix.quaternion.Symmetry` after
+    the crystal map is returned.
     """
+    nx, ny, n_best = results["phase_index"].shape
+    n_points = nx * ny
 
-    """ Gets properties """
-
-    shape = results["phase_index"].data.shape
-    datashape = shape[0] * shape[1], shape[2]
-
+    # Best matching phase
     phase_id = results["phase_index"][:, :, 0].ravel()
-    alpha = results["orientation"][:, :, :, 0].ravel()
-    beta = results["orientation"][:, :, :, 1].ravel()
-    gamma = results["orientation"][:, :, :, 2].ravel()
-    score = results["correlation"][:, :, :].ravel()
-    mirrors = results["mirrored_template"][:, :, :].ravel()
+    n_phases = np.unique(phase_id).size
 
-    if diffraction_library != None:
+    x, y = np.indices((nx, ny)).reshape((2, n_points))
+
+    if diffraction_library is not None:
         structures = diffraction_library.structures
     else:
         structures = None
-
-    """ Gets navigation placements """
-    xy = np.indices(shape[:2])
-    x = xy[1].ravel()
-    y = xy[0].ravel()
-
-    """ Tidies up so we can put these things into CrystalMap """
-    euler = np.column_stack((alpha, beta, gamma))
-    rotations = Rotation.from_euler(
-        np.deg2rad(euler), convention="bunge", direction="crystal2lab"
-    )
-
-    """ Reshape to fit proper rotations_per_point """
-    rotations = rotations.reshape(*datashape)
-    score = score.reshape(datashape)
-    mirrors = mirrors.reshape(datashape)
-
     phase_list = PhaseList(names=phase_key_dict, structures=structures)
 
-    properties = {"score": score, "mirrored_template": mirrors}
+    euler = np.deg2rad(results["orientation"].reshape((n_points, n_best, 3)))
+    if n_phases > 1:
+        euler = euler[:, 0]  # Keep best match only
+    euler = euler.squeeze()  # Remove singleton dimensions
+    rotations = Rotation.from_euler(euler, convention="bunge", direction="crystal2lab")
+
+    props = {}
+    for key in ("correlation", "mirrored_template", "template_index"):
+        try:
+            prop = results[key]
+        except KeyError:
+            warn(f"Property '{key}' was expected but not found in `results`")
+
+        if n_phases > 1:
+            prop = prop[:, :, 0].ravel()  # Keep best match only
+        else:
+            prop = prop.reshape((n_points, n_best))
+        props[key] = prop.squeeze()  # Remove singleton dimensions
+
     return CrystalMap(
         rotations=rotations,
         phase_id=phase_id,
         x=x,
         y=y,
         phase_list=phase_list,
-        prop=properties,
+        prop=props,
     )
 
 
