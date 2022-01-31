@@ -106,6 +106,26 @@ def test_results_dict_to_crystal_map(test_library_phases_multi, test_lib_gen):
     np.testing.assert_allclose(
         xmap.phase_id.reshape(nav_shape), result["phase_index"][:, :, 0]
     )
+    
+    assert xmap.rotations_per_point == 1
+    assert xmap.phases.names == phase_names
+    assert (
+        xmap.phases.structures[0].lattice.abcABG()
+        == library_phases.structures[0].lattice.abcABG()
+    )
+
+    del result["correlation"]
+    with pytest.warns(UserWarning, match="Property 'correlation' was expected"):
+        xmap2 = results_dict_to_crystal_map(
+            result, phasedict, diffraction_library=diff_lib
+        )
+    assert list(xmap2.prop.keys()) == ["mirrored_template", "template_index"]
+
+    result["phase_index"][..., 0] = 0
+    xmap3 = results_dict_to_crystal_map(result, phasedict)
+    assert np.all(xmap3.phase_id == 0)
+    assert xmap3.phases.names[0] == phase_names[0]
+    assert xmap3.rotations_per_point == 3
 
 
 @pytest.fixture
