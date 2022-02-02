@@ -17,7 +17,7 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from numba import cuda
+from numba import cuda, int32, float32
 import numpy as np
 
 try:
@@ -107,9 +107,13 @@ def is_cupy_array(array):
         return False
 
 
+# must be defined outside the kernel
+TPB = 256
+
+
 @cuda.jit
 def _correlate_polar_image_to_library_gpu(
-    polar_image, sim_r, sim_t, sim_i, correlation
+    polar_image, sim_r, sim_t, sim_i, correlation, correlation_m
 ):
     """
     Custom cuda kernel for calculating the correlation for each template
@@ -131,22 +135,63 @@ def _correlate_polar_image_to_library_gpu(
     correlation: 2D numpy.ndarray or cupy.ndarray
         The output correlation matrix of shape (template number, theta), giving
         the correlation of each template at each in-plane angle
+    correlation_m: 2D numpy.ndarray or cupy.ndarray
+        The output correlation matrix of shape (template number, theta), giving
+        the correlation of the mirror of each template at each in-plane angle
     """
     # each cuda thread handles one element
+    # thread blocks should be shaped (1, TPB)
     template, shift = cuda.grid(2)
-    # don't calculate for grid positions outside
+
+    r_shared = cuda.shared.array(shape=TPB, dtype=int32)
+    t_shared = cuda.shared.array(shape=TPB, dtype=int32)
+    i_shared = cuda.shared.array(shape=TPB, dtype=float32)
+
+    # don't calculate anything for grid positions outside range
     if template >= correlation.shape[0] or shift >= correlation.shape[1]:
         return
+
+    ty = cuda.threadIdx.y
+
+    n_shifts = polar_image.shape[0]
+
+    total_spots = sim_r.shape[1]
+
+    # number of iterations necessary to process all the spots
+    iters = total_spots // TPB + 1
+
+    # number of values to loop over in the inner loop
+    max_spots_iter = min((TPB, total_spots))
+
     tmp = 0.0
-    # add up all contributions to the correlation from spots
-    for spot in range(sim_r.shape[1]):
-        if sim_r[template, spot] == 0:
-            break
-        tmp += (
-            polar_image[
-                (sim_t[template, spot] + shift) % polar_image.shape[0],
-                sim_r[template, spot],
-            ]
-            * sim_i[template, spot]
-        )
+    tmp_m = 0.0
+    for i in range(iters):
+        # fill up the shared arrays with the template
+        spot = ty + i * TPB
+        if spot < total_spots:
+            r_shared[ty] = sim_r[template, spot]
+            t_shared[ty] = sim_t[template, spot]
+            i_shared[ty] = sim_i[template, spot]
+        else:
+            r_shared[ty] = 0
+            t_shared[ty] = 0
+            i_shared[ty] = 0.0
+
+        # wait for all the threads
+        cuda.syncthreads()
+
+        # use the shared arrays to update tmp
+        for s in range(max_spots_iter):
+            r_sp = r_shared[s]
+            if r_sp == 0:
+                break
+            t_sp = t_shared[s]
+            i_sp = i_shared[s]
+            tmp += polar_image[(t_sp + shift) % n_shifts, r_sp] * i_sp
+            tmp_m += polar_image[(n_shifts - t_sp + shift) % n_shifts, r_sp] * i_sp
+
+        # wait for all the threads
+        cuda.syncthreads()
+
     correlation[template, shift] = tmp
+    correlation_m[template, shift] = tmp_m
