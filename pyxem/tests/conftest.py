@@ -253,3 +253,24 @@ def test_library_phases():
         [np.array([(0, 0, 90), (0, 44, 90), (0, 54.735, 45)])],
     )
     return library_phases_test
+
+
+@pytest.fixture
+def test_library_phases_multi():
+
+    ni_structure = diffpy.structure.Structure(
+        atoms=[diffpy.structure.atom.Atom(atype="Ni", xyz=[0, 0, 0])], lattice=diffpy.structure.lattice.Lattice(3, 3, 3, 90, 90, 90)
+    )
+    al_structure = diffpy.structure.Structure(
+        atoms=[diffpy.structure.atom.Atom(atype="Al", xyz=[0, 0, 0])], lattice=diffpy.structure.lattice.Lattice(3, 4, 3, 90, 90, 90)
+    )
+    library_phases_test = StructureLibrary(
+        ["Ni", "Al"],
+        [ni_structure, al_structure],
+        [
+            np.array([(0, 0, 90), (0, 44, 90), (0, 54.735, 45)]),
+            np.array([(45, 45, 90), (45, 90, 45), (90, 45, 0)]),
+        ],
+    )
+    return library_phases_test
+

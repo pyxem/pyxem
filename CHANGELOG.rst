@@ -14,7 +14,9 @@ Added
 - BeamShift class, which includes the `make_linear_plane` method for better correction of the beam shift when scanning large regions in STEM (#746)
 - Add unit testing of docstring examples (#766)
 - Add function for optimizing calibration of SPED data (#785)
+- Add function for creating a orix CrystalMap from indexation results (#794)
 - Speed optimizations for the fast template matching on CPU and GPU, improving speeds by 200% and 40% respectively (#796)
+
 
 Removed
 ^^^^^^^
