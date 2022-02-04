@@ -247,7 +247,7 @@ def _warp_polar_custom(
     H = output_shape[0]
     W = output_shape[1]
     T = dispatcher.linspace(0, 2 * dispatcher.pi, H).reshape(H, 1)
-    R = dispatcher.arange(W).reshape(1, W)
+    R = dispatcher.linspace(0, radius, W).reshape(1, W)
     X = R * dispatcher.cos(T) + cx
     Y = R * dispatcher.sin(T) + cy
     coordinates = dispatcher.stack([Y, X])
