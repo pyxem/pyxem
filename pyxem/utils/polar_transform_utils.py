@@ -244,14 +244,12 @@ def _warp_polar_custom(
     """
     dispatcher = get_array_module(image)
     cy, cx = center
-    delta_theta = 360 / output_shape[0]
-    delta_r = radius / output_shape[1]
-    t = dispatcher.arange(output_shape[0])
-    r = dispatcher.arange(output_shape[1])
-    # sparse speeds up grid calculation by factor 10
-    R, T = dispatcher.meshgrid(r, t, sparse=True)
-    X = R * delta_r * dispatcher.cos(dispatcher.deg2rad(T * delta_theta)) + cx
-    Y = R * delta_r * dispatcher.sin(dispatcher.deg2rad(T * delta_theta)) + cy
+    H = output_shape[0]
+    W = output_shape[1]
+    T = dispatcher.linspace(0, 2 * dispatcher.pi, H).reshape(H, 1)
+    R = dispatcher.arange(W).reshape(1, W)
+    X = R * dispatcher.cos(T) + cx
+    Y = R * dispatcher.sin(T) + cy
     coordinates = dispatcher.stack([Y, X])
     map_function = _get_map_function(dispatcher)
     polar = map_function(image.astype(precision), coordinates, order=order)
