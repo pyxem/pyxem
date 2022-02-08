@@ -295,8 +295,11 @@ def compare_model_params(params0, params1, rel=None, abs=None):
     if a1 < b1:
         r1 += math.pi / 2
         a1, b1 = b1, a1
-    r0 = r0 % math.pi
-    r1 = r1 % math.pi
+    if a0 < b0:
+        r0 += math.pi / 2
+        a0, b0 = b0, a0
+    r0 = ((r0 - np.pi / 2) % np.pi) - (np.pi / 2)
+    r1 = ((r1 - np.pi / 2) % np.pi) - (np.pi / 2)
     assert approx((xf0, yf0), rel=rel, abs=abs) == (xf1, yf1)
     assert approx((a0, b0), rel=rel, abs=abs) == (a1, b1)
     assert approx(r0, rel=rel, abs=abs) == r1
@@ -585,8 +588,8 @@ class TestGetEllipseModelRansac:
         )
 
         for iy, ix in np.ndindex(xf.shape):
-            assert approx(xf[iy, ix]) == ellipse_array0[iy, ix][1]
-            assert approx(yf[iy, ix]) == ellipse_array0[iy, ix][0]
+            assert approx(xf[iy, ix], abs=0.0005) == ellipse_array0[iy, ix][1]
+            assert approx(yf[iy, ix], abs=0.0005) == ellipse_array0[iy, ix][0]
             assert inlier_array0[iy, ix].all()
             assert ellipse_array1[iy, ix] is None
             assert inlier_array1[iy, ix] is None
@@ -968,7 +971,7 @@ def test_full_ellipse_ransac_processing():
 
     s = Diffraction2D(data)
     s_t = s.template_match_disk(disk_r=5)
-    peak_array = s_t.find_peaks_lazy(lazy_result=False)
+    peak_array = s_t.find_peaks_lazy(threshold=0.1, lazy_result=False)
 
     c = math.sqrt(math.pow(a, 2) - math.pow(b, 2))
     xc, yc = xf - c * math.cos(r), yf - c * math.sin(r)
@@ -998,7 +1001,7 @@ def test_full_ellipse_ransac_processing():
 
     for iy, ix in np.ndindex(ellipse_array.shape):
         ycf, xcf, bf, af, rf = ellipse_array[iy, ix]
-        assert approx((xcf, ycf, af, bf, rf), abs=0.1) == [xc, yc, a, b, r]
+        compare_model_params((xcf, ycf, af, bf, rf), (xc, yc, a, b, r), abs=0.1)
         assert inlier_array[iy, ix].all()
 
     s.add_ellipse_array_as_markers(ellipse_array)
