@@ -27,21 +27,21 @@ exec(open("pyxem/release_info.py").read())  # grab version info
 extra_feature_requirements = {
     "doc": [
         "furo",
-        "nbsphinx >= 0.7",
-        "sphinx >= 3.0.2, <= 4.0.2",
-        "sphinx-copybutton >= 0.2.5",
-        "sphinx-autodoc-typehints >= 1.10.3",
-        "sphinx-gallery >= 0.6",
-        "sphinxcontrib-bibtex >= 1.0",
+        "nbsphinx                   >= 0.7",
+        "sphinx                     >= 3.0.2, <= 4.0.2",
+        "sphinx-copybutton          >= 0.2.5",
+        "sphinx-autodoc-typehints   >= 1.10.3",
+        "sphinx-gallery             >= 0.6",
+        "sphinxcontrib-bibtex       >= 1.0",
     ],
-    "tests": ["pytest>=5.0",
-              "pytest-cov>=2.8.1",
-              "coveralls>=1.10",
-              "coverage>=5.0"],
-    "dev": ["black",
-            "pre-commit > =1.16"
-            ],
-    "gpu": ["cupy>=9.0.0"],
+    "tests": [
+        "pytest     >= 5.0",
+        "pytest-cov >= 2.8.1",
+        "coveralls  >= 1.10",
+        "coverage   >= 5.0"
+    ],
+    "dev": ["black", "pre-commit >=1.16"],
+    "gpu": ["cupy >= 9.0.0"],
 }
 
 
@@ -77,21 +77,25 @@ setup(
     packages=find_packages(),
     extras_require=extra_feature_requirements,
     install_requires=[
-        "scikit-image >= 0.17.0",
-        "matplotlib >= 3.1.1",  # 3.1.0 failed
-        "scikit-learn >= 0.19",  # reason unknown
-        "hyperspy >= 1.6.2",  # significant improvements
-        "diffsims ~= 0.4",
-        "lmfit >= 0.9.12",
-        "pyfai",
-        "psutil",
+        "dask",
+        "diffsims       ~= 0.4",
+        "hyperspy       >= 1.6.2",  # significant improvements
         "ipywidgets",
+        "lmfit          >= 0.9.12",
+        "matplotlib     >= 3.1.1",  # 3.1.0 failed
         "numba",
-        "orix >= 0.3",
+        "numpy",
+        "orix           >= 0.3",
+        "psutil",
+        "pyfai",
+        "scikit-image   >= 0.17.0",
+        "scikit-learn   >= 0.19",  # reason unknown
+        "scipy",
+        "transforms3d",
     ],
     python_requires=">=3.7",
     package_data={
-        "": ["LICENSE", "readme.rst"],
+        "": ["LICENSE", "README.rst"],
         "pyxem": ["*.py", "hyperspy_extension.yaml"],
     },
     entry_points={"hyperspy.extensions": ["pyxem = pyxem"]},
