@@ -21,7 +21,6 @@ import pytest
 from matplotlib import pyplot as plt
 from transforms3d.euler import euler2mat
 
-from hyperspy.signals import Signal2D
 from diffsims.libraries.structure_library import StructureLibrary
 from diffsims.generators.diffraction_generator import DiffractionGenerator
 from diffsims.generators.library_generator import DiffractionLibraryGenerator
@@ -33,8 +32,6 @@ from pyxem.signals import (
     DiffractionVectors,
 )
 from pyxem.utils.indexation_utils import OrientationResult
-from pyxem.utils.indexation_utils import index_dataset_with_template_rotation
-from pyxem.signals.indexation_results import results_dict_to_crystal_map
 
 
 def test_TemplateMatchingResults_to_crystal_map():
@@ -65,67 +62,6 @@ def test_TemplateMatchingResults_plot_best_results_on_signal(
         diffraction_pattern, library=library
     )
     plt.close("all")
-
-
-def test_results_dict_to_crystal_map(test_library_phases_multi, test_lib_gen):
-    library_phases = test_library_phases_multi
-    lib_gen = test_lib_gen
-    diff_lib = lib_gen.get_diffraction_library(
-        library_phases,
-        calibration=0.015,
-        reciprocal_radius=1.182243629714282,
-        half_shape=(64, 64),
-        with_direct_beam=False,
-        max_excitation_error=0.07,
-    )
-
-    nav_shape = (2, 6)
-    sig_shape = (128, 128)
-    test_set = np.zeros(nav_shape + sig_shape)
-
-    phase_id = np.zeros(nav_shape, dtype=int)
-    phase_id[:, [1, 3, 5]] = 1
-    phase_names = list(diff_lib.keys())
-
-    for idx in np.ndindex(*nav_shape):
-        i = phase_id[idx]
-        
-        test_pattern = diff_lib[phase_names[i]]["simulations"][
-            int(idx[1] / 2)
-        ].get_diffraction_pattern(size=sig_shape[0], sigma=4)
-        
-        test_set[idx] = test_pattern
-        test_data = Signal2D(test_set)
-    result, phasedict = index_dataset_with_template_rotation(
-        test_data,
-        diff_lib,
-        phases=phase_names,
-        n_best=3,
-    )
-    xmap = results_dict_to_crystal_map(result, phasedict, diffraction_library=diff_lib)
-    np.testing.assert_allclose(
-        xmap.phase_id.reshape(nav_shape), result["phase_index"][:, :, 0]
-    )
-    
-    assert xmap.rotations_per_point == 1
-    assert xmap.phases.names == phase_names
-    assert (
-        xmap.phases.structures[0].lattice.abcABG()
-        == library_phases.structures[0].lattice.abcABG()
-    )
-
-    del result["correlation"]
-    with pytest.warns(UserWarning, match="Property 'correlation' was expected"):
-        xmap2 = results_dict_to_crystal_map(
-            result, phasedict, diffraction_library=diff_lib
-        )
-    assert list(xmap2.prop.keys()) == ["mirrored_template", "template_index"]
-
-    result["phase_index"][..., 0] = 0
-    xmap3 = results_dict_to_crystal_map(result, phasedict)
-    assert np.all(xmap3.phase_id == 0)
-    assert xmap3.phases.names[0] == phase_names[0]
-    assert xmap3.rotations_per_point == 3
 
 
 @pytest.fixture
