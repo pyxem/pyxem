@@ -1772,15 +1772,15 @@ def results_dict_to_crystal_map(
     --------
     After getting `results` and `phase_key_dict` from template matching
 
-    >>> xmap = results_dict_to_crystal_map(results, phase_key_dict)
-    >>> xmap.plot()  # Phase map
+    >>> xmap = results_dict_to_crystal_map(results, phase_key_dict)  # doctest: +SKIP
+    >>> xmap.plot()  # Phase map  # doctest: +SKIP
 
     Getting the second best match if `n_best` passed to the template
     matching function is greater than one
 
     >>> xmap2 = results_dict_to_crystal_map(
     ...     results, phase_key_dict, index=1
-    ... )
+    ... )  # doctest: +SKIP
     """
     nx, ny, n_best = results["phase_index"].shape
     if index is not None and index > n_best - 1:
