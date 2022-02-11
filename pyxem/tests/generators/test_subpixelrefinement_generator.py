@@ -157,6 +157,7 @@ class Test_subpixelpeakfinders:
         rms_error = np.sqrt(error[0, 0] ** 2 + error[0, 1] ** 2)
         assert rms_error < 0.5  # correct to within a pixel
 
+    @pytest.mark.skip(reason="Broken downstream in scikit image")
     def test_assertioned_xc(self, diffraction_vectors):
         subpixelsfound = self.get_spr(diffraction_vectors).conventional_xc(12, 4, 8)
         self.no_shift_case(subpixelsfound)
