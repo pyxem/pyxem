@@ -93,7 +93,7 @@ def cal_dist(request, calgen):
     )
     return calgen
 
-@pytest.mark.skip(reason="This functionality already smells, skipping while new things are built")
+
 class TestCalibrationGenerator:
     def test_init(self, calgen):
         assert isinstance(calgen.diffraction_pattern, ElectronDiffraction2D)
