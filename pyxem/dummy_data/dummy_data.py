@@ -18,7 +18,7 @@
 
 import numpy as np
 import dask.array as da
-from scipy.ndimage.filters import gaussian_filter
+from scipy.ndimage import gaussian_filter
 from scipy.signal import convolve2d
 from skimage import morphology
 from skimage.draw import polygon
