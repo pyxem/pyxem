@@ -540,7 +540,7 @@ def get_generic_fem_signal(probe_x=2, probe_y=2, image_x=50, image_y=50, lazy=Fa
     >>> s.plot()
 
     """
-    image_center = [np.int(image_x / 2), np.int(image_y / 2)]
+    image_center = [int(image_x / 2), int(image_y / 2)]
 
     radii1 = 10 * np.random.randint(0, 2, size=(probe_y, probe_x))
     intensities1 = np.random.randint(0, 5, size=(probe_y, probe_x))

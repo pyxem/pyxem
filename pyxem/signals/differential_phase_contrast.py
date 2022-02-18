@@ -235,7 +235,7 @@ class DPCSignal2D(Signal2D):
         corner_slice_list = pst._get_corner_slices(
             self.inav[0], corner_size=corner_size
         )
-        mask = np.ones_like(self.inav[0].data, dtype=np.bool)
+        mask = np.ones_like(self.inav[0].data, dtype=bool)
         for corner_slice in corner_slice_list:
             mask[corner_slice] = False
         for i, s in enumerate(self):

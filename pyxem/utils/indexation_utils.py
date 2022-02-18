@@ -258,7 +258,7 @@ def _choose_peak_ids(peaks, n_peaks_to_index):
     """
     r, angles = _cart2polar(peaks[:, 0], peaks[:, 1])
     return angles.argsort()[
-        np.linspace(0, angles.shape[0] - 1, n_peaks_to_index, dtype=np.int)
+        np.linspace(0, angles.shape[0] - 1, n_peaks_to_index, dtype=int)
     ]
 
 

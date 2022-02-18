@@ -786,9 +786,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         if shifts is None:
             if half_square_width is not None:
-                min_index = np.int(origin_coordinates[0] - half_square_width)
+                min_index = int(origin_coordinates[0] - half_square_width)
                 # fails if non-square dp
-                max_index = np.int(origin_coordinates[0] + half_square_width)
+                max_index = int(origin_coordinates[0] + half_square_width)
                 temp_signal = temp_signal.isig[min_index:max_index, min_index:max_index]
             shifts = temp_signal.get_direct_beam_position(
                 method=method,
