@@ -21,6 +21,7 @@ Added
 Removed
 ^^^^^^^
 - lazy_* virtual imaging has been removed, use get_integrated_intensity (#722)
+- `big_data_utils' has been removed as this is not the modern way of attacking this problem
 
 Fixed
 ^^^^^
