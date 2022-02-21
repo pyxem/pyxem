@@ -143,14 +143,17 @@ def _correlate_polar_image_to_library_gpu(
     # thread blocks should be shaped (1, TPB)
     template, shift = cuda.grid(2)
 
-    r_shared = cuda.shared.array(shape=TPB, dtype=int32)
-    t_shared = cuda.shared.array(shape=TPB, dtype=int32)
-    i_shared = cuda.shared.array(shape=TPB, dtype=float32)
-
-    # don't calculate anything for grid positions outside range
-    if template >= correlation.shape[0] or shift >= correlation.shape[1]:
+    # don't do anything for grid positions outside template number range
+    # we still use threads with shift > correlation.shape[1] to load spot data
+    # to shared memory
+    if template >= correlation.shape[0]:
         return
 
+    r_shared = cuda.shared.array(shape=(TPB,), dtype=int32)
+    t_shared = cuda.shared.array(shape=(TPB,), dtype=int32)
+    i_shared = cuda.shared.array(shape=(TPB,), dtype=float32)
+
+    # thread index within block
     ty = cuda.threadIdx.y
 
     n_shifts = polar_image.shape[0]
@@ -160,8 +163,7 @@ def _correlate_polar_image_to_library_gpu(
     # number of iterations necessary to process all the spots
     iters = total_spots // TPB + 1
 
-    # number of values to loop over in the inner loop
-    max_spots_iter = min((TPB, total_spots))
+    min_spot_iter = min((TPB, total_spots))
 
     tmp = 0.0
     tmp_m = 0.0
@@ -180,18 +182,29 @@ def _correlate_polar_image_to_library_gpu(
         # wait for all the threads
         cuda.syncthreads()
 
-        # use the shared arrays to update tmp
-        for s in range(max_spots_iter):
-            r_sp = r_shared[s]
-            if r_sp == 0:
-                break
-            t_sp = t_shared[s]
-            i_sp = i_shared[s]
-            tmp += polar_image[(t_sp + shift) % n_shifts, r_sp] * i_sp
-            tmp_m += polar_image[(n_shifts - t_sp + shift) % n_shifts, r_sp] * i_sp
+        if shift < n_shifts:
+            # use the shared arrays to update tmp
+            for s in range(min_spot_iter):
+                r_sp = r_shared[s]
+                if r_sp == 0:
+                    break
+                t_sp = t_shared[s]
+                i_sp = i_shared[s]
+                t1 = t_sp + shift
+                if t1 >= n_shifts:
+                    t1 = t1 - n_shifts
+                t2 = n_shifts - t_sp + shift
+                if t2 >= n_shifts:
+                    t2 = t2 - n_shifts
+                tmp += polar_image[t1, r_sp] * i_sp
+                tmp_m += polar_image[t2, r_sp] * i_sp
 
         # wait for all the threads
         cuda.syncthreads()
+
+    # don't update out of range
+    if shift >= n_shifts:
+        return
 
     correlation[template, shift] = tmp
     correlation_m[template, shift] = tmp_m
