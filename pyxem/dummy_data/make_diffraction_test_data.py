@@ -18,8 +18,7 @@
 
 import numpy as np
 from tqdm import tqdm
-from scipy.ndimage.filters import gaussian_filter
-from scipy.ndimage import rotate
+from scipy.ndimage import rotate, gaussian_filter
 from scipy.signal import convolve2d
 from skimage import morphology
 import dask.array as da

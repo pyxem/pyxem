@@ -252,7 +252,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             show_progressbar=show_progressbar,
         )
         if self._lazy:
-            s_rotated.compute(progressbar=show_progressbar)
+            s_rotated.compute(show_progressbar=show_progressbar)
         return s_rotated
 
     def flip_diffraction_x(self):
@@ -492,7 +492,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         )
         s_dead_pixels = LazySignal2D(dead_pixels)
         if not lazy_result:
-            s_dead_pixels.compute(progressbar=show_progressbar)
+            s_dead_pixels.compute(show_progressbar=show_progressbar)
         return s_dead_pixels
 
     def find_hot_pixels(
@@ -556,7 +556,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         s_hot_pixels = LazySignal2D(hot_pixels)
         if not lazy_result:
-            s_hot_pixels.compute(progressbar=show_progressbar)
+            s_hot_pixels.compute(show_progressbar=show_progressbar)
         return s_hot_pixels
 
     def correct_bad_pixels(
@@ -608,7 +608,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         s_bad_pixel_removed = LazyDiffraction2D(bad_pixel_removed)
         pst._copy_signal2d_axes_manager_metadata(self, s_bad_pixel_removed)
         if not lazy_result:
-            s_bad_pixel_removed.compute(progressbar=show_progressbar)
+            s_bad_pixel_removed.compute(show_progressbar=show_progressbar)
         return s_bad_pixel_removed
 
     """ Direct beam and peak finding tools """
@@ -786,9 +786,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         if shifts is None:
             if half_square_width is not None:
-                min_index = np.int(origin_coordinates[0] - half_square_width)
+                min_index = int(origin_coordinates[0] - half_square_width)
                 # fails if non-square dp
-                max_index = np.int(origin_coordinates[0] + half_square_width)
+                max_index = int(origin_coordinates[0] + half_square_width)
                 temp_signal = temp_signal.isig[min_index:max_index, min_index:max_index]
             shifts = temp_signal.get_direct_beam_position(
                 method=method,
@@ -942,7 +942,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         Get a lazy signal, then calculate afterwards
 
         >>> s_com = s.center_of_mass(lazy_result=True, show_progressbar=False)
-        >>> s_com.compute(progressbar=False)
+        >>> s_com.compute(show_progressbar=False)
 
         """
         det_shape = self.axes_manager.signal_shape

@@ -518,7 +518,7 @@ def _find_peak_max(arr, sigma, upsample_factor, kind):
     center: float
         Pixel position of the maximum
     """
-    y1 = ndi.filters.gaussian_filter1d(arr, sigma)
+    y1 = ndi.gaussian_filter1d(arr, sigma)
     c1 = np.argmax(y1)  # initial guess for beam center
 
     m = upsample_factor

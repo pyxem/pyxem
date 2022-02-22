@@ -22,7 +22,7 @@ import numpy as np
 from skimage import morphology
 from skimage.measure import label
 from scipy import ndimage as ndi
-from scipy.ndimage.measurements import center_of_mass
+from scipy.ndimage import center_of_mass
 
 from hyperspy.signals import BaseSignal
 
