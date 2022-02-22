@@ -82,7 +82,7 @@ class Power2D(Signal2D):
         return sym_map
 
     def plot_symmetries(self, k_region=None, symmetry=None, *args, **kwargs):
-        """Plots the symmetries in the list of symmetries. Plot symmetries takes all of the arguements that imshow does.
+        """Plots the symmetries in the list of symmetries. Plot symmetries takes all of the arguments that imshow does.
 
         Parameters
         ----------

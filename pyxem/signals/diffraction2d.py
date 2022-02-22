@@ -1523,7 +1523,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         navigation_axes=None,
         **kwargs,
     ):
-        """Calculates the variance using one of the methods described in [1]. A shot noise correction and
+        """Calculates the variance using one of the methods described in [1]. A shot noise correction
            and specification of axes to operate over are also possible.
 
         Parameters
@@ -1535,7 +1535,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         dqe : int, optional
             The detector quantum efficiency or the pixel value for one electron.
         spatial : bool, optional
-            Included intermediate spatial variance in output (only avaliable if method=='r')
+            Included intermediate spatial variance in output (only available if method=='r')
         navigation_axes : list or none, optional
             The axes to calculate the variance over.  The default is to use the navigation axes.
         **kwargs: dict
@@ -1672,7 +1672,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         """
         warnings.warn(
-            "This method is depreacted, and will be removed in version 0.14.0, please use .get_azimuthal_integral1d",
+            "This method is deprecated, and will be removed in version 0.14.0, please use .get_azimuthal_integral1d",
             FutureWarning,
         )
         if (centre_x is None) or (centre_y is None):
@@ -2059,7 +2059,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             The number of azimuthal points to calculate
         mask:  boolean array or BaseSignal
             A boolean mask to apply to the data to exclude some points.
-            If mask is a baseSignal then it is itereated over as well.
+            If mask is a BaseSignal then it is iterated over as well.
         radial_range: None or (float, float)
             The radial range over which to perform the integration. Default is
             the full frame
@@ -2192,7 +2192,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             number of points in the radial space. Too few points may lead to huge rounding errors.
         mask:  boolean array or BaseSignal
             A boolean mask to apply to the data to exclude some points.
-            If mask is a baseSignal then it is itereated over as well.
+            If mask is a BaseSignal then it is iterated over as well.
         radial_range: None or (float, float)
             The radial range over which to perform the integration. Default is
             the full frame
@@ -2227,7 +2227,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         show_progressbar: bool
             If True shows a progress bar for the mapping function
         parallel: bool
-            If true launches paralell workers for the integration
+            If true launches parallel workers for the integration
         max_workers: int
             The number of streams to initialize. Only used if parallel=True
 
@@ -2311,7 +2311,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
              The number of radial points
         mask:  boolean array or BaseSignal
             A boolean mask to apply to the data to exclude some points.
-            If mask is a baseSignal then it is itereated over as well.
+            If mask is a BaseSignal then it is iterated over as well.
         inplace: bool
             If the signal is overwritten or copied to a new signal
         method: str
@@ -2340,7 +2340,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         show_progressbar: bool
             If True shows a progress bar for the mapping function
         parallel: bool
-            If true launches paralell workers for the integration
+            If true launches parallel workers for the integration
         max_workers: int
             The number of streams to initialize. Only used if parallel=True
 
@@ -2421,7 +2421,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
              The number of radial points
         mask:  boolean array or BaseSignal
             A boolean mask to apply to the data to exclude some points.
-            If mask is a baseSignal then it is itereated over as well.
+            If mask is a BaseSignal then it is iterated over as well.
         inplace: bool
             If the signal is overwritten or copied to a new signal
         method: str
@@ -2450,7 +2450,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         show_progressbar: bool
             If True shows a progress bar for the mapping function
         parallel: bool
-            If true launches paralell workers for the integration
+            If true launches parallel workers for the integration
         max_workers: int
             The number of streams to initialize. Only used if parallel=True
 
