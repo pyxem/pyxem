@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -74,8 +74,8 @@ def get_simulated_disc(square_size, disc_radius):
 
     ss = int(square_size)
     arr = np.zeros((ss, ss))
-    rr, cc = draw.circle(
-        int(ss / 2), int(ss / 2), radius=disc_radius, shape=arr.shape
+    rr, cc = draw.disk(
+        (int(ss / 2), int(ss / 2)), radius=disc_radius, shape=arr.shape
     )  # is the thin disc a good idea
     arr[rr, cc] = 1
     return arr
@@ -105,9 +105,7 @@ def _get_pixel_vectors(dp, vectors, calibration, center):
     def _floor(vectors, calibration, center):
         if vectors.shape == (1,) and vectors.dtype == object:
             vectors = vectors[0]
-        return np.floor((vectors.astype(np.float64) / calibration) + center).astype(
-            np.int
-        )
+        return np.floor((vectors.astype(np.float64) / calibration) + center).astype(int)
 
     if isinstance(vectors, DiffractionVectors):
         if vectors.axes_manager.navigation_shape != dp.axes_manager.navigation_shape:

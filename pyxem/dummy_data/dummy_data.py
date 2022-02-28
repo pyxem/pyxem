@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -18,7 +18,7 @@
 
 import numpy as np
 import dask.array as da
-from scipy.ndimage.filters import gaussian_filter
+from scipy.ndimage import gaussian_filter
 from scipy.signal import convolve2d
 from skimage import morphology
 from skimage.draw import polygon
@@ -540,7 +540,7 @@ def get_generic_fem_signal(probe_x=2, probe_y=2, image_x=50, image_y=50, lazy=Fa
     >>> s.plot()
 
     """
-    image_center = [np.int(image_x / 2), np.int(image_y / 2)]
+    image_center = [int(image_x / 2), int(image_y / 2)]
 
     radii1 = 10 * np.random.randint(0, 2, size=(probe_y, probe_x))
     intensities1 = np.random.randint(0, 5, size=(probe_y, probe_x))

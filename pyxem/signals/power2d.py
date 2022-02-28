@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -82,7 +82,7 @@ class Power2D(Signal2D):
         return sym_map
 
     def plot_symmetries(self, k_region=None, symmetry=None, *args, **kwargs):
-        """Plots the symmetries in the list of symmetries. Plot symmetries takes all of the arguements that imshow does.
+        """Plots the symmetries in the list of symmetries. Plot symmetries takes all of the arguments that imshow does.
 
         Parameters
         ----------

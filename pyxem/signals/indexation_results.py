@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -17,17 +17,17 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 from warnings import warn
-import numpy as np
-from transforms3d.euler import mat2euler
 
 import hyperspy.api as hs
 from hyperspy.signal import BaseSignal
-from orix.quaternion import Rotation
+import numpy as np
 from orix.crystal_map import CrystalMap
+from orix.quaternion import Rotation
+from transforms3d.euler import mat2euler
 
 from pyxem.signals.diffraction_vectors import generate_marker_inputs_from_peaks
-from pyxem.utils.signal import transfer_navigation_axes
 from pyxem.utils.indexation_utils import get_nth_best_solution
+from pyxem.utils.signal import transfer_navigation_axes
 
 
 def crystal_from_vector_matching(z_matches):
@@ -121,7 +121,8 @@ def _get_best_match(z):
         array with shape (5,)
 
     """
-    return z[np.argmax(z[:, -1]),:] 
+    return z[np.argmax(z[:, -1]), :]
+
 
 class GenericMatchingResults:
     def __init__(self, data):
@@ -134,7 +135,7 @@ class GenericMatchingResults:
 
         Returns
         -------
-        orix.CrystalMap
+        orix.crystal_map.CrystalMap
 
         """
         _s = self.data.map(_get_best_match, inplace=False)
@@ -152,7 +153,7 @@ class GenericMatchingResults:
         y = xy[0].flatten()
 
         """ Tidies up so we can put these things into CrystalMap """
-        euler = np.vstack((alpha, beta, gamma)).T
+        euler = np.column_stack((alpha, beta, gamma))
         rotations = Rotation.from_euler(
             euler, convention="bunge", direction="crystal2lab"
         )

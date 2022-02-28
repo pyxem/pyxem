@@ -1,6 +1,10 @@
 name: build
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
 
 jobs:
   build-with-pip:
@@ -26,6 +30,7 @@ jobs:
         shell: bash
         run: pip install -U -e .'[tests]'
       - name: Run docstring tests
+        continue-on-error: true
         run: pytest --doctest-modules --ignore=pyxem/tests pyxem
       - name: Run tests
         run: pytest --cov=pyxem --runslow --pyargs pyxem

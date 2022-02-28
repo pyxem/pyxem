@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -66,7 +66,7 @@ class BeamShift(Signal1D):
         Examples
         --------
         >>> s = pxm.signals.BeamShift(np.random.randint(0, 99, (100, 120, 2)))
-        >>> s_mask = hs.signals.Signal2D(np.zeros((100, 120), dtype=np.bool))
+        >>> s_mask = hs.signals.Signal2D(np.zeros((100, 120), dtype=bool))
         >>> s_mask.data[20:-20, 20:-20] = True
         >>> s.make_linear_plane(mask=s_mask)
 

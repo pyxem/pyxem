@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -360,7 +360,7 @@ def get_radius_vs_angle(
         prepeak_range=prepeak_range,
         show_progressbar=show_progressbar,
     )
-    m_ra.multifit(fitter="mpfit", bounded=True, show_progressbar=show_progressbar)
+    m_ra.multifit(optimizer="lm", bounded=True, show_progressbar=show_progressbar)
 
     s_centre = m_ra.components.Gaussian.centre.as_signal()
     return s_centre

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -19,8 +19,8 @@
 import copy
 import math
 import numpy as np
-from scipy.ndimage import measurements, shift
-from scipy.optimize import leastsq
+import scipy.optimize as opt
+import scipy.ndimage as ndi
 from hyperspy.misc.utils import isiterable
 from matplotlib.colors import hsv_to_rgb
 import pyxem.utils.lazy_tools as lt
@@ -31,7 +31,7 @@ def _threshold_and_mask_single_frame(im, threshold=None, mask=None):
     if mask is not None:
         image *= mask
     if threshold is not None:
-        mean_value = measurements.mean(image, mask) * threshold
+        mean_value = ndi.mean(image, mask) * threshold
         image[image <= mean_value] = 0
         image[image > mean_value] = 1
     return image
@@ -64,7 +64,7 @@ def _radial_average_dask_array(
 
 
 def _shift_single_frame(im, shift_x, shift_y, interpolation_order=1):
-    im_shifted = shift(im, (-shift_y, -shift_x), order=interpolation_order)
+    im_shifted = ndi.shift(im, (-shift_y, -shift_x), order=interpolation_order)
     return im_shifted
 
 
@@ -182,7 +182,7 @@ def _get_linear_plane_from_signal2d(signal, mask=None, initial_values=None):
             raise ValueError("signal and mask need to have the same shape")
         points = points[np.invert(mask).flatten()]
 
-    p = leastsq(_residuals, initial_values, args=points)[0]
+    p = opt.leastsq(_residuals, initial_values, args=points)[0]
 
     plane = _plane_parameters_to_image(p, xaxis, yaxis)
     return plane

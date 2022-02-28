@@ -13,10 +13,15 @@ Added
 - Add Symmetry1D signal class and symmetry analysis methods (#724)
 - BeamShift class, which includes the `make_linear_plane` method for better correction of the beam shift when scanning large regions in STEM (#746)
 - Add unit testing of docstring examples (#766)
+- Add function for optimizing calibration of SPED data (#785)
+- Add function for creating a orix CrystalMap from indexation results (#794)
+- Speed optimizations for the fast template matching on CPU and GPU, improving speeds by 200% and 40% respectively (#796)
+
 
 Removed
 ^^^^^^^
 - lazy_* virtual imaging has been removed, use get_integrated_intensity (#722)
+- `big_data_utils' has been removed as this is not the modern way of attacking this problem
 
 Fixed
 ^^^^^

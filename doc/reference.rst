@@ -19,8 +19,8 @@ The list of top modules:
 
 ....
 
-Detectors
-===============
+detectors
+=========
 
 .. automodule:: pyxem.detectors
 
@@ -37,8 +37,8 @@ Detectors
 
 ....
 
-Generators
-===========
+generators
+==========
 
 .. currentmodule:: pyxem.generators
 
@@ -65,7 +65,7 @@ Generators
 
 ....
 
-Libraries
+libraries
 =========
 
 .. automodule:: pyxem.libraries
@@ -74,8 +74,8 @@ Libraries
     CalibrationDataLibrary
 
 
-Signals
-==========
+signals
+=======
 
 .. automodule:: pyxem.signals
 
@@ -314,3 +314,14 @@ VirtualDarkFieldImage
 .. autoclass:: pyxem.signals.VirtualDarkFieldImage
     :members:
     :undoc-members:
+
+utils
+=====
+
+indexation_utils
+----------------
+
+.. automodule:: pyxem.utils.indexation_utils
+.. currentmodule:: pyxem.utils.indexation_utils
+
+.. autofunction:: results_dict_to_crystal_map

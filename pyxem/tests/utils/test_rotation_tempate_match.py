@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -258,7 +258,6 @@ def test_match_polar_to_polar_library(dtype):
         r,
         theta,
         intensities,
-        None,
     )
     assert cor.shape[0] == 4
     assert angles.shape[0] == 4
@@ -450,7 +449,6 @@ def test_mixed_matching_lib_to_polar(nbest):
         None,
         1.0,
         nbest,
-        None,
     )
     assert answer.shape[0] == nbest
     assert answer.shape[1] == 4

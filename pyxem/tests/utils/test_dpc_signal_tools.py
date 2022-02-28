@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -223,7 +223,7 @@ class TestGetLinearPlaneFromSignal2d:
 
     def test_mask(self):
         data = np.ones((110, 200), dtype=np.float32)
-        mask = np.zeros_like(data, dtype=np.bool)
+        mask = np.zeros_like(data, dtype=bool)
         data[50, 51] = 10000
         mask[50, 51] = True
         s = hs.signals.Signal2D(data)
@@ -239,7 +239,7 @@ class TestGetLinearPlaneFromSignal2d:
         s.axes_manager[0].scale = -0.22
         s.axes_manager[1].scale = 5.2
         s_orig = s.deepcopy()
-        mask = np.zeros_like(s.data, dtype=np.bool)
+        mask = np.zeros_like(s.data, dtype=bool)
         s.data[50, 51] = 10000
         mask[50, 51] = True
         plane_mask = pst._get_linear_plane_from_signal2d(s, mask=mask)
@@ -255,7 +255,7 @@ class TestGetLinearPlaneFromSignal2d:
         s_crop = s.isig[10:-20, 21:-11]
         s_crop_orig = s_crop.deepcopy()
         s_crop.data[50, 51] = 10000
-        mask = np.zeros_like(s_crop.data, dtype=np.bool)
+        mask = np.zeros_like(s_crop.data, dtype=bool)
         mask[50, 51] = True
         plane = pst._get_linear_plane_from_signal2d(s_crop, mask=mask)
         np.testing.assert_almost_equal(plane, s_crop_orig.data, decimal=6)
@@ -273,7 +273,7 @@ class TestGetLinearPlaneFromSignal2d:
 
     def test_wrong_mask_dimensions(self):
         s = hs.signals.Signal2D(np.ones((10, 10)))
-        mask = np.zeros((11, 9), dtype=np.bool)
+        mask = np.zeros((11, 9), dtype=bool)
         with pytest.raises(ValueError):
             pst._get_linear_plane_from_signal2d(s, mask=mask)
 

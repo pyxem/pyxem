@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -42,7 +42,7 @@ def test_TemplateMatchingResults_to_crystal_map():
 def test_TemplateMatchingResults_plot_best_results_on_signal(
     diffraction_pattern, default_structure
 ):
-    """ Coverage testing """
+    """Coverage testing"""
     edc = DiffractionGenerator(300)
     half_side_length = 4
     rot_list = [[0, 1, 0], [1, 0, 0]]

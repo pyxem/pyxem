@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -58,7 +58,7 @@ def signal_data():
 
 @pytest.fixture
 def signal_decomposition(signal_data):
-    signal_data.decomposition(algorithm="nmf", output_dimension=5)
+    signal_data.decomposition(algorithm="NMF", output_dimension=5)
     s_nmf = signal_data.get_decomposition_model(components=5)
     factors = s_nmf.get_decomposition_factors()
     loadings = s_nmf.get_decomposition_loadings()

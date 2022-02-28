@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -24,14 +24,19 @@ matplotlib.use("agg")
 import pytest
 import diffpy.structure
 import numpy as np
+import hyperspy.api as hs
 
 from diffsims.libraries.vector_library import DiffractionVectorLibrary
+from diffsims.generators.diffraction_generator import DiffractionGenerator
+from diffsims.generators.library_generator import DiffractionLibraryGenerator
+from diffsims.libraries.structure_library import StructureLibrary
 
 from pyxem.signals import ElectronDiffraction1D, ElectronDiffraction2D
 
 # a straight lift from
 # https://docs.pytest.org/en/latest/example/simple.html#control-skipping-of-tests-according-to-command-line-option--
 # This means we don't always run the slowest tests
+
 
 def pytest_addoption(parser):
     parser.addoption(
@@ -53,7 +58,9 @@ def pytest_collection_modifyitems(config, items):
             if "slow" in item.keywords:
                 item.add_marker(skip_slow)
 
+
 # End of the code lift, it's regular code from here on out
+
 
 @pytest.fixture
 def default_structure():
@@ -194,3 +201,76 @@ def vector_library():
     lattice = diffpy.structure.Lattice(1, 1, 1, 90, 90, 90)
     library.structures = [diffpy.structure.Structure(lattice=lattice)]
     return library
+
+
+@pytest.fixture
+def test_patterns():
+    patterns = hs.signals.Signal2D(np.zeros((3, 1, 128, 128)))
+    _001_indexs = (
+        np.array([31, 31, 31, 64, 64, 97, 97, 97]),
+        np.array([31, 64, 97, 31, 97, 31, 64, 97]),
+    )
+    _101_indexs = (
+        np.array([17, 17, 17, 64, 64, 111, 111, 111]),
+        np.array([31, 64, 97, 31, 97, 31, 64, 97]),
+    )
+    _111_indexs = (
+        np.array([23, 23, 64, 64, 105, 105]),
+        np.array([40, 88, 17, 111, 40, 88]),
+    )
+    for i in range(8):
+        patterns.inav[0, 0].isig[_001_indexs[1][i], _001_indexs[0][i]] = 24.0
+        patterns.inav[0, 1].isig[_101_indexs[1][i], _101_indexs[0][i]] = 24.0
+    for i in range(6):
+        patterns.inav[0, 2].isig[_111_indexs[1][i], _111_indexs[0][i]] = 24.0
+    return patterns
+
+
+@pytest.fixture
+def test_lib_gen():
+    diff_gen = DiffractionGenerator(
+        accelerating_voltage=200,
+        precession_angle=1,
+        scattering_params="lobato",
+        shape_factor_model="linear",
+        minimum_intensity=0.1,
+    )
+
+    lib_gen = DiffractionLibraryGenerator(diff_gen)
+    return lib_gen
+
+
+@pytest.fixture
+def test_library_phases():
+
+    latt = diffpy.structure.lattice.Lattice(3, 3, 3, 90, 90, 90)
+    atom = diffpy.structure.atom.Atom(atype="Ni", xyz=[0, 0, 0], lattice=latt)
+    structure = diffpy.structure.Structure(atoms=[atom], lattice=latt)
+
+    library_phases_test = StructureLibrary(
+        ["Test"],
+        [structure],
+        [np.array([(0, 0, 90), (0, 44, 90), (0, 54.735, 45)])],
+    )
+    return library_phases_test
+
+
+@pytest.fixture
+def test_library_phases_multi():
+
+    ni_structure = diffpy.structure.Structure(
+        atoms=[diffpy.structure.atom.Atom(atype="Ni", xyz=[0, 0, 0])], lattice=diffpy.structure.lattice.Lattice(3, 3, 3, 90, 90, 90)
+    )
+    al_structure = diffpy.structure.Structure(
+        atoms=[diffpy.structure.atom.Atom(atype="Al", xyz=[0, 0, 0])], lattice=diffpy.structure.lattice.Lattice(3, 4, 3, 90, 90, 90)
+    )
+    library_phases_test = StructureLibrary(
+        ["Ni", "Al"],
+        [ni_structure, al_structure],
+        [
+            np.array([(0, 0, 90), (0, 44, 90), (0, 54.735, 45)]),
+            np.array([(45, 45, 90), (45, 90, 45), (90, 45, 0)]),
+        ],
+    )
+    return library_phases_test
+

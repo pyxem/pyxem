@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -68,7 +68,7 @@ class TestMakeLinearPlane:
             np.arange(-50, 50, dtype=np.float32), np.arange(-256, 0, dtype=np.float32)
         )
         data = np.stack((data_y, data_x), -1)
-        mask = np.zeros_like(data[:, :, 0], dtype=np.bool)
+        mask = np.zeros_like(data[:, :, 0], dtype=bool)
         mask[45:50, 36:41] = True
         s_mask = Signal2D(mask)
         s = BeamShift(data)
@@ -139,7 +139,7 @@ class TestFullDirectBeamCentering:
     def test_mask(self):
         s = self.s
         s.data[1, 2, 2, 3] = 1000
-        mask = np.zeros((3, 3), dtype=np.bool)
+        mask = np.zeros((3, 3), dtype=bool)
         mask[1, 2] = True
         s_mask = Signal2D(mask)
         s_beam_shift = s.get_direct_beam_position(method="blur", sigma=1)
@@ -154,7 +154,7 @@ class TestFullDirectBeamCentering:
         s = self.s
         s.data[1, 2, 2, 3] = 1000
         s = self.s.as_lazy()
-        mask = np.zeros((3, 3), dtype=np.bool)
+        mask = np.zeros((3, 3), dtype=bool)
         mask[1, 2] = True
         s_mask = Signal2D(mask)
         s_beam_shift = s.get_direct_beam_position(method="blur", sigma=1)

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -34,8 +34,8 @@ def exp_disc():
     ss, disc_radius, upsample_factor = int(60), 6, 10
 
     arr = np.zeros((ss, ss))
-    rr, cc = draw.circle(
-        int(ss / 2) + 20, int(ss / 2) - 10, radius=disc_radius, shape=arr.shape
+    rr, cc = draw.disk(
+        (int(ss / 2) + 20, int(ss / 2) - 10), radius=disc_radius, shape=arr.shape
     )
     arr[rr, cc] = 1
     return arr
@@ -103,13 +103,13 @@ class set_up_for_subpixelpeakfinders:
         z1, z1a = np.zeros((128, 128)), np.zeros((128, 128))
         z2, z2a = np.zeros((128, 128)), np.zeros((128, 128))
 
-        rr, cc = draw.circle(30, 90, radius=4, shape=z1.shape)  # 30 is y!
+        rr, cc = draw.disk((30, 90), radius=4, shape=z1.shape)  # 30 is y!
         z1[rr, cc], z2[rr, cc] = 1, 1
-        rr2, cc2 = draw.circle(100, 60, radius=4, shape=z2.shape)
+        rr2, cc2 = draw.disk((100, 60), radius=4, shape=z2.shape)
         z2[rr2, cc2] = 1
-        rr, cc = draw.circle(30, 90 + 3, radius=4, shape=z1.shape)  # 30 is y!
+        rr, cc = draw.disk((30, 90 + 3), radius=4, shape=z1.shape)  # 30 is y!
         z1a[rr, cc], z2a[rr, cc] = 1, 1
-        rr2, cc2 = draw.circle(100 - 2, 60, radius=4, shape=z2.shape)
+        rr2, cc2 = draw.disk((100 - 2, 60), radius=4, shape=z2.shape)
         z2a[rr2, cc2] = 1
 
         # marks centers for local com and local_gaussian_method
@@ -157,6 +157,7 @@ class Test_subpixelpeakfinders:
         rms_error = np.sqrt(error[0, 0] ** 2 + error[0, 1] ** 2)
         assert rms_error < 0.5  # correct to within a pixel
 
+    @pytest.mark.skip(reason="Broken downstream in scikit image")
     def test_assertioned_xc(self, diffraction_vectors):
         subpixelsfound = self.get_spr(diffraction_vectors).conventional_xc(12, 4, 8)
         self.no_shift_case(subpixelsfound)
