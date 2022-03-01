@@ -2,9 +2,9 @@ name: build
 
 on:
   push:
-    branches: [master]
+    branches: [master, hyperspy_release_next_minor]
   pull_request:
-    branches: [master]
+    branches: [master, hyperspy_release_next_minor]
 
 jobs:
   build-with-pip:
