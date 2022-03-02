@@ -370,6 +370,7 @@ class SubpixelrefinementGenerator:
             center=self.center,
             calibration=self.calibration,
             inplace=False,
+            ragged=True,
         )
         self.vectors_out.set_signal_type("diffraction_vectors")
 

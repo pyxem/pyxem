@@ -113,6 +113,7 @@ class VirtualDarkFieldImage(Signal2D):
                 marker_radius=marker_radius,
                 threshold=threshold,
                 exclude_border=exclude_border,
+                ragged=True,
             ),
             dtype=object,
         )

@@ -159,7 +159,11 @@ class DiffractionVectors(BaseSignal):
             List of diffraction vectors
         """
         gvectors = peaks.map(
-            peaks_as_gvectors, center=center, calibration=calibration, inplace=False
+            peaks_as_gvectors,
+            center=center,
+            calibration=calibration,
+            inplace=False,
+            ragged=True,
         )
 
         vectors = cls(gvectors)
@@ -557,6 +561,7 @@ class DiffractionVectors(BaseSignal):
                 min_magnitude=min_magnitude,
                 max_magnitude=max_magnitude,
                 inplace=False,
+                ragged=True,
                 *args,
                 **kwargs
             )
