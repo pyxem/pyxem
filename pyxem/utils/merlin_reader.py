@@ -16,8 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-# a lot of stuff depends on this, so we have to create it first
-
 import os
 from struct import unpack
 

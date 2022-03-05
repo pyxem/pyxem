@@ -28,7 +28,7 @@ from pyxem import dummy_data
 from pyxem import generators
 from pyxem import signals
 
-from pyxem.utils.io_utils import load_mib
+from pyxem.utils.merlin_reader import load_mib
 
 from . import release_info
 
