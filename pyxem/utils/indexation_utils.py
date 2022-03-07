@@ -1782,7 +1782,7 @@ def results_dict_to_crystal_map(
     ...     results, phase_key_dict, index=1
     ... )  # doctest: +SKIP
     """
-    nx, ny, n_best = results["phase_index"].shape
+    ny, nx, n_best = results["phase_index"].shape
     if index is not None and index > n_best - 1:
         raise ValueError(f"`index` cannot be higher than {n_best - 1} (`n_best` - 1)")
 
