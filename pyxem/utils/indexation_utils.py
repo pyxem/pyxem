@@ -1508,8 +1508,8 @@ def index_dataset_with_template_rotation(
         the best matching orientations expressed in Bunge convention Euler angles.
         Correlation is the matching correlation indices. mirrored template represents
         whether the original template best fits (False) or the mirror image (True).
-        Each is a numpy array of shape (scan_x, scan_y, n_best) except orientation
-        is of shape (scan_x, scan_y, n_best, 3).
+        Each is a numpy array of shape (scan_y, scan_x, n_best) except orientation
+        is of shape (scan_y, scan_x, n_best, 3).
     phase_key_dict: dictionary
         A small dictionary to translate the integers in the phase_index array
         to phase names in the original template library.
