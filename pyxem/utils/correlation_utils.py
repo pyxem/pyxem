@@ -151,7 +151,7 @@ def _pearson_correlation(z, mask=None):
     return p_correlation
 
 
-def wrap_set_float(target, bottom, top, value):
+def _wrap_set_float(target, bottom, top, value):
     """This function sets values in a list assuming that
     the list is circular and allows for float bottom and float top
     which are equal to the residual times that value.
@@ -179,7 +179,7 @@ def wrap_set_float(target, bottom, top, value):
     return target
 
 
-def get_interpolation_matrix(angles, angular_range, num_points, method="average"):
+def _get_interpolation_matrix(angles, angular_range, num_points, method="average"):
     """Gets an interpolation matrix which when a matrix multiplied gets the symmetry elements
     for a correlation.
     """
@@ -190,7 +190,7 @@ def get_interpolation_matrix(angles, angular_range, num_points, method="average"
         angular_ranges = np.subtract(angular_ranges, 0.5)
         interpolation_matrix = np.zeros(num_points)
         for i, angle in enumerate(angular_ranges):
-            wrap_set_float(interpolation_matrix, top=angle[1], bottom=angle[0], value=1)
+            _wrap_set_float(interpolation_matrix, top=angle[1], bottom=angle[0], value=1)
         return interpolation_matrix
     else:
         angular_ranges = [(angle - angular_range / (2*np.pi), angle + angular_range / (2*np.pi))
@@ -198,11 +198,11 @@ def get_interpolation_matrix(angles, angular_range, num_points, method="average"
         angular_ranges = np.multiply(angular_ranges, num_points)
         interpolation_matrix = np.zeros((len(angles), num_points))
         for i, angle in enumerate(angular_ranges):
-            wrap_set_float(interpolation_matrix[i, :], top=angle[1], bottom=angle[0], value=1)
+            _wrap_set_float(interpolation_matrix[i, :], top=angle[1], bottom=angle[0], value=1)
         return interpolation_matrix
 
 
-def symmetry_stem(signal, interpolation, method="average"):
+def _symmetry_stem(signal, interpolation, method="average"):
     """Preforms a symmetry stem operation given a method of `average` `max` or `first` and
      a given interpolation matrix
      """
@@ -216,7 +216,7 @@ def symmetry_stem(signal, interpolation, method="average"):
         val = np.transpose([np.matmul(signal, np.transpose(interp[0]))
                             for interp in interpolation])
     else:
-        print("Method must be one of `average`, `max` or `first`")
+        raise ValueError("Method must be one of `average`, `max` or `first`")
     return val
 
 def corr_to_power(z):

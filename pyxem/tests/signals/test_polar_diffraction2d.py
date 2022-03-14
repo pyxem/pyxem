@@ -155,16 +155,16 @@ class TestPearsonCorrelation:
         return pd
 
     @pytest.mark.parametrize("krange", [None, (0, 4), (1., 5.)])
-    def test_pcorrelation_signal(self, flat_pattern, krange):
+    def test_pearson_correlation_signal(self, flat_pattern, krange):
         rho = flat_pattern.get_pearson_correlation(krange=krange)
         assert isinstance(rho, Signal1D)
 
     @pytest.mark.parametrize("krange", [None, (0, 30), (1., 5.)])
-    def test_pcorrelation_results(self, flat_pattern, krange):
+    def test_pearson_correlation_results(self, flat_pattern, krange):
         rho = flat_pattern.get_pearson_correlation(krange=krange)
         np.testing.assert_almost_equal(rho.data[:, :, 1:], np.zeros((2, 2, 14)), 1)
 
-    def test_pcorrelation_inplace(self, flat_pattern):
+    def test_pearson_correlation_inplace(self, flat_pattern):
         rho = flat_pattern.get_pearson_correlation(inplace=True)
         assert rho is None
         assert isinstance(flat_pattern, Correlation1D)
@@ -179,7 +179,7 @@ class TestPearsonCorrelation:
     @pytest.mark.parametrize(
         "mask", [None, np.zeros(shape=(50, 15))]
     )
-    def test_masking_pcorrelation(self, flat_pattern, mask):
+    def test_masking_pearson_correlation(self, flat_pattern, mask):
         rho_0 = flat_pattern.get_pearson_correlation(mask=mask)
         assert isinstance(rho_0, Correlation1D)
         rho = flat_pattern.get_pearson_correlation(mask=mask, krange=(0, 4))

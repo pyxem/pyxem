@@ -20,8 +20,8 @@
 
 from hyperspy.signals import BaseSignal, Signal1D
 import numpy as np
-import fractions as frac
-from pyxem.utils.correlation_utils import get_interpolation_matrix, symmetry_stem
+from fractions import Fraction as frac
+from pyxem.utils.correlation_utils import _get_interpolation_matrix, _symmetry_stem
 
 
 class Correlation1D(Signal1D):
@@ -82,18 +82,19 @@ class Correlation1D(Signal1D):
             angles = new_angles
         num_angles = [len(a) for a in angles]
 
-        interp = [get_interpolation_matrix(a,
+        interp = [_get_interpolation_matrix(a,
                                            angular_range,
                                            num_points=self.axes_manager.signal_axes[0].size,
                                            method=method)
                   for a in angles]
-
-        signals = self.map(symmetry_stem,
+        signals = self.map(_symmetry_stem,
                            interpolation=interp,
                            show_progressbar=True,
                            inplace=False,
                            method=method)
-        if normalize & (method is not "max" or method is not "first"):
+        if method == "max" or method =="first":
+            normalize =False
+        if normalize:
             signals = np.divide(signals, num_angles)
 
         signals.axes_manager.navigation_axes = self.axes_manager.navigation_axes
