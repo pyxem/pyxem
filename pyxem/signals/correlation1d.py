@@ -29,7 +29,7 @@ class Correlation1D(Signal1D):
     _signal_type = "correlation"
 
     def __init__(self, *args, **kwargs):
-        """Create a Symmetry object from a numpy.ndarray.
+        """Create a Correlation 1D signal from a numpy.ndarray.
 
         Parameters
         ----------
