@@ -1,0 +1,94 @@
+# -*- coding: utf-8 -*-
+# Copyright 2016-2022 The pyXem developers
+#
+# This file is part of pyXem.
+#
+# pyXem is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# pyXem is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+
+
+
+from hyperspy.signals import Signal2D, BaseSignal, Signal1D
+import numpy as np
+import fractions as frac
+from pyxem.utils.correlation_utils import get_interpolation_matrix, symmetry_stem
+
+
+class Correlation1D(Signal1D):
+    """Signal class for pearson correlation and symmetry coefficient."""
+    _signal_type = "correlation"
+
+    def __init__(self, *args, **kwargs):
+        """Create a Symmetry object from a numpy.ndarray.
+
+        Parameters
+        ----------
+        *args :
+            Passed to the __init__ of Signal1D. The first arg should be
+            a numpy.ndarray
+        **kwargs :
+            Passed to the __init__ of Signal1D
+        """
+        super().__init__(*args, **kwargs)
+
+        self.decomposition.__func__.__doc__ = BaseSignal.decomposition.__doc__
+
+    def get_symmetry_coefficient(self,
+                                 angular_range=0.1,
+                                 symmetries=[2, 3, 4, 5, 6, 7, 8, 9, 10],
+                                 method="average",
+                                 include_duplicates=False,
+                                 normalize=True,
+                                 ):
+        """Return symmetry coefficient from pearson correlation function at all real
+        space positions (n from 2 to 10).
+
+        Returns
+        -------
+        sn: Signal1D
+            Symmetry coefficient
+        """
+        angles = [set(frac(j, i) for j in range(0, i)) for i in symmetries]
+
+        if not include_duplicates:  # remove duplicated symmetries
+            already_used = set()
+            new_angles = []
+            for a in angles:
+                new_angles.append(a.difference(already_used))
+                already_used = already_used.union(a)
+            angles = new_angles
+        num_angles = [len(a) for a in angles]
+
+        print(self.data)
+        interp = [get_interpolation_matrix(a,
+                                           angular_range,
+                                           num_points=self.axes_manager.signal_axes[0].size,
+                                           method=method)
+                  for a in angles]
+
+        signals = self.map(symmetry_stem,
+                           interpolation=interp,
+                           show_progressbar=True,
+                           inplace=False,
+                           method=method)
+
+        #signals.set_signal_type("symmetry")
+        if normalize & (method is not "max" or method is not "first"):
+            signals = np.divide(signals, num_angles)
+
+        signals.axes_manager.navigation_axes = self.axes_manager.navigation_axes
+        signals.axes_manager[-1].name = "Symmetry Order"
+        signals.axes_manager.navigation_axes[0].scale = 1
+        signals.axes_manager.navigation_axes[0].name = "Symmetry"
+        signals.axes_manager.navigation_axes[0].offset = 0
+        return signals
