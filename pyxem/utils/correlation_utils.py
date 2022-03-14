@@ -151,7 +151,7 @@ def _pearson_correlation(z, mask=None):
     return p_correlation
 
 
-def wrap_set_float(list, bottom, top, value):
+def wrap_set_float(target, bottom, top, value):
     """This function sets values in a list assuming that
     the list is circular and allows for float bottom and float top
     which are equal to the residual times that value.
@@ -160,23 +160,23 @@ def wrap_set_float(list, bottom, top, value):
     residual_bottom = ceiling_bottom-bottom
     floor_top = int(np.floor(top))
     residual_top = top-floor_top
-    if floor_top > len(list) - 1:
-        list[ceiling_bottom:] = value
-        new_floor_top = floor_top % len(list)
-        list[new_floor_top] = value
-        list[new_floor_top+1] = value*residual_top
+    if floor_top > len(target) - 1:
+        target[ceiling_bottom:] = value
+        new_floor_top = floor_top % len(target)
+        target[new_floor_top] = value
+        target[new_floor_top+1] = value*residual_top
     elif ceiling_bottom < 0:
-        list[:floor_top] = value
-        list[ceiling_bottom:] = value
-        list[ceiling_bottom-1] = value*residual_bottom
+        target[:floor_top] = value
+        target[ceiling_bottom:] = value
+        target[ceiling_bottom-1] = value*residual_bottom
     else:
-        list[ceiling_bottom:floor_top+1] = value
-        list[ceiling_bottom-1] = value*residual_bottom
-        if floor_top + 1 > len(list) - 1:
-            list[0] = value*residual_top
+        target[ceiling_bottom:floor_top+1] = value
+        target[ceiling_bottom-1] = value*residual_bottom
+        if floor_top + 1 > len(target) - 1:
+            target[0] = value*residual_top
         else:
-            list[floor_top+1] = value*residual_top
-    return list
+            target[floor_top+1] = value*residual_top
+    return target
 
 
 def get_interpolation_matrix(angles, angular_range, num_points, method="average"):
