@@ -18,7 +18,7 @@
 
 
 
-from hyperspy.signals import Signal2D, BaseSignal, Signal1D
+from hyperspy.signals import BaseSignal, Signal1D
 import numpy as np
 import fractions as frac
 from pyxem.utils.correlation_utils import get_interpolation_matrix, symmetry_stem
@@ -53,6 +53,19 @@ class Correlation1D(Signal1D):
         """Return symmetry coefficient from pearson correlation function at all real
         space positions (n from 2 to 10).
 
+        Parameters
+        ----------
+        angular_range: float
+            The angular range (in rad) to integrate over when calculating the symmetry coefficient.
+        symmetries: list
+            The list of symmetries to calculate.
+        method: "average", "first", "max"
+            The method for calculating the Symmetry STEM
+        include_duplicates: bool
+            If angles which are duplicated should be included.
+        normalize: bool
+            This normalized by dividing by the number of angles for each symmetry.
+
         Returns
         -------
         sn: Signal1D
@@ -69,7 +82,6 @@ class Correlation1D(Signal1D):
             angles = new_angles
         num_angles = [len(a) for a in angles]
 
-        print(self.data)
         interp = [get_interpolation_matrix(a,
                                            angular_range,
                                            num_points=self.axes_manager.signal_axes[0].size,
@@ -81,8 +93,6 @@ class Correlation1D(Signal1D):
                            show_progressbar=True,
                            inplace=False,
                            method=method)
-
-        #signals.set_signal_type("symmetry")
         if normalize & (method is not "max" or method is not "first"):
             signals = np.divide(signals, num_angles)
 
