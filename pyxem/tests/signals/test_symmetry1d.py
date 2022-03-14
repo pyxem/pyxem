@@ -21,7 +21,7 @@ import numpy as np
 
 from hyperspy.signals import Signal1D
 
-from pyxem.signals.symmetry1d import Symmetry1D
+from pyxem.signals.correlation1d import Symmetry1D
 
 class TestSymmetry:
     @pytest.fixture

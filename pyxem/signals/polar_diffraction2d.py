@@ -168,10 +168,10 @@ class PolarDiffraction2D(Signal2D):
                                                 **kwargs)
 
         if inplace:
-            self.set_signal_type("symmetry")
+            self.set_signal_type("correlation")
             rho_axis = self.axes_manager.signal_axes[0]
         else:
-            correlation.set_signal_type("symmetry")
+            correlation.set_signal_type("correlation")
             rho_axis = correlation.axes_manager.signal_axes[0]
             correlation.axes_manager.navigation_axes = self.axes_manager.navigation_axes
         rho_axis.name = "Radians"
