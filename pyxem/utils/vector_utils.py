@@ -47,7 +47,7 @@ def detector_to_fourier(k_xy, wavelength, camera_length):
 
     if k_xy.shape == (1,) and k_xy.dtype == "object":
         # From ragged array
-        k_xy = k_xy[0]
+        k_xy = k_xy
 
     # The calibrated positions of the diffraction spots are already the x and y
     # coordinates of the k vector on the Ewald sphere. The radius is given by
@@ -92,7 +92,7 @@ def calculate_norms_ragged(z):
         Array of vector norms.
     """
     norms = []
-    for i in z[0]:
+    for i in z:
         norms.append(np.linalg.norm(i))
     return np.asarray(norms)
 
@@ -115,13 +115,13 @@ def filter_vectors_ragged(z, min_magnitude, max_magnitude):
     """
     # Calculate norms
     norms = []
-    for i in z[0]:
+    for i in z:
         norms.append(np.linalg.norm(i))
     norms = np.asarray(norms)
     # Filter based on norms
     norms[norms < min_magnitude] = 0
     norms[norms > max_magnitude] = 0
-    filtered_vectors = z[0][np.where(norms)]
+    filtered_vectors = z[np.where(norms)]
 
     return filtered_vectors
 
@@ -143,9 +143,9 @@ def filter_vectors_edge_ragged(z, x_threshold, y_threshold):
         Diffraction vectors within allowed tolerances.
     """
     # Filter x / y coordinates
-    z[0][np.absolute(z[0].T[0]) > x_threshold] = 0
-    z[0][np.absolute(z[0].T[1]) > y_threshold] = 0
-    filtered_vectors = z[0][np.where(z[0].T[0])]
+    z[np.absolute(z.T[0]) > x_threshold] = 0
+    z[np.absolute(z.T[1]) > y_threshold] = 0
+    filtered_vectors = z[np.where(z.T[0])]
 
     return filtered_vectors
 
@@ -261,7 +261,7 @@ def get_npeaks(found_peaks):
     len : int
         The number of peaks in the array.
     """
-    return len(found_peaks[0])
+    return len(found_peaks)
 
 
 def get_angle_cartesian_vec(a, b):
