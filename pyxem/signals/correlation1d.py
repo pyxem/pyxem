@@ -71,7 +71,7 @@ class Correlation1D(Signal1D):
         sn: Signal1D
             Symmetry coefficient
         """
-        angles = [set(frac(j, i) for j in range(0, i)) for i in symmetries]
+        angles = [set(frac(j, i) for j in range(1, i)) for i in symmetries]
 
         if not include_duplicates:  # remove duplicated symmetries
             already_used = set()

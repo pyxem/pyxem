@@ -187,7 +187,6 @@ def _get_interpolation_matrix(angles, angular_range, num_points, method="average
         angular_ranges = [(angle - angular_range / (2*np.pi),
                            angle + angular_range / (2*np.pi)) for angle in angles]
         angular_ranges = np.multiply(angular_ranges, num_points)
-        angular_ranges = np.subtract(angular_ranges, 0.5)
         interpolation_matrix = np.zeros(num_points)
         for i, angle in enumerate(angular_ranges):
             _wrap_set_float(interpolation_matrix, top=angle[1], bottom=angle[0], value=1)

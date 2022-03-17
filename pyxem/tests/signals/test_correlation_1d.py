@@ -19,7 +19,7 @@
 import pytest
 import numpy as np
 
-from pyxem.signals import Correlation1D
+from pyxem.signals import Correlation1D, PolarDiffraction2D
 
 
 class TestCorrelation1D:
@@ -59,3 +59,29 @@ class TestCorrelation1D:
             normalize=True,
         )
         np.testing.assert_array_almost_equal(sym_coeff.data, sym_coeff.data[0, 0, 0])
+
+    def test_corr(self):
+        rand_number = np.random.random(10)
+        tiled_random = np.tile(rand_number, (2, 3, 2))
+        p = PolarDiffraction2D(tiled_random)
+        cor = p.get_pearson_correlation()
+        sym_coeff = cor.get_symmetry_coefficient(
+            method="average",
+            angular_range=0.0,
+            include_duplicates=True,
+            normalize=False,
+        )
+        np.testing.assert_almost_equal(sym_coeff.data[0, 0], 1)
+
+    def test_2_fold_corr(self):
+        rand_number = np.random.random(10)
+        tiled_random = np.tile(rand_number, (2, 3, 2))
+        p = PolarDiffraction2D(tiled_random)
+        cor = p.get_pearson_correlation()
+        sym_coeff = cor.get_symmetry_coefficient(
+            method="average",
+            angular_range=0.0,
+            include_duplicates=True,
+            normalize=False,
+        )
+        np.testing.assert_almost_equal(sym_coeff.data[0, 0], 1)
