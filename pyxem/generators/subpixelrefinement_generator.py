@@ -122,21 +122,34 @@ def _get_pixel_vectors(dp, vectors, calibration, center):
     else:
         vector_pixels = _floor(vectors, calibration, center)
 
+    dp_max_size = np.max(dp.data.shape) - 1
     if isinstance(vector_pixels, DiffractionVectors):
-        if np.any(vector_pixels.data > (np.max(dp.data.shape) - 1)) or (
-            np.any(vector_pixels.data < 0)
-        ):
+        min_value, max_value = 100, -100
+        for index in np.ndindex(dp.axes_manager.navigation_shape):
+            islice = np.s_[index]
+            vec = vector_pixels.inav[islice].data[0]
+            temp_min = vec.flatten().min()
+            temp_max = vec.flatten().max()
+            if min_value > temp_min:
+                min_value = temp_min
+            if max_value < temp_max:
+                max_value = temp_max
+        if max_value > dp_max_size or (min_value < 0):
             raise ValueError(
-                "Some of your vectors do not lie within your diffraction pattern, check your calibration"
+                "Some of your vectors do not lie within your "
+                "diffraction pattern, check your calibration"
             )
     elif isinstance(vector_pixels, np.ndarray):
-        if np.any((vector_pixels > np.max(dp.data.shape) - 1)) or (
-            np.any(vector_pixels < 0)
-        ):
+        if np.any(vector_pixels > dp_max_size) or np.any(vector_pixels < 0):
             raise ValueError(
-                "Some of your vectors do not lie within your diffraction pattern, check your calibration"
+                "Some of your vectors do not lie within your "
+                "diffraction pattern, check your calibration"
             )
-
+    else:
+        raise ValueError(
+            "The vectors are not recognized as either DiffractionVectors "
+            "or a NumPy array"
+        )
     return vector_pixels
 
 
@@ -166,6 +179,68 @@ def _conventional_xc(exp_disc, sim_disc, upsample_factor):
     )
     shifts = np.flip(shifts)  # to comply with hyperspy conventions - see issue#490
     return shifts
+
+
+def _center_of_mass_hs(z):
+    """Return the center of mass of an array with coordinates in the
+    hyperspy convention
+
+    Parameters
+    ----------
+    z : np.array
+
+    Returns
+    -------
+    (x,y) : tuple of floats
+        The x and y locations of the center of mass of the parsed square
+    """
+
+    s = np.sum(z)
+    if s != 0:
+        z *= 1 / s
+    dx = np.sum(z, axis=0)
+    dy = np.sum(z, axis=1)
+    h, w = z.shape
+    cx = np.sum(dx * np.arange(w))
+    cy = np.sum(dy * np.arange(h))
+    return cx, cy
+
+
+def _com_experimental_square(z, vector, square_size):
+    """Wrapper for get_experimental_square that makes the non-zero
+    elements symmetrical around the 'unsubpixeled' peak by zeroing a
+    'spare' row and column (top and left).
+
+    Parameters
+    ----------
+    z : np.array
+
+    vector : np.array([x,y])
+
+    square_size : int (even)
+
+    Returns
+    -------
+    z_adpt : np.array
+        z, but with row and column zero set to 0
+    """
+    # Copy to make sure we don't change the dp
+    z_adpt = np.copy(
+        get_experimental_square(z, vector=vector, square_size=square_size)
+    )
+    z_adpt[:, 0] = 0
+    z_adpt[0, :] = 0
+    return z_adpt
+
+
+def _center_of_mass_map(dp, vectors, square_size, center, calibration):
+    if vectors.shape == (2,):
+        vectors = [vectors, ]
+    shifts = np.zeros_like(vectors, dtype=np.float64)
+    for i, vector in enumerate(vectors):
+        expt_disc = _com_experimental_square(dp, vector, square_size)
+        shifts[i] = [a - square_size / 2 for a in _center_of_mass_hs(expt_disc)]
+    return ((vectors + shifts) - center) * calibration
 
 
 class SubpixelrefinementGenerator:
@@ -239,6 +314,7 @@ class SubpixelrefinementGenerator:
             center=self.center,
             calibration=self.calibration,
             inplace=False,
+            ragged=True,
         )
         self.vectors_out.set_signal_type("diffraction_vectors")
 
@@ -282,6 +358,7 @@ class SubpixelrefinementGenerator:
             center=self.center,
             calibration=self.calibration,
             inplace=False,
+            ragged=True,
         )
         self.vectors_out.set_signal_type("diffraction_vectors")
 
@@ -305,64 +382,6 @@ class SubpixelrefinementGenerator:
             units with the same navigation shape as the diffraction patterns.
 
         """
-
-        def _center_of_mass_hs(z):
-            """Return the center of mass of an array with coordinates in the
-            hyperspy convention
-
-            Parameters
-            ----------
-            z : np.array
-
-            Returns
-            -------
-            (x,y) : tuple of floats
-                The x and y locations of the center of mass of the parsed square
-            """
-
-            s = np.sum(z)
-            if s != 0:
-                z *= 1 / s
-            dx = np.sum(z, axis=0)
-            dy = np.sum(z, axis=1)
-            h, w = z.shape
-            cx = np.sum(dx * np.arange(w))
-            cy = np.sum(dy * np.arange(h))
-            return cx, cy
-
-        def _com_experimental_square(z, vector, square_size):
-            """Wrapper for get_experimental_square that makes the non-zero
-            elements symmetrical around the 'unsubpixeled' peak by zeroing a
-            'spare' row and column (top and left).
-
-            Parameters
-            ----------
-            z : np.array
-
-            vector : np.array([x,y])
-
-            square_size : int (even)
-
-            Returns
-            -------
-            z_adpt : np.array
-                z, but with row and column zero set to 0
-            """
-            # Copy to make sure we don't change the dp
-            z_adpt = np.copy(
-                get_experimental_square(z, vector=vector, square_size=square_size)
-            )
-            z_adpt[:, 0] = 0
-            z_adpt[0, :] = 0
-            return z_adpt
-
-        def _center_of_mass_map(dp, vectors, square_size, center, calibration):
-            shifts = np.zeros_like(vectors, dtype=np.float64)
-            for i, vector in enumerate(vectors):
-                expt_disc = _com_experimental_square(dp, vector, square_size)
-                shifts[i] = [a - square_size / 2 for a in _center_of_mass_hs(expt_disc)]
-            return ((vectors + shifts) - center) * calibration
-
         self.vectors_out = self.dp.map(
             _center_of_mass_map,
             vectors=self.vector_pixels,
@@ -370,6 +389,7 @@ class SubpixelrefinementGenerator:
             center=self.center,
             calibration=self.calibration,
             inplace=False,
+            ragged=True,
         )
         self.vectors_out.set_signal_type("diffraction_vectors")
 
