@@ -26,6 +26,9 @@ from scipy.ndimage import center_of_mass
 
 from hyperspy.signals import BaseSignal
 
+import logging
+_logger = logging.getLogger(__name__)
+
 from pyxem.generators.subpixelrefinement_generator import _get_pixel_vectors
 from pyxem.signals import DiffractionVectors
 
@@ -61,7 +64,7 @@ def _get_intensities(z, vectors, radius=1):
 
 def _take_ragged(z, indices, _axis=None, out=None, mode="raise"):
     """Like `np.take` for ragged arrays, see `np.take` for documentation."""
-    return np.take(z[0], indices, axis=_axis, out=out, mode=mode)
+    return np.take(z, indices, axis=_axis, out=out, mode=mode)
 
 
 def _get_largest_connected_region(segmentation):
@@ -212,7 +215,7 @@ class IntegrationGenerator:
         self.center = [sig_ax[0].size / 2, sig_ax[1].size / 2]
 
         self.vector_pixels = _get_pixel_vectors(
-            dp, vectors, calibration=self.calibration, center=self.center
+            dp=dp, vectors=vectors, calibration=self.calibration, center=self.center
         )
 
     def extract_intensities(self, radius: int = 1):
@@ -282,6 +285,10 @@ class IntegrationGenerator:
         Implementation based on Barty et al, J. Appl. Cryst. (2014). 47, 1118-1131
                                 Lesli, Acta Cryst. (2006). D62, 48-57
         """
+        _logger.warning(
+            "This function might not work properly at the moment, check that the "
+            "returned results looks reasonable."
+        )
         result = self.dp.map(
             _get_intensities_summation_method,
             vectors=self.vector_pixels,
