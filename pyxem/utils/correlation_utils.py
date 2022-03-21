@@ -155,6 +155,19 @@ def _wrap_set_float(target, bottom, top, value):
     """This function sets values in a list assuming that
     the list is circular and allows for float bottom and float top
     which are equal to the residual times that value.
+
+    Parameters
+    ----------
+    target: list
+        The list or array to be adjusted
+    bottom: float
+        The bottom index. Can be a float in which case the value will be
+        split.  i.e. 7.5 will set target[7]= value * .5
+    top: float
+        The top index. Can be a float in which case the value will be
+        split.  i.e. 7.5 will set target[8]= value * .5
+    value:
+        The value to set the range as.
     """
     ceiling_bottom = int(np.ceil(bottom))
     residual_bottom = ceiling_bottom-bottom
@@ -180,8 +193,26 @@ def _wrap_set_float(target, bottom, top, value):
 
 
 def _get_interpolation_matrix(angles, angular_range, num_points, method="average"):
-    """Gets an interpolation matrix which when a matrix multiplied gets the symmetry elements
-    for a correlation.
+    """Returns an interpolation matrix for slicing a dataset based on the given angles as
+    well as an angular range.
+
+    The method is separated into two based on if the angles are all treated equally or if
+    only the first or max angle is considered for some list of angles.
+
+    Parameters
+    ----------
+    angles: list
+        A list of a list of angles where each row represents a grouping of angles to be considered.
+        For example if you are trying to get the expression of 2-fold and 4-fold symmetry this
+        would look like [[0,np.pi],[0,np.pi/2,np.pi,np.pi*3/2]]
+    angular_range: float
+        The angular range in rad to consider.  If zero only the nearest pixel will be considered
+    num_points: int
+        The number of points in the azimuthal range to consider
+    method: str
+        One of "average" "first" or "max".  Changes how the interpolation matrix is created
+        for further processing
+
     """
     if method is "average":
         angular_ranges = [(angle - angular_range / (2*np.pi),
@@ -202,9 +233,23 @@ def _get_interpolation_matrix(angles, angular_range, num_points, method="average
 
 
 def _symmetry_stem(signal, interpolation, method="average"):
-    """Preforms a symmetry stem operation given a method of `average` `max` or `first` and
-     a given interpolation matrix
-     """
+    """Returns the "average" "max" or "first" value for some given signal and an interpolation matrix.
+
+    The interpolation matrix is defined by the  `_get_interpolation_matrix` function which creates a
+    matrix which when matrix multiplied by the signal returns the "average", "max" or "first" value for
+    certain angles related to some symmetry operation.
+
+    ie. For 4-Fold symmetry operations the angles are [0, pi/2, pi,3pi/2]
+
+    Parameters
+    ----------
+    signal: np.array
+        The signal from which to calculate the symmetry stem given an interpolation matrix
+    interpolation: np.array
+        The interpolation matrix for calculating the expression of certain symmetry operations.
+    method:str
+        One of "average", "max" or "first"
+    """
     if method is "average":
         return np.matmul(signal, np.transpose(interpolation))
     elif method is "max":
@@ -217,6 +262,7 @@ def _symmetry_stem(signal, interpolation, method="average"):
     else:
         raise ValueError("Method must be one of `average`, `max` or `first`")
     return val
+
 
 def corr_to_power(z):
     return np.power(np.fft.rfft(z, axis=1), 2).real
