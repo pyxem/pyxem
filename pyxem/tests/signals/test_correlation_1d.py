@@ -54,9 +54,10 @@ class TestCorrelation1D:
     def test_include_duplicates(self, flat_pattern):
         sym_coeff = flat_pattern.get_symmetry_coefficient(
             method="average",
-            angular_range=0.01,
+            angular_range=0.02,
             include_duplicates=True,
             normalize=True,
+            symmetries=[3,4,5,6,7,8],
         )
         np.testing.assert_array_almost_equal(sym_coeff.data, sym_coeff.data[0, 0, 0])
 
