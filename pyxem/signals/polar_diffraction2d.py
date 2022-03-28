@@ -150,22 +150,28 @@ class PolarDiffraction2D(Signal2D):
         correlation: Signal2D
         """
         if krange is None:
-            correlation = self._map_iterate(_pearson_correlation, mask=mask, inplace=inplace, **kwargs)
+            correlation = self.map(_pearson_correlation, mask=mask, inplace=inplace, **kwargs)
         else:
-            self_slice = self.isig[:, krange[0]:krange[1]]
+            k_range_slice = self.isig[:, krange[0]:krange[1]]
             if mask is not None:
                 mask_signal = Signal2D(mask)
                 mask_signal.axes_manager.signal_axes[1].scale = self.axes_manager[-1].scale
+                mask_signal.axes_manager.signal_axes[1].offset = self.axes_manager[-1].offset
                 mask_slice = mask_signal.isig[:, krange[0]:krange[1]]
-                correlation = self_slice._map_iterate(_pearson_correlation, mask=mask_slice, inplace=inplace, **kwargs)
+                correlation = k_range_slice.map(_pearson_correlation,
+                                                mask=mask_slice,
+                                                inplace=inplace,
+                                                **kwargs)
             else:
-                correlation = self_slice._map_iterate(_pearson_correlation, inplace=inplace, **kwargs)
+                correlation = k_range_slice.map(_pearson_correlation,
+                                                inplace=inplace,
+                                                **kwargs)
 
         if inplace:
-            self.set_signal_type("symmetry")
+            self.set_signal_type("correlation")
             rho_axis = self.axes_manager.signal_axes[0]
         else:
-            correlation.set_signal_type("symmetry")
+            correlation.set_signal_type("correlation")
             rho_axis = correlation.axes_manager.signal_axes[0]
             correlation.axes_manager.navigation_axes = self.axes_manager.navigation_axes
         rho_axis.name = "Radians"

@@ -25,6 +25,7 @@ Removed
 
 Fixed
 ^^^^^
+- Symmetry STEM Class updated to allow for better interpolation and lazy operation. (#809)
 - Generalized plotting diffraction vectors on ND stacks of images (#783)
 - Small bugfix with dask/cuda scheduler to prevent running out of VRAM (#779)
 
