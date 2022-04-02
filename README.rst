@@ -29,5 +29,18 @@ pyxem is an extension of the hyperspy library for multi-dimensional data analysi
 **Basic Documentation is available** `here <https://pyxem.readthedocs.io/en/latest/>`__.
 
 If analysis using pyxem forms a part of published work please cite the DOI at the top of this page.
+In addition, we would appreciate an additional citation to the following paper if you use the orientation mapping capabilities:
+
+```bibtex
+@article{pyxemorientationmapping2022,
+  title={Free, flexible and fast: Orientation mapping using the multi-core and GPU-accelerated template matching capabilities in the python-based open source 4D-STEM analysis toolbox Pyxem},
+  author={Cautaerts, Niels and Crout, Phillip and {\AA}nes, H{\aa}kon Wiik and Prestat, Eric and Jeong, Jiwon and Dehm, Gerhard and Liebscher, Christian H},
+  journal={Ultramicroscopy},
+  pages={113517},
+  year={2022},
+  publisher={Elsevier},
+  doi={10.1016/j.ultramic.2022.113517}
+}
+```
 
 pyxem is released under the GPL v3 license.
