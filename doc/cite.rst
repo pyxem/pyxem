@@ -5,7 +5,7 @@ If analysis using pyxem forms a part of published work please cite the work usin
 
 If you use pyxem for orientation mapping, please also cite:
 
-.. raw:: bibtex
+::
 
     @article{pyxemorientationmapping2022,
         title={Free, flexible and fast: Orientation mapping using the multi-core and GPU-accelerated template matching capabilities in the python-based open source 4D-STEM analysis toolbox Pyxem},

@@ -31,7 +31,7 @@ pyxem is an extension of the hyperspy library for multi-dimensional data analysi
 If analysis using pyxem forms a part of published work please cite the DOI at the top of this page.
 In addition, we would appreciate an additional citation to the following paper if you use the orientation mapping capabilities:
 
-.. raw:: bibtex
+::
 
     @article{pyxemorientationmapping2022,
         title={Free, flexible and fast: Orientation mapping using the multi-core and GPU-accelerated template matching capabilities in the python-based open source 4D-STEM analysis toolbox Pyxem},
