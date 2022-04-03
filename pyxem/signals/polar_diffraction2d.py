@@ -173,7 +173,8 @@ class PolarDiffraction2D(Signal2D):
         else:
             correlation.set_signal_type("correlation")
             rho_axis = correlation.axes_manager.signal_axes[0]
-            correlation.axes_manager.navigation_axes = self.axes_manager.navigation_axes
+            for ia, a in enumerate(self.axes_manager.navigation_axes[::-1]):
+                correlation.axes_manager.set_axis(a, ia)
         rho_axis.name = "Radians"
         rho_axis.units = 'rad'
         rho_axis.scale = self.axes_manager[-2].scale
