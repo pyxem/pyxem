@@ -12,4 +12,15 @@ Here are some open datasets which are helpful for running some of the functions 
 
 #. Magnetic STEM-DPC dataset: https://zenodo.org/record/4312960
 
-#.
+#. Cu-Ag nanocrystaline alloy PED dataset:  https://doi.org/10.5281/zenodo.5595292. Used in the `orientation mapping paper <https://doi.org/10.1016/j.ultramic.2022.113517>`__ .
+
+#. Austenitic steel with radiation induced embedded precipitates NBED dataset: https://doi.org/10.5281/zenodo.5597738. Used in the `orientation mapping paper <https://doi.org/10.1016/j.ultramic.2022.113517>`__ .
+
+
+Open workflows
+==============
+
+Here are links to open analysis workflows demonstrating the functionality of Pyxem.
+
+
+#. Analysis worfklows associated with the `orientation mapping paper <https://doi.org/10.1016/j.ultramic.2022.113517>`__ : https://github.com/din14970/pyxem_template_matching_workflows/tree/v2
