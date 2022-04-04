@@ -1,11 +1,11 @@
+============
 Citing pyxem
-=============
-If analysis using pyxem forms a part of published work please cite the work using the DOI
-10.5281/zenodo.2649351.
+============
 
-If you use pyxem for orientation mapping, please also cite:
+If analysis using pyxem forms a part of published work please cite the work using the
+DOI 10.5281/zenodo.2649351.
 
-::
+If you use pyxem for orientation mapping, please also cite::
 
     @article{pyxemorientationmapping2022,
         title={Free, flexible and fast: Orientation mapping using the multi-core and GPU-accelerated template matching capabilities in the python-based open source 4D-STEM analysis toolbox Pyxem},
@@ -17,7 +17,9 @@ If you use pyxem for orientation mapping, please also cite:
         doi={10.1016/j.ultramic.2022.113517}
     }
 
-In addition if you are releasing the data and code related to the work please add the link to the data
-on the Open Datasets page.  Consider adding a new demo notebook as well if you are using a novel workflow.
+In addition if you are releasing the data and code related to the work please add the
+link to the data on the Open Datasets page.  Consider adding a new demo notebook as well
+if you are using a novel workflow.
 
-A list of papers citing pyxem can be found `here <https://scholar.google.com/scholar?q=pyxem>`_
+A list of papers citing pyxem can be found `here
+<https://scholar.google.com/scholar?q=pyxem>`_.
