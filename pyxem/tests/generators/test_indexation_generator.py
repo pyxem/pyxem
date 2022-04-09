@@ -70,7 +70,7 @@ def generate_library(good_library):
 def test_old_indexer_routine():
     with pytest.raises(ValueError):
         _ = IndexationGenerator("a", "b")
-    with pytest.raise(ValueError):
+    with pytest.raises(ValueError):
         _ = TemplateIndexationGenerator("a", "b")
 
 @pytest.mark.skipif(sys.platform=='darwin',reason="Fails on Mac OSX")

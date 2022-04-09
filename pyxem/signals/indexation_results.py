@@ -163,53 +163,6 @@ class GenericMatchingResults:
             rotations=rotations, phase_id=phase_id, x=x, y=y, prop=properties
         )
 
-
-class TemplateMatchingResults(GenericMatchingResults):
-    """Template matching results containing the top n best matching crystal
-    phase and orientation at each navigation position with associated metrics.
-
-    Examples
-    --------
-    Saving the signal containing all potential matches at each pixel
-
-    >>> TemplateMatchingResult.data.save("filename")
-
-    Exporting the best matches to a crystal map
-
-    >>> xmap = TemplateMatchingResult.to_crystal_map()
-
-    """
-
-    def plot_best_matching_results_on_signal(
-        self, signal, library, permanent_markers=True, *args, **kwargs
-    ):
-        """Plot the best matching diffraction vectors on a signal.
-
-        Parameters
-        ----------
-        signal : ElectronDiffraction2D
-            The ElectronDiffraction2D signal object on which to plot the peaks.
-            This signal must have the same navigation dimensions as the peaks.
-        library : DiffractionLibrary
-            Diffraction library containing the phases and rotations
-        permanent_markers : bool
-            Permanently save the peaks as markers on the signal
-        *args :
-            Arguments passed to signal.plot()
-        **kwargs :
-            Keyword arguments passed to signal.plot()
-
-        """
-        match_peaks = self.data.map(
-            _peaks_from_best_template, library=library, inplace=False
-        )
-        mmx, mmy = generate_marker_inputs_from_peaks(match_peaks)
-        signal.plot(*args, **kwargs)
-        for mx, my in zip(mmx, mmy):
-            m = hs.markers.point(x=mx, y=my, color="red", marker="x")
-            signal.add_marker(m, plot_marker=True, permanent=permanent_markers)
-
-
 class VectorMatchingResults(BaseSignal):
     """Vector matching results containing the top n best matching crystal
     phase and orientation at each navigation position with associated metrics.
