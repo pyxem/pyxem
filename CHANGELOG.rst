@@ -24,7 +24,7 @@ Removed
 -------
 - lazy_* virtual imaging has been removed, use get_integrated_intensity (#722)
 - `big_data_utils` has been removed as this is not the modern way of attacking this problem
-
+- similarly, `TemplateIndexationGenerator` has been removed as the Accelerated approach is far better (#823)
 Fixed
 -----
 - Generalized plotting diffraction vectors on ND stacks of images (#783)
