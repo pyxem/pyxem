@@ -26,8 +26,6 @@ from diffsims.utils.sim_utils import get_electron_wavelength
 
 from pyxem.signals import TemplateMatchingResults, VectorMatchingResults
 from pyxem.utils.indexation_utils import (
-    zero_mean_normalized_correlation,
-    fast_correlation,
     index_magnitudes,
     match_vectors,
     OrientationResult,
@@ -52,108 +50,25 @@ class IndexationGenerator:
 
     Returns
     -------
-    ValueError : "use TemplateIndexationGenerator or VectorIndexationGenerator"
+    ValueError : "use AcceleratedIndexationGenerator or VectorIndexationGenerator"
     """
 
     def __init__(self, signal, diffraction_library):
-        raise ValueError("use TemplateIndexationGenerator or VectorIndexationGenerator")
+        raise ValueError("use AcceleratedIndexationGenerator or VectorIndexationGenerator")
 
-
-def _correlate_templates(image, library, n_largest, method, mask):
-    r"""Correlates all simulated diffraction templates in a DiffractionLibrary
-    with a particular experimental diffraction pattern (image).
-
-    Calculated using the normalised (see return type documentation) dot
-    product, or cosine distance,
-
-    .. math:: fast_correlation
-        \\frac{\\sum_{j=1}^m P(x_j, y_j) T(x_j, y_j)}{\\sqrt{\\sum_{j=1}^m T^2(x_j, y_j)}}
-
-    .. math:: zero_mean_normalized_correlation
-        \\frac{\\sum_{j=1}^m P(x_j, y_j) T(x_j, y_j)- avg(P)avg(T)}{\\sqrt{\\sum_{j=1}^m (T(x_j, y_j)-avg(T))^2+\sum_{j=1}^m P(x_j,y_j)-avg(P)}}
-        for a template T and an experimental pattern P.
+class TemplateIndexationGenerator:
+    """Generates an indexer for data using a number of methods.
 
     Parameters
     ----------
-    image : numpy.array
-        The experimental diffraction pattern of interest.
-    library : DiffractionLibrary
-        The library of diffraction simulations to be correlated with the
-        experimental data.
-    n_largest : int
-        The number of well correlated simulations to be retained per phase
-    method : str
-        Name of method used to compute correlation between templates and diffraction patterns. Can be
-        'fast_correlation' or 'zero_mean_normalized_correlation'.
-    mask : bool
-        A mask for navigation axes. 1 indicates positions to be indexed.
-
-
-    Returns
-    -------
-    top_matches : numpy.array
-        Array of shape (<num phases>*n_largest, 5) containing the top n
-        correlated simulations for the experimental pattern of interest, where
-        each entry is on the form [phase index,alpha,beta,gamma,correlation].
-
-
-    References
-    ----------
-    E. F. Rauch and L. Dupuy, “Rapid Diffraction Patterns identification through
-       template matching,” vol. 50, no. 1, pp. 87–99, 2005.
-
+    signal : ElectronDiffraction2D
+        The signal of electron diffraction patterns to be indexed.
+    diffraction_library : DiffractionLibrary
+        The library of simulated diffraction patterns for indexation.
     """
-    phase_count = len(library.keys())
-    top_matches = np.zeros((n_largest * phase_count, 5))
 
-    # return for the masked data
-    if mask != 1:
-        return top_matches
-
-    if method == "zero_mean_normalized_correlation":
-        nb_pixels = image.shape[0] * image.shape[1]
-        average_image_intensity = np.average(image)
-        image_std = np.linalg.norm(image - average_image_intensity)
-
-    for phase_number, phase in enumerate(library.keys()):
-        saved_results = np.zeros((n_largest, 5))
-        saved_results[:, 0] = phase_number
-
-        for entry_number in np.arange(len(library[phase]["orientations"])):
-            orientations = library[phase]["orientations"][entry_number]
-            pixel_coords = library[phase]["pixel_coords"][entry_number]
-            intensities = library[phase]["intensities"][entry_number]
-
-            # Extract experimental intensities from the diffraction image
-            image_intensities = image[pixel_coords[:, 1], pixel_coords[:, 0]]
-
-            if method == "zero_mean_normalized_correlation":
-                corr_local = zero_mean_normalized_correlation(
-                    nb_pixels,
-                    image_std,
-                    average_image_intensity,
-                    image_intensities,
-                    intensities,
-                )
-
-            elif method == "fast_correlation":
-                corr_local = fast_correlation(
-                    image_intensities,
-                    intensities,
-                    library[phase]["pattern_norms"][entry_number],
-                )
-
-            if corr_local > np.min(saved_results[:, 4]):
-                row_index = np.argmin(saved_results[:, 4])
-                saved_results[row_index, 1:4] = orientations
-                saved_results[row_index, 4] = corr_local
-
-        phase_sorted = saved_results[saved_results[:, 4].argsort()]
-        start_slot = phase_number * n_largest
-        end_slot = (phase_number + 1) * n_largest
-        top_matches[start_slot:end_slot, :] = phase_sorted
-    return top_matches
-
+    def __init__(self, signal, diffraction_library):
+        raise ValueError("use AcceleratedIndexationGenerator or VectorIndexationGenerator")
 
 class AcceleratedIndexationGenerator:
     """
@@ -251,94 +166,6 @@ class AcceleratedIndexationGenerator:
                                                     n_best=n_largest,
                                                     **kwargs)
         return result
-
-
-
-
-
-
-class TemplateIndexationGenerator:
-    """Generates an indexer for data using a number of methods.
-
-    Parameters
-    ----------
-    signal : ElectronDiffraction2D
-        The signal of electron diffraction patterns to be indexed.
-    diffraction_library : DiffractionLibrary
-        The library of simulated diffraction patterns for indexation.
-    """
-
-    def __init__(self, signal, diffraction_library):
-        self.signal = signal
-        self.library = diffraction_library
-
-    def correlate(
-        self,
-        n_largest=5,
-        method="fast_correlation",
-        mask=None,
-        print_help=False,
-        **kwargs,
-    ):
-        """Correlates the library of simulated diffraction patterns with the
-        electron diffraction signal.
-
-        Parameters
-        ----------
-        n_largest : int
-            The n orientations with the highest correlation values for each phase are returned.
-        method : str
-            Name of method used to compute correlation between templates and diffraction patterns. Can be
-            'fast_correlation' or 'zero_mean_normalized_correlation'.
-        mask : hs.BaseSignal or None
-            Only apply the method a unmasked (value=1) pixel, default is None (index all pixels)
-        print_help : bool
-            Display information about the method used.
-        **kwargs : arguments
-            Keyword arguments passed map().
-
-        Returns
-        -------
-        matching_results : TemplateMatchingResults
-        """
-        signal = self.signal
-        library = self.library
-
-        method_dict = {
-            "fast_correlation": fast_correlation,
-            "zero_mean_normalized_correlation": zero_mean_normalized_correlation,
-        }
-
-        if mask is None:
-            # Index at all real space pixels
-            mask = 1
-
-        # tests if selected method is valid and can print help for selected method.
-        _ = select_method_from_method_dict(method, method_dict, print_help)
-
-        # adds a normalisation to library #TODO: Port to diffsims
-        for phase in library.keys():
-            # initialise a container for the norms
-            norm_array = np.ones(library[phase]["intensities"].shape[0])
-
-            for i, intensity_array in enumerate(library[phase]["intensities"]):
-                norm_array[i] = np.linalg.norm(intensity_array)
-                library[phase]["pattern_norms"] = norm_array
-
-        matches = signal.map(
-            _correlate_templates,
-            library=library,
-            n_largest=n_largest,
-            method=method,
-            mask=mask,
-            inplace=False,
-            **kwargs,
-        )
-
-        matching_results = TemplateMatchingResults(matches)
-
-        return matching_results
-
 
 class ProfileIndexationGenerator:
     """Generates an indexer for data using a number of methods.

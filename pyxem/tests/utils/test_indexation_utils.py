@@ -21,33 +21,10 @@ import numpy as np
 from orix.quaternion import Rotation
 import pytest
 
-from pyxem.utils.indexation_utils import (
-    match_vectors,
-    zero_mean_normalized_correlation,
-    fast_correlation,
-)
+from pyxem.utils.indexation_utils import match_vectors
 from pyxem.utils.indexation_utils import (
     index_dataset_with_template_rotation, results_dict_to_crystal_map
 )
-
-
-def test_zero_mean_normalized_correlation():
-    np.testing.assert_approx_equal(
-        zero_mean_normalized_correlation(
-            3, np.linalg.norm([2 / 3, 1 / 3, 1 / 3]), 1 / 3, [1, 0, 0], [1, 0, 0]
-        ),
-        1,
-    )
-    # nb_pixels,image_std,average_image_intensity,image_intensities,int_local
-    assert zero_mean_normalized_correlation(3, 0, 1, [1, 1, 1], [0, 0, 1]) == 0
-
-
-def test_fast_correlation():
-    np.testing.assert_approx_equal(
-        fast_correlation([1, 1, 1], [1, 1, 1], np.sqrt(3)), np.sqrt(3)
-    )
-    np.testing.assert_approx_equal(fast_correlation([1, 1, 1], [1, 0, 0], 1), 1)
-
 
 def test_match_vectors(vector_match_peaks, vector_library):
     # Wrap to test handling of ragged arrays
