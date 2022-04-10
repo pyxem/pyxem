@@ -74,39 +74,6 @@ def crystal_from_vector_matching(z_matches):
 
     return results_array
 
-
-def _peaks_from_best_template(single_match_result, library, rank=0):
-    """Takes a TemplateMatchingResults object and return the associated peaks,
-    to be used in combination with map().
-
-    Parameters
-    ----------
-    single_match_result : ndarray
-        An entry in a TemplateMatchingResults.
-    library : DiffractionLibrary
-        Diffraction library containing the phases and rotations.
-    rank : int
-        Get peaks from nth best orientation (default: 0, best vector match)
-
-    Returns
-    -------
-    peaks : array
-        Coordinates of peaks in the matching results object in calibrated units.
-
-    """
-    best_fit = get_nth_best_solution(single_match_result, "template", rank=rank)
-
-    phase_names = list(library.keys())
-    phase_index = int(best_fit[0])
-    phase = phase_names[phase_index]
-    simulation = library.get_library_entry(phase=phase, angle=tuple(best_fit[1:4]))[
-        "Sim"
-    ]
-
-    peaks = simulation.coordinates[:, :2]  # cut z
-    return peaks
-
-
 def _get_best_match(z):
     """Returns the match with the highest score for a given navigation pixel
 

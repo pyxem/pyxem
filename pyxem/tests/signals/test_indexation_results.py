@@ -27,16 +27,10 @@ from diffsims.generators.library_generator import DiffractionLibraryGenerator
 
 from pyxem.generators import TemplateIndexationGenerator
 from pyxem.signals import (
-    TemplateMatchingResults,
     VectorMatchingResults,
     DiffractionVectors,
 )
 from pyxem.utils.indexation_utils import OrientationResult
-
-
-def test_TemplateMatchingResults_to_crystal_map():
-    t = TemplateMatchingResults(np.empty((10, 10, 10, 5)))
-    return t.to_crystal_map()
 
 @pytest.fixture
 def sp_vector_match_result():

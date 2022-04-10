@@ -24,7 +24,7 @@ from transforms3d.euler import mat2euler, euler2mat
 
 from diffsims.utils.sim_utils import get_electron_wavelength
 
-from pyxem.signals import TemplateMatchingResults, VectorMatchingResults
+from pyxem.signals import VectorMatchingResults
 from pyxem.utils.indexation_utils import (
     index_magnitudes,
     match_vectors,

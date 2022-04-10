@@ -37,7 +37,6 @@ from pyxem.generators import (
 )
 from pyxem.signals import (
     ElectronDiffraction2D,
-    TemplateMatchingResults,
     DiffractionVectors,
 )
 from pyxem.utils.indexation_utils import OrientationResult
