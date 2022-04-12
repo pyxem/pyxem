@@ -568,12 +568,14 @@ class TestPyFAIIntegration:
 
     def test_integrate_radial(self, ones):
         ones.set_ai(center=(5.5, 5.5), wavelength=1e-9)
+        assert isinstance(ones, Diffraction2D)
         integration = ones.get_radial_integral(
             npt=10,
             npt_rad=100,
             method="BBox",
             correctSolidAngle=False,
         )
+        assert isinstance(integration, Diffraction1D)
         np.testing.assert_array_equal(integration, np.ones(10))
         integration = ones.get_radial_integral(
             npt=10,

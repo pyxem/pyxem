@@ -147,7 +147,8 @@ class TestCorrelations:
 class TestPearsonCorrelation:
     @pytest.fixture
     def flat_pattern(self):
-        pd = PolarDiffraction2D(data=np.random.random((2, 2, 50, 15)))
+        rng = np.random.default_rng(seed=1)
+        pd = PolarDiffraction2D(data=rng.random((2, 2, 50, 15)))
         pd.axes_manager.signal_axes[0].scale = 0.5
         pd.axes_manager.signal_axes[0].name = "theta"
         pd.axes_manager.signal_axes[1].scale = 0.1
@@ -162,12 +163,16 @@ class TestPearsonCorrelation:
     @pytest.mark.parametrize("krange", [None, (0, 30), (1., 5.)])
     def test_pearson_correlation_results(self, flat_pattern, krange):
         rho = flat_pattern.get_pearson_correlation(krange=krange)
-        np.testing.assert_almost_equal(rho.data[:, :, 1:], np.zeros((2, 2, 14)), 1)
+        np.testing.assert_allclose(np.zeros((2, 2, 14)), rho.data[:, :, 1:], atol=0.1)
 
     def test_pearson_correlation_inplace(self, flat_pattern):
         rho = flat_pattern.get_pearson_correlation(inplace=True)
         assert rho is None
         assert isinstance(flat_pattern, Correlation1D)
+
+    def test_pearson_correlation_inplace_error(self, flat_pattern):
+        with pytest.raises(ValueError):
+            flat_pattern.get_pearson_correlation(inplace=True, krange=[0, 30])
 
     def test_axes_transfer(self, flat_pattern):
         rho = flat_pattern.get_pearson_correlation()

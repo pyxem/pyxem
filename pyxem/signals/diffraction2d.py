@@ -2103,7 +2103,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         Returns
         -------
         polar: PolarDiffraction2D
-            A polar diffraction signal
+            A polar diffraction signal, when inplace is False, otherwise None
 
         Examples
         --------
@@ -2147,23 +2147,21 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             **kwargs,
         )
 
+        s = self if inplace else integration
+        s.set_signal_type("polar_diffraction")
+
         # Dealing with axis changes
-        if inplace:
-            t_axis = self.axes_manager.signal_axes[0]
-            k_axis = self.axes_manager.signal_axes[1]
-            self.set_signal_type("polar_diffraction")
-        else:
-            transfer_navigation_axes(integration, self)
-            integration.set_signal_type("polar_diffraction")
-            t_axis = integration.axes_manager.signal_axes[0]
-            k_axis = integration.axes_manager.signal_axes[1]
+        t_axis = s.axes_manager.signal_axes[0]
+        k_axis = s.axes_manager.signal_axes[1]
         t_axis.name = "Radians"
+        
         if azimuth_range is None:
             t_axis.scale = np.pi * 2 / npt_azim
             t_axis.offset = -np.pi
         else:
             t_axis.scale = (azimuth_range[1] - azimuth_range[0]) / npt
             t_axis.offset = azimuth_range[0]
+
         k_axis.name = "Radius"
         k_axis.scale = (radial_range[1] - radial_range[0]) / npt
         k_axis.units = unit
@@ -2254,7 +2252,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> ds.get_radial_integral(npt=100,npt_rad=400)
 
         """
-        signal_type = self._signal_type
         sig_shape = self.axes_manager.signal_shape
         if radial_range is None:
             radial_range = _get_radial_extent(
@@ -2277,14 +2274,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             **kwargs,
         )
 
+        s = self if inplace else integration
+
         # Dealing with axis changes
-        if inplace:
-            k_axis = self.axes_manager.signal_axes[0]
-            self.set_signal_type(signal_type)
-        else:
-            integration.set_signal_type(signal_type)
-            transfer_navigation_axes(integration, self)
-            k_axis = integration.axes_manager.signal_axes[0]
+        k_axis = s.axes_manager.signal_axes[0]
         k_axis.name = "Radius"
         k_axis.scale = (radial_range[1] - radial_range[0]) / npt
         # k_axis.units = unit.unit_symbol
@@ -2367,7 +2360,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> ds.get_radial_integral(npt=100,npt_rad=400)
 
         """
-        signal_type = self._signal_type
         sig_shape = self.axes_manager.signal_shape
         radial_range = _get_radial_extent(ai=self.ai, shape=sig_shape, unit=self.unit)
         radial_range[0] = 0
@@ -2384,14 +2376,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             **kwargs,
         )
 
+        s = self if inplace else integration
+        
         # Dealing with axis changes
-        if inplace:
-            k_axis = self.axes_manager.signal_axes[0]
-            self.set_signal_type(signal_type)
-        else:
-            integration.set_signal_type(signal_type)
-            transfer_navigation_axes(integration, self)
-            k_axis = integration.axes_manager.signal_axes[0]
+        k_axis = s.axes_manager.signal_axes[0]
         k_axis.name = "Radius"
         k_axis.scale = (radial_range[1] - radial_range[0]) / npt_rad
         # k_axis.units = unit.unit_symbol
@@ -2477,7 +2465,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> ds.get_radial_integral(npt=100,npt_rad=400)
 
         """
-        signal_type = self._signal_type
         sig_shape = self.axes_manager.signal_shape
         radial_range = _get_radial_extent(ai=self.ai, shape=sig_shape, unit=self.unit)
         radial_range[0] = 0
@@ -2496,14 +2483,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             **kwargs,
         )
 
+        s = self if inplace else integration
+
         # Dealing with axis changes
-        if inplace:
-            k_axis = self.axes_manager.signal_axes[0]
-            self.set_signal_type(signal_type)
-        else:
-            integration.set_signal_type(signal_type)
-            transfer_navigation_axes(integration, self)
-            k_axis = integration.axes_manager.signal_axes[0]
+        k_axis = s.axes_manager.signal_axes[0]
         k_axis.name = "Radius"
         k_axis.scale = (radial_range[1] - radial_range[0]) / npt_rad
         # k_axis.units = unit.unit_symbol
