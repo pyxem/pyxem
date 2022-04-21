@@ -18,7 +18,7 @@
 
 
 
-from hyperspy.signals import BaseSignal, Signal1D
+from hyperspy.signals import Signal1D
 import numpy as np
 from fractions import Fraction as frac
 from pyxem.utils.correlation_utils import _get_interpolation_matrix, _symmetry_stem
@@ -26,22 +26,8 @@ from pyxem.utils.correlation_utils import _get_interpolation_matrix, _symmetry_s
 
 class Correlation1D(Signal1D):
     """Signal class for pearson correlation and symmetry coefficient."""
+    
     _signal_type = "correlation"
-
-    def __init__(self, *args, **kwargs):
-        """Create a Correlation 1D signal from a numpy.ndarray.
-
-        Parameters
-        ----------
-        *args :
-            Passed to the __init__ of Signal1D. The first arg should be
-            a numpy.ndarray
-        **kwargs :
-            Passed to the __init__ of Signal1D
-        """
-        super().__init__(*args, **kwargs)
-
-        self.decomposition.__func__.__doc__ = BaseSignal.decomposition.__doc__
 
     def get_symmetry_coefficient(self,
                                  angular_range=0.1,
@@ -97,9 +83,9 @@ class Correlation1D(Signal1D):
         if normalize:
             signals = np.divide(signals, num_angles)
 
-        signals.axes_manager.navigation_axes = self.axes_manager.navigation_axes
         signals.axes_manager[-1].name = "Symmetry Order"
         signals.axes_manager.navigation_axes[0].scale = 1
         signals.axes_manager.navigation_axes[0].name = "Symmetry"
         signals.axes_manager.navigation_axes[0].offset = 0
+        
         return signals

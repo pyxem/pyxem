@@ -591,8 +591,8 @@ class TestGetEllipseModelRansac:
         )
 
         for iy, ix in np.ndindex(xf.shape):
-            assert approx(xf[iy, ix], abs=0.0005) == ellipse_array0[iy, ix][1]
-            assert approx(yf[iy, ix], abs=0.0005) == ellipse_array0[iy, ix][0]
+            assert approx(xf[iy, ix], abs=0.0008) == ellipse_array0[iy, ix][1]
+            assert approx(yf[iy, ix], abs=0.0008) == ellipse_array0[iy, ix][0]
             assert inlier_array0[iy, ix].all()
             assert ellipse_array1[iy, ix] is None
             assert inlier_array1[iy, ix] is None
