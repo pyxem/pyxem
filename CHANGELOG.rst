@@ -28,6 +28,7 @@ Fixed
 - Symmetry STEM Class updated to allow for better interpolation and lazy operation. (#809)
 - Generalized plotting diffraction vectors on ND stacks of images (#783)
 - Small bugfix with dask/cuda scheduler to prevent running out of VRAM (#779)
+- Bugfix:AzimuthalIntegral1D accepts masks and uses updated `map` function (#826)
 
 2021-04-14 - version 0.13.2
 ---------------------------
