@@ -124,11 +124,13 @@ class PolarDiffraction2D(Signal2D):
         Parameters
         ----------
         mask: Numpy array
-            A bool mask of values to ignore of shape equal to the signal shape. True for
-            elements masked, False for elements unmasked
-        krange: tuple
-            The range of k values in corresponding unit for segment correlation (None if use
-            the entire pattern). Not compatible with ``inplace=True``.
+            A bool mask of values to ignore of shape equal to the signal shape.
+            True for elements masked, False for elements unmasked
+        krange: tuple of int or float
+            The range of k values for segment correlation. If type is ``int``,
+            the value is taken as the axis index. If type is ``float`` the
+            value is in corresponding unit.
+            If None (default), use the entire pattern .
         inplace: bool
             From hyperspy.signal.map(). inplace=True means the signal is
             overwritten.
@@ -139,30 +141,32 @@ class PolarDiffraction2D(Signal2D):
             The pearson rotational correlation when inplace is False, otherwise
             return None
         """
-        if krange is None:
-            correlation = self.map(_pearson_correlation, mask=mask, inplace=inplace, **kwargs)
-        else:
+        # placeholder to handle inplace playing well with cropping and mapping
+        s_ = self
+        if krange is not None:
             if inplace:
-                raise ValueError("`krange` is not compatible with `inplace=True`")
-            k_range_slice = self.isig[:, krange[0]:krange[1]]
-            if mask is not None:
-                mask_signal = Signal2D(mask)
-                mask_signal.axes_manager.signal_axes[1].scale = self.axes_manager[-1].scale
-                mask_signal.axes_manager.signal_axes[1].offset = self.axes_manager[-1].offset
-                mask_slice = mask_signal.isig[:, krange[0]:krange[1]]
-                correlation = k_range_slice.map(_pearson_correlation,
-                                                mask=mask_slice,
-                                                inplace=inplace,
-                                                **kwargs)
+                s_.crop(-1, start=krange[0], end=krange[1])
             else:
-                correlation = k_range_slice.map(_pearson_correlation,
-                                                inplace=inplace,
-                                                **kwargs)
+                s_ = self.isig[:, krange[0]:krange[1]]
 
-        s = self if inplace else correlation
+            if mask is not None:
+                mask = Signal2D(mask)
+                # When float krange are used, axis calibration is required
+                mask.axes_manager[-1].scale = self.axes_manager[-1].scale
+                mask.axes_manager[-1].offset = self.axes_manager[-1].offset
+                mask.crop(-1, start=krange[0], end=krange[1])
+
+        correlation = s_.map(
+            _pearson_correlation,
+            mask=mask,
+            inplace=inplace,
+            **kwargs
+            )
+
+        s = s_ if inplace else correlation
         s.set_signal_type("correlation")
+        
         rho_axis = s.axes_manager.signal_axes[0]
-
         rho_axis.name = "Radians"
         rho_axis.units = 'rad'
         rho_axis.scale = self.axes_manager[-2].scale
