@@ -613,7 +613,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
     """ Direct beam and peak finding tools """
 
-    def get_direct_beam_position(self, method, lazy_result=None, **kwargs):
+    def get_direct_beam_position(self, method, lazy_output=None, **kwargs):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern.
 
@@ -634,8 +634,13 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             signal index being the x-shift and the second the y-shift.
 
         """
-        if lazy_result is None:
-            lazy_result = self._lazy
+        if "lazy_result" in kwargs:
+            warnings.warn("lazy_result was replaced with lazy_output in version 0.14",
+                          DeprecationWarning)
+            lazy_output = kwargs.pop("lazy_result")
+
+        if lazy_output is None:
+            lazy_output = self._lazy
 
         signal_shape = self.axes_manager.signal_shape
         origin_coordinates = np.array(signal_shape) / 2
@@ -646,37 +651,35 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             "interpolate": find_beam_center_interpolate,
         }
 
-        method_function = select_method_from_method_dict(method, method_dict, **kwargs)
-
-        #dask_array = _get_dask_array(self)
-
-        #drop_axis = (len(self.axes_manager.shape) - 2, len(self.axes_manager.shape) - 1)
-        #new_axis = self.axes_manager.navigation_dimension
-        #chunks_output = dask_array.chunks[:-2] + ((2,),)
+        method_function = select_method_from_method_dict(method, method_dict,
+                                                         print_help=False, **kwargs)
 
         if method == "cross_correlate":
             shifts = self.map(method_function,
                               inplace=False,
                               output_signal_size=(2,),
                               output_dtype=np.float32,
+                              lazy_output=lazy_output,
                               **kwargs,
                               )
         elif method == "blur":
             centers = self.map(method_function,
-                              inplace=False,
-                              output_signal_size=(2,),
-                              output_dtype=np.int16,
-                              **kwargs,
-                              )
-            shifts = origin_coordinates - centers
+                               inplace=False,
+                               output_signal_size=(2,),
+                               output_dtype=np.int16,
+                               lazy_output=lazy_output,
+                               **kwargs,
+                               )
+            shifts = -centers + origin_coordinates
         elif method == "interpolate":
             centers = self.map(method_function,
-                              inplace=False,
-                              output_signal_size=(2,),
-                              output_dtype=np.float32,
-                              **kwargs,
-                              )
-            shifts = origin_coordinates - centers
+                               inplace=False,
+                               output_signal_size=(2,),
+                               output_dtype=np.float32,
+                               lazy_output=lazy_output,
+                               **kwargs,
+                               )
+            shifts = -centers + origin_coordinates
 
         shifts.set_signal_type("beam_shift")
 
@@ -748,6 +751,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         use a float dtype, which can be done by s.change_dtype('float32', rechunk=False).
 
         """
+        if "lazy_result" in kwargs:
+            warnings.warn("lazy_result was replaced with lazy_output in version 0.14",
+                          DeprecationWarning)
+            lazy_output = kwargs.pop("lazy_result")
         if (shifts is None) and (method is None):
             raise ValueError("Either method or shifts parameter must be specified")
         if (shifts is not None) and (method is not None):
@@ -770,7 +777,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 temp_signal = temp_signal.isig[min_index:max_index, min_index:max_index]
             shifts = temp_signal.get_direct_beam_position(
                 method=method,
-                lazy_output=True,
+                lazy_output=lazy_output,
                 **kwargs,
             )
 
@@ -779,13 +786,14 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 align_kwargs["order"] = 1
             else:
                 align_kwargs["order"] = 0
-
-
         aligned = self.map(align_single_frame,
                            shifts=shifts,
                            inplace=inplace,
                            lazy_output=lazy_output,
+                           output_dtype=self.data.dtype,
+                           output_signal_size=self.axes_manager.signal_shape[::-1],
                            **align_kwargs)
+
 
         if return_shifts and inplace:
             return shifts
