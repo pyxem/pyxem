@@ -862,7 +862,7 @@ class TestCenterDirectBeam:
     def test_return_shifts_non_lazy(self):
         s = self.s
         s_shifts = s.center_direct_beam(method="blur", sigma=1, return_shifts=True)
-        assert s_shifts._lazy is True
+        assert s_shifts._lazy is False
         nav_dim = s.axes_manager.navigation_dimension
         assert nav_dim == s_shifts.axes_manager.navigation_dimension
         x_pos_list, y_pos_list = self.x_pos_list, self.y_pos_list
