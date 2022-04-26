@@ -2154,6 +2154,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         t_axis = s.axes_manager.signal_axes[0]
         k_axis = s.axes_manager.signal_axes[1]
         t_axis.name = "Radians"
+        t_axis.units = "Rad"
         
         if azimuth_range is None:
             t_axis.scale = np.pi * 2 / npt_azim
