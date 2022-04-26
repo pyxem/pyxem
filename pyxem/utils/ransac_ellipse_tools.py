@@ -22,10 +22,12 @@ from functools import partial
 import numpy as np
 from skimage.measure import EllipseModel, ransac
 from hyperspy.misc.utils import isiterable
-import pyxem.utils.marker_tools as mt
+
 import warnings
 
+from hyperspy.signals import BaseSignal
 
+import pyxem.utils.marker_tools as mt
 def is_ellipse_good(
     ellipse_model,
     data,
