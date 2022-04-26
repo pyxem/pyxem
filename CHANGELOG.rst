@@ -16,7 +16,7 @@ Added
 - Add function for optimizing calibration of SPED data (#785)
 - Add function for creating a orix CrystalMap from indexation results (#794)
 - Speed optimizations for the fast template matching on CPU and GPU, improving speeds by 200% and 40% respectively (#796)
-
+- Added the ability to determine the center and ellipticity using the `determine_ellipse` function.
 
 Removed
 ^^^^^^^
