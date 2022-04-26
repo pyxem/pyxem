@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -594,11 +594,7 @@ def _get_ellipse_from_parameters(x, y, semi_len0, semi_len1, rot, r_scale=0.05):
 
 
 def _get_marker_list(
-        ellipse_parameters,
-        x_list=None,
-        y_list=None,
-        name=None,
-        r_scale=0.05,
+    ellipse_parameters, x_list=None, y_list=None, name=None, r_scale=0.05
 ):
     xC, yC, semi_len0, semi_len1, rot, ecce = _get_ellipse_parameters(
         ellipse_parameters
@@ -680,7 +676,7 @@ def fit_single_ellipse_to_signal(
     x, y = _get_xy_points_from_radius_angle_plot(s_ra)
     ellipse_parameters = _fit_ellipse_to_xy_points(x, y)
     xC, yC, semi0, semi1, rot, ecc = _get_ellipse_parameters(ellipse_parameters)
-    marker_list = _get_marker_list(ellipse_parameters, x_list=x, _list=y,)
+    marker_list = _get_marker_list(ellipse_parameters, x_list=x, y_list=y)
     s_m = s.deepcopy()
     s_m.add_marker(marker_list, permanent=True, plot_marker=False)
     return s_m, xC, yC, semi0, semi1, rot, ecc

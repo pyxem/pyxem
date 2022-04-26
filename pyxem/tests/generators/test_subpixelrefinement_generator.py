@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -67,16 +67,17 @@ class Test_init_xfails:
 
         with pytest.raises(
             ValueError,
-            match="Some of your vectors do not lie within your diffraction pattern",
+            match="Some of your vectors do not lie within your ",
         ):
             _ = SubpixelrefinementGenerator(dp, vector)
 
     def test_out_of_range_vectors_DiffractionVectors(self):
         """Test that putting vectors that lie outside of the
         diffraction patterns raises a ValueError"""
-        vectors = DiffractionVectors(np.array([[1, -100]]))
-        dp = ElectronDiffraction2D(np.ones((20, 20)))
-
+        peaks = np.empty((1, ), dtype=object)
+        peaks[0] = np.array([[1, -100]])
+        vectors = DiffractionVectors(peaks)
+        dp = ElectronDiffraction2D(np.ones((1, 20, 20)))
         with pytest.raises(
             ValueError,
             match="Some of your vectors do not lie within your diffraction pattern",
@@ -98,8 +99,12 @@ class Test_init_xfails:
             _ = SubpixelrefinementGenerator(dp, vectors)
 
 
-class set_up_for_subpixelpeakfinders:
-    def create_spot(self):
+class TestSubpixelPeakFinders:
+    """Tests the various peak finders have the correct x,y conventions for
+    both the vectors and the shifts, in both the numpy and the DiffractionVectors
+    cases as well as confirming we have avoided 'off by one' errors"""
+
+    def create_dp(self):
         z1, z1a = np.zeros((128, 128)), np.zeros((128, 128))
         z2, z2a = np.zeros((128, 128)), np.zeros((128, 128))
 
@@ -116,36 +121,19 @@ class set_up_for_subpixelpeakfinders:
         z1[30, 90], z2[30, 90], z2[100, 60] = 2, 2, 2
         z1a[30, 93], z2a[30, 93], z2a[98, 60] = 10, 10, 10
 
-        dp = ElectronDiffraction2D(
+        self.dp = ElectronDiffraction2D(
             np.asarray([[z1, z1a], [z2, z2a]])
         )  # this needs to be in 2x2
-        return dp
 
-    def create_Diffraction_vectors(self):
+    def create_diffraction_vectors(self):
         v1 = np.array([[90 - 64, 30 - 64]])
         v2 = np.array([[90 - 64, 30 - 64], [100 - 64, 60 - 64]])
-        vectors = DiffractionVectors(np.array([[v1, v1], [v2, v2]]))
-        vectors.axes_manager.set_signal_dimension(0)
-        return vectors
+        self.diffraction_vectors = DiffractionVectors(np.array([[v1, v1], [v2, v2]]))
 
-
-class Test_subpixelpeakfinders:
-    """Tests the various peak finders have the correct x,y conventions for
-    both the vectors and the shifts, in both the numpy and the DiffractionVectors
-    cases as well as confirming we have avoided 'off by one' errors"""
-
-    set_up = set_up_for_subpixelpeakfinders()
-
-    @pytest.fixture(
-        params=[set_up.create_Diffraction_vectors(), np.array([[90 - 64, 30 - 64]])]
-    )
-    def diffraction_vectors(self, request):
-        # see https://bit.ly/2mXpSlD for an example of this architecture
-        return request.param
-
-    def get_spr(self, diffraction_vectors):
-        dp = set_up_for_subpixelpeakfinders().create_spot()
-        return SubpixelrefinementGenerator(dp, diffraction_vectors)
+    def setup_method(self):
+        self.create_dp()
+        self.create_diffraction_vectors()
+        self.sprg = SubpixelrefinementGenerator(self.dp, self.diffraction_vectors)
 
     def no_shift_case(self, s):
         error = s.data[0, 0] - np.asarray([[90 - 64, 30 - 64]])
@@ -157,22 +145,24 @@ class Test_subpixelpeakfinders:
         rms_error = np.sqrt(error[0, 0] ** 2 + error[0, 1] ** 2)
         assert rms_error < 0.5  # correct to within a pixel
 
-    def test_assertioned_xc(self, diffraction_vectors):
-        subpixelsfound = self.get_spr(diffraction_vectors).conventional_xc(12, 4, 8)
-        self.no_shift_case(subpixelsfound)
-        self.x_shift_case(subpixelsfound)
+    def test_assertioned_xc(self):
+        sprg = self.sprg
+        vector_refine = sprg.conventional_xc(12, 4, 8)
+        self.no_shift_case(vector_refine)
+        self.x_shift_case(vector_refine)
 
-    def test_assertioned_com(self, diffraction_vectors):
-        subpixelsfound = self.get_spr(diffraction_vectors).center_of_mass_method(12)
-        self.no_shift_case(subpixelsfound)
-        self.x_shift_case(subpixelsfound)
+    def test_assertioned_com(self):
+        sprg = self.sprg
+        vector_refine = sprg.center_of_mass_method(12)
+        self.no_shift_case(vector_refine)
+        self.x_shift_case(vector_refine)
 
-    def test_log(self, diffraction_vectors):
+    def test_log(self):
         with pytest.raises(
             NotImplementedError,
             match="This functionality was removed in v.0.13.0",
         ):
-            _ = self.get_spr(diffraction_vectors).local_gaussian_method(12)
+            _ = self.sprg.local_gaussian_method(12)
 
 
 def test_xy_errors_in_conventional_xc_method_as_per_issue_490():
@@ -182,11 +172,14 @@ def test_xy_errors_in_conventional_xc_method_as_per_issue_490():
     shifted = np.pad(dp, ((0, 4), (0, 0)), "constant")[4:].reshape(1, 1, *dp.shape)
     signal = ElectronDiffraction2D(shifted)
     spg = SubpixelrefinementGenerator(signal, np.array([[0, 0]]))
-    peaks = spg.conventional_xc(100, 20, 1).data[0, 0, 0]  # as quoted in the issue
+    peaks = spg.conventional_xc(100, 20, 1).data[0][0][0]  # as quoted in the issue
     np.testing.assert_allclose([0, -4], peaks)
     """ we also test com method for clarity """
-    peaks = spg.center_of_mass_method(60).data[0, 0, 0]
+    peaks = spg.center_of_mass_method(60).data[0][0][0]
     np.testing.assert_allclose([0, -4], peaks, atol=1.5)
     """ we also test reference_xc """
-    peaks = spg.reference_xc(100, dp, 1).data[0, 0, 0]  # as quoted in the issue
+    peaks = spg.reference_xc(100, dp, 1).data[0][0][0]  # as quoted in the issue
     np.testing.assert_allclose([0, -4], peaks)
+
+
+

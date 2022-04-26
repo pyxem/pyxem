@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -16,10 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Signal classes for nanocrystal segmentation results obtained from
-i) machine learning (LearningSegment) and ii) VDF images (VDFSegment).
 
-"""
 
 import numpy as np
 from tqdm import tqdm
@@ -36,6 +33,9 @@ from pyxem.utils.segment_utils import (
 
 
 class LearningSegment:
+    """Signal classes for nanocrystal segmentation results obtained from
+    i) machine learning (LearningSegment) and ii) VDF images (VDFSegment).
+    """
     _signal_type = "learning_segment"
 
     def __init__(self, factors, loadings):
@@ -238,8 +238,9 @@ class LearningSegment:
                 marker_radius=marker_radius,
                 threshold=threshold,
                 exclude_border=exclude_border,
+                ragged=True,
             ),
-            dtype=np.object,
+            dtype=object,
         )
 
         segments, factors_of_segments = [], []

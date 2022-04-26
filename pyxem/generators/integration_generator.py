@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -61,7 +61,7 @@ def _get_intensities(z, vectors, radius=1):
 
 def _take_ragged(z, indices, _axis=None, out=None, mode="raise"):
     """Like `np.take` for ragged arrays, see `np.take` for documentation."""
-    return np.take(z[0], indices, axis=_axis, out=out, mode=mode)
+    return np.take(z, indices, axis=_axis, out=out, mode=mode)
 
 
 def _get_largest_connected_region(segmentation):
@@ -212,7 +212,7 @@ class IntegrationGenerator:
         self.center = [sig_ax[0].size / 2, sig_ax[1].size / 2]
 
         self.vector_pixels = _get_pixel_vectors(
-            dp, vectors, calibration=self.calibration, center=self.center
+            dp=dp, vectors=vectors, calibration=self.calibration, center=self.center
         )
 
     def extract_intensities(self, radius: int = 1):

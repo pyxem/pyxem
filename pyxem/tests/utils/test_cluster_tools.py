@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -149,7 +149,7 @@ class TestFilterPeakListRadius:
 
 class TestFilterPeakArrayRadius:
     def test_simple(self):
-        peak_array = np.empty(shape=(2, 3), dtype=np.object)
+        peak_array = np.empty(shape=(2, 3), dtype=object)
         for ix, iy in np.ndindex(peak_array.shape):
             peak_array[ix, iy] = np.random.randint(30, 70, size=(1000, 2))
         peak_array_filtered = ct._filter_peak_array_radius(peak_array, 50, 50, r_min=10)
@@ -158,7 +158,7 @@ class TestFilterPeakArrayRadius:
             assert len(peak_array_filtered[ix, iy]) != 1000
 
     def test_r_lim(self):
-        peak_array = np.empty(shape=(2, 3), dtype=np.object)
+        peak_array = np.empty(shape=(2, 3), dtype=object)
         for ix, iy in np.ndindex(peak_array.shape):
             peak_array[ix, iy] = np.random.randint(30, 70, size=(1000, 2))
         peak_array_filtered = ct._filter_peak_array_radius(peak_array, 50, 50, r_min=50)
@@ -166,7 +166,7 @@ class TestFilterPeakArrayRadius:
             assert len(peak_array_filtered[ix, iy]) == 0
 
     def test_r_max(self):
-        peak_array = np.empty(shape=(2, 3), dtype=np.object)
+        peak_array = np.empty(shape=(2, 3), dtype=object)
         for ix, iy in np.ndindex(peak_array.shape):
             peak_array[ix, iy] = np.random.randint(30, 70, size=(1000, 2))
         peak_array_filtered0 = ct._filter_peak_array_radius(peak_array, 0, 0, r_max=20)
@@ -177,7 +177,7 @@ class TestFilterPeakArrayRadius:
             assert len(peak_array_filtered1[ix, iy]) == 1000
 
     def test_r_min_and_r_max(self):
-        peak_array = np.empty(shape=(2, 3), dtype=np.object)
+        peak_array = np.empty(shape=(2, 3), dtype=object)
         for ix, iy in np.ndindex(peak_array.shape):
             peak_array[ix, iy] = np.random.randint(30, 70, size=(1000, 2))
         peak_array_filtered0 = ct._filter_peak_array_radius(
@@ -197,7 +197,7 @@ class TestFilterPeakArrayRadius:
             assert len(peak_array_filtered2[ix, iy]) == 0
 
     def test_xc(self):
-        peak_array = np.empty(shape=(2, 3), dtype=np.object)
+        peak_array = np.empty(shape=(2, 3), dtype=object)
         for ix, iy in np.ndindex(peak_array.shape):
             peak_array[ix, iy] = np.random.randint(30, 70, size=(1000, 2))
         peak_array_filtered = ct._filter_peak_array_radius(peak_array, 10, 50, r_min=10)
@@ -205,7 +205,7 @@ class TestFilterPeakArrayRadius:
             assert len(peak_array_filtered[ix, iy]) == 1000
 
     def test_yc(self):
-        peak_array = np.empty(shape=(2, 3), dtype=np.object)
+        peak_array = np.empty(shape=(2, 3), dtype=object)
         for ix, iy in np.ndindex(peak_array.shape):
             peak_list = np.random.randint(30, 70, size=(999, 2)).tolist()
             peak_list.append([10, 50])
@@ -437,7 +437,7 @@ class TestGetPeakArrayShape:
     @pytest.mark.parametrize("ndim", [0, 1, 2, 3, 4, 5, 6])
     def test_dtype_object(self, ndim):
         shape = tuple(np.random.randint(2, 5, size=ndim))
-        peak_array = np.empty(shape, dtype=np.object)
+        peak_array = np.empty(shape, dtype=object)
         shape_output = ct._get_peak_array_shape(peak_array)
         assert shape == shape_output
 

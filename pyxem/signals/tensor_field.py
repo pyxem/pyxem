@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -25,7 +25,7 @@ from hyperspy.utils import stack
 
 from pyxem.signals import StrainMap
 
-"""Signal class for Tensor Fields."""
+
 
 
 def _polar_decomposition(image, side):
@@ -40,7 +40,7 @@ def _polar_decomposition(image, side):
 
     Returns
     -------
-    U, R : np.array()
+    R, U : np.array()
         Stretch and rotation matrices obtained by polar decomposition.
 
     """
@@ -65,6 +65,7 @@ def _get_rotation_angle(matrix):
 
 
 class DisplacementGradientMap(Signal2D):
+    """Signal class for Tensor Fields."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

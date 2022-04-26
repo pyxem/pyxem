@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -1229,7 +1229,7 @@ class TestFindHotPixels:
         assert not s_hot_pixels.data.any()
 
     def test_mask_array(self, hot_pixel_data_2d):
-        mask_array = np.ones_like(hot_pixel_data_2d.data, dtype=np.bool)
+        mask_array = np.ones_like(hot_pixel_data_2d.data, dtype=bool)
         s_hot_pixels = hot_pixel_data_2d.find_hot_pixels(mask_array=mask_array)
         assert not s_hot_pixels.data.any()
 
@@ -1286,7 +1286,7 @@ class TestFindDeadPixels:
         assert not s_dead_pixels.data.any()
 
     def test_mask_array(self, dead_pixel_data_2d):
-        mask_array = np.ones_like(dead_pixel_data_2d.data, dtype=np.bool)
+        mask_array = np.ones_like(dead_pixel_data_2d.data, dtype=bool)
         s_dead_pixels = dead_pixel_data_2d.find_dead_pixels(mask_array=mask_array)
         assert not s_dead_pixels.data.any()
 

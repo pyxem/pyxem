@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Signal class for two-dimensional diffraction data in Cartesian coordinates."""
+
 
 import numpy as np
 from skimage import filters
@@ -29,7 +29,7 @@ from tqdm import tqdm
 import warnings
 
 import hyperspy.api as hs
-from hyperspy.signals import Signal2D
+from hyperspy.signals import Signal2D, BaseSignal
 from hyperspy._signals.lazy import LazySignal
 from hyperspy._signals.signal1d import LazySignal1D
 from hyperspy._signals.signal2d import LazySignal2D
@@ -85,6 +85,8 @@ import pyxem.utils.ransac_ellipse_tools as ret
 
 
 class Diffraction2D(Signal2D, CommonDiffraction):
+    """Signal class for two-dimensional diffraction data in Cartesian coordinates."""
+
     _signal_type = "diffraction"
 
     """ Methods that make geometrical changes to a diffraction pattern """
@@ -201,18 +203,18 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             shift_x, shift_y = pst._make_centre_array_from_signal(
                 self, x=shift_x, y=shift_y
             )
-        shift_x = shift_x.flatten()
-        shift_y = shift_y.flatten()
-        iterating_kwargs = [("shift_x", shift_x), ("shift_y", shift_y)]
+        s_shift_x = BaseSignal(shift_x).T
+        s_shift_y = BaseSignal(shift_y).T
 
-        s_shift = self._map_iterate(
+        s_shift = self.map(
             pst._shift_single_frame,
-            iterating_kwargs=iterating_kwargs,
             inplace=inplace,
             ragged=False,
             parallel=parallel,
             show_progressbar=show_progressbar,
             interpolation_order=interpolation_order,
+            shift_x=s_shift_x,
+            shift_y=s_shift_y,
         )
         if not inplace:
             return s_shift
@@ -466,7 +468,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         Using a mask array
 
         >>> import numpy as np
-        >>> mask_array = np.zeros((128, 128), dtype=np.bool)
+        >>> mask_array = np.zeros((128, 128), dtype=bool)
         >>> mask_array[:, 100:] = True
         >>> s = pxm.dummy_data.get_dead_pixel_signal()
         >>> s_dead_pixels = s.find_dead_pixels(
@@ -529,7 +531,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         Using a mask array
 
         >>> import numpy as np
-        >>> mask_array = np.zeros((128, 128), dtype=np.bool)
+        >>> mask_array = np.zeros((128, 128), dtype=bool)
         >>> mask_array[:, 100:] = True
         >>> s = pxm.dummy_data.get_hot_pixel_signal()
         >>> s_hot_pixels = s.find_hot_pixels(
@@ -1067,8 +1069,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         edge = r_outer - r_inner
         edge_slice = np.s_[edge:-edge, edge:-edge]
 
-        ring_inner = morphology.disk(r_inner, dtype=np.bool)
-        ring = morphology.disk(r_outer, dtype=np.bool)
+        ring_inner = morphology.disk(r_inner, dtype=bool)
+        ring = morphology.disk(r_outer, dtype=bool)
         ring[edge_slice] = ring[edge_slice] ^ ring_inner
         s = self.template_match_with_binary_image(
             ring, lazy_result=lazy_result, show_progressbar=show_progressbar
@@ -1144,7 +1146,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         show_progressbar : bool, optional
             Default True
         **kwargs :
-            Passed to the peakfinder, see skimage docs for details
+            Passed to the peakfinder, see skimage doc for details
 
         Returns
         -------
@@ -1690,37 +1692,39 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             )
             + 1
         )
-        centre_x = centre_x.flatten()
-        centre_y = centre_y.flatten()
-        iterating_kwargs = [("centre_x", centre_x), ("centre_y", centre_y)]
-        if mask_array is not None:
-            #  This line flattens the mask array, except for the two
-            #  last dimensions. This to make the mask array work for the
-            #  _map_iterate function.
-            mask_flat = mask_array.reshape(-1, *mask_array.shape[-2:])
-            iterating_kwargs.append(("mask", mask_flat))
-
         if self._lazy:
             data = pst._radial_average_dask_array(
                 self.data,
                 return_sig_size=radial_array_size,
-                centre_x=centre_x,
-                centre_y=centre_y,
+                centre_x=centre_x.flatten(),
+                centre_y=centre_y.flatten(),
                 mask_array=mask_array,
                 normalize=normalize,
                 show_progressbar=show_progressbar,
             )
             s_radial = hs.signals.Signal1D(data)
         else:
-            s_radial = self._map_iterate(
+            if mask_array is not None:
+                mask_array = Signal2D(mask_array)
+            if self.data.ndim == centre_x.ndim:
+                centre_x = Signal2D(centre_x)
+                centre_y = Signal2D(centre_y)
+            else:
+                centre_x = BaseSignal(centre_x).T
+                centre_y = BaseSignal(centre_y).T
+
+            s_radial = self.map(
                 pst._get_radial_profile_of_diff_image,
                 normalize=normalize,
-                iterating_kwargs=iterating_kwargs,
+                centre_x=centre_x,
+                centre_y=centre_y,
+                mask=mask_array,
                 inplace=False,
                 ragged=False,
                 parallel=parallel,
                 radial_array_size=radial_array_size,
                 show_progressbar=show_progressbar,
+                lazy_output=False,
             )
             data = s_radial.data
         s_radial = hs.signals.Signal1D(data)

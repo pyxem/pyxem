@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -91,7 +91,7 @@ class TestDiffraction2DFlipDiffraction:
 class TestAddPeakArrayAsMarkers:
     def test_simple(self):
         s = Diffraction2D(np.zeros((2, 3, 100, 100)))
-        peak_array = np.empty((2, 3), dtype=np.object)
+        peak_array = np.empty((2, 3), dtype=object)
         for index in np.ndindex(peak_array.shape):
             islice = np.s_[index]
             peak_array[islice] = np.random.randint(20, 80, (100, 2))
@@ -99,7 +99,7 @@ class TestAddPeakArrayAsMarkers:
 
     def test_color(self):
         s = Diffraction2D(np.zeros((2, 3, 100, 100)))
-        peak_array = np.empty((2, 3), dtype=np.object)
+        peak_array = np.empty((2, 3), dtype=object)
         for index in np.ndindex(peak_array.shape):
             islice = np.s_[index]
             peak_array[islice] = np.random.randint(20, 80, (100, 2))
@@ -109,7 +109,7 @@ class TestAddPeakArrayAsMarkers:
 
     def test_size(self):
         s = Diffraction2D(np.zeros((2, 3, 100, 100)))
-        peak_array = np.empty((2, 3), dtype=np.object)
+        peak_array = np.empty((2, 3), dtype=object)
         for index in np.ndindex(peak_array.shape):
             islice = np.s_[index]
             peak_array[islice] = np.random.randint(20, 80, (100, 2))
@@ -119,7 +119,7 @@ class TestAddPeakArrayAsMarkers:
 
     def test_3d_nav_dims(self):
         s = Diffraction2D(np.zeros((2, 3, 4, 100, 100)))
-        peak_array = np.empty((2, 3, 4), dtype=np.object)
+        peak_array = np.empty((2, 3, 4), dtype=object)
         for index in np.ndindex(peak_array.shape):
             islice = np.s_[index]
             peak_array[islice] = np.random.randint(20, 80, (100, 2))
@@ -130,7 +130,7 @@ class TestAddPeakArrayAsMarkers:
     def test_1d_nav_dims(self):
         nav_dim = 3
         s = Diffraction2D(np.zeros((nav_dim, 100, 100)))
-        peak_array = np.empty(nav_dim, dtype=np.object)
+        peak_array = np.empty(nav_dim, dtype=object)
         for index in np.ndindex(peak_array.shape):
             islice = np.s_[index]
             peak_array[islice] = np.random.randint(20, 80, (100, 2))

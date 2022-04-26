@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -28,6 +28,18 @@ from skimage.registration import phase_cross_correlation
 from tqdm import tqdm
 
 from pyxem.utils.pyfai_utils import get_azimuthal_integrator
+from pyxem.utils.cuda_utils import is_cupy_array
+
+
+try:
+    import cupy as cp
+    import cupyx.scipy.ndimage as ndigpu
+
+    CUPY_INSTALLED = True
+except ImportError:
+    CUPY_INSTALLED = False
+    cp = None
+    ndigpu = None
 
 
 """
@@ -575,11 +587,17 @@ def find_beam_center_blur(z, sigma):
     Returns
     -------
     center : np.array
-        np.array [y, x] containing indices of estimated direct beam positon.
+        np.array [x, y] containing indices of estimated direct beam positon.
     """
-    blurred = ndi.gaussian_filter(z, sigma, mode="wrap")
-    center = np.unravel_index(blurred.argmax(), blurred.shape)[::-1]
-    return np.array(center)
+    if is_cupy_array(z):
+        gaus = ndigpu.gaussian_filter
+        dispatcher = cp
+    else:
+        gaus = ndi.gaussian_filter
+        dispatcher = np
+    blurred = gaus(z, sigma, mode="wrap")
+    center = dispatcher.unravel_index(blurred.argmax(), blurred.shape)[::-1]
+    return dispatcher.array(center)
 
 
 def find_beam_offset_cross_correlation(z, radius_start, radius_finish):
@@ -642,20 +660,24 @@ def peaks_as_gvectors(z, center, calibration):
     Parameters
     ----------
     z : numpy array
-        peak postitions as array indices.
+        Peak positions as array indices, in the form [[x0, y0], [x1, y1], ...]
     center : numpy array
-        diffraction pattern center in array indices.
+        Diffraction pattern center in array indices.
     calibration : float
-        calibration in reciprocal Angstroms per pixels.
+        Calibration in reciprocal Angstroms per pixels.
 
     Returns
     -------
     g : numpy array
-        peak positions in calibrated units.
+        Peak positions in calibrated units.
 
     """
-    g = (z - center) * calibration
-    return np.array([g[0].T[1], g[0].T[0]]).T
+    z = z.copy()
+    z = z.astype(float)
+    z[:, 0] -= center[0]
+    z[:, 1] -= center[1]
+    z *= calibration
+    return np.fliplr(z)
 
 
 def investigate_dog_background_removal_interactive(

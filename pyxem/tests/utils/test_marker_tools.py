@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -27,7 +27,7 @@ import pyxem.utils.marker_tools as mt
 
 class TestGet4DMarkerList:
     def test_simple(self):
-        peak_array = np.empty((2, 3), dtype=np.object)
+        peak_array = np.empty((2, 3), dtype=object)
         peak_array[0, 0] = [[2, 4]]
         peak_array[0, 1] = [[8, 2]]
         peak_array[0, 2] = [[1, 8]]
@@ -76,11 +76,11 @@ class TestGet4DMarkerList:
         assert len(marker_list) == 3
 
     def test_bool_array(self):
-        peak_array = np.empty((2, 3), dtype=np.object)
-        bool_array = np.empty((2, 3), dtype=np.object)
+        peak_array = np.empty((2, 3), dtype=object)
+        bool_array = np.empty((2, 3), dtype=object)
         for ix, iy in np.ndindex(peak_array.shape):
             peak_array[ix, iy] = np.random.randint(9, size=(1, 2))
-            bool_array[ix, iy] = np.random.randint(0, 2, size=1, dtype=np.bool)
+            bool_array[ix, iy] = np.random.randint(0, 2, size=1, dtype=bool)
 
         s = Diffraction2D(np.zeros(shape=(2, 3, 10, 10)))
         marker_list = mt._get_4d_points_marker_list(
@@ -102,7 +102,7 @@ class TestGet4DMarkerList:
                 assert marker.get_data_position("y1") == -1000.0
 
     def test_several_markers_different_peak_array_size(self):
-        peak_array = np.empty((2, 3), dtype=np.object)
+        peak_array = np.empty((2, 3), dtype=object)
         peak_array[0, 0] = [[2, 4], [1, 9]]
         peak_array[0, 1] = [[8, 2]]
         s = Diffraction2D(np.zeros(shape=(2, 3, 10, 10)))
@@ -119,8 +119,8 @@ class TestFilterPeakArrayListBoolArray:
             mt._filter_peak_array_with_bool_array(peak_array, bool_array)
 
     def test_filter(self):
-        peak_array = np.empty((2, 3), dtype=np.object)
-        bool_array = np.empty((2, 3), dtype=np.object)
+        peak_array = np.empty((2, 3), dtype=object)
+        bool_array = np.empty((2, 3), dtype=object)
         peak_array[0, 0] = [[2, 4], [1, 9], [4, 5]]
         peak_array[0, 1] = [[8, 2]]
         bool_array[0, 0] = [True, False, True]
@@ -133,8 +133,8 @@ class TestFilterPeakArrayListBoolArray:
         assert_equal(peak_array_filter[0, 1], [[8, 2]])
 
     def test_bool_invert(self):
-        peak_array = np.empty((2, 3), dtype=np.object)
-        bool_array = np.empty((2, 3), dtype=np.object)
+        peak_array = np.empty((2, 3), dtype=object)
+        bool_array = np.empty((2, 3), dtype=object)
         peak_array[0, 0] = [[2, 4], [1, 9], [4, 5]]
         peak_array[0, 1] = [[8, 2]]
         bool_array[0, 0] = [True, False, True]

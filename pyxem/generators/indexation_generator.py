@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -471,7 +471,7 @@ def _refine_best_orientations(
         top_matches[i] = result[0]
         res_rhkls.append(result[1])
 
-    res = np.empty(2, dtype=np.object)
+    res = np.empty(2, dtype=object)
     res[0] = top_matches
     res[1] = np.asarray(res_rhkls)
     return res
@@ -607,7 +607,7 @@ def _refine_orientation(
         center_y=center_y,
     )
 
-    res = np.empty(2, dtype=np.object)
+    res = np.empty(2, dtype=object)
     res[0] = orientation
     res[1] = rhklss
 

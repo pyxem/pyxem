@@ -16,6 +16,7 @@ def plot_template_over_pattern(
     max_r=None,
     find_direct_beam=True,
     direct_beam_position=None,
+    mirrored_template=False,
     coordinate_system="cartesian",
     marker_color="red",
     marker_type="x",
@@ -43,6 +44,8 @@ def plot_template_over_pattern(
     direct_beam_position: 2-tuple
         The (x, y) position of the direct beam in pixel coordinates. Takes
         precedence over `find_direct_beam`
+    mirrored_template: bool, optional
+        Whether to mirror the given template
     coordinate_system : str, optional
         Type of coordinate system to plot the image and template in. Either
         `cartesian` or `polar`
@@ -69,12 +72,6 @@ def plot_template_over_pattern(
     """
     if ax is None:
         _, ax = plt.subplots()
-    if direct_beam_position is not None:
-        c_x, c_y = direct_beam_position
-    elif find_direct_beam:
-        c_y, c_x = find_beam_center_blur(pattern, 1)
-    else:
-        c_y, c_x = pattern.shape[0] // 2, pattern.shape[1] // 2
     if coordinate_system == "polar":
         pattern = image_to_polar(
             pattern,
@@ -83,14 +80,24 @@ def plot_template_over_pattern(
             direct_beam_position=direct_beam_position,
         )
         x, y, intensities = get_template_polar_coordinates(
-            simulation, in_plane_angle=in_plane_angle, max_r=max_r
+            simulation,
+            in_plane_angle=in_plane_angle,
+            max_r=max_r,
+            mirrored=mirrored_template,
         )
     elif coordinate_system == "cartesian":
+        if direct_beam_position is not None:
+            c_x, c_y = direct_beam_position
+        elif find_direct_beam:
+            c_x, c_y = find_beam_center_blur(pattern, 1)
+        else:
+            c_y, c_x = pattern.shape[0] / 2, pattern.shape[1] / 2
         x, y, intensities = get_template_cartesian_coordinates(
             simulation,
             center=(c_x, c_y),
             in_plane_angle=in_plane_angle,
-            window_size=pattern.shape[::-1],
+            window_size=(pattern.shape[1], pattern.shape[0]),
+            mirrored=mirrored_template,
         )
     else:
         raise NotImplementedError(

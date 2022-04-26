@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -283,7 +283,7 @@ def _process_dask_array(
     Getting output which is different shape than the input. For example
     two coordinates. Note: the output size must be the same for all the
     navigation positions. If the size is variable, for example with peak
-    finding, use dtype=np.object (see below).
+    finding, use dtype=object (see below).
 
     >>> def test_function3(image):
     ...     return [10, 3]
@@ -295,7 +295,7 @@ def _process_dask_array(
     ...     new_axis=new_axis, output_signal_size=(2, ))
 
     For functions where we don't know the shape of the output data,
-    use dtype=np.object
+    use dtype=object
 
     >>> def test_function4(image):
     ...     return list(range(np.random.randint(20)))
@@ -303,7 +303,7 @@ def _process_dask_array(
     >>> drop_axis = (len(dask_array.shape) - 2, len(dask_array.shape) - 1)
     >>> output_dask_array = _process_dask_array(
     ...     dask_array, test_function4, chunks=chunks, drop_axis=drop_axis,
-    ...     new_axis=None, dtype=np.object, output_signal_size=())
+    ...     new_axis=None, dtype=object, output_signal_size=())
     >>> output_array = output_dask_array.compute()
 
     """
@@ -446,7 +446,7 @@ def _mask_array(dask_array, mask_array, fill_value=None):
                 mask_array.shape, dask_array.shape[-2:]
             )
         )
-    mask_array_4d = da.ones_like(dask_array, dtype=np.bool)
+    mask_array_4d = da.ones_like(dask_array, dtype=bool)
     mask_array_4d = mask_array_4d[:, :] * mask_array
     dask_array_masked = da.ma.masked_array(
         dask_array, mask_array_4d, fill_value=fill_value
@@ -763,7 +763,7 @@ def _peak_find_dog(dask_array, **kwargs):
         _peak_find_dog_chunk,
         dask_array_rechunked,
         drop_axis=drop_axis,
-        dtype=np.object,
+        dtype=object,
         **kwargs
     )
     return output_array
@@ -903,7 +903,7 @@ def _peak_find_log(dask_array, **kwargs):
         _peak_find_log_chunk,
         dask_array_rechunked,
         drop_axis=drop_axis,
-        dtype=np.object,
+        dtype=object,
         **kwargs
     )
     return output_array
@@ -1065,7 +1065,7 @@ def _find_dead_pixels(dask_array, dead_pixel_value=0, mask_array=None):
 
     With a mask
 
-    >>> mask_array = np.zeros((128, 128), dtype=np.bool)
+    >>> mask_array = np.zeros((128, 128), dtype=bool)
     >>> mask_array[:, :100] = True
     >>> dead_pixels = dt._find_dead_pixels(s.data, mask_array=mask_array)
 
@@ -1216,7 +1216,7 @@ def _intensity_peaks_image_chunk(data, peak_array, disk_r):
     >>> intensity = dt._intensity_peaks_image_chunk(s.data, peak_array, 5)
     """
 
-    output_array = np.empty(data.shape[:-2], dtype=np.object)
+    output_array = np.empty(data.shape[:-2], dtype=object)
     if peak_array.ndim < data.ndim:
         dim_dif = data.ndim - peak_array.ndim
         for i in range(dim_dif):
@@ -1296,7 +1296,7 @@ def _intensity_peaks_image(dask_array, peak_array, disk_r):
         dask_array_rechunked,
         peak_array_rechunked,
         drop_axis=drop_axis,
-        dtype=np.object,
+        dtype=object,
         **kwargs_intensity_peaks
     )
     return output_array
@@ -1656,7 +1656,7 @@ def _peak_refinement_centre_of_mass_chunk(data, peak_array, square_size):
 
 
     """
-    output_array = np.empty(data.shape[:-2], dtype=np.object)
+    output_array = np.empty(data.shape[:-2], dtype=object)
     if peak_array.ndim < data.ndim:
         dim_dif = data.ndim - peak_array.ndim
         for i in range(dim_dif):
@@ -1727,7 +1727,7 @@ def _peak_refinement_centre_of_mass(dask_array, peak_array, square_size):
         dask_array_rechunked,
         peak_array_rechunked,
         drop_axis=drop_axis,
-        dtype=np.object,
+        dtype=object,
         **kwargs_refinement
     )
     return output_array

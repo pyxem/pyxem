@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -71,15 +71,11 @@ def _find_max_length_peaks(peaks):
         The length of the longest peak list.
 
     """
-    x_size, y_size = (
-        peaks.axes_manager.navigation_shape[0],
-        peaks.axes_manager.navigation_shape[1],
-    )
     length_of_longest_peaks_list = 0
-    for x in np.arange(0, x_size):
-        for y in np.arange(0, y_size):
-            if peaks.data[y, x].shape[0] > length_of_longest_peaks_list:
-                length_of_longest_peaks_list = peaks.data[y, x].shape[0]
+    with peaks.unfolded(unfold_navigation=True, unfold_signal=False):
+        for array in peaks.data:
+            if array.shape[0] > length_of_longest_peaks_list:
+                length_of_longest_peaks_list = array.shape[0]
     return length_of_longest_peaks_list
 
 
@@ -104,18 +100,17 @@ def generate_marker_inputs_from_peaks(peaks):
 
     """
     max_peak_len = _find_max_length_peaks(peaks)
-    pad = np.array(
-        list(
-            itertools.zip_longest(
-                *np.concatenate(peaks.data), fillvalue=[np.nan, np.nan]
-            )
-        )
-    )
-    pad = pad.reshape((max_peak_len), peaks.data.shape[0], peaks.data.shape[1], 2)
-    xy_cords = np.transpose(pad, [3, 0, 1, 2])  # move the x,y pairs to the front
-    x = xy_cords[0]
-    y = xy_cords[1]
-
+    if peaks.data.dtype == np.dtype("O"):
+        navshape = peaks.data.shape
+    else:
+        navshape = peaks.axes_manager.navigation_shape[::-1]
+    pad = np.full((max_peak_len, *navshape, 2), np.nan)
+    for coordinate in np.ndindex(navshape):
+        array = peaks.data[coordinate]
+        sl = (slice(0, array.shape[0]), *coordinate, slice(None))
+        pad[sl] = array
+    x = pad[..., 0]
+    y = pad[..., 1]
     return x, y
 
 
@@ -142,11 +137,14 @@ class DiffractionVectors(BaseSignal):
         self.hkls = None
         self.detector_shape = None
         self.pixel_calibration = None
+        if self.data.dtype == object:
+            self.ragged = True
+
 
     @classmethod
     def from_peaks(cls, peaks, center, calibration):
         """Takes a list of peak positions (pixel coordinates) and returns
-        an instance of `Diffraction2D`
+        an instance of `DiffractionVectors`
 
         Parameters
         ----------
@@ -164,13 +162,15 @@ class DiffractionVectors(BaseSignal):
             List of diffraction vectors
         """
         gvectors = peaks.map(
-            peaks_as_gvectors, center=center, calibration=calibration, inplace=False
+            peaks_as_gvectors,
+            center=center,
+            calibration=calibration,
+            ragged=True,
+            inplace=False
         )
-
         vectors = cls(gvectors)
-        vectors.axes_manager.set_signal_dimension(0)
-
         return vectors
+
 
     def plot_diffraction_vectors(
         self,
@@ -556,18 +556,16 @@ class DiffractionVectors(BaseSignal):
             Diffraction vectors within allowed magnitude tolerances.
         """
         # If ragged the signal axes will not be defined
-        if len(self.axes_manager.signal_axes) == 0:
+        if self.ragged:
             filtered_vectors = self.map(
                 filter_vectors_ragged,
                 min_magnitude=min_magnitude,
                 max_magnitude=max_magnitude,
                 inplace=False,
+                ragged=True,
                 *args,
                 **kwargs
             )
-            # Type assignment to DiffractionVectors for return
-            filtered_vectors = DiffractionVectors(filtered_vectors)
-            filtered_vectors.axes_manager.set_signal_dimension(0)
         # Otherwise easier to calculate.
         else:
             magnitudes = self.get_magnitudes()
@@ -610,18 +608,16 @@ class DiffractionVectors(BaseSignal):
             - self.pixel_calibration * exclude_width
         )
         # If ragged the signal axes will not be defined
-        if len(self.axes_manager.signal_axes) == 0:
+        if self.ragged:
             filtered_vectors = self.map(
                 filter_vectors_edge_ragged,
                 x_threshold=x_threshold,
                 y_threshold=y_threshold,
                 inplace=False,
+                ragged=True,
                 *args,
                 **kwargs
             )
-            # Type assignment to DiffractionVectors for return
-            filtered_vectors = DiffractionVectors(filtered_vectors)
-            filtered_vectors.axes_manager.set_signal_dimension(0)
         # Otherwise easier to calculate.
         else:
             x_inbounds = (
@@ -656,16 +652,16 @@ class DiffractionVectors(BaseSignal):
         """
         if in_range:
             filtered = self.filter_magnitude(in_range[0], in_range[1])
-            xim = filtered.map(get_npeaks, inplace=False).as_signal2D((0, 1))
+            xim = filtered.map(get_npeaks, inplace=False, ragged=False)
         else:
-            xim = self.map(get_npeaks, inplace=False).as_signal2D((0, 1))
+            xim = self.map(get_npeaks, inplace=False, ragged=False)
+        xim.set_signal_type("")
+        xim = xim.as_signal2D((0, 1))
         # Make binary if specified
         if binary is True:
             xim = xim >= 1.0
         # Set properties
-        xim = transfer_navigation_axes_to_signal_axes(xim, self)
         xim.change_dtype("float")
-        xim.set_signal_type("signal2d")
         xim.metadata.General.title = "Diffracting Pixels Map"
 
         return xim

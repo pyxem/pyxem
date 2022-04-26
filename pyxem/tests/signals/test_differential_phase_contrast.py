@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -282,7 +282,7 @@ class TestBivariateHistogram:
         s_hist = s.get_bivariate_histogram(bins=10, histogram_range=(-5, 5))
         assert s_hist.isig[3.0, 0.0] == float(value)
 
-        masked = np.zeros((11, 11), dtype=np.bool)
+        masked = np.zeros((11, 11), dtype=bool)
         masked[0, 0] = True
         s_hist = s.get_bivariate_histogram(
             bins=10, histogram_range=(-5, 5), masked=masked

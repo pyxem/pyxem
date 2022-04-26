@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -91,7 +91,7 @@ def _filter_4D_peak_array(
         max_x_index = signal_axes[0].high_index
         max_y_index = signal_axes[1].high_index
     peak_array_shape = _get_peak_array_shape(peak_array)
-    peak_array_filtered = np.empty(shape=peak_array_shape, dtype=np.object)
+    peak_array_filtered = np.empty(shape=peak_array_shape, dtype=object)
     for index in np.ndindex(peak_array_shape):
         islice = np.s_[index]
         peak_list_filtered = _filter_peak_list(
@@ -174,7 +174,7 @@ def _filter_peak_array_radius(peak_array, xc, yc, r_min=None, r_max=None):
         xc = np.ones(peak_array.shape[:2]) * xc
     if not isiterable(yc):
         yc = np.ones(peak_array.shape[:2]) * yc
-    peak_array_filtered = np.empty(shape=peak_array.shape[:2], dtype=np.object)
+    peak_array_filtered = np.empty(shape=peak_array.shape[:2], dtype=object)
     for iy, ix in np.ndindex(peak_array.shape[:2]):
         temp_xc, temp_yc = xc[iy, ix], yc[iy, ix]
         peak_list_filtered = _filter_peak_list_radius(
@@ -225,7 +225,7 @@ def _filter_peak_list_radius(peak_list, xc, yc, r_min=None, r_max=None):
             raise ValueError(
                 "r_min ({0}) must be smaller than r_max ({1})".format(r_min, r_max)
             )
-    filter_list = np.ones_like(dist, dtype=np.bool)
+    filter_list = np.ones_like(dist, dtype=bool)
     if r_min is not None:
         temp_filter_list = dist > r_min
         filter_list[:] = np.logical_and(filter_list, temp_filter_list)
@@ -352,7 +352,7 @@ def _get_peak_array_shape(peak_array):
     peak_array_shape : tuple
 
     """
-    if peak_array.dtype == np.object:
+    if peak_array.dtype == object:
         peak_array_shape = peak_array.shape
     else:
         peak_array_shape = peak_array.shape[:-2]
@@ -393,9 +393,9 @@ def _cluster_and_sort_peak_array(
 
     """
     peak_array_shape = _get_peak_array_shape(peak_array)
-    peak_centre_array = np.empty(shape=peak_array_shape, dtype=np.object)
-    peak_rest_array = np.empty(shape=peak_array_shape, dtype=np.object)
-    peak_none_array = np.empty(shape=peak_array_shape, dtype=np.object)
+    peak_centre_array = np.empty(shape=peak_array_shape, dtype=object)
+    peak_rest_array = np.empty(shape=peak_array_shape, dtype=object)
+    peak_none_array = np.empty(shape=peak_array_shape, dtype=object)
     for index in np.ndindex(peak_array_shape):
         islice = np.s_[index]
         cluster_dict = _get_cluster_dict(

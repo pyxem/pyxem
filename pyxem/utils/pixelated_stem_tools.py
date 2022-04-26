@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -385,7 +385,7 @@ def _get_angle_sector_mask(
             "angle1 ({0}) needs to be larger than angle0 ({1})".format(angle1, angle0)
         )
 
-    bool_array = np.zeros_like(signal.data, dtype=np.bool)
+    bool_array = np.zeros_like(signal.data, dtype=bool)
     for s in signal:
         indices = signal.axes_manager.indices[::-1]
         signal_axes = s.axes_manager.signal_axes

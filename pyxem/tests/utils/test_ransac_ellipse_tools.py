@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -770,7 +770,7 @@ class TestGetInlierOutlierPeakArrays:
     def test_simple(self):
         x, y, n = 2, 3, 10
         peak_array = np.arange(y * x * n * 2).reshape((y, x, n, 2))
-        inlier_array = np.ones((y, x, n), dtype=np.bool)
+        inlier_array = np.ones((y, x, n), dtype=bool)
         inlier_parray0, outlier_parray0 = ret._get_inlier_outlier_peak_arrays(
             peak_array, inlier_array
         )
@@ -786,7 +786,7 @@ class TestGetInlierOutlierPeakArrays:
     def test_some_true_some_false(self):
         x, y, n = 2, 3, 10
         peak_array = np.arange(y * x * n * 2).reshape((y, x, n, 2))
-        inlier_array = np.ones((y, x, n), dtype=np.bool)
+        inlier_array = np.ones((y, x, n), dtype=bool)
         inlier_array[:, :, 4:] = False
         inlier_parray, outlier_parray = ret._get_inlier_outlier_peak_arrays(
             peak_array, inlier_array
@@ -800,7 +800,7 @@ class TestGetInlierOutlierPeakArrays:
     def test_inlier_none(self):
         x, y, n = 2, 3, 10
         peak_array = np.arange(y * x * n * 2).reshape((y, x, n, 2))
-        inlier_array = np.empty((y, x), dtype=np.object)
+        inlier_array = np.empty((y, x), dtype=object)
         for iy, ix in np.ndindex(inlier_array.shape):
             inlier_array[iy, ix] = None
 
@@ -836,7 +836,7 @@ class TestGetLinesArrayFromEllipseArray:
         sx_array = np.random.randint(70, 80, size=(2, 3))
         sy_array = np.random.randint(89, 99, size=(2, 3))
         ro_array = np.zeros((2, 3))
-        ellipse_array = np.empty((2, 3), dtype=np.object)
+        ellipse_array = np.empty((2, 3), dtype=object)
         for iy, ix in np.ndindex(ellipse_array.shape):
             xc, yc = xc_array[iy, ix], yc_array[iy, ix]
             sx, sy = sx_array[iy, ix], sy_array[iy, ix]
@@ -855,7 +855,7 @@ class TestGetLinesArrayFromEllipseArray:
             assert approx(lines_list[3]) == [yc, xc - sx, yc + sy, xc]
 
     def test_ellipse_array_none(self):
-        ellipse_array = np.empty(shape=(2, 3), dtype=np.object)
+        ellipse_array = np.empty(shape=(2, 3), dtype=object)
         for ix, iy in np.ndindex(ellipse_array.shape):
             ellipse_array[ix, iy] = None
         lines_array = ret._get_lines_array_from_ellipse_array(ellipse_array)
@@ -920,7 +920,7 @@ class TestGetEllipseMarkerListFromEllipseArray:
         sx_array = np.random.randint(70, 80, size=(2, 3))
         sy_array = np.random.randint(89, 99, size=(2, 3))
         ro_array = np.zeros((2, 3))
-        ellipse_array = np.empty((2, 3), dtype=np.object)
+        ellipse_array = np.empty((2, 3), dtype=object)
         for iy, ix in np.ndindex(ellipse_array.shape):
             xc, yc = xc_array[iy, ix], yc_array[iy, ix]
             sx, sy = sx_array[iy, ix], sy_array[iy, ix]

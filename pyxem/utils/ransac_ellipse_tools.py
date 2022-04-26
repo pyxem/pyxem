@@ -27,7 +27,6 @@ import pyxem.utils.marker_tools as mt
 from hyperspy.signal import BaseSignal
 
 
-
 def is_ellipse_good(
     ellipse_model,
     data,
@@ -405,8 +404,8 @@ def get_ellipse_model_ransac(
     if not isiterable(yf):
         yf = np.ones(data.shape[:2]) * yf
 
-    ellipse_array = np.zeros(data.shape[:2], dtype=np.object)
-    inlier_array = np.zeros(data.shape[:2], dtype=np.object)
+    ellipse_array = np.zeros(data.shape[:2], dtype=object)
+    inlier_array = np.zeros(data.shape[:2], dtype=object)
     num_total = data.shape[0] * data.shape[1]
     t = tqdm(np.ndindex(data.shape[:2]), disable=not show_progressbar, total=num_total)
     for iy, ix in t:
@@ -489,7 +488,7 @@ def _get_lines_array_from_ellipse_array(ellipse_array, nr=20):
     Examples
     --------
     >>> import pyxem.utils.ransac_ellipse_tools as ret
-    >>> ellipse_array = np.empty((2, 3), dtype=np.object)
+    >>> ellipse_array = np.empty((2, 3), dtype=object)
     >>> ellipse_array[0, 0] = (30, 70, 10, 20, 0.5)
     >>> ellipse_array[1, 0] = (31, 69, 10, 21, 0.5)
     >>> ellipse_array[0, 1] = (29, 68, 10, 21, 0.1)
@@ -499,7 +498,7 @@ def _get_lines_array_from_ellipse_array(ellipse_array, nr=20):
     >>> larray = ret._get_lines_array_from_ellipse_array(ellipse_array, nr=20)
 
     """
-    lines_array = np.empty(ellipse_array.shape[:2], dtype=np.object)
+    lines_array = np.empty(ellipse_array.shape[:2], dtype=object)
     for ix, iy in np.ndindex(ellipse_array.shape[:2]):
         ellipse_params = ellipse_array[ix, iy]
         if ellipse_params is not None:
@@ -511,8 +510,8 @@ def _get_lines_array_from_ellipse_array(ellipse_array, nr=20):
 
 
 def _get_inlier_outlier_peak_arrays(peak_array, inlier_array):
-    inlier_peak_array = np.empty(peak_array.shape[:2], dtype=np.object)
-    outlier_peak_array = np.empty(peak_array.shape[:2], dtype=np.object)
+    inlier_peak_array = np.empty(peak_array.shape[:2], dtype=object)
+    outlier_peak_array = np.empty(peak_array.shape[:2], dtype=object)
     for ix, iy in np.ndindex(peak_array.shape[:2]):
         inliers = inlier_array[ix, iy]
         if inliers is not None:

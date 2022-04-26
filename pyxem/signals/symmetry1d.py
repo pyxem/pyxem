@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -16,13 +16,14 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Signal class for pearson correlation and symmetry coefficient."""
+
 
 from hyperspy.signals import Signal2D, BaseSignal, Signal1D
 import numpy as np
 
 
 class Symmetry1D(Signal1D):
+    """Signal class for pearson correlation and symmetry coefficient."""
     _signal_type = "symmetry"
 
     def __init__(self, *args, **kwargs):

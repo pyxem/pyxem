@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -254,7 +254,7 @@ class TestGetAngleSectorMask:
         data = np.ones(data_shape) * 100.0
         s = Signal2D(data)
         mask0 = pst._get_angle_sector_mask(s, angle0=0.0, angle1=np.pi / 2)
-        np.testing.assert_array_equal(mask0, np.zeros_like(mask0, dtype=np.bool))
+        np.testing.assert_array_equal(mask0, np.zeros_like(mask0, dtype=bool))
         assert mask0.shape == data_shape
 
         s.axes_manager.signal_axes[0].offset = -5
@@ -262,7 +262,7 @@ class TestGetAngleSectorMask:
         mask1 = pst._get_angle_sector_mask(s, angle0=0.0, angle1=np.pi / 2)
         assert mask1[:5, :5].all()
         mask1[:5, :5] = False
-        np.testing.assert_array_equal(mask1, np.zeros_like(mask1, dtype=np.bool))
+        np.testing.assert_array_equal(mask1, np.zeros_like(mask1, dtype=bool))
 
         s.axes_manager.signal_axes[0].offset = -15
         s.axes_manager.signal_axes[1].offset = -15
@@ -293,7 +293,7 @@ class TestGetAngleSectorMask:
         data = np.ones(data_shape) * 100.0
         s = Signal2D(data)
         mask0 = pst._get_angle_sector_mask(s, angle0=0.0, angle1=np.pi / 2)
-        np.testing.assert_array_equal(mask0, np.zeros_like(mask0, dtype=np.bool))
+        np.testing.assert_array_equal(mask0, np.zeros_like(mask0, dtype=bool))
         assert mask0.shape == data_shape
 
         s.axes_manager.signal_axes[0].offset = -5
@@ -301,7 +301,7 @@ class TestGetAngleSectorMask:
         mask1 = pst._get_angle_sector_mask(s, angle0=0.0, angle1=np.pi / 2)
         assert mask1[:, :4, :5].all()
         mask1[:, :4, :5] = False
-        np.testing.assert_array_equal(mask1, np.zeros_like(mask1, dtype=np.bool))
+        np.testing.assert_array_equal(mask1, np.zeros_like(mask1, dtype=bool))
 
     def test_2d(self):
         data_shape = (3, 5, 7, 10)

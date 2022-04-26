@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Signal class for two-dimensional diffraction data in polar coordinates."""
+
 
 from hyperspy.signals import Signal2D
 from hyperspy._signals.lazy import LazySignal
@@ -26,6 +26,8 @@ from pyxem.signals.common_diffraction import CommonDiffraction
 
 
 class Correlation2D(Signal2D, CommonDiffraction):
+    """Signal class for Correlation data after applying some correlation along some axis.
+    """
     _signal_type = "correlation"
 
     def __init__(self, *args, **kwargs):

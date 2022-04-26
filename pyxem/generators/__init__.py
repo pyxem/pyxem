@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The pyXem developers
+# Copyright 2016-2022 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -15,6 +15,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+
+"""Classes to help with generating some more complicated analysis/workflow"""
 
 from .calibration_generator import CalibrationGenerator
 from .displacement_gradient_tensor_generator import (
