@@ -83,9 +83,10 @@ class Correlation1D(Signal1D):
         if normalize:
             signals = np.divide(signals, num_angles)
 
-        signals.axes_manager[-1].name = "Symmetry Order"
-        signals.axes_manager.navigation_axes[0].scale = 1
-        signals.axes_manager.navigation_axes[0].name = "Symmetry"
-        signals.axes_manager.navigation_axes[0].offset = 0
+        signals.axes_manager.signal_axes[-1].name = "Symmetry Order"
+        signals.axes_manager.signal_axes[0].scale = 1
+        signals.axes_manager.signal_axes[0].name = "Symmetry"
+        signals.axes_manager.signal_axes[0].unit = "a.u."
+        signals.axes_manager.signal_axes[0].offset = 0
         
         return signals

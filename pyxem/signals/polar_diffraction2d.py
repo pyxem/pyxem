@@ -28,7 +28,6 @@ class PolarDiffraction2D(Signal2D):
 
     _signal_type = "polar_diffraction"
 
-
     def get_angular_correlation(
         self, mask=None, normalize=True, inplace=False, **kwargs
     ):
@@ -73,9 +72,12 @@ class PolarDiffraction2D(Signal2D):
             **kwargs
         )
         s = self if inplace else correlation
-        s.set_signal_type("correlation")
-        s.axes_manager.signal_axes[0].name = "Angular Correlation, $/phi$"   
+        theta_axis = s.axes_manager.signal_axes[0]
 
+        theta_axis.name = "Angular Correlation, $ \Delta \Theta$"
+        theta_axis.offset = 0
+
+        s.set_signal_type("correlation")
         return correlation
 
     def get_angular_power(self, mask=None, normalize=True, inplace=False, **kwargs):
@@ -113,7 +115,6 @@ class PolarDiffraction2D(Signal2D):
 
         fourier_axis.name = "Fourier Coefficient"
         fourier_axis.units = "a.u"
-        fourier_axis.offset = 0.5
         fourier_axis.scale = 1
 
         return power
@@ -167,7 +168,8 @@ class PolarDiffraction2D(Signal2D):
         s.set_signal_type("correlation")
         
         rho_axis = s.axes_manager.signal_axes[0]
-        rho_axis.name = "Radians"
+        rho_axis.name = "Pearson Correlation, $ \Delta \Theta$"
+        rho_axis.offset = 0
         rho_axis.units = 'rad'
         rho_axis.scale = self.axes_manager[-2].scale
         

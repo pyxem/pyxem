@@ -30,19 +30,6 @@ class Correlation2D(Signal2D, CommonDiffraction):
     """
     _signal_type = "correlation"
 
-    def __init__(self, *args, **kwargs):
-        """Create a PolarDiffraction2D object from a numpy.ndarray.
-
-        Parameters
-        ----------
-        *args :
-            Passed to the __init__ of Signal2D. The first arg should be
-            a numpy.ndarray
-        **kwargs :
-            Passed to the __init__ of Signal2D
-        """
-        super().__init__(*args, **kwargs)
-
     def get_angular_power(self, inplace=False, **kwargs):
         """Returns the power spectrum of the angular auto-correlation function
         in the form of a Signal2D class.
@@ -68,15 +55,14 @@ class Correlation2D(Signal2D, CommonDiffraction):
             The power spectrum of the Signal2D
         """
         power = self.map(corr_to_power, inplace=inplace, **kwargs)
-        if inplace:
-            self.set_signal_type("power")
-            fourier_axis = self.axes_manager.signal_axes[0]
-        else:
-            power.set_signal_type("power")
-            fourier_axis = self.axes_manager.signal_axes[0]
+
+        s = self if inplace else power
+
+        s.set_signal_type("power")
+        fourier_axis = s.axes_manager.signal_axes[0]
+
         fourier_axis.name = "Fourier Coefficient"
         fourier_axis.units = "a.u"
-        fourier_axis.offset = 0.5
         fourier_axis.scale = 1
         return power
 
@@ -96,15 +82,14 @@ class Correlation2D(Signal2D, CommonDiffraction):
             The power spectrum of summed angular correlation
         """
         power = self.nansum().map(corr_to_power, inplace=inplace, **kwargs)
-        if inplace:
-            self.set_signal_type("power")
-            fourier_axis = self.axes_manager.signal_axes[0]
-        else:
-            power.set_signal_type("power")
-            fourier_axis = self.axes_manager.signal_axes[0]
+
+        s = self if inplace else power
+
+        s.set_signal_type("power")
+        fourier_axis = s.axes_manager.signal_axes[0]
+
         fourier_axis.name = "Fourier Coefficient"
         fourier_axis.units = "a.u"
-        fourier_axis.offset = 0.5
         fourier_axis.scale = 1
         return power
 
