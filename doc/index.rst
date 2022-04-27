@@ -1,13 +1,11 @@
-.. pyxem documentation master file, created by
-   sphinx-quickstart on Mon May 10 13:49:29 2021.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
+=================================
 Welcome to pyxem's documentation!
 =================================
+
 Pyxem is an open source project working to bring together tools for the analysis of
-data from pixilated electron detectors.  Based on the Hyperspy project, pyxem has an active
-community of users and developers who are interested in many different areas including:
+data from pixelated electron detectors. Based on the HyperSpy project, pyxem has an
+active community of users and developers who are interested in many different areas
+including:
 
 - Orientation Mapping of Crystals
 - Strain Mapping
@@ -17,18 +15,21 @@ community of users and developers who are interested in many different areas inc
 - And much, much more!
 
 Where do I start?
-------------------
-For most cases starting with one of the linked jupyter notebooks is the
-correct place to start. If you can either download the notebook and run locally
-or run the notebooks remotely using Binder.
+=================
 
-Otherwise is you are searching for documentation on some function
-then you can use the API reference or search the documentation.
+For most cases starting with one of the linked Jupyter notebooks is the correct place to
+start. If you can either download the notebook and run locally or run the notebooks
+remotely using Binder.
 
-The following Jupyter Notebooks should give you good workflows for analyzing your dataset.
+If you are searching for documentation on some function you can use the API reference or
+search the documentation.
 
-User Guide and Workflows:
---------------------------
+The following notebooks should provide workflows for analyzing your dataset.
+
+.. _user-guide-workflows:
+
+User Guide and Workflows
+========================
 
 .. nbgallery::
     :caption: User guide
@@ -46,16 +47,14 @@ User Guide and Workflows:
     demos/09*
     demos/10*
 
-
 .. toctree::
-    :maxdepth: 0
     :caption: Help
+    :maxdepth: 0
 
     reference.rst
     bibliography.rst
     contributing.rst
-    open_datasets.rst
+    open_datasets_workflows.rst
     cite.rst
     related_projects.rst
-    CHANGELOG.rst
-
+    changelog.rst
