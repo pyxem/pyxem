@@ -90,6 +90,7 @@ def test_match_vector_total_error_default(vector_match_peaks, vector_library):
     assert len(rhkls) == 0
 
 
+@pytest.mark.filterwarnings("ignore:Property 'correlation' was expected")
 def test_results_dict_to_crystal_map(test_library_phases_multi, test_lib_gen):
     """Test getting a :class:`orix.crystal_map.CrystalMap` from returns
     from :func:`index_dataset_with_template_rotation`.
@@ -138,6 +139,7 @@ def test_results_dict_to_crystal_map(test_library_phases_multi, test_lib_gen):
     # Only get the bast match when multiple phases match best to some
     # patterns
     xmap = results_dict_to_crystal_map(results, phase_dict, diffraction_library=diff_lib)
+    assert xmap.shape == nav_shape
     assert np.allclose(xmap.phase_id, phase_id[:, 0])
     assert xmap.rotations_per_point == 1
     assert xmap.phases.names == phase_names
