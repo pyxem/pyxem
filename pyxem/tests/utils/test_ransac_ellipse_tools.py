@@ -23,7 +23,7 @@ import numpy as np
 from numpy.testing import assert_allclose
 from scipy.signal import convolve2d
 from skimage import morphology
-import hyperspy.api as hs
+from hyperspy.signals import Signal2D
 
 from pyxem.dummy_data import make_diffraction_test_data as mdtd
 from pyxem.signals import Diffraction2D
@@ -1035,15 +1035,15 @@ class TestDetermineEllipse:
         t[x ** 2 + (y * 1.15) ** 2 < 40 ** 2] = 100
         t[x ** 2 + (y * 1.15) ** 2 < 30 ** 2] = 1
         t = t + np.random.random((100, 100))
-        center, affine = ret.determine_ellipse(t,
-                                               mask=mask,
-                                               use_ransac=ransac)
+        center, affine = ret.determine_ellipse(t, mask=mask, use_ransac=ransac)
 
-        np.testing.assert_array_almost_equal(affine,
-                                              [[1., 0, 0],
-                                              [0, 1.15, 0],
-                                              [0, 0, 1]],
-                                             2)
+        np.testing.assert_array_almost_equal(
+            affine,
+            [[1., 0, 0],
+            [0, 1.15, 0],
+            [0, 0, 1]],
+            2,
+        )
         np.testing.assert_array_almost_equal(center, [45, 50], 0)
 
     @mark.parametrize('execution_number', range(5))
@@ -1055,7 +1055,7 @@ class TestDetermineEllipse:
         s = test_data.signal
         s.set_signal_type("electron_diffraction")
 
-        mask = np.zeros_like(s.data, dtype=np.bool)
+        mask = np.zeros_like(s.data, dtype=bool)
         mask[100 - 20:100 + 20, 100 - 20:100 + 20] = True
         center, affine = ret.determine_ellipse(s, mask=mask, use_ransac=False, num_points=2000)
         s.unit = "k_nm^-1"
@@ -1073,7 +1073,7 @@ class TestDetermineEllipse:
         test_data.add_ring_ellipse(x0=100, y0=100, semi_len0=63, semi_len1=70, rotation=rot)
         s = test_data.signal
         s.set_signal_type("electron_diffraction")
-        mask = np.zeros_like(s.data, dtype=np.bool)
+        mask = np.zeros_like(s.data, dtype=bool)
         mask[100 - 20:100 + 20, 100 - 20:100 + 20] = True
         center, affine = ret.determine_ellipse(s, mask=mask, use_ransac=False)
         s.unit = "k_nm^-1"
@@ -1084,19 +1084,13 @@ class TestDetermineEllipse:
         s_az = s.get_azimuthal_integral2d(npt=100)
         assert (np.sum((s_az.sum(axis=0).isig[10:] > 1).data) < 10)
 
-
     def test_get_max_pos(self):
         t = np.ones((100, 100))
         x, y = np.ogrid[-45:55, -50:50]
         t[x ** 2 + (y * 1.15) ** 2 < 40 ** 2] = 100
         t[x ** 2 + (y * 1.15) ** 2 < 30 ** 2] = 1
         t = t + np.random.random((100, 100))
-        s = hs.signals.Signal2D(t)
+        s = Signal2D(t)
         pos = ret._get_max_positions(s, num_points=100)
         dist = np.array([((p[0] - 45) ** 2 + (p[1] - 50) ** 2) ** 0.5 for p in pos])
         np.testing.assert_array_less(dist, 40)
-
-
-
-
-

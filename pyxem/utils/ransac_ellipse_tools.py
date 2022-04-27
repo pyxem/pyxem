@@ -21,13 +21,12 @@ import math
 from functools import partial
 import numpy as np
 from skimage.measure import EllipseModel, ransac
-from hyperspy.misc.utils import isiterable
-
 import warnings
-
 from hyperspy.signals import BaseSignal
-
+from hyperspy.misc.utils import isiterable
 import pyxem.utils.marker_tools as mt
+
+
 def is_ellipse_good(
     ellipse_model,
     data,
@@ -579,11 +578,9 @@ def _get_ellipse_markers(
     return marker_list
 
 
-def _get_max_positions(signal,
-                       mask=None,
-                       num_points=5000,
-                       ):
-    """ Gets the top num_points pixels in the dataset.
+def _get_max_positions(signal, mask=None, num_points=5000):
+    """Gets the top num_points pixels in the dataset.
+
     Parameters
     --------------
     signal : BaseSignal
@@ -610,14 +607,35 @@ def _get_max_positions(signal,
     return cords.T
 
 
-def determine_ellipse(signal,
-                      mask=None,
-                      num_points=1000,
-                      use_ransac=False,
-                      guess_starting_params=True,
-                      return_params=False,
-                      **kwargs,
-                      ):
+def _ellipse_to_affine(major, minor, rot):
+    if minor > major:
+        temp = minor
+        minor = major
+        major = temp
+        rot = rot + np.pi/2
+    rot = np.pi / 2 - rot
+    if rot < 0:
+        rot = rot+np.pi
+
+    Q = [[np.cos(rot), -np.sin(rot), 0],
+         [np.sin(rot), np.cos(rot), 0],
+         [0, 0, 1]]
+    S = [[1, 0, 0],
+         [0, minor / major, 0],
+         [0, 0, 1]]
+    C = np.matmul(np.matmul(Q, S), np.transpose(Q))
+    return C
+
+
+def determine_ellipse(
+    signal,
+    mask=None,
+    num_points=1000,
+    use_ransac=False,
+    guess_starting_params=True,
+    return_params=False,
+    **kwargs,
+):
     """
     This method starts by taking some number of points which are the most intense
     in the signal.  It then takes those points and guesses some starting parameters
@@ -665,30 +683,29 @@ def determine_ellipse(signal,
     >>> s_corr = s.apply_affine_transformation(affine, inplace=False)
 
     """
-    pos = _get_max_positions(signal,
-                             mask=mask,
-                             num_points=num_points)
+    pos = _get_max_positions(signal, mask=mask, num_points=num_points)
     if use_ransac:
         if guess_starting_params:
-            el, _ = get_ellipse_model_ransac_single_frame(pos,
-                                                  xf=np.mean(pos[:, 0]),
-                                                  yf=np.mean(pos[:, 1]),
-                                                  rf_lim=np.shape(signal.data)[0]/5,
-                                                  semi_len_min=np.std(pos[:, 1]),
-                                                  semi_len_max=np.std(pos[:, 1])*2,
-                                                  semi_len_ratio_lim=1.2,
-                                                  min_samples=6,
-                                                  residual_threshold=20,
-                                                  max_trails=1000)
+            el, _ = get_ellipse_model_ransac_single_frame(
+                pos,
+                xf=np.mean(pos[:, 0]),
+                yf=np.mean(pos[:, 1]),
+                rf_lim=np.shape(signal.data)[0]/5,
+                semi_len_min=np.std(pos[:, 1]),
+                semi_len_max=np.std(pos[:, 1])*2,
+                semi_len_ratio_lim=1.2,
+                min_samples=6,
+                residual_threshold=20,
+                max_trails=1000
+            )
         else:
-            el, _ = get_ellipse_model_ransac_single_frame(pos,
-                                                          **kwargs)
+            el, _ = get_ellipse_model_ransac_single_frame(pos, **kwargs)
     else:
         e = EllipseModel()
         converge = e.estimate(data=pos)
         el = e
     if el is not None:
-        affine = ellipse_to_affine(el.params[3], el.params[2], el.params[4])
+        affine = _ellipse_to_affine(el.params[3], el.params[2], el.params[4])
         center = (el.params[0], el.params[1])
         if return_params:
             return center, affine, el.params
@@ -697,23 +714,3 @@ def determine_ellipse(signal,
     else:
         warnings.warn("Ransac Ellipse detection did not converge")
         return None
-
-
-def ellipse_to_affine(major, minor, rot):
-    if minor > major:
-        temp = minor
-        minor = major
-        major = temp
-        rot = rot + np.pi/2
-    rot = np.pi / 2 - rot
-    if rot < 0:
-        rot = rot+np.pi
-
-    Q = [[np.cos(rot), -np.sin(rot), 0],
-         [np.sin(rot), np.cos(rot), 0],
-         [0, 0, 1]]
-    S = [[1, 0, 0],
-         [0, minor / major, 0],
-         [0, 0, 1]]
-    C = np.matmul(np.matmul(Q, S), np.transpose(Q))
-    return C
