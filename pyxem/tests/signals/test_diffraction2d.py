@@ -769,25 +769,25 @@ class TestGetDirectBeamPosition:
 
     def test_lazy_result(self):
         s = self.s
-        s_shift = s.get_direct_beam_position(method="blur", sigma=1, lazy_result=True)
+        s_shift = s.get_direct_beam_position(method="blur", sigma=1, lazy_output=True)
         assert hasattr(s_shift.data, "compute")
         s_shift.compute()
 
     def test_lazy_input_non_lazy_result(self):
         s = LazyDiffraction2D(da.from_array(self.s.data))
-        s_shift = s.get_direct_beam_position(method="blur", sigma=1, lazy_result=False)
+        s_shift = s.get_direct_beam_position(method="blur", sigma=1, lazy_output=False)
         assert not hasattr(s_shift.data, "compute")
         assert not hasattr(s_shift, "compute")
 
     def test_lazy_input_lazy_result(self):
         s = LazyDiffraction2D(da.from_array(self.s.data))
-        s_shift = s.get_direct_beam_position(method="blur", sigma=1, lazy_result=True)
+        s_shift = s.get_direct_beam_position(method="blur", sigma=1, lazy_output=True)
         assert hasattr(s_shift.data, "compute")
         s_shift.compute()
 
     def test_non_uniform_chunks(self):
         s = LazyDiffraction2D(da.from_array(self.s.data, chunks=(8, 7, 10, 12)))
-        s_shift = s.get_direct_beam_position(method="blur", sigma=1, lazy_result=True)
+        s_shift = s.get_direct_beam_position(method="blur", sigma=1, lazy_output=True)
         shift_data_shape = s.data.shape[:-2] + (2,)
         assert s_shift.data.shape == shift_data_shape
         s_shift.compute()
@@ -825,7 +825,7 @@ class TestCenterDirectBeam:
 
     def test_non_lazy_lazy_result(self):
         s = self.s
-        s.center_direct_beam(method="blur", sigma=1, lazy_result=True)
+        s.center_direct_beam(method="blur", sigma=1, lazy_output=True, inplace=True)
         assert s._lazy is True
         s.compute()
         assert (s.data[:, :, 10, 8] == 9).all()
@@ -843,7 +843,7 @@ class TestCenterDirectBeam:
 
     def test_lazy_not_lazy_result(self):
         s_lazy = self.s_lazy
-        s_lazy.center_direct_beam(method="blur", sigma=1, lazy_result=False)
+        s_lazy.center_direct_beam(method="blur", sigma=1, lazy_output=False)
         assert s_lazy._lazy is False
         assert (s_lazy.data[:, :, 10, 8] == 9).all()
         s_lazy.data[:, :, 10, 8] = 0
@@ -854,7 +854,7 @@ class TestCenterDirectBeam:
         s_lazy.data = s_lazy.data.rechunk((5, 4, 12, 14))
         s_lazy_shape = s_lazy.axes_manager.shape
         data_lazy_shape = s_lazy.data.shape
-        s_lazy.center_direct_beam(method="blur", sigma=1, lazy_result=True)
+        s_lazy.center_direct_beam(method="blur", sigma=1, lazy_output=True)
         assert s_lazy.axes_manager.shape == s_lazy_shape
         assert s_lazy.data.shape == data_lazy_shape
         s_lazy.compute()
@@ -890,7 +890,7 @@ class TestCenterDirectBeam:
 
     def test_shifts_input(self):
         s = self.s
-        s_shifts = s.get_direct_beam_position(method="blur", sigma=1, lazy_result=False)
+        s_shifts = s.get_direct_beam_position(method="blur", sigma=1, lazy_output=False)
         s.center_direct_beam(shifts=s_shifts)
         assert (s.data[:, :, 10, 8] == 9).all()
         s.data[:, :, 10, 8] = 0
@@ -898,7 +898,7 @@ class TestCenterDirectBeam:
 
     def test_shifts_input_lazy(self):
         s = self.s
-        s_shifts = s.get_direct_beam_position(method="blur", sigma=1, lazy_result=True)
+        s_shifts = s.get_direct_beam_position(method="blur", sigma=1, lazy_output=True)
         s.center_direct_beam(shifts=s_shifts)
         assert (s.data[:, :, 10, 8] == 9).all()
         s.data[:, :, 10, 8] = 0

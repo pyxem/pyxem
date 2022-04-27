@@ -613,7 +613,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
     """ Direct beam and peak finding tools """
 
-    def get_direct_beam_position(self, method, lazy_result=None, **kwargs):
+    def get_direct_beam_position(self, method, lazy_output=None, **kwargs):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern.
 
@@ -634,8 +634,13 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             signal index being the x-shift and the second the y-shift.
 
         """
-        if lazy_result is None:
-            lazy_result = self._lazy
+        if "lazy_result" in kwargs:
+            warnings.warn("lazy_result was replaced with lazy_output in version 0.14",
+                          DeprecationWarning)
+            lazy_output = kwargs.pop("lazy_result")
+
+        if lazy_output is None:
+            lazy_output = self._lazy
 
         signal_shape = self.axes_manager.signal_shape
         origin_coordinates = np.array(signal_shape) / 2
@@ -646,56 +651,39 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             "interpolate": find_beam_center_interpolate,
         }
 
-        method_function = select_method_from_method_dict(method, method_dict, **kwargs)
-
-        dask_array = _get_dask_array(self)
-
-        drop_axis = (len(self.axes_manager.shape) - 2, len(self.axes_manager.shape) - 1)
-        new_axis = self.axes_manager.navigation_dimension
-        chunks_output = dask_array.chunks[:-2] + ((2,),)
+        method_function = select_method_from_method_dict(method, method_dict,
+                                                         print_help=False, **kwargs)
 
         if method == "cross_correlate":
-            shifts = _process_dask_array(
-                dask_array,
-                method_function,
-                dtype=np.float32,
-                output_signal_size=(2,),
-                drop_axis=drop_axis,
-                new_axis=new_axis,
-                chunks=chunks_output,
-                **kwargs,
-            )
+            shifts = self.map(method_function,
+                              inplace=False,
+                              output_signal_size=(2,),
+                              output_dtype=np.float32,
+                              lazy_output=lazy_output,
+                              **kwargs,
+                              )
         elif method == "blur":
-            centers = _process_dask_array(
-                dask_array,
-                method_function,
-                dtype=np.int16,
-                output_signal_size=(2,),
-                drop_axis=drop_axis,
-                new_axis=new_axis,
-                chunks=chunks_output,
-                **kwargs,
-            )
-            shifts = origin_coordinates - centers
+            centers = self.map(method_function,
+                               inplace=False,
+                               output_signal_size=(2,),
+                               output_dtype=np.int16,
+                               lazy_output=lazy_output,
+                               **kwargs,
+                               )
+            shifts = -centers + origin_coordinates
         elif method == "interpolate":
-            centers = _process_dask_array(
-                dask_array,
-                method_function,
-                dtype=np.float32,
-                output_signal_size=(2,),
-                drop_axis=drop_axis,
-                new_axis=new_axis,
-                chunks=chunks_output,
-                **kwargs,
-            )
-            shifts = origin_coordinates - centers
+            centers = self.map(method_function,
+                               inplace=False,
+                               output_signal_size=(2,),
+                               output_dtype=np.float32,
+                               lazy_output=lazy_output,
+                               **kwargs,
+                               )
+            shifts = -centers + origin_coordinates
 
-        s_shifts = LazyBeamShift(shifts)
+        shifts.set_signal_type("beam_shift")
 
-        if not lazy_result:
-            s_shifts.compute()
-
-        return s_shifts
+        return shifts
 
     def center_direct_beam(
         self,
@@ -704,8 +692,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         shifts=None,
         return_shifts=False,
         subpixel=True,
-        lazy_result=None,
+        lazy_output=None,
         align_kwargs=None,
+        inplace= True,
         *args,
         **kwargs,
     ):
@@ -762,6 +751,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         use a float dtype, which can be done by s.change_dtype('float32', rechunk=False).
 
         """
+        if "lazy_result" in kwargs:
+            warnings.warn("lazy_result was replaced with lazy_output in version 0.14",
+                          DeprecationWarning)
+            lazy_output = kwargs.pop("lazy_result")
         if (shifts is None) and (method is None):
             raise ValueError("Either method or shifts parameter must be specified")
         if (shifts is not None) and (method is not None):
@@ -769,20 +762,12 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 "Only one of the shifts or method parameters should be specified, "
                 "not both"
             )
-        if lazy_result is None:
-            lazy_result = self._lazy
         if align_kwargs is None:
             align_kwargs = {}
 
         signal_shape = self.axes_manager.signal_shape
         origin_coordinates = np.array(signal_shape) / 2
-
-        data_dask_array = _get_dask_array(self)
-        if not self._lazy:
-            temp_signal = self.as_lazy()
-            temp_signal.data = da.from_array(self.data, chunks=data_dask_array.chunks)
-        else:
-            temp_signal = self
+        temp_signal = self
 
         if shifts is None:
             if half_square_width is not None:
@@ -792,7 +777,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 temp_signal = temp_signal.isig[min_index:max_index, min_index:max_index]
             shifts = temp_signal.get_direct_beam_position(
                 method=method,
-                lazy_result=True,
+                lazy_output=lazy_output,
                 **kwargs,
             )
 
@@ -801,45 +786,21 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 align_kwargs["order"] = 1
             else:
                 align_kwargs["order"] = 0
+        aligned = self.map(align_single_frame,
+                           shifts=shifts,
+                           inplace=inplace,
+                           lazy_output=lazy_output,
+                           output_dtype=self.data.dtype,
+                           output_signal_size=self.axes_manager.signal_shape[::-1],
+                           **align_kwargs)
 
-        nav_dims = self.axes_manager.navigation_dimension
-        nav_chunks = data_dask_array.chunks[:nav_dims]
-        shifts_dask_array = _get_dask_array(shifts, chunk_shape=nav_chunks)
 
-        output_dask_array = _process_dask_array(
-            data_dask_array,
-            align_single_frame,
-            iter_array=shifts_dask_array,
-            **align_kwargs,
-        )
-
-        if lazy_result:
-            if not self._lazy:
-                self._lazy = True
-                self._assign_subclass()
-            self.data = output_dask_array
-        else:
-            if self._lazy:
-                self.data = np.empty(
-                    output_dask_array.shape, dtype=output_dask_array.dtype
-                )
-                self._lazy = False
-                self._assign_subclass()
-            shifts.data = np.empty(
-                shifts_dask_array.shape, dtype=shifts_dask_array.dtype
-            )
-            shifts._lazy = False
-            shifts._assign_subclass()
-            with ProgressBar():
-                da.store(
-                    [shifts_dask_array, output_dask_array],
-                    [shifts.data, self.data],
-                )
-
-        self.events.data_changed.trigger(obj=self)
-
-        if return_shifts:
+        if return_shifts and inplace:
             return shifts
+        elif return_shifts:
+            return shifts, aligned
+        else:
+            return aligned
 
     def threshold_and_mask(self, threshold=None, mask=None, show_progressbar=True):
         """Get a thresholded and masked of the signal.
