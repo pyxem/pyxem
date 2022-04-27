@@ -117,7 +117,7 @@ class TestAzimuthalIntegral1d:
         ones.unit = unit
         ones.set_ai(wavelength=1e-9)
         az = ones.get_azimuthal_integral1d(
-            npt=10, wavelength=1e-9, correctSolidAngle=False
+            npt=10, correctSolidAngle=False
         )
         np.testing.assert_array_equal(az.data[0:8], np.ones(8))
 
@@ -190,7 +190,6 @@ class TestAzimuthalIntegral1d:
         ones.get_azimuthal_integral1d(
             npt=10,
             method="BBox",
-            wavelength=1e-9,
             correctSolidAngle=False,
             mask=mask_bs,
         )
@@ -230,7 +229,7 @@ class TestAzimuthalIntegral1d:
         s.unit = "2th_deg"
         s.set_ai()
         npt = 10
-        s_a = s.get_azimuthal_integral1d(npt=npt, lazy_result=True)
+        s_a = s.get_azimuthal_integral1d(npt=npt, lazy_output=True)
         output_signal_shape = s.axes_manager.shape[:-2] + (npt,)
         output_data_shape = shape[:-2] + (npt,)
         assert s_a.axes_manager.shape == output_signal_shape
@@ -248,7 +247,7 @@ class TestAzimuthalIntegral1d:
         s.unit = "2th_deg"
         s.set_ai()
         npt = 10
-        s_a = s.get_azimuthal_integral1d(npt=npt, lazy_result=False)
+        s_a = s.get_azimuthal_integral1d(npt=npt, lazy_output=False)
         output_signal_shape = s.axes_manager.shape[:-2] + (npt,)
         output_data_shape = shape[:-2] + (npt,)
         assert s_a.axes_manager.shape == output_signal_shape
@@ -265,7 +264,7 @@ class TestAzimuthalIntegral1d:
         npt = 10
         output_signal_shape = s.axes_manager.shape[:-2] + (npt,)
         output_data_shape = shape[:-2] + (npt,)
-        s.get_azimuthal_integral1d(npt=npt, inplace=True, lazy_result=True)
+        s.get_azimuthal_integral1d(npt=npt, inplace=True, lazy_output=True)
         assert s.axes_manager.shape == output_signal_shape
         assert s.data.shape == output_data_shape
         s.compute()
@@ -283,7 +282,7 @@ class TestAzimuthalIntegral1d:
         npt = 10
         output_signal_shape = s.axes_manager.shape[:-2] + (npt,)
         output_data_shape = shape[:-2] + (npt,)
-        s.get_azimuthal_integral1d(npt=npt, inplace=True, lazy_result=False)
+        s.get_azimuthal_integral1d(npt=npt, inplace=True, lazy_output=False)
         assert s.axes_manager.shape == output_signal_shape
         assert s.data.shape == output_data_shape
 
@@ -297,7 +296,7 @@ class TestAzimuthalIntegral1d:
         npt = 10
         output_signal_shape = s.axes_manager.shape[:-2] + (npt,)
         output_data_shape = shape[:-2] + (npt,)
-        s.get_azimuthal_integral1d(npt=npt, inplace=True, lazy_result=True)
+        s.get_azimuthal_integral1d(npt=npt, inplace=True, lazy_output=True)
         assert s.axes_manager.shape == output_signal_shape
         assert s.data.shape == output_data_shape
         s.compute()
