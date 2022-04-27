@@ -17,6 +17,9 @@ Added
 - Add function for creating a orix CrystalMap from indexation results (#794)
 - Speed optimizations for the fast template matching on CPU and GPU, improving speeds by 200% and 40% respectively (#796)
 
+Changed
+^^^^^^^
+- For developers: HyperSpy's `.map` function will now be used to process big datasets, instead of pyXem's `process_dask_array`
 
 Removed
 ^^^^^^^
@@ -28,6 +31,10 @@ Fixed
 - Symmetry STEM Class updated to allow for better interpolation and lazy operation. (#809)
 - Generalized plotting diffraction vectors on ND stacks of images (#783)
 - Small bugfix with dask/cuda scheduler to prevent running out of VRAM (#779)
+
+Deprecated
+^^^^^^^^^^
+- The `lazy_result` keyword, which has been changed to `lazy_output` to conform to similar keyword in HyperSpy
 
 2021-04-14 - version 0.13.2
 ---------------------------
