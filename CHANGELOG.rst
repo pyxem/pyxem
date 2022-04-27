@@ -18,6 +18,10 @@ Added
 - Speed optimizations for the fast template matching on CPU and GPU, improving speeds by 200% and 40% respectively (#796)
 - Added the ability to determine the center and ellipticity using the `determine_ellipse` function.
 
+Changed
+^^^^^^^
+- For developers: HyperSpy's `.map` function will now be used to process big datasets, instead of pyXem's `process_dask_array`
+
 Removed
 ^^^^^^^
 - lazy_* virtual imaging has been removed, use get_integrated_intensity (#722)
@@ -29,6 +33,10 @@ Fixed
 - Generalized plotting diffraction vectors on ND stacks of images (#783)
 - Small bugfix with dask/cuda scheduler to prevent running out of VRAM (#779)
 - Bugfix:AzimuthalIntegral1D accepts masks and uses updated `map` function (#826)
+
+Deprecated
+^^^^^^^^^^
+- The `lazy_result` keyword, which has been changed to `lazy_output` to conform to similar keyword in HyperSpy
 
 2021-04-14 - version 0.13.2
 ---------------------------
