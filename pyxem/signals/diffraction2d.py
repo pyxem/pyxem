@@ -1880,9 +1880,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         azimuth_range : None or (float, float)
             The azimuthal range over which to perform the integration. Default is
             from -pi to pi
-        wavelength : None or float
-            The wavelength of for the microscope. Has to be in the same units as the pyxem units if you want
-            it to properly work.
         inplace : bool
             If the signal is overwritten or copied to a new signal
         method : str
@@ -1892,13 +1889,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         sum : bool
             If true returns the pixel split sum rather than the azimuthal integration which
             gives the mean.
-        lazy_result : optional
-            If True, the result will be a lazy signal. If False, a non-lazy signal.
-            By default, if the signal is lazy, the result will also be lazy.
-            If the signal is non-lazy, the result will be non-lazy.
-        show_progressbar : None or bool
-            If True and lazy_result is True, show a progressbar for the calculation.
-            If None, the preference from the settings will be used.
 
         Other Parameters
         -------
@@ -1931,18 +1921,19 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         (wavelength needed)
 
         >>> ds.unit = "k_nm^-1" # setting units
-        >>> ds.get_azimuthal_integral1d(npt=100, wavelength=2.5e-12)
+        >>> ds.set_ai(wavelength=2.5e-12) # creating an AzimuthalIntegrator Object
+        >>> ds.get_azimuthal_integral1d(npt=100)
 
-        Using pyFAI to define a detector case using a curved Ewald Sphere approximation and pyXEM units
-
-        >>> from pyFAI.detectors import Detector
-        >>> det = Detector(pixel1=1e-4, pixel2=1e-4)
-        >>> ds.get_azimuthal_integral1d(npt=100, detector_dist=.2, detector= det, wavelength=2.508e-12)
         """
         if "lazy_result" in kwargs:
             warnings.warn("lazy_result was replaced with lazy_output in version 0.14",
                           DeprecationWarning)
             kwargs["lazy_output"] = kwargs.pop("lazy_result")
+        if "wavelength" in kwargs:
+            warnings.warn("The wavelength parameter was removed in 0.14. The wavelength "
+                          "can be set using the `set_ai` function or using `s.beam_energy`"
+                          " for `ElectronDiffraction2D` signals")
+            kwargs.pop("wavelength")
 
         sig_shape = self.axes_manager.signal_shape
         if radial_range is None:
@@ -2056,16 +2047,11 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         (wavelength needed)
 
         >>> ds.unit = "k_nm^-1" # setting units
-        >>> ds.get_azimuthal_integral2d(npt_rad=100, wavelength=2.5e-12)
+        >>> ds.set_ai(wavelength= 2.5e-12)
+        >>> ds.get_azimuthal_integral2d(npt_rad=100)
 
-        Using pyFAI to define a detector case using a curved Ewald Sphere approximation and pyXEM units
-
-        >>> from pyFAI.detectors import Detector
-        >>> det = Detector(pixel1=1e-4, pixel2=1e-4)
-        >>> ds.get_azimuthal_integral2d(npt_rad=100, detector_dist=.2, detector= det, wavelength=2.508e-12)
         """
         sig_shape = self.axes_manager.signal_shape
-        unit = self.unit
         if radial_range is None:
             radial_range = _get_radial_extent(
                 ai=self.ai, shape=sig_shape, unit=self.unit
@@ -2105,7 +2091,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         k_axis.name = "Radius"
         k_axis.scale = (radial_range[1] - radial_range[0]) / npt
-        k_axis.units = unit
         k_axis.offset = radial_range[0]
 
         return integration

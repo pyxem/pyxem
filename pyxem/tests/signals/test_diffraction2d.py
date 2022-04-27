@@ -117,7 +117,7 @@ class TestAzimuthalIntegral1d:
         ones.unit = unit
         ones.set_ai(wavelength=1e-9)
         az = ones.get_azimuthal_integral1d(
-            npt=10, wavelength=1e-9, correctSolidAngle=False
+            npt=10, correctSolidAngle=False
         )
         np.testing.assert_array_equal(az.data[0:8], np.ones(8))
 
@@ -190,7 +190,6 @@ class TestAzimuthalIntegral1d:
         ones.get_azimuthal_integral1d(
             npt=10,
             method="BBox",
-            wavelength=1e-9,
             correctSolidAngle=False,
             mask=mask_bs,
         )
