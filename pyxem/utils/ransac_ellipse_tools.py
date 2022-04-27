@@ -586,12 +586,13 @@ def _get_max_positions(signal,
     """ Gets the top num_points pixels in the dataset.
     Parameters
     --------------
-    signal: BaseSignal
+    signal : BaseSignal
         The signal which we want to find the max positions for.
-    mask: np.array
-        A mask to be applied to the data for values to ignore
-    num_points: int
-        The number of points to be considered
+    mask : np.array
+        A mask to be applied to the data for values to ignore.
+    num_points : int
+        The number of points to be considered.
+
     """
     if isinstance(signal, BaseSignal):
         data = signal.data
@@ -622,41 +623,47 @@ def determine_ellipse(signal,
     in the signal.  It then takes those points and guesses some starting parameters
     for the `get_ellipse_model_ransac_single_frame` function. From there it will try
     to determine the ellipse parameters.
+
     Parameters
     -----------
-    signal: Signal2D
-        The signal of interest
-    mask: Array-like
-        The mask to be applied to the data.  The True values are ignored
-    num_points: int
-        The number of points to consider
-    use_ransac: bool
-        If Ransac should be used to determine the ellipse. False is faster but less
+    signal : Signal2D
+        The signal of interest.
+    mask : Array-like
+        The mask to be applied to the data.  The True values are ignored.
+    num_points : int
+        The number of points to consider.
+    use_ransac : bool
+        If Ransac should be used to determine the ellipse. False is faster but less.
         robust with respect to noise.
-    guess_starting_params: bool
+    guess_starting_params : bool
         If True then the starting parameters will be guessed based on the points determined.
-    return_params: bool
+    return_params : bool
         If the ellipse parameters should be returned as well.
     **kwargs:
-        Any other keywords for ` get_ellipse_model_ransac_single_frame`
+        Any other keywords for `get_ellipse_model_ransac_single_frame`.
+
     Returns
     -------
-    center: (x,y)
-        The center of the diffraction pattern
-    affine:
+    center : (x,y)
+        The center of the diffraction pattern.
+    affine :
         The affine transformation to make the diffraction pattern circular.
-        Examples
+
+    Examples
     --------
     >>> import pyxem.utils.ransac_ellipse_tools as ret
     >>> import pyxem.dummy_data.make_diffraction_test_data as mdtd
     >>> test_data = mdtd.MakeTestData(200, 200, default=False)
     >>> test_data.add_disk(x0=100, y0=100, r=5, intensity=30)
-    >>> test_data.add_ring_ellipse(x0=100, y0=100, semi_len0=63, semi_len1=70, rotation=rot)
+    >>> test_data.add_ring_ellipse(x0=100, y0=100, semi_len0=63, semi_len1=70, rotation=45)
     >>> s = test_data.signal
     >>> s.set_signal_type("electron_diffraction")
-    >>> mask = np.zeros_like(s.data, dtype=np.bool)
-    >>> mask[100 - 20:100 + 20, 100 - 20:100 + 20] = True #mask beamstop
+    >>> import numpy as np
+    >>> mask = np.zeros_like(s.data, dtype=bool)
+    >>> mask[100 - 20:100 + 20, 100 - 20:100 + 20] = True # mask beamstop
     >>> center, affine = ret.determine_ellipse(s, mask=mask, use_ransac=False)
+    >>> s_corr = s.apply_affine_transformation(affine, inplace=False)
+
     """
     pos = _get_max_positions(signal,
                              mask=mask,
