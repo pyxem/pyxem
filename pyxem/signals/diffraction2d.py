@@ -2047,7 +2047,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         (wavelength needed)
 
         >>> ds.unit = "k_nm^-1" # setting units
-        >>> ds.set_ai(wavelength= 2.5e-12)
+        >>> ds.set_ai(wavelength=2.5e-12)
         >>> ds.get_azimuthal_integral2d(npt_rad=100)
 
         """
