@@ -31,11 +31,8 @@ import warnings
 import hyperspy.api as hs
 from hyperspy.signals import Signal2D, BaseSignal
 from hyperspy._signals.lazy import LazySignal
-from hyperspy._signals.signal1d import LazySignal1D
 from hyperspy._signals.signal2d import LazySignal2D
 from hyperspy.misc.utils import isiterable
-
-from pyFAI.units import to_unit
 
 from pyxem.signals import (
     CommonDiffraction,
@@ -45,7 +42,6 @@ from pyxem.signals import (
     LazyDPCBaseSignal,
     LazyDPCSignal1D,
     LazyDPCSignal2D,
-    LazyBeamShift,
 )
 from pyxem.utils.pyfai_utils import (
     get_azimuthal_integrator,
@@ -56,7 +52,6 @@ from pyxem.utils.expt_utils import (
     azimuthal_integrate1d,
     azimuthal_integrate2d,
     gain_normalise,
-    remove_dead,
     regional_filter,
     circular_mask,
     find_beam_offset_cross_correlation,
@@ -69,7 +64,6 @@ from pyxem.utils.expt_utils import (
     sigma_clip,
 )
 from pyxem.utils.dask_tools import (
-    _process_dask_array,
     _get_dask_array,
     get_signal_dimension_host_chunk_slice,
     align_single_frame,
@@ -1954,16 +1948,14 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             sum=sum,
             **kwargs,
         )
+        s = self if inplace else integration
 
         # Dealing with axis changes
-        if inplace:
-            k_axis = self.axes_manager.signal_axes[0]
-        else:
-            transfer_navigation_axes(integration, self)
-            k_axis = integration.axes_manager.signal_axes[0]
+        k_axis = s.axes_manager.signal_axes[0]
         k_axis.name = "Radius"
         k_axis.scale = (radial_range[1] - radial_range[0]) / npt
         k_axis.offset = radial_range[0]
+        
         return integration
 
     def get_azimuthal_integral2d(
@@ -2203,10 +2195,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         s = self if inplace else integration
 
         # Dealing with axis changes
-        s = self if inplace else integration
-
         k_axis = s.axes_manager.signal_axes[0]
-
         k_axis.name = "Radius"
         k_axis.scale = (radial_range[1] - radial_range[0]) / npt
         k_axis.offset = radial_range[0]
