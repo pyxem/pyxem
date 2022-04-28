@@ -145,7 +145,7 @@ class TestFullDirectBeamCentering:
         s_beam_shift = s.get_direct_beam_position(method="blur", sigma=1)
         s_beam_shift.make_linear_plane(mask=s_mask)
         s.center_direct_beam(shifts=s_beam_shift)
-        assert (s.data[:, :, 8, 8] == 10).all()
+        np.testing.assert_almost_equal(s.data[:, :, 8, 8], 10,decimal=5)
         s.data[:, :, 8, 8] = 0
         s.data[1, 2, 3, 2] = 0
         np.testing.assert_almost_equal(s.data, 0.0, decimal=5)
@@ -162,7 +162,7 @@ class TestFullDirectBeamCentering:
         s_beam_shift.make_linear_plane(mask=s_mask)
         s.center_direct_beam(shifts=s_beam_shift)
         s.compute()
-        assert (s.data[:, :, 8, 8] == 10).all()
+        np.testing.assert_almost_equal(s.data[:, :, 8, 8], 10,decimal=5)
         s.data[:, :, 8, 8] = 0
         s.data[1, 2, 3, 2] = 0
         np.testing.assert_almost_equal(s.data, 0.0, decimal=5)

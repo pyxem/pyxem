@@ -31,11 +31,8 @@ import warnings
 import hyperspy.api as hs
 from hyperspy.signals import Signal2D, BaseSignal
 from hyperspy._signals.lazy import LazySignal
-from hyperspy._signals.signal1d import LazySignal1D
 from hyperspy._signals.signal2d import LazySignal2D
 from hyperspy.misc.utils import isiterable
-
-from pyFAI.units import to_unit
 
 from pyxem.signals import (
     CommonDiffraction,
@@ -45,7 +42,6 @@ from pyxem.signals import (
     LazyDPCBaseSignal,
     LazyDPCSignal1D,
     LazyDPCSignal2D,
-    LazyBeamShift,
 )
 from pyxem.utils.pyfai_utils import (
     get_azimuthal_integrator,
@@ -56,7 +52,6 @@ from pyxem.utils.expt_utils import (
     azimuthal_integrate1d,
     azimuthal_integrate2d,
     gain_normalise,
-    remove_dead,
     regional_filter,
     circular_mask,
     find_beam_offset_cross_correlation,
@@ -69,7 +64,6 @@ from pyxem.utils.expt_utils import (
     sigma_clip,
 )
 from pyxem.utils.dask_tools import (
-    _process_dask_array,
     _get_dask_array,
     get_signal_dimension_host_chunk_slice,
     align_single_frame,
@@ -613,7 +607,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
     """ Direct beam and peak finding tools """
 
-    def get_direct_beam_position(self, method, lazy_result=None, **kwargs):
+    def get_direct_beam_position(self, method, lazy_output=None, **kwargs):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern.
 
@@ -634,8 +628,13 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             signal index being the x-shift and the second the y-shift.
 
         """
-        if lazy_result is None:
-            lazy_result = self._lazy
+        if "lazy_result" in kwargs:
+            warnings.warn("lazy_result was replaced with lazy_output in version 0.14",
+                          DeprecationWarning)
+            lazy_output = kwargs.pop("lazy_result")
+
+        if lazy_output is None:
+            lazy_output = self._lazy
 
         signal_shape = self.axes_manager.signal_shape
         origin_coordinates = np.array(signal_shape) / 2
@@ -646,56 +645,39 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             "interpolate": find_beam_center_interpolate,
         }
 
-        method_function = select_method_from_method_dict(method, method_dict, **kwargs)
-
-        dask_array = _get_dask_array(self)
-
-        drop_axis = (len(self.axes_manager.shape) - 2, len(self.axes_manager.shape) - 1)
-        new_axis = self.axes_manager.navigation_dimension
-        chunks_output = dask_array.chunks[:-2] + ((2,),)
+        method_function = select_method_from_method_dict(method, method_dict,
+                                                         print_help=False, **kwargs)
 
         if method == "cross_correlate":
-            shifts = _process_dask_array(
-                dask_array,
-                method_function,
-                dtype=np.float32,
-                output_signal_size=(2,),
-                drop_axis=drop_axis,
-                new_axis=new_axis,
-                chunks=chunks_output,
-                **kwargs,
-            )
+            shifts = self.map(method_function,
+                              inplace=False,
+                              output_signal_size=(2,),
+                              output_dtype=np.float32,
+                              lazy_output=lazy_output,
+                              **kwargs,
+                              )
         elif method == "blur":
-            centers = _process_dask_array(
-                dask_array,
-                method_function,
-                dtype=np.int16,
-                output_signal_size=(2,),
-                drop_axis=drop_axis,
-                new_axis=new_axis,
-                chunks=chunks_output,
-                **kwargs,
-            )
-            shifts = origin_coordinates - centers
+            centers = self.map(method_function,
+                               inplace=False,
+                               output_signal_size=(2,),
+                               output_dtype=np.int16,
+                               lazy_output=lazy_output,
+                               **kwargs,
+                               )
+            shifts = -centers + origin_coordinates
         elif method == "interpolate":
-            centers = _process_dask_array(
-                dask_array,
-                method_function,
-                dtype=np.float32,
-                output_signal_size=(2,),
-                drop_axis=drop_axis,
-                new_axis=new_axis,
-                chunks=chunks_output,
-                **kwargs,
-            )
-            shifts = origin_coordinates - centers
+            centers = self.map(method_function,
+                               inplace=False,
+                               output_signal_size=(2,),
+                               output_dtype=np.float32,
+                               lazy_output=lazy_output,
+                               **kwargs,
+                               )
+            shifts = -centers + origin_coordinates
 
-        s_shifts = LazyBeamShift(shifts)
+        shifts.set_signal_type("beam_shift")
 
-        if not lazy_result:
-            s_shifts.compute()
-
-        return s_shifts
+        return shifts
 
     def center_direct_beam(
         self,
@@ -704,8 +686,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         shifts=None,
         return_shifts=False,
         subpixel=True,
-        lazy_result=None,
+        lazy_output=None,
         align_kwargs=None,
+        inplace= True,
         *args,
         **kwargs,
     ):
@@ -762,6 +745,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         use a float dtype, which can be done by s.change_dtype('float32', rechunk=False).
 
         """
+        if "lazy_result" in kwargs:
+            warnings.warn("lazy_result was replaced with lazy_output in version 0.14",
+                          DeprecationWarning)
+            lazy_output = kwargs.pop("lazy_result")
         if (shifts is None) and (method is None):
             raise ValueError("Either method or shifts parameter must be specified")
         if (shifts is not None) and (method is not None):
@@ -769,20 +756,12 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 "Only one of the shifts or method parameters should be specified, "
                 "not both"
             )
-        if lazy_result is None:
-            lazy_result = self._lazy
         if align_kwargs is None:
             align_kwargs = {}
 
         signal_shape = self.axes_manager.signal_shape
         origin_coordinates = np.array(signal_shape) / 2
-
-        data_dask_array = _get_dask_array(self)
-        if not self._lazy:
-            temp_signal = self.as_lazy()
-            temp_signal.data = da.from_array(self.data, chunks=data_dask_array.chunks)
-        else:
-            temp_signal = self
+        temp_signal = self
 
         if shifts is None:
             if half_square_width is not None:
@@ -792,7 +771,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 temp_signal = temp_signal.isig[min_index:max_index, min_index:max_index]
             shifts = temp_signal.get_direct_beam_position(
                 method=method,
-                lazy_result=True,
+                lazy_output=lazy_output,
                 **kwargs,
             )
 
@@ -801,45 +780,21 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 align_kwargs["order"] = 1
             else:
                 align_kwargs["order"] = 0
+        aligned = self.map(align_single_frame,
+                           shifts=shifts,
+                           inplace=inplace,
+                           lazy_output=lazy_output,
+                           output_dtype=self.data.dtype,
+                           output_signal_size=self.axes_manager.signal_shape[::-1],
+                           **align_kwargs)
 
-        nav_dims = self.axes_manager.navigation_dimension
-        nav_chunks = data_dask_array.chunks[:nav_dims]
-        shifts_dask_array = _get_dask_array(shifts, chunk_shape=nav_chunks)
 
-        output_dask_array = _process_dask_array(
-            data_dask_array,
-            align_single_frame,
-            iter_array=shifts_dask_array,
-            **align_kwargs,
-        )
-
-        if lazy_result:
-            if not self._lazy:
-                self._lazy = True
-                self._assign_subclass()
-            self.data = output_dask_array
-        else:
-            if self._lazy:
-                self.data = np.empty(
-                    output_dask_array.shape, dtype=output_dask_array.dtype
-                )
-                self._lazy = False
-                self._assign_subclass()
-            shifts.data = np.empty(
-                shifts_dask_array.shape, dtype=shifts_dask_array.dtype
-            )
-            shifts._lazy = False
-            shifts._assign_subclass()
-            with ProgressBar():
-                da.store(
-                    [shifts_dask_array, output_dask_array],
-                    [shifts.data, self.data],
-                )
-
-        self.events.data_changed.trigger(obj=self)
-
-        if return_shifts:
+        if return_shifts and inplace:
             return shifts
+        elif return_shifts:
+            return shifts, aligned
+        else:
+            return aligned
 
     def threshold_and_mask(self, threshold=None, mask=None, show_progressbar=True):
         """Get a thresholded and masked of the signal.
@@ -1692,37 +1647,39 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             )
             + 1
         )
-        centre_x = centre_x.flatten()
-        centre_y = centre_y.flatten()
-        iterating_kwargs = [("centre_x", centre_x), ("centre_y", centre_y)]
-        if mask_array is not None:
-            #  This line flattens the mask array, except for the two
-            #  last dimensions. This to make the mask array work for the
-            #  _map_iterate function.
-            mask_flat = mask_array.reshape(-1, *mask_array.shape[-2:])
-            iterating_kwargs.append(("mask", mask_flat))
-
         if self._lazy:
             data = pst._radial_average_dask_array(
                 self.data,
                 return_sig_size=radial_array_size,
-                centre_x=centre_x,
-                centre_y=centre_y,
+                centre_x=centre_x.flatten(),
+                centre_y=centre_y.flatten(),
                 mask_array=mask_array,
                 normalize=normalize,
                 show_progressbar=show_progressbar,
             )
             s_radial = hs.signals.Signal1D(data)
         else:
-            s_radial = self._map_iterate(
+            if mask_array is not None:
+                mask_array = Signal2D(mask_array)
+            if self.data.ndim == centre_x.ndim:
+                centre_x = Signal2D(centre_x)
+                centre_y = Signal2D(centre_y)
+            else:
+                centre_x = BaseSignal(centre_x).T
+                centre_y = BaseSignal(centre_y).T
+
+            s_radial = self.map(
                 pst._get_radial_profile_of_diff_image,
                 normalize=normalize,
-                iterating_kwargs=iterating_kwargs,
+                centre_x=centre_x,
+                centre_y=centre_y,
+                mask=mask_array,
                 inplace=False,
                 ragged=False,
                 parallel=parallel,
                 radial_array_size=radial_array_size,
                 show_progressbar=show_progressbar,
+                lazy_output=False,
             )
             data = s_radial.data
         s_radial = hs.signals.Signal1D(data)
@@ -1894,12 +1851,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         mask=None,
         radial_range=None,
         azimuth_range=None,
-        wavelength=None,
         inplace=False,
         method="splitpixel",
         sum=False,
-        lazy_result=None,
-        show_progressbar=None,
         **kwargs,
     ):
         """Creates a polar reprojection using pyFAI's azimuthal integrate 2d. This method is designed
@@ -1920,9 +1874,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         azimuth_range : None or (float, float)
             The azimuthal range over which to perform the integration. Default is
             from -pi to pi
-        wavelength : None or float
-            The wavelength of for the microscope. Has to be in the same units as the pyxem units if you want
-            it to properly work.
         inplace : bool
             If the signal is overwritten or copied to a new signal
         method : str
@@ -1932,13 +1883,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         sum : bool
             If true returns the pixel split sum rather than the azimuthal integration which
             gives the mean.
-        lazy_result : optional
-            If True, the result will be a lazy signal. If False, a non-lazy signal.
-            By default, if the signal is lazy, the result will also be lazy.
-            If the signal is non-lazy, the result will be non-lazy.
-        show_progressbar : None or bool
-            If True and lazy_result is True, show a progressbar for the calculation.
-            If None, the preference from the settings will be used.
 
         Other Parameters
         -------
@@ -1971,67 +1915,48 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         (wavelength needed)
 
         >>> ds.unit = "k_nm^-1" # setting units
-        >>> ds.get_azimuthal_integral1d(npt=100, wavelength=2.5e-12)
+        >>> ds.set_ai(wavelength=2.5e-12) # creating an AzimuthalIntegrator Object
+        >>> ds.get_azimuthal_integral1d(npt=100)
 
-        Using pyFAI to define a detector case using a curved Ewald Sphere approximation and pyXEM units
-
-        >>> from pyFAI.detectors import Detector
-        >>> det = Detector(pixel1=1e-4, pixel2=1e-4)
-        >>> ds.get_azimuthal_integral1d(npt=100, detector_dist=.2, detector= det, wavelength=2.508e-12)
         """
-        if lazy_result is None:
-            lazy_result = self._lazy
-        signal_type = self._signal_type
-        unit = to_unit(self.unit)
+        if "lazy_result" in kwargs:
+            warnings.warn("lazy_result was replaced with lazy_output in version 0.14",
+                          DeprecationWarning)
+            kwargs["lazy_output"] = kwargs.pop("lazy_result")
+        if "wavelength" in kwargs:
+            warnings.warn("The wavelength parameter was removed in 0.14. The wavelength "
+                          "can be set using the `set_ai` function or using `s.beam_energy`"
+                          " for `ElectronDiffraction2D` signals")
+            kwargs.pop("wavelength")
+
         sig_shape = self.axes_manager.signal_shape
         if radial_range is None:
-            radial_range = _get_radial_extent(ai=self.ai, shape=sig_shape, unit=unit)
+            radial_range = _get_radial_extent(
+                ai=self.ai, shape=sig_shape, unit=self.unit
+            )
             radial_range[0] = 0
-
-        data_dask_array = _get_dask_array(self)
-        chunks = data_dask_array.chunks[:-2] + ((npt,),)
-        drop_axis = (len(self.axes_manager.shape) - 2, len(self.axes_manager.shape) - 1)
-        new_axis = self.axes_manager.navigation_dimension
-        integration_dask_array = _process_dask_array(
-            data_dask_array,
+        integration = self.map(
             azimuthal_integrate1d,
-            drop_axis=drop_axis,
-            new_axis=new_axis,
-            chunks=chunks,
-            output_signal_size=(npt,),
             azimuthal_integrator=self.ai,
             npt_rad=npt,
             azimuth_range=azimuth_range,
             radial_range=radial_range,
             method=method,
-            unit=unit,
+            inplace=inplace,
+            unit=self.unit,
+            mask=mask,
             sum=sum,
-            dtype=np.float32,  # pyFAI does the calculation in float32
             **kwargs,
         )
+        s = self if inplace else integration
 
         # Dealing with axis changes
-        if inplace:
-            result = self
-            result.axes_manager.remove(self.axes_manager.signal_axes[0])
-            result.data = integration_dask_array
-            result._lazy = True
-        else:
-            result = LazySignal1D(integration_dask_array)
-            result.set_signal_type(signal_type)
-            transfer_navigation_axes(result, self)
-        k_axis = result.axes_manager.signal_axes[0]
+        k_axis = s.axes_manager.signal_axes[0]
         k_axis.name = "Radius"
         k_axis.scale = (radial_range[1] - radial_range[0]) / npt
-        k_axis.units = unit.unit_symbol
         k_axis.offset = radial_range[0]
-
-        result.set_signal_type(signal_type)
-        if not lazy_result:
-            result.compute(show_progressbar=show_progressbar)
-
-        if not inplace:
-            return result
+        
+        return integration
 
     def get_azimuthal_integral2d(
         self,
@@ -2101,7 +2026,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         Returns
         -------
         polar: PolarDiffraction2D
-            A polar diffraction signal
+            A polar diffraction signal, when inplace is False, otherwise None
 
         Examples
         --------
@@ -2114,16 +2039,11 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         (wavelength needed)
 
         >>> ds.unit = "k_nm^-1" # setting units
-        >>> ds.get_azimuthal_integral2d(npt_rad=100, wavelength=2.5e-12)
+        >>> ds.set_ai(wavelength=2.5e-12)
+        >>> ds.get_azimuthal_integral2d(npt_rad=100)
 
-        Using pyFAI to define a detector case using a curved Ewald Sphere approximation and pyXEM units
-
-        >>> from pyFAI.detectors import Detector
-        >>> det = Detector(pixel1=1e-4, pixel2=1e-4)
-        >>> ds.get_azimuthal_integral2d(npt_rad=100, detector_dist=.2, detector= det, wavelength=2.508e-12)
         """
         sig_shape = self.axes_manager.signal_shape
-        unit = self.unit
         if radial_range is None:
             radial_range = _get_radial_extent(
                 ai=self.ai, shape=sig_shape, unit=self.unit
@@ -2145,26 +2065,24 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             **kwargs,
         )
 
+        s = self if inplace else integration
+        s.set_signal_type("polar_diffraction")
+
         # Dealing with axis changes
-        if inplace:
-            t_axis = self.axes_manager.signal_axes[0]
-            k_axis = self.axes_manager.signal_axes[1]
-            self.set_signal_type("polar_diffraction")
-        else:
-            transfer_navigation_axes(integration, self)
-            integration.set_signal_type("polar_diffraction")
-            t_axis = integration.axes_manager.signal_axes[0]
-            k_axis = integration.axes_manager.signal_axes[1]
+        t_axis = s.axes_manager.signal_axes[0]
+        k_axis = s.axes_manager.signal_axes[1]
         t_axis.name = "Radians"
+        t_axis.units = "Rad"
+
         if azimuth_range is None:
             t_axis.scale = np.pi * 2 / npt_azim
             t_axis.offset = -np.pi
         else:
             t_axis.scale = (azimuth_range[1] - azimuth_range[0]) / npt
             t_axis.offset = azimuth_range[0]
+
         k_axis.name = "Radius"
         k_axis.scale = (radial_range[1] - radial_range[0]) / npt
-        k_axis.units = unit
         k_axis.offset = radial_range[0]
 
         return integration
@@ -2252,7 +2170,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> ds.get_radial_integral(npt=100,npt_rad=400)
 
         """
-        signal_type = self._signal_type
         sig_shape = self.axes_manager.signal_shape
         if radial_range is None:
             radial_range = _get_radial_extent(
@@ -2275,17 +2192,12 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             **kwargs,
         )
 
+        s = self if inplace else integration
+
         # Dealing with axis changes
-        if inplace:
-            k_axis = self.axes_manager.signal_axes[0]
-            self.set_signal_type(signal_type)
-        else:
-            integration.set_signal_type(signal_type)
-            transfer_navigation_axes(integration, self)
-            k_axis = integration.axes_manager.signal_axes[0]
+        k_axis = s.axes_manager.signal_axes[0]
         k_axis.name = "Radius"
         k_axis.scale = (radial_range[1] - radial_range[0]) / npt
-        # k_axis.units = unit.unit_symbol
         k_axis.offset = radial_range[0]
 
         return integration
@@ -2365,7 +2277,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> ds.get_radial_integral(npt=100,npt_rad=400)
 
         """
-        signal_type = self._signal_type
         sig_shape = self.axes_manager.signal_shape
         radial_range = _get_radial_extent(ai=self.ai, shape=sig_shape, unit=self.unit)
         radial_range[0] = 0
@@ -2382,14 +2293,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             **kwargs,
         )
 
+        s = self if inplace else integration
+
         # Dealing with axis changes
-        if inplace:
-            k_axis = self.axes_manager.signal_axes[0]
-            self.set_signal_type(signal_type)
-        else:
-            integration.set_signal_type(signal_type)
-            transfer_navigation_axes(integration, self)
-            k_axis = integration.axes_manager.signal_axes[0]
+        k_axis = s.axes_manager.signal_axes[0]
         k_axis.name = "Radius"
         k_axis.scale = (radial_range[1] - radial_range[0]) / npt_rad
         # k_axis.units = unit.unit_symbol
@@ -2475,7 +2382,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> ds.get_radial_integral(npt=100,npt_rad=400)
 
         """
-        signal_type = self._signal_type
         sig_shape = self.axes_manager.signal_shape
         radial_range = _get_radial_extent(ai=self.ai, shape=sig_shape, unit=self.unit)
         radial_range[0] = 0
@@ -2494,14 +2400,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             **kwargs,
         )
 
+        s = self if inplace else integration
+
         # Dealing with axis changes
-        if inplace:
-            k_axis = self.axes_manager.signal_axes[0]
-            self.set_signal_type(signal_type)
-        else:
-            integration.set_signal_type(signal_type)
-            transfer_navigation_axes(integration, self)
-            k_axis = integration.axes_manager.signal_axes[0]
+        k_axis = s.axes_manager.signal_axes[0]
         k_axis.name = "Radius"
         k_axis.scale = (radial_range[1] - radial_range[0]) / npt_rad
         # k_axis.units = unit.unit_symbol
