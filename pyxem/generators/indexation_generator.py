@@ -40,6 +40,9 @@ from pyxem.utils.signal import (
 
 class IndexationGenerator:
     """Generates an indexer for data using a number of methods.
+    
+    .. deprecated:: 0.14.0
+    `IndexationGenerator` will be removed in pyxem 0.15.0
 
     Parameters
     ----------
@@ -58,6 +61,9 @@ class IndexationGenerator:
 
 class TemplateIndexationGenerator:
     """Generates an indexer for data using a number of methods.
+    
+    .. deprecated:: 0.14.0
+    `TemplateIndexationGenerator` will be removed in pyxem 0.15.0
 
     Parameters
     ----------
@@ -65,6 +71,12 @@ class TemplateIndexationGenerator:
         The signal of electron diffraction patterns to be indexed.
     diffraction_library : DiffractionLibrary
         The library of simulated diffraction patterns for indexation.
+        
+    Returns
+    -------
+    ValueError : "use AcceleratedIndexationGenerator or VectorIndexationGenerator"
+    
+    
     """
 
     def __init__(self, signal, diffraction_library):
