@@ -10,6 +10,9 @@
       "name":"Magnus Nord",
   },
   {
+      "name":"Carter Francis",
+  },
+  {
       "name":"Joonatan Laulainen",
   },
   {
@@ -20,9 +23,6 @@
   },
   {
       "name":"Ben Martineau",
-  },
-  {
-      "name":"Carter Francis",
   },
   {
       "name":"Tina Bergh",
@@ -89,7 +89,7 @@
   },
   {
       "name":"Rob Tovey",
-  },  
+  },
     ]
 }
 
