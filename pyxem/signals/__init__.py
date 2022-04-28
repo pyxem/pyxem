@@ -36,7 +36,7 @@ from .diffraction1d import Diffraction1D, LazyDiffraction1D
 from .diffraction2d import Diffraction2D, LazyDiffraction2D
 from .electron_diffraction1d import ElectronDiffraction1D, LazyElectronDiffraction1D
 from .electron_diffraction2d import ElectronDiffraction2D, LazyElectronDiffraction2D
-from .indexation_results import TemplateMatchingResults, VectorMatchingResults
+from .indexation_results import VectorMatchingResults
 from .pair_distribution_function1d import PairDistributionFunction1D
 from .polar_diffraction2d import PolarDiffraction2D, LazyPolarDiffraction2D
 from .power2d import Power2D, LazyPower2D

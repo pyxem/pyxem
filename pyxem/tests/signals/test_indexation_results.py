@@ -27,43 +27,10 @@ from diffsims.generators.library_generator import DiffractionLibraryGenerator
 
 from pyxem.generators import TemplateIndexationGenerator
 from pyxem.signals import (
-    TemplateMatchingResults,
     VectorMatchingResults,
     DiffractionVectors,
 )
 from pyxem.utils.indexation_utils import OrientationResult
-
-
-def test_TemplateMatchingResults_to_crystal_map():
-    t = TemplateMatchingResults(np.empty((10, 10, 10, 5)))
-    return t.to_crystal_map()
-
-
-@pytest.mark.skip(reason="Failing test due to using an old version of template matching")
-def test_TemplateMatchingResults_plot_best_results_on_signal(
-    diffraction_pattern, default_structure
-):
-    """Coverage testing"""
-    edc = DiffractionGenerator(300)
-    half_side_length = 4
-    rot_list = [[0, 1, 0], [1, 0, 0]]
-
-    diff_gen = DiffractionLibraryGenerator(edc)
-    struc_lib = StructureLibrary(["A"], [default_structure], [rot_list])
-    library = diff_gen.get_diffraction_library(
-        struc_lib,
-        calibration=1 / half_side_length,
-        reciprocal_radius=0.8,
-        half_shape=(half_side_length, half_side_length),
-        with_direct_beam=True,
-    )
-    indexer = TemplateIndexationGenerator(diffraction_pattern, library)
-    match_results = indexer.correlate()
-    match_results.plot_best_matching_results_on_signal(
-        diffraction_pattern, library=library
-    )
-    plt.close("all")
-
 
 @pytest.fixture
 def sp_vector_match_result():

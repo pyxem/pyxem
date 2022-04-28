@@ -37,7 +37,6 @@ from pyxem.generators import (
 )
 from pyxem.signals import (
     ElectronDiffraction2D,
-    TemplateMatchingResults,
     DiffractionVectors,
 )
 from pyxem.utils.indexation_utils import OrientationResult
@@ -70,6 +69,8 @@ def generate_library(good_library):
 def test_old_indexer_routine():
     with pytest.raises(ValueError):
         _ = IndexationGenerator("a", "b")
+    with pytest.raises(ValueError):
+        _ = TemplateIndexationGenerator("a", "b")
 
 @pytest.mark.skipif(sys.platform=='darwin',reason="Fails on Mac OSX")
 @pytest.mark.slow
@@ -87,33 +88,6 @@ def test_AcceleratedIndexationGenerator(good_library):
             acgen = AcceleratedIndexationGenerator(signal,library)
 
     return None
-
-@pytest.mark.parametrize(
-    "method", ["fast_correlation", "zero_mean_normalized_correlation"]
-)
-def test_TemplateIndexationGenerator(default_structure, method):
-    identifiers = ["a", "b"]
-    structures = [default_structure, default_structure]
-    orientations = [
-        [(0, 0, 0), (0, 1, 0), (1, 0, 0)],
-        [(0, 0, 1), (0, 0, 2), (0, 0, 3)],
-    ]
-    structure_library = StructureLibrary(identifiers, structures, orientations)
-    libgen = DiffractionLibraryGenerator(DiffractionGenerator(300))
-    library = libgen.get_diffraction_library(
-        structure_library, 0.017, 0.02, (100, 100), False
-    )
-
-    edp = ElectronDiffraction2D(np.random.rand(2, 2, 200, 200))
-    indexer = TemplateIndexationGenerator(edp, library)
-
-    mask_signal = hs.signals.Signal2D(np.array([[1, 0], [1, 1]])).T
-    z = indexer.correlate(method=method, n_largest=2, mask=mask_signal)
-    assert isinstance(z, TemplateMatchingResults)
-    assert isinstance(z.data, Signal2D)
-    assert z.data.data.shape[0:2] == edp.data.shape[0:2]
-    assert z.data.data.shape[3] == 5
-
 
 @pytest.fixture
 def profile_simulation():

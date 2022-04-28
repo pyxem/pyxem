@@ -25,7 +25,7 @@ Removed
 -------
 - lazy_* virtual imaging has been removed, use get_integrated_intensity (#722)
 - `big_data_utils` has been removed as this is not the modern way of attacking this problem
-
+- similarly, `TemplateIndexationGenerator` has been removed as the Accelerated approach is far better (#823)
 Fixed
 ^^^^^
 - Symmetry STEM Class updated to allow for better interpolation and lazy operation. (#809)
