@@ -19,6 +19,7 @@ Added
 - Add function for optimizing calibration of SPED data (#785)
 - Add function for creating a orix CrystalMap from indexation results (#794)
 - Speed optimizations for the fast template matching on CPU and GPU, improving speeds by 200% and 40% respectively (#796)
+- Added the ability to determine the center and ellipticity using the `determine_ellipse` function.
 
 Removed
 -------
@@ -26,9 +27,19 @@ Removed
 - `big_data_utils` has been removed as this is not the modern way of attacking this problem
 
 Fixed
------
+^^^^^
+- Symmetry STEM Class updated to allow for better interpolation and lazy operation. (#809)
 - Generalized plotting diffraction vectors on ND stacks of images (#783)
 - Small bugfix with dask/cuda scheduler to prevent running out of VRAM (#779)
+- Bugfix:AzimuthalIntegral1D accepts masks and uses updated `map` function (#826)
+
+Deprecated
+^^^^^^^^^^
+- The `lazy_result` keyword, which has been changed to `lazy_output` to conform to similar keyword in HyperSpy
+
+Changed
+^^^^^^^
+- For developers: HyperSpy's `.map` function will now be used to process big datasets, instead of pyXem's `process_dask_array`
 
 2021-04-14 - version 0.13.2
 ===========================
