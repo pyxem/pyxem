@@ -65,10 +65,7 @@ class Test_init_xfails:
         vector = np.array([[1, -100]])
         dp = ElectronDiffraction2D(np.ones((20, 20)))
 
-        with pytest.raises(
-            ValueError,
-            match="Some of your vectors do not lie within your diffraction pattern",
-        ):
+        with pytest.raises(ValueError):
             _ = SubpixelrefinementGenerator(dp, vector)
 
     def test_out_of_range_vectors_DiffractionVectors(self):
@@ -77,10 +74,7 @@ class Test_init_xfails:
         vectors = DiffractionVectors(np.array([[1, -100]]))
         dp = ElectronDiffraction2D(np.ones((20, 20)))
 
-        with pytest.raises(
-            ValueError,
-            match="Some of your vectors do not lie within your diffraction pattern",
-        ):
+        with pytest.raises(ValueError):
             _ = SubpixelrefinementGenerator(dp, vectors)
 
     def test_wrong_navigation_dimensions(self):
