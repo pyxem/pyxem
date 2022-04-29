@@ -4,7 +4,8 @@
       "name": "Duncan Johnstone"
     },
     {
-      "name":"Phillip Crout"
+      "name":"Phillip Crout",
+      "orcid": "0000-0001-5754-0938"
     },
     {
       "name":"Magnus Nord"
@@ -31,20 +32,25 @@
       "name":"Eric Prestat"
     },
     {
-      "name":"Stef Smeets"
-    },
-    {
       "name":"Niels Cautaerts",
       "orcid": "0000-0002-6402-9879",
+    },
+    {
+      "name":"Stef Smeets"
     },
     {
       "name":"Andrew Ross"
     },
     {
-      "name":"Sean Collins"
+      "name":"Joseph Broussard"
     },
     {
-      "name":"Joseph Broussard"
+      "name":"Håkon Wiik Ånes",
+      "orcid": "0000-0002-1213-2911",
+      "affiliation": "Norwegian University of Science and Technology"
+    },
+    {
+      "name":"Sean Collins"
     },
     {
       "name":"Tom Furnival"
@@ -56,33 +62,28 @@
       "name":"Ida Hjorth"
     },
     {
-      "name":"Håkon Wiik Ånes",
-      "orcid": "0000-0002-1213-2911",
-      "affiliation": "Norwegian University of Science and Technology"
-    },
-    {
-      "name":"Endre Jacobsen"
-    },
-    {
       "name":"Mohsen Danaie"
     },
     {
       "name":"Andrew Herzing"
     },
     {
-      "name":"Tim Poon"
+      "name":"Endre Jacobsen"
     },
     {
-      "name":"Shuoyuan Huang"
+      "name":"Tim Poon"
     },
     {
       "name": "Tiarnan Doherty"
     },
     {
-      "name":"Affan Iqbal"
+      "name":"Shuoyuan Huang"
     },
     {
       "name":"Jedrzej Morzy"
+    },
+    {
+      "name":"Affan Iqbal"
     },
     {
       "name":"Tomas Ostasevicius"
