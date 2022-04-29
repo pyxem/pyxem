@@ -1,5 +1,5 @@
 name = "pyxem"
-version = "0.14.0"
+version = "0.14.1"
 author = "Duncan Johnstone, Phillip Crout, Magnus Nord"
 copyright = "Copyright 2016-2022, The pyxem developers"
 # Contributors listed by original commiter, maintainers, then other
