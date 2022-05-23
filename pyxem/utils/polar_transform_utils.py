@@ -19,7 +19,7 @@ except ImportError:
 
 
 def _cartesian_positions_to_polar_nonround(x, y, delta_r=1.0, delta_theta=1.0):
-    r = np.sqrt(x ** 2 + y ** 2) / delta_r
+    r = np.sqrt(x**2 + y**2) / delta_r
     theta = np.mod(np.rad2deg(np.arctan2(y, x)), 360) / delta_theta
     return r, theta
 
@@ -134,9 +134,10 @@ def get_template_cartesian_coordinates(
     in_plane_angle : float, optional
         Angle in degrees representing an in-plane rotation of the template
         around the direct beam
-    window_size : 2-tuple, optional
-        Only return the reflections within the (width, height) in pixels
-        of the image
+    window_size : float or 2-tuple, optional
+        Only return reflections within a given pixel range in the image.
+        If given as a float it is interpreted as a radius, while a tuple
+        is interpreted as a rectangular window.
     mirrored : bool, optional
         Whether to mirror the template
 
@@ -160,7 +161,14 @@ def get_template_cartesian_coordinates(
     x = c * ox - s * oy + center[0]
     y = s * ox + c * oy + center[1]
     if window_size is not None:
-        condition = (x < window_size[0]) & (y < window_size[1]) & (y >= 0) & (x >= 0)
+        try:
+            condition = (np.abs(x - center[0]) <= window_size[0]) & (
+                np.abs(y - center[1]) <= window_size[1]
+            )
+        except TypeError:  # Interpret non-indexable window sizes as a radius rather than a window
+            condition = (
+                np.sqrt((x - center[0]) ** 2 + (y - center[1]) ** 2) <= window_size
+            )
         x = x[condition]
         y = y[condition]
         intensities = intensities[condition]
@@ -195,7 +203,7 @@ def get_polar_pattern_shape(image_shape, delta_r, delta_theta, max_r=None):
     if max_r is None:
         half_y = image_shape[0] / 2
         half_x = image_shape[1] / 2
-        r_dim = int(np.ceil(np.sqrt(half_x ** 2 + half_y ** 2)) / delta_r)
+        r_dim = int(np.ceil(np.sqrt(half_x**2 + half_y**2)) / delta_r)
     else:
         r_dim = int(round(max_r / delta_r))
     theta_dim = int(round(360 / delta_theta))
