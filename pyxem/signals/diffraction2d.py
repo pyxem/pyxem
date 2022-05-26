@@ -614,7 +614,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         Parameters
         ----------
         method : str,
-            Must be one of "cross_correlate", "blur" or "interpolate"
+            Must be one of "cross_correlate", "blur", "interpolate" or "center_of_mass".
         lazy_result : optional
             If True, s_shifts will be a lazy signal. If False, a non-lazy signal.
             By default, if the signal is (non-)lazy, the result will also be (non-)lazy.
@@ -643,6 +643,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             "cross_correlate": find_beam_offset_cross_correlation,
             "blur": find_beam_center_blur,
             "interpolate": find_beam_center_interpolate,
+            "center_of_mass": None,
         }
 
         method_function = select_method_from_method_dict(method, method_dict,
@@ -674,6 +675,11 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                                **kwargs,
                                )
             shifts = -centers + origin_coordinates
+        elif method == "center_of_mass":
+            centers = self.center_of_mass(lazy_result=lazy_output,
+                                          **kwargs,
+                                          )
+            shifts = -centers.T + origin_coordinates
 
         shifts.set_signal_type("beam_shift")
 
