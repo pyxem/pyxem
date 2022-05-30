@@ -7,6 +7,13 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_,
 and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
+Unreleased
+==========
+
+Added
+-----
+- Center-of-mass algorithm added to get_direct_beam_position (#845)
+
 2022-29-04 - version 0.14.1
 ===========================
 
