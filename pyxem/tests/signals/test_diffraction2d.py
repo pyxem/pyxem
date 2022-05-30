@@ -938,6 +938,10 @@ class TestCenterDirectBeam:
         s = self.s
         s.center_direct_beam(method="cross_correlate", radius_start=0, radius_finish=2)
 
+    def test_method_center_of_mass(self):
+        s = self.s
+        s.center_direct_beam(method="center_of_mass")
+
     def test_parameter_both_method_and_shifts(self):
         s = self.s
         with pytest.raises(ValueError):
