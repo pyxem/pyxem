@@ -163,7 +163,10 @@ def get_template_cartesian_coordinates(
             condition = (np.abs(x - center[0]) <= window_size[0] / 2) & (
                 np.abs(y - center[1]) <= window_size[1] / 2
             )
-        except TypeError:  # Interpret non-indexable window sizes as a radius rather than a window
+        except (
+            TypeError,
+            IndexError,
+        ) as e:  # Interpret non-indexable window sizes as a radius rather than a window
             condition = (
                 np.sqrt((x - center[0]) ** 2 + (y - center[1]) ** 2) <= window_size
             )
