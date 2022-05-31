@@ -3,7 +3,6 @@ from pyxem.utils.expt_utils import find_beam_center_blur
 from scipy import ndimage
 from pyxem.utils.cuda_utils import get_array_module
 
-
 try:
     import cupy as cp
     import cupyx.scipy.ndimage as ndigpu
@@ -13,7 +12,6 @@ except ImportError:
     CUPY_INSTALLED = False
     cp = None
     ndigpu = None
-
 
 """ These are designed to be fast and used for indexation, for data correction, see radial_utils"""
 
@@ -162,8 +160,8 @@ def get_template_cartesian_coordinates(
     y = s * ox + c * oy + center[1]
     if window_size is not None:
         try:
-            condition = (np.abs(x - center[0]) <= window_size[0]) & (
-                np.abs(y - center[1]) <= window_size[1]
+            condition = (np.abs(x - center[0]) <= window_size[0] / 2) & (
+                np.abs(y - center[1]) <= window_size[1] / 2
             )
         except TypeError:  # Interpret non-indexable window sizes as a radius rather than a window
             condition = (
