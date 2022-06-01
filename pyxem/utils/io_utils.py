@@ -841,7 +841,14 @@ def _STEM_flag_dict(exp_times_list):
             check = np.ravel(np.where(lines == scan_X, True, False))
             # Checking line lengths
             check = list(check)
-            start_ind = check.index(True)
+            #find last False where line length is not equal to scan_X
+            #set starting ind to the next line
+            if False in check: 
+                check = np.array(check)
+                start_ind = np.where(check == False)[0][-1] + 2
+            else:
+            #if all line lengths are equal to scan_X
+                start_ind = check.index(True)
             
             frames_to_skip = peaks[start_ind]
 
