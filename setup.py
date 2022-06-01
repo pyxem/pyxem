@@ -85,7 +85,7 @@ setup(
         "matplotlib     >= 3.1.1",  # 3.1.0 failed
         "numba",
         "numpy",
-        "orix           >= 0.3",
+        "orix           >= 0.9",
         "psutil",
         "pyfai",
         "scikit-image   >= 0.17.0",
