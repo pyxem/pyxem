@@ -92,7 +92,6 @@ class TestLearningSegment:
             ]
         )
         # fmt: on
-        print(ncc.data)
         assert np.allclose(ncc.data, ans, atol=1e-3)
 
     @pytest.mark.parametrize(
