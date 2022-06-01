@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+import sys
 
 from hyperspy.signals import Signal2D
 import numpy as np
@@ -70,6 +71,11 @@ def learning_segment(signal_decomposition):
 
 
 class TestLearningSegment:
+    @pytest.mark.skipif(
+        (sys.platform == "win32" and sys.version_info[:2] == (3, 8)) or
+        (sys.platform == "darwin" and sys.version_info[:2] in [(3, 8), (3, 9)]),
+        reason="NCC scores differ on these OS' with these Python versions"
+    )
     def test_learning_ncc_matrix(self, learning_segment):
         ncc = learning_segment.get_ncc_matrix()
         # fmt: off
