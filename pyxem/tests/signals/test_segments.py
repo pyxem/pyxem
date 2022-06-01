@@ -16,11 +16,10 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-import pytest
-
-import numpy as np
 
 from hyperspy.signals import Signal2D
+import numpy as np
+import pytest
 
 from pyxem.generators import VirtualDarkFieldGenerator
 from pyxem.signals import (
@@ -73,25 +72,28 @@ def learning_segment(signal_decomposition):
 class TestLearningSegment:
     def test_learning_ncc_matrix(self, learning_segment):
         ncc = learning_segment.get_ncc_matrix()
+        # fmt: off
         ans = np.array(
             [
                 [
-                    [1.0, -0.26413543, -0.50636968, 0.61237256, 0.0],
-                    [-0.26413543, 1.0, -0.40125028, -0.43133109, 0.0],
-                    [-0.50636968, -0.40125028, 1.0, -0.31008684, 0.0],
-                    [0.61237256, -0.43133109, -0.31008684, 1.0, 0.0],
-                    [0.0, 0.0, 0.0, 0.0, 1.0],
+                    [ 1.0,   -0.264, -0.506,  0.612, 0.0],
+                    [-0.264,  1.0,   -0.401, -0.431, 0.0],
+                    [-0.506, -0.401,  1.0,   -0.310, 0.0],
+                    [ 0.612, -0.431, -0.310,  1.0,   0.0],
+                    [ 0.0,    0.0,    0.0,    0.0,   1.0],
                 ],
                 [
-                    [1.0, -0.0588285, -0.07313363, -0.04087783, 0.0],
-                    [-0.0588285, 1.0, -0.07312725, -0.04099601, 0.0],
-                    [-0.07313363, -0.07312725, 1.0, -0.05096472, 0.0],
-                    [-0.04087783, -0.04099601, -0.05096472, 1.0, 0.0],
-                    [0.0, 0.0, 0.0, 0.0, 1.0],
+                    [ 1.0,   -0.059, -0.073, -0.041, 0.0],
+                    [-0.059,  1.0,   -0.073, -0.041, 0.0],
+                    [-0.073, -0.073,  1.0,   -0.051, 0.0],
+                    [-0.040, -0.041, -0.051,  1.0,   0.0],
+                    [ 0.0,    0.0,    0.0,    0.0,   1.0],
                 ],
             ]
         )
-        np.testing.assert_almost_equal(ncc.data, ans)
+        # fmt: on
+        print(ncc.data)
+        assert np.allclose(ncc.data, ans, atol=1e-3)
 
     @pytest.mark.parametrize(
         "corr_th_factors, corr_th_loadings", [(-0.1, 0.6), (0.5, 0.5)]
