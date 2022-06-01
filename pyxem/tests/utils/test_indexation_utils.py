@@ -26,6 +26,7 @@ from pyxem.utils.indexation_utils import (
     index_dataset_with_template_rotation, results_dict_to_crystal_map
 )
 
+
 def test_match_vectors(vector_match_peaks, vector_library):
     # Wrap to test handling of ragged arrays
     peaks = np.empty(1, dtype="object")
@@ -92,7 +93,14 @@ def test_results_dict_to_crystal_map(test_library_phases_multi, test_lib_gen):
     phase_names = list(diff_lib.keys())
 
     # Simulate patterns
-    sim_kwargs = dict(size=sig_shape[0], sigma=4)
+    # TODO: Remove version check after diffsims 0.5.0 is released
+    from packaging.version import Version
+    import diffsims
+    diffsims_version = Version(diffsims.__version__)
+    if diffsims_version > Version("0.4.2"):
+        sim_kwargs = dict(shape=sig_shape, sigma=4)
+    else:  # pragma: no cover
+        sim_kwargs = dict(size=sig_shape[0], sigma=4)
     for idx in np.ndindex(*nav_shape):
         i = phase_id[idx]
         j = int(idx[1] / 2)
