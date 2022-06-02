@@ -78,7 +78,8 @@ setup(
     extras_require=extra_feature_requirements,
     install_requires=[
         "dask",
-        "diffsims       ~= 0.4",
+#        "diffsims       ~= 0.4",
+        "diffsims       == 0.5.0rc1",
         "hyperspy       >= 1.7.0",  # significant improvements
         "ipywidgets",
         "lmfit          >= 0.9.12",
