@@ -58,7 +58,7 @@ def signal_data():
 
 @pytest.fixture
 def signal_decomposition(signal_data):
-    signal_data.decomposition(algorithm="NMF", output_dimension=5)
+    signal_data.decomposition(algorithm="NMF", output_dimension=5, init="nndsvd")
     s_nmf = signal_data.get_decomposition_model(components=5)
     factors = s_nmf.get_decomposition_factors()
     loadings = s_nmf.get_decomposition_loadings()
@@ -71,11 +71,6 @@ def learning_segment(signal_decomposition):
 
 
 class TestLearningSegment:
-    @pytest.mark.skipif(
-        (sys.platform == "win32" and sys.version_info[:2] == (3, 8)) or
-        (sys.platform == "darwin" and sys.version_info[:2] in [(3, 8), (3, 9)]),
-        reason="NCC scores differ on these OS' with these Python versions"
-    )
     def test_learning_ncc_matrix(self, learning_segment):
         ncc = learning_segment.get_ncc_matrix()
         # fmt: off
