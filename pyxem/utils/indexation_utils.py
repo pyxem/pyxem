@@ -107,6 +107,7 @@ def get_nth_best_solution(
 
     return best_fit
 
+
 def index_magnitudes(z, simulation, tolerance):
     """Assigns hkl indices to peaks in the diffraction profile.
 
@@ -1711,7 +1712,7 @@ def results_dict_to_crystal_map(
     elif index is not None:
         euler = euler[:, index]  # Desired match only
     euler = euler.squeeze()  # Remove singleton dimensions
-    rotations = Rotation.from_euler(euler, convention="bunge", direction="crystal2lab")
+    rotations = Rotation.from_euler(euler)
 
     props = {}
     for key in ("correlation", "mirrored_template", "template_index"):
