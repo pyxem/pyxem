@@ -65,6 +65,8 @@ def get_DisplacementGradientMap(strained_vectors, unstrained_vectors, weights=No
         Vu=unstrained_vectors,
         weights=weights,
         inplace=False,
+        output_signal_size=(3, 3),
+        output_dtype=np.float64,
     )
 
     return DisplacementGradientMap(D)
@@ -102,6 +104,9 @@ def get_single_DisplacementGradientTensor(Vs, Vu=None, weights=None):
     get_DisplacementGradientMap()
 
     """
+    if Vu is not None:
+        if Vu.dtype == object:
+            Vu = Vu[()]
     if weights is not None:
         # see https://stackoverflow.com/questions/27128688
         weights = np.asarray(weights)
