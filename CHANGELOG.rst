@@ -14,6 +14,10 @@ Changed
 -------
 - Increase minimal version of orix to >= 0.9.
 
+Fixed
+-----
+- Fix bug in `get_DisplacementGradientMap` (#852)
+
 2022-29-04 - version 0.14.1
 ===========================
 
