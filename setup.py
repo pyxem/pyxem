@@ -28,7 +28,7 @@ extra_feature_requirements = {
     "doc": [
         "furo",
         "nbsphinx                   >= 0.7",
-        "sphinx                     >= 3.0.2, <= 4.0.2",
+        "sphinx                     >= 3.0.2",
         "sphinx-copybutton          >= 0.2.5",
         "sphinx-autodoc-typehints   >= 1.10.3",
         "sphinx-gallery             >= 0.6",
