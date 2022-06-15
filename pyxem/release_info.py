@@ -1,5 +1,5 @@
 name = "pyxem"
-version = "0.14.1"
+version = "0.14.2"
 author = "Duncan Johnstone, Phillip Crout, Magnus Nord"
 copyright = "Copyright 2016-2022, The pyxem developers"
 # Contributors listed by original commiter, maintainers, then other
@@ -18,9 +18,9 @@ credits = [
     "Eric Prestat",
     "Niels Cautaerts",
     "Stef Smeets",
+    "Håkon Wiik Ånes",
     "Andrew Ross",
     "Joseph Broussard",
-    "Håkon Wiik Ånes",
     "Sean Collins",
     "Tom Furnival",
     "Daen Jannis",
