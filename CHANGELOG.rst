@@ -7,16 +7,18 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_,
 and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
-Unreleased
-==========
+2022-15-06 - version 0.14.2
+===========================
 
 Changed
 -------
 - Increase minimal version of orix to >= 0.9.
+- Increase minimal version of diffsims to >= 0.5.
 
 Fixed
 -----
 - Fix bug in `get_DisplacementGradientMap` (#852)
+- Fix template matching bugs (originally fixed in #771 but omitted from 0.14 series by accident)
 
 2022-29-04 - version 0.14.1
 ===========================

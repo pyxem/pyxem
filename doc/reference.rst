@@ -94,7 +94,6 @@ signals
     Diffraction2D
     ElectronDiffraction1D
     ElectronDiffraction2D
-    TemplateMatchingResults
     VectorMatchingResults
     PairDistributionFunction1D
     PolarDiffraction2D
