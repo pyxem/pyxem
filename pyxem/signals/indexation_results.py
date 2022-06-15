@@ -120,7 +120,7 @@ class GenericMatchingResults:
         y = xy[0].flatten()
 
         """ Tidies up so we can put these things into CrystalMap """
-        euler = np.column_stack((alpha, beta, gamma))
+        euler = np.deg2rad(np.vstack((alpha, beta, gamma)).T)
         rotations = Rotation.from_euler(
             euler, convention="bunge", direction="crystal2lab"
         )
