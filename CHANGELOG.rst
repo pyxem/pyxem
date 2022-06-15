@@ -13,10 +13,12 @@ Unreleased
 Changed
 -------
 - Increase minimal version of orix to >= 0.9.
+- Increase minimal version of diffsims to >= 0.5.
 
 Fixed
 -----
 - Fix bug in `get_DisplacementGradientMap` (#852)
+- Fix template matching bugs (originally fixed in #771 but omitted from 0.14 series by accident)
 
 2022-29-04 - version 0.14.1
 ===========================
