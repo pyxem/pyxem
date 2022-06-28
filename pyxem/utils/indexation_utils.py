@@ -108,103 +108,6 @@ def get_nth_best_solution(
     return best_fit
 
 
-# Functions used in correlate_library.
-def fast_correlation(image_intensities, int_local, pn_local, **kwargs):
-    r"""Computes the correlation score between an image and a template
-
-    Uses the formula
-
-    .. math:: FastCorrelation
-        \\frac{\\sum_{j=1}^m P(x_j, y_j) T(x_j, y_j)}{\\sqrt{\\sum_{j=1}^m T^2(x_j, y_j)}}
-
-    Parameters
-    ----------
-    image_intensities: list
-        list of intensity values in the image, for pixels where the template has a non-zero intensity
-     int_local: list
-        list of all non-zero intensities in the template
-     pn_local: float
-        pattern norm of the template
-
-    Returns
-    -------
-    corr_local: float
-        correlation score between template and image.
-
-    See Also
-    --------
-    correlate_library, zero_mean_normalized_correlation
-
-    """
-    return (
-        np.sum(np.multiply(image_intensities, int_local)) / pn_local
-    )  # Correlation is the partially normalized dot product
-
-
-def zero_mean_normalized_correlation(
-    nb_pixels,
-    image_std,
-    average_image_intensity,
-    image_intensities,
-    int_local,
-    **kwargs,
-):
-    r"""Computes the correlation score between an image and a template.
-
-    Uses the formula
-
-    .. math:: zero_mean_normalized_correlation
-        \\frac{\\sum_{j=1}^m P(x_j, y_j) T(x_j, y_j)- avg(P)avg(T)}{\\sqrt{\\sum_{j=1}^m (T(x_j, y_j)-avg(T))^2+\\sum_{Not {j}} avg(T)}}
-        for a template T and an experimental pattern P.
-
-    Parameters
-    ----------
-    nb_pixels: int
-        total number of pixels in the image
-    image_std: float
-        Standard deviation of intensities in the image.
-    average_image_intensity: float
-        average intensity for the image
-    image_intensities: list
-        list of intensity values in the image, for pixels where the template has a non-zero intensity
-     int_local: list
-        list of all non-zero intensities in the template
-     pn_local: float
-        pattern norm of the template
-
-    Returns
-    -------
-    corr_local: float
-        correlation score between template and image.
-
-    See Also
-    --------
-    correlate_library, fast_correlation
-
-    """
-
-    nb_pixels_star = len(int_local)
-    average_pattern_intensity = nb_pixels_star * np.average(int_local) / nb_pixels
-
-    match_numerator = (
-        np.sum(np.multiply(image_intensities, int_local))
-        - nb_pixels * average_image_intensity * average_pattern_intensity
-    )
-    match_denominator = image_std * (
-        np.linalg.norm(int_local - average_pattern_intensity)
-        + (nb_pixels - nb_pixels_star) * pow(average_pattern_intensity, 2)
-    )
-
-    if match_denominator == 0:
-        corr_local = 0
-    else:
-        corr_local = (
-            match_numerator / match_denominator
-        )  # Correlation is the normalized dot product
-
-    return corr_local
-
-
 def index_magnitudes(z, simulation, tolerance):
     """Assigns hkl indices to peaks in the diffraction profile.
 
@@ -1508,8 +1411,8 @@ def index_dataset_with_template_rotation(
         the best matching orientations expressed in Bunge convention Euler angles.
         Correlation is the matching correlation indices. mirrored template represents
         whether the original template best fits (False) or the mirror image (True).
-        Each is a numpy array of shape (scan_x, scan_y, n_best) except orientation
-        is of shape (scan_x, scan_y, n_best, 3).
+        Each is a numpy array of shape (scan_y, scan_x, n_best) except orientation
+        is of shape (scan_y, scan_x, n_best, 3).
     phase_key_dict: dictionary
         A small dictionary to translate the integers in the phase_index array
         to phase names in the original template library.
@@ -1782,7 +1685,7 @@ def results_dict_to_crystal_map(
     ...     results, phase_key_dict, index=1
     ... )  # doctest: +SKIP
     """
-    nx, ny, n_best = results["phase_index"].shape
+    ny, nx, n_best = results["phase_index"].shape
     if index is not None and index > n_best - 1:
         raise ValueError(f"`index` cannot be higher than {n_best - 1} (`n_best` - 1)")
 
@@ -1809,7 +1712,7 @@ def results_dict_to_crystal_map(
     elif index is not None:
         euler = euler[:, index]  # Desired match only
     euler = euler.squeeze()  # Remove singleton dimensions
-    rotations = Rotation.from_euler(euler, convention="bunge", direction="crystal2lab")
+    rotations = Rotation.from_euler(euler)
 
     props = {}
     for key in ("correlation", "mirrored_template", "template_index"):

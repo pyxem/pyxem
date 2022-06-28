@@ -233,20 +233,17 @@ def test_lib_gen():
         precession_angle=1,
         scattering_params="lobato",
         shape_factor_model="linear",
-        minimum_intensity=0.1,
+        minimum_intensity=0.05,
     )
-
     lib_gen = DiffractionLibraryGenerator(diff_gen)
     return lib_gen
 
 
 @pytest.fixture
 def test_library_phases():
-
     latt = diffpy.structure.lattice.Lattice(3, 3, 3, 90, 90, 90)
     atom = diffpy.structure.atom.Atom(atype="Ni", xyz=[0, 0, 0], lattice=latt)
     structure = diffpy.structure.Structure(atoms=[atom], lattice=latt)
-
     library_phases_test = StructureLibrary(
         ["Test"],
         [structure],
@@ -257,12 +254,13 @@ def test_library_phases():
 
 @pytest.fixture
 def test_library_phases_multi():
-
     ni_structure = diffpy.structure.Structure(
-        atoms=[diffpy.structure.atom.Atom(atype="Ni", xyz=[0, 0, 0])], lattice=diffpy.structure.lattice.Lattice(3, 3, 3, 90, 90, 90)
+        atoms=[diffpy.structure.atom.Atom(atype="Ni", xyz=[0, 0, 0])],
+        lattice=diffpy.structure.lattice.Lattice(3, 3, 3, 90, 90, 90)
     )
     al_structure = diffpy.structure.Structure(
-        atoms=[diffpy.structure.atom.Atom(atype="Al", xyz=[0, 0, 0])], lattice=diffpy.structure.lattice.Lattice(3, 4, 3, 90, 90, 90)
+        atoms=[diffpy.structure.atom.Atom(atype="Al", xyz=[0, 0, 0])],
+        lattice=diffpy.structure.lattice.Lattice(4, 4, 4, 90, 90, 90)
     )
     library_phases_test = StructureLibrary(
         ["Ni", "Al"],

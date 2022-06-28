@@ -1,11 +1,10 @@
-===============
+=============
 API reference
-===============
+=============
 
-This reference manual details the public modules, classes, and functions in
-pyxem, as generated from their docstrings. Many of the docstrings contain
-examples and continued effort to improve these examples is on going.
-
+This reference manual details the public modules, classes, and functions in pyxem, as
+generated from their docstrings. Many of the docstrings contain examples and continued
+effort to improve these examples is on going.
 
 .. currentmodule:: pyxem
 
@@ -73,12 +72,12 @@ libraries
 .. autosummary::
     CalibrationDataLibrary
 
+....
 
 signals
 =======
 
 .. automodule:: pyxem.signals
-
 .. currentmodule:: pyxem.signals
 
 .. autosummary::
@@ -95,7 +94,6 @@ signals
     Diffraction2D
     ElectronDiffraction1D
     ElectronDiffraction2D
-    TemplateMatchingResults
     VectorMatchingResults
     PairDistributionFunction1D
     PolarDiffraction2D
@@ -108,7 +106,7 @@ signals
     VirtualDarkFieldImage
 
 CommonDiffraction
--------------------
+-----------------
 
 .. currentmodule:: pyxem.signals.CommonDiffraction
 
@@ -118,7 +116,7 @@ CommonDiffraction
     :show-inheritance:
 
 Correlation2D
-------------------
+-------------
 
 .. currentmodule:: pyxem.signals.Correlation2D
 
@@ -128,7 +126,7 @@ Correlation2D
     :show-inheritance:
 
 DPCSignal1D
-------------------
+-----------
 
 .. currentmodule:: pyxem.signals.DPCSignal1D
 
@@ -138,7 +136,7 @@ DPCSignal1D
     :show-inheritance:
 
 DPCSignal2D
-------------------
+-----------
 
 .. currentmodule:: pyxem.signals.DPCSignal2D
 
@@ -148,7 +146,7 @@ DPCSignal2D
     :show-inheritance:
 
 DiffractionVariance1D
-----------------------
+---------------------
 
 .. currentmodule:: pyxem.signals.DiffractionVariance1D
 
@@ -158,7 +156,7 @@ DiffractionVariance1D
     :show-inheritance:
 
 DiffractionVariance2D
-----------------------
+---------------------
 
 .. currentmodule:: pyxem.signals.DiffractionVariance2D
 
@@ -168,7 +166,7 @@ DiffractionVariance2D
     :show-inheritance:
 
 Diffraction1D
-------------------
+-------------
 
 .. currentmodule:: pyxem.signals.Diffraction1D
 
@@ -178,7 +176,7 @@ Diffraction1D
     :show-inheritance:
 
 Diffraction2D
-------------------
+-------------
 
 .. currentmodule:: pyxem.signals.Diffraction2D
 
@@ -188,7 +186,7 @@ Diffraction2D
     :show-inheritance: False
 
 ElectronDiffraction1D
-----------------------
+---------------------
 
 .. currentmodule:: pyxem.signals.ElectronDiffraction1D
 
@@ -198,7 +196,7 @@ ElectronDiffraction1D
     :show-inheritance:
 
 ElectronDiffraction2D
-----------------------
+---------------------
 
 .. currentmodule:: pyxem.signals.ElectronDiffraction2D
 
@@ -208,7 +206,7 @@ ElectronDiffraction2D
     :show-inheritance:
 
 TemplateMatchingResults
-------------------------
+-----------------------
 
 .. currentmodule:: pyxem.signals.TemplateMatchingResults
 
@@ -218,7 +216,7 @@ TemplateMatchingResults
     :show-inheritance:
 
 VectorMatchingResults
-----------------------
+---------------------
 
 .. currentmodule:: pyxem.signals.VectorMatchingResults
 
@@ -228,7 +226,7 @@ VectorMatchingResults
     :show-inheritance:
 
 PairDistributionFunction1D
----------------------------
+--------------------------
 
 .. currentmodule:: pyxem.signals.PairDistributionFunction1D
 
@@ -238,7 +236,7 @@ PairDistributionFunction1D
     :show-inheritance:
 
 PolarDiffraction2D
--------------------
+------------------
 
 .. currentmodule:: pyxem.signals.PolarDiffraction2D
 
@@ -248,7 +246,7 @@ PolarDiffraction2D
     :show-inheritance:
 
 Power2D
-------------------
+-------
 
 .. currentmodule:: pyxem.signals.Power2D
 
@@ -258,7 +256,7 @@ Power2D
     :show-inheritance:
 
 ReducedIntensity1D
--------------------
+------------------
 
 .. currentmodule:: pyxem.signals.ReducedIntensity1D
 
@@ -268,7 +266,7 @@ ReducedIntensity1D
     :show-inheritance:
 
 LearningSegment
-------------------
+---------------
 
 .. currentmodule:: pyxem.signals.LearningSegment
 
@@ -278,7 +276,7 @@ LearningSegment
     :show-inheritance:
 
 VDFSegment
-------------------
+----------
 
 .. currentmodule:: pyxem.signals.VDFSegment
 
@@ -288,7 +286,7 @@ VDFSegment
     :show-inheritance:
 
 StrainMap
-------------------
+---------
 
 .. currentmodule:: pyxem.signals.StrainMap
 
@@ -298,7 +296,7 @@ StrainMap
     :show-inheritance:
 
 DisplacementGradientMap
-------------------------
+-----------------------
 
 .. currentmodule:: pyxem.signals.DisplacementGradientMap
 
@@ -307,7 +305,7 @@ DisplacementGradientMap
     :undoc-members:
 
 VirtualDarkFieldImage
-----------------------
+---------------------
 
 .. currentmodule:: pyxem.signals.VirtualDarkFieldImage
 
@@ -317,6 +315,8 @@ VirtualDarkFieldImage
 
 utils
 =====
+
+.. automodule:: pyxem.utils
 
 indexation_utils
 ----------------

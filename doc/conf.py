@@ -4,7 +4,6 @@
 # list see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
-from datetime import datetime
 import inspect
 import os
 from os.path import relpath, dirname
@@ -13,7 +12,6 @@ import sys
 
 from pyxem import release_info
 import pyxem
-import requests
 
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -49,18 +47,18 @@ extensions = [
 
 # Create links to references within pyxem's documentation to these packages.
 intersphinx_mapping = {
-    "dask": ("https://docs.dask.org/en/latest", None),
+    "dask": ("https://docs.dask.org/en/stable", None),
     "diffpy.structure": ("https://www.diffpy.org/diffpy.structure", None),
-    "diffsims": ("https://diffsims.readthedocs.io/en/latest", None),
-    "hyperspy": ("http://hyperspy.org/hyperspy-doc/current", None),
-    "matplotlib": ("https://matplotlib.org", None),
-    "numpy": ("https://docs.scipy.org/doc/numpy", None),
+    "diffsims": ("https://diffsims.readthedocs.io/en/stable", None),
+    "hyperspy": ("https://hyperspy.org/hyperspy-doc/current", None),
+    "h5py": ("https://docs.h5py.org/en/stable", None),
+    "matplotlib": ("https://matplotlib.org/stable", None),
+    "numpy": ("https://numpy.org/doc/stable", None),
     "orix": ("https://orix.readthedocs.io/en/stable", None),
     "python": ("https://docs.python.org/3", None),
-    "scipy": ("https://docs.scipy.org/doc/scipy/reference", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy", None),
     "skimage": ("https://scikit-image.org/docs/stable", None),
     "sklearn": ("https://scikit-learn.org/stable", None),
-    "h5py": ("http://docs.h5py.org/en/stable/", None),
 }
 
 # Add any paths that contain templates here, relative to this directory.
@@ -79,9 +77,7 @@ html_theme = "furo"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files, so
 # a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = [
-    "_static",
-]
+#html_static_path = ["_static"]
 
 # Syntax highlighting
 pygments_style = "friendly"
@@ -89,17 +85,6 @@ pygments_style = "friendly"
 napoleon_google_docstring = False
 napoleon_use_param = False
 napoleon_use_ivar = True
-
-
-# Logo
-cmap = "hot"
-html_logo = f"_static/icon/logo.svg"
-html_favicon = f"_static/icon/logo.png"
-
-# Read the Docs theme options
-html_theme_options = {
-    "prev_next_buttons_location": "bottom",
-}
 
 # Figure references
 numfig = True

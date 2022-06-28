@@ -89,12 +89,6 @@ signals:
     dtype: real
     lazy: False
     module: pyxem.signals.diffraction_vectors
-  TemplateMatchingResults:
-    signal_type: template_matching
-    signal_dimension: 2
-    dtype: real
-    lazy: False
-    module: pyxem.signals.indexation_results
   VectorMatchingResults:
     signal_type: vector_matching
     signal_dimension: 0
@@ -209,12 +203,12 @@ signals:
     dtype: real
     lazy: True
     module: pyxem.signals.power2d
-  Symmetry1D:
-    signal_type: symmetry
+  Correlation1D:
+    signal_type: correlation
     signal_dimension: 1
     dtype: real
     lazy: False
-    module: pyxem.signals.symmetry1d
+    module: pyxem.signals.correlation1d
 
 components1D:
     ReducedIntensityCorrectionComponent:

@@ -28,7 +28,7 @@ extra_feature_requirements = {
     "doc": [
         "furo",
         "nbsphinx                   >= 0.7",
-        "sphinx                     >= 3.0.2, <= 4.0.2",
+        "sphinx                     >= 3.0.2",
         "sphinx-copybutton          >= 0.2.5",
         "sphinx-autodoc-typehints   >= 1.10.3",
         "sphinx-gallery             >= 0.6",
@@ -78,14 +78,14 @@ setup(
     extras_require=extra_feature_requirements,
     install_requires=[
         "dask",
-        "diffsims       ~= 0.4",
-        "hyperspy       >= 1.6.2",  # significant improvements
+        "diffsims       >= 0.5",
+        "hyperspy       >= 1.7.0",  # significant improvements
         "ipywidgets",
         "lmfit          >= 0.9.12",
         "matplotlib     >= 3.1.1",  # 3.1.0 failed
         "numba",
         "numpy",
-        "orix           >= 0.3",
+        "orix           >= 0.9",
         "psutil",
         "pyfai",
         "scikit-image   >= 0.17.0",

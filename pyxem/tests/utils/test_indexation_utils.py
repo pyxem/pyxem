@@ -21,32 +21,10 @@ import numpy as np
 from orix.quaternion import Rotation
 import pytest
 
-from pyxem.utils.indexation_utils import (
-    match_vectors,
-    zero_mean_normalized_correlation,
-    fast_correlation,
-)
+from pyxem.utils.indexation_utils import match_vectors
 from pyxem.utils.indexation_utils import (
     index_dataset_with_template_rotation, results_dict_to_crystal_map
 )
-
-
-def test_zero_mean_normalized_correlation():
-    np.testing.assert_approx_equal(
-        zero_mean_normalized_correlation(
-            3, np.linalg.norm([2 / 3, 1 / 3, 1 / 3]), 1 / 3, [1, 0, 0], [1, 0, 0]
-        ),
-        1,
-    )
-    # nb_pixels,image_std,average_image_intensity,image_intensities,int_local
-    assert zero_mean_normalized_correlation(3, 0, 1, [1, 1, 1], [0, 0, 1]) == 0
-
-
-def test_fast_correlation():
-    np.testing.assert_approx_equal(
-        fast_correlation([1, 1, 1], [1, 1, 1], np.sqrt(3)), np.sqrt(3)
-    )
-    np.testing.assert_approx_equal(fast_correlation([1, 1, 1], [1, 0, 0], 1), 1)
 
 
 def test_match_vectors(vector_match_peaks, vector_library):
@@ -90,6 +68,7 @@ def test_match_vector_total_error_default(vector_match_peaks, vector_library):
     assert len(rhkls) == 0
 
 
+@pytest.mark.filterwarnings("ignore:Property 'correlation' was expected")
 def test_results_dict_to_crystal_map(test_library_phases_multi, test_lib_gen):
     """Test getting a :class:`orix.crystal_map.CrystalMap` from returns
     from :func:`index_dataset_with_template_rotation`.
@@ -114,7 +93,14 @@ def test_results_dict_to_crystal_map(test_library_phases_multi, test_lib_gen):
     phase_names = list(diff_lib.keys())
 
     # Simulate patterns
-    sim_kwargs = dict(size=sig_shape[0], sigma=4)
+    # TODO: Remove version check after diffsims 0.5.0 is released
+    from packaging.version import Version
+    import diffsims
+    diffsims_version = Version(diffsims.__version__)
+    if diffsims_version > Version("0.4.2"):
+        sim_kwargs = dict(shape=sig_shape, sigma=4)
+    else:  # pragma: no cover
+        sim_kwargs = dict(size=sig_shape[0], sigma=4)
     for idx in np.ndindex(*nav_shape):
         i = phase_id[idx]
         j = int(idx[1] / 2)
@@ -138,6 +124,7 @@ def test_results_dict_to_crystal_map(test_library_phases_multi, test_lib_gen):
     # Only get the bast match when multiple phases match best to some
     # patterns
     xmap = results_dict_to_crystal_map(results, phase_dict, diffraction_library=diff_lib)
+    assert xmap.shape == nav_shape
     assert np.allclose(xmap.phase_id, phase_id[:, 0])
     assert xmap.rotations_per_point == 1
     assert xmap.phases.names == phase_names

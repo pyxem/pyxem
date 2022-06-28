@@ -350,7 +350,7 @@ class DiffractionVectors(BaseSignal):
         # If ragged the signal axes will not be defined
         if len(self.axes_manager.signal_axes) == 0:
             magnitudes = self.map(
-                calculate_norms_ragged, inplace=False, *args, **kwargs
+                calculate_norms_ragged, inplace=False,ragged=True, *args, **kwargs
             )
         # Otherwise easier to calculate.
         else:
@@ -557,6 +557,7 @@ class DiffractionVectors(BaseSignal):
                 min_magnitude=min_magnitude,
                 max_magnitude=max_magnitude,
                 inplace=False,
+                ragged=True,
                 *args,
                 **kwargs
             )
@@ -611,6 +612,7 @@ class DiffractionVectors(BaseSignal):
                 x_threshold=x_threshold,
                 y_threshold=y_threshold,
                 inplace=False,
+                ragged=True,
                 *args,
                 **kwargs
             )
@@ -687,6 +689,7 @@ class DiffractionVectors(BaseSignal):
             camera_length=camera_length * 1e10,
             inplace=False,
             parallel=False,  # TODO: For testing
+            ragged=True,
             *args,
             **kwargs
         )

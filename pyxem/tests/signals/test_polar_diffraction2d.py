@@ -27,7 +27,7 @@ from pyxem.signals import (
     LazyPolarDiffraction2D,
     Correlation2D,
     Power2D,
-    Symmetry1D,
+    Correlation1D,
 )
 
 
@@ -143,25 +143,44 @@ class TestCorrelations:
         assert ac is None
         assert isinstance(flat_pattern, Power2D)
 
+
 class TestPearsonCorrelation:
     @pytest.fixture
     def flat_pattern(self):
-        pd = PolarDiffraction2D(data=np.ones(shape=(2, 2, 5, 5)))
+        rng = np.random.default_rng(seed=1)
+        pd = PolarDiffraction2D(data=rng.random((2, 2, 50, 15)))
         pd.axes_manager.signal_axes[0].scale = 0.5
         pd.axes_manager.signal_axes[0].name = "theta"
-        pd.axes_manager.signal_axes[1].scale = 2
+        pd.axes_manager.signal_axes[1].scale = 0.1
         pd.axes_manager.signal_axes[1].name = "k"
         return pd
 
-    @pytest.mark.parametrize("krange", [None, (0, 4),(1., 5.)])
-    def test_pcorrelation_signal(self, flat_pattern, krange):
+    @pytest.mark.parametrize("krange", [None, (0, 4), (1., 4.9)])
+    def test_pearson_correlation_signal(self, flat_pattern, krange):
         rho = flat_pattern.get_pearson_correlation(krange=krange)
-        assert isinstance(rho, Symmetry1D)
+        assert isinstance(rho, Signal1D)
 
-    def test_pcorrelation_inplace(self, flat_pattern):
+    @pytest.mark.parametrize('inplace', (True, False))
+    @pytest.mark.parametrize("krange", [None, (0, 30), (1., 4.9)])
+    def test_pearson_correlation_results(self, flat_pattern, krange, inplace):
+        out = flat_pattern.get_pearson_correlation(
+            krange=krange,
+            inplace=inplace,
+            )
+        if inplace:
+            assert out is None
+            out = flat_pattern
+        else:
+            # check the original signal is not changed
+            assert flat_pattern.axes_manager[-1].size == 50
+
+        assert isinstance(out, Correlation1D)
+        np.testing.assert_allclose(np.zeros((2, 2, 14)), out.data[..., 1:], atol=0.1)
+
+    def test_pearson_correlation_inplace(self, flat_pattern):
         rho = flat_pattern.get_pearson_correlation(inplace=True)
         assert rho is None
-        assert isinstance(flat_pattern, Symmetry1D)
+        assert isinstance(flat_pattern, Correlation1D)
 
     def test_axes_transfer(self, flat_pattern):
         rho = flat_pattern.get_pearson_correlation()
@@ -170,14 +189,13 @@ class TestPearsonCorrelation:
             == flat_pattern.axes_manager.signal_axes[0].scale
         )
 
-    @pytest.mark.parametrize(
-        "mask", [None, np.zeros(shape=(5, 5))]
-    )
-    def test_masking_pcorrelation(self, flat_pattern, mask):
+    @pytest.mark.parametrize( "mask", [None, np.zeros(shape=(50, 15))])
+    def test_masking_pearson_correlation(self, flat_pattern, mask):
         rho_0 = flat_pattern.get_pearson_correlation(mask=mask)
-        assert isinstance(rho_0, Symmetry1D)
+        assert isinstance(rho_0, Correlation1D)
         rho = flat_pattern.get_pearson_correlation(mask=mask, krange=(0, 4))
-        assert isinstance(rho, Symmetry1D)
+        assert isinstance(rho, Correlation1D)
+
 
 class TestDecomposition:
     def test_decomposition_is_performed(self, diffraction_pattern):
