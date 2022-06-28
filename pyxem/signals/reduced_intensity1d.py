@@ -24,6 +24,7 @@ from pyxem.utils.ri_utils import (
     damp_ri_exponential,
     damp_ri_lorch,
     damp_ri_updated_lorch,
+    damp_ri_extrapolate_to_zero,
     damp_ri_low_q_region_erfc,
 )
 
@@ -137,6 +138,38 @@ class ReducedIntensity1D(Signal1D):
         return self.map(
             damp_ri_updated_lorch,
             s_max=s_max,
+            s_scale=s_scale,
+            s_size=s_size,
+            s_offset=s_offset,
+            inplace=inplace,
+            *args,
+            **kwargs
+        )
+
+    def extrapolate_to_zero(
+        self, s_min, inplace=True, *args, **kwargs
+    ):
+        """Extrapolates the reduced intensity to zero linearly below s_min.
+
+        Parameters
+        ----------
+        s_min : float
+            Value of s below which extrapolation to zero is done.
+        inplace : bool
+            If True (default), this signal is overwritten. Otherwise, returns a
+            new signal.
+        *args:
+            Arguments to be passed to map().
+        **kwargs:
+            Keyword arguments to be passed to map().
+        """
+        s_scale = self.axes_manager.signal_axes[0].scale
+        s_size = self.axes_manager.signal_axes[0].size
+        s_offset = self.axes_manager.signal_axes[0].offset
+
+        return self.map(
+            damp_ri_extrapolate_to_zero,
+            s_min=s_min,
             s_scale=s_scale,
             s_size=s_size,
             s_offset=s_offset,
