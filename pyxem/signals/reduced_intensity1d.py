@@ -171,7 +171,6 @@ class ReducedIntensity1D(Signal1D):
             s_scale=s_scale,
             s_size=s_size,
             s_offset=s_offset,
-            inplace=inplace,
             *args,
             **kwargs
         )
