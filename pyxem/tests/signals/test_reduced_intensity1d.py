@@ -233,7 +233,7 @@ def test_extrapolate_to_zero(RedIntData):
     ri.axes_manager.signal_axes[0].scale = 1
     ri.axes_manager.signal_axes[0].offset = 0.5
 
-    ri.extrapolate_to_zero(s_min = 4)
+    ri.damp_extrapolate_to_zero(s_min = 4)
     compare = np.array(
         [
             [
