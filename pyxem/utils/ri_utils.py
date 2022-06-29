@@ -160,6 +160,38 @@ def damp_ri_updated_lorch(z, s_max, s_scale, s_size, s_offset, *args, **kwargs):
     damping_term = np.nan_to_num(damping_term)
     return z * damping_term
 
+def damp_ri_extrapolate_to_zero(
+    z, s_min, s_scale, s_size, s_offset, *args, **kwargs
+):
+    """Used by hs.map in the ReducedIntensity1D to extrapolate the reduced
+    intensity signal to zero below s_min.
+
+    Parameters
+    ----------
+    z : np.array
+        A reduced intensity np.array to be transformed.
+    s_min : float
+        Value of s below which data is extrapolated to zero.
+    scale : float
+        The scattering vector calibation of the reduced intensity array.
+    size : int
+        The size of the reduced intensity signal. (in pixels)
+    *args:
+        Arguments to be passed to map().
+    **kwargs:
+        Keyword arguments to be passed to map().
+    """
+
+    s_min_num = int((s_min-s_offset)/s_scale)
+
+    s_min_val = z[s_min_num]
+    extrapolated_vals = np.arange(s_min_num)*s_scale+s_offset
+    extrapolated_vals *= s_min_val / extrapolated_vals[-1] #scale zero to one
+
+    z[:s_min_num] = extrapolated_vals
+
+    return z
+
 
 def damp_ri_low_q_region_erfc(
     z, scale, offset, s_scale, s_size, s_offset, *args, **kwargs
