@@ -31,7 +31,7 @@ def _correlation(z, axis=0, mask=None, wrap=True, normalize=True):
         padder[axis] = (pad, pad)
         slicer = [
             slice(None),
-        ] * len(z_shape)
+                 ] * len(z_shape)
         slicer[axis] = slice(0, -2 * pad)  # creating the proper slices
         if mask is None:
             mask = np.zeros(shape=np.shape(z))
@@ -71,8 +71,7 @@ def _correlation(z, axis=0, mask=None, wrap=True, normalize=True):
         a = np.divide(np.subtract(a, row_mean), row_mean)
 
     if wrap is False:
-        print(slicer)
-        a = a[slicer]
+        a = a[tuple(slicer)]
     return a
 
 
