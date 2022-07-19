@@ -72,7 +72,7 @@ class TestComputeAndAsLazy2D:
 class TestGetPower:
     @pytest.fixture
     def flat_pattern(self):
-        pd = Correlation2D(data=np.ones(shape=(2, 2, 5, 5)))
+        pd = Correlation2D(data=np.ones(shape=(2, 2, 25, 25)))
         pd.axes_manager.signal_axes[0].scale = 0.5
         pd.axes_manager.signal_axes[0].name = "theta"
         pd.axes_manager.signal_axes[1].scale = 2
@@ -96,6 +96,21 @@ class TestGetPower:
         power = flat_pattern.get_summed_angular_power(inplace=True)
         assert isinstance(flat_pattern, Power2D)
         assert power is None
+
+    @pytest.mark.parametrize("method", ["max", "first", "average"])
+    def test_symmetry_stem_max_first(self, flat_pattern, method):
+        sym_coeff = flat_pattern.get_symmetry_coefficient(method=method)
+        np.testing.assert_array_almost_equal(sym_coeff.data, sym_coeff.data[0, 0, 0, 0])
+    def test_symmetry_stem_max(self, flat_pattern):
+        sym_coeff = flat_pattern.get_symmetry_coefficient(method="max")
+        np.testing.assert_array_almost_equal(sym_coeff.data, sym_coeff.data[0, 0, 0, 0])
+
+    def test_symmetry_stem_average(self, flat_pattern):
+        sym_coeff = flat_pattern.get_symmetry_coefficient(
+            method="average", angular_range=0.01, normalize=True
+        )
+        np.testing.assert_array_almost_equal(sym_coeff.data, sym_coeff.data[0, 0, 0, 0])
+
 
 
 class TestDecomposition:

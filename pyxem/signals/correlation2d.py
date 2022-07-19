@@ -17,7 +17,7 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import fractions as frac
+from fractions import Fraction as frac
 import numpy as np
 
 from hyperspy.signals import Signal2D
@@ -95,9 +95,9 @@ class Correlation2D(Signal2D, CommonDiffraction):
         fourier_axis.scale = 1
         return power
 
-    def get_symmetry_stem(self,
-                          symmetries=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-                          angular_range=0,
+    def get_symmetry_coefficient(self,
+                                 symmetries=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                                 angular_range=0,
                           method="average",
                           include_duplicates=False,
                           normalize=True,
@@ -137,7 +137,9 @@ class Correlation2D(Signal2D, CommonDiffraction):
                            inplace=False,
                            method=method,
                            **kwargs)
-        if normalize & (method is not "max" or method is not "first"):
+        if method in ["max", "first"]:
+            normalize = False
+        if normalize:
             signals = np.divide(signals, num_angles)
         # 2-D signal (x,y,k,s) for each symmetry
         signals.axes_manager.signal_axes[0].scale = 1
