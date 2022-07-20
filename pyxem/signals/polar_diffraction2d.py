@@ -232,7 +232,7 @@ class PolarDiffraction2D(Signal2D):
         if krange is not None:
             k_axis.offset = krange[0]
         else:
-            k_axis.offset = 0
+            k_axis.offset = self.axes_manager[-1].offset
         k_axis.units = '$\AA^{-1}$'
         k_axis.scale = self.axes_manager[-2].scale
 

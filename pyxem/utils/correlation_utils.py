@@ -155,7 +155,7 @@ def _pearson_correlation(z, mask=None, mode='full'):
     if mode is 'full':
         p_correlation = (np.mean(a, axis=0) - np.mean(z) ** 2) / (np.mean(z ** 2) - np.mean(z) ** 2)
     elif mode is 'kresolved':
-        p_correlation = (a - np.mean(z, axis=1) ** 2) / (np.mean(z ** 2, axis=1) - np.mean(z, axis=1) ** 2)
+        p_correlation = (a - np.mean(z, axis=1)[:, np.newaxis] ** 2) / (np.mean(z ** 2, axis=1) - np.mean(z, axis=1) ** 2)[:, np.newaxis]
     else:
         raise ValueError('Mode must be chosen from \'full\' or \'kresolved\'')
 
