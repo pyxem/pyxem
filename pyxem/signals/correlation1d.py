@@ -94,5 +94,5 @@ class Correlation1D(Signal1D):
         signals.axes_manager.signal_axes[0].name = "Symmetry"
         signals.axes_manager.signal_axes[0].unit = "a.u."
         signals.axes_manager.signal_axes[0].offset = symmetries[0]
-        
+
         return signals
