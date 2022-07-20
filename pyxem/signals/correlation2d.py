@@ -96,7 +96,7 @@ class Correlation2D(Signal2D, CommonDiffraction):
         return power
 
     def get_symmetry_coefficient(self,
-                                 symmetries=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                                 symmetries=[2, 3, 4, 5, 6, 7, 8, 9, 10],
                                  angular_range=0,
                           method="average",
                           include_duplicates=False,
@@ -144,7 +144,8 @@ class Correlation2D(Signal2D, CommonDiffraction):
         # 2-D signal (x,y,k,s) for each symmetry
         signals.axes_manager.signal_axes[0].scale = 1
         signals.axes_manager.signal_axes[0].name = "Symmetry"
-        signals.axes_manager.signal_axes[0].offset = 0
+        signals.axes_manager.signal_axes[0].offset = symmetries[0]
+        signals.axes_manager.signal_axes[0].unit = None
         return signals
 
 
