@@ -131,16 +131,16 @@ class Correlation2D(Signal2D, CommonDiffraction):
                                             num_points=self.axes_manager.signal_axes[0].size,
                                             method=method)
                   for a in angles]
+
         signals = self.map(_symmetry_stem,
                            interpolation=interp,
-                           show_progressbar=True,
                            inplace=False,
                            method=method,
                            **kwargs)
         if method in ["max", "first"]:
             normalize = False
         if normalize:
-            signals = np.divide(signals, num_angles)
+            signals.data = np.divide(signals.data, num_angles)
         # 2-D signal (x,y,k,s) for each symmetry
         signals.axes_manager.signal_axes[0].scale = 1
         signals.axes_manager.signal_axes[0].name = "Symmetry"

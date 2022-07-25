@@ -111,6 +111,14 @@ class TestGetPower:
         )
         np.testing.assert_array_almost_equal(sym_coeff.data, sym_coeff.data[0, 0, 0, 0])
 
+    def test_symmetry_stem_lazy(self, flat_pattern):
+        flat_pattern = flat_pattern.as_lazy()
+        sym_coeff = flat_pattern.get_symmetry_coefficient(
+            method="average", angular_range=0.01, normalize=True
+        )
+        assert isinstance(sym_coeff.data, da.Array)
+
+
 
 
 class TestDecomposition:
