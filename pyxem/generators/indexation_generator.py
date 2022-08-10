@@ -37,8 +37,13 @@ from pyxem.utils.signal import (
     select_method_from_method_dict,
     transfer_navigation_axes,
 )
+from pyxem.utils._deprecated import deprecated
 
 
+@deprecated(since="0.14",
+            alternative="pyxem.generators.AcceleratedIndexationGenerator or pyxem.generators.VectorIndexationGenerator",
+            alternative_is_function=True,
+            removal="1.0.0", )
 class IndexationGenerator:
     """Generates an indexer for data using a number of methods.
 
@@ -63,6 +68,10 @@ class IndexationGenerator:
         )
 
 
+@deprecated(since="0.14",
+            alternative="pyxem.generators.AcceleratedIndexationGenerator or pyxem.generators.VectorIndexationGenerator",
+            alternative_is_function=True,
+            removal="1.0.0", )
 class TemplateIndexationGenerator:
     """Generates an indexer for data using a number of methods.
 
