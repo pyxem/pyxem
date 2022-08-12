@@ -89,7 +89,7 @@ setup(
         "psutil",
         "pyfai",
         "scikit-image   >= 0.17.0",
-        "scikit-learn   >= 0.19",  # reason unknown
+        "scikit-learn   >= 1.0",  
         "scipy",
         "transforms3d",
     ],
