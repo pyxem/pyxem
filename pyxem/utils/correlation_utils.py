@@ -22,7 +22,7 @@ def _correlation(z, axis=0, mask=None, wrap=True, normalize=True):
     normalize: bool
         Subtract <I(\theta)>^2 and divide by <I(\theta)>^2
     """
-    if wrap is False:
+    if not wrap:
         z_shape = np.shape(z)
         padder = [(0, 0)] * len(z_shape)
         pad = z_shape[axis]  # This will be faster if the length of the axis
@@ -37,12 +37,12 @@ def _correlation(z, axis=0, mask=None, wrap=True, normalize=True):
             mask = np.zeros(shape=np.shape(z))
         z = np.pad(z, padder, "constant")
 
-    if mask is not None or wrap is False:  # Need to scale for wrapping properly
+    if mask is not None or not wrap:  # Need to scale for wrapping properly
         m = np.array(mask, dtype=bool)  # make sure it is a boolean array
         # this is to determine how many of the variables were non zero... This is really dumb.  but...
         # it works and I should stop trying to fix it (wreak it)
         mask_boolean = ~m  # inverting the boolean mask
-        if wrap is False:  # padding with zeros to the function along some axis
+        if not wrap:  # padding with zeros to the function along some axis
             m = np.pad(
                 m, padder, "constant"
             )  # all the zeros are masked (should account for padding
@@ -70,7 +70,7 @@ def _correlation(z, axis=0, mask=None, wrap=True, normalize=True):
         row_mean = np.expand_dims(row_mean, axis=axis)
         a = np.divide(np.subtract(a, row_mean), row_mean)
 
-    if wrap is False:
+    if not wrap:
         a = a[tuple(slicer)]
     return a
 
@@ -213,7 +213,7 @@ def _get_interpolation_matrix(angles, angular_range, num_points, method="average
         for further processing
 
     """
-    if method is "average":
+    if method == "average":
         angular_ranges = [(angle - angular_range / (2*np.pi),
                            angle + angular_range / (2*np.pi)) for angle in angles]
         angular_ranges = np.multiply(angular_ranges, num_points)
@@ -249,13 +249,13 @@ def _symmetry_stem(signal, interpolation, method="average"):
     method:str
         One of "average", "max" or "first"
     """
-    if method is "average":
+    if method == "average":
         return np.matmul(signal, np.transpose(interpolation))
-    elif method is "max":
+    elif method == "max":
         val = np.transpose([np.amax([np.matmul(signal, np.transpose(i))
                                      for i in interp], axis=0)
                             for interp in interpolation])
-    elif method is "first":
+    elif method == "first":
         val = np.transpose([np.matmul(signal, np.transpose(interp[0]))
                             for interp in interpolation])
     else:
