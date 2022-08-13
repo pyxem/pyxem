@@ -962,6 +962,7 @@ class TestGetEllipseMarkerListFromEllipseArray:
         assert_allclose(m3.data["x2"][()], xc_array)
         assert_allclose(m3.data["y2"][()], yc_array + sy_array)
 
+
 def test_full_ellipse_ransac_processing():
     xf, yf, a, b, r, nt = 100, 115, 45, 35, 0, 15
     data_points = ret.make_ellipse_data_points(xf, yf, a, b, r, nt)
@@ -1039,42 +1040,46 @@ class TestDetermineEllipse:
 
         np.testing.assert_array_almost_equal(
             affine,
-            [[1., 0, 0],
-            [0, 1.15, 0],
-            [0, 0, 1]],
+            [[1.0, 0, 0], [0, 1.15, 0], [0, 0, 1]],
             2,
         )
         np.testing.assert_array_almost_equal(center, [45, 50], 0)
 
-    @mark.parametrize('execution_number', range(5))
+    @mark.parametrize("execution_number", range(5))
     def test_determine_ellipse_rotated(self, execution_number):
-        angle = np.random.random()*np.pi
+        angle = np.random.random() * np.pi
         test_data = mdtd.MakeTestData(200, 200, default=False)
         test_data.add_disk(x0=100, y0=100, r=5, intensity=30)
-        test_data.add_ring_ellipse(x0=100, y0=100, semi_len0=64, semi_len1=70, rotation=angle)
+        test_data.add_ring_ellipse(
+            x0=100, y0=100, semi_len0=64, semi_len1=70, rotation=angle
+        )
         s = test_data.signal
         s.set_signal_type("electron_diffraction")
 
         mask = np.zeros_like(s.data, dtype=bool)
-        mask[100 - 20:100 + 20, 100 - 20:100 + 20] = True
-        center, affine = ret.determine_ellipse(s, mask=mask, use_ransac=False, num_points=2000)
+        mask[100 - 20 : 100 + 20, 100 - 20 : 100 + 20] = True
+        center, affine = ret.determine_ellipse(
+            s, mask=mask, use_ransac=False, num_points=2000
+        )
         s.unit = "k_nm^-1"
         s.beam_energy = 200
         s.axes_manager.signal_axes[0].scale = 0.1
         s.axes_manager.signal_axes[1].scale = 0.1
         s.set_ai(center=center, affine=affine)
         s_az = s.get_azimuthal_integral2d(npt=100)
-        assert (np.sum((s_az.sum(axis=0).isig[6:] > 1).data)<11)
+        assert np.sum((s_az.sum(axis=0).isig[6:] > 1).data) < 11
 
-    @mark.parametrize("rot", np.linspace(0, 2*np.pi, 10))
+    @mark.parametrize("rot", np.linspace(0, 2 * np.pi, 10))
     def test_determine_ellipse(self, rot):
         test_data = mdtd.MakeTestData(200, 200, default=False)
         test_data.add_disk(x0=100, y0=100, r=5, intensity=30)
-        test_data.add_ring_ellipse(x0=100, y0=100, semi_len0=63, semi_len1=70, rotation=rot)
+        test_data.add_ring_ellipse(
+            x0=100, y0=100, semi_len0=63, semi_len1=70, rotation=rot
+        )
         s = test_data.signal
         s.set_signal_type("electron_diffraction")
         mask = np.zeros_like(s.data, dtype=bool)
-        mask[100 - 20:100 + 20, 100 - 20:100 + 20] = True
+        mask[100 - 20 : 100 + 20, 100 - 20 : 100 + 20] = True
         center, affine = ret.determine_ellipse(s, mask=mask, use_ransac=False)
         s.unit = "k_nm^-1"
         s.beam_energy = 200
@@ -1082,7 +1087,7 @@ class TestDetermineEllipse:
         s.axes_manager.signal_axes[1].scale = 0.1
         s.set_ai(center=center, affine=affine)
         s_az = s.get_azimuthal_integral2d(npt=100)
-        assert (np.sum((s_az.sum(axis=0).isig[10:] > 1).data) < 10)
+        assert np.sum((s_az.sum(axis=0).isig[10:] > 1).data) < 10
 
     def test_get_max_pos(self):
         t = np.ones((100, 100))

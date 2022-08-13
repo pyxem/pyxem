@@ -51,6 +51,7 @@ from pyxem.utils.polar_transform_utils import (
 
 try:
     import cupy as cp
+
     CUPY_INSTALLED = True
     import cupyx.scipy as spgpu
 except ImportError:
@@ -534,8 +535,12 @@ def _match_polar_to_polar_library_gpu(
     N is the number of templates and R the number of spots in the template
     with the maximum number of spots
     """
-    correlation = cp.empty((r_templates.shape[0], polar_image.shape[0]), dtype=cp.float32)
-    correlation_m = cp.empty((r_templates.shape[0], polar_image.shape[0]), dtype=cp.float32)
+    correlation = cp.empty(
+        (r_templates.shape[0], polar_image.shape[0]), dtype=cp.float32
+    )
+    correlation_m = cp.empty(
+        (r_templates.shape[0], polar_image.shape[0]), dtype=cp.float32
+    )
     threadsperblock = (1, TPB)
     blockspergrid = (r_templates.shape[0], int(np.ceil(polar_image.shape[0] / TPB)))
     _correlate_polar_image_to_library_gpu[blockspergrid, threadsperblock](
@@ -1432,7 +1437,9 @@ def index_dataset_with_template_rotation(
     if target == "gpu":
         # an error will be raised if cupy is not available
         if not CUPY_INSTALLED:
-            raise ValueError("There must be a CUDA enabled GPU and cupy must be installed.")
+            raise ValueError(
+                "There must be a CUDA enabled GPU and cupy must be installed."
+            )
         dispatcher = cp
     else:
         dispatcher = np
@@ -1579,7 +1586,7 @@ def index_dataset_with_template_rotation(
         if target == "gpu":
             # let's base it on the size of the free GPU memory and array blocksize
             # this is probably too many workers!
-            max_gpu_mem = 0.6*cp.cuda.Device().mem_info[0]
+            max_gpu_mem = 0.6 * cp.cuda.Device().mem_info[0]
             blocksize = data.nbytes / data.npartitions
             max_workers = max_gpu_mem / blocksize
             if max_workers < parallel_workers:

@@ -842,7 +842,7 @@ def _STEM_flag_dict(exp_times_list):
             # Checking line lengths
             check = list(check)
             start_ind = check.index(True)
-            
+
             frames_to_skip = peaks[start_ind]
 
         flyback_times = list(times_set)

@@ -31,6 +31,7 @@ from pyxem.utils.ri_utils import (
 
 class ReducedIntensity1D(Signal1D):
     """Signal class for Reduced Intensity profiles as a fucntion of scattering vector."""
+
     _signal_type = "reduced_intensity"
 
     def damp_exponential(self, b, inplace=True, *args, **kwargs):
@@ -146,9 +147,7 @@ class ReducedIntensity1D(Signal1D):
             **kwargs
         )
 
-    def damp_extrapolate_to_zero(
-        self, s_min, *args, **kwargs
-    ):
+    def damp_extrapolate_to_zero(self, s_min, *args, **kwargs):
         """Extrapolates the reduced intensity to zero linearly below s_min.
         This method is always inplace.
 

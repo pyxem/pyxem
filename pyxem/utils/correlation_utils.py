@@ -31,7 +31,7 @@ def _correlation(z, axis=0, mask=None, wrap=True, normalize=True):
         padder[axis] = (pad, pad)
         slicer = [
             slice(None),
-                 ] * len(z_shape)
+        ] * len(z_shape)
         slicer[axis] = slice(0, -2 * pad)  # creating the proper slices
         if mask is None:
             mask = np.zeros(shape=np.shape(z))
@@ -137,16 +137,22 @@ def _pearson_correlation(z, mask=None):
         mask_bool = ~m
         mask_fft = np.fft.fft(mask_bool, axis=1)
         n_unmasked = np.fft.ifft(mask_fft * mask_fft.conj()).real
-        n_unmasked[n_unmasked < 1] = 1  # avoid dividing by zero for completely masked rows
+        n_unmasked[
+            n_unmasked < 1
+        ] = 1  # avoid dividing by zero for completely masked rows
         z[m] = 0  # set masked pixels to zero
         fft_intensity = np.divide(np.fft.fft(z, axis=1), n_unmasked)
-        a = np.multiply(np.fft.ifft(fft_intensity * fft_intensity.conj()).real, n_unmasked)
+        a = np.multiply(
+            np.fft.ifft(fft_intensity * fft_intensity.conj()).real, n_unmasked
+        )
     else:
         z_length = np.shape(z)[1]
         fft_intensity = np.fft.fft(z, axis=1) / z_length
         a = np.fft.ifft(fft_intensity * fft_intensity.conj(), axis=1).real * z_length
 
-    p_correlation = (np.mean(a, axis=0) - np.mean(z) ** 2) / (np.mean(z ** 2) - np.mean(z) ** 2)
+    p_correlation = (np.mean(a, axis=0) - np.mean(z) ** 2) / (
+        np.mean(z ** 2) - np.mean(z) ** 2
+    )
     return p_correlation
 
 
@@ -169,25 +175,25 @@ def _wrap_set_float(target, bottom, top, value):
         The value to set the range as.
     """
     ceiling_bottom = int(np.ceil(bottom))
-    residual_bottom = ceiling_bottom-bottom
+    residual_bottom = ceiling_bottom - bottom
     floor_top = int(np.floor(top))
-    residual_top = top-floor_top
+    residual_top = top - floor_top
     if floor_top > len(target) - 1:
         target[ceiling_bottom:] = value
         new_floor_top = floor_top % len(target)
         target[new_floor_top] = value
-        target[new_floor_top+1] = value*residual_top
+        target[new_floor_top + 1] = value * residual_top
     elif ceiling_bottom < 0:
         target[:floor_top] = value
         target[ceiling_bottom:] = value
-        target[ceiling_bottom-1] = value*residual_bottom
+        target[ceiling_bottom - 1] = value * residual_bottom
     else:
-        target[ceiling_bottom:floor_top+1] = value
-        target[ceiling_bottom-1] = value*residual_bottom
+        target[ceiling_bottom : floor_top + 1] = value
+        target[ceiling_bottom - 1] = value * residual_bottom
         if floor_top + 1 > len(target) - 1:
-            target[0] = value*residual_top
+            target[0] = value * residual_top
         else:
-            target[floor_top+1] = value*residual_top
+            target[floor_top + 1] = value * residual_top
     return target
 
 
@@ -214,20 +220,28 @@ def _get_interpolation_matrix(angles, angular_range, num_points, method="average
 
     """
     if method == "average":
-        angular_ranges = [(angle - angular_range / (2*np.pi),
-                           angle + angular_range / (2*np.pi)) for angle in angles]
+        angular_ranges = [
+            (angle - angular_range / (2 * np.pi), angle + angular_range / (2 * np.pi))
+            for angle in angles
+        ]
         angular_ranges = np.multiply(angular_ranges, num_points)
         interpolation_matrix = np.zeros(num_points)
         for i, angle in enumerate(angular_ranges):
-            _wrap_set_float(interpolation_matrix, top=angle[1], bottom=angle[0], value=1)
+            _wrap_set_float(
+                interpolation_matrix, top=angle[1], bottom=angle[0], value=1
+            )
         return interpolation_matrix
     else:
-        angular_ranges = [(angle - angular_range / (2*np.pi), angle + angular_range / (2*np.pi))
-                          for angle in angles]
+        angular_ranges = [
+            (angle - angular_range / (2 * np.pi), angle + angular_range / (2 * np.pi))
+            for angle in angles
+        ]
         angular_ranges = np.multiply(angular_ranges, num_points)
         interpolation_matrix = np.zeros((len(angles), num_points))
         for i, angle in enumerate(angular_ranges):
-            _wrap_set_float(interpolation_matrix[i, :], top=angle[1], bottom=angle[0], value=1)
+            _wrap_set_float(
+                interpolation_matrix[i, :], top=angle[1], bottom=angle[0], value=1
+            )
         return interpolation_matrix
 
 
@@ -252,12 +266,16 @@ def _symmetry_stem(signal, interpolation, method="average"):
     if method == "average":
         return np.matmul(signal, np.transpose(interpolation))
     elif method == "max":
-        val = np.transpose([np.amax([np.matmul(signal, np.transpose(i))
-                                     for i in interp], axis=0)
-                            for interp in interpolation])
+        val = np.transpose(
+            [
+                np.amax([np.matmul(signal, np.transpose(i)) for i in interp], axis=0)
+                for interp in interpolation
+            ]
+        )
     elif method == "first":
-        val = np.transpose([np.matmul(signal, np.transpose(interp[0]))
-                            for interp in interpolation])
+        val = np.transpose(
+            [np.matmul(signal, np.transpose(interp[0])) for interp in interpolation]
+        )
     else:
         raise ValueError("Method must be one of `average`, `max` or `first`")
     return val

@@ -94,7 +94,7 @@ class ScatteringFitComponentXTables(Component):
         for i, element in enumerate(params):
             fi = np.zeros(x.size)
             for n in range(len(element)):  # 5 parameters per element
-                fi += element[n][0] * np.exp(-element[n][1] * (np.square(x/2)))
+                fi += element[n][0] * np.exp(-element[n][1] * (np.square(x / 2)))
             elem_frac = fracs[i]
             sum_squares += np.square(fi) * elem_frac
             square_sum += fi * elem_frac

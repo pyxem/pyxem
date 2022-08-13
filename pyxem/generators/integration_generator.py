@@ -27,6 +27,7 @@ from scipy.ndimage import center_of_mass
 from hyperspy.signals import BaseSignal
 
 import logging
+
 _logger = logging.getLogger(__name__)
 
 from pyxem.generators.subpixelrefinement_generator import _get_pixel_vectors

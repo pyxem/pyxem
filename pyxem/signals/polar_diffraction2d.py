@@ -108,7 +108,7 @@ class PolarDiffraction2D(Signal2D):
         power = self.map(
             _power, axis=1, mask=mask, normalize=normalize, inplace=inplace, **kwargs
         )
-        
+
         s = self if inplace else power
         s.set_signal_type("power")
         fourier_axis = s.axes_manager.signal_axes[0]
@@ -148,7 +148,7 @@ class PolarDiffraction2D(Signal2D):
             if inplace:
                 s_.crop(-1, start=krange[0], end=krange[1])
             else:
-                s_ = self.isig[:, krange[0]:krange[1]]
+                s_ = self.isig[:, krange[0] : krange[1]]
 
             if mask is not None:
                 mask = Signal2D(mask)
@@ -157,22 +157,17 @@ class PolarDiffraction2D(Signal2D):
                 mask.axes_manager[-1].offset = self.axes_manager[-1].offset
                 mask.crop(-1, start=krange[0], end=krange[1])
 
-        correlation = s_.map(
-            _pearson_correlation,
-            mask=mask,
-            inplace=inplace,
-            **kwargs
-            )
+        correlation = s_.map(_pearson_correlation, mask=mask, inplace=inplace, **kwargs)
 
         s = s_ if inplace else correlation
         s.set_signal_type("correlation")
-        
+
         rho_axis = s.axes_manager.signal_axes[0]
         rho_axis.name = "Pearson Correlation, $ \Delta \Theta$"
         rho_axis.offset = 0
-        rho_axis.units = 'rad'
+        rho_axis.units = "rad"
         rho_axis.scale = self.axes_manager[-2].scale
-        
+
         return correlation
 
 

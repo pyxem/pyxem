@@ -74,6 +74,7 @@ def crystal_from_vector_matching(z_matches):
 
     return results_array
 
+
 def _get_best_match(z):
     """Returns the match with the highest score for a given navigation pixel
 
@@ -92,7 +93,7 @@ def _get_best_match(z):
 
 
 def _get_phase_reliability(z):
-    """ Returns the phase reliability (phase_alpha_best/phase_beta_best) for a given navigation pixel
+    """Returns the phase reliability (phase_alpha_best/phase_beta_best) for a given navigation pixel
 
     Parameters
     ----------
@@ -109,7 +110,7 @@ def _get_phase_reliability(z):
     phase_best_score = best_match[4]
 
     # mask for other phases
-    lower_phases = z[z[:,0] != phase_best]
+    lower_phases = z[z[:, 0] != phase_best]
     # needs a second phase, if none return np.inf
     if lower_phases.size > 0:
         phase_second = _get_best_match(lower_phases)
@@ -117,10 +118,11 @@ def _get_phase_reliability(z):
     else:
         return np.inf
 
-    return phase_best_score/phase_second_score
+    return phase_best_score / phase_second_score
+
 
 def _get_second_best_phase(z):
-    """ Returns the the second best phase for a given navigation pixel
+    """Returns the the second best phase for a given navigation pixel
 
     Parameters
     ----------
@@ -136,7 +138,7 @@ def _get_second_best_phase(z):
     phase_best = best_match[0]
 
     # mask for other phases
-    lower_phases = z[z[:,0] != phase_best]
+    lower_phases = z[z[:, 0] != phase_best]
 
     # needs a second phase, if none return -1
     if lower_phases.size > 0:
@@ -144,6 +146,7 @@ def _get_second_best_phase(z):
         return phase_second[4]
     else:
         return -1
+
 
 class GenericMatchingResults:
     def __init__(self, data):
@@ -180,15 +183,22 @@ class GenericMatchingResults:
         )
 
         """ add various properties """
-        phase_reliabilty = self.data.map(_get_phase_reliability,inplace=False).data.flatten()
-        second_phase = self.data.map(_get_second_best_phase,inplace=False).data.flatten()
-        properties = {"score": score,
-                      "phase_reliabilty" : phase_reliabilty,
-                      "second_phase" : second_phase}
+        phase_reliabilty = self.data.map(
+            _get_phase_reliability, inplace=False
+        ).data.flatten()
+        second_phase = self.data.map(
+            _get_second_best_phase, inplace=False
+        ).data.flatten()
+        properties = {
+            "score": score,
+            "phase_reliabilty": phase_reliabilty,
+            "second_phase": second_phase,
+        }
 
         return CrystalMap(
             rotations=rotations, phase_id=phase_id, x=x, y=y, prop=properties
         )
+
 
 class VectorMatchingResults(BaseSignal):
     """Vector matching results containing the top n best matching crystal

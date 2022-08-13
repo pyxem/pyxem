@@ -28,6 +28,7 @@ class ElectronDiffraction2D(Diffraction2D):
     Signal class for two-dimensional electron diffraction data in Cartesian
     coordinates.
     """
+
     _signal_type = "electron_diffraction"
 
     def __init__(self, *args, **kwargs):

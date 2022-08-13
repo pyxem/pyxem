@@ -155,18 +155,18 @@ class TestPearsonCorrelation:
         pd.axes_manager.signal_axes[1].name = "k"
         return pd
 
-    @pytest.mark.parametrize("krange", [None, (0, 4), (1., 4.9)])
+    @pytest.mark.parametrize("krange", [None, (0, 4), (1.0, 4.9)])
     def test_pearson_correlation_signal(self, flat_pattern, krange):
         rho = flat_pattern.get_pearson_correlation(krange=krange)
         assert isinstance(rho, Signal1D)
 
-    @pytest.mark.parametrize('inplace', (True, False))
-    @pytest.mark.parametrize("krange", [None, (0, 30), (1., 4.9)])
+    @pytest.mark.parametrize("inplace", (True, False))
+    @pytest.mark.parametrize("krange", [None, (0, 30), (1.0, 4.9)])
     def test_pearson_correlation_results(self, flat_pattern, krange, inplace):
         out = flat_pattern.get_pearson_correlation(
             krange=krange,
             inplace=inplace,
-            )
+        )
         if inplace:
             assert out is None
             out = flat_pattern
@@ -189,7 +189,7 @@ class TestPearsonCorrelation:
             == flat_pattern.axes_manager.signal_axes[0].scale
         )
 
-    @pytest.mark.parametrize( "mask", [None, np.zeros(shape=(50, 15))])
+    @pytest.mark.parametrize("mask", [None, np.zeros(shape=(50, 15))])
     def test_masking_pearson_correlation(self, flat_pattern, mask):
         rho_0 = flat_pattern.get_pearson_correlation(mask=mask)
         assert isinstance(rho_0, Correlation1D)

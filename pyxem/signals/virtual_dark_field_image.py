@@ -27,6 +27,7 @@ from pyxem.utils.segment_utils import separate_watershed
 
 class VirtualDarkFieldImage(Signal2D):
     """Signal class for virtual diffraction contrast images."""
+
     _signal_type = "virtual_dark_field"
 
     def __init__(self, *args, **kwargs):

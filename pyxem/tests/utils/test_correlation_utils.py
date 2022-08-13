@@ -85,14 +85,29 @@ class TestCorrelations:
         result[1::2, :] = -0.93478899
         np.testing.assert_array_almost_equal(c, result)
 
-    @pytest.mark.parametrize("angles", np.array([[0.1],
-                                                 [0.25, ],
-                                                 [0.5, ],
-                                                 [.9, ]]))
-    @pytest.mark.parametrize("angular_range", [0,4*np.pi/90])
-    def test_get_interpolation_matrix(self, angles,angular_range):
+    @pytest.mark.parametrize(
+        "angles",
+        np.array(
+            [
+                [0.1],
+                [
+                    0.25,
+                ],
+                [
+                    0.5,
+                ],
+                [
+                    0.9,
+                ],
+            ]
+        ),
+    )
+    @pytest.mark.parametrize("angular_range", [0, 4 * np.pi / 90])
+    def test_get_interpolation_matrix(self, angles, angular_range):
         m = np.zeros((10, 20))
         m[2:4, :] = 1
-        c = _get_interpolation_matrix(angles, num_points=90, angular_range=angular_range)
+        c = _get_interpolation_matrix(
+            angles, num_points=90, angular_range=angular_range
+        )
         com = np.average(range(90), weights=c)
-        np.testing.assert_almost_equal(com, 90*angles[0])
+        np.testing.assert_almost_equal(com, 90 * angles[0])

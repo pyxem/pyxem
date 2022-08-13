@@ -228,12 +228,13 @@ def test_damp_updated_lorch(RedIntData):
     )
     assert np.allclose(ri, compare)
 
+
 def test_extrapolate_to_zero(RedIntData):
     ri = ReducedIntensity1D(RedIntData)
     ri.axes_manager.signal_axes[0].scale = 1
     ri.axes_manager.signal_axes[0].offset = 0.5
 
-    ri.damp_extrapolate_to_zero(s_min = 4)
+    ri.damp_extrapolate_to_zero(s_min=4)
     compare = np.array(
         [
             [
@@ -247,6 +248,7 @@ def test_extrapolate_to_zero(RedIntData):
         ]
     )
     assert np.allclose(ri, compare)
+
 
 def test_damp_low_q_region_erfc(RedIntData):
     ri = ReducedIntensity1D(RedIntData)
