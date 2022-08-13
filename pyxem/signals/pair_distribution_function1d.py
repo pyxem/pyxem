@@ -26,6 +26,7 @@ class PairDistributionFunction1D(Signal1D):
     """Signal class for Pair Distribution Function (PDF) radial profiles
     as a function of distance r.
     """
+
     _signal_type = "pair_distribution_function"
 
     def normalise_signal(self, s_min=0, inplace=False, *args, **kwargs):

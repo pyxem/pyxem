@@ -116,9 +116,7 @@ class TestAzimuthalIntegral1d:
     def test_1d_azimuthal_integral_2th_units(self, ones, unit):
         ones.unit = unit
         ones.set_ai(wavelength=1e-9)
-        az = ones.get_azimuthal_integral1d(
-            npt=10, correctSolidAngle=False
-        )
+        az = ones.get_azimuthal_integral1d(npt=10, correctSolidAngle=False)
         np.testing.assert_array_equal(az.data[0:8], np.ones(8))
 
     def test_1d_azimuthal_integral_inplace(self, ones):
@@ -455,16 +453,16 @@ class TestAzimuthalIntegral2d:
         )
         np.testing.assert_array_equal(az.data[0:8, :], np.ones((8, 10)))
 
-    def test_2d_azimuthal_integral_scale(self,ring):
+    def test_2d_azimuthal_integral_scale(self, ring):
         ring.set_ai(wavelength=2.5e-12)
         az = ring.get_azimuthal_integral2d(npt=500)
         peak = np.argmax(az.sum(axis=0)).data * az.axes_manager[1].scale
-        np.testing.assert_almost_equal(peak[0], 3,decimal=1)
-        ring.unit="k_A^-1"
+        np.testing.assert_almost_equal(peak[0], 3, decimal=1)
+        ring.unit = "k_A^-1"
         ring.set_ai(wavelength=2.5e-12)
         az = ring.get_azimuthal_integral2d(npt=500)
         peak = np.argmax(az.sum(axis=0)).data * az.axes_manager[1].scale
-        np.testing.assert_almost_equal(peak[0], 3,decimal=1)
+        np.testing.assert_almost_equal(peak[0], 3, decimal=1)
 
     def test_2d_azimuthal_integral_fast_slicing(self, ones):
         ones.set_ai(center=(5.5, 5.5))
@@ -631,7 +629,7 @@ class TestVirtualImaging:
         diffraction_pattern.plot_integrated_intensity(roi)
         plt.close("all")
 
-    @pytest.mark.parametrize('has_nan', [True, False])
+    @pytest.mark.parametrize("has_nan", [True, False])
     def test_get_integrated_intensity(self, diffraction_pattern, has_nan):
         roi = hs.roi.CircleROI(3, 3, 5)
         if has_nan:
@@ -639,7 +637,7 @@ class TestVirtualImaging:
         vi = diffraction_pattern.get_integrated_intensity(roi)
         assert vi.axes_manager.signal_dimension == 2
         assert vi.axes_manager.navigation_dimension == 0
-        np.testing.assert_allclose(vi.data, np.array([[ 6.,  6.], [ 8., 10.]]))
+        np.testing.assert_allclose(vi.data, np.array([[6.0, 6.0], [8.0, 10.0]]))
 
     @pytest.mark.parametrize("out_signal_axes", [None, (0, 1), (1, 2), ("x", "y")])
     def test_get_integrated_intensity_stack(self, diffraction_pattern, out_signal_axes):
@@ -668,8 +666,7 @@ class TestVirtualImaging:
         assert vi.axes_manager.navigation_dimension == 0
         assert vi.metadata.General.title == "Integrated intensity"
         assert (
-            vi.metadata.Diffraction.integrated_range[:25]
-            == "CircleROI(cx=3, cy=3, r=5"
+            vi.metadata.Diffraction.integrated_range[:25] == "CircleROI(cx=3, cy=3, r=5"
         )
 
     def test_get_integrated_intensity_error(
@@ -687,7 +684,9 @@ class TestVirtualImaging:
         assert vi.data.shape == (2,)
         assert vi.axes_manager.signal_dimension == 1
         assert vi.axes_manager.navigation_dimension == 0
-        assert vi.metadata.Diffraction.integrated_range[:25] == "CircleROI(cx=3, cy=3, r=5"
+        assert (
+            vi.metadata.Diffraction.integrated_range[:25] == "CircleROI(cx=3, cy=3, r=5"
+        )
 
 
 class TestAzimuthalIntegrator:
@@ -1312,7 +1311,7 @@ class TestCorrectBadPixel:
 
     @pytest.mark.parametrize("lazy_input", (True, False))
     @pytest.mark.parametrize("lazy_result", (True, False))
-    def test_lazy_with_bad_pixel_finders(self, data, lazy_input,lazy_result):
+    def test_lazy_with_bad_pixel_finders(self, data, lazy_input, lazy_result):
         s = Diffraction2D(data).as_lazy()
         if not lazy_input:
             s.compute()

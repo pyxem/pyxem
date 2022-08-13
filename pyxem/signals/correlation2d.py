@@ -17,7 +17,6 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
 from hyperspy.signals import Signal2D
 from hyperspy._signals.lazy import LazySignal
 
@@ -26,8 +25,8 @@ from pyxem.signals.common_diffraction import CommonDiffraction
 
 
 class Correlation2D(Signal2D, CommonDiffraction):
-    """Signal class for Correlation data after applying some correlation along some axis.
-    """
+    """Signal class for Correlation data after applying some correlation along some axis."""
+
     _signal_type = "correlation"
 
     def get_angular_power(self, inplace=False, **kwargs):

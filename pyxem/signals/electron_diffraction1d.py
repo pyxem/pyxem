@@ -23,6 +23,7 @@ from pyxem.signals.diffraction1d import Diffraction1D
 
 class ElectronDiffraction1D(Diffraction1D):
     """Signal class for Electron Diffraction radial profiles."""
+
     _signal_type = "electron_diffraction"
 
     def set_experimental_parameters(

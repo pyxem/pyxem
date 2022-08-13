@@ -135,7 +135,6 @@ def test_weight_function_behaviour():
 
 
 class TestLazyNotLazy:
-
     def setup_method(self):
         data = np.empty((4, 2), dtype=object)
         for iy, ix in np.ndindex(data.shape):

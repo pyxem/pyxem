@@ -77,7 +77,7 @@ html_theme = "furo"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files, so
 # a file named "default.css" will overwrite the builtin "default.css".
-#html_static_path = ["_static"]
+# html_static_path = ["_static"]
 
 # Syntax highlighting
 pygments_style = "friendly"
@@ -135,7 +135,7 @@ nbsphinx_prolog = (
 # https://nbsphinx.readthedocs.io/en/0.8.0/never-execute.html
 nbsphinx_execute = "never"  # auto, always, never
 nbsphinx_allow_errors = True
-exclude_patterns = ['_build', '**.ipynb_checkpoints']
+exclude_patterns = ["_build", "**.ipynb_checkpoints"]
 
 # sphinxcontrib-bibtex configuration
 bibtex_bibfiles = ["bibliography.bib"]

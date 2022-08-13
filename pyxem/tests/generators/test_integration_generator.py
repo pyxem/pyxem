@@ -29,7 +29,7 @@ from pyxem.signals import DiffractionVectors, ElectronDiffraction2D
 
 @pytest.mark.parametrize("radius, offset", [[1, 0], [2, 1], [3, 2]])
 def test_integration_generator(radius, offset):
-    pixel_positions = np.empty((2, ), dtype=object)
+    pixel_positions = np.empty((2,), dtype=object)
     pixel_positions[0] = np.array([[0, 0], [15, -15], [-15, 15]])
     pixel_positions[1] = np.array([[0, 0], [15, -15], [-15, 15]])
     pattern = np.zeros((2, 50, 50))
@@ -51,7 +51,7 @@ def test_integration_generator(radius, offset):
 
 @pytest.mark.skip(reason="Broken due to changes in HyperSpy")
 def test_integration_generator_summation_method():
-    pixel_positions = np.empty((2, ), dtype=object)
+    pixel_positions = np.empty((2,), dtype=object)
     pixel_positions[0] = np.array([[0, 0], [25, -25], [-25, 25]])
     pixel_positions[1] = np.array([[0, 0], [25, -25], [-25, 25]])
     pattern = np.zeros((2, 100, 100))

@@ -17,7 +17,6 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
 import numpy as np
 from skimage import filters
 from skimage.morphology import square
@@ -629,8 +628,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         """
         if "lazy_result" in kwargs:
-            warnings.warn("lazy_result was replaced with lazy_output in version 0.14",
-                          DeprecationWarning)
+            warnings.warn(
+                "lazy_result was replaced with lazy_output in version 0.14",
+                DeprecationWarning,
+            )
             lazy_output = kwargs.pop("lazy_result")
 
         if lazy_output is None:
@@ -645,34 +646,38 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             "interpolate": find_beam_center_interpolate,
         }
 
-        method_function = select_method_from_method_dict(method, method_dict,
-                                                         print_help=False, **kwargs)
+        method_function = select_method_from_method_dict(
+            method, method_dict, print_help=False, **kwargs
+        )
 
         if method == "cross_correlate":
-            shifts = self.map(method_function,
-                              inplace=False,
-                              output_signal_size=(2,),
-                              output_dtype=np.float32,
-                              lazy_output=lazy_output,
-                              **kwargs,
-                              )
+            shifts = self.map(
+                method_function,
+                inplace=False,
+                output_signal_size=(2,),
+                output_dtype=np.float32,
+                lazy_output=lazy_output,
+                **kwargs,
+            )
         elif method == "blur":
-            centers = self.map(method_function,
-                               inplace=False,
-                               output_signal_size=(2,),
-                               output_dtype=np.int16,
-                               lazy_output=lazy_output,
-                               **kwargs,
-                               )
+            centers = self.map(
+                method_function,
+                inplace=False,
+                output_signal_size=(2,),
+                output_dtype=np.int16,
+                lazy_output=lazy_output,
+                **kwargs,
+            )
             shifts = -centers + origin_coordinates
         elif method == "interpolate":
-            centers = self.map(method_function,
-                               inplace=False,
-                               output_signal_size=(2,),
-                               output_dtype=np.float32,
-                               lazy_output=lazy_output,
-                               **kwargs,
-                               )
+            centers = self.map(
+                method_function,
+                inplace=False,
+                output_signal_size=(2,),
+                output_dtype=np.float32,
+                lazy_output=lazy_output,
+                **kwargs,
+            )
             shifts = -centers + origin_coordinates
 
         shifts.set_signal_type("beam_shift")
@@ -688,7 +693,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         subpixel=True,
         lazy_output=None,
         align_kwargs=None,
-        inplace= True,
+        inplace=True,
         *args,
         **kwargs,
     ):
@@ -746,8 +751,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         """
         if "lazy_result" in kwargs:
-            warnings.warn("lazy_result was replaced with lazy_output in version 0.14",
-                          DeprecationWarning)
+            warnings.warn(
+                "lazy_result was replaced with lazy_output in version 0.14",
+                DeprecationWarning,
+            )
             lazy_output = kwargs.pop("lazy_result")
         if (shifts is None) and (method is None):
             raise ValueError("Either method or shifts parameter must be specified")
@@ -780,14 +787,15 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 align_kwargs["order"] = 1
             else:
                 align_kwargs["order"] = 0
-        aligned = self.map(align_single_frame,
-                           shifts=shifts,
-                           inplace=inplace,
-                           lazy_output=lazy_output,
-                           output_dtype=self.data.dtype,
-                           output_signal_size=self.axes_manager.signal_shape[::-1],
-                           **align_kwargs)
-
+        aligned = self.map(
+            align_single_frame,
+            shifts=shifts,
+            inplace=inplace,
+            lazy_output=lazy_output,
+            output_dtype=self.data.dtype,
+            output_signal_size=self.axes_manager.signal_shape[::-1],
+            **align_kwargs,
+        )
 
         if return_shifts and inplace:
             return shifts
@@ -1920,13 +1928,17 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         """
         if "lazy_result" in kwargs:
-            warnings.warn("lazy_result was replaced with lazy_output in version 0.14",
-                          DeprecationWarning)
+            warnings.warn(
+                "lazy_result was replaced with lazy_output in version 0.14",
+                DeprecationWarning,
+            )
             kwargs["lazy_output"] = kwargs.pop("lazy_result")
         if "wavelength" in kwargs:
-            warnings.warn("The wavelength parameter was removed in 0.14. The wavelength "
-                          "can be set using the `set_ai` function or using `s.beam_energy`"
-                          " for `ElectronDiffraction2D` signals")
+            warnings.warn(
+                "The wavelength parameter was removed in 0.14. The wavelength "
+                "can be set using the `set_ai` function or using `s.beam_energy`"
+                " for `ElectronDiffraction2D` signals"
+            )
             kwargs.pop("wavelength")
 
         sig_shape = self.axes_manager.signal_shape
@@ -1955,7 +1967,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         k_axis.name = "Radius"
         k_axis.scale = (radial_range[1] - radial_range[0]) / npt
         k_axis.offset = radial_range[0]
-        
+
         return integration
 
     def get_azimuthal_integral2d(

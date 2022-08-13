@@ -136,8 +136,8 @@ def _get_setup(wavelength, pyxem_unit, pixel_scale, radial_range=None):
     else:
         theta0 = pixel_scale[0] * (wavelength / wavelength_scale)
         theta1 = pixel_scale[1] * (wavelength / wavelength_scale)
-        pixel_1_size = np.tan(theta0)*detector_distance
-        pixel_2_size = np.tan(theta1)* detector_distance
+        pixel_1_size = np.tan(theta0) * detector_distance
+        pixel_2_size = np.tan(theta1) * detector_distance
     detector = Detector(pixel1=pixel_1_size, pixel2=pixel_2_size)
     if radial_range is not None:
         radial_range = [radial_range[0], radial_range[1]]
@@ -152,7 +152,7 @@ register_radial_unit(
     "k_A^-1",
     center="qArray",
     delta="deltaQ",
-    scale=.1 / (2 * np.pi),
+    scale=0.1 / (2 * np.pi),
     label=r"Scattering vector $k$ ($\AA^{-1}$)",
     equation=eq_q,
     short_name="k",

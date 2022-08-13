@@ -350,7 +350,7 @@ class DiffractionVectors(BaseSignal):
         # If ragged the signal axes will not be defined
         if len(self.axes_manager.signal_axes) == 0:
             magnitudes = self.map(
-                calculate_norms_ragged, inplace=False,ragged=True, *args, **kwargs
+                calculate_norms_ragged, inplace=False, ragged=True, *args, **kwargs
             )
         # Otherwise easier to calculate.
         else:

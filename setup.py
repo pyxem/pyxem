@@ -38,7 +38,7 @@ extra_feature_requirements = {
         "pytest     >= 5.0",
         "pytest-cov >= 2.8.1",
         "coveralls  >= 1.10",
-        "coverage   >= 5.0"
+        "coverage   >= 5.0",
     ],
     "dev": ["black", "pre-commit >=1.16"],
     "gpu": ["cupy >= 9.0.0"],
@@ -66,6 +66,7 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Development Status :: 4 - Beta",
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
@@ -89,7 +90,7 @@ setup(
         "psutil",
         "pyfai",
         "scikit-image   >= 0.17.0",
-        "scikit-learn   >= 0.19",  # reason unknown
+        "scikit-learn   >= 1.0",
         "scipy",
         "transforms3d",
     ],
