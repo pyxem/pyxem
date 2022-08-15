@@ -40,10 +40,6 @@ from pyxem.utils.signal import (
 from pyxem.utils._deprecated import deprecated
 
 
-@deprecated(since="0.14",
-            alternative="pyxem.generators.AcceleratedIndexationGenerator or pyxem.generators.VectorIndexationGenerator",
-            alternative_is_function=True,
-            removal="1.0.0", )
 class IndexationGenerator:
     """Generates an indexer for data using a number of methods.
 
@@ -68,10 +64,6 @@ class IndexationGenerator:
         )
 
 
-@deprecated(since="0.14",
-            alternative="pyxem.generators.AcceleratedIndexationGenerator or pyxem.generators.VectorIndexationGenerator",
-            alternative_is_function=True,
-            removal="1.0.0", )
 class TemplateIndexationGenerator:
     """Generates an indexer for data using a number of methods.
 
@@ -131,10 +123,7 @@ class AcceleratedIndexationGenerator:
         self.library = diffraction_library
 
     def correlate(
-        self,
-        n_largest=5,
-        include_phases=None,
-        **kwargs,
+        self, n_largest=5, include_phases=None, **kwargs,
     ):
         """
         Correlates the library of simulated diffraction patterns with the

@@ -41,20 +41,22 @@ class VarianceGenerator:
 
     """
 
-    @deprecated(since="0.15",
-                alternative="diffraction2d.get_variance",
-                alternative_is_function=True,
-                removal="1.0.0", )
+    @deprecated(
+        since="0.15",
+        alternative="pyxem.signals.diffraction2d.get_variance",
+        removal="1.0.0",
+    )
     def __init__(self, signal, *args, **kwargs):
         self.signal = signal
         self.thickness_filter = None
 
-
         # add a check for calibration
-    @deprecated(since="0.15",
-                alternative="diffraction2d.get_variance",
-                alternative_is_function=True,
-                removal="1.0.0", )
+
+    @deprecated(
+        since="0.15",
+        alternative="pyxem.signals.diffraction2d.get_variance",
+        removal="1.0.0",
+    )
     def get_diffraction_variance(self, dqe, set_data_type=None):
         """Calculates the variance in scattered intensity as a function of
         scattering vector.
@@ -101,10 +103,12 @@ class VarianceGenerator:
         dv = transfer_signal_axes(dv, self.signal)
 
         return dv
-    @deprecated(since="0.15",
-                alternative="diffraction2d.get_variance",
-                alternative_is_function=True,
-                removal="1.0.0", )
+
+    @deprecated(
+        since="0.15",
+        alternative="pyxem.signals.diffraction2d.get_variance",
+        removal="1.0.0",
+    )
     def get_image_variance(self, dqe):
         """Calculates the variance in scattered intensity as a function of
         scattering vector. The calculated variance is normalised by the mean
