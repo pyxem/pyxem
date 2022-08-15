@@ -778,9 +778,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 max_index = int(origin_coordinates[0] + half_square_width)
                 temp_signal = temp_signal.isig[min_index:max_index, min_index:max_index]
             shifts = temp_signal.get_direct_beam_position(
-                method=method,
-                lazy_output=lazy_output,
-                **kwargs,
+                method=method, lazy_output=lazy_output, **kwargs,
             )
 
         if not "order" in align_kwargs:
@@ -1093,10 +1091,12 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             s = LazyDiffraction2D(output_array)
         pst._copy_signal_all_axes_metadata(self, s)
         return s
-    @deprecated(since="0.14",
-                alternative="find_peaks",
-                alternative_is_function=True,
-                removal="1.0.0",)
+
+    @deprecated(
+        since="0.14",
+        alternative="hyperspy.signals.signal2d.find_peaks",
+        removal="1.0.0",
+    )
     def find_peaks_lazy(
         self, method="dog", lazy_result=True, show_progressbar=True, **kwargs
     ):
@@ -1588,16 +1588,20 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         return variance
 
     """ Methods associated with radial integration, not pyFAI based """
-    @deprecated(since="0.14",
-                alternative="get_azimuthal_integral1d",
-                alternative_is_function=True,
-                removal="1.0.0",)
+
+    @deprecated(
+        since="0.14",
+        alternative="pyxem.signals.diffraction2d.get_azimuthal_integral1d",
+        removal="1.0.0",
+    )
     def radial_integration(self):
         raise Exception("radial_integration has been renamed radial_average")
-    @deprecated(since="0.14",
-                alternative="get_azimuthal_integral1d",
-                alternative_is_function=True,
-                removal="1.0.0",)
+
+    @deprecated(
+        since="0.14",
+        alternative="pyxem.signals.diffraction2d.get_azimuthal_integral1d",
+        removal="1.0.0",
+    )
     def radial_average(
         self,
         centre_x=None,
