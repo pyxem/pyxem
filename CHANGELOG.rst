@@ -13,6 +13,7 @@ Unreleased
 Added
 -----
 - Added damp_extrapolate_to_zero to ReducedIntensity1D
+- Addded in deprecation wrapper class to wrap deprecated functions in pyxem.
 
 Changed
 -------
