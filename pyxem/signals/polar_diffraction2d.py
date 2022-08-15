@@ -173,6 +173,9 @@ class PolarDiffraction2D(Signal2D):
 
         return correlation
 
+    def get_pearson_correlation(self, **kwargs):
+        return self.get_full_pearson_correlation(**kwargs)
+
     def get_resolved_pearson_correlation(
         self, mask=None, krange=None, inplace=False, **kwargs
     ):
