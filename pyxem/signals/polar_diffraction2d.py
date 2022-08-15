@@ -119,7 +119,9 @@ class PolarDiffraction2D(Signal2D):
 
         return power
 
-    def get_full_pearson_correlation(self, mask=None, krange=None, inplace=False, **kwargs):
+    def get_full_pearson_correlation(
+        self, mask=None, krange=None, inplace=False, **kwargs
+    ):
         """Calculate the fully convolved pearson rotational correlation in the
         form of a Signal1D class.
 
@@ -171,7 +173,9 @@ class PolarDiffraction2D(Signal2D):
 
         return correlation
 
-    def get_resolved_pearson_correlation(self, mask=None, krange=None, inplace=False, **kwargs):
+    def get_resolved_pearson_correlation(
+        self, mask=None, krange=None, inplace=False, **kwargs
+    ):
         """Calculate the pearson rotational correlation with k resolution in
         the form of a Signal2D class.
 
@@ -201,7 +205,7 @@ class PolarDiffraction2D(Signal2D):
             if inplace:
                 s_.crop(-1, start=krange[0], end=krange[1])
             else:
-                s_ = self.isig[:, krange[0]:krange[1]]
+                s_ = self.isig[:, krange[0] : krange[1]]
 
             if mask is not None:
                 mask = Signal2D(mask)
@@ -211,11 +215,7 @@ class PolarDiffraction2D(Signal2D):
                 mask.crop(-1, start=krange[0], end=krange[1])
 
         correlation = s_.map(
-            _pearson_correlation,
-            mask=mask,
-            mode='kresolved',
-            inplace=inplace,
-            **kwargs
+            _pearson_correlation, mask=mask, mode="kresolved", inplace=inplace, **kwargs
         )
 
         s = s_ if inplace else correlation
@@ -224,7 +224,7 @@ class PolarDiffraction2D(Signal2D):
         rho_axis = s.axes_manager.signal_axes[0]
         rho_axis.name = "Correlation Angle, $ \Delta \Theta$"
         rho_axis.offset = 0
-        rho_axis.units = 'rad'
+        rho_axis.units = "rad"
         rho_axis.scale = self.axes_manager[-2].scale
 
         k_axis = s.axes_manager.signal_axes[1]
@@ -233,7 +233,7 @@ class PolarDiffraction2D(Signal2D):
             k_axis.offset = krange[0]
         else:
             k_axis.offset = self.axes_manager[-1].offset
-        k_axis.units = '$\AA^{-1}$'
+        k_axis.units = "$\AA^{-1}$"
         k_axis.scale = self.axes_manager[-1].scale
 
         return correlation

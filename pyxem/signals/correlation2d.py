@@ -23,7 +23,11 @@ import numpy as np
 from hyperspy.signals import Signal2D
 from hyperspy._signals.lazy import LazySignal
 
-from pyxem.utils.correlation_utils import corr_to_power, _get_interpolation_matrix,_symmetry_stem
+from pyxem.utils.correlation_utils import (
+    corr_to_power,
+    _get_interpolation_matrix,
+    _symmetry_stem,
+)
 from pyxem.signals.common_diffraction import CommonDiffraction
 
 
@@ -95,13 +99,15 @@ class Correlation2D(Signal2D, CommonDiffraction):
         fourier_axis.scale = 1
         return power
 
-    def get_symmetry_coefficient(self,
-                                 symmetries=[2, 3, 4, 5, 6, 7, 8, 9, 10],
-                                 angular_range=0,
-                          method="average",
-                          include_duplicates=False,
-                          normalize=True,
-                          **kwargs):
+    def get_symmetry_coefficient(
+        self,
+        symmetries=[2, 3, 4, 5, 6, 7, 8, 9, 10],
+        angular_range=0,
+        method="average",
+        include_duplicates=False,
+        normalize=True,
+        **kwargs
+    ):
         """ This function is for finding and extracting information about clusters
         based on the angular symmetries. This a pretty catch all method which has
         a couple of different operating principles.
@@ -126,17 +132,19 @@ class Correlation2D(Signal2D, CommonDiffraction):
                 already_used = already_used.union(a)
             angles = new_angles
         num_angles = [len(a) for a in angles]
-        interp = [_get_interpolation_matrix(a,
-                                            angular_range,
-                                            num_points=self.axes_manager.signal_axes[0].size,
-                                            method=method)
-                  for a in angles]
+        interp = [
+            _get_interpolation_matrix(
+                a,
+                angular_range,
+                num_points=self.axes_manager.signal_axes[0].size,
+                method=method,
+            )
+            for a in angles
+        ]
 
-        signals = self.map(_symmetry_stem,
-                           interpolation=interp,
-                           inplace=False,
-                           method=method,
-                           **kwargs)
+        signals = self.map(
+            _symmetry_stem, interpolation=interp, inplace=False, method=method, **kwargs
+        )
         if method in ["max", "first"]:
             normalize = False
         if normalize:

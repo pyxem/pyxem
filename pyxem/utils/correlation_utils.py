@@ -29,9 +29,7 @@ def _correlation(z, axis=0, mask=None, wrap=True, normalize=True):
         # is a power of 2.  Based on the numpy implementation.  Not terribly
         # faster I think..
         padder[axis] = (pad, pad)
-        slicer = [
-            slice(None),
-        ] * len(z_shape)
+        slicer = [slice(None),] * len(z_shape)
         slicer[axis] = slice(0, -2 * pad)  # creating the proper slices
         if mask is None:
             mask = np.zeros(shape=np.shape(z))
@@ -113,7 +111,7 @@ def _power(z, axis=0, mask=None, wrap=True, normalize=True):
         ).real
 
 
-def _pearson_correlation(z, mask=None, mode='full'):
+def _pearson_correlation(z, mask=None, mode="full"):
     """
     Calculate Pearson cross-correlation of the image with itself
     after rotation as a function of rotation
@@ -152,12 +150,18 @@ def _pearson_correlation(z, mask=None, mode='full'):
         fft_intensity = np.fft.fft(z, axis=1) / z_length
         a = np.fft.ifft(fft_intensity * fft_intensity.conj(), axis=1).real * z_length
 
-    if mode == 'full':
-        p_correlation = (np.mean(a, axis=0) - np.mean(z) ** 2) / (np.mean(z ** 2) - np.mean(z) ** 2)
-    elif mode == 'kresolved':
-        p_correlation = (a - np.mean(z, axis=1)[:, np.newaxis] ** 2) / (np.mean(z ** 2, axis=1) - np.mean(z, axis=1) ** 2)[:, np.newaxis]
+    if mode == "full":
+        p_correlation = (np.mean(a, axis=0) - np.mean(z) ** 2) / (
+            np.mean(z ** 2) - np.mean(z) ** 2
+        )
+    elif mode == "kresolved":
+        p_correlation = (a - np.mean(z, axis=1)[:, np.newaxis] ** 2) / (
+            np.mean(z ** 2, axis=1) - np.mean(z, axis=1) ** 2
+        )[:, np.newaxis]
     else:
-        raise ValueError('Mode cannot be ' + mode + ', must be chosen from \'full\' or \'kresolved\'')
+        raise ValueError(
+            "Mode cannot be " + mode + ", must be chosen from 'full' or 'kresolved'"
+        )
 
     return p_correlation
 
@@ -226,8 +230,10 @@ def _get_interpolation_matrix(angles, angular_range, num_points, method="average
 
     """
     if method == "average":
-        angular_ranges = [(angle - angular_range / (2*np.pi),
-                           angle + angular_range / (2*np.pi)) for angle in angles]
+        angular_ranges = [
+            (angle - angular_range / (2 * np.pi), angle + angular_range / (2 * np.pi))
+            for angle in angles
+        ]
         angular_ranges = np.multiply(angular_ranges, num_points)
         interpolation_matrix = np.zeros(num_points)
         for i, angle in enumerate(angular_ranges):
@@ -270,12 +276,16 @@ def _symmetry_stem(signal, interpolation, method="average"):
     if method == "average":
         return np.matmul(signal, np.transpose(interpolation))
     elif method == "max":
-        val = np.transpose([np.amax([np.matmul(signal, np.transpose(i))
-                                     for i in interp], axis=0)
-                            for interp in interpolation])
+        val = np.transpose(
+            [
+                np.amax([np.matmul(signal, np.transpose(i)) for i in interp], axis=0)
+                for interp in interpolation
+            ]
+        )
     elif method == "first":
-        val = np.transpose([np.matmul(signal, np.transpose(interp[0]))
-                            for interp in interpolation])
+        val = np.transpose(
+            [np.matmul(signal, np.transpose(interp[0])) for interp in interpolation]
+        )
     else:
         raise ValueError("Method must be one of `average`, `max` or `first`")
     return val
