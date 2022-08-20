@@ -594,7 +594,7 @@ class TestGetEllipseModelRansac:
 
         for iy, ix in np.ndindex(xf.shape):
             assert np.isclose(xf[iy, ix],ellipse_array0[iy, ix][1],atol=1e-8,rtol=1e-3)
-            assert np.isclose((yf[iy, ix],ellipse_array0[iy, ix][0],atol=1e-8,rtol=1e-3)
+            assert np.isclose(yf[iy, ix],ellipse_array0[iy, ix][0],atol=1e-8,rtol=1e-3)
             assert inlier_array0[iy, ix].all()
             assert ellipse_array1[iy, ix] is None
             assert inlier_array1[iy, ix] is None
