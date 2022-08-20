@@ -78,6 +78,7 @@ class TestSimpleMaps:
         )
         assert isinstance(diffraction_pattern, ElectronDiffraction2D)
 
+    @pytest.mark.skip(reason="Dynamic version is broken downstream in scikit image, issue pyxem/#870")
     def test_apply_affine_transforms_paths(self, diffraction_pattern):
         D = np.array([[1.0, 0.9, 0.0], [1.1, 1.0, 0.0], [0.0, 0.0, 1.0]])
         s = Signal2D(np.asarray([[D, D], [D, D]]))
