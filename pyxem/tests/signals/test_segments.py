@@ -161,7 +161,7 @@ class TestLearningSegment:
 )
 def unique_vectors(request):
     uv = DiffractionVectors(request.param)
-    uv.axes_manager.set_signal_dimension(0)
+    uv = uv.transpose(signal_axes=0)
     return uv
 
 

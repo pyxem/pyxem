@@ -163,7 +163,7 @@ class DiffractionVectors(BaseSignal):
         )
 
         vectors = cls(gvectors)
-        vectors.axes_manager.set_signal_dimension(0)
+        vectors = vectors.transpose(signal_axes=0)
 
         return vectors
 
@@ -262,7 +262,7 @@ class DiffractionVectors(BaseSignal):
                 )
             else:
                 peaks = DiffractionVectors(cores)
-                peaks.axes_manager.set_signal_dimension(1)
+                peaks = peaks.transpose(signal_axes=1)
                 # Since this original number of vectors can be huge, we
                 # find a reduced number of vectors that should be plotted, by
                 # running a new clustering on all the vectors not considered
@@ -355,7 +355,7 @@ class DiffractionVectors(BaseSignal):
         # Otherwise easier to calculate.
         else:
             magnitudes = BaseSignal(calculate_norms(self))
-            magnitudes.axes_manager.set_signal_dimension(0)
+            magnitudes = magnitudes.transpose(signal_axes=0)
 
         return magnitudes
 
@@ -524,7 +524,7 @@ class DiffractionVectors(BaseSignal):
         # Manipulate into DiffractionVectors class
         if unique_peaks.size > 0:
             unique_peaks = DiffractionVectors(unique_peaks)
-            unique_peaks.axes_manager.set_signal_dimension(1)
+            unique_peaks = unique_peaks.transpose(signal_axes=1)
         if return_clusters and method == "DBSCAN":
             return unique_peaks, clusters
         else:
@@ -563,7 +563,7 @@ class DiffractionVectors(BaseSignal):
             )
             # Type assignment to DiffractionVectors for return
             filtered_vectors = DiffractionVectors(filtered_vectors)
-            filtered_vectors.axes_manager.set_signal_dimension(0)
+            filtered_vectors = filtered_vectors.transpose(signal_axes=0)
         # Otherwise easier to calculate.
         else:
             magnitudes = self.get_magnitudes()
@@ -618,7 +618,7 @@ class DiffractionVectors(BaseSignal):
             )
             # Type assignment to DiffractionVectors for return
             filtered_vectors = DiffractionVectors(filtered_vectors)
-            filtered_vectors.axes_manager.set_signal_dimension(0)
+            filtered_vectors = filtered_vectors.transpose(signal_axes=0)
         # Otherwise easier to calculate.
         else:
             x_inbounds = (
@@ -628,7 +628,7 @@ class DiffractionVectors(BaseSignal):
             filtered_vectors = self.data[np.logical_and(x_inbounds, y_inbounds)]
             # Type assignment to DiffractionVectors for return
             filtered_vectors = DiffractionVectors(filtered_vectors)
-            filtered_vectors.axes_manager.set_signal_dimension(1)
+            filtered_vectors = filtered_vectors.transpose(signal_axes=1)
 
         transfer_navigation_axes(filtered_vectors, self)
 
@@ -714,4 +714,4 @@ class DiffractionVectors2D(DiffractionVectors):
     def __init__(self, *args, **kw):
         super().__init__(*args, **kw)
         if self.axes_manager.signal_dimension != 2:
-            self.axes_manager.set_signal_dimension(2)
+            self.transpose(signal_axes=2)

@@ -47,7 +47,7 @@ from pyxem.signals import DiffractionVectors
 )
 def diffraction_vectors_single(request):
     dvs = DiffractionVectors(request.param)
-    dvs.axes_manager.set_signal_dimension(1)
+    dvs = dvs.transpose(signal_axes=1)
     return dvs
 
 
@@ -110,7 +110,7 @@ def diffraction_vectors_single(request):
 )
 def diffraction_vectors_map(request):
     dvm = DiffractionVectors(request.param)
-    dvm.axes_manager.set_signal_dimension(0)
+    dvm = dvm.transpose(signal_axes=0)
     dvm.axes_manager[0].name = "x"
     dvm.axes_manager[1].name = "y"
     return dvm

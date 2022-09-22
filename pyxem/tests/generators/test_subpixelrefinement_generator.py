@@ -81,8 +81,8 @@ class Test_init_xfails:
         """Tests that navigation dimensions must be appropriate too."""
         dp = ElectronDiffraction2D(np.zeros((2, 2, 8, 8)))
         vectors = DiffractionVectors(np.zeros((1, 2)))
-        dp.axes_manager.set_signal_dimension(2)
-        vectors.axes_manager.set_signal_dimension(0)
+        dp = dp.transpose(signal_axes=2)
+        vectors = vectors.transpose(signal_axes=0)
 
         # Note - uses regex via re.search()
         with pytest.raises(
@@ -119,7 +119,7 @@ class set_up_for_subpixelpeakfinders:
         v1 = np.array([[90 - 64, 30 - 64]])
         v2 = np.array([[90 - 64, 30 - 64], [100 - 64, 60 - 64]])
         vectors = DiffractionVectors(np.array([[v1, v1], [v2, v2]]))
-        vectors.axes_manager.set_signal_dimension(0)
+        vectors = vectors.transpose(signal_axes=0)
         return vectors
 
 

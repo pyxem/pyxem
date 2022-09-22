@@ -32,7 +32,7 @@ from pyxem.signals import (
 @pytest.fixture(params=[np.array([[1, 1], [2, 2]])])
 def diffraction_vectors(request):
     dvec = DiffractionVectors(request.param)
-    dvec.axes_manager.set_signal_dimension(1)
+    dvec = dvec.transpose(signal_axes=1)
     return dvec
 
 
@@ -55,7 +55,7 @@ class TestVirtualDarkFieldGenerator:
                 dtype=object,
             )
         )
-        dvm.axes_manager.set_signal_dimension(0)
+        dvm = dvm.transpose(signal_axes=0)
 
         vdfgen = VirtualDarkFieldGenerator(diffraction_pattern, dvm)
         assert isinstance(vdfgen.signal, ElectronDiffraction2D)
@@ -126,7 +126,7 @@ def test_vdf_generator_from_map(diffraction_pattern):
             dtype=object,
         )
     )
-    dvm.axes_manager.set_signal_dimension(0)
+    dvm = dvm.transpose(signal_axes=0)
 
     vdfgen = VirtualImageGenerator(diffraction_pattern, dvm)
     assert isinstance(vdfgen, VirtualImageGenerator)

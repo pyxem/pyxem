@@ -150,7 +150,7 @@ class VirtualDarkFieldImage(Signal2D):
         n = vdfsegs.segments.axes_manager.navigation_axes[0]
         n.name = "n"
         n.units = "number"
-        vdfsegs.vectors_of_segments.axes_manager.set_signal_dimension(1)
+        vdfsegs.vectors_of_segments = vdfsegs.vectors_of_segments.transpose(signal_axes=1)
         vdfsegs.vectors_of_segments = transfer_signal_axes(
             vdfsegs.vectors_of_segments, self.vectors
         )
