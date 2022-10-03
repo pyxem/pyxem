@@ -581,7 +581,12 @@ class TestGetChunking:
     def test_chunk_bytes(self):
         s = LazyDiffraction2D(da.zeros((32, 32, 256, 256), dtype=np.uint16))
         chunks = dt._get_chunking(s, chunk_bytes="15MiB")
-        assert chunks == ((8, 8, 8, 8), (8, 8, 8, 8), (256,), (256,))
+        assert chunks == da.core.normalize_chunks(
+            chunks={0: "auto", 1: "auto", 2: -1, 3: -1},
+            limit="15MiB",
+            shape=s.data.shape,
+            dtype=s.data.dtype,
+        )
 
 
 class TestAlignSingleFrame:
