@@ -724,6 +724,7 @@ class TestThresholdArray:
         slice_array = [slice(None)] * len(shape)
         slice_array[-1] = slice(5, 6)
         slice_array[-2] = slice(10, 11)
+        slice_array = tuple(slice_array)
         numpy_array[slice_array] = 10000000
         dask_array = da.from_array(numpy_array)
         data = dt._threshold_array(dask_array, threshold_value=1)
