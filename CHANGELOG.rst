@@ -21,6 +21,8 @@ Changed
 Fixed
 -----
 - Fixed a factor of 1/2 missing in ScatteringFitComponentXTables
+- Bugfix related to Numpy 1.24.0. Strict array creation with dtype=object is needed
+  for ragged arrays. (#880 & #881)
 
 
 2022-15-06 - version 0.14.2

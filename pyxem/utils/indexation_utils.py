@@ -137,7 +137,7 @@ def index_magnitudes(z, simulation, tolerance):
         diffs = diff[np.where(diff < tolerance)]
 
         indices = np.array((hkls, diffs))
-        indexation[i] = np.array((mags.data[i], indices))
+        indexation[i] = np.array((mags.data[i], indices), dtype=object)
 
     return indexation
 
