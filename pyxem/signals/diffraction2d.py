@@ -127,11 +127,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         else:
             out_dtype = self.data.dtype
 
-        if "output_shape" in kwargs:
-            output_shape = kwargs["output_shape"]
-        else:
-            output_shape= shape
-
+        output_shape = kwargs.get("output_shape", shape)
         return self.map(
             apply_transformation,
             transformation=transformation,
