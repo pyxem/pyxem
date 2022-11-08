@@ -122,9 +122,21 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 convert_affine_to_transform, shape=shape, inplace=False
             )
 
+        if not keep_dtype:
+            out_dtype = float
+        else:
+            out_dtype = self.data.dtype
+
+        if "output_shape" in kwargs:
+            output_shape = kwargs["output_shape"]
+        else:
+            output_shape= shape
+
         return self.map(
             apply_transformation,
             transformation=transformation,
+            output_dtype=out_dtype,
+            output_signal_size=output_shape,
             order=order,
             keep_dtype=keep_dtype,
             inplace=inplace,
