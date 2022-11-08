@@ -76,6 +76,7 @@ class TestGet4DMarkerList:
         assert len(marker_list) == 3
 
     def test_bool_array(self):
+        np.random.seed(7)
         peak_array = np.empty((2, 3), dtype=object)
         bool_array = np.empty((2, 3), dtype=object)
         for ix, iy in np.ndindex(peak_array.shape):

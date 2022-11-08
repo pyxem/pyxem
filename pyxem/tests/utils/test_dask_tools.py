@@ -581,7 +581,12 @@ class TestGetChunking:
     def test_chunk_bytes(self):
         s = LazyDiffraction2D(da.zeros((32, 32, 256, 256), dtype=np.uint16))
         chunks = dt._get_chunking(s, chunk_bytes="15MiB")
-        assert chunks == ((8, 8, 8, 8), (8, 8, 8, 8), (256,), (256,))
+        assert chunks == da.core.normalize_chunks(
+            chunks={0: "auto", 1: "auto", 2: -1, 3: -1},
+            limit="15MiB",
+            shape=s.data.shape,
+            dtype=s.data.dtype,
+        )
 
 
 class TestAlignSingleFrame:
@@ -719,6 +724,7 @@ class TestThresholdArray:
         slice_array = [slice(None)] * len(shape)
         slice_array[-1] = slice(5, 6)
         slice_array[-2] = slice(10, 11)
+        slice_array = tuple(slice_array)
         numpy_array[slice_array] = 10000000
         dask_array = da.from_array(numpy_array)
         data = dt._threshold_array(dask_array, threshold_value=1)
