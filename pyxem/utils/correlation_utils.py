@@ -184,6 +184,9 @@ def _wrap_set_float(target, bottom, top, value):
     value:
         The value to set the range as.
     """
+    if (top-bottom) > 0:
+        value = value/(top-bottom+1)
+
     ceiling_bottom = int(np.ceil(bottom))
     residual_bottom = ceiling_bottom - bottom
     floor_top = int(np.floor(top))
@@ -198,7 +201,7 @@ def _wrap_set_float(target, bottom, top, value):
         target[ceiling_bottom:] = value
         target[ceiling_bottom - 1] = value * residual_bottom
     else:
-        target[ceiling_bottom : floor_top + 1] = value
+        target[ceiling_bottom: floor_top + 1] = value
         target[ceiling_bottom - 1] = value * residual_bottom
         if floor_top + 1 > len(target) - 1:
             target[0] = value * residual_top
