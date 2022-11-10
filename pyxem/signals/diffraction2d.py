@@ -1093,7 +1093,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         return s
 
     @deprecated(
-        since="0.14",
+        since="0.15",
         alternative="hyperspy.signals.signal2d.find_peaks",
         removal="1.0.0",
     )
@@ -1590,7 +1590,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
     """ Methods associated with radial integration, not pyFAI based """
 
     @deprecated(
-        since="0.14",
+        since="0.15",
         alternative="pyxem.signals.diffraction2d.get_azimuthal_integral1d",
         removal="1.0.0",
     )
@@ -1598,7 +1598,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         raise Exception("radial_integration has been renamed radial_average")
 
     @deprecated(
-        since="0.14",
+        since="0.15",
         alternative="pyxem.signals.diffraction2d.get_azimuthal_integral1d",
         removal="1.0.0",
     )

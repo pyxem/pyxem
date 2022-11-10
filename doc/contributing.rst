@@ -153,8 +153,8 @@ Tips for writing Jupyter notebooks that are meant to be converted to reST text f
   must be added to the gallery in the README.rst to be included in the
   documentation pages.
 
-Deprecations:
-=============
+Deprecations
+============
 We attempt to adhere to semantic versioning as best we can. This means that as little,
 ideally no, functionality should break between minor releases. Deprecation warnings
 are raised whenever possible and feasible for functions/methods/properties/arguments,

@@ -37,7 +37,6 @@ from pyxem.utils.signal import (
     select_method_from_method_dict,
     transfer_navigation_axes,
 )
-from pyxem.utils._deprecated import deprecated
 
 
 class IndexationGenerator:

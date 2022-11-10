@@ -40,7 +40,7 @@ class deprecated:
     `scikit-image
     <https://github.com/scikit-image/scikit-image/blob/main/skimage/_shared/utils.py>`_
     and `matplotlib
-    <https://github.com/matplotlib/matplotlib/blob/master/lib/matplotlib/_api/deprecation.py#L122>`_.
+    <https://github.com/matplotlib/matplotlib/blob/master/lib/matplotlib/_api/deprecation.py>`_.
     """
 
     def __init__(
@@ -50,6 +50,7 @@ class deprecated:
         alternative_is_function: bool = True,
         removal: Union[str, int, float, None] = None,
     ):
+
         """Visible deprecation warning.
         Parameters
         ----------
@@ -116,7 +117,7 @@ class deprecated_argument:
     """Decorator to remove an argument from a function or method's
     signature.
     Adapted from `scikit-image
-    <https://github.com/scikit-image/scikit-image/blob/main/skimage/_shared/utils.py#L115>`_.
+    <https://github.com/scikit-image/scikit-image/blob/main/skimage/_shared/utils.py>`_.
     """
 
     def __init__(self, name, since, removal, alternative=None):
