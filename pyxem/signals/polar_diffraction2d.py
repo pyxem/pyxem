@@ -20,7 +20,9 @@
 from hyperspy.signals import Signal2D
 from hyperspy._signals.lazy import LazySignal
 
+import pyxem.signals
 from pyxem.utils.correlation_utils import _correlation, _power, _pearson_correlation
+from pyxem.utils._deprecated import deprecated
 
 
 class PolarDiffraction2D(Signal2D):
@@ -173,6 +175,7 @@ class PolarDiffraction2D(Signal2D):
 
         return correlation
 
+    @deprecated(since="0.15", removal="1.0.0", alternative="pyxem.signals.PolarDiffraction2D.get_pearson_correlation")
     def get_pearson_correlation(self, **kwargs):
         return self.get_full_pearson_correlation(**kwargs)
 
