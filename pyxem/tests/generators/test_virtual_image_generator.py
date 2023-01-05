@@ -23,6 +23,7 @@ import hyperspy.api as hs
 from pyxem.generators import VirtualImageGenerator, VirtualDarkFieldGenerator
 from pyxem.signals import (
     Diffraction2D,
+    DiffractionVectors2D,
     ElectronDiffraction2D,
     DiffractionVectors,
     VirtualDarkFieldImage,
@@ -31,8 +32,7 @@ from pyxem.signals import (
 
 @pytest.fixture(params=[np.array([[1, 1], [2, 2]])])
 def diffraction_vectors(request):
-    dvec = DiffractionVectors(request.param)
-    dvec.axes_manager.set_signal_dimension(1)
+    dvec = DiffractionVectors2D(request.param)
     return dvec
 
 
@@ -55,11 +55,11 @@ class TestVirtualDarkFieldGenerator:
                 dtype=object,
             )
         )
-        dvm.axes_manager.set_signal_dimension(0)
-
+        assert isinstance(dvm, DiffractionVectors)
         vdfgen = VirtualDarkFieldGenerator(diffraction_pattern, dvm)
+
         assert isinstance(vdfgen.signal, ElectronDiffraction2D)
-        assert isinstance(vdfgen.vectors, DiffractionVectors)
+        assert isinstance(vdfgen.vectors, DiffractionVectors2D)
 
     @pytest.mark.parametrize("radius, normalize", [(4.0, False), (4.0, True)])
     def test_get_virtual_dark_field_images(self, vdf_generator, radius, normalize):
@@ -126,8 +126,6 @@ def test_vdf_generator_from_map(diffraction_pattern):
             dtype=object,
         )
     )
-    dvm.axes_manager.set_signal_dimension(0)
-
     vdfgen = VirtualImageGenerator(diffraction_pattern, dvm)
     assert isinstance(vdfgen, VirtualImageGenerator)
 

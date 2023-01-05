@@ -28,6 +28,7 @@ from pyxem.signals import (
     DiffractionVectors,
     LearningSegment,
     VDFSegment,
+    DiffractionVectors2D,
 )
 
 
@@ -160,8 +161,7 @@ class TestLearningSegment:
     ]
 )
 def unique_vectors(request):
-    uv = DiffractionVectors(request.param)
-    uv.axes_manager.set_signal_dimension(0)
+    uv = DiffractionVectors2D(request.param)
     return uv
 
 
