@@ -22,7 +22,7 @@ import numpy.linalg as la
 from tqdm import tqdm
 from hyperspy.components1d import Polynomial, Gaussian
 from hyperspy.signals import Signal2D
-from hyperspy.utils.markers import point, line_segment
+from hyperspy.utils.markers import Point, LineSegment
 from hyperspy.misc.utils import isiterable
 
 import pyxem.utils.pixelated_stem_tools as pst
@@ -605,15 +605,15 @@ def _get_marker_list(
     marker_list = []
     if x_list is not None:
         for x, y in zip(x_list, y_list):
-            point_marker = point(x, y, color="red")
+            point_marker = Point(x, y, color="red")
             if name is not None:
                 point_marker.name = name + "_" + point_marker.name
             marker_list.append(point_marker)
     for i in range(len(xx)):
         if i == (len(xx) - 1):
-            line = line_segment(xx[i], yy[i], xx[0], yy[0], color="green")
+            line = LineSegment(xx[i], yy[i], xx[0], yy[0], color="green")
         else:
-            line = line_segment(xx[i], yy[i], xx[i + 1], yy[i + 1], color="green")
+            line = LineSegment(xx[i], yy[i], xx[i + 1], yy[i + 1], color="green")
         if name is not None:
             line.name = name + "_" + line.name
         marker_list.append(line)
