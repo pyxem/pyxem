@@ -80,7 +80,6 @@ setup(
     install_requires=[
         "dask",
         "diffsims       >= 0.5",
-        "hyperspy       >= 1.7.0",  # significant improvements
         "ipywidgets",
         "lmfit          >= 0.9.12",
         "matplotlib     >= 3.1.1",  # 3.1.0 failed
@@ -93,6 +92,11 @@ setup(
         "scikit-learn   >= 1.0",
         "scipy",
         "transforms3d",
+        # UPDATE BEFORE RELEASE
+        'rosettasciio @ git+https://github.com/hyperspy/rosettasciio#egg=rosettasciio',
+        'hyperspy @ git+https://github.com/hyperspy/hyperspy@RELEASE_next_major#egg=hyperspy',
+        # significant improvements
+
     ],
     python_requires=">=3.7",
     package_data={
