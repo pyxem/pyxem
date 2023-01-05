@@ -644,9 +644,9 @@ class DiffractionVectors(BaseSignal):
         """
         if in_range:
             filtered = self.filter_magnitude(in_range[0], in_range[1])
-            xim = filtered.map(get_npeaks, inplace=False).as_signal2D((0, 1))
+            xim = filtered.map(get_npeaks, inplace=False, ragged=False).as_signal2D((0, 1))
         else:
-            xim = self.map(get_npeaks, inplace=False).as_signal2D((0, 1))
+            xim = self.map(get_npeaks, inplace=False, ragged=False).as_signal2D((0, 1))
         # Make binary if specified
         if binary is True:
             xim = xim >= 1.0
