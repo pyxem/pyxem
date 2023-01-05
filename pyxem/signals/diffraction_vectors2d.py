@@ -25,8 +25,6 @@ from sklearn.cluster import DBSCAN
 
 from hyperspy.signals import Signal2D
 
-from pyxem.utils.vector_utils import calculate_norms
-
 
 class DiffractionVectors2D(Signal2D):
     """Crystallographic mapping results containing the best matching crystal
