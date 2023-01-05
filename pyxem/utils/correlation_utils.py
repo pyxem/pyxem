@@ -29,9 +29,7 @@ def _correlation(z, axis=0, mask=None, wrap=True, normalize=True):
         # is a power of 2.  Based on the numpy implementation.  Not terribly
         # faster I think..
         padder[axis] = (pad, pad)
-        slicer = [
-            slice(None),
-        ] * len(z_shape)
+        slicer = [slice(None),] * len(z_shape)
         slicer[axis] = slice(0, -2 * pad)  # creating the proper slices
         if mask is None:
             mask = np.zeros(shape=np.shape(z))
@@ -113,7 +111,7 @@ def _power(z, axis=0, mask=None, wrap=True, normalize=True):
         ).real
 
 
-def _pearson_correlation(z, mask=None):
+def _pearson_correlation(z, mask=None, mode="full"):
     """
     Calculate Pearson cross-correlation of the image with itself
     after rotation as a function of rotation
@@ -124,6 +122,8 @@ def _pearson_correlation(z, mask=None):
         Input image in 2D array
     mask: np.array
         A boolean mask to be applied.
+    mode: str 'full' or 'kresolved'
+        Mode for calculating pearson correlation, default is 'full'
 
     Returns
     -------
@@ -150,9 +150,19 @@ def _pearson_correlation(z, mask=None):
         fft_intensity = np.fft.fft(z, axis=1) / z_length
         a = np.fft.ifft(fft_intensity * fft_intensity.conj(), axis=1).real * z_length
 
-    p_correlation = (np.mean(a, axis=0) - np.mean(z) ** 2) / (
-        np.mean(z ** 2) - np.mean(z) ** 2
-    )
+    if mode == "full":
+        p_correlation = (np.mean(a, axis=0) - np.mean(z) ** 2) / (
+            np.mean(z ** 2) - np.mean(z) ** 2
+        )
+    elif mode == "kresolved":
+        p_correlation = (a - np.mean(z, axis=1)[:, np.newaxis] ** 2) / (
+            np.mean(z ** 2, axis=1) - np.mean(z, axis=1) ** 2
+        )[:, np.newaxis]
+    else:
+        raise ValueError(
+            "Mode cannot be " + mode + ", must be chosen from 'full' or 'kresolved'"
+        )
+
     return p_correlation
 
 
@@ -174,6 +184,9 @@ def _wrap_set_float(target, bottom, top, value):
     value:
         The value to set the range as.
     """
+    if (top-bottom) > 0:
+        value = value/(top-bottom+1)
+
     ceiling_bottom = int(np.ceil(bottom))
     residual_bottom = ceiling_bottom - bottom
     floor_top = int(np.floor(top))
@@ -188,7 +201,7 @@ def _wrap_set_float(target, bottom, top, value):
         target[ceiling_bottom:] = value
         target[ceiling_bottom - 1] = value * residual_bottom
     else:
-        target[ceiling_bottom : floor_top + 1] = value
+        target[ceiling_bottom: floor_top + 1] = value
         target[ceiling_bottom - 1] = value * residual_bottom
         if floor_top + 1 > len(target) - 1:
             target[0] = value * residual_top

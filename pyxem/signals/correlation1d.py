@@ -87,12 +87,12 @@ class Correlation1D(Signal1D):
         if method == "max" or method == "first":
             normalize = False
         if normalize:
-            signals = np.divide(signals, num_angles)
+            signals.data = np.divide(signals.data, num_angles)
 
         signals.axes_manager.signal_axes[-1].name = "Symmetry Order"
         signals.axes_manager.signal_axes[0].scale = 1
         signals.axes_manager.signal_axes[0].name = "Symmetry"
         signals.axes_manager.signal_axes[0].unit = "a.u."
-        signals.axes_manager.signal_axes[0].offset = 0
+        signals.axes_manager.signal_axes[0].offset = symmetries[0]
 
         return signals
