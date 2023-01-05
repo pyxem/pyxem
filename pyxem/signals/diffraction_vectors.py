@@ -167,6 +167,78 @@ class DiffractionVectors(BaseSignal):
         vectors.transpose(signal_axes=0)
         return vectors
 
+    def _get_navigation_positions(self,
+                                  flatten=False,
+                                  real_units=True):
+        nav_indexes = np.array(list(np.ndindex(self.axes_manager._navigation_shape_in_array)))
+        if not real_units:
+            scales = [1 for a in self.axes_manager.navigation_axes]
+            offsets = [0 for a in self.axes_manager.navigation_axes]
+        else:
+            scales = [a.scale for a in self.axes_manager.navigation_axes]
+            offsets = [a.offset for a in self.axes_manager.navigation_axes]
+
+        if flatten:
+            real_nav = np.array(
+                [
+                    np.array(ind) * scales + offsets
+                    for ind in np.array(list(nav_indexes))
+                ]
+            )
+        else:
+            real_nav = np.reshape(
+                [
+                    np.array(ind) * scales + offsets
+                    for ind in np.array(list(nav_indexes))
+                ],
+                self.axes_manager._navigation_shape_in_array + (-1,),
+            )
+        return real_nav
+
+    def flatten_diffraction_vectors(self, real_units=True,):
+        """ Flattens the diffraction vectors into a `DiffractionVector2D` object.
+
+        Each navigation axis is transformed into a vector defined by the scale and offset.
+        This method allows purely vector based actions like filtering or determining unique
+        values.
+
+        Parameters
+        ----------
+        real_units: bool
+            If the navigation dimension should be flattened based on the pixel position
+            or the real value as determined by the scale and offset.
+        """
+        nav_positions = self._get_navigation_positions(flatten=True, real_units=real_units)
+
+        vectors = np.vstack([np.hstack([np.tile(nav_pos,
+                                                (len(self.data[ind]), 1)),
+                                        self.data[ind]])
+                             for ind, nav_pos in zip(np.ndindex(self.data.shape), nav_positions)])
+
+        if real_units:
+            scales = [a.scale for a in self.axes_manager.navigation_axes]
+            offsets = [a.offset for a in self.axes_manager.navigation_axes]
+        else:
+            scales = [1 for a in self.axes_manager.navigation_axes]
+            offsets = [0 for a in self.axes_manager.navigation_axes]
+
+        if self.column_offsets is None:
+            column_offsets = [None, ]*(vectors.shape[1]-len(self.axes_manager.navigation_axes))
+        else:
+            column_offsets = self.column_offsets
+
+        if self.column_scale is None:
+            column_scale = [None, ]*(vectors.shape[1]-len(self.axes_manager.navigation_axes))
+        else:
+            column_scale = self.column_scale
+
+        column_offsets = np.append(column_offsets, offsets)
+        column_scale = np.append(column_scale, scales)
+
+        return DiffractionVectors2D(vectors,
+                                    column_offsets=column_offsets,
+                                    column_scale=column_scale)
+
     def plot_diffraction_vectors(
         self,
         xlim=1.0,
