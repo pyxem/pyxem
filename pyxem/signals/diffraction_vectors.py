@@ -26,7 +26,7 @@ from scipy.spatial import distance_matrix
 from sklearn.cluster import DBSCAN
 
 from hyperspy.signals import BaseSignal, Signal1D
-from hyperspy.api import markers
+from hyperspy.drawing.marker import markers
 
 from pyxem.utils.signal import (
     transfer_navigation_axes,
@@ -164,7 +164,7 @@ class DiffractionVectors(BaseSignal):
         )
 
         vectors = cls(gvectors)
-
+        vectors.transpose(signal_axes=0)
         return vectors
 
     def plot_diffraction_vectors(
@@ -262,7 +262,7 @@ class DiffractionVectors(BaseSignal):
                 )
             else:
                 peaks = DiffractionVectors(cores)
-                peaks.axes_manager.set_signal_dimension(1)
+                peaks.transpose(signal_axes=1)
                 # Since this original number of vectors can be huge, we
                 # find a reduced number of vectors that should be plotted, by
                 # running a new clustering on all the vectors not considered
@@ -355,7 +355,7 @@ class DiffractionVectors(BaseSignal):
         # Otherwise easier to calculate.
         else:
             magnitudes = BaseSignal(calculate_norms(self))
-            magnitudes.axes_manager.set_signal_dimension(0)
+            magnitudes.transpose(signal_axes=0)
 
         return magnitudes
 
@@ -523,8 +523,8 @@ class DiffractionVectors(BaseSignal):
 
         # Manipulate into DiffractionVectors class
         if unique_peaks.size > 0:
-            unique_peaks = DiffractionVectors(unique_peaks)
-            unique_peaks.axes_manager.set_signal_dimension(1)
+            unique_peaks.transpose(signal_axes=0)
+            unique_peaks.set_signal_type = "diffraction_vectors"
         if return_clusters and method == "DBSCAN":
             return unique_peaks, clusters
         else:
@@ -598,8 +598,9 @@ class DiffractionVectors(BaseSignal):
                 **kwargs
             )
             # Type assignment to DiffractionVectors for return
-            filtered_vectors = DiffractionVectors(filtered_vectors)
-            filtered_vectors.axes_manager.set_signal_dimension(0)
+
+            filtered_vectors = filtered_vectors.transpose(signal_axes=0)
+            filtered_vectors.set_signal_type("diffraction_vectors")
         # Otherwise easier to calculate.
         else:
             magnitudes = self.get_magnitudes()
@@ -607,6 +608,7 @@ class DiffractionVectors(BaseSignal):
             magnitudes.data[magnitudes.data > max_magnitude] = 0
             filtered_vectors = self.data[np.where(magnitudes)]
             # Type assignment to DiffractionVectors for return
+            filtered_vectors.transpose(signal_axes=0)
             filtered_vectors = DiffractionVectors(filtered_vectors)
             filtered_vectors.axes_manager.set_signal_dimension(1)
 
