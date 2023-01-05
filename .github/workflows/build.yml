@@ -2,9 +2,9 @@ name: build
 
 on:
   push:
-    branches: [master]
+    branches: [master, RELEASE_next_major]
   pull_request:
-    branches: [master]
+    branches: [master, RELEASE_next_major]
 
 jobs:
   build-with-pip:
