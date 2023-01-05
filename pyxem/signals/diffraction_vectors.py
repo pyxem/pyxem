@@ -42,7 +42,8 @@ from pyxem.utils.vector_utils import (
     filter_vectors_near_basis
 )
 from pyxem.utils.expt_utils import peaks_as_gvectors
-
+from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
+from pyxem.signals.diffraction_vectors1d import DiffractionVectors1D
 
 """
 Signal class for diffraction vectors.
@@ -133,11 +134,12 @@ class DiffractionVectors(BaseSignal):
     _signal_type = "diffraction_vectors"
 
     def __init__(self, *args, **kwargs):
+        self.column_scale = kwargs.pop("column_scale", None)
+        self.column_offsets = kwargs.pop("column_offsets", None)
+        self.detector_shape = kwargs.pop("detector_shape", None)
         super().__init__(*args, **kwargs)
         self.cartesian = None
         self.hkls = None
-        self.detector_shape = None
-        self.pixel_calibration = None
 
     @classmethod
     def from_peaks(cls, peaks, center, calibration):

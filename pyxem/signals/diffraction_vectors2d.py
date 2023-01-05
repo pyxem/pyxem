@@ -17,7 +17,16 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
+import numpy as np
+from warnings import warn
+
+from scipy.spatial import distance_matrix
+from sklearn.cluster import DBSCAN
+
 from hyperspy.signals import Signal2D
+
+from pyxem.utils.vector_utils import calculate_norms
+
 
 class DiffractionVectors2D(Signal2D):
     """Crystallographic mapping results containing the best matching crystal
