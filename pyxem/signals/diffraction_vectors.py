@@ -416,19 +416,16 @@ class DiffractionVectors(BaseSignal):
         -------
         magnitudes : BaseSignal
             A signal with navigation dimensions as the original diffraction
-            vectors containging an array of gvector magnitudes at each
+            vectors containg an array of gvector magnitudes at each
             navigation position.
 
         """
-        # If ragged the signal axes will not be defined
-        if len(self.axes_manager.signal_axes) == 0:
-            magnitudes = self.map(
-                calculate_norms_ragged, inplace=False, ragged=True, *args, **kwargs
-            )
-        # Otherwise easier to calculate.
-        else:
-            magnitudes = BaseSignal(calculate_norms(self))
-            magnitudes.transpose(signal_axes=0)
+        magnitudes = self.map(np.linalg.norm,
+                              inplace=False,
+                              axis=-1,
+                              ragged=True,
+                              *args,
+                              **kwargs)
 
         return magnitudes
 
@@ -469,13 +466,7 @@ class DiffractionVectors(BaseSignal):
 
         return ghis
 
-    def get_unique_vectors(
-        self,
-        distance_threshold=0.01,
-        method="distance_comparison",
-        min_samples=1,
-        return_clusters=False,
-    ):
+    def get_unique_vectors(self, *args, **kwargs):
         """Returns diffraction vectors considered unique by:
         strict comparison, distance comparison with a specified
         threshold, or by clustering using DBSCAN [1].
@@ -519,91 +510,15 @@ class DiffractionVectors(BaseSignal):
             The results from the clustering, given as class DBSCAN.
             Only returned if method='DBSCAN' and return_clusters=True.
         """
-        # Flatten the array of peaks to reach dimension (n, 2), where n
-        # is the number of peaks.
-        peaks_all = np.concatenate([peaks.ravel() for peaks in self.data.flat]).reshape(
-            -1, 2
-        )
+        flattened_vectors = self.flatten_diffraction_vectors(real_units=True)
 
-        # A distance_threshold of 0 implies a strict comparison. So in that
-        # case, a warning is raised unless the specified method is 'strict'.
-        if distance_threshold == 0:
-            if method != "strict":
-                warn(
-                    "distance_threshold=0 was given, and therefore "
-                    "a strict comparison is used, even though the "
-                    "specified method was {}".format(method)
-                )
-                method = "strict"
+        return flattened_vectors.get_unique_vectors(*args, **kwargs)
 
-        if method == "strict":
-            unique_peaks = np.unique(peaks_all, axis=0)
-
-        elif method == "distance_comparison":
-            unique_vectors, unique_counts = np.unique(
-                peaks_all, axis=0, return_counts=True
-            )
-
-            unique_peaks = np.array([[0, 0]])
-            unique_peaks_counts = np.array([0])
-
-            while unique_vectors.shape[0] > 0:
-                unique_vector = unique_vectors[0]
-                distances = distance_matrix(np.array([unique_vector]), unique_vectors)
-                indices = np.where(distances < distance_threshold)[1]
-
-                new_count = indices.size
-                new_unique_peak = np.array(
-                    [
-                        np.average(
-                            unique_vectors[indices],
-                            weights=unique_counts[indices],
-                            axis=0,
-                        )
-                    ]
-                )
-
-                unique_peaks = np.append(unique_peaks, new_unique_peak, axis=0)
-
-                unique_peaks_counts = np.append(unique_peaks_counts, new_count)
-                unique_vectors = np.delete(unique_vectors, indices, axis=0)
-                unique_counts = np.delete(unique_counts, indices, axis=0)
-            unique_peaks = np.delete(unique_peaks, [0], axis=0)
-
-        elif method == "DBSCAN":
-            # All peaks are clustered by DBSCAN so that peaks within
-            # one cluster are separated by distance_threshold or less.
-            unique_vectors, unique_vectors_counts = np.unique(
-                peaks_all, axis=0, return_counts=True
-            )
-            clusters = DBSCAN(
-                eps=distance_threshold, min_samples=min_samples, metric="euclidean"
-            ).fit(unique_vectors, sample_weight=unique_vectors_counts)
-            unique_labels, unique_labels_count = np.unique(
-                clusters.labels_, return_counts=True
-            )
-            unique_peaks = np.zeros((unique_labels.max() + 1, 2))
-
-            # For each cluster, a center of mass is calculated based
-            # on all the peaks within the cluster, and the center of
-            # mass is taken as the final unique vector position.
-            for n in np.arange(unique_labels.max() + 1):
-                peaks_n_temp = unique_vectors[clusters.labels_ == n]
-                peaks_n_counts_temp = unique_vectors_counts[clusters.labels_ == n]
-                unique_peaks[n] = np.average(
-                    peaks_n_temp, weights=peaks_n_counts_temp, axis=0
-                )
-
-        # Manipulate into DiffractionVectors class
-        if unique_peaks.size > 0:
-            unique_peaks.transpose(signal_axes=0)
-            unique_peaks.set_signal_type = "diffraction_vectors"
-        if return_clusters and method == "DBSCAN":
-            return unique_peaks, clusters
-        else:
-            return unique_peaks
-
-    def filter_magnitude(self, min_magnitude, max_magnitude, *args, **kwargs):
+    def filter_magnitude(self,
+                         min_magnitude,
+                         max_magnitude,
+                         *args,
+                         **kwargs):
         """Filter the diffraction vectors to accept only those with a magnitude
         within a user specified range.
 
@@ -624,33 +539,15 @@ class DiffractionVectors(BaseSignal):
             Diffraction vectors within allowed magnitude tolerances.
         """
         # If ragged the signal axes will not be defined
-        if len(self.axes_manager.signal_axes) == 0:
-            filtered_vectors = self.map(
-                filter_vectors_ragged,
-                min_magnitude=min_magnitude,
-                max_magnitude=max_magnitude,
-                inplace=False,
-                ragged=True,
-                *args,
-                **kwargs
-            )
-            # Type assignment to DiffractionVectors for return
-
-            filtered_vectors = filtered_vectors.transpose(signal_axes=0)
-            filtered_vectors.set_signal_type("diffraction_vectors")
-        # Otherwise easier to calculate.
-        else:
-            magnitudes = self.get_magnitudes()
-            magnitudes.data[magnitudes.data < min_magnitude] = 0
-            magnitudes.data[magnitudes.data > max_magnitude] = 0
-            filtered_vectors = self.data[np.where(magnitudes)]
-            # Type assignment to DiffractionVectors for return
-            filtered_vectors.transpose(signal_axes=0)
-            filtered_vectors = DiffractionVectors(filtered_vectors)
-            filtered_vectors.axes_manager.set_signal_dimension(1)
-
-        transfer_navigation_axes(filtered_vectors, self)
-
+        filtered_vectors = self.map(
+            filter_vectors_ragged,
+            min_magnitude=min_magnitude,
+            max_magnitude=max_magnitude,
+            inplace=False,
+            ragged=True,
+            *args,
+            **kwargs
+        )
         return filtered_vectors
 
     def filter_detector_edge(self, exclude_width, *args, **kwargs):
@@ -680,33 +577,15 @@ class DiffractionVectors(BaseSignal):
             self.pixel_calibration * (self.detector_shape[1] / 2)
             - self.pixel_calibration * exclude_width
         )
-        # If ragged the signal axes will not be defined
-        if len(self.axes_manager.signal_axes) == 0:
-            filtered_vectors = self.map(
-                filter_vectors_edge_ragged,
-                x_threshold=x_threshold,
-                y_threshold=y_threshold,
-                inplace=False,
-                ragged=True,
-                *args,
-                **kwargs
-            )
-            # Type assignment to DiffractionVectors for return
-            filtered_vectors = DiffractionVectors(filtered_vectors)
-            filtered_vectors.axes_manager.set_signal_dimension(0)
-        # Otherwise easier to calculate.
-        else:
-            x_inbounds = (
-                np.absolute(self.data.T[0]) < x_threshold
-            )  # True if vector is good to go
-            y_inbounds = np.absolute(self.data.T[1]) < y_threshold
-            filtered_vectors = self.data[np.logical_and(x_inbounds, y_inbounds)]
-            # Type assignment to DiffractionVectors for return
-            filtered_vectors = DiffractionVectors(filtered_vectors)
-            filtered_vectors.axes_manager.set_signal_dimension(1)
-
-        transfer_navigation_axes(filtered_vectors, self)
-
+        filtered_vectors = self.map(
+            filter_vectors_edge_ragged,
+            x_threshold=x_threshold,
+            y_threshold=y_threshold,
+            inplace=False,
+            ragged=True,
+            *args,
+            **kwargs
+        )
         return filtered_vectors
 
     def get_diffracting_pixels_map(self, in_range=None, binary=False):
