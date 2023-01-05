@@ -120,7 +120,7 @@ def test_rotation(Displacement_Grad_Map):
 
 def test_trace(Displacement_Grad_Map):
     """
-    Basis does effect strain measurement, but we can simply calculate suitable invariants.
+    Basis does affect strain measurement, but we can simply calculate suitable invariants.
     See https://en.wikipedia.org/wiki/Infinitesimal_strain_theory for details.
     """
 

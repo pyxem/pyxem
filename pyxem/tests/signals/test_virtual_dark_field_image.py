@@ -23,7 +23,7 @@ import pytest
 from hyperspy.signals import Signal2D
 
 from pyxem.generators import VirtualDarkFieldGenerator
-from pyxem.signals import ElectronDiffraction2D, DiffractionVectors, VDFSegment
+from pyxem.signals import ElectronDiffraction2D, DiffractionVectors, VDFSegment, DiffractionVectors2D
 
 
 @pytest.fixture(
@@ -43,7 +43,7 @@ from pyxem.signals import ElectronDiffraction2D, DiffractionVectors, VDFSegment
     ]
 )
 def unique_vectors(request):
-    uv = DiffractionVectors(request.param)
+    uv = DiffractionVectors2D(request.param)
     return uv
 
 
