@@ -44,7 +44,6 @@ from pyxem.signals import ElectronDiffraction2D, DiffractionVectors, VDFSegment
 )
 def unique_vectors(request):
     uv = DiffractionVectors(request.param)
-    uv.axes_manager.set_signal_dimension(0)
     return uv
 
 
