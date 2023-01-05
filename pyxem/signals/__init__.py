@@ -31,7 +31,9 @@ from .differential_phase_contrast import (
 )
 from .diffraction_variance1d import DiffractionVariance1D
 from .diffraction_variance2d import DiffractionVariance2D, ImageVariance
-from .diffraction_vectors import DiffractionVectors, DiffractionVectors2D
+from .diffraction_vectors import DiffractionVectors
+from .diffraction_vectors2d import DiffractionVectors2D
+from .diffraction_vectors1d import DiffractionVectors1D
 from .diffraction1d import Diffraction1D, LazyDiffraction1D
 from .diffraction2d import Diffraction2D, LazyDiffraction2D
 from .electron_diffraction1d import ElectronDiffraction1D, LazyElectronDiffraction1D

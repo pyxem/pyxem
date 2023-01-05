@@ -733,23 +733,3 @@ class DiffractionVectors(BaseSignal):
         )
 
 
-class DiffractionVectors2D(DiffractionVectors):
-    """Crystallographic mapping results containing the best matching crystal
-    phase and orientation at each navigation position with associated metrics.
-
-    Attributes
-    ----------
-    cartesian : np.array()
-        Array of 3-vectors describing Cartesian coordinates associated with
-        each diffraction vector.
-    hkls : np.array()
-        Array of Miller indices associated with each diffraction vector
-        following indexation.
-    """
-
-    _signal_dimension = 2
-
-    def __init__(self, *args, **kw):
-        super().__init__(*args, **kw)
-        if self.axes_manager.signal_dimension != 2:
-            self.axes_manager.set_signal_dimension(2)
