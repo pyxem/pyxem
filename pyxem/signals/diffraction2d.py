@@ -283,7 +283,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         """
         s_out = self.copy()
         s_out.axes_manager = self.axes_manager.deepcopy()
-        s_out.metadata = self.metadata.deepcopy()
         s_out.data = np.flip(self.data, axis=-1)
         return s_out
 
@@ -314,7 +313,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         """
         s_out = self.copy()
         s_out.axes_manager = self.axes_manager.deepcopy()
-        s_out.metadata = self.metadata.deepcopy()
         s_out.data = np.flip(self.data, axis=-2)
         return s_out
 
