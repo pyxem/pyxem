@@ -66,6 +66,7 @@ __all__ = [
     "DiffractionVariance2D",
     "ImageVariance",
     "DiffractionVectors",
+    "DiffractionVectors1D",
     "DiffractionVectors2D",
     "Diffraction1D",
     "LazyDiffraction1D",
