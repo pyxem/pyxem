@@ -41,6 +41,7 @@ class DiffractionVectors2D(Signal2D):
     """
 
     _signal_dimension = 2
+    _signal_type = "diffraction_vectors"
 
     def __init__(self, *args, **kwargs):
         self.column_scale = kwargs.pop("column_scale", None)
