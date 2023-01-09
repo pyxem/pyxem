@@ -622,7 +622,19 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         Parameters
         ----------
         method : str,
-            Must be one of "cross_correlate", "blur" or "interpolate"
+            Must be one of "cross_correlate", "blur", "interpolate" or "center_of_mass".
+
+           "cross_correlate": Center finding using cross-correlation of circles of 
+                `radius_start` to `radius_finish`.
+           "blur": Center finding by blurring each frame with a Gaussian kernel with 
+                standard deviation `sigma` and finding the maximum.
+           "interpolate": Finding the center by summing along X/Y and finding the peak 
+                for each axis independently. Data is blurred first using a Gaussian kernel 
+                with standard deviation "sigma".
+           "center_of_mass": The center is found using a calculation of the center of mass. 
+                Optionally a `mask` can be applied to focus on just the center of some 
+                dataset. A threshold value can also be given to suppress contrast from 
+                weaker diffraction features.
         lazy_result : optional
             If True, s_shifts will be a lazy signal. If False, a non-lazy signal.
             By default, if the signal is (non-)lazy, the result will also be (non-)lazy.
@@ -653,6 +665,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             "cross_correlate": find_beam_offset_cross_correlation,
             "blur": find_beam_center_blur,
             "interpolate": find_beam_center_interpolate,
+            "center_of_mass": None,
         }
 
         method_function = select_method_from_method_dict(
@@ -688,6 +701,12 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 **kwargs,
             )
             shifts = -centers + origin_coordinates
+        elif method == "center_of_mass":
+            centers = self.center_of_mass(lazy_result=lazy_output,
+                                          show_progressbar=False,
+                                          **kwargs,
+                                          )
+            shifts = -centers.T + origin_coordinates
 
         shifts.set_signal_type("beam_shift")
 
@@ -712,7 +731,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Parameters
         ----------
-        method : str {'cross_correlate', 'blur', 'interpolate'}
+        method : str {'cross_correlate', 'blur', 'interpolate', 'center_of_mass'}
             Method used to estimate the direct beam position. The direct
             beam position can also be passed directly with the shifts parameter.
         half_square_width : int
@@ -785,6 +804,16 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 # fails if non-square dp
                 max_index = int(origin_coordinates[0] + half_square_width)
                 temp_signal = temp_signal.isig[min_index:max_index, min_index:max_index]
+                if method == "center_of_mass" and "mask" in kwargs:
+                    # correct mask coordinates
+                    center_of_mass_mask = kwargs["mask"]
+                    center_of_mass_mask = (
+                        center_of_mass_mask[0] - min_index, 
+                        center_of_mass_mask[1] - min_index, 
+                        center_of_mass_mask[2],
+                    )
+                    kwargs["mask"] = center_of_mass_mask
+            
             shifts = temp_signal.get_direct_beam_position(
                 method=method, lazy_output=lazy_output, **kwargs,
             )

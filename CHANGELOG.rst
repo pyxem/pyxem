@@ -8,12 +8,13 @@ The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`
 and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
 Unreleased
-===========================
+==========
 
 Added
 -----
 - Added damp_extrapolate_to_zero to ReducedIntensity1D
 - Added in deprecation wrapper class to wrap deprecated functions in pyxem.
+- Center-of-mass algorithm added to get_direct_beam_position (#845)
 
 Changed
 -------
@@ -39,6 +40,7 @@ Fixed
 -----
 - Fix bug in `get_DisplacementGradientMap` (#852)
 - Fix template matching bugs (originally fixed in #771 but omitted from 0.14 series by accident)
+
 
 2022-29-04 - version 0.14.1
 ===========================
