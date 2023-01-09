@@ -77,6 +77,8 @@ import pyxem.utils.marker_tools as mt
 import pyxem.utils.ransac_ellipse_tools as ret
 from pyxem.utils._deprecated import deprecated, deprecated_argument
 
+from pyxem.utils.background_utils import (_subtract_median,_subtract_dog,
+                                          _subtract_hdome,_subtract_radial_median)
 
 class Diffraction2D(Signal2D, CommonDiffraction):
     """Signal class for two-dimensional diffraction data in Cartesian coordinates."""
@@ -368,17 +370,16 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             **kwargs,
         )
 
-    def subtract_diffraction_background(
-        self, method="median kernel", lazy_result=True, show_progressbar=True, **kwargs
-    ):
+    @deprecated_argument(name="lazy_result", alternative="lazy_output", since="0.15.0", removal="1.00.0")
+    def subtract_diffraction_background(self, method="median kernel", inplace=False, **kwargs):
         """Background subtraction of the diffraction data.
 
         Parameters
         ----------
         method : str, optional
             'difference of gaussians', 'median kernel', 'radial median', 'h-dome'
-            'h-dome' is for non-lazy data only. Default 'median kernel'.
-        lazy_result : bool, optional
+             Default 'median kernel'.
+        lazy_output : bool, optional
             If True (default), will return a LazyDiffraction2D object. If False,
             will compute the result and return a Diffraction2D object.
         show_progressbar : bool, optional
@@ -395,46 +396,23 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         --------
         >>> s = pxm.dummy_data.get_cbed_signal()
         >>> s_r = s.subtract_diffraction_background(method='median kernel',
-        ...     footprint=20, lazy_result=False, show_progressbar=False)
+        ...     footprint=20, lazy_output=False, show_progressbar=False)
         >>> s_r.plot()
 
         """
+        method_dict = {"difference of gaussians": _subtract_dog,
+                       "median kernel": _subtract_median,
+                       "radial median": _subtract_radial_median,
+                       "h-dome": _subtract_hdome,
+                       }
+        if method not in method_dict:
+            raise NotImplementedError(f"The method specified, '{method}',"
+                                      f" is not implemented.  The different methods are:"
+                                      f" 'difference of gaussians','median kernel',"
+                                      f"'radial median' or 'h-dome'.")
+        subtraction_function = method_dict[method]
 
-        # Ugly, should look into making this lazy compatible
-        if method == "h-dome":
-            self.data = self.data / np.max(self.data)
-            bg_subtracted = self.map(regional_filter, inplace=False, **kwargs)
-            bg_subtracted.map(filters.rank.mean, footprint=square(3))
-            bg_subtracted.data = bg_subtracted.data / np.max(bg_subtracted.data)
-            return bg_subtracted
-
-        dask_array = _get_dask_array(self)
-
-        if method == "difference of gaussians":
-            output_array = dt._background_removal_dog(dask_array, **kwargs)
-        elif method == "median kernel":
-            output_array = dt._background_removal_median(dask_array, **kwargs)
-        elif method == "radial median":
-            output_array = dt._background_removal_radial_median(dask_array, **kwargs)
-        else:
-            raise NotImplementedError(
-                "The method specified, '{}', is not implemented. "
-                "The different methods are: 'difference of gaussians',"
-                " 'median kernel','radial median' or 'h-dome'.".format(method)
-            )
-
-        if not lazy_result:
-            if show_progressbar:
-                pbar = ProgressBar()
-                pbar.register()
-            output_array = output_array.compute()
-            if show_progressbar:
-                pbar.unregister()
-            s = Diffraction2D(output_array)
-        else:
-            s = LazyDiffraction2D(output_array)
-        pst._copy_signal_all_axes_metadata(self, s)
-        return s
+        return self.map(subtraction_function, inplace=inplace, **kwargs)
 
     def find_dead_pixels(
         self,
@@ -1057,6 +1035,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         )
         return s
 
+    @deprecated
     def template_match_ring(
         self, r_inner=5, r_outer=7, lazy_result=True, show_progressbar=True
     ):
