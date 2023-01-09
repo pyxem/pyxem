@@ -379,6 +379,19 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         method : str, optional
             'difference of gaussians', 'median kernel', 'radial median', 'h-dome'
              Default 'median kernel'.
+
+             For `difference of gaussians the parameters min_sigma (default:1) and
+             max_sigma(default:55) control the size of the gaussian kernels used.
+
+             For `median kernel` the footprint(default:19) parameter detemines the
+             footprint used to determine the median.
+
+             For `radial median` the parameters center_x(default:128), center_y(default:128) are
+             used to detmine the center of the pattern to use to determine the median.
+
+             For `h-dome` the parameter h detemines the relative height of local peaks that
+             are supressed.
+    max_sigma : float
         lazy_output : bool, optional
             If True (default), will return a LazyDiffraction2D object. If False,
             will compute the result and return a Diffraction2D object.
