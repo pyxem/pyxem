@@ -695,39 +695,34 @@ class TestGetDirectBeamPosition:
         self.dx, self.dy = dx, dy
         self.x_pos_list, self.y_pos_list = x_pos_list, y_pos_list
 
-    def test_blur(self):
-        dx, dy = self.dx, self.dy
-        s, x_pos_list, y_pos_list = self.s, self.x_pos_list, self.y_pos_list
-        s_shift = s.get_direct_beam_position(method="blur", sigma=1)
-        assert s.axes_manager.navigation_shape == s_shift.axes_manager.navigation_shape
-        assert (-(x_pos_list - dx / 2) == s_shift.isig[0].data[0]).all()
-        assert (-(y_pos_list - dy / 2) == s_shift.isig[1].data[:, 0]).all()
-
-    def test_interpolate(self):
-        dx, dy = self.dx, self.dy
-        s, x_pos_list, y_pos_list = self.s, self.x_pos_list, self.y_pos_list
-        s_shift = s.get_direct_beam_position(
-            method="interpolate", sigma=1, upsample_factor=2, kind="nearest",
-        )
-        assert s.axes_manager.navigation_shape == s_shift.axes_manager.navigation_shape
-        assert (-(x_pos_list - dx / 2) == s_shift.isig[0].data[0]).all()
-        assert (-(y_pos_list - dy / 2) == s_shift.isig[1].data[:, 0]).all()
-
-    def test_cross_correlate(self):
+    @pytest.mark.parametrize("sig_slice", (None, (2, 18, 2, 24), (2.0, 18.0, 2.0, 24.0)))
+    @pytest.mark.parametrize("method,kwargs", [("cross_correlate",
+                                                {"radius_start": 0,
+                                                 "radius_finish": 2}),
+                                               ("blur",
+                                                {"sigma": 1,
+                                                 }),
+                                               ("interpolate",
+                                                {"sigma": 1,
+                                                 "upsample_factor": 2, "kind": "nearest",
+                                                 }),
+                                               ("center_of_mass",
+                                                {}),
+                                               ])
+    def test_get_direct_beam(self, method, sig_slice,  kwargs):
         s = self.s
-        s_shift = s.get_direct_beam_position(
-            method="cross_correlate", radius_start=0, radius_finish=1
-        )
-
-    def test_center_of_mass(self):
         dx, dy = self.dx, self.dy
         s, x_pos_list, y_pos_list = self.s, self.x_pos_list, self.y_pos_list
-        s_shift = s.get_direct_beam_position(
-            method="center_of_mass"
-        )
+        s_shift = s.get_direct_beam_position(method=method, signal_slice=sig_slice, **kwargs)
+        if method == "cross_correlate":
+            # shifted by half a pixel
+            assert (-(x_pos_list - dx / 2) == s_shift.isig[0].data[0]+0.5).all()
+            assert (-(y_pos_list - dy / 2) == s_shift.isig[1].data[:, 0]+0.5).all()
+        else:
+            np.testing.assert_array_almost_equal(-(x_pos_list - dx / 2), s_shift.isig[0].data[0])
+            np.testing.assert_array_almost_equal(-(y_pos_list - dy / 2),
+                                                 s_shift.isig[1].data[:, 0])
         assert s.axes_manager.navigation_shape == s_shift.axes_manager.navigation_shape
-        assert (-(x_pos_list - dx / 2) == s_shift.isig[0].data[0]).all()
-        assert (-(y_pos_list - dy / 2) == s_shift.isig[1].data[:, 0]).all()
 
     def test_lazy_result_none_non_lazy_signal(self):
         s = self.s
