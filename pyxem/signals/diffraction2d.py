@@ -75,7 +75,7 @@ import pyxem.utils.pixelated_stem_tools as pst
 import pyxem.utils.dask_tools as dt
 import pyxem.utils.marker_tools as mt
 import pyxem.utils.ransac_ellipse_tools as ret
-from pyxem.utils._deprecated import deprecated
+from pyxem.utils._deprecated import deprecated, deprecated_argument
 
 
 class Diffraction2D(Signal2D, CommonDiffraction):
@@ -635,7 +635,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 Optionally a `mask` can be applied to focus on just the center of some 
                 dataset. A threshold value can also be given to suppress contrast from 
                 weaker diffraction features.
-        lazy_result : optional
+        lazy_output : optional
             If True, s_shifts will be a lazy signal. If False, a non-lazy signal.
             By default, if the signal is (non-)lazy, the result will also be (non-)lazy.
         **kwargs:
@@ -891,11 +891,13 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         )
         return s_out
 
+    @deprecated_argument(since="0.15.0", name="lazy_result", alternative="lazy_output", removal="1.00.0")
     def center_of_mass(
         self,
         threshold=None,
         mask=None,
-        lazy_result=False,
+        lazy_result=None,
+        lazy_output=False,
         show_progressbar=True,
         chunk_calculations=None,
     ):
