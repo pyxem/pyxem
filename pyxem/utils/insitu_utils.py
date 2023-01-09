@@ -29,3 +29,5 @@ def _register_drift_5d(data, shifts1, shifts2):
                                                      offset=(shifts1[i][0, 0, 0, 0], shifts2[i][0, 0, 0, 0], 0, 0),
                                                      order=1)
     return data_t
+
+

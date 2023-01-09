@@ -26,19 +26,19 @@ from pyxem.utils.dask_tools import _get_dask_array
 from pyxem.utils.insitu_utils import _register_drift_5d
 
 class InSituDiffraction2D(Diffraction2D):
-    """Signal class for two-dimensional diffraction data in polar coordinates."""
+    """Signal class for in-situ 4D-STEM data."""
 
     _signal_type = "insitu_diffraction"
 
     def __init__(self, *args, **kwargs):
         """
-        Create a InsituDiffraction2D object from a numpy.ndarray.
+        Create a InsituDiffraction2D object from a numpy.ndarray or dask.array.
 
         Parameters
         ----------
         *args :
             Passed to the __init__ of Signal2D. The first arg should be
-            a numpy.ndarray
+            a numpy.ndarray or dask.array
         **kwargs :
             Passed to the __init__ of Signal2D.
         """
