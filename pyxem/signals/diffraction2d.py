@@ -615,7 +615,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
     """ Direct beam and peak finding tools """
 
-    def get_direct_beam_position(self, method, lazy_output=None, **kwargs):
+    def get_direct_beam_position(self, method,
+                                 lazy_output=None,
+                                 signal_slice=None,
+                                 **kwargs):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern.
 
@@ -638,6 +641,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         lazy_output : optional
             If True, s_shifts will be a lazy signal. If False, a non-lazy signal.
             By default, if the signal is (non-)lazy, the result will also be (non-)lazy.
+        signal_slice : None or tuple
+            A tuple defining the (low_x,high_x, low_y, high_y) to slice the data before
+            finding the direct beam. Equivalent to
+            s.isig[low_x:high_x, low_y:high_y].get_direct_beam_position()+[low_x,low_y])
         **kwargs:
             Keyword arguments to be passed to the method function.
 
@@ -648,6 +655,14 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             signal index being the x-shift and the second the y-shift.
 
         """
+        if signal_slice is not None:
+            sig_axes = self.axes_manager.signal_axes
+            low_x, high_x, low_y, high_y = signal_slice
+            low_x, high_x = sig_axes[0].value_range_to_indices(low_x, high_x)
+            low_y, high_y = sig_axes[1].value_range_to_indices(low_y, high_y)
+            signal = self.isig[low_x:high_x, low_y:high_y]
+        else:
+            signal = self
         if "lazy_result" in kwargs:
             warnings.warn(
                 "lazy_result was replaced with lazy_output in version 0.14",
@@ -656,9 +671,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             lazy_output = kwargs.pop("lazy_result")
 
         if lazy_output is None:
-            lazy_output = self._lazy
+            lazy_output = signal._lazy
 
-        signal_shape = self.axes_manager.signal_shape
+        signal_shape = signal.axes_manager.signal_shape
         origin_coordinates = np.array(signal_shape) / 2
 
         method_dict = {
@@ -673,7 +688,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         )
 
         if method == "cross_correlate":
-            shifts = self.map(
+            shifts = signal.map(
                 method_function,
                 inplace=False,
                 output_signal_size=(2,),
@@ -682,7 +697,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 **kwargs,
             )
         elif method == "blur":
-            centers = self.map(
+            centers = signal.map(
                 method_function,
                 inplace=False,
                 output_signal_size=(2,),
@@ -692,7 +707,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             )
             shifts = -centers + origin_coordinates
         elif method == "interpolate":
-            centers = self.map(
+            centers = signal.map(
                 method_function,
                 inplace=False,
                 output_signal_size=(2,),
@@ -702,11 +717,22 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             )
             shifts = -centers + origin_coordinates
         elif method == "center_of_mass":
-            centers = self.center_of_mass(lazy_result=lazy_output,
-                                          show_progressbar=False,
-                                          **kwargs,
-                                          )
+            if "mask" in kwargs and signal_slice is not None:
+                x, y, r = kwargs["mask"]
+                x = x - signal_slice[0]
+                y = y - signal_slice[1]
+                kwargs["mask"] = (x, y, r)
+            centers = signal.center_of_mass(lazy_result=lazy_output,
+                                            show_progressbar=False,
+                                            **kwargs,
+                                            )
             shifts = -centers.T + origin_coordinates
+
+        if signal_slice is not None:
+            shifted_center = [(low_x + high_x) / 2, (low_y + high_y) / 2]
+            unshifted_center = np.array(self.axes_manager.signal_shape) / 2
+            shift = np.subtract(unshifted_center, shifted_center)
+            shifts = shifts+shift
 
         shifts.set_signal_type("beam_shift")
 
@@ -737,7 +763,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         half_square_width : int
             Half the side length of square that captures the direct beam in all
             scans. Means that the centering algorithm is stable against
-            diffracted spots brighter than the direct beam.
+            diffracted spots brighter than the direct beam. Crops the diffraction
+            pattern to `half_sqare_width` pixels around th center of the diffraction
+            pattern.
         shifts : Signal, optional
             The position of the direct beam, which can either be passed with this
             parameter (shifts), or calculated on its own.
@@ -758,7 +786,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             Parameters passed to the alignment function. See scipy.ndimage.shift
             for more information about the parameters.
         *args, **kwargs :
-            Passed to the function which estimate the direct beam position
+            Passed to the function which estimate the direct beam position.
 
         Example
         -------
@@ -793,32 +821,25 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             )
         if align_kwargs is None:
             align_kwargs = {}
-
         signal_shape = self.axes_manager.signal_shape
-        origin_coordinates = np.array(signal_shape) / 2
+        signal_center = np.array(signal_shape) / 2
         temp_signal = self
 
+        # Cropping the signal around the center alternatively use the signal_slice when
+        # Direct beam is not near the center.
         if shifts is None:
             if half_square_width is not None:
-                min_index = int(origin_coordinates[0] - half_square_width)
-                # fails if non-square dp
-                max_index = int(origin_coordinates[0] + half_square_width)
-                temp_signal = temp_signal.isig[min_index:max_index, min_index:max_index]
-                if method == "center_of_mass" and "mask" in kwargs:
-                    # correct mask coordinates
-                    center_of_mass_mask = kwargs["mask"]
-                    center_of_mass_mask = (
-                        center_of_mass_mask[0] - min_index, 
-                        center_of_mass_mask[1] - min_index, 
-                        center_of_mass_mask[2],
-                    )
-                    kwargs["mask"] = center_of_mass_mask
-            
-            shifts = temp_signal.get_direct_beam_position(
-                method=method, lazy_output=lazy_output, **kwargs,
-            )
+                min_x = int(signal_center[0] - half_square_width)
+                max_x = int(signal_center[0] + half_square_width)
 
-        if not "order" in align_kwargs:
+                min_y = int(signal_center[1] - half_square_width)
+                max_y = int(signal_center[1] + half_square_width)
+                sig_slice = (min_x, max_x, min_y, max_y)
+                kwargs["signal_slice"] = sig_slice
+            shifts = self.get_direct_beam_position(method=method,
+                                                   lazy_output=lazy_output,
+                                                   **kwargs)
+        if "order" not in align_kwargs:
             if subpixel:
                 align_kwargs["order"] = 1
             else:
@@ -913,6 +934,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             this threshold value.
         mask : tuple (x, y, r), optional
             Round mask centered on x and y, with radius r.
+        signal_slice : tuple (low_x, high_x, low_y, high_y)
+            Slice the data. Equivilent to s.isig[low_x:high_x, low_y,
         lazy_result : bool, optional
             If True, will not compute the data directly, but
             return a lazy signal. Default False
