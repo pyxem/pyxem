@@ -719,6 +719,16 @@ class TestGetDirectBeamPosition:
             method="cross_correlate", radius_start=0, radius_finish=1
         )
 
+    def test_center_of_mass(self):
+        dx, dy = self.dx, self.dy
+        s, x_pos_list, y_pos_list = self.s, self.x_pos_list, self.y_pos_list
+        s_shift = s.get_direct_beam_position(
+            method="center_of_mass"
+        )
+        assert s.axes_manager.navigation_shape == s_shift.axes_manager.navigation_shape
+        assert (-(x_pos_list - dx / 2) == s_shift.isig[0].data[0]).all()
+        assert (-(y_pos_list - dy / 2) == s_shift.isig[1].data[:, 0]).all()
+
     def test_lazy_result_none_non_lazy_signal(self):
         s = self.s
         s_shift = s.get_direct_beam_position(method="blur", sigma=1)
@@ -927,6 +937,10 @@ class TestCenterDirectBeam:
     def test_method_cross_correlate(self):
         s = self.s
         s.center_direct_beam(method="cross_correlate", radius_start=0, radius_finish=2)
+
+    def test_method_center_of_mass(self):
+        s = self.s
+        s.center_direct_beam(method="center_of_mass")
 
     def test_parameter_both_method_and_shifts(self):
         s = self.s
