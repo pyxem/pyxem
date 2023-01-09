@@ -26,8 +26,6 @@ from hyperspy.utils import stack
 from pyxem.signals import StrainMap
 
 
-
-
 def _polar_decomposition(image, side):
     """Perform a polar decomposition of a second rank tensor.
 

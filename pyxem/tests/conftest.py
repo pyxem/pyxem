@@ -256,11 +256,11 @@ def test_library_phases():
 def test_library_phases_multi():
     ni_structure = diffpy.structure.Structure(
         atoms=[diffpy.structure.atom.Atom(atype="Ni", xyz=[0, 0, 0])],
-        lattice=diffpy.structure.lattice.Lattice(3, 3, 3, 90, 90, 90)
+        lattice=diffpy.structure.lattice.Lattice(3, 3, 3, 90, 90, 90),
     )
     al_structure = diffpy.structure.Structure(
         atoms=[diffpy.structure.atom.Atom(atype="Al", xyz=[0, 0, 0])],
-        lattice=diffpy.structure.lattice.Lattice(4, 4, 4, 90, 90, 90)
+        lattice=diffpy.structure.lattice.Lattice(4, 4, 4, 90, 90, 90),
     )
     library_phases_test = StructureLibrary(
         ["Ni", "Al"],
@@ -271,4 +271,3 @@ def test_library_phases_multi():
         ],
     )
     return library_phases_test
-

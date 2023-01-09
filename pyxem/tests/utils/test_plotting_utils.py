@@ -6,6 +6,7 @@ from unittest.mock import Mock
 
 _, ax = plt.subplots()
 
+
 @pytest.fixture()
 def mock_simulation():
     mock_sim = Mock()
@@ -37,7 +38,10 @@ def test_plot_sim_over_pattern(
         coordinate_system=coordinate_system,
     )
 
+
 def test_plot_sim_over_pattern_fail(mock_simulation):
     pattern = np.ones((15, 20))
     with pytest.raises(NotImplementedError):
-        plu.plot_template_over_pattern(pattern, mock_simulation, coordinate_system="dracula")
+        plu.plot_template_over_pattern(
+            pattern, mock_simulation, coordinate_system="dracula"
+        )

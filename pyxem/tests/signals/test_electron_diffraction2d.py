@@ -78,6 +78,15 @@ class TestSimpleMaps:
         )
         assert isinstance(diffraction_pattern, ElectronDiffraction2D)
 
+    def test_apply_affine_transformation_upsample(self, diffraction_pattern):
+        old_data = np.copy(diffraction_pattern.data)
+        diffraction_pattern.apply_affine_transformation(
+            D=np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]), output_shape=(8, 8)
+        )
+        assert isinstance(diffraction_pattern, ElectronDiffraction2D)
+        assert diffraction_pattern.axes_manager.signal_shape == (8, 8)
+        np.testing.assert_almost_equal(old_data, diffraction_pattern.data)
+
     def test_apply_affine_transforms_paths(self, diffraction_pattern):
         D = np.array([[1.0, 0.9, 0.0], [1.1, 1.0, 0.0], [0.0, 0.0, 1.0]])
         s = Signal2D(np.asarray([[D, D], [D, D]]))

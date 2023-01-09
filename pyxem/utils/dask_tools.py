@@ -128,7 +128,7 @@ def _get_chunking(signal, chunk_shape=None, chunk_bytes=None):
     if chunk_shape is not None:
         if not isiterable(chunk_shape):
             chunk_shape = [chunk_shape] * nav_dim
-    
+
     chunks_dict = {}
     for i in range(nav_dim):
         if chunk_shape is None:

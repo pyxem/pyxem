@@ -24,6 +24,7 @@ from pyxem.signals.diffraction2d import Diffraction2D
 
 class DiffractionVariance2D(Diffraction2D):
     """Signal class for two-dimensional diffraction variance."""
+
     _signal_type = "diffraction_variance"
 
     pass

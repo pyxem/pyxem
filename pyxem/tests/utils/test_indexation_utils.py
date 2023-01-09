@@ -23,8 +23,10 @@ import pytest
 
 from pyxem.utils.indexation_utils import match_vectors
 from pyxem.utils.indexation_utils import (
-    index_dataset_with_template_rotation, results_dict_to_crystal_map
+    index_dataset_with_template_rotation,
+    results_dict_to_crystal_map,
 )
+
 
 def test_match_vectors(vector_match_peaks, vector_library):
     # Wrap to test handling of ragged arrays
@@ -92,18 +94,30 @@ def test_results_dict_to_crystal_map(test_library_phases_multi, test_lib_gen):
     phase_names = list(diff_lib.keys())
 
     # Simulate patterns
-    sim_kwargs = dict(size=sig_shape[0], sigma=4)
+    # TODO: Remove version check after diffsims 0.5.0 is released
+    from packaging.version import Version
+    import diffsims
+
+    diffsims_version = Version(diffsims.__version__)
+    if diffsims_version > Version("0.4.2"):
+        sim_kwargs = dict(shape=sig_shape, sigma=4)
+    else:  # pragma: no cover
+        sim_kwargs = dict(size=sig_shape[0], sigma=4)
     for idx in np.ndindex(*nav_shape):
         i = phase_id[idx]
         j = int(idx[1] / 2)
-        test_pattern = diff_lib[phase_names[i]]["simulations"][j].\
-            get_diffraction_pattern(**sim_kwargs)
+        test_pattern = diff_lib[phase_names[i]]["simulations"][
+            j
+        ].get_diffraction_pattern(**sim_kwargs)
         test_set[idx] = test_pattern
 
     # Perform template matching
     n_best = 3
     results, phase_dict = index_dataset_with_template_rotation(
-        Signal2D(test_set), diff_lib, phases=phase_names, n_best=n_best,
+        Signal2D(test_set),
+        diff_lib,
+        phases=phase_names,
+        n_best=n_best,
     )
 
     # Extract various results once
@@ -115,7 +129,9 @@ def test_results_dict_to_crystal_map(test_library_phases_multi, test_lib_gen):
 
     # Only get the bast match when multiple phases match best to some
     # patterns
-    xmap = results_dict_to_crystal_map(results, phase_dict, diffraction_library=diff_lib)
+    xmap = results_dict_to_crystal_map(
+        results, phase_dict, diffraction_library=diff_lib
+    )
     assert xmap.shape == nav_shape
     assert np.allclose(xmap.phase_id, phase_id[:, 0])
     assert xmap.rotations_per_point == 1

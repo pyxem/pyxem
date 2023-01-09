@@ -132,3 +132,27 @@ def test_weight_function_behaviour():
     np.testing.assert_almost_equal(
         strain_map.inav[0].isig[0, 0].data[0], -1.0166666 + 1, decimal=2
     )
+
+
+class TestLazyNotLazy:
+    def setup_method(self):
+        data = np.empty((4, 2), dtype=object)
+        for iy, ix in np.ndindex(data.shape):
+            data[iy, ix] = np.array([[5, 10], [10, 5]])
+        self.vs = hs.signals.BaseSignal(data, ragged=True)
+
+    def test_not_lazy(self):
+        vs = self.vs
+        vs_ref = vs.inav[0, 0]
+        D = get_DisplacementGradientMap(vs, vs_ref)
+        assert D.axes_manager.navigation_shape == (2, 4)
+        assert D.axes_manager.signal_shape == (3, 3)
+        strain_map = D.get_strain_maps()
+
+    def test_lazy(self):
+        vs = self.vs.as_lazy()
+        vs_ref = vs.inav[0, 0]
+        D = get_DisplacementGradientMap(vs, vs_ref)
+        assert D.axes_manager.navigation_shape == (2, 4)
+        assert D.axes_manager.signal_shape == (3, 3)
+        strain_map = D.get_strain_maps()

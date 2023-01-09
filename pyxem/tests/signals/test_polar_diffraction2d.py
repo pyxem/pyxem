@@ -148,53 +148,93 @@ class TestPearsonCorrelation:
     @pytest.fixture
     def flat_pattern(self):
         rng = np.random.default_rng(seed=1)
-        pd = PolarDiffraction2D(data=rng.random((2, 2, 50, 15)))
+        pd = PolarDiffraction2D(data=rng.random((2, 2, 15, 50)))
         pd.axes_manager.signal_axes[0].scale = 0.5
         pd.axes_manager.signal_axes[0].name = "theta"
         pd.axes_manager.signal_axes[1].scale = 0.1
         pd.axes_manager.signal_axes[1].name = "k"
         return pd
 
-    @pytest.mark.parametrize("krange", [None, (0, 4), (1., 4.9)])
+    @pytest.mark.parametrize("krange", [None, (0, 4), (.5, 1.4)])
     def test_pearson_correlation_signal(self, flat_pattern, krange):
-        rho = flat_pattern.get_pearson_correlation(krange=krange)
+        rho = flat_pattern.get_full_pearson_correlation(krange=krange)
         assert isinstance(rho, Signal1D)
+        rhok = flat_pattern.get_resolved_pearson_correlation(krange=krange)
+        assert isinstance(rhok, Signal2D)
 
     @pytest.mark.parametrize('inplace', (True, False))
-    @pytest.mark.parametrize("krange", [None, (0, 30), (1., 4.9)])
-    def test_pearson_correlation_results(self, flat_pattern, krange, inplace):
-        out = flat_pattern.get_pearson_correlation(
+    @pytest.mark.parametrize("krange", [None, (0, 10), (.5, 1.4)])
+    def test_full_pearson_correlation_results(self, flat_pattern, krange, inplace):
+        out = flat_pattern.get_full_pearson_correlation(
             krange=krange,
             inplace=inplace,
-            )
+        )
         if inplace:
             assert out is None
             out = flat_pattern
         else:
             # check the original signal is not changed
-            assert flat_pattern.axes_manager[-1].size == 50
+            assert flat_pattern.axes_manager[-1].size == 15
 
         assert isinstance(out, Correlation1D)
-        np.testing.assert_allclose(np.zeros((2, 2, 14)), out.data[..., 1:], atol=0.1)
+        np.testing.assert_allclose(np.zeros((2, 2, 49)), out.data[..., 1:], atol=0.2)
 
-    def test_pearson_correlation_inplace(self, flat_pattern):
-        rho = flat_pattern.get_pearson_correlation(inplace=True)
+    @pytest.mark.parametrize('inplace', (True, False))
+    @pytest.mark.parametrize("krange", [None, (0, 10), (.5, 1.4)])
+    def test_resolved_pearson_correlation_results(self, flat_pattern, krange, inplace):
+        out = flat_pattern.get_resolved_pearson_correlation(
+            krange=krange,
+            inplace=inplace,
+        )
+        if inplace:
+            assert out is None
+            out = flat_pattern
+        else:
+            # check the original signal is not changed
+            assert flat_pattern.axes_manager[-1].size == 15
+            assert flat_pattern.axes_manager[-2].size == 50
+
+        assert isinstance(out, Correlation2D)
+        np.testing.assert_allclose(np.zeros((2, 2, 49)), np.mean(out.data[..., 1:], axis=-2), atol=0.2)
+
+    def test_full_pearson_correlation_inplace(self, flat_pattern):
+        rho = flat_pattern.get_full_pearson_correlation(inplace=True)
         assert rho is None
         assert isinstance(flat_pattern, Correlation1D)
 
+    def test_resolved_pearson_correlation_inplace(self, flat_pattern):
+        rho = flat_pattern.get_resolved_pearson_correlation(inplace=True)
+        assert rho is None
+        assert isinstance(flat_pattern, Correlation2D)
+
     def test_axes_transfer(self, flat_pattern):
-        rho = flat_pattern.get_pearson_correlation()
+        rho = flat_pattern.get_full_pearson_correlation()
         assert (
             rho.axes_manager.signal_axes[0].scale
             == flat_pattern.axes_manager.signal_axes[0].scale
         )
 
-    @pytest.mark.parametrize( "mask", [None, np.zeros(shape=(50, 15))])
+        rhok = flat_pattern.get_resolved_pearson_correlation()
+        assert (
+                rhok.axes_manager.signal_axes[0].scale
+                == flat_pattern.axes_manager.signal_axes[0].scale
+        )
+        assert (
+                rhok.axes_manager.signal_axes[1].scale
+                == flat_pattern.axes_manager.signal_axes[1].scale
+        )
+
+    @pytest.mark.parametrize( "mask", [None, np.zeros(shape=(15, 50))])
     def test_masking_pearson_correlation(self, flat_pattern, mask):
-        rho_0 = flat_pattern.get_pearson_correlation(mask=mask)
+        rho_0 = flat_pattern.get_full_pearson_correlation(mask=mask)
         assert isinstance(rho_0, Correlation1D)
-        rho = flat_pattern.get_pearson_correlation(mask=mask, krange=(0, 4))
+        rho = flat_pattern.get_full_pearson_correlation(mask=mask, krange=(0, 4))
         assert isinstance(rho, Correlation1D)
+
+        rhok_0 = flat_pattern.get_resolved_pearson_correlation(mask=mask)
+        assert isinstance(rhok_0, Correlation2D)
+        rhok = flat_pattern.get_resolved_pearson_correlation(mask=mask, krange=(0, 4))
+        assert isinstance(rhok, Correlation2D)
 
 
 class TestDecomposition:

@@ -225,9 +225,7 @@ def _com_experimental_square(z, vector, square_size):
         z, but with row and column zero set to 0
     """
     # Copy to make sure we don't change the dp
-    z_adpt = np.copy(
-        get_experimental_square(z, vector=vector, square_size=square_size)
-    )
+    z_adpt = np.copy(get_experimental_square(z, vector=vector, square_size=square_size))
     z_adpt[:, 0] = 0
     z_adpt[0, :] = 0
     return z_adpt
@@ -235,7 +233,9 @@ def _com_experimental_square(z, vector, square_size):
 
 def _center_of_mass_map(dp, vectors, square_size, center, calibration):
     if vectors.shape == (2,):
-        vectors = [vectors, ]
+        vectors = [
+            vectors,
+        ]
     shifts = np.zeros_like(vectors, dtype=np.float64)
     for i, vector in enumerate(vectors):
         expt_disc = _com_experimental_square(dp, vector, square_size)

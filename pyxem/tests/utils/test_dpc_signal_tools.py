@@ -276,4 +276,3 @@ class TestGetLinearPlaneFromSignal2d:
         mask = np.zeros((11, 9), dtype=bool)
         with pytest.raises(ValueError):
             pst._get_linear_plane_from_signal2d(s, mask=mask)
-

@@ -35,7 +35,7 @@ def test_calculate_norms():
 
 
 def test_calculate_norms_ragged():
-    norms = calculate_norms_ragged(np.array([[3], [6, 8]]))
+    norms = calculate_norms_ragged(np.array([[3], [6, 8]], dtype=object))
     assert np.allclose(norms, [3, 10])
 
 

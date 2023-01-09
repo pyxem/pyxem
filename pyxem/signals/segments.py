@@ -17,7 +17,6 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
 import numpy as np
 from tqdm import tqdm
 
@@ -36,6 +35,7 @@ class LearningSegment:
     """Signal classes for nanocrystal segmentation results obtained from
     i) machine learning (LearningSegment) and ii) VDF images (VDFSegment).
     """
+
     _signal_type = "learning_segment"
 
     def __init__(self, factors, loadings):

@@ -28,7 +28,7 @@ extra_feature_requirements = {
     "doc": [
         "furo",
         "nbsphinx                   >= 0.7",
-        "sphinx                     >= 3.0.2, <= 4.0.2",
+        "sphinx                     >= 3.0.2",
         "sphinx-copybutton          >= 0.2.5",
         "sphinx-autodoc-typehints   >= 1.10.3",
         "sphinx-gallery             >= 0.6",
@@ -38,7 +38,7 @@ extra_feature_requirements = {
         "pytest     >= 5.0",
         "pytest-cov >= 2.8.1",
         "coveralls  >= 1.10",
-        "coverage   >= 5.0"
+        "coverage   >= 5.0",
     ],
     "dev": ["black", "pre-commit >=1.16"],
     "gpu": ["cupy >= 9.0.0"],
@@ -66,6 +66,7 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Development Status :: 4 - Beta",
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
@@ -78,18 +79,18 @@ setup(
     extras_require=extra_feature_requirements,
     install_requires=[
         "dask",
-        "diffsims       ~= 0.4",
+        "diffsims       >= 0.5",
         "hyperspy       >= 1.7.0",  # significant improvements
         "ipywidgets",
         "lmfit          >= 0.9.12",
         "matplotlib     >= 3.1.1",  # 3.1.0 failed
         "numba",
         "numpy",
-        "orix           >= 0.3",
+        "orix           >= 0.9",
         "psutil",
         "pyfai",
         "scikit-image   >= 0.17.0",
-        "scikit-learn   >= 0.19",  # reason unknown
+        "scikit-learn   >= 1.0",
         "scipy",
         "transforms3d",
     ],

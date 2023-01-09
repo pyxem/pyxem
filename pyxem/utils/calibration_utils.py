@@ -52,7 +52,7 @@ def find_diffraction_calibration(
         Maximum exacitation error.  Default is 0.01.
     kwargs
         Keyword arguments passed to :meth:`index_dataset_with_template_rotation`.
-        
+
     Returns
     -------
     mean_cal : float
@@ -161,7 +161,7 @@ def _calibration_iteration(
         Maximum exacitation error.  Default is 0.01.
     kwargs
         Keyword arguments passed to :meth:`index_dataset_with_template_rotation`.
-        
+
     Returns
     -------
     corrlines : numpy.ndarray
@@ -220,7 +220,7 @@ def _create_check_diflib(
         Maximum exacitation error.  Default is 0.01.
     kwargs
         Keyword arguments passed to :meth:`index_dataset_with_template_rotation`.
-        
+
     Returns
     -------
     correlations : numpy.ndarray
