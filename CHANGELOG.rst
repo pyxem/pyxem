@@ -16,7 +16,6 @@ Added
 - Added in deprecation wrapper class to wrap deprecated functions in pyxem.
 - Center-of-mass algorithm added to get_direct_beam_position (#845)
 
-
 Changed
 -------
 - Sklearn is now required to be on the 1.0 series.
@@ -75,6 +74,13 @@ Deprecated
 Changed
 ^^^^^^^
 - For developers: HyperSpy's `.map` function will now be used to process big datasets, instead of pyXem's `process_dask_array`
+
+2022-29-04 - version 0.14.0
+===========================
+
+The code contained in this version is identical to 0.14.1, the release was 
+recreated to fix an error with the Zenodo files.
+
 
 2021-04-14 - version 0.13.2
 ===========================

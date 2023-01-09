@@ -627,16 +627,16 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         method : str,
             Must be one of "cross_correlate", "blur", "interpolate" or "center_of_mass".
 
-           "cross_correlate": Center finding using cross-correlation of circles of 
+           "cross_correlate": Center finding using cross-correlation of circles of
                 `radius_start` to `radius_finish`.
-           "blur": Center finding by blurring each frame with a Gaussian kernel with 
+           "blur": Center finding by blurring each frame with a Gaussian kernel with
                 standard deviation `sigma` and finding the maximum.
-           "interpolate": Finding the center by summing along X/Y and finding the peak 
-                for each axis independently. Data is blurred first using a Gaussian kernel 
+           "interpolate": Finding the center by summing along X/Y and finding the peak
+                for each axis independently. Data is blurred first using a Gaussian kernel
                 with standard deviation "sigma".
-           "center_of_mass": The center is found using a calculation of the center of mass. 
-                Optionally a `mask` can be applied to focus on just the center of some 
-                dataset. A threshold value can also be given to suppress contrast from 
+           "center_of_mass": The center is found using a calculation of the center of mass.
+                Optionally a `mask` can be applied to focus on just the center of some
+                dataset. A threshold value can also be given to suppress contrast from
                 weaker diffraction features.
         lazy_output : optional
             If True, s_shifts will be a lazy signal. If False, a non-lazy signal.
