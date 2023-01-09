@@ -34,10 +34,18 @@ class TestTimeSeriesReconstruction:
         dc.axes_manager.signal_axes[1].name = "ky"
         return dc
 
-    @pytest.mark.parametrize("roi", [hs.roi.CircleROI(1, 1, 0.5), hs.roi.RectangularROI(0, 1, 1, 2)])
+    @pytest.mark.parametrize("roi",
+                             [hs.roi.CircleROI(1, 1, 0.5),
+                              hs.roi.RectangularROI(0, 1, 1, 2),
+                              None]
+                             )
     def test_different_roi(self, insitu_data, roi):
         series = insitu_data.get_time_series(roi=roi)
         assert len(series.axes_manager.navigation_axes) == 1
-        assert series.axes_manager.navigation_axes[0].shape == insitu_data.axes_manager.navigation_axes[2].shape
-        assert series.axes_manager.signal_axes[0].shape == insitu_data.axes_manager.navigation_axes[0].shape
-        assert series.axes_manager.signal_axes[1].shape == insitu_data.axes_manager.navigation_axes[1].shape
+        assert series.axes_manager.navigation_axes[0].size == insitu_data.axes_manager.navigation_axes[2].size
+        assert series.axes_manager.signal_axes[0].size == insitu_data.axes_manager.navigation_axes[0].size
+        assert series.axes_manager.signal_axes[1].size == insitu_data.axes_manager.navigation_axes[1].size
+
+    def test_time_axis(self, insitu_data):
+        series = insitu_data.get_time_series(roi=hs.roi.CircleROI(1, 1, 0.5), time_axis=0)
+        assert series.axes_manager.navigation_axes[0].size == insitu_data.axes_manager.navigation_axes[0].size
