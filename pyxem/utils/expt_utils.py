@@ -772,3 +772,35 @@ def find_hot_pixels(z, threshold_multiplier=500, mask=None):
     if mask is not None:
         hot_pixels[mask] = False
     return hot_pixels
+
+
+def remove_bad_pixels(z, bad_pixels):
+    """Replace values in bad pixels with mean of neighbors.
+
+    Parameters
+    ----------
+    z : array-like
+        A single frame
+    bad_pixels : array-like
+        Must either have the same shape as dask_array,
+        or the same shape as the two last dimensions of dask_array.
+
+    Returns
+    -------
+    data_output : Dask array
+
+    Examples
+    --------
+    >>> import pyxem.utils.dask_tools as dt
+    >>> s = pxm.dummy_data.dummy_data.get_dead_pixel_signal(lazy=True)
+    >>> dead_pixels = dt._find_dead_pixels(s.data)
+    >>> data_output = dt._remove_bad_pixels(s.data, dead_pixels)
+
+    """
+    z[bad_pixels] = 0
+    bad_pixels_ind = np.transpose(np.array(np.where(bad_pixels)))
+    bad_slices = [tuple([slice(i - 1, i + 2) for i in ind]) for ind in bad_pixels_ind]
+    values = [np.sum(z[s]) / 8 for s in bad_slices]
+    z[bad_pixels] = values
+    return z
+

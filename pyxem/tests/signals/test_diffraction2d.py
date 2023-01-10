@@ -1265,11 +1265,11 @@ class TestCorrectBadPixel:
         if not lazy_input:
             s.compute()
 
-        hot = s.find_hot_pixels(lazy_result=True)
-        dead = s.find_dead_pixels(lazy_result=True)
+        hot = s.find_hot_pixels(lazy_output=True)
+        dead = s.find_dead_pixels()
         bad = hot + dead
 
-        s = s.correct_bad_pixels(bad, lazy_result=lazy_result)
+        s = s.correct_bad_pixels(bad, lazy_output=lazy_result, inplace=False)
         assert s._lazy == lazy_result
         if lazy_result:
             s.compute()

@@ -545,13 +545,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                         inplace=inplace,
                         **kwargs)
 
+    @deprecated_argument(name="lazy_result", since="0.15.0", removal="1.00.0", alternative="lazy_output")
     def correct_bad_pixels(
         self,
         bad_pixel_array,
-        show_progressbar=True,
-        lazy_result=True,
-        inplace=True,
-        *args,
         **kwargs,
     ):
         """Correct bad (dead/hot) pixels by replacing their values with the mean value of neighbors.
@@ -579,8 +576,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         Examples
         --------
         >>> s = pxm.dummy_data.get_hot_pixel_signal()
-        >>> s_hot_pixels = s.find_hot_pixels(
-        ...     show_progressbar=False, lazy_result=True)
+        >>> s_hot_pixels = s.find_hot_pixels()
         >>> s_corr = s.correct_bad_pixels(s_hot_pixels)
 
         See Also
@@ -589,13 +585,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         find_hot_pixels
 
         """
-        dask_array = self.data
-        bad_pixel_removed = dt._remove_bad_pixels(dask_array, bad_pixel_array.data)
-        s_bad_pixel_removed = LazyDiffraction2D(bad_pixel_removed)
-        pst._copy_signal2d_axes_manager_metadata(self, s_bad_pixel_removed)
-        if not lazy_result:
-            s_bad_pixel_removed.compute(show_progressbar=show_progressbar)
-        return s_bad_pixel_removed
+        return self.map(remove_bad_pixels, bad_pixels=bad_pixel_array, **kwargs)
 
     """ Direct beam and peak finding tools """
 
