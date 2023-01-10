@@ -806,12 +806,12 @@ def remove_bad_pixels(z, bad_pixels):
     return z
 
 
-def normalize_template_match(z, template, subtract_min=True, **kwargs):
+def normalize_template_match(z, template, subtract_min=True, pad_input=True, **kwargs):
     """ Matches a template with an image z. Preformed a normalized cross-correlation
         using the given templates. If subtract_min is True then the minimum value will
          be subtracted from the correlation.
     """
-    template_match = match_template(z, template, **kwargs)
+    template_match = match_template(z, template, pad_input=pad_input, **kwargs)
     if subtract_min:
         template_match = template_match - np.min(template_match)
     return template_match

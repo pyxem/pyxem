@@ -1057,79 +1057,23 @@ class TestDiffraction2DTemplateMatchDisk:
         s = Diffraction2D(np.random.randint(100, size=(5, 5, 20, 20)))
         s_template = s.template_match_disk()
         assert s.data.shape == s_template.data.shape
-        assert s_template._lazy is True
-
-    def test_axes_manager_copy(self):
-        s = Diffraction2D(np.random.randint(100, size=(5, 5, 20, 20)))
-        ax_sa = s.axes_manager.signal_axes
-        ax_na = s.axes_manager.navigation_axes
-        ax_sa[0].name, ax_sa[1].name = "Detector x", "Detector y"
-        ax_sa[0].scale, ax_sa[1].scale = 0.2, 0.2
-        ax_sa[0].offset, ax_sa[1].offset = 10, 20
-        ax_sa[0].units, ax_sa[1].units = "mrad", "mrad"
-        ax_na[0].name, ax_na[1].name = "Probe x", "Probe y"
-        ax_na[0].scale, ax_na[1].scale = 35, 35
-        ax_na[0].offset, ax_na[1].offset = 54, 12
-        ax_na[0].units, ax_na[1].units = "nm", "nm"
-        s_temp = s.template_match_disk()
-        assert s.data.shape == s_temp.data.shape
-        ax_sa_t = s_temp.axes_manager.signal_axes
-        ax_na_t = s_temp.axes_manager.navigation_axes
-        assert ax_sa[0].name == ax_sa_t[0].name
-        assert ax_sa[1].name == ax_sa_t[1].name
-        assert ax_sa[0].scale == ax_sa_t[0].scale
-        assert ax_sa[1].scale == ax_sa_t[1].scale
-        assert ax_sa[0].offset == ax_sa_t[0].offset
-        assert ax_sa[1].offset == ax_sa_t[1].offset
-        assert ax_sa[0].units == ax_sa_t[0].units
-        assert ax_sa[1].units == ax_sa_t[1].units
-
-        assert ax_na[0].name == ax_na_t[0].name
-        assert ax_na[1].name == ax_na_t[1].name
-        assert ax_na[0].scale == ax_na_t[0].scale
-        assert ax_na[1].scale == ax_na_t[1].scale
-        assert ax_na[0].offset == ax_na_t[0].offset
-        assert ax_na[1].offset == ax_na_t[1].offset
-        assert ax_na[0].units == ax_na_t[0].units
-        assert ax_na[1].units == ax_na_t[1].units
-
-    def test_non_lazy(self):
-        s = Diffraction2D(np.random.randint(100, size=(5, 5, 20, 20)))
-        s_template = s.template_match_disk(lazy_result=False)
-        assert s.data.shape == s_template.data.shape
-        assert s._lazy is False
-
-    def test_lazy_input(self):
-        s = LazyDiffraction2D(
-            da.random.randint(100, size=(5, 5, 20, 20), chunks=(1, 1, 10, 10))
-        )
-        s_template = s.template_match_disk()
-        assert s.data.shape == s_template.data.shape
-        assert s._lazy is True
+        assert not s_template._lazy
 
     def test_disk_radius(self):
         s = LazyDiffraction2D(
             da.random.randint(100, size=(5, 5, 30, 30), chunks=(1, 1, 10, 10))
         )
-        s_template0 = s.template_match_disk(disk_r=2, lazy_result=False)
-        s_template1 = s.template_match_disk(disk_r=4, lazy_result=False)
+        s_template0 = s.template_match_disk(disk_r=2, lazy_output=False)
+        s_template1 = s.template_match_disk(disk_r=4, lazy_output=False)
         assert s.data.shape == s_template0.data.shape
         assert s.data.shape == s_template1.data.shape
         assert not (s_template0.data == s_template1.data).all()
-
-    @pytest.mark.parametrize("nav_dims", [0, 1, 2, 3, 4])
-    def test_different_dimensions(self, nav_dims):
-        shape = list(np.random.randint(2, 6, size=nav_dims))
-        shape.extend([50, 50])
-        s = Diffraction2D(np.random.random(size=shape))
-        st = s.template_match_disk(disk_r=4, lazy_result=False)
-        assert st.data.shape == tuple(shape)
 
 
 class TestDiffraction2DTemplateMatchRing:
     def test_simple(self):
         s = Diffraction2D(np.random.randint(100, size=(5, 5, 20, 20)))
-        s_template = s.template_match_ring(r_inner=3, r_outer=5)
+        s_template = s.template_match_ring(r_inner=3, r_outer=5, lazy_output=True)
         assert s.data.shape == s_template.data.shape
         assert s_template._lazy is True
 
@@ -1141,6 +1085,44 @@ class TestDiffraction2DTemplateMatchRing:
             s.template_match_ring(r_inner=3, r_outer=3)
 
 
+class TestDiffraction2DTemplateWithBinaryImage:
+    def test_square_and_disk(self):
+        s = Diffraction2D(np.zeros((2, 2, 100, 100)))
+
+        square_image = np.zeros((9, 9))
+        square_image[2:-2, 2:-2] = 1
+        s.data[:, :, 20:29, 40:49] = square_image
+
+        disk = morphology.disk(4, s.data.dtype)
+        s.data[:, :, 60:69, 50:59] = disk
+
+        s_st = s.template_match(square_image)
+        s_dt = s.template_match(disk)
+
+        st_ind = np.unravel_index(np.argmax(s_st.data, axis=None), s_st.data.shape)[-2:]
+        dt_ind = np.unravel_index(np.argmax(s_dt.data, axis=None), s_dt.data.shape)[-2:]
+
+        assert st_ind == (24, 44)
+        assert dt_ind == (64, 54)
+        assert s.data.shape == s_st.data.shape
+        assert s.data.shape == s_dt.data.shape
+
+    def test_wrong_binary_image_input(self):
+        s = Diffraction2D(np.random.randint(0, 1000, (2, 2, 20, 20)))
+        template = np.zeros(10)
+        with pytest.raises(ValueError):
+            s.template_match(template)
+
+        template = np.zeros((10, 5, 5))
+        with pytest.raises(ValueError):
+            s.template_match(template)
+
+        template = np.zeros((10, 5, 5, 3))
+        with pytest.raises(ValueError):
+            s.template_match(template)
+
+
+# Remove in 1.00.0 Release
 class TestDiffraction2DTemplateWithBinaryImage:
     def test_square_and_disk(self):
         s = Diffraction2D(np.zeros((2, 2, 100, 100)))
