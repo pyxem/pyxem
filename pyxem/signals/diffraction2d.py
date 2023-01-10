@@ -1125,7 +1125,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
     @deprecated(since="0.15.0", removal="1.00.0")
     def template_match_with_binary_image(
-        self, binary_image, lazy_result=True, show_progressbar=True
+        self, binary_image, lazy_result=True, show_progressbar=True, **kwargs
     ):
         """Template match the signal dimensions with a binary image.
 
@@ -1161,21 +1161,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         template_match_ring
 
         """
-        dask_array = _get_dask_array(self)
-
-        output_array = dt._template_match_with_binary_image(dask_array, binary_image)
-        if not lazy_result:
-            if show_progressbar:
-                pbar = ProgressBar()
-                pbar.register()
-            output_array = output_array.compute()
-            if show_progressbar:
-                pbar.unregister()
-            s = Diffraction2D(output_array)
-        else:
-            s = LazyDiffraction2D(output_array)
-        pst._copy_signal_all_axes_metadata(self, s)
-        return s
+        return self.template_match(template=binary_image,
+                                   lazy_output=lazy_result,
+                                   show_progressbar=show_progressbar,
+                                   **kwargs)
 
     @deprecated(
         since="0.15",

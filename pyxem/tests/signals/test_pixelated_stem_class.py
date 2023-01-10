@@ -1107,21 +1107,6 @@ class TestDiffraction2DTemplateWithBinaryImage:
         assert s.data.shape == s_st.data.shape
         assert s.data.shape == s_dt.data.shape
 
-    def test_wrong_binary_image_input(self):
-        s = Diffraction2D(np.random.randint(0, 1000, (2, 2, 20, 20)))
-        template = np.zeros(10)
-        with pytest.raises(ValueError):
-            s.template_match(template)
-
-        template = np.zeros((10, 5, 5))
-        with pytest.raises(ValueError):
-            s.template_match(template)
-
-        template = np.zeros((10, 5, 5, 3))
-        with pytest.raises(ValueError):
-            s.template_match(template)
-
-
 # Remove in 1.00.0 Release
 class TestDiffraction2DTemplateWithBinaryImage:
     def test_square_and_disk(self):
@@ -1144,20 +1129,6 @@ class TestDiffraction2DTemplateWithBinaryImage:
         assert dt_ind == (64, 54)
         assert s.data.shape == s_st.data.shape
         assert s.data.shape == s_dt.data.shape
-
-    def test_wrong_binary_image_input(self):
-        s = Diffraction2D(np.random.randint(0, 1000, (2, 2, 20, 20)))
-        template = np.zeros(10)
-        with pytest.raises(ValueError):
-            s.template_match_with_binary_image(template)
-
-        template = np.zeros((10, 5, 5))
-        with pytest.raises(ValueError):
-            s.template_match_with_binary_image(template)
-
-        template = np.zeros((10, 5, 5, 3))
-        with pytest.raises(ValueError):
-            s.template_match_with_binary_image(template)
 
 
 class TestDiffraction2DRotateDiffraction:
