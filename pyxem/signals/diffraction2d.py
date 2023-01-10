@@ -52,12 +52,14 @@ from pyxem.utils.expt_utils import (
     azimuthal_integrate2d,
     gain_normalise,
     regional_filter,
+    remove_bad_pixels,
     circular_mask,
     find_beam_offset_cross_correlation,
     convert_affine_to_transform,
     apply_transformation,
     find_beam_center_blur,
     find_beam_center_interpolate,
+    find_hot_pixels,
     integrate_radially,
     medfilt_1d,
     sigma_clip,
@@ -486,12 +488,16 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             s_dead_pixels.compute(show_progressbar=show_progressbar)
         return s_dead_pixels
 
+    @deprecated_argument(name="mask_array", since="0.15.0",
+                         removal="1.00.0", alternative="mask")
+    @deprecated_argument(name="lazy_result", since="0.15.0",
+                         removal="1.00.0", alternative="lazy_output")
     def find_hot_pixels(
         self,
         threshold_multiplier=500,
-        mask_array=None,
-        lazy_result=True,
-        show_progressbar=True,
+        mask=None,
+        inplace=False,
+        **kwargs
     ):
         """Find hot pixels in the diffraction images.
 
@@ -530,8 +536,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Getting a non-lazy signal as output
 
-        >>> s_hot_pixels = s.find_hot_pixels(
-        ...     lazy_result=False, show_progressbar=False)
+        >>> s_hot_pixels = s.find_hot_pixels()
 
         See Also
         --------
@@ -539,16 +544,11 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         correct_bad_pixels
 
         """
-        dask_array = _get_dask_array(self)
-
-        hot_pixels = dt._find_hot_pixels(
-            dask_array, threshold_multiplier=threshold_multiplier, mask_array=mask_array
-        )
-
-        s_hot_pixels = LazySignal2D(hot_pixels)
-        if not lazy_result:
-            s_hot_pixels.compute(show_progressbar=show_progressbar)
-        return s_hot_pixels
+        return self.map(find_hot_pixels,
+                        threshold_multiplier=threshold_multiplier,
+                        mask=mask,
+                        inplace=inplace,
+                        **kwargs)
 
     def correct_bad_pixels(
         self,

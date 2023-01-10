@@ -766,8 +766,9 @@ def find_hot_pixels(z, threshold_multiplier=500, mask=None):
 
         """
     # find the gradient of the image.
-    gradient = ndi.filters.sobel(z)
-    hot_pixels = gradient > threshold_multiplier
+    footprint = [[1, 1, 1], [1, 0, 1], [1, 1, 1]]
+    median = ndi.filters.median_filter(z, footprint=footprint)
+    hot_pixels = (z-median) > threshold_multiplier
     if mask is not None:
         hot_pixels[mask] = False
     return hot_pixels
