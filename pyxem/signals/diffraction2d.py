@@ -1010,6 +1010,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             pst._copy_axes_object_metadata(nav_axes, sig_axes)
         return s_com
 
+    @deprecated(removal="1.00.0", since="0.15.0", alternative="hyperspy.Signal2D.find_peaks")
     def template_match_disk(self, disk_r=4, lazy_result=True, show_progressbar=True):
         """Template match the signal dimensions with a disk.
 
@@ -1048,7 +1049,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         )
         return s
 
-    @deprecated
     def template_match_ring(
         self, r_inner=5, r_outer=7, lazy_result=True, show_progressbar=True
     ):

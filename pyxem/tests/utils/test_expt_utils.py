@@ -35,6 +35,7 @@ from pyxem.utils.expt_utils import (
     find_beam_center_interpolate,
     azimuthal_integrate1d,
     azimuthal_integrate2d,
+    find_hot_pixels
 )
 
 
@@ -235,3 +236,12 @@ class TestAzimuthalIntegration:
             unit="2th_rad",
             correctSolidAngle=True,
         )
+
+class TestFindFeatures:
+    def test_find_hot_pixels(self):
+        data = np.random.random((40, 40))
+        data[30, 32] = 500
+
+        assert np.sum(find_hot_pixels(data,) == 1)
+
+

@@ -744,3 +744,30 @@ def investigate_dog_background_removal_interactive(
 
     dp_gaussian.plot(cmap="viridis")
     return None
+
+
+def find_hot_pixels(z, threshold_multiplier=500, mask=None):
+    """Find single pixels which have much larger values compared to neighbors.
+
+        Finds pixels which have a gradient larger than the threshold multiplier.
+        These are extremely sharp peaks with values on average much larger than
+        the surrounding values.
+
+        Parameters
+        ----------
+        z : array-like
+            Frame to operate on
+        threshold_multiplier : scaler
+            Used to threshold the dif.
+        mask : NumPy array, optional
+            Array with bool values. The True values will be masked
+            (i.e. ignored). Must have the same shape as the two
+            last dimensions in dask_array.
+
+        """
+    # find the gradient of the image.
+    gradient = ndi.filters.sobel(z)
+    hot_pixels = gradient > threshold_multiplier
+    if mask is not None:
+        hot_pixels[mask] = False
+    return hot_pixels
