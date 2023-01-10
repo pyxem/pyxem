@@ -429,12 +429,11 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         return self.map(subtraction_function, inplace=inplace, **kwargs)
 
+    @deprecated_argument(name="mask_array", since="0.15.0", removal="1.00.0", alternative="mask")
     def find_dead_pixels(
         self,
         dead_pixel_value=0,
-        mask_array=None,
-        lazy_result=False,
-        show_progressbar=True,
+        mask=None,
     ):
         """Find dead pixels in the diffraction images.
 
@@ -478,15 +477,11 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         correct_bad_pixels
 
         """
-        dask_array = _get_dask_array(self)
-
-        dead_pixels = dt._find_dead_pixels(
-            dask_array, dead_pixel_value=dead_pixel_value, mask_array=mask_array
-        )
-        s_dead_pixels = LazySignal2D(dead_pixels)
-        if not lazy_result:
-            s_dead_pixels.compute(show_progressbar=show_progressbar)
-        return s_dead_pixels
+        mean_signal = self.mean(axis=self.axes_manager.navigation_axes)
+        dead_pixels = mean_signal == dead_pixel_value
+        if mask is not None:
+            dead_pixels = dead_pixels * np.invert(mask)
+        return dead_pixels
 
     @deprecated_argument(name="mask_array", since="0.15.0",
                          removal="1.00.0", alternative="mask")

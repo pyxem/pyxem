@@ -1205,8 +1205,7 @@ class TestFindDeadPixels:
     def test_2d(self, dead_pixel_data_2d, lazy_case):
         if not lazy_case:
             dead_pixel_data_2d.compute()
-        s_dead_pixels = dead_pixel_data_2d.find_dead_pixels(lazy_result=False)
-        assert not s_dead_pixels._lazy
+        s_dead_pixels = dead_pixel_data_2d.find_dead_pixels()
         assert s_dead_pixels.data.shape == dead_pixel_data_2d.data.shape
         assert s_dead_pixels.data[14, 42]
         assert s_dead_pixels.data[2, 12]
@@ -1232,17 +1231,13 @@ class TestFindDeadPixels:
         s_dead_pixels = s.find_dead_pixels()
         assert s_dead_pixels.data.shape == s.data.shape[-2:]
 
-    def test_lazy_result(self, dead_pixel_data_2d):
-        s_dead_pixels = dead_pixel_data_2d.find_dead_pixels(lazy_result=True)
-        assert s_dead_pixels._lazy
-
     def test_dead_pixel_value(self, dead_pixel_data_2d):
         s_dead_pixels = dead_pixel_data_2d.find_dead_pixels(dead_pixel_value=-10)
         assert not s_dead_pixels.data.any()
 
     def test_mask_array(self, dead_pixel_data_2d):
         mask_array = np.ones_like(dead_pixel_data_2d.data, dtype=bool)
-        s_dead_pixels = dead_pixel_data_2d.find_dead_pixels(mask_array=mask_array)
+        s_dead_pixels = dead_pixel_data_2d.find_dead_pixels(mask=mask_array)
         assert not s_dead_pixels.data.any()
 
 
