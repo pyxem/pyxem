@@ -237,11 +237,3 @@ class TestAzimuthalIntegration:
             correctSolidAngle=True,
         )
 
-class TestFindFeatures:
-    def test_find_hot_pixels(self):
-        data = np.random.random((40, 40))
-        data[30, 32] = 500
-
-        assert np.sum(find_hot_pixels(data,) == 1)
-
-

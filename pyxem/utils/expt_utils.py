@@ -22,6 +22,7 @@ import pyxem as pxm  # for ElectronDiffraction2D
 
 from scipy.interpolate import interp1d
 from skimage import transform as tf
+from skimage.feature import match_template
 from skimage import morphology, filters
 from skimage.draw import ellipse_perimeter
 from skimage.registration import phase_cross_correlation
@@ -724,7 +725,7 @@ def investigate_dog_background_removal_interactive(
         for j, std_dev_min in enumerate(std_dev_mins):
             gauss_processed[i, j] = sample_dp.subtract_diffraction_background(
                 "difference of gaussians",
-                lazy_result=False,
+                lazy_output=False,
                 min_sigma=std_dev_min,
                 max_sigma=std_dev_max,
                 show_progressbar=False,
@@ -804,3 +805,13 @@ def remove_bad_pixels(z, bad_pixels):
     z[bad_pixels] = values
     return z
 
+
+def normalize_template_match(z, template, subtract_min=True, **kwargs):
+    """ Matches a template with an image z. Preformed a normalized cross-correlation
+        using the given templates. If subtract_min is True then the minimum value will
+         be subtracted from the correlation.
+    """
+    template_match = match_template(z, template, **kwargs)
+    if subtract_min:
+        template_match = template_match - np.min(template_match)
+    return template_match

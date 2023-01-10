@@ -19,7 +19,7 @@
 
 import numpy as np
 from skimage import filters
-from skimage.morphology import square
+from skimage.feature import match_template
 from scipy.ndimage import rotate
 from skimage import morphology
 import dask.array as da
@@ -55,6 +55,7 @@ from pyxem.utils.expt_utils import (
     remove_bad_pixels,
     circular_mask,
     find_beam_offset_cross_correlation,
+    normalize_template_match,
     convert_affine_to_transform,
     apply_transformation,
     find_beam_center_blur,
@@ -559,7 +560,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             List of pixels to correct
         show_progressbar : bool, optional
             Default True
-        lazy_result : bool, optional
+        lazy_output : bool, optional
             When working lazily, determines if the result is computed. Default is True (ie. no .compute)
         inplace : bool, optional
             When working in memory, determines if operation is performed inplace, default is True. When
@@ -755,7 +756,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             the diffraction patterns. This can lead to changes in the total intensity
             of the diffraction images, see Notes for more information. If False, the
             data is not interpolated. Default True.
-        lazy_result : optional
+        lazy_output : optional
             If True, the result will be a lazy signal. If False, a non-lazy signal.
             By default, if the signal is lazy, the result will also be lazy.
             If the signal is non-lazy, the result will be non-lazy.
@@ -995,8 +996,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             pst._copy_axes_object_metadata(nav_axes, sig_axes)
         return s_com
 
-    @deprecated(removal="1.00.0", since="0.15.0", alternative="hyperspy.Signal2D.find_peaks")
-    def template_match_disk(self, disk_r=4, lazy_result=True, show_progressbar=True):
+    @deprecated_argument(name="lazy_result", alternative="lazy_output", since="0.15.0", removal="1.00.0")
+    def template_match_disk(self, disk_r=4, inplace=False,  **kwargs):
         """Template match the signal dimensions with a disk.
 
         Used to find diffraction disks in convergent beam electron
@@ -1006,7 +1007,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         ----------
         disk_r : scalar, optional
             Radius of the disk. Default 4.
-        lazy_result : bool, default True
+        lazy_output : bool, default True
             If True, will return a LazyDiffraction2D object. If False,
             will compute the result and return a Diffraction2D object.
         show_progressbar : bool, default True
@@ -1025,17 +1026,18 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         See Also
         --------
         template_match_ring
-        template_match_with_binary_image
+        template_match
 
         """
         disk = morphology.disk(disk_r, self.data.dtype)
-        s = self.template_match_with_binary_image(
-            disk, lazy_result=lazy_result, show_progressbar=show_progressbar
-        )
-        return s
+        return self.map(normalize_template_match,
+                        template=disk,
+                        inplace=inplace,
+                        **kwargs)
 
+    @deprecated_argument(name="lazy_result", alternative="lazy_output", since="0.15.0", removal="1.00.0")
     def template_match_ring(
-        self, r_inner=5, r_outer=7, lazy_result=True, show_progressbar=True
+        self, r_inner=5, r_outer=7, inplace=False, **kwargs
     ):
         """Template match the signal dimensions with a ring.
 
@@ -1064,7 +1066,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         See Also
         --------
         template_match_disk
-        template_match_with_binary_image
+        template_match
 
         """
         if r_outer <= r_inner:
@@ -1079,11 +1081,49 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         ring_inner = morphology.disk(r_inner, dtype=bool)
         ring = morphology.disk(r_outer, dtype=bool)
         ring[edge_slice] = ring[edge_slice] ^ ring_inner
-        s = self.template_match_with_binary_image(
-            ring, lazy_result=lazy_result, show_progressbar=show_progressbar
-        )
-        return s
+        return self.map(normalize_template_match,
+                        template=ring,
+                        inplace=inplace,
+                        **kwargs)
 
+    def template_match(self, template,inplace=False, **kwargs):
+        """Template match the signal dimensions with a binary image.
+
+        Used to find diffraction disks in convergent beam electron
+        diffraction data.
+
+        Might also work with non-binary images, but this haven't been
+        extensively tested.
+
+        Parameters
+        ----------
+        template : 2-D NumPy array
+
+        Returns
+        -------
+        template_match : Diffraction2D object
+
+        Examples
+        --------
+        >>> s = pxm.dummy_data.get_cbed_signal()
+        >>> binary_image = np.random.randint(0, 2, (6, 6))
+        >>> s_template = s.template_match_with_binary_image(
+        ...     binary_image, show_progressbar=False)
+        >>> s.plot()
+
+        See Also
+        --------
+        template_match_disk
+        template_match_ring
+
+        """
+
+        return self.map(normalize_template_match,
+                        template=template,
+                        inplace=inplace,
+                        **kwargs)
+
+    @deprecated(since="0.15.0", removal="1.00.0")
     def template_match_with_binary_image(
         self, binary_image, lazy_result=True, show_progressbar=True
     ):
