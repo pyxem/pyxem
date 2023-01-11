@@ -374,7 +374,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             **kwargs,
         )
 
-    @deprecated_argument(name="lazy_result", alternative="lazy_output", since="0.15.0", removal="1.00.0")
+    @deprecated_argument(name="lazy_result", alternative="lazy_output", since="0.15.0", removal="1.0.0")
     def subtract_diffraction_background(self, method="median kernel", inplace=False, **kwargs):
         """Background subtraction of the diffraction data.
 
@@ -431,7 +431,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         return self.map(subtraction_function, inplace=inplace, **kwargs)
 
-    @deprecated_argument(name="mask_array", since="0.15.0", removal="1.00.0", alternative="mask")
+    @deprecated_argument(name="mask_array", since="0.15.0", removal="1.0.0", alternative="mask")
     def find_dead_pixels(
         self,
         dead_pixel_value=0,
@@ -486,9 +486,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         return dead_pixels
 
     @deprecated_argument(name="mask_array", since="0.15.0",
-                         removal="1.00.0", alternative="mask")
+                         removal="1.0.0", alternative="mask")
     @deprecated_argument(name="lazy_result", since="0.15.0",
-                         removal="1.00.0", alternative="lazy_output")
+                         removal="1.0.0", alternative="lazy_output")
     def find_hot_pixels(
         self,
         threshold_multiplier=500,
@@ -547,7 +547,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                         inplace=inplace,
                         **kwargs)
 
-    @deprecated_argument(name="lazy_result", since="0.15.0", removal="1.00.0", alternative="lazy_output")
+    @deprecated_argument(name="lazy_result", since="0.15.0", removal="1.0.0", alternative="lazy_output")
     def correct_bad_pixels(
         self,
         bad_pixel_array,
@@ -997,7 +997,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             pst._copy_axes_object_metadata(nav_axes, sig_axes)
         return s_com
 
-    @deprecated_argument(name="lazy_result", alternative="lazy_output", since="0.15.0", removal="1.00.0")
+    @deprecated_argument(name="lazy_result", alternative="lazy_output", since="0.15.0", removal="1.0.0")
     def template_match_disk(self, disk_r=4, inplace=False,  **kwargs):
         """Template match the signal dimensions with a disk.
 
@@ -1036,7 +1036,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                         inplace=inplace,
                         **kwargs)
 
-    @deprecated_argument(name="lazy_result", alternative="lazy_output", since="0.15.0", removal="1.00.0")
+    @deprecated_argument(name="lazy_result", alternative="lazy_output", since="0.15.0", removal="1.0.0")
     def template_match_ring(
         self, r_inner=5, r_outer=7, inplace=False, **kwargs
     ):
@@ -1124,7 +1124,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                         inplace=inplace,
                         **kwargs)
 
-    @deprecated(since="0.15.0", removal="1.00.0")
+    @deprecated(since="0.15.0", removal="1.0.0")
     def template_match_with_binary_image(
         self, binary_image, lazy_result=True, show_progressbar=True, **kwargs
     ):
