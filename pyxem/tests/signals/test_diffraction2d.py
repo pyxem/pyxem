@@ -1140,7 +1140,7 @@ class TestSubtractingDiffractionBackground:
     @pytest.mark.parametrize("methods", method1)
     def test_subtract_backgrounds(self, methods):
         # test that background is mostly removed
-        if methods is "h-dome":
+        if methods == "h-dome":
             kwargs = {"h": .25}
         else:
             kwargs = {}

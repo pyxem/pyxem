@@ -23,6 +23,7 @@ import skimage.morphology as sm
 
 from pyxem.signals import Diffraction2D, LazyDiffraction2D
 import pyxem.utils.dask_tools as dt
+import pyxem.utils.background_utils as bt
 import pyxem.utils.pixelated_stem_tools as pst
 
 
@@ -1179,170 +1180,37 @@ class TestPeakPositionRefinementCOM:
                 dask_array, peak_array.compute(), square_size=10
             )
 
-
-@pytest.mark.slow
-class TestBackgroundRemovalDOG:
-    def test_single_frame_min_sigma(self):
-        min_sigma = 10
-        numpy_array = np.ones((50, 50))
-        numpy_array[20:30, 20:30] = 5
-        data = dt._background_removal_single_frame_dog(numpy_array, min_sigma=min_sigma)
-        assert data.sum() != numpy_array.sum()
-        assert data.shape == numpy_array.shape
-        assert data[0, :].all() == 0
-
-    def test_single_frame_max_sigma(self):
-        max_sigma = 10
-        numpy_array = np.ones((50, 50))
-        numpy_array[20:30, 20:30] = 5
-        data = dt._background_removal_single_frame_dog(numpy_array, max_sigma=max_sigma)
-        assert data.sum() != numpy_array.sum()
-        assert data.shape == numpy_array.shape
-        assert data[0, :].all() == 0
-
-    def test_dask_min_sigma(self):
-        min_sigma = 10
-        numpy_array = np.ones((10, 10, 50, 50))
-        numpy_array[:, :20:30, 20:30] = 5
-        dask_array = da.from_array(numpy_array, chunks=(2, 2, 50, 50))
-
-        data = dt._background_removal_dog(dask_array, min_sigma=min_sigma)
-        data.compute()
-        assert data.sum() != numpy_array.sum()
-        assert data.shape == numpy_array.shape
-        assert data[:, :, 0, :].all() == 0
-
-    def test_dask_max_sigma(self):
-        max_sigma = 10
-        numpy_array = np.ones((10, 10, 50, 50))
-        numpy_array[:, :20:30, 20:30] = 5
-        dask_array = da.from_array(numpy_array, chunks=(2, 2, 50, 50))
-
-        data = dt._background_removal_dog(dask_array, max_sigma=max_sigma)
-        data.compute()
-        assert data.sum() != numpy_array.sum()
-        assert data.shape == numpy_array.shape
-        assert data[:, :, 0, :].all() == 0
-
-    @pytest.mark.parametrize("nav_dims", [0, 1, 2, 3, 4])
-    def test_array_different_dimensions(self, nav_dims):
-        shape = list(np.random.randint(2, 6, size=nav_dims))
-        shape.extend([50, 50])
-        chunks = [1] * nav_dims
-        chunks.extend([25, 25])
-        dask_array = da.random.random(size=shape, chunks=chunks)
-        match_array_dask = dt._background_removal_dog(dask_array)
-        assert len(dask_array.shape) == nav_dims + 2
-        assert dask_array.shape == match_array_dask.shape
-        match_array = match_array_dask.compute()
-        assert dask_array.shape == match_array.shape
-
-
-@pytest.mark.slow
-class TestBackgroundRemovalMedianFilter:
-    def test_single_frame_footprint(self):
+class TestBackgroundRemoval:
+    def test_median_sub(self):
         footprint = 10
         numpy_array = np.ones((50, 50))
         numpy_array[20:30, 20:30] = 5
-        data = dt._background_removal_single_frame_median(
+
+        data = bt._subtract_median(
             numpy_array, footprint=footprint
         )
         assert data.sum() != numpy_array.sum()
         assert data.shape == numpy_array.shape
         assert data[0, :].all() == 0
 
-    def test_chunk_footprint(self):
-        footprint = 10
-        numpy_array = np.ones((10, 10, 50, 50))
-        numpy_array[:, :20:30, 20:30] = 5
-        data = dt._background_removal_chunk_median(numpy_array, footprint=footprint)
-        assert data.sum() != numpy_array.sum()
-        assert data.shape == numpy_array.shape
-        assert data[:, :, 0, :].all() == 0
-
-    def test_dask_footprint(self):
-        footprint = 10
-        numpy_array = np.ones((10, 10, 50, 50))
-        numpy_array[:, :20:30, 20:30] = 5
-        dask_array = da.from_array(numpy_array, chunks=(2, 2, 50, 50))
-
-        data = dt._background_removal_median(dask_array, footprint=footprint)
-        data = data.compute()
-        assert data.sum() != numpy_array.sum()
-        assert data.shape == numpy_array.shape
-        assert data[:, :, 0, :].all() == 0
-
-    @pytest.mark.parametrize("nav_dims", [0, 1, 2, 3, 4])
-    def test_array_different_dimensions(self, nav_dims):
-        shape = list(np.random.randint(2, 6, size=nav_dims))
-        shape.extend([50, 50])
-        chunks = [1] * nav_dims
-        chunks.extend([25, 25])
-        dask_array = da.random.random(size=shape, chunks=chunks)
-        match_array_dask = dt._background_removal_median(dask_array)
-        assert len(dask_array.shape) == nav_dims + 2
-        assert dask_array.shape == match_array_dask.shape
-        match_array = match_array_dask.compute()
-        assert dask_array.shape == match_array.shape
-
-
-@pytest.mark.slow
-class TestBackgroundRemovalRadialMedian:
-    def test_single_frame_centre(self):
-        centre_x = 25
-        centre_y = 25
+    def test_radial_median_sub(self):
+        center_x = 25
+        center_y = 25
         numpy_array = np.ones((50, 50))
         numpy_array[20:30, 20:30] = 5
-        data = dt._background_removal_single_frame_radial_median(
-            numpy_array, centre_x=centre_x, centre_y=centre_y
-        )
+        data = bt._subtract_radial_median(numpy_array, center_x=center_x, center_y=center_y)
         assert data.sum() != numpy_array.sum()
         assert data.shape == numpy_array.shape
         assert data[0, :].all() == 0
 
-    def test_chunk_centre(self):
-        centre_x = 25
-        centre_y = 25
-        numpy_array = np.ones((10, 10, 50, 50))
-        numpy_array[:, :20:30, 20:30] = 5
-        data = dt._background_removal_chunk_radial_median(
-            numpy_array, centre_x=centre_x, centre_y=centre_y
-        )
+    def test_dog_sub(self):
+        min_sigma = 10
+        numpy_array = np.ones((50, 50))
+        numpy_array[20:30, 20:30] = 5
+        data = bt._subtract_dog(numpy_array, min_sigma=min_sigma)
         assert data.sum() != numpy_array.sum()
         assert data.shape == numpy_array.shape
-        assert data[:, :, 0, :].all() == 0
-
-    def test_dask_centre(self):
-        centre_x = 25
-        centre_y = 25
-        numpy_array = np.ones((10, 10, 50, 50))
-        numpy_array[:, :20:30, 20:30] = 5
-        dask_array = da.from_array(numpy_array, chunks=(2, 2, 50, 50))
-
-        data = dt._background_removal_radial_median(
-            dask_array, centre_x=centre_x, centre_y=centre_y
-        )
-        data = data.compute()
-        assert data.sum() != numpy_array.sum()
-        assert data.shape == numpy_array.shape
-        assert (data[:, :, 0, :]).all() == 0
-
-    @pytest.mark.parametrize("nav_dims", [0, 1, 2, 3, 4])
-    def test_array_different_dimensions(self, nav_dims):
-        centre_x = 25
-        centre_y = 25
-        shape = list(np.random.randint(2, 6, size=nav_dims))
-        shape.extend([50, 50])
-        chunks = [1] * nav_dims
-        chunks.extend([25, 25])
-        dask_array = da.random.random(size=shape, chunks=chunks)
-        match_array_dask = dt._background_removal_radial_median(
-            dask_array, centre_x=centre_x, centre_y=centre_y
-        )
-        assert len(dask_array.shape) == nav_dims + 2
-        assert dask_array.shape == match_array_dask.shape
-        match_array = match_array_dask.compute()
-        assert dask_array.shape == match_array.shape
+        assert data[0, :].all() == 0
 
 
 @pytest.mark.slow
