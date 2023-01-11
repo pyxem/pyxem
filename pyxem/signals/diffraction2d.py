@@ -591,9 +591,12 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
     """ Direct beam and peak finding tools """
 
-    def get_direct_beam_position(
-        self, method, lazy_output=None, signal_slice=None, **kwargs
-    ):
+    @deprecated_argument(name="lazy_result", since="0.14", removal="1.0.0",
+                         alternative="lazy_output")
+    def get_direct_beam_position(self, method,
+                                 lazy_output=None,
+                                 signal_slice=None,
+                                 **kwargs):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern.
 
@@ -717,6 +720,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         return shifts
 
+    @deprecated_argument(name="lazy_result", since="0.15",
+                         removal="1.0.0", alternative="lazy_output")
     def center_direct_beam(
         self,
         method=None,
@@ -788,12 +793,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         use a float dtype, which can be done by s.change_dtype('float32', rechunk=False).
 
         """
-        if "lazy_result" in kwargs:
-            warnings.warn(
-                "lazy_result was replaced with lazy_output in version 0.14",
-                DeprecationWarning,
-            )
-            lazy_output = kwargs.pop("lazy_result")
         if (shifts is None) and (method is None):
             raise ValueError("Either method or shifts parameter must be specified")
         if (shifts is not None) and (method is not None):
@@ -1049,7 +1048,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         ----------
         r_inner, r_outer : scalar, optional
             Inner and outer radius of the rings.
-        lazy_result : bool, default True
+        lazy_output : bool, default True
             If True, will return a LazyDiffraction2D object. If False,
             will compute the result and return a Diffraction2D object.
         show_progressbar : bool, default True
@@ -1942,6 +1941,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         self.metadata.set_item("Signal.ai", ai)
         return None
 
+    @deprecated_argument(name="lazy_result", since="0.14", removal="1.0.0", alternative="lazy_output")
     def get_azimuthal_integral1d(
         self,
         npt,
@@ -2016,12 +2016,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> ds.get_azimuthal_integral1d(npt=100)
 
         """
-        if "lazy_result" in kwargs:
-            warnings.warn(
-                "lazy_result was replaced with lazy_output in version 0.14",
-                DeprecationWarning,
-            )
-            kwargs["lazy_output"] = kwargs.pop("lazy_result")
         if "wavelength" in kwargs:
             warnings.warn(
                 "The wavelength parameter was removed in 0.14. The wavelength "
