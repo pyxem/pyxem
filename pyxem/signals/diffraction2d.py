@@ -81,7 +81,8 @@ import pyxem.utils.ransac_ellipse_tools as ret
 from pyxem.utils._deprecated import deprecated, deprecated_argument
 
 from pyxem.utils.background_utils import (_subtract_median,_subtract_dog,
-                                          _subtract_hdome,_subtract_radial_median)
+                                          _subtract_hdome,)
+
 
 class Diffraction2D(Signal2D, CommonDiffraction):
     """Signal class for two-dimensional diffraction data in Cartesian coordinates."""

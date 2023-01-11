@@ -1085,7 +1085,7 @@ class TestDiffraction2DTemplateMatchRing:
             s.template_match_ring(r_inner=3, r_outer=3)
 
 
-class TestDiffraction2DTemplateWithBinaryImage:
+class TestDiffraction2DTemplate:
     def test_square_and_disk(self):
         s = Diffraction2D(np.zeros((2, 2, 100, 100)))
 
