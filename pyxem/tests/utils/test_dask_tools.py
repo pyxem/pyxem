@@ -24,6 +24,7 @@ import skimage.morphology as sm
 from pyxem.signals import Diffraction2D, LazyDiffraction2D
 import pyxem.utils.dask_tools as dt
 import pyxem.utils.background_utils as bt
+import pyxem.utils.expt_utils as et
 import pyxem.utils.pixelated_stem_tools as pst
 
 
@@ -742,168 +743,25 @@ class TestThresholdArray:
             dt._threshold_array(dask_array)
 
 
-@pytest.mark.slow
 class TestRemoveBadPixels:
     def test_simple(self):
         data = np.ones((20, 30)) * 12
         data[5, 9] = 0
         data[2, 1] = 0
-        dask_array = da.from_array(data, chunks=(5, 5))
-        dead_pixels = dt._find_dead_pixels(dask_array)
-        output = dt._remove_bad_pixels(dask_array, dead_pixels)
-        output = output.compute()
+        output = et.remove_bad_pixels(data, data==0)
         assert (output == 12).all()
 
-    def test_3d(self):
-        data = np.ones((5, 20, 30)) * 12
-        data[:, 5, 9] = 0
-        data[:, 2, 1] = 0
-        dask_array = da.from_array(data, chunks=(5, 5, 5))
-        dead_pixels = dt._find_dead_pixels(dask_array)
-        output = dt._remove_bad_pixels(dask_array, dead_pixels)
-        output = output.compute()
-        assert (output == 12).all()
 
-    def test_4d(self):
-        data = np.ones((5, 10, 20, 30)) * 12
-        data[:, :, 5, 9] = 0
-        data[:, :, 2, 1] = 0
-        dask_array = da.from_array(data, chunks=(5, 5, 5, 5))
-        dead_pixels = dt._find_dead_pixels(dask_array)
-        output = dt._remove_bad_pixels(dask_array, dead_pixels)
-        output = output.compute()
-        assert (output == 12).all()
-
-    def test_3d_same_bad_pixel_array_shape(self):
-        data = np.ones((5, 20, 30)) * 12
-        data[2, 5, 9] = 0
-        data[3, 2, 1] = 0
-        dask_array = da.from_array(data, chunks=(5, 5, 5))
-        bad_pixel_array = np.zeros(dask_array.shape)
-        bad_pixel_array[2, 5, 9] = True
-        bad_pixel_array[3, 2, 1] = True
-        bad_pixel_array = da.from_array(bad_pixel_array, chunks=(5, 5, 5))
-        output = dt._remove_bad_pixels(dask_array, bad_pixel_array)
-        output = output.compute()
-        assert (output == 12).all()
-
-    def test_wrong_dask_array_shape_1d(self):
-        data = np.ones((30))
-        dask_array = da.from_array(data, chunks=(5))
-        with pytest.raises(ValueError):
-            dt._remove_bad_pixels(dask_array, dask_array)
-
-    def test_wrong_shape_bad_pixel_array(self):
-        data = np.ones((5, 10, 20, 30))
-        dask_array = da.from_array(data, chunks=(5, 5, 5, 5))
-        bad_pixel_array = da.zeros_like(dask_array)
-        with pytest.raises(ValueError):
-            dt._remove_bad_pixels(dask_array, bad_pixel_array[1, :, :, :])
-        with pytest.raises(ValueError):
-            dt._remove_bad_pixels(dask_array, bad_pixel_array[1, 1, :-2, :])
-
-    def test_find_dead_pixels_wrong_input(self):
-        dask_array = da.zeros((20,))
-        with pytest.raises(ValueError):
-            dt._find_dead_pixels(dask_array)
-
-    def test_find_hot_pixels_wrong_input(self):
-        dask_array = da.zeros((20,))
-        with pytest.raises(ValueError):
-            dt._find_hot_pixels(dask_array)
-
-
-@pytest.mark.slow
 class TestTemplateMatchBinaryImage:
     @pytest.mark.parametrize("x, y", [(13, 32), (76, 32), (87, 21), (43, 85)])
     def test_single_frame(self, x, y):
         disk_r = 5
         disk = sm.disk(disk_r)
         data = np.zeros(shape=(100, 100))
-
-        data[y - disk_r : y + disk_r + 1, x - disk_r : x + disk_r + 1] = disk
-        match = dt._template_match_binary_image_single_frame(data, disk)
+        data[y - disk_r: y + disk_r + 1, x - disk_r: x + disk_r + 1] = disk
+        match = et.normalize_template_match(data, disk)
         index = np.unravel_index(np.argmax(match), match.shape)
         assert (y, x) == index
-
-    def test_chunk(self):
-        x, y, disk_r = 76, 23, 5
-        disk = sm.disk(disk_r)
-        data = np.zeros(shape=(5, 10, 100, 90))
-        data[:, :, y - disk_r : y + disk_r + 1, x - disk_r : x + disk_r + 1] = disk
-        match_array = dt._template_match_binary_image_chunk(data, disk)
-        assert data.shape == match_array.shape
-        for ix, iy in np.ndindex(data.shape[:2]):
-            match = match_array[ix, iy]
-            index = np.unravel_index(np.argmax(match), match.shape)
-            assert (y, x) == index
-
-    def test_simple(self):
-        data = np.ones((5, 3, 50, 40))
-        disk = sm.disk(5)
-        dask_array = da.from_array(data, chunks=(1, 1, 5, 5))
-        match_array_dask = dt._template_match_with_binary_image(
-            dask_array, binary_image=disk
-        )
-        match_array = match_array_dask.compute()
-        assert match_array.shape == data.shape
-        assert match_array.min() >= 0
-
-    def test_position(self):
-        disk_r = 5
-        data = np.zeros((2, 3, 90, 100))
-        # Nav top left, sig x=5, y=5
-        data[0, 0, :11, :11] = sm.disk(disk_r)
-        # Nav top centre, sig x=94, y=84
-        data[0, 1, -11:, -11:] = sm.disk(disk_r)
-        # Nav top right, sig x=94, y=5
-        data[0, 2, :11, -11:] = sm.disk(disk_r)
-        # Nav bottom left, sig x=5, y=84
-        data[1, 0, -11:, :11] = sm.disk(disk_r)
-        # Nav bottom centre, sig x=75, y=25
-        data[1, 1, 20:31, 70:81] = sm.disk(disk_r)
-        # Nav bottom right, sig x=55, y=75
-        data[1, 2, 70:81, 50:61] = sm.disk(disk_r)
-        binary_image = sm.disk(disk_r)
-        dask_array = da.from_array(data, chunks=(1, 1, 5, 5))
-        out_dask = dt._template_match_with_binary_image(
-            dask_array, binary_image=binary_image
-        )
-        out = out_dask.compute()
-        match00 = np.unravel_index(np.argmax(out[0, 0]), out[0, 0].shape)
-        assert (5, 5) == match00
-        match01 = np.unravel_index(np.argmax(out[0, 1]), out[0, 1].shape)
-        assert (84, 94) == match01
-        match02 = np.unravel_index(np.argmax(out[0, 2]), out[0, 2].shape)
-        assert (5, 94) == match02
-        match10 = np.unravel_index(np.argmax(out[1, 0]), out[1, 0].shape)
-        assert (84, 5) == match10
-        match11 = np.unravel_index(np.argmax(out[1, 1]), out[1, 1].shape)
-        assert (25, 75) == match11
-        match12 = np.unravel_index(np.argmax(out[1, 2]), out[1, 2].shape)
-        assert (75, 55) == match12
-
-    @pytest.mark.parametrize("nav_dims", [0, 1, 2, 3, 4])
-    def test_array_different_dimensions(self, nav_dims):
-        shape = list(np.random.randint(2, 6, size=nav_dims))
-        shape.extend([50, 50])
-        chunks = [1] * nav_dims
-        chunks.extend([25, 25])
-        dask_array = da.random.random(size=shape, chunks=chunks)
-        binary_image = sm.disk(5)
-        match_array_dask = dt._template_match_with_binary_image(
-            dask_array, binary_image=binary_image
-        )
-        assert len(dask_array.shape) == nav_dims + 2
-        assert dask_array.shape == match_array_dask.shape
-        match_array = match_array_dask.compute()
-        assert dask_array.shape == match_array.shape
-
-    def test_1d_dask_array_error(self):
-        binary_image = sm.disk(5)
-        dask_array = da.random.random(size=50, chunks=10)
-        with pytest.raises(ValueError):
-            dt._template_match_with_binary_image(dask_array, binary_image=binary_image)
 
 
 @pytest.mark.slow
