@@ -107,6 +107,7 @@ class TestDeprecateArgument:
             def bar_arg_alt(self, **kwargs):
                 return kwargs
 
+
         my_foo = Foo()
 
         # Does not warn
@@ -125,7 +126,7 @@ class TestDeprecateArgument:
 
         # Warns with alternative
         with pytest.warns(np.VisibleDeprecationWarning) as record3:
-            assert my_foo.bar_arg_alt(a=3) == {"a": 3}
+            assert my_foo.bar_arg_alt(a=3) == {"b": 3}
         assert str(record3[0].message) == (
             r"Argument `a` is deprecated and will be removed in version 1.4. "
             r"To avoid this warning, please do not use `a`. Use `b` instead. See the "
