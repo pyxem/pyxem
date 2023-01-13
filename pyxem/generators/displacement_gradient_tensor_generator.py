@@ -44,6 +44,11 @@ def get_DisplacementGradientMap(strained_vectors, unstrained_vectors, weights=No
         basis vectors, V and U, defined as row vectors.
     weights : list
         of weights to be passed to the least squares optimiser, not used for n=2
+    return_residuals: Bool
+        If the residuals for the least squares optimiser should be returned.
+    kwargs: dict
+        Any additional keyword arguments passed to the `hyperspy.signals.BaseSignal.map`
+        function.
 
     Returns
     -------
@@ -67,7 +72,7 @@ def get_DisplacementGradientMap(strained_vectors, unstrained_vectors, weights=No
         weights=weights,
         inplace=False,
         output_signal_size=(3, 3),
-        output_dtype=np.float64,
+        output_dtype=np.float64,**kwargs
     )
 
     if return_residuals:
@@ -77,7 +82,7 @@ def get_DisplacementGradientMap(strained_vectors, unstrained_vectors, weights=No
             weights=weights,
             inplace=False,
             output_dtype=np.float64,
-            return_residuals=True
+            return_residuals=True, **kwargs
         )
         return DisplacementGradientMap(D), R
     else:
@@ -102,10 +107,14 @@ def get_single_DisplacementGradientTensor(Vs, Vu=None, weights=None, return_resi
         basis vectors, V and U, defined as row vectors.
     weights : list
         of weights to be passed to the least squares optimiser
+    return_residuals: Bool
+        If the residuals for the least squares optimiser should be returned.
     Returns
     -------
     D : numpy.array
         A 3 x 3 displacement gradient tensor (measured in reciprocal space).
+    residuals : numpy.array
+        The residuals for the least squares fitting.
 
     Notes
     -----
