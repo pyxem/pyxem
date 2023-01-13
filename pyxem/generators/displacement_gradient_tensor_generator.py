@@ -104,6 +104,10 @@ def get_single_DisplacementGradientTensor(Vs, Vu=None, weights=None):
     get_DisplacementGradientMap()
 
     """
+    is_row_nan = np.logical_not(np.any(np.isnan(Vs), axis=1))
+    Vs = Vs[is_row_nan]
+    Vu = Vu[is_row_nan]
+
     if Vu is not None:
         if Vu.dtype == object:
             Vu = Vu[()]
@@ -111,12 +115,15 @@ def get_single_DisplacementGradientTensor(Vs, Vu=None, weights=None):
         # see https://stackoverflow.com/questions/27128688
         weights = np.asarray(weights)
         # Need vectors normalized to the unstrained region otherwise the weighting breaks down
-        Vs = (
-            np.divide(Vs, np.linalg.norm(Vu, axis=0)) * np.sqrt(weights)
-        ).T  # transpose for conventions
-        Vu = (np.divide(Vu, np.linalg.norm(Vu, axis=0)) * np.sqrt(weights)).T
+        norm = np.linalg.norm(Vu, axis=1)
+        Vs = (np.divide(Vs.T,
+                        np.linalg.norm(Vu, axis=1)) *
+              np.sqrt(weights)).T
+        Vu = (np.divide(Vu.T,
+                        np.linalg.norm(Vu, axis=1)) *
+              np.sqrt(weights)).T
     else:
-        Vs, Vu = Vs.T, Vu.T
+        Vs, Vu = Vs, Vu
 
     L = np.linalg.lstsq(Vu, Vs, rcond=-1)[
         0
