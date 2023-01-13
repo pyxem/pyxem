@@ -22,7 +22,8 @@ import numpy as np
 from pyxem.signals.tensor_field import DisplacementGradientMap
 
 
-def get_DisplacementGradientMap(strained_vectors, unstrained_vectors, weights=None):
+def get_DisplacementGradientMap(strained_vectors, unstrained_vectors, weights=None,
+                                return_residuals=False, **kwargs):
     r"""Calculates the displacement gradient tensor at each navigation position in a map.
 
     Compares vectors to determine the 2 x 2 matrix,
@@ -69,10 +70,21 @@ def get_DisplacementGradientMap(strained_vectors, unstrained_vectors, weights=No
         output_dtype=np.float64,
     )
 
-    return DisplacementGradientMap(D)
+    if return_residuals:
+        R = strained_vectors.map(
+            get_single_DisplacementGradientTensor,
+            Vu=unstrained_vectors,
+            weights=weights,
+            inplace=False,
+            output_dtype=np.float64,
+            return_residuals=True
+        )
+        return DisplacementGradientMap(D), R
+    else:
+        return DisplacementGradientMap(D)
 
 
-def get_single_DisplacementGradientTensor(Vs, Vu=None, weights=None):
+def get_single_DisplacementGradientTensor(Vs, Vu=None, weights=None, return_residuals=False):
     r"""Calculates the displacement gradient tensor from a pairs of vectors.
 
     Determines the 2 x 2 matrix, :math:`\\mathbf(L)`, that maps unstrained
@@ -125,11 +137,13 @@ def get_single_DisplacementGradientTensor(Vs, Vu=None, weights=None):
     else:
         Vs, Vu = Vs, Vu
 
-    L = np.linalg.lstsq(Vu, Vs, rcond=-1)[
-        0
-    ]  # only need the return array, see np,linalg.lstsq doc
+    L, residuals, rank, s = np.linalg.lstsq(Vu, Vs, rcond=-1)
+    # only need the return array, see np,linalg.lstsq doc
     # Put caculated matrix values into 3 x 3 matrix to be returned.
     D = np.eye(3)
     D[0:2, 0:2] = L
 
-    return D
+    if return_residuals:
+        return residuals
+    else:
+        return D

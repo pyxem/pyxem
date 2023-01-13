@@ -39,7 +39,6 @@ def vector_operation(z, M):
         Output vectors
     """
     v_transformed = []
-    print(z.shape[0])
     for i in np.arange(0, z.shape[0]):
         v_transformed.append(np.matmul(M, z[i, :]))
     return np.asarray(v_transformed)
@@ -69,9 +68,10 @@ def generate_test_vectors(v):
     return np.asarray([[v, rotation(v)], [uniform_expansion(v), stretch_in_x(v)]])
 
 
-def generate_displacment_map(vectors):
+def generate_displacment_map(vectors, return_residuals=False):
     deformed = hs.signals.Signal2D(generate_test_vectors(vectors))
-    return get_DisplacementGradientMap(deformed, vectors)
+    return get_DisplacementGradientMap(deformed, vectors,
+                                       return_residuals=return_residuals)
 
 
 def generate_strain_map(vectors):
@@ -103,9 +103,13 @@ class TestDisplacementGradientMap:
         assert np.shape(test_vectors[0, 0]) == four_vectors.shape
         assert np.shape(test_vectors[0, 1]) == four_vectors.shape
 
+    @pytest.mark.parametrize("residuals", (True,False))
     @pytest.mark.parametrize("vectors", (four_vectors, xy_vectors, left_handed))
-    def test_generate_displacement_map(self, vectors):
-        dis_map = generate_displacment_map(vectors)
+    def test_generate_displacement_map(self, vectors, residuals):
+        if residuals:
+            dis_map, r = generate_displacment_map(vectors, return_residuals=residuals)
+        else:
+            dis_map = generate_displacment_map(vectors, return_residuals=residuals)
         assert isinstance(dis_map, DisplacementGradientMap)
 
     @pytest.mark.parametrize("vectors", (four_vectors, xy_vectors, left_handed))

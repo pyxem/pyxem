@@ -560,7 +560,7 @@ class DiffractionVectors(BaseSignal):
         kwargs["ragged"] = ragged
         if not ragged:
             kwargs["output_signal_size"] = np.shape(basis)
-            kwargs["output_dtype"]= float
+            kwargs["output_dtype"] = float
 
         filtered_vectors = self.map(filter_vectors_near_basis,  basis=basis,
                                     distance=distance, **kwargs)
