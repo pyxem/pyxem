@@ -18,6 +18,7 @@
 
 import numpy as np
 import scipy.ndimage as ndi
+import scipy.signal as ss
 
 
 def _register_drift_5d(data, shifts1, shifts2):
@@ -77,3 +78,46 @@ def get_drift_vectors(s, **kwargs):
     yshifts = shift_vectors[:, 1]
 
     return xshifts, yshifts
+
+
+def _g2_2d(data, normalization='split', kbin=1, tbin=1):
+    """
+    Calculate k resolved g2(k,t) from I(t,k_r,k_phi)
+
+     Parameters
+    ----------
+    data: 3D np.array
+        Time series for I(t,k_r,k_phi)
+    normalization: string
+        Normalization format for time autocorrelation, 'split' or 'self'
+    kbin: int
+        Binning factor for both k axes
+    tbin: int
+        Binning factor for t axis
+
+    Returns
+    -------
+    g2: 3D np.array
+        Time correlation function g2(t,k_r,k_phi)
+    """
+    data = data.T
+    data = data.reshape((data.shape[0] // kbin), kbin, (data.shape[1] // kbin), kbin, (data.shape[2] // tbin),
+                        tbin).sum(5).sum(3).sum(1)
+
+    # Calculate autocorrelation along time axis
+    autocorr = ss.fftconvolve(data, data[:, :, ::-1], mode='full', axes=[-1])
+    norm = ss.fftconvolve(np.ones(data.shape), data[:, :, ::-1], mode='full', axes=[-1])
+    if normalization == 'self':
+        overlap_factor = np.expand_dims(np.linspace(data.shape[-1], 1, data.shape[-1]), axis=(0, 1))
+        norm_factor = norm[:, :, data.shape[-1]:0:-1] ** 2
+        g2 = autocorr[:, :, data.shape[-1] - 1:] / norm_factor * overlap_factor
+    if normalization == 'split':
+        overlap_factor = np.expand_dims(np.linspace(data.shape[-1], 1, data.shape[-1]), axis=(0, 1))
+        norm_factor = norm[:, :, data.shape[-1] - 1:] * norm[:, :, ::-1][:, :, data.shape[-1] - 1:]
+        g2 = autocorr[:, :, data.shape[-1] - 1:] / norm_factor * overlap_factor
+    else:
+        raise ValueError(
+            normalization + " not recognize, normalization must be chosen 'split' or 'self'"
+        )
+
+    return g2.T

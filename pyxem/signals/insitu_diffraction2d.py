@@ -25,7 +25,7 @@ import dask.array as da
 from dask.graph_manipulation import clone
 
 from pyxem.utils.dask_tools import _get_dask_array
-from pyxem.utils.insitu_utils import _register_drift_5d, get_drift_vectors
+from pyxem.utils.insitu_utils import _register_drift_5d, get_drift_vectors, _g2_2d
 
 class InSituDiffraction2D(Diffraction2D):
     """Signal class for in-situ 4D-STEM data."""
@@ -120,7 +120,7 @@ class InSituDiffraction2D(Diffraction2D):
 
         data_overlapped = da.overlap.overlap(dask_data,
                                              depth=overlapped_depth,
-                                             boundary='none')
+                                             boundary={a: 'none' for a in range(5)})
 
         # Clone original overlap dask array to work around memory release issue in map_overlap
         data_clones = da.concatenate(
@@ -152,3 +152,38 @@ class InSituDiffraction2D(Diffraction2D):
             registered_data.compute()
 
         return registered_data
+
+    def get_g2_2d_kresolved(self, time_axis=2, normalization='split', kbin=1, tbin=1):
+        """
+        Calculate k resolved g2 from in situ diffraction signal
+
+        Parameters
+        ----------
+        time_axis: int
+            Index of time axis. Default is 2
+        normalization: string
+            Normalization format for time autocorrelation, 'split' or 'self'
+        kbin: int
+            Binning factor for both k axes
+        tbin: int
+            Binning factor for t axis
+
+        Returns
+        ---------
+        g2kt: Signal2D or Correlation2D?
+            k resolved time correlation signal
+        """
+        if time_axis != 2:
+            transposed_signal = self.roll_time_axis(time_axis).transpose(navigation_axes=[0, 1])
+        else:
+            transposed_signal = self.transpose(navigation_axes=[0, 1])
+
+        g2kt = transposed_signal.map(_g2_2d,
+                                     normalization=normalization,
+                                     kbin=kbin,
+                                     tbin=tbin,
+                                     inplace=False)
+
+        g2kt.set_signal_type('correlation')
+
+        return g2kt
