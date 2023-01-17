@@ -39,6 +39,7 @@ from pyxem.utils.vector_utils import (
     get_npeaks,
     filter_vectors_ragged,
     filter_vectors_edge_ragged,
+    filter_vectors_near_basis
 )
 from pyxem.utils.expt_utils import peaks_as_gvectors
 
@@ -163,7 +164,6 @@ class DiffractionVectors(BaseSignal):
         )
 
         vectors = cls(gvectors)
-        vectors.axes_manager.set_signal_dimension(0)
 
         return vectors
 
@@ -529,6 +529,42 @@ class DiffractionVectors(BaseSignal):
             return unique_peaks, clusters
         else:
             return unique_peaks
+
+    def filter_basis(self, basis, distance=0.5, **kwargs):
+        """
+        Filter vectors to only the set of vectors which is close
+        to a basis set of vectors. If there is no vector within the `distance`
+        parameter of the vector np.`nan` will be returned.
+
+        Parameters
+        ----------
+        basis: array-like or BaseSignal
+            The set of vectors to be compared.
+        distance: float
+            The distance between vectors and basis which detemine if the vector
+            is associated with the basis vector. If no vector is inside the
+            distance np.nan will be returned.
+        kwargs: dict
+            Any other parameters passed to the `hyperspy.BaseSignal.Map` function.
+        Returns
+        -------
+        vectors: DiffractionVectors or DiffractionVectors2D
+            The filtered list of diffraction vectors.  If basis is
+            an instance of hyperspy.Signals.BaseSignal and instance of the
+            DiffractionVectors class will be returned otherwise an instance
+            of the DiffractionVectors2D class will be returned.
+        """
+        ragged = (isinstance(basis, BaseSignal) and
+                  (basis.axes_manager.navigation_shape ==
+                   self.axes_manager.navigation_shape))
+        kwargs["ragged"] = ragged
+        if not ragged:
+            kwargs["output_signal_size"] = np.shape(basis)
+            kwargs["output_dtype"] = float
+
+        filtered_vectors = self.map(filter_vectors_near_basis,  basis=basis,
+                                    distance=distance, **kwargs)
+        return filtered_vectors
 
     def filter_magnitude(self, min_magnitude, max_magnitude, *args, **kwargs):
         """Filter the diffraction vectors to accept only those with a magnitude

@@ -105,19 +105,18 @@ def test_polar2cart(r, theta, x, y):
 
 
 @pytest.mark.parametrize(
-    "z, center, calibration, g",
+    "z, center, calibration",
     [
         (
             np.array([[100, 100], [200, 200], [150, -150]]),
             np.array((127.5, 127.5)),
-            0.0039,
-            np.array([-0.10725, -0.10725]),
-        ),
+            0.0039,),
     ],
 )
-def test_peaks_as_gvectors(z, center, calibration, g):
+def test_peaks_as_gvectors(z, center, calibration):
     gc = peaks_as_gvectors(z=z, center=center, calibration=calibration)
-    np.testing.assert_almost_equal(gc, g)
+    ans = (z - 127.5) *calibration
+    np.testing.assert_almost_equal(gc, ans)
 
 
 def test_remove_dead_pixels(dp_single):
