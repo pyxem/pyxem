@@ -26,7 +26,7 @@ from scipy.spatial import distance_matrix
 from sklearn.cluster import DBSCAN
 
 from hyperspy.signals import BaseSignal, Signal1D
-from hyperspy.api import markers
+from hyperspy.drawing._markers.point import Point
 
 from pyxem.utils.signal import (
     transfer_navigation_axes,
@@ -326,7 +326,7 @@ class DiffractionVectors(BaseSignal):
         mmx, mmy = generate_marker_inputs_from_peaks(self)
         signal.plot(*args, **kwargs)
         for mx, my in zip(mmx, mmy):
-            m = markers.point(x=mx, y=my, color="red", marker="x")
+            m = Point(x=mx, y=my, color="red", marker="x")
             signal.add_marker(m, plot_marker=True, permanent=False)
 
     def get_magnitudes(self, *args, **kwargs):
