@@ -50,4 +50,3 @@ class DiffractionVectors1D(Signal1D):
         self.column_scale = kwargs.get("column_scale", None)
         self.column_offsets = kwargs.get("column_offsets", None)
         super().__init__(*args, **kwargs)
-

@@ -29,7 +29,7 @@ from pyxem.signals import (
     LearningSegment,
     VDFSegment,
     DiffractionVectors2D,
-    Diffraction2D
+    Diffraction2D,
 )
 
 
@@ -197,10 +197,7 @@ class TestVDFSegment:
         data[object2, 1, 4] = 9
         data[object2, 4, 7] = 10
 
-        self.vectors = DiffractionVectors2D([[7, 6],
-                                             [3, 2],
-                                             [4, 1],
-                                             [7, 4]])
+        self.vectors = DiffractionVectors2D([[7, 6], [3, 2], [4, 1], [7, 4]])
 
         self.data = Diffraction2D(data)
 
@@ -212,10 +209,8 @@ class TestVDFSegment:
         ncc = self.vdf_segments.get_ncc_matrix()
         assert ncc.data.shape == (4, 4)
         # assert that the ncc for v1 and v2 == 1 and ncc for v3 and v4 == 1
-        np.testing.assert_array_almost_equal(ncc.data[:2, :2],
-                                             np.ones((2, 2)))
-        np.testing.assert_array_almost_equal(ncc.data[2:, 2:],
-                                             np.ones((2, 2)))
+        np.testing.assert_array_almost_equal(ncc.data[:2, :2], np.ones((2, 2)))
+        np.testing.assert_array_almost_equal(ncc.data[2:, 2:], np.ones((2, 2)))
 
         print(ncc.data)
 

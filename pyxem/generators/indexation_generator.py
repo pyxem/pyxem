@@ -122,7 +122,10 @@ class AcceleratedIndexationGenerator:
         self.library = diffraction_library
 
     def correlate(
-        self, n_largest=5, include_phases=None, **kwargs,
+        self,
+        n_largest=5,
+        include_phases=None,
+        **kwargs,
     ):
         """
         Correlates the library of simulated diffraction patterns with the

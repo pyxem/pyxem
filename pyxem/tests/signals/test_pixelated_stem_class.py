@@ -75,7 +75,7 @@ class TestDiffraction2DFlipDiffraction:
         s_flip = s.flip_diffraction_x()
         s.metadata.General.title = "Test"
         assert s_flip.metadata == s.metadata
-        assert s_flip.metadata.General.title =="Test"
+        assert s_flip.metadata.General.title == "Test"
         assert (s_flip.data[:, :, :, 5:] == 0).all()
         assert (s_flip.data[:, :, :, :5] == 1).all()
 
@@ -87,7 +87,7 @@ class TestDiffraction2DFlipDiffraction:
         s.metadata.General.title = "Test"
         s_flip = s.flip_diffraction_y()
         assert s_flip.metadata == s.metadata
-        assert s_flip.metadata.General.title =="Test"
+        assert s_flip.metadata.General.title == "Test"
         assert (s_flip.data[:, :, 3:, :] == 0).all()
         assert (s_flip.data[:, :, :3, :] == 1).all()
 

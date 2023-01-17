@@ -95,8 +95,10 @@ class VirtualDarkFieldImage(Signal2D):
             VDFSegment object containing segments (i.e. grains) of
             single virtual dark field images with corresponding vectors.
         """
-        warnings.warn("Changed in version 0.15.0.  May cause unexpected"
-                      "errors related to managing the proper axes.")
+        warnings.warn(
+            "Changed in version 0.15.0.  May cause unexpected"
+            "errors related to managing the proper axes."
+        )
         vdfs = self.copy()
         vectors = self.vectors.data
 

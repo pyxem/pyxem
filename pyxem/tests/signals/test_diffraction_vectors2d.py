@@ -27,10 +27,8 @@ from pyxem.signals import DiffractionVectors2D
 
 
 class TestDiffractionVectors2D:
-
     def setup(self):
-        vectors = np.reshape(np.repeat(np.arange(0, 100), 2),
-                             (50, 4))
+        vectors = np.reshape(np.repeat(np.arange(0, 100), 2), (50, 4))
         self.vector = DiffractionVectors2D(vectors)
 
     def test_setup(self):
@@ -51,33 +49,31 @@ class TestDiffractionVectors2D:
 
 class TestSingleDiffractionVectors2D:
     def setup(self):
-        self.data = np.array([[0.063776, 0.011958],
-                              [-0.035874, 0.131538],
-                              [0.035874, -0.131538],
-                              [0.035874, 0.143496],
-                              [-0.035874, -0.13951],
-                              [-0.115594, 0.123566],
-                              [0.103636, -0.11958],
-                              [0.123566, 0.151468], ])
+        self.data = np.array(
+            [
+                [0.063776, 0.011958],
+                [-0.035874, 0.131538],
+                [0.035874, -0.131538],
+                [0.035874, 0.143496],
+                [-0.035874, -0.13951],
+                [-0.115594, 0.123566],
+                [0.103636, -0.11958],
+                [0.123566, 0.151468],
+            ]
+        )
         self.vector = DiffractionVectors2D(self.data)
 
     def test_filter_magnitude_single(self):
         filtered_vectors = self.vector.filter_magnitude(0.15, 1.0)
-        ans = np.array([
-            [-0.115594, 0.123566],
-            [0.103636, -0.11958],
-            [0.123566, 0.151468]
-        ]
+        ans = np.array(
+            [[-0.115594, 0.123566], [0.103636, -0.11958], [0.123566, 0.151468]]
         )
         np.testing.assert_almost_equal(filtered_vectors.data, ans)
 
     def test_filter_detector_edge_single(self):
         self.vector.detector_shape = (260, 240)
         self.vector.column_scale = [0.001, 0.001]
-        self.vector.column_offsets = [130*0.001, 120*0.001]
+        self.vector.column_offsets = [130 * 0.001, 120 * 0.001]
         filtered_vectors = self.vector.filter_detector_edge(exclude_width=10)
         ans = np.array([[0.063776, 0.011958]])
         np.testing.assert_almost_equal(filtered_vectors.data, ans)
-
-
-

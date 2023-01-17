@@ -50,12 +50,12 @@ class DiffractionVectors2D(Signal2D):
         super().__init__(*args, **kwargs)
 
     def get_unique_vectors(
-            self,
-            distance_threshold=0.01,
-            method="distance_comparison",
-            min_samples=1,
-            return_clusters=False,
-            columns=(-2,-1),
+        self,
+        distance_threshold=0.01,
+        method="distance_comparison",
+        min_samples=1,
+        return_clusters=False,
+        columns=(-2, -1),
     ):
         """Returns diffraction vectors considered unique by:
         strict comparison, distance comparison with a specified
@@ -117,9 +117,7 @@ class DiffractionVectors2D(Signal2D):
             unique_peaks = np.unique(data, axis=0)
 
         elif method == "distance_comparison":
-            unique_vectors, unique_counts = np.unique(
-                data, axis=0, return_counts=True
-            )
+            unique_vectors, unique_counts = np.unique(data, axis=0, return_counts=True)
 
             unique_peaks = np.array([[0, 0]])
             unique_peaks_counts = np.array([0])
@@ -179,9 +177,7 @@ class DiffractionVectors2D(Signal2D):
         else:
             return unique_peaks
 
-    def get_magnitudes(self,
-                       out=None,
-                       rechunk=False):
+    def get_magnitudes(self, out=None, rechunk=False):
         """
         Calculate the magnitude of diffraction vectors.
 
@@ -189,10 +185,9 @@ class DiffractionVectors2D(Signal2D):
         """
 
         axis = self.axes_manager[-2]
-        return self._apply_function_on_data_and_remove_axis(np.linalg.norm,
-                                                            axes=axis,
-                                                            out=out,
-                                                            rechunk=rechunk)
+        return self._apply_function_on_data_and_remove_axis(
+            np.linalg.norm, axes=axis, out=out, rechunk=rechunk
+        )
 
     def filter_magnitude(self, min_magnitude, max_magnitude, *args, **kwargs):
         """Filter the diffraction vectors to accept only those with a magnitude
@@ -236,25 +231,30 @@ class DiffractionVectors2D(Signal2D):
         filtered_vectors : DiffractionVectors
             Diffraction vectors within allowed detector region.
         """
-        values = self.data[:,  columns]
+        values = self.data[:, columns]
         offsets = np.array(self.column_offsets)[columns]
         scales = np.array(self.column_scale)[columns]
 
-        xlow = (-offsets[0] + scales[0] * exclude_width)
-        xhigh = (-offsets[0] +
-                 (scales[0] * self.detector_shape[0]) -
-                 (scales[0] * exclude_width))
+        xlow = -offsets[0] + scales[0] * exclude_width
+        xhigh = (
+            -offsets[0]
+            + (scales[0] * self.detector_shape[0])
+            - (scales[0] * exclude_width)
+        )
 
-        ylow = (-offsets[1] + scales[1] * exclude_width)
-        yhigh = (-offsets[1] +
-                 (scales[1] * self.detector_shape[1]) -
-                 (scales[1] * exclude_width))
+        ylow = -offsets[1] + scales[1] * exclude_width
+        yhigh = (
+            -offsets[1]
+            + (scales[1] * self.detector_shape[1])
+            - (scales[1] * exclude_width)
+        )
 
-        inbounds = ((values[:, 0] > xlow) *
-                    (values[:, 0] < xhigh) *
-                    (values[:, 1] > ylow) *
-                    (values[:, 1] < yhigh)
-                    )
+        inbounds = (
+            (values[:, 0] > xlow)
+            * (values[:, 0] < xhigh)
+            * (values[:, 1] > ylow)
+            * (values[:, 1] < yhigh)
+        )
         new_data = self.data[inbounds]
 
         return DiffractionVectors2D(new_data)

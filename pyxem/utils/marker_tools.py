@@ -17,7 +17,8 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import numpy as np
-from hyperspy.utils.markers import Point, LineSegment
+from hyperspy.drawing._markers.point import Point
+from hyperspy.drawing._markers.line_segment import LineSegment
 
 
 def _get_4d_points_marker_list(

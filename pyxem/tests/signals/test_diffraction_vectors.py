@@ -97,11 +97,12 @@ class TestVectorPlotting:
     def test_plot_diffraction_vectors(self, diffraction_vectors_map):
         with pytest.warns(UserWarning, match="distance_threshold=0 was given"):
             diffraction_vectors_map.plot_diffraction_vectors(
-                xlim=1.0, ylim=1.0, distance_threshold=0)
+                xlim=1.0, ylim=1.0, distance_threshold=0
+            )
 
-    def test_plot_diffraction_vectors_on_signal(self,
-                                                diffraction_vectors_map,
-                                                diffraction_pattern):
+    def test_plot_diffraction_vectors_on_signal(
+        self, diffraction_vectors_map, diffraction_pattern
+    ):
         diffraction_vectors_map.plot_diffraction_vectors_on_signal(diffraction_pattern)
 
 
@@ -123,7 +124,9 @@ def test_get_cartesian_coordinates(diffraction_vectors_map):
 class TestConvertVectors:
     @pytest.mark.parametrize("real_units", (True, False))
     def test_flatten_vectors(self, diffraction_vectors_map, real_units):
-        vectors = diffraction_vectors_map.flatten_diffraction_vectors(real_units=real_units)
+        vectors = diffraction_vectors_map.flatten_diffraction_vectors(
+            real_units=real_units
+        )
         assert isinstance(vectors, DiffractionVectors2D)
         assert vectors.data.shape == (32, 4)
 
@@ -268,7 +271,6 @@ class TestFilterVectors:
         diffraction_vectors_map.pixel_calibration = 0.001
         filtered_vectors = diffraction_vectors_map.filter_detector_edge(exclude_width=2)
         assert isinstance(filtered_vectors, DiffractionVectors)
-
 
     def test_filter_detector_edge_map(self, diffraction_vectors_map):
         diffraction_vectors_map.detector_shape = (260, 240)

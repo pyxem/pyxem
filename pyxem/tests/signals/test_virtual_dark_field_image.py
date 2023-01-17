@@ -23,7 +23,12 @@ import pytest
 from hyperspy.signals import Signal2D
 
 from pyxem.generators import VirtualDarkFieldGenerator
-from pyxem.signals import ElectronDiffraction2D, DiffractionVectors, VDFSegment, DiffractionVectors2D
+from pyxem.signals import (
+    ElectronDiffraction2D,
+    DiffractionVectors,
+    VDFSegment,
+    DiffractionVectors2D,
+)
 
 
 @pytest.fixture(
