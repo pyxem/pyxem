@@ -980,10 +980,12 @@ def test_full_ellipse_ransac_processing():
 
     s = Diffraction2D(data)
     s_t = s.template_match_disk(disk_r=5)
-    peak_array = s_t.find_peaks(method="difference_of_gaussian",
-                                threshold=0.1,
-                                lazy_output=False,
-                                interactive=False).data
+    peak_array = s_t.find_peaks(
+        method="difference_of_gaussian",
+        threshold=0.1,
+        lazy_output=False,
+        interactive=False,
+    ).data
 
     c = math.sqrt(math.pow(a, 2) - math.pow(b, 2))
     xc, yc = xf - c * math.cos(r), yf - c * math.sin(r)

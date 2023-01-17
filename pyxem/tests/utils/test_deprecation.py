@@ -107,7 +107,6 @@ class TestDeprecateArgument:
             def bar_arg_alt(self, **kwargs):
                 return kwargs
 
-
         my_foo = Foo()
 
         # Does not warn

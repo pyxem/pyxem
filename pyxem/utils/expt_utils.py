@@ -750,26 +750,26 @@ def investigate_dog_background_removal_interactive(
 def find_hot_pixels(z, threshold_multiplier=500, mask=None):
     """Find single pixels which have much larger values compared to neighbors.
 
-        Finds pixels which have a gradient larger than the threshold multiplier.
-        These are extremely sharp peaks with values on average much larger than
-        the surrounding values.
+    Finds pixels which have a gradient larger than the threshold multiplier.
+    These are extremely sharp peaks with values on average much larger than
+    the surrounding values.
 
-        Parameters
-        ----------
-        z : array-like
-            Frame to operate on
-        threshold_multiplier : scaler
-            Used to threshold the dif.
-        mask : NumPy array, optional
-            Array with bool values. The True values will be masked
-            (i.e. ignored). Must have the same shape as the two
-            last dimensions in dask_array.
+    Parameters
+    ----------
+    z : array-like
+        Frame to operate on
+    threshold_multiplier : scaler
+        Used to threshold the dif.
+    mask : NumPy array, optional
+        Array with bool values. The True values will be masked
+        (i.e. ignored). Must have the same shape as the two
+        last dimensions in dask_array.
 
-        """
+    """
     # find the gradient of the image.
     footprint = [[1, 1, 1], [1, 0, 1], [1, 1, 1]]
     median = ndi.filters.median_filter(z, footprint=footprint)
-    hot_pixels = (z-median) > threshold_multiplier
+    hot_pixels = (z - median) > threshold_multiplier
     if mask is not None:
         hot_pixels[mask] = False
     return hot_pixels
@@ -807,9 +807,9 @@ def remove_bad_pixels(z, bad_pixels):
 
 
 def normalize_template_match(z, template, subtract_min=True, pad_input=True, **kwargs):
-    """ Matches a template with an image z. Preformed a normalized cross-correlation
-        using the given templates. If subtract_min is True then the minimum value will
-         be subtracted from the correlation.
+    """Matches a template with an image z. Preformed a normalized cross-correlation
+    using the given templates. If subtract_min is True then the minimum value will
+     be subtracted from the correlation.
     """
     template_match = match_template(z, template, pad_input=pad_input, **kwargs)
     if subtract_min:

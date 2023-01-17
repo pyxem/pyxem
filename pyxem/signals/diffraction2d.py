@@ -80,8 +80,12 @@ import pyxem.utils.marker_tools as mt
 import pyxem.utils.ransac_ellipse_tools as ret
 from pyxem.utils._deprecated import deprecated, deprecated_argument
 
-from pyxem.utils.background_utils import (_subtract_median,_subtract_dog,
-                                          _subtract_hdome,_subtract_radial_median)
+from pyxem.utils.background_utils import (
+    _subtract_median,
+    _subtract_dog,
+    _subtract_hdome,
+    _subtract_radial_median,
+)
 
 
 class Diffraction2D(Signal2D, CommonDiffraction):
@@ -374,64 +378,73 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             **kwargs,
         )
 
-    @deprecated_argument(name="lazy_result", alternative="lazy_output", since="0.15.0", removal="1.0.0")
-    def subtract_diffraction_background(self, method="median kernel", inplace=False, **kwargs):
+    @deprecated_argument(
+        name="lazy_result", alternative="lazy_output", since="0.15.0", removal="1.0.0"
+    )
+    def subtract_diffraction_background(
+        self, method="median kernel", inplace=False, **kwargs
+    ):
         """Background subtraction of the diffraction data.
 
-        Parameters
-        ----------
-        method : str, optional
-            'difference of gaussians', 'median kernel', 'radial median', 'h-dome'
-             Default 'median kernel'.
+            Parameters
+            ----------
+            method : str, optional
+                'difference of gaussians', 'median kernel', 'radial median', 'h-dome'
+                 Default 'median kernel'.
 
-             For `difference of gaussians the parameters min_sigma (default:1) and
-             max_sigma(default:55) control the size of the gaussian kernels used.
+                 For `difference of gaussians the parameters min_sigma (default:1) and
+                 max_sigma(default:55) control the size of the gaussian kernels used.
 
-             For `median kernel` the footprint(default:19) parameter detemines the
-             footprint used to determine the median.
+                 For `median kernel` the footprint(default:19) parameter detemines the
+                 footprint used to determine the median.
 
-             For `radial median` the parameters center_x(default:128), center_y(default:128) are
-             used to detmine the center of the pattern to use to determine the median.
+                 For `radial median` the parameters center_x(default:128), center_y(default:128) are
+                 used to detmine the center of the pattern to use to determine the median.
 
-             For `h-dome` the parameter h detemines the relative height of local peaks that
-             are supressed.
-    max_sigma : float
-        lazy_output : bool, optional
-            If True (default), will return a LazyDiffraction2D object. If False,
-            will compute the result and return a Diffraction2D object.
-        show_progressbar : bool, optional
-            Default True
-        **kwargs :
-            To be passed to the method chosen: min_sigma/max_sigma, footprint,
-            centre_x,centre_y / h
+                 For `h-dome` the parameter h detemines the relative height of local peaks that
+                 are supressed.
+        max_sigma : float
+            lazy_output : bool, optional
+                If True (default), will return a LazyDiffraction2D object. If False,
+                will compute the result and return a Diffraction2D object.
+            show_progressbar : bool, optional
+                Default True
+            **kwargs :
+                To be passed to the method chosen: min_sigma/max_sigma, footprint,
+                centre_x,centre_y / h
 
-        Returns
-        -------
-        s : Diffraction2D or LazyDiffraction2D signal
+            Returns
+            -------
+            s : Diffraction2D or LazyDiffraction2D signal
 
-        Examples
-        --------
-        >>> s = pxm.dummy_data.get_cbed_signal()
-        >>> s_r = s.subtract_diffraction_background(method='median kernel',
-        ...     footprint=20, lazy_output=False, show_progressbar=False)
-        >>> s_r.plot()
+            Examples
+            --------
+            >>> s = pxm.dummy_data.get_cbed_signal()
+            >>> s_r = s.subtract_diffraction_background(method='median kernel',
+            ...     footprint=20, lazy_output=False, show_progressbar=False)
+            >>> s_r.plot()
 
         """
-        method_dict = {"difference of gaussians": _subtract_dog,
-                       "median kernel": _subtract_median,
-                       "radial median": _subtract_radial_median,
-                       "h-dome": _subtract_hdome,
-                       }
+        method_dict = {
+            "difference of gaussians": _subtract_dog,
+            "median kernel": _subtract_median,
+            "radial median": _subtract_radial_median,
+            "h-dome": _subtract_hdome,
+        }
         if method not in method_dict:
-            raise NotImplementedError(f"The method specified, '{method}',"
-                                      f" is not implemented.  The different methods are:"
-                                      f" 'difference of gaussians','median kernel',"
-                                      f"'radial median' or 'h-dome'.")
+            raise NotImplementedError(
+                f"The method specified, '{method}',"
+                f" is not implemented.  The different methods are:"
+                f" 'difference of gaussians','median kernel',"
+                f"'radial median' or 'h-dome'."
+            )
         subtraction_function = method_dict[method]
 
         return self.map(subtraction_function, inplace=inplace, **kwargs)
 
-    @deprecated_argument(name="mask_array", since="0.15.0", removal="1.0.0", alternative="mask")
+    @deprecated_argument(
+        name="mask_array", since="0.15.0", removal="1.0.0", alternative="mask"
+    )
     def find_dead_pixels(
         self,
         dead_pixel_value=0,
@@ -485,16 +498,14 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             dead_pixels = dead_pixels * np.invert(mask)
         return dead_pixels
 
-    @deprecated_argument(name="mask_array", since="0.15.0",
-                         removal="1.0.0", alternative="mask")
-    @deprecated_argument(name="lazy_result", since="0.15.0",
-                         removal="1.0.0", alternative="lazy_output")
+    @deprecated_argument(
+        name="mask_array", since="0.15.0", removal="1.0.0", alternative="mask"
+    )
+    @deprecated_argument(
+        name="lazy_result", since="0.15.0", removal="1.0.0", alternative="lazy_output"
+    )
     def find_hot_pixels(
-        self,
-        threshold_multiplier=500,
-        mask=None,
-        inplace=False,
-        **kwargs
+        self, threshold_multiplier=500, mask=None, inplace=False, **kwargs
     ):
         """Find hot pixels in the diffraction images.
 
@@ -541,13 +552,17 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         correct_bad_pixels
 
         """
-        return self.map(find_hot_pixels,
-                        threshold_multiplier=threshold_multiplier,
-                        mask=mask,
-                        inplace=inplace,
-                        **kwargs)
+        return self.map(
+            find_hot_pixels,
+            threshold_multiplier=threshold_multiplier,
+            mask=mask,
+            inplace=inplace,
+            **kwargs,
+        )
 
-    @deprecated_argument(name="lazy_result", since="0.15.0", removal="1.0.0", alternative="lazy_output")
+    @deprecated_argument(
+        name="lazy_result", since="0.15.0", removal="1.0.0", alternative="lazy_output"
+    )
     def correct_bad_pixels(
         self,
         bad_pixel_array,
@@ -591,12 +606,12 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
     """ Direct beam and peak finding tools """
 
-    @deprecated_argument(name="lazy_result", since="0.14", removal="1.0.0",
-                         alternative="lazy_output")
-    def get_direct_beam_position(self, method,
-                                 lazy_output=None,
-                                 signal_slice=None,
-                                 **kwargs):
+    @deprecated_argument(
+        name="lazy_result", since="0.14", removal="1.0.0", alternative="lazy_output"
+    )
+    def get_direct_beam_position(
+        self, method, lazy_output=None, signal_slice=None, **kwargs
+    ):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern.
 
@@ -720,8 +735,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         return shifts
 
-    @deprecated_argument(name="lazy_result", since="0.15",
-                         removal="1.0.0", alternative="lazy_output")
+    @deprecated_argument(
+        name="lazy_result", since="0.15", removal="1.0.0", alternative="lazy_output"
+    )
     def center_direct_beam(
         self,
         method=None,
@@ -996,8 +1012,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             pst._copy_axes_object_metadata(nav_axes, sig_axes)
         return s_com
 
-    @deprecated_argument(name="lazy_result", alternative="lazy_output", since="0.15.0", removal="1.0.0")
-    def template_match_disk(self, disk_r=4, inplace=False,  **kwargs):
+    @deprecated_argument(
+        name="lazy_result", alternative="lazy_output", since="0.15.0", removal="1.0.0"
+    )
+    def template_match_disk(self, disk_r=4, inplace=False, **kwargs):
         """Template match the signal dimensions with a disk.
 
         Used to find diffraction disks in convergent beam electron
@@ -1030,15 +1048,14 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         """
         disk = morphology.disk(disk_r, self.data.dtype)
-        return self.map(normalize_template_match,
-                        template=disk,
-                        inplace=inplace,
-                        **kwargs)
+        return self.map(
+            normalize_template_match, template=disk, inplace=inplace, **kwargs
+        )
 
-    @deprecated_argument(name="lazy_result", alternative="lazy_output", since="0.15.0", removal="1.0.0")
-    def template_match_ring(
-        self, r_inner=5, r_outer=7, inplace=False, **kwargs
-    ):
+    @deprecated_argument(
+        name="lazy_result", alternative="lazy_output", since="0.15.0", removal="1.0.0"
+    )
+    def template_match_ring(self, r_inner=5, r_outer=7, inplace=False, **kwargs):
         """Template match the signal dimensions with a ring.
 
         Used to find diffraction rings in convergent beam electron
@@ -1081,12 +1098,11 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         ring_inner = morphology.disk(r_inner, dtype=bool)
         ring = morphology.disk(r_outer, dtype=bool)
         ring[edge_slice] = ring[edge_slice] ^ ring_inner
-        return self.map(normalize_template_match,
-                        template=ring,
-                        inplace=inplace,
-                        **kwargs)
+        return self.map(
+            normalize_template_match, template=ring, inplace=inplace, **kwargs
+        )
 
-    def template_match(self, template,inplace=False, **kwargs):
+    def template_match(self, template, inplace=False, **kwargs):
         """Template match the signal dimensions with a binary image.
 
         Used to find diffraction disks in convergent beam electron
@@ -1118,10 +1134,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         """
 
-        return self.map(normalize_template_match,
-                        template=template,
-                        inplace=inplace,
-                        **kwargs)
+        return self.map(
+            normalize_template_match, template=template, inplace=inplace, **kwargs
+        )
 
     @deprecated(since="0.15.0", removal="1.0.0")
     def template_match_with_binary_image(
@@ -1161,10 +1176,12 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         template_match_ring
 
         """
-        return self.template_match(template=binary_image,
-                                   lazy_output=lazy_result,
-                                   show_progressbar=show_progressbar,
-                                   **kwargs)
+        return self.template_match(
+            template=binary_image,
+            lazy_output=lazy_result,
+            show_progressbar=show_progressbar,
+            **kwargs,
+        )
 
     @deprecated(
         since="0.15",
@@ -1941,7 +1958,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         self.metadata.set_item("Signal.ai", ai)
         return None
 
-    @deprecated_argument(name="lazy_result", since="0.14", removal="1.0.0", alternative="lazy_output")
+    @deprecated_argument(
+        name="lazy_result", since="0.14", removal="1.0.0", alternative="lazy_output"
+    )
     def get_azimuthal_integral1d(
         self,
         npt,

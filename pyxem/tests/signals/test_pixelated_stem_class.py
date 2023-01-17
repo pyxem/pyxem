@@ -1107,6 +1107,7 @@ class TestDiffraction2DTemplate:
         assert s.data.shape == s_st.data.shape
         assert s.data.shape == s_dt.data.shape
 
+
 # Remove in 1.0.0 Release
 class TestDiffraction2DTemplateWithBinaryImage:
     def test_square_and_disk(self):

@@ -40,6 +40,8 @@ def _subtract_radial_median(frame, center_x=128, center_y=128):
     image = frame - r_median[r]
 
     return image
+
+
 def _subtract_dog(frame, min_sigma=1, max_sigma=55):
     """Background removal using difference of Gaussians.
 
@@ -87,11 +89,12 @@ def _subtract_median(frame, footprint=19):
     bg_subtracted = frame - median_filter(frame, size=footprint)
     return bg_subtracted
 
-def _subtract_hdome(frame, **kwargs):
-    """Background removal using h-dome filter.
 
-    """
+def _subtract_hdome(frame, **kwargs):
+    """Background removal using h-dome filter."""
     max_value = np.max(frame)
-    bg_subtracted = rank_mean(regional_filter(frame/max_value, **kwargs), footprint=square(3))
-    bg_subtracted = bg_subtracted/np.max(bg_subtracted)
+    bg_subtracted = rank_mean(
+        regional_filter(frame / max_value, **kwargs), footprint=square(3)
+    )
+    bg_subtracted = bg_subtracted / np.max(bg_subtracted)
     return bg_subtracted

@@ -734,10 +734,7 @@ class TestGetDirectBeamPosition:
     @pytest.mark.parametrize(
         "method,kwargs",
         [
-            (
-                "cross_correlate",
-                {"radius_start": 0, "radius_finish": 2, "normalization": None},
-            ),
+            ("cross_correlate", {"radius_start": 0, "radius_finish": 2}),
             (
                 "blur",
                 {
@@ -1127,10 +1124,7 @@ class TestDiffraction2DPeakPositionRefinement:
 
 class TestSubtractingDiffractionBackground:
 
-    method1 = ["difference of gaussians",
-               "median kernel",
-               "radial median",
-               "h-dome"]
+    method1 = ["difference of gaussians", "median kernel", "radial median", "h-dome"]
 
     def setup(self):
         self.data = np.random.rand(3, 2, 20, 15)
@@ -1141,7 +1135,7 @@ class TestSubtractingDiffractionBackground:
     def test_subtract_backgrounds(self, methods):
         # test that background is mostly removed
         if methods == "h-dome":
-            kwargs = {"h": .25}
+            kwargs = {"h": 0.25}
         else:
             kwargs = {}
         subtracted = self.dp.subtract_diffraction_background(method=methods, **kwargs)

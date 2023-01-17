@@ -748,7 +748,7 @@ class TestRemoveBadPixels:
         data = np.ones((20, 30)) * 12
         data[5, 9] = 0
         data[2, 1] = 0
-        output = et.remove_bad_pixels(data, data==0)
+        output = et.remove_bad_pixels(data, data == 0)
         assert (output == 12).all()
 
 
@@ -758,7 +758,7 @@ class TestTemplateMatchBinaryImage:
         disk_r = 5
         disk = sm.disk(disk_r)
         data = np.zeros(shape=(100, 100))
-        data[y - disk_r: y + disk_r + 1, x - disk_r: x + disk_r + 1] = disk
+        data[y - disk_r : y + disk_r + 1, x - disk_r : x + disk_r + 1] = disk
         match = et.normalize_template_match(data, disk)
         index = np.unravel_index(np.argmax(match), match.shape)
         assert (y, x) == index
@@ -1038,15 +1038,14 @@ class TestPeakPositionRefinementCOM:
                 dask_array, peak_array.compute(), square_size=10
             )
 
+
 class TestBackgroundRemoval:
     def test_median_sub(self):
         footprint = 10
         numpy_array = np.ones((50, 50))
         numpy_array[20:30, 20:30] = 5
 
-        data = bt._subtract_median(
-            numpy_array, footprint=footprint
-        )
+        data = bt._subtract_median(numpy_array, footprint=footprint)
         assert data.sum() != numpy_array.sum()
         assert data.shape == numpy_array.shape
         assert data[0, :].all() == 0
@@ -1056,7 +1055,9 @@ class TestBackgroundRemoval:
         center_y = 25
         numpy_array = np.ones((50, 50))
         numpy_array[20:30, 20:30] = 5
-        data = bt._subtract_radial_median(numpy_array, center_x=center_x, center_y=center_y)
+        data = bt._subtract_radial_median(
+            numpy_array, center_x=center_x, center_y=center_y
+        )
         assert data.sum() != numpy_array.sum()
         assert data.shape == numpy_array.shape
         assert data[0, :].all() == 0

@@ -519,6 +519,7 @@ def _threshold_array(dask_array, threshold_value=1, mask_array=None):
     thresholded_array = da.ma.getdata(thresholded_array)
     return thresholded_array
 
+
 def _peak_find_dog_single_frame(
     image,
     min_sigma=0.98,
