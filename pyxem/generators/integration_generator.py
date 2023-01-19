@@ -238,7 +238,7 @@ class IntegrationGenerator:
         )
 
         intensities = BaseSignal(intensities)
-        intensities.axes_manager.set_signal_dimension(0)
+        intensities = intensities.transpose(0)
 
         return intensities
 

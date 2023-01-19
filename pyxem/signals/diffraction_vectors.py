@@ -26,7 +26,7 @@ from scipy.spatial import distance_matrix
 from sklearn.cluster import DBSCAN
 
 from hyperspy.signals import BaseSignal, Signal1D
-from hyperspy.api import markers
+from hyperspy.drawing._markers.point import Point
 
 from pyxem.utils.signal import (
     transfer_navigation_axes,
@@ -39,10 +39,11 @@ from pyxem.utils.vector_utils import (
     get_npeaks,
     filter_vectors_ragged,
     filter_vectors_edge_ragged,
-    filter_vectors_near_basis
+    filter_vectors_near_basis,
 )
 from pyxem.utils.expt_utils import peaks_as_gvectors
-
+from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
+from pyxem.signals.diffraction_vectors1d import DiffractionVectors1D
 
 """
 Signal class for diffraction vectors.
@@ -133,11 +134,12 @@ class DiffractionVectors(BaseSignal):
     _signal_type = "diffraction_vectors"
 
     def __init__(self, *args, **kwargs):
+        self.column_scale = kwargs.pop("column_scale", None)
+        self.column_offsets = kwargs.pop("column_offsets", None)
+        self.detector_shape = kwargs.pop("detector_shape", None)
         super().__init__(*args, **kwargs)
         self.cartesian = None
         self.hkls = None
-        self.detector_shape = None
-        self.pixel_calibration = None
 
     @classmethod
     def from_peaks(cls, peaks, center, calibration):
@@ -164,8 +166,91 @@ class DiffractionVectors(BaseSignal):
         )
 
         vectors = cls(gvectors)
-
+        vectors.transpose(signal_axes=0)
         return vectors
+
+    def _get_navigation_positions(self, flatten=False, real_units=True):
+        nav_indexes = np.array(
+            list(np.ndindex(self.axes_manager._navigation_shape_in_array))
+        )
+        if not real_units:
+            scales = [1 for a in self.axes_manager.navigation_axes]
+            offsets = [0 for a in self.axes_manager.navigation_axes]
+        else:
+            scales = [a.scale for a in self.axes_manager.navigation_axes]
+            offsets = [a.offset for a in self.axes_manager.navigation_axes]
+
+        if flatten:
+            real_nav = np.array(
+                [
+                    np.array(ind) * scales + offsets
+                    for ind in np.array(list(nav_indexes))
+                ]
+            )
+        else:
+            real_nav = np.reshape(
+                [
+                    np.array(ind) * scales + offsets
+                    for ind in np.array(list(nav_indexes))
+                ],
+                self.axes_manager._navigation_shape_in_array + (-1,),
+            )
+        return real_nav
+
+    def flatten_diffraction_vectors(
+        self,
+        real_units=True,
+    ):
+        """Flattens the diffraction vectors into a `DiffractionVector2D` object.
+
+        Each navigation axis is transformed into a vector defined by the scale and offset.
+        This method allows purely vector based actions like filtering or determining unique
+        values.
+
+        Parameters
+        ----------
+        real_units: bool
+            If the navigation dimension should be flattened based on the pixel position
+            or the real value as determined by the scale and offset.
+        """
+        nav_positions = self._get_navigation_positions(
+            flatten=True, real_units=real_units
+        )
+
+        vectors = np.vstack(
+            [
+                np.hstack([np.tile(nav_pos, (len(self.data[ind]), 1)), self.data[ind]])
+                for ind, nav_pos in zip(np.ndindex(self.data.shape), nav_positions)
+            ]
+        )
+
+        if real_units:
+            scales = [a.scale for a in self.axes_manager.navigation_axes]
+            offsets = [a.offset for a in self.axes_manager.navigation_axes]
+        else:
+            scales = [1 for a in self.axes_manager.navigation_axes]
+            offsets = [0 for a in self.axes_manager.navigation_axes]
+
+        if self.column_offsets is None:
+            column_offsets = [
+                None,
+            ] * (vectors.shape[1] - len(self.axes_manager.navigation_axes))
+        else:
+            column_offsets = self.column_offsets
+
+        if self.column_scale is None:
+            column_scale = [
+                None,
+            ] * (vectors.shape[1] - len(self.axes_manager.navigation_axes))
+        else:
+            column_scale = self.column_scale
+
+        column_offsets = np.append(column_offsets, offsets)
+        column_scale = np.append(column_scale, scales)
+
+        return DiffractionVectors2D(
+            vectors, column_offsets=column_offsets, column_scale=column_scale
+        )
 
     def plot_diffraction_vectors(
         self,
@@ -262,7 +347,7 @@ class DiffractionVectors(BaseSignal):
                 )
             else:
                 peaks = DiffractionVectors(cores)
-                peaks.axes_manager.set_signal_dimension(1)
+                peaks.transpose(signal_axes=1)
                 # Since this original number of vectors can be huge, we
                 # find a reduced number of vectors that should be plotted, by
                 # running a new clustering on all the vectors not considered
@@ -326,7 +411,7 @@ class DiffractionVectors(BaseSignal):
         mmx, mmy = generate_marker_inputs_from_peaks(self)
         signal.plot(*args, **kwargs)
         for mx, my in zip(mmx, mmy):
-            m = markers.point(x=mx, y=my, color="red", marker="x")
+            m = Point(x=mx, y=my, color="red", marker="x")
             signal.add_marker(m, plot_marker=True, permanent=False)
 
     def get_magnitudes(self, *args, **kwargs):
@@ -343,19 +428,13 @@ class DiffractionVectors(BaseSignal):
         -------
         magnitudes : BaseSignal
             A signal with navigation dimensions as the original diffraction
-            vectors containging an array of gvector magnitudes at each
+            vectors containg an array of gvector magnitudes at each
             navigation position.
 
         """
-        # If ragged the signal axes will not be defined
-        if len(self.axes_manager.signal_axes) == 0:
-            magnitudes = self.map(
-                calculate_norms_ragged, inplace=False, ragged=True, *args, **kwargs
-            )
-        # Otherwise easier to calculate.
-        else:
-            magnitudes = BaseSignal(calculate_norms(self))
-            magnitudes.axes_manager.set_signal_dimension(0)
+        magnitudes = self.map(
+            np.linalg.norm, inplace=False, axis=-1, ragged=True, *args, **kwargs
+        )
 
         return magnitudes
 
@@ -396,13 +475,7 @@ class DiffractionVectors(BaseSignal):
 
         return ghis
 
-    def get_unique_vectors(
-        self,
-        distance_threshold=0.01,
-        method="distance_comparison",
-        min_samples=1,
-        return_clusters=False,
-    ):
+    def get_unique_vectors(self, *args, **kwargs):
         """Returns diffraction vectors considered unique by:
         strict comparison, distance comparison with a specified
         threshold, or by clustering using DBSCAN [1].
@@ -446,89 +519,41 @@ class DiffractionVectors(BaseSignal):
             The results from the clustering, given as class DBSCAN.
             Only returned if method='DBSCAN' and return_clusters=True.
         """
-        # Flatten the array of peaks to reach dimension (n, 2), where n
-        # is the number of peaks.
-        peaks_all = np.concatenate([peaks.ravel() for peaks in self.data.flat]).reshape(
-            -1, 2
+        flattened_vectors = self.flatten_diffraction_vectors(real_units=True)
+
+        return flattened_vectors.get_unique_vectors(*args, **kwargs)
+
+    def filter_magnitude(self, min_magnitude, max_magnitude, *args, **kwargs):
+        """Filter the diffraction vectors to accept only those with a magnitude
+        within a user specified range.
+
+        Parameters
+        ----------
+        min_magnitude : float
+            Minimum allowed vector magnitude.
+        max_magnitude : float
+            Maximum allowed vector magnitude.
+        *args:
+            Arguments to be passed to map().
+        **kwargs:
+            Keyword arguments to map().
+
+        Returns
+        -------
+        filtered_vectors : DiffractionVectors
+            Diffraction vectors within allowed magnitude tolerances.
+        """
+        # If ragged the signal axes will not be defined
+        filtered_vectors = self.map(
+            filter_vectors_ragged,
+            min_magnitude=min_magnitude,
+            max_magnitude=max_magnitude,
+            inplace=False,
+            ragged=True,
+            *args,
+            **kwargs
         )
-
-        # A distance_threshold of 0 implies a strict comparison. So in that
-        # case, a warning is raised unless the specified method is 'strict'.
-        if distance_threshold == 0:
-            if method != "strict":
-                warn(
-                    "distance_threshold=0 was given, and therefore "
-                    "a strict comparison is used, even though the "
-                    "specified method was {}".format(method)
-                )
-                method = "strict"
-
-        if method == "strict":
-            unique_peaks = np.unique(peaks_all, axis=0)
-
-        elif method == "distance_comparison":
-            unique_vectors, unique_counts = np.unique(
-                peaks_all, axis=0, return_counts=True
-            )
-
-            unique_peaks = np.array([[0, 0]])
-            unique_peaks_counts = np.array([0])
-
-            while unique_vectors.shape[0] > 0:
-                unique_vector = unique_vectors[0]
-                distances = distance_matrix(np.array([unique_vector]), unique_vectors)
-                indices = np.where(distances < distance_threshold)[1]
-
-                new_count = indices.size
-                new_unique_peak = np.array(
-                    [
-                        np.average(
-                            unique_vectors[indices],
-                            weights=unique_counts[indices],
-                            axis=0,
-                        )
-                    ]
-                )
-
-                unique_peaks = np.append(unique_peaks, new_unique_peak, axis=0)
-
-                unique_peaks_counts = np.append(unique_peaks_counts, new_count)
-                unique_vectors = np.delete(unique_vectors, indices, axis=0)
-                unique_counts = np.delete(unique_counts, indices, axis=0)
-            unique_peaks = np.delete(unique_peaks, [0], axis=0)
-
-        elif method == "DBSCAN":
-            # All peaks are clustered by DBSCAN so that peaks within
-            # one cluster are separated by distance_threshold or less.
-            unique_vectors, unique_vectors_counts = np.unique(
-                peaks_all, axis=0, return_counts=True
-            )
-            clusters = DBSCAN(
-                eps=distance_threshold, min_samples=min_samples, metric="euclidean"
-            ).fit(unique_vectors, sample_weight=unique_vectors_counts)
-            unique_labels, unique_labels_count = np.unique(
-                clusters.labels_, return_counts=True
-            )
-            unique_peaks = np.zeros((unique_labels.max() + 1, 2))
-
-            # For each cluster, a center of mass is calculated based
-            # on all the peaks within the cluster, and the center of
-            # mass is taken as the final unique vector position.
-            for n in np.arange(unique_labels.max() + 1):
-                peaks_n_temp = unique_vectors[clusters.labels_ == n]
-                peaks_n_counts_temp = unique_vectors_counts[clusters.labels_ == n]
-                unique_peaks[n] = np.average(
-                    peaks_n_temp, weights=peaks_n_counts_temp, axis=0
-                )
-
-        # Manipulate into DiffractionVectors class
-        if unique_peaks.size > 0:
-            unique_peaks = DiffractionVectors(unique_peaks)
-            unique_peaks.axes_manager.set_signal_dimension(1)
-        if return_clusters and method == "DBSCAN":
-            return unique_peaks, clusters
-        else:
-            return unique_peaks
+        return filtered_vectors
 
     def filter_basis(self, basis, distance=0.5, **kwargs):
         """
@@ -554,64 +579,17 @@ class DiffractionVectors(BaseSignal):
             DiffractionVectors class will be returned otherwise an instance
             of the DiffractionVectors2D class will be returned.
         """
-        ragged = (isinstance(basis, BaseSignal) and
-                  (basis.axes_manager.navigation_shape ==
-                   self.axes_manager.navigation_shape))
+        ragged = isinstance(basis, BaseSignal) and (
+            basis.axes_manager.navigation_shape == self.axes_manager.navigation_shape
+        )
         kwargs["ragged"] = ragged
         if not ragged:
             kwargs["output_signal_size"] = np.shape(basis)
             kwargs["output_dtype"] = float
 
-        filtered_vectors = self.map(filter_vectors_near_basis,  basis=basis,
-                                    distance=distance, **kwargs)
-        return filtered_vectors
-
-    def filter_magnitude(self, min_magnitude, max_magnitude, *args, **kwargs):
-        """Filter the diffraction vectors to accept only those with a magnitude
-        within a user specified range.
-
-        Parameters
-        ----------
-        min_magnitude : float
-            Minimum allowed vector magnitude.
-        max_magnitude : float
-            Maximum allowed vector magnitude.
-        *args:
-            Arguments to be passed to map().
-        **kwargs:
-            Keyword arguments to map().
-
-        Returns
-        -------
-        filtered_vectors : DiffractionVectors
-            Diffraction vectors within allowed magnitude tolerances.
-        """
-        # If ragged the signal axes will not be defined
-        if len(self.axes_manager.signal_axes) == 0:
-            filtered_vectors = self.map(
-                filter_vectors_ragged,
-                min_magnitude=min_magnitude,
-                max_magnitude=max_magnitude,
-                inplace=False,
-                ragged=True,
-                *args,
-                **kwargs
-            )
-            # Type assignment to DiffractionVectors for return
-            filtered_vectors = DiffractionVectors(filtered_vectors)
-            filtered_vectors.axes_manager.set_signal_dimension(0)
-        # Otherwise easier to calculate.
-        else:
-            magnitudes = self.get_magnitudes()
-            magnitudes.data[magnitudes.data < min_magnitude] = 0
-            magnitudes.data[magnitudes.data > max_magnitude] = 0
-            filtered_vectors = self.data[np.where(magnitudes)]
-            # Type assignment to DiffractionVectors for return
-            filtered_vectors = DiffractionVectors(filtered_vectors)
-            filtered_vectors.axes_manager.set_signal_dimension(1)
-
-        transfer_navigation_axes(filtered_vectors, self)
-
+        filtered_vectors = self.map(
+            filter_vectors_near_basis, basis=basis, distance=distance, **kwargs
+        )
         return filtered_vectors
 
     def filter_detector_edge(self, exclude_width, *args, **kwargs):
@@ -641,33 +619,15 @@ class DiffractionVectors(BaseSignal):
             self.pixel_calibration * (self.detector_shape[1] / 2)
             - self.pixel_calibration * exclude_width
         )
-        # If ragged the signal axes will not be defined
-        if len(self.axes_manager.signal_axes) == 0:
-            filtered_vectors = self.map(
-                filter_vectors_edge_ragged,
-                x_threshold=x_threshold,
-                y_threshold=y_threshold,
-                inplace=False,
-                ragged=True,
-                *args,
-                **kwargs
-            )
-            # Type assignment to DiffractionVectors for return
-            filtered_vectors = DiffractionVectors(filtered_vectors)
-            filtered_vectors.axes_manager.set_signal_dimension(0)
-        # Otherwise easier to calculate.
-        else:
-            x_inbounds = (
-                np.absolute(self.data.T[0]) < x_threshold
-            )  # True if vector is good to go
-            y_inbounds = np.absolute(self.data.T[1]) < y_threshold
-            filtered_vectors = self.data[np.logical_and(x_inbounds, y_inbounds)]
-            # Type assignment to DiffractionVectors for return
-            filtered_vectors = DiffractionVectors(filtered_vectors)
-            filtered_vectors.axes_manager.set_signal_dimension(1)
-
-        transfer_navigation_axes(filtered_vectors, self)
-
+        filtered_vectors = self.map(
+            filter_vectors_edge_ragged,
+            x_threshold=x_threshold,
+            y_threshold=y_threshold,
+            inplace=False,
+            ragged=True,
+            *args,
+            **kwargs
+        )
         return filtered_vectors
 
     def get_diffracting_pixels_map(self, in_range=None, binary=False):
@@ -689,9 +649,11 @@ class DiffractionVectors(BaseSignal):
         """
         if in_range:
             filtered = self.filter_magnitude(in_range[0], in_range[1])
-            xim = filtered.map(get_npeaks, inplace=False).as_signal2D((0, 1))
+            xim = filtered.map(get_npeaks, inplace=False, ragged=False).as_signal2D(
+                (0, 1)
+            )
         else:
-            xim = self.map(get_npeaks, inplace=False).as_signal2D((0, 1))
+            xim = self.map(get_npeaks, inplace=False, ragged=False).as_signal2D((0, 1))
         # Make binary if specified
         if binary is True:
             xim = xim >= 1.0
@@ -729,25 +691,3 @@ class DiffractionVectors(BaseSignal):
             *args,
             **kwargs
         )
-
-
-class DiffractionVectors2D(DiffractionVectors):
-    """Crystallographic mapping results containing the best matching crystal
-    phase and orientation at each navigation position with associated metrics.
-
-    Attributes
-    ----------
-    cartesian : np.array()
-        Array of 3-vectors describing Cartesian coordinates associated with
-        each diffraction vector.
-    hkls : np.array()
-        Array of Miller indices associated with each diffraction vector
-        following indexation.
-    """
-
-    _signal_dimension = 2
-
-    def __init__(self, *args, **kw):
-        super().__init__(*args, **kw)
-        if self.axes_manager.signal_dimension != 2:
-            self.axes_manager.set_signal_dimension(2)

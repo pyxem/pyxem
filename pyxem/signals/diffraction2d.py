@@ -283,7 +283,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         """
         s_out = self.copy()
         s_out.axes_manager = self.axes_manager.deepcopy()
-        s_out.metadata = self.metadata.deepcopy()
         s_out.data = np.flip(self.data, axis=-1)
         return s_out
 
@@ -314,7 +313,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         """
         s_out = self.copy()
         s_out.axes_manager = self.axes_manager.deepcopy()
-        s_out.metadata = self.metadata.deepcopy()
         s_out.data = np.flip(self.data, axis=-2)
         return s_out
 
@@ -615,10 +613,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
     """ Direct beam and peak finding tools """
 
-    def get_direct_beam_position(self, method,
-                                 lazy_output=None,
-                                 signal_slice=None,
-                                 **kwargs):
+    def get_direct_beam_position(
+        self, method, lazy_output=None, signal_slice=None, **kwargs
+    ):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern.
 
@@ -722,17 +719,18 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 x = x - signal_slice[0]
                 y = y - signal_slice[1]
                 kwargs["mask"] = (x, y, r)
-            centers = signal.center_of_mass(lazy_result=lazy_output,
-                                            show_progressbar=False,
-                                            **kwargs,
-                                            )
+            centers = signal.center_of_mass(
+                lazy_result=lazy_output,
+                show_progressbar=False,
+                **kwargs,
+            )
             shifts = -centers.T + origin_coordinates
 
         if signal_slice is not None:
             shifted_center = [(low_x + high_x) / 2, (low_y + high_y) / 2]
             unshifted_center = np.array(self.axes_manager.signal_shape) / 2
             shift = np.subtract(unshifted_center, shifted_center)
-            shifts = shifts+shift
+            shifts = shifts + shift
 
         shifts.set_signal_type("beam_shift")
 
@@ -836,9 +834,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 max_y = int(signal_center[1] + half_square_width)
                 sig_slice = (min_x, max_x, min_y, max_y)
                 kwargs["signal_slice"] = sig_slice
-            shifts = self.get_direct_beam_position(method=method,
-                                                   lazy_output=lazy_output,
-                                                   **kwargs)
+            shifts = self.get_direct_beam_position(
+                method=method, lazy_output=lazy_output, **kwargs
+            )
         if "order" not in align_kwargs:
             if subpixel:
                 align_kwargs["order"] = 1
@@ -912,7 +910,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         )
         return s_out
 
-    @deprecated_argument(since="0.15.0", name="lazy_result", alternative="lazy_output", removal="1.00.0")
+    @deprecated_argument(
+        since="0.15.0", name="lazy_result", alternative="lazy_output", removal="1.00.0"
+    )
     def center_of_mass(
         self,
         threshold=None,
@@ -1597,25 +1597,25 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         if method == "Omega":
             one_d_integration = self.get_azimuthal_integral1d(npt=npt, **kwargs)
             variance = (
-                (one_d_integration ** 2).mean(axis=navigation_axes)
+                (one_d_integration**2).mean(axis=navigation_axes)
                 / one_d_integration.mean(axis=navigation_axes) ** 2
             ) - 1
             if dqe is not None:
                 sum_points = self.get_azimuthal_integral1d(
                     npt=npt, sum=True, **kwargs
                 ).mean(axis=navigation_axes)
-                variance = variance - ((sum_points ** -1) * dqe)
+                variance = variance - ((sum_points**-1) * dqe)
 
         elif method == "r":
             one_d_integration = self.get_azimuthal_integral1d(npt=npt, **kwargs)
-            integration_squared = (self ** 2).get_azimuthal_integral1d(
+            integration_squared = (self**2).get_azimuthal_integral1d(
                 npt=npt, **kwargs
             )
             # Full variance is the same as the unshifted phi=0 term in angular correlation
-            full_variance = (integration_squared / one_d_integration ** 2) - 1
+            full_variance = (integration_squared / one_d_integration**2) - 1
 
             if dqe is not None:
-                full_variance = full_variance - ((one_d_integration ** -1) * dqe)
+                full_variance = full_variance - ((one_d_integration**-1) * dqe)
 
             variance = full_variance.mean(axis=navigation_axes)
 
@@ -1627,19 +1627,19 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 axis=navigation_axes
             )
             integration_squared = (
-                (self ** 2)
+                (self**2)
                 .get_azimuthal_integral1d(npt=npt, **kwargs)
                 .mean(axis=navigation_axes)
             )
-            variance = (integration_squared / one_d_integration ** 2) - 1
+            variance = (integration_squared / one_d_integration**2) - 1
 
             if dqe is not None:
                 sum_int = self.get_azimuthal_integral1d(npt=npt, **kwargs).mean()
-                variance = variance - (sum_int ** -1) * (1 / dqe)
+                variance = variance - (sum_int**-1) * (1 / dqe)
 
         elif method == "VImage":
             variance_image = (
-                (self ** 2).mean(axis=navigation_axes)
+                (self**2).mean(axis=navigation_axes)
                 / self.mean(axis=navigation_axes) ** 2
             ) - 1
             if dqe is not None:
