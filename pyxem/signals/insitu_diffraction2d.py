@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-from hyperspy.signals import Signal2D, BaseSignal
+from hyperspy.signals import Signal1D
 from pyxem.signals import Diffraction2D
 import numpy as np
 from hyperspy.roi import RectangularROI
@@ -24,7 +24,7 @@ from hyperspy.roi import RectangularROI
 import dask.array as da
 from dask.graph_manipulation import clone
 
-from pyxem.utils.dask_tools import _get_dask_array
+from pyxem.utils.dask_tools import _get_dask_array, _get_chunking
 from pyxem.utils.insitu_utils import _register_drift_5d, _g2_2d
 import pyxem.utils.pixelated_stem_tools as pst
 
@@ -141,7 +141,10 @@ class InSituDiffraction2D(Diffraction2D):
         else:
             dask_data = _get_dask_array(self)
 
-        time_chunks = self.get_chunk_size()[0][0]
+        if self._lazy:
+            time_chunks = self.get_chunk_size()[0][0]
+        else:
+            time_chunks = _get_chunking(self)[0][0]
         xdrift = shifts.data[:, 0]
         ydrift = shifts.data[:, 1]
         xdrift_dask = da.from_array(xdrift[:, np.newaxis, np.newaxis, np.newaxis, np.newaxis],
