@@ -49,37 +49,6 @@ def _register_drift_5d(data, shifts1, shifts2):
                                                      order=1)
     return data_t
 
-
-def get_drift_vectors(s, **kwargs):
-    """
-    Calculate real space drift vectors from time series of images
-
-     Parameters
-    ----------
-    s: Signal2D
-        Time series of reconstructed images
-    **kwargs:
-        Passed to the hs.signals.Signal2D.estimate_shift2D() function
-
-    Returns
-    -------
-    xshifts: np.array
-        1D array of shift in x direction
-    yshifts: np.array
-        1D array of shift in y direction
-
-    """
-    shift_reference = kwargs.get("reference", "stat")
-    sub_pixel = kwargs.get("sub_pixel_factor", 10)
-    shift_vectors = s.estimate_shift2D(reference=shift_reference,
-                                       sub_pixel_factor=sub_pixel,
-                                       **kwargs)
-    xshifts = shift_vectors[:, 0]
-    yshifts = shift_vectors[:, 1]
-
-    return xshifts, yshifts
-
-
 def _g2_2d(data, normalization='split', kbin=1, tbin=1):
     """
     Calculate k resolved g2(k,t) from I(t,k_r,k_phi)

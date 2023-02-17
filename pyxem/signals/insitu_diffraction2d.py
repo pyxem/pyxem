@@ -19,13 +19,15 @@
 from hyperspy.signals import Signal2D, BaseSignal
 from pyxem.signals import Diffraction2D
 import numpy as np
-from hyperspy.roi import CircleROI
+from hyperspy.roi import RectangularROI
 
 import dask.array as da
 from dask.graph_manipulation import clone
 
 from pyxem.utils.dask_tools import _get_dask_array
-from pyxem.utils.insitu_utils import _register_drift_5d, get_drift_vectors, _g2_2d
+from pyxem.utils.insitu_utils import _register_drift_5d, _g2_2d
+import pyxem.utils.pixelated_stem_tools as pst
+
 
 class InSituDiffraction2D(Diffraction2D):
     """Signal class for in-situ 4D-STEM data."""
@@ -70,17 +72,48 @@ class InSituDiffraction2D(Diffraction2D):
         out_axes.remove(time_axis)
 
         if roi is None:
-            cx = (self.axes_manager.signal_extent[0] + self.axes_manager.signal_extent[1]) / 2
-            cy = (self.axes_manager.signal_extent[2] + self.axes_manager.signal_extent[3]) / 2
-            r = min(cx, cy)
-            r_inner = r / 2
-            roi = CircleROI(cx=cx, cy=cy, r=r, r_inner=r_inner)
+            roi = RectangularROI(self.axes_manager.signal_extent[0],
+                                 self.axes_manager.signal_extent[1],
+                                 self.axes_manager.signal_extent[2],
+                                 self.axes_manager.signal_extent[3])
+
         virtual_series = self.get_integrated_intensity(roi, out_signal_axes=out_axes)
         virtual_series.metadata.General.title = "Integrated intensity time series"
 
         return virtual_series
 
-    def correct_real_space_drift(self, xdrift=None, ydrift=None, time_axis=2, lazy_result=True):
+    def get_drift_vectors(self, time_axis=2, **kwargs):
+        """
+        Calculate real space drift vectors from time series of images
+
+         Parameters
+        ----------
+        s: Signal2D
+            Time series of reconstructed images
+        **kwargs:
+            Passed to the hs.signals.Signal2D.estimate_shift2D() function
+
+        Returns
+        -------
+        shift_vectors
+
+        """
+        roi = kwargs.pop("roi", None)
+        ref = self.get_time_series(roi=roi, time_axis=time_axis)
+
+        shift_reference = kwargs.get("reference", "stat")
+        sub_pixel = kwargs.get("sub_pixel_factor", 10)
+        s = ref.estimate_shift2D(reference=shift_reference,
+                                 sub_pixel_factor=sub_pixel,
+                                 **kwargs)
+        shift_vectors = Signal1D(s)
+
+        pst._copy_axes_object_metadata(self.axes_manager.navigation_axes[time_axis],
+                                       shift_vectors.axes_manager.navigation_axes[0])
+
+        return shift_vectors
+
+    def correct_real_space_drift(self, shifts=None, time_axis=2, lazy_result=True):
         """
         Perform real space drift registration on the dataset.
 
@@ -100,9 +133,8 @@ class InSituDiffraction2D(Diffraction2D):
         registered_data: InSituDiffraction2D
             Real space drift corrected version of the original dataset
         """
-        if xdrift is None or ydrift is None:
-            ref = self.get_time_series(time_axis=time_axis)
-            xdrift, ydrift = get_drift_vectors(ref)
+        if shifts is None:
+            shifts = self.get_drift_vectors(time_axis=time_axis)
 
         if time_axis != 2:
             dask_data = _get_dask_array(self.roll_time_axis(time_axis))
@@ -110,6 +142,8 @@ class InSituDiffraction2D(Diffraction2D):
             dask_data = _get_dask_array(self)
 
         time_chunks = self.get_chunk_size()[0][0]
+        xdrift = shifts.data[:, 0]
+        ydrift = shifts.data[:, 1]
         xdrift_dask = da.from_array(xdrift[:, np.newaxis, np.newaxis, np.newaxis, np.newaxis],
                                     chunks=(time_chunks, 1, 1, 1, 1))
         ydrift_dask = da.from_array(ydrift[:, np.newaxis, np.newaxis, np.newaxis, np.newaxis],
@@ -137,16 +171,14 @@ class InSituDiffraction2D(Diffraction2D):
         ).as_lazy()
 
         # Set axes info for registered signal
-        for i, axis in enumerate(registered_data.axes_manager.navigation_axes):
-            axis.name = self.axes_manager.navigation_axes[i].name
-            axis.scale = self.axes_manager.navigation_axes[i].scale
-            axis.offset = self.axes_manager.navigation_axes[i].offset
-            axis.unit = self.axes_manager.navigation_axes[i].unit
-        for i, axis in enumerate(registered_data.axes_manager.signal_axes):
-            axis.name = self.axes_manager.siganl_axes[i].name
-            axis.scale = self.axes_manager.signal_axes[i].scale
-            axis.offset = self.axes_manager.signal_axes[i].offset
-            axis.unit = self.axes_manager.signal_axes[i].unit
+        for nav_axis_old, nav_axis_new in zip(
+                self.axes_manager.navigation_axes, registered_data.axes_manager.navigation_axes
+        ):
+            pst._copy_axes_object_metadata(nav_axis_old, nav_axis_new)
+        for sig_axis_old, sig_axis_new in zip(
+                self.axes_manager.signal_axes, registered_data.axes_manager.signal_axes
+        ):
+            pst._copy_axes_object_metadata(sig_axis_old, sig_axis_new)
 
         if not lazy_result:
             registered_data.compute()
