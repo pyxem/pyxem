@@ -18,6 +18,8 @@
 
 from hyperspy.signals import Signal1D
 from pyxem.signals import Diffraction2D
+from hyperspy._signals.lazy import LazySignal
+
 import numpy as np
 from hyperspy.roi import RectangularROI
 
@@ -73,8 +75,8 @@ class InSituDiffraction2D(Diffraction2D):
 
         if roi is None:
             roi = RectangularROI(self.axes_manager.signal_extent[0],
-                                 self.axes_manager.signal_extent[1],
                                  self.axes_manager.signal_extent[2],
+                                 self.axes_manager.signal_extent[1],
                                  self.axes_manager.signal_extent[3])
 
         virtual_series = self.get_integrated_intensity(roi, out_signal_axes=out_axes)
@@ -101,8 +103,8 @@ class InSituDiffraction2D(Diffraction2D):
         roi = kwargs.pop("roi", None)
         ref = self.get_time_series(roi=roi, time_axis=time_axis)
 
-        shift_reference = kwargs.get("reference", "stat")
-        sub_pixel = kwargs.get("sub_pixel_factor", 10)
+        shift_reference = kwargs.pop("reference", "cascade")
+        sub_pixel = kwargs.pop("sub_pixel_factor", 10)
         s = ref.estimate_shift2D(reference=shift_reference,
                                  sub_pixel_factor=sub_pixel,
                                  **kwargs)
@@ -157,7 +159,7 @@ class InSituDiffraction2D(Diffraction2D):
 
         data_overlapped = da.overlap.overlap(dask_data,
                                              depth=overlapped_depth,
-                                             boundary={a: 'none' for a in range(5)})
+                                             boundary={a: 0 for a in range(5)})
 
         # Clone original overlap dask array to work around memory release issue in map_overlap
         data_clones = da.concatenate(
@@ -165,8 +167,8 @@ class InSituDiffraction2D(Diffraction2D):
         )
 
         mapped = data_clones.map_blocks(_register_drift_5d,
-                                        shifts1=ydrift_dask,
-                                        shifts2=xdrift_dask,
+                                        shifts1=xdrift_dask,
+                                        shifts2=ydrift_dask,
                                         dtype='float32')
 
         registered_data = InSituDiffraction2D(
@@ -222,3 +224,7 @@ class InSituDiffraction2D(Diffraction2D):
         g2kt.set_signal_type('correlation')
 
         return g2kt
+
+
+class LazyInSituDiffraction2D(LazySignal, InSituDiffraction2D):
+    pass

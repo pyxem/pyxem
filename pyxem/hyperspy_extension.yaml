@@ -215,6 +215,12 @@ signals:
     dtype: real
     lazy: False
     module: pyxem.signals.insitu_diffraction2d
+  LazyInSituDiffraction2D:
+    signal_type: insitu_diffraction
+    signal_dimension: 2
+    dtype: real
+    lazy: True
+    module: pyxem.signals.insitu_diffraction2d
 
 components1D:
     ReducedIntensityCorrectionComponent:
