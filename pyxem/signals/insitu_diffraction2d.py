@@ -27,7 +27,7 @@ import dask.array as da
 from dask.graph_manipulation import clone
 
 from pyxem.utils.dask_tools import _get_dask_array, _get_chunking
-from pyxem.utils.insitu_utils import _register_drift_5d, _g2_2d
+from pyxem.utils.insitu_utils import _register_drift_5d, _register_drift_2d, _g2_2d
 import pyxem.utils.pixelated_stem_tools as pst
 
 
@@ -121,10 +121,9 @@ class InSituDiffraction2D(Diffraction2D):
 
         Parameters
         ----------
-        xdrift: np.array
-            Real space drift vectors in x direction. If None, drift is calculated from data instead.
-        ydrift: np.array
-            Real space drift vectors in x direction. If None, drift is calculated from data instead.
+        shifts: Signal1D
+            shift vectors to register, must be in the shape of <N_time | 2>.
+            If None, shift vectors will be calculated automatically
         time_axis: int
             Index of time axis. Default is 2
         lazy_result: bool, default True
@@ -139,14 +138,15 @@ class InSituDiffraction2D(Diffraction2D):
             shifts = self.get_drift_vectors(time_axis=time_axis)
 
         if time_axis != 2:
-            dask_data = _get_dask_array(self.roll_time_axis(time_axis))
+            s_ = self.roll_time_axis(time_axis)
         else:
-            dask_data = _get_dask_array(self)
+            s_ = self
+        dask_data = _get_dask_array(s_)
 
         if self._lazy:
-            time_chunks = self.get_chunk_size()[0][0]
+            time_chunks = s_.get_chunk_size()[0][0]
         else:
-            time_chunks = _get_chunking(self)[0][0]
+            time_chunks = _get_chunking(s_)[0][0]
         xdrift = shifts.data[:, 0]
         ydrift = shifts.data[:, 1]
         xdrift_dask = da.from_array(xdrift[:, np.newaxis, np.newaxis, np.newaxis, np.newaxis],
@@ -155,11 +155,11 @@ class InSituDiffraction2D(Diffraction2D):
                                     chunks=(time_chunks, 1, 1, 1, 1))
         depthx = np.ceil(np.max(np.abs(xdrift))).astype(int)
         depthy = np.ceil(np.max(np.abs(ydrift))).astype(int)
-        overlapped_depth = {0: 0, 1: depthy, 2: depthx, 3: 0, 4: 0}
+        overlapped_depth = {0: 0, 1: depthx, 2: depthy, 3: 0, 4: 0}
 
         data_overlapped = da.overlap.overlap(dask_data,
                                              depth=overlapped_depth,
-                                             boundary={a: 0 for a in range(5)})
+                                             boundary={a: 'none' for a in range(5)})
 
         # Clone original overlap dask array to work around memory release issue in map_overlap
         data_clones = da.concatenate(
@@ -177,11 +177,11 @@ class InSituDiffraction2D(Diffraction2D):
 
         # Set axes info for registered signal
         for nav_axis_old, nav_axis_new in zip(
-                self.axes_manager.navigation_axes, registered_data.axes_manager.navigation_axes
+                s_.axes_manager.navigation_axes, registered_data.axes_manager.navigation_axes
         ):
             pst._copy_axes_object_metadata(nav_axis_old, nav_axis_new)
         for sig_axis_old, sig_axis_new in zip(
-                self.axes_manager.signal_axes, registered_data.axes_manager.signal_axes
+                s_.axes_manager.signal_axes, registered_data.axes_manager.signal_axes
         ):
             pst._copy_axes_object_metadata(sig_axis_old, sig_axis_new)
 
@@ -189,6 +189,80 @@ class InSituDiffraction2D(Diffraction2D):
             registered_data.compute()
 
         return registered_data
+
+    def correct_real_space_drift_fast(self, shifts=None, time_axis=2, lazy_result=True):
+        """
+        Perform real space drift registration on the dataset with fast performance
+        over spatial axes. If signal is lazy, spatial axes must not be chunked
+
+        Parameters
+        ----------
+        shifts: Signal1D
+            shift vectors to register, must be in the shape of <N_time | 2>.
+            If None, shift vectors will be calculated automatically
+        time_axis: int
+            Index of time axis. Default is 2
+        lazy_result: bool, default True
+            Whether to return lazy result. Only relevant if signal is not lazy
+
+        Returns
+        ---------
+        registered_data: InSituDiffraction2D
+            Real space drift corrected version of the original dataset
+        """
+        if self._lazy:
+            nav_axes = [0, 1, 2]
+            nav_axes.remove(2 - time_axis)
+            chunkings = self.get_chunk_size()
+            if len(chunkings[nav_axes[0]]) != 1 or len(chunkings[nav_axes[1]]) != 1:
+                raise Exception("Spatial axes are chunked. Please rechunk signal or use \'correct_real_space_drift\' "
+                                "instead")
+
+        if shifts is None:
+            shifts = self.get_drift_vectors(time_axis=time_axis)
+
+        if time_axis != 2:
+            s_ = self.roll_time_axis(time_axis=time_axis)
+        else:
+            s_ = self
+        s_transposed = s_.transpose(signal_axes=(0, 1))
+
+        xdrift = shifts.data[:, 0]
+        ydrift = shifts.data[:, 1]
+        xs = Signal1D(
+            np.repeat(
+                np.repeat(xdrift[:, np.newaxis, np.newaxis],
+                          repeats=s_transposed.axes_manager.navigation_axes[0].size,
+                          axis=-1
+                          ),
+                repeats=s_transposed.axes_manager.navigation_axes[1].size,
+                axis=1
+            )[:, :, :, np.newaxis]
+        )
+
+        ys = Signal1D(
+            np.repeat(
+                np.repeat(ydrift[:, np.newaxis, np.newaxis],
+                          repeats=s_transposed.axes_manager.navigation_axes[0].size,
+                          axis=-1
+                          ),
+                repeats=s_transposed.axes_manager.navigation_axes[1].size,
+                axis=1
+            )[:, :, :, np.newaxis]
+        )
+
+        registered_data = s_transposed.map(_register_drift_2d,
+                                           shift1=xs,
+                                           shift2=ys,
+                                           inplace=False
+                                           )
+
+        registered_data_t = registered_data.transpose(navigation_axes=[-2, -1, -3])
+        registered_data_t.set_signal_type("insitu_diffraction")
+        if self._lazy and not lazy_result:
+            registered_data_t.compute()
+
+        return registered_data_t
 
     def get_g2_2d_kresolved(self, time_axis=2, normalization='split', kbin=1, tbin=1):
         """

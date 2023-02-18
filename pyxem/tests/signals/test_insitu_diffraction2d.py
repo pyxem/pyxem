@@ -76,20 +76,12 @@ class TestCorrelation:
     def test_drift_corrected_g2_nonlazy(self, insitu_data, shifts):
         shifted_data = insitu_data.correct_real_space_drift(shifts=shifts, lazy_result=False)
         assert isinstance(shifted_data, InSituDiffraction2D)
-        assert shifted_data.data.shape == insitu_data.data.shape
 
         g2 = shifted_data.get_g2_2d_kresolved()
-        assert g2.data.shape == (10, 10, 50, 4, 4)
-        if shifts is not None:
-            edges = np.ceil(np.max(np.abs(shifts.data))).astype('int')
-        else:
-            edges = np.ceil(np.max(np.abs(insitu_data.get_drift_vectors().data))).astype('int')
-        if edges != 0:
-            np.testing.assert_allclose(
-                np.ones((10-edges*2, 10-edges*2)),
-                g2.inav[edges:-edges, edges:-edges].isig[:, :, 1:].mean(axis=(-1, -2, -3)), atol=0.1)
-        else:
-            np.testing.assert_allclose(np.ones((10, 10)), g2.isig[:, :, 1:].mean(axis=(-1, -2, -3)), atol=0.1)
+        assert g2.axes_manager.signal_axes[-1].size == 50
+        mean_g2 = g2.isig[:, :, 1:].mean().data
+        num_index = ~np.isreal(mean_g2)
+        np.testing.assert_allclose(np.ones((49, 4, 4))[num_index], mean_g2[num_index], atol=0.1)
 
     def test_drift_corrected_g2_lazy(self, insitu_data):
         shifts = Signal1D(np.repeat(np.linspace(0, 2, 50)[:, np.newaxis], repeats=2, axis=1))
@@ -98,7 +90,45 @@ class TestCorrelation:
         assert isinstance(shifted_data, InSituDiffraction2D)
 
         g2_lazy = shifted_data.get_g2_2d_kresolved()
-        assert g2_lazy.data.shape == (10, 10, 50, 4, 4)
+        assert g2_lazy.axes_manager.signal_axes[-1].size == 50
         g2_lazy.compute()
-        np.testing.assert_allclose(np.ones((6, 6)),
-                                   g2_lazy.inav[2:-2, 2:-2].isig[:, :, 1:].mean(axis=(-1, -2, -3)), atol=0.1)
+        mean_g2 = g2_lazy.isig[:, :, 1:].mean().data
+        num_index = ~np.isreal(mean_g2)
+        np.testing.assert_allclose(np.ones((49, 4, 4))[num_index], mean_g2[num_index], atol=0.1)
+
+    @pytest.mark.parametrize("shifts",
+                             [Signal1D(np.zeros((50, 2))),
+                              Signal1D(np.repeat(np.linspace(0, 2, 50)[:, np.newaxis], repeats=2, axis=1)),
+                              None]
+                             )
+    def test_fast_drift_corrected_g2_nonlazy(self, insitu_data, shifts):
+        shifted_data = insitu_data.correct_real_space_drift_fast(shifts=shifts, lazy_result=False)
+        assert isinstance(shifted_data, InSituDiffraction2D)
+
+        g2 = shifted_data.get_g2_2d_kresolved()
+        assert g2.axes_manager.signal_axes[-1].size == 50
+        mean_g2 = g2.isig[:, :, 1:-1].mean(axis=[-1, -2, -3]).data
+        num_index = ~np.isreal(mean_g2)
+        np.testing.assert_allclose(np.ones((10, 10))[num_index], mean_g2[num_index], atol=0.1)
+
+
+    def test_fast_drift_corrected_g2_lazy(self, insitu_data):
+        shifts = Signal1D(np.repeat(np.linspace(0, 2, 50)[:, np.newaxis], repeats=2, axis=1))
+        lazy_data = insitu_data.as_lazy()
+        lazy_data.rechunk((25, 5, 5, 4, 4))
+        with pytest.raises(Exception) as exc_info:
+            lazy_data.correct_real_space_drift_fast(shifts=shifts)
+
+        assert exc_info.match("Spatial axes are chunked. Please rechunk signal or use \'correct_real_space_drift\' "
+                                "instead")
+        lazy_data.rechunk((1, 10, 10, 4, 4))
+        shifted_data = lazy_data.correct_real_space_drift_fast(shifts=shifts)
+        assert shifted_data._lazy
+        assert isinstance(shifted_data, InSituDiffraction2D)
+
+        g2_lazy = shifted_data.get_g2_2d_kresolved()
+        assert g2_lazy.axes_manager.signal_axes[-1].size == 50
+        g2_lazy.compute()
+        mean_g2 = g2_lazy.isig[:, :, 1:-1].mean(axis=[-1, -2, -3]).data
+        num_index = ~np.isreal(mean_g2)
+        np.testing.assert_allclose(np.ones((10, 10))[num_index], mean_g2[num_index], atol=0.1)

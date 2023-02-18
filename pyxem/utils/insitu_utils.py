@@ -28,11 +28,11 @@ def _register_drift_5d(data, shifts1, shifts2):
      Parameters
     ----------
     data: np.array or dask.array
-        Input image in 5D array (time * ry * rx * kx * ky)
+        Input image in 5D array (time * rx * ry * kx * ky)
     shifts1: np.array
-        1D array for shifts in 1st real space direction or y in hyperspy indexing.
+        1D array for shifts in 1st real space direction or x in hyperspy indexing.
     shifts2: np.array
-        1D array for shifts in 2nd real space direction or x in hyperspy indexing.
+        1D array for shifts in 2nd real space direction or y in hyperspy indexing.
 
     Returns
     -------
@@ -48,6 +48,30 @@ def _register_drift_5d(data, shifts1, shifts2):
                                                      offset=(shifts1[i][0, 0, 0, 0], shifts2[i][0, 0, 0, 0], 0, 0),
                                                      order=1)
     return data_t
+
+
+def _register_drift_2d(data, shift1, shift2):
+    """
+       Register 2D data set using affine transformation
+
+        Parameters
+       ----------
+       data: np.array or dask.array
+           Input image in 2D array (ry * rx)
+       shift1: float
+           shifts in 1st real space direction or x in hyperspy indexing.
+       shift2: float
+           shifts in 2nd real space direction or y in hyperspy indexing.
+
+       Returns
+       -------
+       data_t: np.array
+           2D array after translation according to shift vectors
+
+       """
+    data_t = ndi.affine_transform(data, np.identity(2), offset=(shift1, shift2), order=1)
+    return data_t
+
 
 def _g2_2d(data, normalization='split', kbin=1, tbin=1):
     """
