@@ -18,7 +18,6 @@
 
 import pytest
 import numpy as np
-import dask.array as da
 import hyperspy.api as hs
 
 from hyperspy.signals import Signal1D
@@ -88,7 +87,6 @@ class TestCorrelation:
         shifted_data = insitu_data.correct_real_space_drift(shifts=shifts)
         assert shifted_data._lazy
         assert isinstance(shifted_data, InSituDiffraction2D)
-
         g2_lazy = shifted_data.get_g2_2d_kresolved()
         assert g2_lazy.axes_manager.signal_axes[-1].size == 50
         g2_lazy.compute()
@@ -111,7 +109,6 @@ class TestCorrelation:
         num_index = ~np.isreal(mean_g2)
         np.testing.assert_allclose(np.ones((10, 10))[num_index], mean_g2[num_index], atol=0.1)
 
-
     def test_fast_drift_corrected_g2_lazy(self, insitu_data):
         shifts = Signal1D(np.repeat(np.linspace(0, 2, 50)[:, np.newaxis], repeats=2, axis=1))
         lazy_data = insitu_data.as_lazy()
@@ -130,5 +127,18 @@ class TestCorrelation:
         assert g2_lazy.axes_manager.signal_axes[-1].size == 50
         g2_lazy.compute()
         mean_g2 = g2_lazy.isig[:, :, 1:-1].mean(axis=[-1, -2, -3]).data
+        num_index = ~np.isreal(mean_g2)
+        np.testing.assert_allclose(np.ones((10, 10))[num_index], mean_g2[num_index], atol=0.1)
+
+    @pytest.mark.parametrize("trs", [np.linspace(0, 10, 25), 10])
+    @pytest.mark.parametrize("bins", [(2, 2, 5), (1, 4, 1)])
+    def test_g2_bin_resample_time(self, insitu_data, trs, bins):
+        g2 = insitu_data.get_g2_2d_kresolved(k1bin=bins[0],
+                                             k2bin=bins[1],
+                                             tbin=bins[2],
+                                             resample_time=trs)
+        assert g2.axes_manager.signal_axes[0].size == int(4 / bins[0])
+        assert g2.axes_manager.signal_axes[1].size == int(4 / bins[1])
+        mean_g2 = g2.isig[:, :, 1:-1].mean(axis=[-1, -2, -3]).data
         num_index = ~np.isreal(mean_g2)
         np.testing.assert_allclose(np.ones((10, 10))[num_index], mean_g2[num_index], atol=0.1)

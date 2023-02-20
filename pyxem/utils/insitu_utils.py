@@ -73,18 +73,20 @@ def _register_drift_2d(data, shift1, shift2):
     return data_t
 
 
-def _g2_2d(data, normalization='split', kbin=1, tbin=1):
+def _g2_2d(data, normalization='split', k1bin=1, k2bin=1, tbin=1):
     """
     Calculate k resolved g2(k,t) from I(t,k_r,k_phi)
 
-     Parameters
+    Parameters
     ----------
     data: 3D np.array
         Time series for I(t,k_r,k_phi)
     normalization: string
         Normalization format for time autocorrelation, 'split' or 'self'
-    kbin: int
-        Binning factor for both k axes
+    k1bin: int
+            Binning factor for k1 axis
+    k2bin: int
+        Binning factor for k2 axis
     tbin: int
         Binning factor for t axis
 
@@ -94,7 +96,7 @@ def _g2_2d(data, normalization='split', kbin=1, tbin=1):
         Time correlation function g2(t,k_r,k_phi)
     """
     data = data.T
-    data = data.reshape((data.shape[0] // kbin), kbin, (data.shape[1] // kbin), kbin, (data.shape[2] // tbin),
+    data = data.reshape((data.shape[0] // k1bin), k1bin, (data.shape[1] // k2bin), k2bin, (data.shape[2] // tbin),
                         tbin).sum(5).sum(3).sum(1)
 
     # Calculate autocorrelation along time axis
@@ -114,3 +116,54 @@ def _g2_2d(data, normalization='split', kbin=1, tbin=1):
         )
 
     return g2.T
+
+
+def _get_resample_time(t_size, dt, t_rs_size):
+    """
+    Return log linear resampled time array based on time step and sampling points
+
+    Parameters
+    ----------
+    t_size: int
+        Size of original time array
+    dt: float
+        Time interval for original time array
+    t_rs_size: int
+        Size of resampled time array
+
+    Returns
+    -------
+    t_rs: 1D np.array
+        Resampled time array
+    """
+    t_rs = np.zeros(t_rs_size, dtype=float)
+
+    for i in range(t_rs_size):
+        t_rs[i] = np.power(10, np.log10(dt) + np.log10(t_size - 1) * i / (t_rs_size - 1))
+
+    return t_rs
+
+
+def _interpolate_g2_2d(g2, t_rs, dt):
+    """
+    Interpolate k resolved g2(k,t) based on resampled time
+
+    Parameters
+    ----------
+    g2: 3D np.array
+        Time correlation function g2(t,k_r,k_phi)
+    t_rs: 1D np.array
+        Resampled time axis array
+    dt: float
+        Time interval for original g2 function
+
+    Returns
+    -------
+    g2rs: 3D np.array
+        Resampled time correlation function g2(t,k_r,k_phi)
+    """
+    t = np.round(t_rs / dt, 8)
+    g2_l = g2[np.floor(t).astype(int)]
+    g2_h = g2[np.ceil(t).astype(int)]
+    g2_rs = g2_l + (g2_h - g2_l) * (t - np.floor(t).astype(int))[:, np.newaxis, np.newaxis]
+    return g2_rs

@@ -27,7 +27,8 @@ import dask.array as da
 from dask.graph_manipulation import clone
 
 from pyxem.utils.dask_tools import _get_dask_array, _get_chunking
-from pyxem.utils.insitu_utils import _register_drift_5d, _register_drift_2d, _g2_2d
+from pyxem.utils.insitu_utils import _register_drift_5d, _register_drift_2d, _g2_2d, \
+    _interpolate_g2_2d, _get_resample_time
 import pyxem.utils.pixelated_stem_tools as pst
 
 
@@ -264,7 +265,13 @@ class InSituDiffraction2D(Diffraction2D):
 
         return registered_data_t
 
-    def get_g2_2d_kresolved(self, time_axis=2, normalization='split', kbin=1, tbin=1):
+    def get_g2_2d_kresolved(self,
+                            time_axis=2,
+                            normalization='split',
+                            k1bin=1,
+                            k2bin=1,
+                            tbin=1,
+                            resample_time=None):
         """
         Calculate k resolved g2 from in situ diffraction signal
 
@@ -274,10 +281,16 @@ class InSituDiffraction2D(Diffraction2D):
             Index of time axis. Default is 2
         normalization: string
             Normalization format for time autocorrelation, 'split' or 'self'
-        kbin: int
-            Binning factor for both k axes
+        k1bin: int
+            Binning factor for k1 axis
+        k2bin: int
+            Binning factor for k2 axis
         tbin: int
             Binning factor for t axis
+        resample_time: int or np.array
+            If int, time is resample into log linear with resample_time as
+            number of sampling. If array, it is used as resampled time axis
+            instead. No resampling is performed if argument is not specified
 
         Returns
         ---------
@@ -291,9 +304,31 @@ class InSituDiffraction2D(Diffraction2D):
 
         g2kt = transposed_signal.map(_g2_2d,
                                      normalization=normalization,
-                                     kbin=kbin,
+                                     k1bin=k1bin,
+                                     k2bin=k2bin,
                                      tbin=tbin,
                                      inplace=False)
+
+        if resample_time is not None:
+            if isinstance(resample_time, int):
+                trs = _get_resample_time(t_size=transposed_signal.axes_manager.signal_axes[-1].size / tbin,
+                                         dt=transposed_signal.axes_manager.signal_axes[-1].scale * tbin,
+                                         t_rs_size=resample_time)
+                g2rs = g2kt.map(_interpolate_g2_2d,
+                                t_rs=trs,
+                                dt=transposed_signal.axes_manager.signal_axes[-1].scale * tbin,
+                                inplace=False)
+                g2rs.set_signal_type('correlation')
+                return g2rs
+            if isinstance(resample_time, (list, tuple, np.ndarray)) and len(np.shape(resample_time)) == 1:
+                g2rs = g2kt.map(_interpolate_g2_2d,
+                                t_rs=resample_time / tbin,
+                                dt=transposed_signal.axes_manager.signal_axes[-1].scale * tbin,
+                                inplace=False)
+                g2rs.set_signal_type('correlation')
+                return g2rs
+            else:
+                raise TypeError("\'resample_time\' must be int or 1d array")
 
         g2kt.set_signal_type('correlation')
 
