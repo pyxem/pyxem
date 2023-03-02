@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -17,7 +17,8 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import numpy as np
-import hyperspy.utils.markers as hm
+from hyperspy.drawing._markers.point import Point
+from hyperspy.drawing._markers.line_segment import LineSegment
 
 
 def _get_4d_points_marker_list(
@@ -104,7 +105,7 @@ def _get_4d_points_marker_list(
                         marker_y_array[i2slice] = vy
     marker_list = []
     for i_p in range(max_peaks):
-        marker = hm.point(
+        marker = Point(
             marker_x_array[..., i_p], marker_y_array[..., i_p], color=color, size=size
         )
         marker_list.append(marker)
@@ -191,7 +192,7 @@ def _get_4d_line_segment_list(
 
     marker_list = []
     for i_p in range(max_lines):
-        marker = hm.line_segment(
+        marker = LineSegment(
             marker_x1_array[..., i_p],
             marker_y1_array[..., i_p],
             marker_x2_array[..., i_p],

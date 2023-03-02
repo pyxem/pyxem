@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -83,12 +83,18 @@ signals:
     dtype: real
     lazy: False
     module: pyxem.signals.diffraction_vectors
+  DiffractionVectors1D:
+    signal_type: diffraction_vectors
+    signal_dimension: 1
+    dtype: real
+    lazy: False
+    module: pyxem.signals.diffraction_vectors1d
   DiffractionVectors2D:
     signal_type: diffraction_vectors
     signal_dimension: 2
     dtype: real
     lazy: False
-    module: pyxem.signals.diffraction_vectors
+    module: pyxem.signals.diffraction_vectors2d
   VectorMatchingResults:
     signal_type: vector_matching
     signal_dimension: 0

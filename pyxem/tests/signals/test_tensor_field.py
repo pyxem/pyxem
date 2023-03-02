@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -212,4 +212,6 @@ def test_map_polar_decomposition(dgm, rotation_map, distortion_map):
 )
 def test_get_strain_maps(dgm, strain_answers):
     strain_results = dgm.get_strain_maps()
+    assert strain_answers.dtype == strain_results.data.dtype
+    assert strain_results.data.shape == strain_answers.shape
     np.testing.assert_almost_equal(strain_results.data, strain_answers)

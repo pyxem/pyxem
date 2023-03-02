@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -22,33 +22,11 @@ from sklearn.cluster import DBSCAN
 
 from hyperspy.signals import Signal2D
 
-from pyxem.signals import DiffractionVectors
+from pyxem.signals import DiffractionVectors, DiffractionVectors2D, DiffractionVectors1D
 
 # DiffractionVectors correspond to a single list of vectors, a map of vectors
 # all of equal length, and the ragged case. A fixture is defined for each of
 # these cases and all methods tested for it.
-
-
-@pytest.fixture(
-    params=[
-        np.array(
-            [
-                [0.063776, 0.011958],
-                [-0.035874, 0.131538],
-                [0.035874, -0.131538],
-                [0.035874, 0.143496],
-                [-0.035874, -0.13951],
-                [-0.115594, 0.123566],
-                [0.103636, -0.11958],
-                [0.123566, 0.151468],
-            ]
-        )
-    ]
-)
-def diffraction_vectors_single(request):
-    dvs = DiffractionVectors(request.param)
-    dvs.axes_manager.set_signal_dimension(1)
-    return dvs
 
 
 @pytest.fixture(
@@ -110,23 +88,22 @@ def diffraction_vectors_single(request):
 )
 def diffraction_vectors_map(request):
     dvm = DiffractionVectors(request.param)
-    dvm.axes_manager.set_signal_dimension(0)
     dvm.axes_manager[0].name = "x"
     dvm.axes_manager[1].name = "y"
     return dvm
 
 
-def test_plot_diffraction_vectors(diffraction_vectors_map):
-    with pytest.warns(UserWarning, match="distance_threshold=0 was given"):
-        diffraction_vectors_map.plot_diffraction_vectors(
-            xlim=1.0, ylim=1.0, distance_threshold=0
-        )
+class TestVectorPlotting:
+    def test_plot_diffraction_vectors(self, diffraction_vectors_map):
+        with pytest.warns(UserWarning, match="distance_threshold=0 was given"):
+            diffraction_vectors_map.plot_diffraction_vectors(
+                xlim=1.0, ylim=1.0, distance_threshold=0
+            )
 
-
-def test_plot_diffraction_vectors_on_signal(
-    diffraction_vectors_map, diffraction_pattern
-):
-    diffraction_vectors_map.plot_diffraction_vectors_on_signal(diffraction_pattern)
+    def test_plot_diffraction_vectors_on_signal(
+        self, diffraction_vectors_map, diffraction_pattern
+    ):
+        diffraction_vectors_map.plot_diffraction_vectors_on_signal(diffraction_pattern)
 
 
 def test_get_cartesian_coordinates(diffraction_vectors_map):
@@ -144,14 +121,17 @@ def test_get_cartesian_coordinates(diffraction_vectors_map):
     )
 
 
+class TestConvertVectors:
+    @pytest.mark.parametrize("real_units", (True, False))
+    def test_flatten_vectors(self, diffraction_vectors_map, real_units):
+        vectors = diffraction_vectors_map.flatten_diffraction_vectors(
+            real_units=real_units
+        )
+        assert isinstance(vectors, DiffractionVectors2D)
+        assert vectors.data.shape == (32, 4)
+
+
 class TestMagnitudes:
-    def test_get_magnitudes_single(self, diffraction_vectors_single):
-        diffraction_vectors_single.get_magnitudes()
-
-    @pytest.mark.filterwarnings("ignore::FutureWarning")  # deemed "safe enough"
-    def test_get_magnitude_histogram_single(self, diffraction_vectors_single):
-        diffraction_vectors_single.get_magnitude_histogram(bins=np.arange(0, 0.5, 0.1))
-
     def test_get_magnitudes_map(self, diffraction_vectors_map):
         diffraction_vectors_map.get_magnitudes()
 
@@ -163,10 +143,7 @@ class TestMagnitudes:
 class TestUniqueVectors:
     def test_get_unique_vectors_map_type(self, diffraction_vectors_map):
         unique_vectors = diffraction_vectors_map.get_unique_vectors()
-        assert isinstance(unique_vectors, DiffractionVectors)
-
-    def test_get_unique_vectors_single(self, diffraction_vectors_single):
-        diffraction_vectors_single.get_unique_vectors()
+        assert isinstance(unique_vectors, DiffractionVectors2D)
 
     @pytest.mark.parametrize(
         "distance_threshold, answer",
@@ -219,7 +196,7 @@ class TestUniqueVectors:
         unique_dbscan = diffraction_vectors_map.get_unique_vectors(
             method="DBSCAN", return_clusters=True
         )
-        assert isinstance(unique_dbscan[0], DiffractionVectors)
+        assert isinstance(unique_dbscan[0], DiffractionVectors2D)
         assert isinstance(unique_dbscan[1], DBSCAN)
 
     @pytest.mark.parametrize(
@@ -271,10 +248,6 @@ class TestFilterVectors:
         filtered_vectors = diffraction_vectors_map.filter_magnitude(0.1, 1.0)
         assert isinstance(filtered_vectors, DiffractionVectors)
 
-    def test_filter_magnitude_single_type(self, diffraction_vectors_single):
-        filtered_vectors = diffraction_vectors_single.filter_magnitude(0.1, 1.0)
-        assert isinstance(filtered_vectors, DiffractionVectors)
-
     def test_filter_magnitude_map(self, diffraction_vectors_map):
         filtered_vectors = diffraction_vectors_map.filter_magnitude(0.1, 1.0)
         ans = np.array(
@@ -293,25 +266,10 @@ class TestFilterVectors:
         )
         np.testing.assert_almost_equal(filtered_vectors.data[0][1], ans)
 
-    def test_filter_magnitude_single(self, diffraction_vectors_single):
-        filtered_vectors = diffraction_vectors_single.filter_magnitude(0.15, 1.0)
-        ans = np.array(
-            [[-0.115594, 0.123566], [0.103636, -0.11958], [0.123566, 0.151468]]
-        )
-        np.testing.assert_almost_equal(filtered_vectors.data, ans)
-
     def test_filter_detector_edge_map_type(self, diffraction_vectors_map):
         diffraction_vectors_map.detector_shape = (260, 240)
         diffraction_vectors_map.pixel_calibration = 0.001
         filtered_vectors = diffraction_vectors_map.filter_detector_edge(exclude_width=2)
-        assert isinstance(filtered_vectors, DiffractionVectors)
-
-    def test_filter_detector_edge_single_type(self, diffraction_vectors_single):
-        diffraction_vectors_single.detector_shape = (260, 240)
-        diffraction_vectors_single.pixel_calibration = 0.001
-        filtered_vectors = diffraction_vectors_single.filter_detector_edge(
-            exclude_width=10
-        )
         assert isinstance(filtered_vectors, DiffractionVectors)
 
     def test_filter_detector_edge_map(self, diffraction_vectors_map):
@@ -320,15 +278,6 @@ class TestFilterVectors:
         filtered_vectors = diffraction_vectors_map.filter_detector_edge(exclude_width=2)
         ans = np.array([[-0.117587, 0.113601]])
         np.testing.assert_almost_equal(filtered_vectors.data[0, 0], ans)
-
-    def test_filter_detector_edge_single(self, diffraction_vectors_single):
-        diffraction_vectors_single.detector_shape = (260, 240)
-        diffraction_vectors_single.pixel_calibration = 0.001
-        filtered_vectors = diffraction_vectors_single.filter_detector_edge(
-            exclude_width=10
-        )
-        ans = np.array([[0.063776, 0.011958]])
-        np.testing.assert_almost_equal(filtered_vectors.data, ans)
 
 
 class TestDiffractingPixelsMap:

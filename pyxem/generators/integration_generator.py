@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -238,7 +238,7 @@ class IntegrationGenerator:
         )
 
         intensities = BaseSignal(intensities)
-        intensities.axes_manager.set_signal_dimension(0)
+        intensities = intensities.transpose(0)
 
         return intensities
 

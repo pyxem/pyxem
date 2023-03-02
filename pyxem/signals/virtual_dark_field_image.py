@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -15,6 +15,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+import warnings
 
 import numpy as np
 
@@ -94,6 +95,10 @@ class VirtualDarkFieldImage(Signal2D):
             VDFSegment object containing segments (i.e. grains) of
             single virtual dark field images with corresponding vectors.
         """
+        warnings.warn(
+            "Changed in version 0.15.0.  May cause unexpected"
+            "errors related to managing the proper axes."
+        )
         vdfs = self.copy()
         vectors = self.vectors.data
 
@@ -150,12 +155,4 @@ class VirtualDarkFieldImage(Signal2D):
         n = vdfsegs.segments.axes_manager.navigation_axes[0]
         n.name = "n"
         n.units = "number"
-        vdfsegs.vectors_of_segments.axes_manager.set_signal_dimension(1)
-        vdfsegs.vectors_of_segments = transfer_signal_axes(
-            vdfsegs.vectors_of_segments, self.vectors
-        )
-        n = vdfsegs.vectors_of_segments.axes_manager.navigation_axes[0]
-        n.name = "n"
-        n.units = "number"
-
         return vdfsegs

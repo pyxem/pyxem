@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -81,9 +81,6 @@ class Test_init_xfails:
         """Tests that navigation dimensions must be appropriate too."""
         dp = ElectronDiffraction2D(np.zeros((2, 2, 8, 8)))
         vectors = DiffractionVectors(np.zeros((1, 2)))
-        dp.axes_manager.set_signal_dimension(2)
-        vectors.axes_manager.set_signal_dimension(0)
-
         # Note - uses regex via re.search()
         with pytest.raises(
             ValueError,

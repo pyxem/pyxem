@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_,
 and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
+
 Unreleased
 ==========
 
@@ -15,10 +16,16 @@ Added
 - Added damp_extrapolate_to_zero to ReducedIntensity1D
 - Added in deprecation wrapper class to wrap deprecated functions in pyxem.
 - Center-of-mass algorithm added to get_direct_beam_position (#845)
+- Added `VectorSignal1D` class to handle 1 dimensional signals
 
 Changed
 -------
 - Sklearn is now required to be on the 1.0 series.
+- Changed `set_signal_dimension` to `Hyperspy.signals.BaseSignal.transpose`
+- Moved code from `VectorSignal` to `VectorSignal2D`.  Change is more inline with stated dimensions
+- Fixed bugs resulting from API change in hyperspy/hyperspy#3045. Markers explicitly initialized
+- DiffractionVectors.get_diffraction_pixels_map returns a ragged signal
+- VirtualDarkFieldImage.get_vdf_segment changed to properly handle setting of axes
 
 Fixed
 -----

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -102,8 +102,7 @@ class DisplacementGradientMap(Signal2D):
         e21 = U.isig[1, 0].T
         e22 = -U.isig[1, 1].T + 1
         theta = R.map(_get_rotation_angle, inplace=False)
-        theta.axes_manager.set_signal_dimension(2)
-
+        theta = theta.transpose(2)
         strain_results = stack([e11, e22, e12, theta])
 
         return StrainMap(strain_results)
