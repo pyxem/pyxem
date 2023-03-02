@@ -62,7 +62,7 @@ class InSituDiffraction2D(Diffraction2D):
         Parameters
         ----------
         roi: :obj:`hyperspy.roi.BaseInteractiveROI`
-            Roi for virtual detector. If None, an ADF mask is created
+            Roi for virtual detector. If None, full roi of diffraction plane is used
         time_axis: int
             Index of time axis. Default is 2
 
