@@ -145,12 +145,14 @@ def separate_watershed(
     # Find the coordinates of the local maxima of the distance transform.
     local_maxi = peak_local_max(
         distance,
-        indices=False,
         min_distance=1,
         num_peaks=max_number_of_grains,
         exclude_border=exclude_border,
         threshold_rel=None,
     )
+    peak_mask = np.zeros_like(distance, dtype=bool)
+    peak_mask[tuple(local_maxi.T)] = True
+    local_maxi = peak_mask
     maxi_coord1 = np.where(local_maxi)
 
     # Discard maxima that are found at pixels that are connected to a
