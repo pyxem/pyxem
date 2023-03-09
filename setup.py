@@ -88,8 +88,8 @@ setup(
         "numpy",
         "orix           >= 0.9",
         "psutil",
-        "pyfai",
-        "scikit-image   >= 0.17.0",
+        "pyfai",  # sigma clip function broken
+        "scikit-image   >= 0.19.0",
         "scikit-learn   >= 1.0",
         "scipy",
         "transforms3d",
