@@ -26,6 +26,7 @@ from skimage import morphology, filters
 from skimage.draw import ellipse_perimeter
 from skimage.registration import phase_cross_correlation
 from tqdm import tqdm
+from packaging.version import Version
 
 from pyxem.utils.pyfai_utils import get_azimuthal_integrator
 from pyxem.utils.cuda_utils import is_cupy_array
@@ -298,9 +299,16 @@ def sigma_clip(z, azimuthal_integrator, npt_rad, npt_azim, mask=None, **kwargs):
     I : np.array()
         One-dimensional azimuthal integral of z.
     """
-    output = azimuthal_integrator.sigma_clip(
-        z, npt_rad=npt_rad, npt_azim=npt_azim, mask=mask, **kwargs
-    )
+    from pyFAI._version import version
+    if Version(version) >= Version("2023.2.0"):
+        output = azimuthal_integrator.sigma_clip_ng(z,
+                                                 npt=npt_rad,
+                                                 mask=mask,
+                                                 **kwargs)
+    else:
+        output = azimuthal_integrator.sigma_clip(
+            z, npt_rad=npt_rad, npt_azim=npt_azim, mask=mask, **kwargs
+        )
     return output[1]
 
 
