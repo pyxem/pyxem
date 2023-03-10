@@ -26,6 +26,7 @@ Changed
 - Fixed bugs resulting from API change in hyperspy/hyperspy#3045. Markers explicitly initialized
 - DiffractionVectors.get_diffraction_pixels_map returns a ragged signal
 - VirtualDarkFieldImage.get_vdf_segment changed to properly handle setting of axes
+- Minimal version of scikit-image increased to 0.19.0
 
 Fixed
 -----
