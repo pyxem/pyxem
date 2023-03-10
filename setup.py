@@ -37,6 +37,7 @@ extra_feature_requirements = {
     "tests": [
         "pytest     >= 5.0",
         "pytest-cov >= 2.8.1",
+        "pytest-xdist",
         "coveralls  >= 1.10",
         "coverage   >= 5.0",
     ],
