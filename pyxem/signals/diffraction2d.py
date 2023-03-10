@@ -404,7 +404,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         if method == "h-dome":
             self.data = self.data / np.max(self.data)
             bg_subtracted = self.map(regional_filter, inplace=False, **kwargs)
-            bg_subtracted.map(filters.rank.mean, selem=square(3))
+            bg_subtracted.map(filters.rank.mean, footprint=square(3))
             bg_subtracted.data = bg_subtracted.data / np.max(bg_subtracted.data)
             return bg_subtracted
 
