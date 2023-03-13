@@ -84,7 +84,7 @@ setup(
         "hyperspy       >= 1.7.0",  # significant improvements
         "ipywidgets",
         "lmfit          >= 0.9.12",
-        "matplotlib     >= 3.1.1",  # 3.1.0 failed
+        "matplotlib     >= 3.3",
         "numba",
         "numpy",
         "orix           >= 0.9",
