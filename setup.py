@@ -37,6 +37,7 @@ extra_feature_requirements = {
     "tests": [
         "pytest     >= 5.0",
         "pytest-cov >= 2.8.1",
+        "pytest-xdist",
         "coveralls  >= 1.10",
         "coverage   >= 5.0",
     ],
@@ -83,7 +84,7 @@ setup(
         "hyperspy       >= 1.7.0",  # significant improvements
         "ipywidgets",
         "lmfit          >= 0.9.12",
-        "matplotlib     >= 3.1.1",  # 3.1.0 failed
+        "matplotlib     >= 3.3",
         "numba",
         "numpy",
         "orix           >= 0.9",
