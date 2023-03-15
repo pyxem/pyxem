@@ -3,6 +3,13 @@ name: black-action
 on: [push, pull_request]
 
 jobs:
+  one:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
   linter_name:
     name: runner / black
     runs-on: ubuntu-latest
