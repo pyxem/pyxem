@@ -6,6 +6,7 @@ jobs:
   linter_name:
     name: runner / black
     runs-on: ubuntu-latest
+    if: github.head_ref==github.base_ref # Don't run when target is remote
     steps:
       - uses: actions/checkout@v2
       - name: Check files using the black formatter
