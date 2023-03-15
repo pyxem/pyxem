@@ -6,6 +6,7 @@ jobs:
   linter_name:
     name: runner / black
     runs-on: ubuntu-latest
+    if: github.head_ref==github.base_ref # Don't run when target is remote
     steps:
       - uses: actions/checkout@v2
       - name: Check files using the black formatter
@@ -15,7 +16,7 @@ jobs:
           black_args: "."
       - name: Create Pull Request
         if: steps.action_black.outputs.is_formatted == 'true'
-        uses: peter-evans/create-pull-request@v3
+        uses: peter-evans/create-pull-request@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           title: "Format Python code with psf/black push"
