@@ -1,0 +1,30 @@
+name: black-action
+
+on: [push, pull_request]
+
+jobs:
+  linter_name:
+    name: runner / black
+    runs-on: ubuntu-latest
+    if: github.head_ref == github.base_ref && github.base_ref == 'pyxem/pyxem' # Don't run when target is remote (github.head_ref==github.base_ref)
+    steps:
+      - uses: actions/checkout@v2
+      - name: Check files using the black formatter
+        uses: rickstaa/action-black@v1
+        id: action_black
+        with:
+          black_args: "."
+      - name: Create Pull Request
+        if: steps.action_black.outputs.is_formatted == 'true'
+        uses: peter-evans/create-pull-request@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: "Format Python code with psf/black push"
+          commit-message: ":art: Format Python code with psf/black"
+          body: |
+            There appears to be some python code in ${{ github.sha }} that is not formatted according
+            to the [psf/black](https://github.com/psf/black) specification. This pull request
+            formats the code in question and is inline with the
+            [pyxem developers guide](https://pyxem.readthedocs.io/en/latest/contributing.html#code-style)
+          base: ${{ github.head_ref }} # Creates pull request onto pull request or commit branch
+          branch: actions/black
