@@ -615,12 +615,16 @@ def find_beam_offset_cross_correlation(z, radius_start, radius_finish, **kwargs)
 
     Parameters
     ----------
+    z: array-like
+        The two dimensional array/image that is operated on
     radius_start : int
         The lower bound for the radius of the central disc to be used in the
         alignment.
     radius_finish : int
         The upper bounds for the radius of the central disc to be used in the
         alignment.
+    **kwargs:
+        Any additional keyword arguments defined by :func:`skimage.registration.phase_cross_correlation`
 
     Returns
     -------

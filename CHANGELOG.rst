@@ -17,6 +17,8 @@ Added
 - Added in deprecation wrapper class to wrap deprecated functions in pyxem.
 - Center-of-mass algorithm added to get_direct_beam_position (#845)
 - Added `VectorSignal1D` class to handle 1 dimensional signals
+- Added kwargs to find_beam_offset_cross_correlation allowing for parameters
+to be passed to `phase_cross_correlation` (#907)
 
 Changed
 -------
