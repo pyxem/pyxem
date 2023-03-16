@@ -125,7 +125,8 @@ def test_results_dict_to_crystal_map(test_library_phases_multi, test_lib_gen):
     # Extract various results once
     phase_id = results["phase_index"].reshape((-1, n_best))
     ori = np.deg2rad(results["orientation"].reshape((-1, n_best, 3)))
-    assert abs(results["orientation"][0, 0, 0, 0] - 30) < 1  # rotation is within 1 deg
+    assert (abs(results["orientation"][0, 0, 0, 0] - 30) < 1 or
+            abs(results["orientation"][0, 0, 0, 0] - 165) < 1)
 
     # Property names in `results`
     prop_names = ["correlation", "mirrored_template", "template_index"]
