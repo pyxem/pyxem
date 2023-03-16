@@ -734,7 +734,10 @@ class TestGetDirectBeamPosition:
     @pytest.mark.parametrize(
         "method,kwargs",
         [
-            ("cross_correlate", {"radius_start": 0, "radius_finish": 2}),
+            (
+                "cross_correlate",
+                {"radius_start": 0, "radius_finish": 2, "normalization": None},
+            ),
             (
                 "blur",
                 {

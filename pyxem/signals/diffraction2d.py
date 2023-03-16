@@ -643,7 +643,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             finding the direct beam. Equivalent to
             s.isig[low_x:high_x, low_y:high_y].get_direct_beam_position()+[low_x,low_y])
         **kwargs:
-            Keyword arguments to be passed to the method function.
+            Additional arguments accepted by :func:`~pyxem.utils.expt_utils.find_beam_center_blur`,
+            :func:`~pyxem.utils.expt_utils.find_beam_center_interpolate`,
+            :func:`~pyxem.utils.expt_utils.find_beam_offset_cross_correlation`,
+            and :func:`~pyxem.signals.diffraction2d.Diffraction2D.center_of_mass`,
 
         Returns
         -------
@@ -784,7 +787,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             Parameters passed to the alignment function. See scipy.ndimage.shift
             for more information about the parameters.
         *args, **kwargs :
-            Passed to the function which estimate the direct beam position.
+            Additional arguments accepted by :func:`~pyxem.utils.expt_utils.find_beam_center_blur`,
+            :func:`~pyxem.utils.expt_utils.find_beam_center_interpolate`,
+            :func:`~pyxem.utils.expt_utils.find_beam_offset_cross_correlation`,
+            and :func:`~pyxem.signals.diffraction2d.Diffraction2D.center_of_mass`,
 
         Example
         -------

@@ -606,7 +606,7 @@ def find_beam_center_blur(z, sigma):
     return dispatcher.array(center)
 
 
-def find_beam_offset_cross_correlation(z, radius_start, radius_finish):
+def find_beam_offset_cross_correlation(z, radius_start, radius_finish, **kwargs):
     """Find the offset of the direct beam from the image center by a cross-correlation algorithm.
     The shift is calculated relative to an circle perimeter. The circle can be
     refined across a range of radii during the centring procedure to improve
@@ -615,12 +615,16 @@ def find_beam_offset_cross_correlation(z, radius_start, radius_finish):
 
     Parameters
     ----------
+    z: array-like
+        The two dimensional array/image that is operated on
     radius_start : int
         The lower bound for the radius of the central disc to be used in the
         alignment.
     radius_finish : int
         The upper bounds for the radius of the central disc to be used in the
         alignment.
+    **kwargs:
+        Any additional keyword arguments defined by :func:`skimage.registration.phase_cross_correlation`
 
     Returns
     -------
@@ -641,7 +645,9 @@ def find_beam_offset_cross_correlation(z, radius_start, radius_finish):
         hann2d = np.sqrt(np.outer(h0, h1))
         ref = hann2d * ref
         im = hann2d * z
-        shift, error, diffphase = phase_cross_correlation(ref, im, upsample_factor=10)
+        shift, error, diffphase = phase_cross_correlation(
+            ref, im, upsample_factor=10, **kwargs
+        )
         errRecord[ind] = error
         index_min = np.argmin(errRecord)
 
@@ -653,7 +659,9 @@ def find_beam_offset_cross_correlation(z, radius_start, radius_finish):
     hann2d = np.sqrt(np.outer(h0, h1))
     ref = hann2d * ref
     im = hann2d * z
-    shift, error, diffphase = phase_cross_correlation(ref, im, upsample_factor=100)
+    shift, error, diffphase = phase_cross_correlation(
+        ref, im, upsample_factor=100, **kwargs
+    )
 
     shift = shift[::-1]
     return shift - 0.5
