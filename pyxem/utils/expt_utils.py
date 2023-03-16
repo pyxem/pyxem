@@ -641,7 +641,9 @@ def find_beam_offset_cross_correlation(z, radius_start, radius_finish, **kwargs)
         hann2d = np.sqrt(np.outer(h0, h1))
         ref = hann2d * ref
         im = hann2d * z
-        shift, error, diffphase = phase_cross_correlation(ref, im, upsample_factor=10, **kwargs)
+        shift, error, diffphase = phase_cross_correlation(
+            ref, im, upsample_factor=10, **kwargs
+        )
         errRecord[ind] = error
         index_min = np.argmin(errRecord)
 
@@ -653,7 +655,9 @@ def find_beam_offset_cross_correlation(z, radius_start, radius_finish, **kwargs)
     hann2d = np.sqrt(np.outer(h0, h1))
     ref = hann2d * ref
     im = hann2d * z
-    shift, error, diffphase = phase_cross_correlation(ref, im, upsample_factor=100, **kwargs)
+    shift, error, diffphase = phase_cross_correlation(
+        ref, im, upsample_factor=100, **kwargs
+    )
 
     shift = shift[::-1]
     return shift - 0.5

@@ -728,22 +728,34 @@ class TestGetDirectBeamPosition:
         self.dx, self.dy = dx, dy
         self.x_pos_list, self.y_pos_list = x_pos_list, y_pos_list
 
-    @pytest.mark.parametrize("sig_slice", (None, (2, 18, 2, 24), (2.0, 18.0, 2.0, 24.0)))
-    @pytest.mark.parametrize("method,kwargs", [("cross_correlate",
-                                                {"radius_start": 0,
-                                                 "radius_finish": 2,
-                                                 "normalization":None}),
-                                               ("blur",
-                                                {"sigma": 1,
-                                                 }),
-                                               ("interpolate",
-                                                {"sigma": 1,
-                                                 "upsample_factor": 2, "kind": "nearest",
-                                                 }),
-                                               ("center_of_mass",
-                                                {}),
-                                               ])
-    def test_get_direct_beam(self, method, sig_slice,  kwargs):
+    @pytest.mark.parametrize(
+        "sig_slice", (None, (2, 18, 2, 24), (2.0, 18.0, 2.0, 24.0))
+    )
+    @pytest.mark.parametrize(
+        "method,kwargs",
+        [
+            (
+                "cross_correlate",
+                {"radius_start": 0, "radius_finish": 2, "normalization": None},
+            ),
+            (
+                "blur",
+                {
+                    "sigma": 1,
+                },
+            ),
+            (
+                "interpolate",
+                {
+                    "sigma": 1,
+                    "upsample_factor": 2,
+                    "kind": "nearest",
+                },
+            ),
+            ("center_of_mass", {}),
+        ],
+    )
+    def test_get_direct_beam(self, method, sig_slice, kwargs):
         s = self.s
         dx, dy = self.dx, self.dy
         s, x_pos_list, y_pos_list = self.s, self.x_pos_list, self.y_pos_list
