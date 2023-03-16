@@ -97,6 +97,7 @@ def test_results_dict_to_crystal_map(test_library_phases_multi, test_lib_gen):
     # TODO: Remove version check after diffsims 0.5.0 is released
     from packaging.version import Version
     import diffsims
+    from scipy.ndimage import rotate
 
     diffsims_version = Version(diffsims.__version__)
     if diffsims_version > Version("0.4.2"):
@@ -111,6 +112,7 @@ def test_results_dict_to_crystal_map(test_library_phases_multi, test_lib_gen):
         ].get_diffraction_pattern(**sim_kwargs)
         test_set[idx] = test_pattern
 
+    test_set[0, 0] = rotate(test_set[0, 0], -30, reshape=False)
     # Perform template matching
     n_best = 3
     results, phase_dict = index_dataset_with_template_rotation(
@@ -123,6 +125,7 @@ def test_results_dict_to_crystal_map(test_library_phases_multi, test_lib_gen):
     # Extract various results once
     phase_id = results["phase_index"].reshape((-1, n_best))
     ori = np.deg2rad(results["orientation"].reshape((-1, n_best, 3)))
+    assert abs(results["orientation"][0, 0, 0, 0] - 30) < 1  # rotation is within 1 deg
 
     # Property names in `results`
     prop_names = ["correlation", "mirrored_template", "template_index"]
