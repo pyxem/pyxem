@@ -119,5 +119,4 @@ class ElectronDiffraction1D(Diffraction1D):
 
 
 class LazyElectronDiffraction1D(LazySignal, ElectronDiffraction1D):
-
     pass

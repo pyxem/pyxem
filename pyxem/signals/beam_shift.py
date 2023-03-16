@@ -25,7 +25,6 @@ from hyperspy._signals.signal1d import Signal1D
 
 
 class BeamShift(Signal1D):
-
     _signal_type = "beam_shift"
 
     def make_linear_plane(self, mask=None):

@@ -213,7 +213,7 @@ def _get_limits_from_array(data, sigma=4, ignore_zeros=False, ignore_edges=False
 
 def _make_color_wheel(ax, rotation=None):
     x, y = np.mgrid[-2.0:2.0:500j, -2.0:2.0:500j]
-    r = (x ** 2 + y ** 2) ** 0.5
+    r = (x**2 + y**2) ** 0.5
     t = np.arctan2(x, y)
     del x, y
     if rotation is not None:
@@ -278,7 +278,7 @@ def _find_longest_distance(
         int(((imX - centreX_min) ** 2 + (imY - centreY_min) ** 2) ** 0.5),
         int(((centreX_max) ** 2 + (imY - centreY_min) ** 2) ** 0.5),
         int(((imX - centreX_min) ** 2 + (centreY_max) ** 2) ** 0.5),
-        int((centreX_max ** 2 + centreY_max ** 2) ** 0.5),
+        int((centreX_max**2 + centreY_max**2) ** 0.5),
     )
     return max_value
 

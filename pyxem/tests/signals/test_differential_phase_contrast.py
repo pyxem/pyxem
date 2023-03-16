@@ -544,15 +544,15 @@ class TestPhaseRetrieval:
         # construct the surface, two point with Gaussian distribution
         coords = np.linspace(-20, 10, num=512)
         x, y = np.meshgrid(coords, coords)
-        surface = np.exp(-(x ** 2 + y ** 2) / 2) + np.exp(
+        surface = np.exp(-(x**2 + y**2) / 2) + np.exp(
             -((x - 2) ** 2 + (y + 4) ** 2) / 2
         )
 
         # x and y phase gradient of the Gaussians, analytical form
-        dx = x * (-np.exp(-(x ** 2) / 2 - y ** 2 / 2)) + (x - 2) * -np.exp(
+        dx = x * (-np.exp(-(x**2) / 2 - y**2 / 2)) + (x - 2) * -np.exp(
             (-0.5 * (x - 2) ** 2 - 0.5 * (y + 4) ** 2)
         )
-        dy = y * (-np.exp(-(x ** 2) / 2 - y ** 2 / 2)) + (y + 4) * -np.exp(
+        dy = y * (-np.exp(-(x**2) / 2 - y**2 / 2)) + (y + 4) * -np.exp(
             (-0.5 * (x - 2) ** 2 - 0.5 * (y + 4) ** 2)
         )
 

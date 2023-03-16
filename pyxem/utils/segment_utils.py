@@ -54,7 +54,7 @@ def norm_cross_corr(image, template):
         corr = 0
     else:
         # no divide by zero to worry about now, normal corr definition in use
-        corr = np.sum(f * t) / np.sqrt(np.sum(f ** 2) * np.sum(t ** 2))
+        corr = np.sum(f * t) / np.sqrt(np.sum(f**2) * np.sum(t**2))
 
     return corr
 
@@ -318,8 +318,8 @@ def get_gaussian2d(a, xo, yo, x, y, sigma):
     # TODO This function should be removed in view of its duplication within diffsims
     gaussian = (
         a
-        / (2 * np.pi * sigma ** 2)
-        * np.exp(-((x - xo) ** 2 + (y - yo) ** 2) / (2 * sigma ** 2))
+        / (2 * np.pi * sigma**2)
+        * np.exp(-((x - xo) ** 2 + (y - yo) ** 2) / (2 * sigma**2))
     )
 
     return gaussian

@@ -157,19 +157,19 @@ class TestPixelatedTools:
 
         x_array, y_array = np.mgrid[90:100, 90:100]
         for x, y in zip(x_array.flatten(), y_array.flatten()):
-            distance = int((x ** 2 + y ** 2) ** 0.5)
+            distance = int((x**2 + y**2) ** 0.5)
             dist = pst._find_longest_distance(imX, imY, x, y, x, y)
             assert dist == distance
 
         x_array, y_array = np.mgrid[0:10, 90:100]
         for x, y in zip(x_array.flatten(), y_array.flatten()):
-            distance = int(((imX - x) ** 2 + y ** 2) ** 0.5)
+            distance = int(((imX - x) ** 2 + y**2) ** 0.5)
             dist = pst._find_longest_distance(imX, imY, x, y, x, y)
             assert dist == distance
 
         x_array, y_array = np.mgrid[90:100, 0:10]
         for x, y in zip(x_array.flatten(), y_array.flatten()):
-            distance = int((x ** 2 + (imY - y) ** 2) ** 0.5)
+            distance = int((x**2 + (imY - y) ** 2) ** 0.5)
             dist = pst._find_longest_distance(imX, imY, x, y, x, y)
             assert dist == distance
 

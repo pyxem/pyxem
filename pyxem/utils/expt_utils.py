@@ -92,7 +92,7 @@ def _cart2polar(x, y):
         Polar coordinates
 
     """
-    r = np.sqrt(x ** 2 + y ** 2)
+    r = np.sqrt(x**2 + y**2)
     theta = -np.arctan2(y, x)  # θ = 0 horizontal, +ve = anticlockwise
     return r, theta
 
@@ -300,11 +300,9 @@ def sigma_clip(z, azimuthal_integrator, npt_rad, npt_azim, mask=None, **kwargs):
         One-dimensional azimuthal integral of z.
     """
     from pyFAI._version import version
+
     if Version(version) >= Version("2023.2.0"):
-        output = azimuthal_integrator.sigma_clip_ng(z,
-                                                 npt=npt_rad,
-                                                 mask=mask,
-                                                 **kwargs)
+        output = azimuthal_integrator.sigma_clip_ng(z, npt=npt_rad, mask=mask, **kwargs)
     else:
         output = azimuthal_integrator.sigma_clip(
             z, npt_rad=npt_rad, npt_azim=npt_azim, mask=mask, **kwargs
@@ -350,7 +348,7 @@ def remove_dead(z, deadpixels):
         Two-dimensional data array containing z with dead pixels removed.
     """
     z_bar = np.copy(z)
-    for (i, j) in deadpixels:
+    for i, j in deadpixels:
         z_bar[i, j] = (z[i - 1, j] + z[i + 1, j] + z[i, j - 1] + z[i, j + 1]) / 4
 
     return z_bar
@@ -470,7 +468,7 @@ def circular_mask(shape, radius, center=None):
     l_x, l_y = shape
     x, y = center if center else (l_x / 2, l_y / 2)
     X, Y = np.ogrid[:l_x, :l_y]
-    mask = (X - x) ** 2 + (Y - y) ** 2 < radius ** 2
+    mask = (X - x) ** 2 + (Y - y) ** 2 < radius**2
     return mask
 
 

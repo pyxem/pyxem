@@ -76,7 +76,7 @@ class ElectronDiffraction2D(Diffraction2D):
     def beam_energy(self):
         try:
             return self.metadata.Acquisition_instrument.TEM["beam_energy"]
-        except (AttributeError):
+        except AttributeError:
             return None
 
     @beam_energy.setter
@@ -87,7 +87,7 @@ class ElectronDiffraction2D(Diffraction2D):
     def camera_length(self):
         try:
             return self.metadata.Acquisition_instrument.TEM["camera_length"]
-        except (AttributeError):
+        except AttributeError:
             return None
 
     @camera_length.setter
@@ -217,5 +217,4 @@ class ElectronDiffraction2D(Diffraction2D):
 
 
 class LazyElectronDiffraction2D(LazyDiffraction2D, ElectronDiffraction2D):
-
     pass
