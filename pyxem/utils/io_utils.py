@@ -340,7 +340,6 @@ def _manageHeader(fname):
         Header += str(aByte.decode("ascii"))
         # This gets rid of the header
         while aByte and ord(aByte) != 0:
-
             aByte = input.read(1)
             Header += str(aByte.decode("ascii"))
 
@@ -565,7 +564,6 @@ def _get_mib_depth(hdr_info, fp):
 
     file_size = os.path.getsize(fp[:-3] + "mib")
     if hdr_info["raw"] == "R64":
-
         single_frame = mib_file_size_dict.get(str(hdr_info["Counter Depth (number)"]))
         depth = int(file_size / single_frame)
     elif hdr_info["raw"] == "MIB":
@@ -734,9 +732,7 @@ def _read_exposures(fp, pct_frames_to_read=0.1):
 
                     else:
                         data = data.reshape(-1, width_height + hdr_bits)[:, 71:79]
-                    data = data[
-                        :,
-                    ]
+                    data = data[:,]
                     data_crop = data[: int(depth * pct_frames_to_read)]
                     d = data_crop.compute()
                     exp_time = []
@@ -765,9 +761,7 @@ def _read_exposures(fp, pct_frames_to_read=0.1):
                 # all the other cases are 8 bit
                 else:
                     data = data.reshape(-1, width_height + hdr_bits)[:, 71:79]
-                    data = data[
-                        :,
-                    ]
+                    data = data[:,]
                     data_crop = data[: int(depth * pct_frames_to_read)]
                     d = data_crop.compute()
                     exp_time = []
@@ -815,7 +809,6 @@ def _STEM_flag_dict(exp_times_list):
         output["flyback_times"] = None
     # In case exp times not appearing in header treat as TEM data
     elif len(times_set) == 0:
-
         output["STEM_flag"] = 0
         output["scan_X"] = None
         output["exposure time"] = None

@@ -289,5 +289,5 @@ class TestEmptyCalibrationGenerator:
             rotation=10,
         )
         calgen.diffraction_calibration = (1, 1)
-        ai = calgen.to_ai(wavelength=(2.53 * 10 ** -12))
+        ai = calgen.to_ai(wavelength=(2.53 * 10**-12))
         assert isinstance(ai, AzimuthalIntegrator)

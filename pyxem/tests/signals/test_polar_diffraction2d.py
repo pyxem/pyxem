@@ -155,15 +155,15 @@ class TestPearsonCorrelation:
         pd.axes_manager.signal_axes[1].name = "k"
         return pd
 
-    @pytest.mark.parametrize("krange", [None, (0, 4), (.5, 1.4)])
+    @pytest.mark.parametrize("krange", [None, (0, 4), (0.5, 1.4)])
     def test_pearson_correlation_signal(self, flat_pattern, krange):
         rho = flat_pattern.get_full_pearson_correlation(krange=krange)
         assert isinstance(rho, Signal1D)
         rhok = flat_pattern.get_resolved_pearson_correlation(krange=krange)
         assert isinstance(rhok, Signal2D)
 
-    @pytest.mark.parametrize('inplace', (True, False))
-    @pytest.mark.parametrize("krange", [None, (0, 10), (.5, 1.4)])
+    @pytest.mark.parametrize("inplace", (True, False))
+    @pytest.mark.parametrize("krange", [None, (0, 10), (0.5, 1.4)])
     def test_full_pearson_correlation_results(self, flat_pattern, krange, inplace):
         out = flat_pattern.get_full_pearson_correlation(
             krange=krange,
@@ -179,8 +179,8 @@ class TestPearsonCorrelation:
         assert isinstance(out, Correlation1D)
         np.testing.assert_allclose(np.zeros((2, 2, 49)), out.data[..., 1:], atol=0.2)
 
-    @pytest.mark.parametrize('inplace', (True, False))
-    @pytest.mark.parametrize("krange", [None, (0, 10), (.5, 1.4)])
+    @pytest.mark.parametrize("inplace", (True, False))
+    @pytest.mark.parametrize("krange", [None, (0, 10), (0.5, 1.4)])
     def test_resolved_pearson_correlation_results(self, flat_pattern, krange, inplace):
         out = flat_pattern.get_resolved_pearson_correlation(
             krange=krange,
@@ -195,7 +195,9 @@ class TestPearsonCorrelation:
             assert flat_pattern.axes_manager[-2].size == 50
 
         assert isinstance(out, Correlation2D)
-        np.testing.assert_allclose(np.zeros((2, 2, 49)), np.mean(out.data[..., 1:], axis=-2), atol=0.2)
+        np.testing.assert_allclose(
+            np.zeros((2, 2, 49)), np.mean(out.data[..., 1:], axis=-2), atol=0.2
+        )
 
     def test_full_pearson_correlation_inplace(self, flat_pattern):
         rho = flat_pattern.get_full_pearson_correlation(inplace=True)
@@ -216,15 +218,15 @@ class TestPearsonCorrelation:
 
         rhok = flat_pattern.get_resolved_pearson_correlation()
         assert (
-                rhok.axes_manager.signal_axes[0].scale
-                == flat_pattern.axes_manager.signal_axes[0].scale
+            rhok.axes_manager.signal_axes[0].scale
+            == flat_pattern.axes_manager.signal_axes[0].scale
         )
         assert (
-                rhok.axes_manager.signal_axes[1].scale
-                == flat_pattern.axes_manager.signal_axes[1].scale
+            rhok.axes_manager.signal_axes[1].scale
+            == flat_pattern.axes_manager.signal_axes[1].scale
         )
 
-    @pytest.mark.parametrize( "mask", [None, np.zeros(shape=(15, 50))])
+    @pytest.mark.parametrize("mask", [None, np.zeros(shape=(15, 50))])
     def test_masking_pearson_correlation(self, flat_pattern, mask):
         rho_0 = flat_pattern.get_full_pearson_correlation(mask=mask)
         assert isinstance(rho_0, Correlation1D)

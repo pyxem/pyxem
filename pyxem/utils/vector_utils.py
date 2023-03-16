@@ -54,7 +54,7 @@ def detector_to_fourier(k_xy, wavelength, camera_length):
     # the wavelength. k_z is calculated courtesy of Pythagoras, then offset by
     # the Ewald sphere radius.
 
-    k_z = np.sqrt(1 / (wavelength ** 2) - np.sum(k_xy ** 2, axis=1)) - 1 / wavelength
+    k_z = np.sqrt(1 / (wavelength**2) - np.sum(k_xy**2, axis=1)) - 1 / wavelength
 
     # Stack the xy-vector and the z vector to get the full k
     k = np.hstack((k_xy, k_z[:, np.newaxis]))

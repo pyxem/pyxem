@@ -331,7 +331,7 @@ class TestFitEllipse:
 class TestHolzCalibration:
     def test_get_holz_angle(self):
         wavelength = 2.51 / 1000
-        lattice_parameter = 0.3905 * 2 ** 0.5
+        lattice_parameter = 0.3905 * 2**0.5
         angle = ra._get_holz_angle(wavelength, lattice_parameter)
         assert approx(95.37805 / 1000) == angle
 

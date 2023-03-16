@@ -19,7 +19,11 @@
 import pytest
 import numpy as np
 
-from pyxem.utils.correlation_utils import _correlation, _get_interpolation_matrix, _wrap_set_float
+from pyxem.utils.correlation_utils import (
+    _correlation,
+    _get_interpolation_matrix,
+    _wrap_set_float,
+)
 
 
 class TestCorrelations:
@@ -55,11 +59,11 @@ class TestCorrelations:
 
     def test_wrap_set_float(self):
         target = np.zeros(20)
-        assert 2 == np.sum(_wrap_set_float(target, bottom=10., top=15.5, value=2))
+        assert 2 == np.sum(_wrap_set_float(target, bottom=10.0, top=15.5, value=2))
         target = np.zeros(20)
-        assert 2 == np.sum(_wrap_set_float(target, bottom=10., top=10.5, value=2))
+        assert 2 == np.sum(_wrap_set_float(target, bottom=10.0, top=10.5, value=2))
         target = np.zeros(20)
-        assert 2 == np.sum(_wrap_set_float(target, bottom=10., top=10., value=2))
+        assert 2 == np.sum(_wrap_set_float(target, bottom=10.0, top=10.0, value=2))
 
     def test_correlations_normalization(self, ones_hundred):
         c = _correlation(ones_hundred, axis=0, normalize=True)

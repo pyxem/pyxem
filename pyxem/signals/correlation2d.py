@@ -108,7 +108,7 @@ class Correlation2D(Signal2D, CommonDiffraction):
         normalize=True,
         **kwargs
     ):
-        """ This function is for finding and extracting information about clusters
+        """This function is for finding and extracting information about clusters
         based on the angular symmetries. This a pretty catch all method which has
         a couple of different operating principles.
         If k_range=None the function uses a 3 dimensional version of blob finding and attempts to
@@ -158,7 +158,6 @@ class Correlation2D(Signal2D, CommonDiffraction):
 
 
 class LazyCorrelation2D(LazySignal, Correlation2D):
-
     _lazy = True
 
     def __init__(self, *args, **kwargs):

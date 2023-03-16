@@ -225,7 +225,7 @@ class TestGetClosestFocus:
 
     def test_horizontal_ellipse(self):
         x, y, a, b, r = 10, 20, 20, 10, 0
-        c = math.sqrt(a ** 2 - b ** 2)
+        c = math.sqrt(a**2 - b**2)
         xf0, yf0 = ret._get_closest_focus(20, 20, x, y, a, b, r)
         assert (xf0, yf0) == (x + c, y)
         xf1, yf1 = ret._get_closest_focus(5, 20, x, y, a, b, r)
@@ -233,7 +233,7 @@ class TestGetClosestFocus:
 
     def test_vertical_ellipse(self):
         x, y, a, b, r = 10, 20, 15, 10, math.pi / 2
-        c = math.sqrt(a ** 2 - b ** 2)
+        c = math.sqrt(a**2 - b**2)
         xf0, yf0 = ret._get_closest_focus(10, 30, x, y, a, b, r)
         assert (xf0, yf0) == (x, y + c)
         xf1, yf1 = ret._get_closest_focus(10, 10, x, y, a, b, r)
@@ -250,42 +250,42 @@ class TestEllipseCentreToFocus:
     def test_horizontal_ellipse(self):
         x, y, a, b, r = 10, 20, 20, 10, 0
         f0, f1 = ret._ellipse_centre_to_focus(x, y, a, b, r)
-        c = math.sqrt(a ** 2 - b ** 2)
+        c = math.sqrt(a**2 - b**2)
         assert f0 == (x + c, y)
         assert f1 == (x - c, y)
 
     def test_vertical_ellipse(self):
         x, y, a, b, r = 10, 20, 10, 5, math.pi / 2
         f0, f1 = ret._ellipse_centre_to_focus(x, y, a, b, r)
-        c = math.sqrt(a ** 2 - b ** 2)
+        c = math.sqrt(a**2 - b**2)
         assert f0 == (x, y + c)
         assert f1 == (x, y - c)
 
     def test_rotated45_ellipse(self):
         x, y, a, b, r = 10, 20, 10, 5, math.pi / 4
         f0, f1 = ret._ellipse_centre_to_focus(x, y, a, b, r)
-        c = math.sqrt(a ** 2 - b ** 2)
+        c = math.sqrt(a**2 - b**2)
         assert approx(f0) == (x + c * math.sin(r), y + c * math.cos(r))
         assert approx(f1) == (x - c * math.sin(r), y - c * math.cos(r))
 
     def test_rotated_negative45_ellipse(self):
         x, y, a, b, r = 10, 20, 10, 5, -math.pi / 4
         f0, f1 = ret._ellipse_centre_to_focus(x, y, a, b, r)
-        c = math.sqrt(a ** 2 - b ** 2)
+        c = math.sqrt(a**2 - b**2)
         assert approx(f0) == (x - c * math.sin(r), y - c * math.cos(r))
         assert approx(f1) == (x + c * math.sin(r), y + c * math.cos(r))
 
     def test_horizontal_negative(self):
         x, y, a, b, r = 5, 20, 20, 10, 0
         f0, f1 = ret._ellipse_centre_to_focus(x, y, a, b, r)
-        c = math.sqrt(a ** 2 - b ** 2)
+        c = math.sqrt(a**2 - b**2)
         assert approx(f0) == (x + c, y)
         assert approx(f1) == (x - c, y)
 
     def test_vertical_negative(self):
         x, y, a, b, r = 10, 5, 10, 20, 0
         f0, f1 = ret._ellipse_centre_to_focus(x, y, a, b, r)
-        c = math.sqrt(b ** 2 - a ** 2)
+        c = math.sqrt(b**2 - a**2)
         assert approx(f0) == (x, y + c)
         assert approx(f1) == (x, y - c)
 
@@ -593,8 +593,12 @@ class TestGetEllipseModelRansac:
         )
 
         for iy, ix in np.ndindex(xf.shape):
-            assert np.isclose(xf[iy, ix],ellipse_array0[iy, ix][1],atol=1e-8,rtol=1e-3)
-            assert np.isclose(yf[iy, ix],ellipse_array0[iy, ix][0],atol=1e-8,rtol=1e-3)
+            assert np.isclose(
+                xf[iy, ix], ellipse_array0[iy, ix][1], atol=1e-8, rtol=1e-3
+            )
+            assert np.isclose(
+                yf[iy, ix], ellipse_array0[iy, ix][0], atol=1e-8, rtol=1e-3
+            )
             assert inlier_array0[iy, ix].all()
             assert ellipse_array1[iy, ix] is None
             assert inlier_array1[iy, ix] is None
@@ -1033,8 +1037,8 @@ class TestDetermineEllipse:
             mask = None
         t = np.ones((100, 100))
         x, y = np.ogrid[-45:55, -50:50]
-        t[x ** 2 + (y * 1.15) ** 2 < 40 ** 2] = 100
-        t[x ** 2 + (y * 1.15) ** 2 < 30 ** 2] = 1
+        t[x**2 + (y * 1.15) ** 2 < 40**2] = 100
+        t[x**2 + (y * 1.15) ** 2 < 30**2] = 1
         t = t + np.random.random((100, 100))
         center, affine = ret.determine_ellipse(t, mask=mask, use_ransac=ransac)
 
@@ -1092,8 +1096,8 @@ class TestDetermineEllipse:
     def test_get_max_pos(self):
         t = np.ones((100, 100))
         x, y = np.ogrid[-45:55, -50:50]
-        t[x ** 2 + (y * 1.15) ** 2 < 40 ** 2] = 100
-        t[x ** 2 + (y * 1.15) ** 2 < 30 ** 2] = 1
+        t[x**2 + (y * 1.15) ** 2 < 40**2] = 100
+        t[x**2 + (y * 1.15) ** 2 < 30**2] = 1
         t = t + np.random.random((100, 100))
         s = Signal2D(t)
         pos = ret._get_max_positions(s, num_points=100)

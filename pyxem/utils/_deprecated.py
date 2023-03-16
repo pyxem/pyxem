@@ -50,7 +50,6 @@ class deprecated:
         alternative_is_function: bool = True,
         removal: Union[str, int, float, None] = None,
     ):
-
         """Visible deprecation warning.
         Parameters
         ----------
