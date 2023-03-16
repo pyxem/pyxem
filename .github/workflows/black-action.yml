@@ -1,6 +1,6 @@
 name: black-action
 
-on: [push, pull_request]
+on: [push] # only run on push to repo.
 
 jobs:
   one:
@@ -13,7 +13,7 @@ jobs:
   linter_name:
     name: runner / black
     runs-on: ubuntu-latest
-    if: github.actor_id == '16704128' # Don't run when target is remote (github.head_ref==github.base_ref)
+    if: github.ref == 'refs/heads/auto_black' || github.ref == 'refs/heads/main' # remove auto_black
     steps:
       - uses: actions/checkout@v2
       - name: Check files using the black formatter
