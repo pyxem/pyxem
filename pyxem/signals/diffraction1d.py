@@ -32,5 +32,4 @@ class Diffraction1D(CommonDiffraction, Signal1D):
 
 
 class LazyDiffraction1D(LazySignal, Diffraction1D):
-
     pass

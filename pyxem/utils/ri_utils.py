@@ -151,7 +151,7 @@ def damp_ri_updated_lorch(z, s_max, s_scale, s_size, s_offset, *args, **kwargs):
     scattering_axis = s_scale * np.arange(s_size, dtype="float64") + s_offset
     exponent_array = 3 * np.ones(scattering_axis.shape)
     cubic_array = np.power(scattering_axis, exponent_array)
-    multiplicative_term = np.divide(3 / (delta ** 3), cubic_array)
+    multiplicative_term = np.divide(3 / (delta**3), cubic_array)
     sine_term = np.sin(delta * scattering_axis) - delta * scattering_axis * np.cos(
         delta * scattering_axis
     )

@@ -191,7 +191,7 @@ class TestSubpixelPeakFinders:
 
 
 def test_xy_errors_in_conventional_xc_method_as_per_issue_490():
-    """ This was the MWE example code for the issue """
+    """This was the MWE example code for the issue"""
     dp = get_simulated_disc(100, 20)
     # translate y by +4
     shifted = np.pad(dp, ((0, 4), (0, 0)), "constant")[4:].reshape(1, 1, *dp.shape)

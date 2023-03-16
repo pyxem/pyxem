@@ -44,8 +44,6 @@ def vdf_generator(diffraction_pattern, diffraction_vectors):
     return VirtualDarkFieldGenerator(diffraction_pattern, diffraction_vectors)
 
 
-
-
 class TestVirtualDarkFieldGenerator:
     def setup(self):
         object1 = np.zeros((5, 5), dtype=bool)
@@ -66,10 +64,7 @@ class TestVirtualDarkFieldGenerator:
 
         data[object2, 4, 7] = 10
 
-        self.vectors = DiffractionVectors2D([[7, 6],
-                                             [3, 2],
-                                             [4, 1],
-                                             [7, 4]])
+        self.vectors = DiffractionVectors2D([[7, 6], [3, 2], [4, 1], [7, 4]])
 
         self.data = Diffraction2D(data)
 
@@ -185,7 +180,7 @@ def test_vi_generator_set_ROI_mesh(diffraction_pattern):
 
 @pytest.mark.parametrize("nav_shape", [[2], [2, 4]])
 def test_vi_generator_get_virtual_images_from_mesh(nav_shape):
-    n = np.prod(nav_shape) * 32 ** 2
+    n = np.prod(nav_shape) * 32**2
     s = Diffraction2D(np.arange(n).reshape((*nav_shape, 32, 32)))
     vi_generator = VirtualImageGenerator(s)
 
@@ -212,7 +207,7 @@ def test_vi_generator_get_virtual_images_from_mesh(nav_shape):
 
 
 def test_vi_generator_get_virtual_images_from_mesh_nav_dim3():
-    s = Diffraction2D(np.arange(2 * 4 * 10 * 32 ** 2).reshape((2, 4, 10, 32, 32)))
+    s = Diffraction2D(np.arange(2 * 4 * 10 * 32**2).reshape((2, 4, 10, 32, 32)))
     for axis in s.axes_manager.signal_axes:
         axis.scale = 0.1
         axis.offset = -1.6

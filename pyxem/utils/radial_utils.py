@@ -461,7 +461,7 @@ def _get_holz_angle(electron_wavelength, lattice_parameter):
     k0 = 1.0 / electron_wavelength
     kz = 1.0 / lattice_parameter
     in_root = kz * ((2 * k0) - kz)
-    sin_angle = (in_root ** 0.5) / k0
+    sin_angle = (in_root**0.5) / k0
     angle = math.asin(sin_angle)
     return angle
 

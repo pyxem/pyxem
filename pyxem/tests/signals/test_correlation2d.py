@@ -101,6 +101,7 @@ class TestGetPower:
     def test_symmetry_stem_max_first(self, flat_pattern, method):
         sym_coeff = flat_pattern.get_symmetry_coefficient(method=method)
         np.testing.assert_array_almost_equal(sym_coeff.data, sym_coeff.data[0, 0, 0, 0])
+
     def test_symmetry_stem_max(self, flat_pattern):
         sym_coeff = flat_pattern.get_symmetry_coefficient(method="max")
         np.testing.assert_array_almost_equal(sym_coeff.data, sym_coeff.data[0, 0, 0, 0])
@@ -117,8 +118,6 @@ class TestGetPower:
             method="average", angular_range=0.01, normalize=True
         )
         assert isinstance(sym_coeff.data, da.Array)
-
-
 
 
 class TestDecomposition:

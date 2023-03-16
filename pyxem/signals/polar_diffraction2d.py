@@ -175,7 +175,11 @@ class PolarDiffraction2D(Signal2D):
 
         return correlation
 
-    @deprecated(since="0.15", removal="1.0.0", alternative="pyxem.signals.PolarDiffraction2D.get_pearson_correlation")
+    @deprecated(
+        since="0.15",
+        removal="1.0.0",
+        alternative="pyxem.signals.PolarDiffraction2D.get_pearson_correlation",
+    )
     def get_pearson_correlation(self, **kwargs):
         return self.get_full_pearson_correlation(**kwargs)
 
@@ -246,5 +250,4 @@ class PolarDiffraction2D(Signal2D):
 
 
 class LazyPolarDiffraction2D(LazySignal, PolarDiffraction2D):
-
     pass

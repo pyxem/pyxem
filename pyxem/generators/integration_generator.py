@@ -128,7 +128,7 @@ def _get_intensities_summation_method(
 
     """
     if not n_max:  # pragma: no cover
-        n_max = box_inner ** 2
+        n_max = box_inner**2
 
     peaks = []
 
