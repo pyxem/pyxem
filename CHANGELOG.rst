@@ -37,6 +37,7 @@ Fixed
 - Fixed error related to `DiffractionSignal2D.apply_affine_transformation` when multiple affine transformations are given. (#870)
 - Bugfix related to Numpy 1.24.0. Strict array creation with dtype=object is needed
   for ragged arrays. (#880 & #881)
+- Bug fix for doubling of inplane rotation in template matching.  (#905 & #853)
 
 
 2022-15-06 - version 0.14.2
