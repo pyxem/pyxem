@@ -12,7 +12,8 @@
     },
     {
       "name":"Carter Francis",
-      "orcid": "0000-0003-2564-1851"
+      "orcid": "0000-0003-2564-1851",
+      "affiliation": "University of Wisconsin Madison"
     },
     {
       "name":"Joonatan Laulainen"
@@ -63,22 +64,23 @@
       "name":"Ida Hjorth"
     },
     {
+      "name":"Shuoyuan Huang",
+      "affiliation": "University of Wisconsin Madison"
+    },
+    {
+      "name":"Endre Jacobsen"
+    },
+    {
       "name":"Mohsen Danaie"
     },
     {
       "name":"Andrew Herzing"
     },
     {
-      "name":"Endre Jacobsen"
-    },
-    {
       "name":"Tim Poon"
     },
     {
       "name": "Tiarnan Doherty"
-    },
-    {
-      "name":"Shuoyuan Huang"
     },
     {
       "name":"Jedrzej Morzy"
@@ -90,10 +92,17 @@
       "name":"Tomas Ostasevicius"
     },
     {
+      "name": "Tor Inge Thorsen",
+      "affiliation": "Norwegian University of Science and Technology"
+    },
+    {
       "name":"Matt von Lany"
     },
     {
       "name":"Rob Tovey"
+    },
+    {
+      "name": "Sivert Dagenborg"
     }
   ]
 }

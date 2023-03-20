@@ -34,9 +34,10 @@ credits = [
     "Jedrzej Morzy",
     "Affan Iqbal",
     "Tomas Ostasevicius",
-    "Tor Inge",
+    "Tor Inge Thorsen",
     "Matt von Lany",
     "Rob Tovey",
+    "Sivert Dagenborg",
 ]
 license = "GPLv3"
 maintainer = "Duncan Johnstone, Phillip Crout, Magnus Nord, Carter Francis"
