@@ -1,5 +1,5 @@
 name = "pyxem"
-version = "0.14.2"
+version = "0.15.0"
 author = "Duncan Johnstone, Phillip Crout, Magnus Nord"
 copyright = "Copyright 2016-2023, The pyxem developers"
 # Contributors listed by original commiter, maintainers, then other
@@ -25,17 +25,19 @@ credits = [
     "Tom Furnival",
     "Daen Jannis",
     "Ida Hjorth",
+    "Shuoyuan Huang",
+    "Endre Jacobsen",
     "Mohsen Danaie",
     "Andrew Herzing",
-    "Endre Jacobsen",
     "Tim Poon",
     "Tiarnan Doherty",
-    "Shuoyuan Huang",
     "Jedrzej Morzy",
     "Affan Iqbal",
     "Tomas Ostasevicius",
+    "Tor Inge Thorsen",
     "Matt von Lany",
     "Rob Tovey",
+    "Sivert Dagenborg",
 ]
 license = "GPLv3"
 maintainer = "Duncan Johnstone, Phillip Crout, Magnus Nord, Carter Francis"
