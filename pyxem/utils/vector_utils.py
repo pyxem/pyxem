@@ -336,6 +336,10 @@ def filter_vectors_near_basis(vectors, basis, distance=None):
     closest_vectors: array-like
         An array of vectors which are the closest to the basis considered.
     """
+    if len(vectors) == 0:
+        vectors = np.empty(basis.shape)
+        vectors[:, :]=np.nan
+        return vectors
     distance_mat = cdist(vectors, basis)
     closest_index = np.argmin(distance_mat, axis=0)
     min_distance = distance_mat[closest_index, np.arange(len(basis), dtype=int)]
