@@ -156,3 +156,7 @@ class VirtualDarkFieldImage(Signal2D):
         n.name = "n"
         n.units = "number"
         return vdfsegs
+
+
+class LazyVirtualDarkFieldImage(LazySignal, VirtualDarkFieldImage):
+    pass
