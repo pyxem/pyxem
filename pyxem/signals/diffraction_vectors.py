@@ -145,7 +145,10 @@ class DiffractionVectors(BaseSignal):
             self.metadata.VectorMetadata["scales"] = _scales
         if _offsets is not None or "offsets" not in self.metadata.VectorMetadata:
             self.metadata.VectorMetadata["offsets"] = _offsets
-        if _detector_shape is not None or "detector_shape" not in self.metadata.VectorMetadata:
+        if (
+            _detector_shape is not None
+            or "detector_shape" not in self.metadata.VectorMetadata
+        ):
             self.metadata.VectorMetadata["detector_shape"] = _detector_shape
         self.cartesian = None
         self.hkls = None
@@ -172,12 +175,16 @@ class DiffractionVectors(BaseSignal):
             List of diffraction vectors
         """
         gvectors = peaks.map(
-            peaks_as_gvectors, center=center, calibration=calibration, inplace=False, ragged=True
+            peaks_as_gvectors,
+            center=center,
+            calibration=calibration,
+            inplace=False,
+            ragged=True,
         )
         vectors = cls(gvectors)
         vectors.scales = calibration
         print(vectors.metadata)
-        vectors.is_real_units =True
+        vectors.is_real_units = True
         return vectors
 
     @property
@@ -197,10 +204,14 @@ class DiffractionVectors(BaseSignal):
         if isiterable(value) and len(value) == self.num_columns:
             self.metadata.VectorMetadata["scales"] = value
         elif isiterable(value) and len(value) != self.num_columns:
-            raise ValueError("The len of the scales parameter must equal the number of"
-                             "columns in the underlying vector data.")
+            raise ValueError(
+                "The len of the scales parameter must equal the number of"
+                "columns in the underlying vector data."
+            )
         else:
-            self.metadata.VectorMetadata["scales"] = [value, ]*self.num_columns
+            self.metadata.VectorMetadata["scales"] = [
+                value,
+            ] * self.num_columns
 
     @property
     def offsets(self):
@@ -211,12 +222,14 @@ class DiffractionVectors(BaseSignal):
         if isiterable(value) and len(value) == self.num_columns:
             self.metadata.VectorMetadata["offsets"] = value
         elif isiterable(value) and len(value) != self.num_columns:
-            raise ValueError("The len of the scales parameter must equal the number of"
-                             "columns in the underlying vector data.")
+            raise ValueError(
+                "The len of the scales parameter must equal the number of"
+                "columns in the underlying vector data."
+            )
         else:
-            self.metadata.VectorMetadata["offsets"] = [value, ] * self.num_columns
-
-
+            self.metadata.VectorMetadata["offsets"] = [
+                value,
+            ] * self.num_columns
 
     @property
     @deprecated(

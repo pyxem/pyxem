@@ -406,6 +406,5 @@ class SubpixelrefinementGenerator:
     def local_gaussian_method(self, square_size):
         """Removed in v0.13, please install a version prior to v.0.13 to use."""
         raise NotImplementedError(
-
             "This functionality was removed in v.0.13.0, please use another method"
         )

@@ -39,7 +39,6 @@ class VirtualDarkFieldImage(Signal2D):
         if _vectors is not None or "Vectors" not in self.metadata:
             self.vectors = kwargs.pop("vectors", None)
 
-
     @property
     def vectors(self):
         return self.metadata.Vectors

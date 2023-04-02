@@ -338,7 +338,7 @@ def filter_vectors_near_basis(vectors, basis, distance=None):
     """
     if len(vectors) == 0:
         vectors = np.empty(basis.shape)
-        vectors[:, :]=np.nan
+        vectors[:, :] = np.nan
         return vectors
     distance_mat = cdist(vectors, basis)
     closest_index = np.argmin(distance_mat, axis=0)
