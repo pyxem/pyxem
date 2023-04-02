@@ -30,7 +30,6 @@ from pyxem.utils.vector_utils import get_angle_cartesian_vec
 from pyxem.utils.vector_utils import filter_vectors_near_basis
 
 
-
 def test_calculate_norms():
     norms = calculate_norms([[3, 4], [6, 8]])
     assert np.allclose(norms, [5, 10])
@@ -142,7 +141,7 @@ def test_filter_near_basis():
 
     shifts = np.random.rand(10, 2)
     dist = np.linalg.norm(shifts, axis=1)
-    shifted = basis_vectors+shifts
+    shifted = basis_vectors + shifts
     filt = filter_vectors_near_basis(shifted, basis_vectors, distance=0.4)
     is_nan = np.isnan(filt).sum(axis=1) > 0
     np.testing.assert_array_equal(is_nan, dist > 0.4)
@@ -150,8 +149,7 @@ def test_filter_near_basis():
 
 def test_basis_filter_no_vectors():
     basis_vectors = np.random.randint(0, 100, (10, 2))
-    vectors = np.empty((0,2))
+    vectors = np.empty((0, 2))
     filt = filter_vectors_near_basis(vectors, basis_vectors, distance=0.4)
     is_nan = np.isnan(filt).sum(axis=1) > 0
     np.testing.assert_array_equal(is_nan, True)
-
