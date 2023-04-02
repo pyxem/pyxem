@@ -128,8 +128,12 @@ def _get_pixel_vectors(dp, vectors, calibration, center):
         for index in np.ndindex(dp.axes_manager.navigation_shape):
             islice = np.s_[index]
             vec = vector_pixels.inav[islice].data[0]
-            temp_min = vec.flatten().min()
-            temp_max = vec.flatten().max()
+            if len(vec) == 0:
+                temp_min = 0
+                temp_max = 0
+            else:
+                temp_min = vec.flatten().min()
+                temp_max = vec.flatten().max()
             if min_value > temp_min:
                 min_value = temp_min
             if max_value < temp_max:
