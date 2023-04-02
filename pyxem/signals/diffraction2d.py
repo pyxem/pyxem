@@ -916,10 +916,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         self,
         threshold=None,
         mask=None,
-        lazy_result=None,
         lazy_output=False,
         show_progressbar=True,
         chunk_calculations=None,
+        **kwargs,
     ):
         """Get the centre of the STEM diffraction pattern using
         center of mass. Threshold can be set to only use the most
@@ -985,7 +985,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         data = dt._center_of_mass_array(
             dask_array, threshold_value=threshold, mask_array=mask_array
         )
-        if lazy_result:
+        if lazy_output:
             if nav_dim == 2:
                 s_com = LazyDPCSignal2D(data)
             elif nav_dim == 1:
