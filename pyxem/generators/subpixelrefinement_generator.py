@@ -396,6 +396,9 @@ class SubpixelrefinementGenerator:
             ragged=True,
         )
         self.vectors_out.set_signal_type("diffraction_vectors")
+        self.vectors_out.scales = self.vectors_init.scales
+        self.vectors_out.offsets = self.vectors_init.offsets
+        self.vectors_out.detector_shape = self.vectors_init.detector_shape
 
         self.last_method = "center_of_mass_method"
         return self.vectors_out
@@ -403,5 +406,6 @@ class SubpixelrefinementGenerator:
     def local_gaussian_method(self, square_size):
         """Removed in v0.13, please install a version prior to v.0.13 to use."""
         raise NotImplementedError(
+
             "This functionality was removed in v.0.13.0, please use another method"
         )
