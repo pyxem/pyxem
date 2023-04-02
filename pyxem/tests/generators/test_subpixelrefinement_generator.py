@@ -125,7 +125,8 @@ class TestSubpixelPeakFinders:
     both the vectors and the shifts, in both the numpy and the DiffractionVectors
     cases as well as confirming we have avoided 'off by one' errors"""
 
-    def create_dp(self):
+    @pytest.fixture
+    def dp(self):
         z1, z1a = np.zeros((128, 128)), np.zeros((128, 128))
         z2, z2a = np.zeros((128, 128)), np.zeros((128, 128))
 
@@ -142,22 +143,35 @@ class TestSubpixelPeakFinders:
         z1[30, 90], z2[30, 90], z2[100, 60] = 2, 2, 2
         z1a[30, 93], z2a[30, 93], z2a[98, 60] = 10, 10, 10
 
-        self.dp = ElectronDiffraction2D(
+        return ElectronDiffraction2D(
             np.asarray([[z1, z1a], [z2, z2a]])
         )  # this needs to be in 2x2
 
-    def create_diffraction_vectors(self):
+    @pytest.fixture
+    def diffraction_vectors(self):
         v1 = np.array([[90 - 64, 30 - 64]])
         v2 = np.array([[90 - 64, 30 - 64], [100 - 64, 60 - 64]])
-        self.diffraction_vectors = DiffractionVectors(
+        return DiffractionVectors(
             np.array([[v1, v1], [v2, v2]], dtype=object),
             ragged=True,
         )
 
-    def setup_method(self):
-        self.create_dp()
-        self.create_diffraction_vectors()
-        self.sprg = SubpixelrefinementGenerator(self.dp, self.diffraction_vectors)
+    @pytest.fixture
+    def diffraction_vectors_1_empty(self):
+        v1 = np.empty((0, 2))
+        v2 = np.array([[90 - 64, 30 - 64], [100 - 64, 60 - 64]])
+        return DiffractionVectors(
+            np.array([[v1, v1], [v2, v2]], dtype=object),
+            ragged=True,
+        )
+
+    @pytest.fixture
+    def sprg(self, dp, diffraction_vectors):
+        return SubpixelrefinementGenerator(dp, diffraction_vectors)
+
+    @pytest.fixture
+    def sprg_empty(self, dp, diffraction_vectors_1_empty):
+        return SubpixelrefinementGenerator(dp, diffraction_vectors_1_empty)
 
     def no_shift_case(self, s):
         error = s.data[0, 0] - np.asarray([[90 - 64, 30 - 64]])
@@ -170,24 +184,32 @@ class TestSubpixelPeakFinders:
         assert rms_error < 0.5  # correct to within a pixel
 
     @pytest.mark.skip(reason="Broken downstream in scikit image")
-    def test_assertioned_xc(self):
-        sprg = self.sprg
+    def test_assertioned_xc(self, sprg):
         subpixelsfound = sprg.conventional_xc(12, 4, 8)
         self.no_shift_case(subpixelsfound)
         self.x_shift_case(subpixelsfound)
 
-    def test_assertioned_com(self):
-        sprg = self.sprg
+    def test_assertioned_com(self, sprg):
         vector_refine = sprg.center_of_mass_method(12)
         self.no_shift_case(vector_refine)
         self.x_shift_case(vector_refine)
 
-    def test_log(self):
+    def test_assertioned_com_empty(self, sprg_empty):
+        vector_refine = sprg_empty.center_of_mass_method(12)
+        assert isinstance(vector_refine, DiffractionVectors)
+
+    def test_failure_out_of_bounds(self, dp):
+        v = [[1000, 100]]
+        vectors = np.array([[v, v], [v, v]])
+        with pytest.raises(ValueError):
+            SubpixelrefinementGenerator(dp, vectors)
+
+    def test_log(self, sprg):
         with pytest.raises(
             NotImplementedError,
             match="This functionality was removed in v.0.13.0",
         ):
-            _ = self.sprg.local_gaussian_method(12)
+            _ = sprg.local_gaussian_method(12)
 
 
 def test_xy_errors_in_conventional_xc_method_as_per_issue_490():

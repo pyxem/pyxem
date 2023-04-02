@@ -183,7 +183,6 @@ class DiffractionVectors(BaseSignal):
         )
         vectors = cls(gvectors)
         vectors.scales = calibration
-        print(vectors.metadata)
         vectors.is_real_units = True
         return vectors
 

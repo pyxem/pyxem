@@ -21,6 +21,7 @@ import numpy as np
 from sklearn.cluster import DBSCAN
 
 from hyperspy.signals import Signal2D
+from hyperspy.signal import BaseSignal
 
 from pyxem.signals import DiffractionVectors, DiffractionVectors2D, DiffractionVectors1D
 
@@ -119,6 +120,51 @@ def test_get_cartesian_coordinates(diffraction_vectors_map):
         diffraction_vectors_map.axes_manager[0].name
         == diffraction_vectors_map.cartesian.axes_manager[0].name
     )
+
+
+class TestInitVectors:
+    def test_from_peaks(self):
+        vectors = np.random.randint(0, 100, (2, 2, 10, 2))
+        vectors = np.empty((2, 2), dtype=object)
+        vectors[0, 0] = np.random.randint(0, 100, (5, 2))
+        vectors[0, 1] = np.random.randint(0, 100, (6, 2))
+        vectors[1, 0] = np.random.randint(0, 100, (7, 2))
+        vectors[1, 1] = np.random.randint(0, 100, (8, 2))
+
+        peaks = BaseSignal(vectors, ragged=True)
+
+        dv = DiffractionVectors.from_peaks(
+            peaks,
+            center=(50, 50),
+            calibration=0.1,
+        )
+
+        for i in np.ndindex((2, 2)):
+            np.testing.assert_array_equal((vectors[i] - 50) * 0.1, dv.data[i])
+        assert dv.scales == [0.1, 0.1]
+
+    def test_initial_metadat(self, diffraction_vectors_map):
+        assert diffraction_vectors_map.scales is None
+        assert diffraction_vectors_map.metadata.VectorMetadata["scales"] == None
+
+        assert diffraction_vectors_map.offsets is None
+        assert diffraction_vectors_map.metadata.VectorMetadata["offsets"] == None
+
+        assert diffraction_vectors_map.detector_shape is None
+        assert diffraction_vectors_map.metadata.VectorMetadata["detector_shape"] == None
+
+    def test_setting_metadat(self, diffraction_vectors_map):
+        diffraction_vectors_map.scales = 0.1
+        assert diffraction_vectors_map.metadata.VectorMetadata["scales"] == [0.1, 0.1]
+
+        diffraction_vectors_map.offsets = 1
+        assert diffraction_vectors_map.metadata.VectorMetadata["offsets"] == [1, 1]
+
+        diffraction_vectors_map.detector_shape = [100, 100]
+        assert diffraction_vectors_map.metadata.VectorMetadata["detector_shape"] == [
+            100,
+            100,
+        ]
 
 
 class TestConvertVectors:
