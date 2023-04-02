@@ -396,9 +396,13 @@ class SubpixelrefinementGenerator:
             ragged=True,
         )
         self.vectors_out.set_signal_type("diffraction_vectors")
-        self.vectors_out.scales = self.vectors_init.scales
-        self.vectors_out.offsets = self.vectors_init.offsets
-        self.vectors_out.detector_shape = self.vectors_init.detector_shape
+        if not isinstance(self.vectors_init, DiffractionVectors):
+            self.vectors_out.scales = 1
+            self.vectors_out.offsets = 0
+        else:
+            self.vectors_out.scales = self.vectors_init.scales
+            self.vectors_out.offsets = self.vectors_init.offsets
+            self.vectors_out.detector_shape = self.vectors_init.detector_shape
 
         self.last_method = "center_of_mass_method"
         return self.vectors_out
