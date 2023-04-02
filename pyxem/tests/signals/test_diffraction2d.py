@@ -1123,7 +1123,6 @@ class TestDiffraction2DPeakPositionRefinement:
 
 
 class TestSubtractingDiffractionBackground:
-
     method1 = ["difference of gaussians", "median kernel", "radial median", "h-dome"]
 
     def setup(self):
