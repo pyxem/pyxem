@@ -27,6 +27,7 @@ from sklearn.cluster import DBSCAN
 
 from hyperspy.signals import BaseSignal, Signal1D
 from hyperspy.drawing._markers.point import Point
+from hyperspy.misc.utils import isiterable
 
 from pyxem.utils.signal import (
     transfer_navigation_axes,
@@ -43,7 +44,7 @@ from pyxem.utils.vector_utils import (
 )
 from pyxem.utils.expt_utils import peaks_as_gvectors
 from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
-from pyxem.signals.diffraction_vectors1d import DiffractionVectors1D
+from pyxem.utils._deprecated import deprecated
 
 """
 Signal class for diffraction vectors.
@@ -134,12 +135,24 @@ class DiffractionVectors(BaseSignal):
     _signal_type = "diffraction_vectors"
 
     def __init__(self, *args, **kwargs):
-        self.column_scale = kwargs.pop("column_scale", None)
-        self.column_offsets = kwargs.pop("column_offsets", None)
-        self.detector_shape = kwargs.pop("detector_shape", None)
+        _scales = kwargs.pop("scales", None)
+        _offsets = kwargs.pop("offsets", None)
+        _detector_shape = kwargs.pop("detector_shape", None)
         super().__init__(*args, **kwargs)
+
+        self.metadata.add_node("VectorMetadata")
+        if _scales is not None or not "scales" in self.metadata.VectorMetadata:
+            self.metadata.VectorMetadata["scales"] = _scales
+        if _offsets is not None or "offsets" not in self.metadata.VectorMetadata:
+            self.metadata.VectorMetadata["offsets"] = _offsets
+        if (
+            _detector_shape is not None
+            or "detector_shape" not in self.metadata.VectorMetadata
+        ):
+            self.metadata.VectorMetadata["detector_shape"] = _detector_shape
         self.cartesian = None
         self.hkls = None
+        self.is_real_units = False
 
     @classmethod
     def from_peaks(cls, peaks, center, calibration):
@@ -162,12 +175,86 @@ class DiffractionVectors(BaseSignal):
             List of diffraction vectors
         """
         gvectors = peaks.map(
-            peaks_as_gvectors, center=center, calibration=calibration, inplace=False
+            peaks_as_gvectors,
+            center=center,
+            calibration=calibration,
+            inplace=False,
+            ragged=True,
         )
-
         vectors = cls(gvectors)
-        vectors.transpose(signal_axes=0)
+        vectors.scales = calibration
+        vectors.is_real_units = True
         return vectors
+
+    @property
+    def num_columns(self):
+        shape = self.data[self.data.ndim * (0,)].shape
+        if shape is None:
+            return 0
+        else:
+            return shape[1]
+
+    @property
+    def scales(self):
+        return self.metadata.VectorMetadata["scales"]
+
+    @scales.setter
+    def scales(self, value):
+        if isiterable(value) and len(value) == self.num_columns:
+            self.metadata.VectorMetadata["scales"] = value
+        elif isiterable(value) and len(value) != self.num_columns:
+            raise ValueError(
+                "The len of the scales parameter must equal the number of"
+                "columns in the underlying vector data."
+            )
+        else:
+            self.metadata.VectorMetadata["scales"] = [
+                value,
+            ] * self.num_columns
+
+    @property
+    def offsets(self):
+        return self.metadata.VectorMetadata["offsets"]
+
+    @offsets.setter
+    def offsets(self, value):
+        if isiterable(value) and len(value) == self.num_columns:
+            self.metadata.VectorMetadata["offsets"] = value
+        elif isiterable(value) and len(value) != self.num_columns:
+            raise ValueError(
+                "The len of the scales parameter must equal the number of"
+                "columns in the underlying vector data."
+            )
+        else:
+            self.metadata.VectorMetadata["offsets"] = [
+                value,
+            ] * self.num_columns
+
+    @property
+    @deprecated(
+        since="0.15",
+        alternative="pyxem.signals.DiffractionVectors.scales",
+        removal="1.0.0",
+    )
+    def pixel_calibration(self):
+        return self.scales
+
+    @pixel_calibration.setter
+    @deprecated(
+        since="0.15",
+        alternative="pyxem.signals.DiffractionVectors.scales",
+        removal="1.0.0",
+    )
+    def pixel_calibration(self, value):
+        self.scales = value
+
+    @property
+    def detector_shape(self):
+        return self.metadata.VectorMetadata["detector_shape"]
+
+    @detector_shape.setter
+    def detector_shape(self, value):
+        self.metadata.VectorMetadata["detector_shape"] = value
 
     def _get_navigation_positions(self, flatten=False, real_units=True):
         nav_indexes = np.array(
@@ -231,19 +318,19 @@ class DiffractionVectors(BaseSignal):
             scales = [1 for a in self.axes_manager.navigation_axes]
             offsets = [0 for a in self.axes_manager.navigation_axes]
 
-        if self.column_offsets is None:
+        if self.offsets is None:
             column_offsets = [
                 None,
             ] * (vectors.shape[1] - len(self.axes_manager.navigation_axes))
         else:
-            column_offsets = self.column_offsets
+            column_offsets = self.offsets
 
-        if self.column_scale is None:
+        if self.scales is None:
             column_scale = [
                 None,
             ] * (vectors.shape[1] - len(self.axes_manager.navigation_axes))
         else:
-            column_scale = self.column_scale
+            column_scale = self.scales
 
         column_offsets = np.append(column_offsets, offsets)
         column_scale = np.append(column_scale, scales)
@@ -387,8 +474,8 @@ class DiffractionVectors(BaseSignal):
             )
         # Plot the unique vectors
         ax.plot(
-            (unique_vectors.data.T[0] - offset) / scale,
             (unique_vectors.data.T[1] - offset) / scale,
+            (unique_vectors.data.T[0] - offset) / scale,
             "kx",
         )
         plt.tight_layout()
@@ -519,7 +606,8 @@ class DiffractionVectors(BaseSignal):
             The results from the clustering, given as class DBSCAN.
             Only returned if method='DBSCAN' and return_clusters=True.
         """
-        flattened_vectors = self.flatten_diffraction_vectors(real_units=True)
+        real_units = self.is_real_units
+        flattened_vectors = self.flatten_diffraction_vectors(real_units=real_units)
 
         return flattened_vectors.get_unique_vectors(*args, **kwargs)
 
@@ -612,12 +700,12 @@ class DiffractionVectors(BaseSignal):
             Diffraction vectors within allowed detector region.
         """
         x_threshold = (
-            self.pixel_calibration * (self.detector_shape[0] / 2)
-            - self.pixel_calibration * exclude_width
+            self.scales[0] * (self.detector_shape[0] / 2)
+            - self.scales[0] * exclude_width
         )
         y_threshold = (
-            self.pixel_calibration * (self.detector_shape[1] / 2)
-            - self.pixel_calibration * exclude_width
+            self.scales[1] * (self.detector_shape[1] / 2)
+            - self.scales[1] * exclude_width
         )
         filtered_vectors = self.map(
             filter_vectors_edge_ragged,

@@ -28,6 +28,7 @@ from pyxem.signals import (
     DiffractionVectors,
     VDFSegment,
     DiffractionVectors2D,
+    VirtualDarkFieldImage,
 )
 
 
@@ -88,6 +89,10 @@ def vdf_vector_images_seg(vdf_generator_seg):
 
 
 class TestVDFImage:
+    def test_init(self):
+        vdf = VirtualDarkFieldImage(data=np.ones((8, 10, 10)), vectors=unique_vectors)
+        assert isinstance(vdf, VirtualDarkFieldImage)
+
     @pytest.mark.parametrize(
         "min_distance, min_size, max_size,"
         "max_number_of_grains, marker_radius,"

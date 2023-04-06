@@ -20,6 +20,7 @@ import warnings
 import numpy as np
 
 from hyperspy.signals import Signal2D
+from hyperspy._signals.lazy import LazySignal
 
 from pyxem.signals import DiffractionVectors, VDFSegment
 from pyxem.utils.signal import transfer_signal_axes
@@ -32,8 +33,19 @@ class VirtualDarkFieldImage(Signal2D):
     _signal_type = "virtual_dark_field"
 
     def __init__(self, *args, **kwargs):
+        _vectors = kwargs.pop("vectors", None)
         super().__init__(*args, **kwargs)
-        self.vectors = None
+        self.metadata.add_node("Vectors")
+        if _vectors is not None or "Vectors" not in self.metadata:
+            self.vectors = kwargs.pop("vectors", None)
+
+    @property
+    def vectors(self):
+        return self.metadata.Vectors
+
+    @vectors.setter
+    def vectors(self, value):
+        self.metadata.Vectors = value
 
     def get_vdf_segments(
         self,
@@ -156,3 +168,7 @@ class VirtualDarkFieldImage(Signal2D):
         n.name = "n"
         n.units = "number"
         return vdfsegs
+
+
+class LazyVirtualDarkFieldImage(LazySignal, VirtualDarkFieldImage):
+    pass

@@ -128,8 +128,12 @@ def _get_pixel_vectors(dp, vectors, calibration, center):
         for index in np.ndindex(dp.axes_manager.navigation_shape):
             islice = np.s_[index]
             vec = vector_pixels.inav[islice].data[0]
-            temp_min = vec.flatten().min()
-            temp_max = vec.flatten().max()
+            if len(vec) == 0:
+                temp_min = 0
+                temp_max = 0
+            else:
+                temp_min = vec.flatten().min()
+                temp_max = vec.flatten().max()
             if min_value > temp_min:
                 min_value = temp_min
             if max_value < temp_max:
@@ -392,6 +396,13 @@ class SubpixelrefinementGenerator:
             ragged=True,
         )
         self.vectors_out.set_signal_type("diffraction_vectors")
+        if not isinstance(self.vectors_init, DiffractionVectors):
+            self.vectors_out.scales = 1
+            self.vectors_out.offsets = 0
+        else:
+            self.vectors_out.scales = self.vectors_init.scales
+            self.vectors_out.offsets = self.vectors_init.offsets
+            self.vectors_out.detector_shape = self.vectors_init.detector_shape
 
         self.last_method = "center_of_mass_method"
         return self.vectors_out
