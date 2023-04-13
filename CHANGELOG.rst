@@ -16,10 +16,8 @@ Fixed
 - Fixed type error in ``separate_watershed`` with scikit-image 0.21 (#921)
 
 
-
 2023-04-06 - version 0.15.0
 ===========================
-
 
 Added
 -----
@@ -54,7 +52,7 @@ Fixed
 - Bug fix for passing vector attributes when signal is copied or changed.
 
 
-2022-15-06 - version 0.14.2
+2022-06-15 - version 0.14.2
 ===========================
 
 Changed
@@ -67,7 +65,7 @@ Fixed
 - Fix bug in `get_DisplacementGradientMap` (#852)
 - Fix template matching bugs (originally fixed in #771 but omitted from 0.14 series by accident)
 
-2022-29-04 - version 0.14.1
+2022-04-29 - version 0.14.1
 ===========================
 
 Added
@@ -101,10 +99,10 @@ Changed
 ^^^^^^^
 - For developers: HyperSpy's `.map` function will now be used to process big datasets, instead of pyXem's `process_dask_array`
 
-2022-29-04 - version 0.14.0
+2022-04-29 - version 0.14.0
 ===========================
 
-The code contained in this version is identical to 0.14.1, the release was 
+The code contained in this version is identical to 0.14.1, the release was
 recreated to fix an error with the Zenodo files.
 
 
