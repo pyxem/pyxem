@@ -11,6 +11,16 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ==========
 
+Fixed
+-----
+- Fixed type error in ``separate_watershed`` with scikit-image 0.21 (#921)
+
+
+
+2023-04-06 - version 0.15.0
+===========================
+
+
 Added
 -----
 - Added damp_extrapolate_to_zero to ReducedIntensity1D
