@@ -197,7 +197,7 @@ class TestVDFSegment:
         data[object2, 1, 4] = 9
         data[object2, 4, 7] = 10
 
-        self.vectors = DiffractionVectors2D([[7, 6], [3, 2], [4, 1], [7, 4]])
+        self.vectors = DiffractionVectors2D([[6, 7], [2, 3], [1, 4], [4, 7]])
 
         self.data = Diffraction2D(data)
 
@@ -212,7 +212,6 @@ class TestVDFSegment:
         np.testing.assert_array_almost_equal(ncc.data[:2, :2], np.ones((2, 2)))
         np.testing.assert_array_almost_equal(ncc.data[2:, 2:], np.ones((2, 2)))
 
-        print(ncc.data)
 
     @pytest.mark.parametrize(
         "corr_threshold, vector_threshold," "segment_threshold",
