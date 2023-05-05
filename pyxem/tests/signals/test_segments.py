@@ -212,7 +212,6 @@ class TestVDFSegment:
         np.testing.assert_array_almost_equal(ncc.data[:2, :2], np.ones((2, 2)))
         np.testing.assert_array_almost_equal(ncc.data[2:, 2:], np.ones((2, 2)))
 
-
     @pytest.mark.parametrize(
         "corr_threshold, vector_threshold," "segment_threshold",
         [(0.1, 1, 1), (0.9, 3, 2)],
