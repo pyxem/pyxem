@@ -123,7 +123,9 @@ def separate_watershed(
     """
 
     # Create a mask from the input VDF image.
-    if threshold:
+    if not isinstance(threshold, bool):
+        mask = vdf_temp > np.max(vdf_temp) * threshold
+    elif threshold:
         th = threshold_li(vdf_temp)
         mask = vdf_temp > th
     else:
