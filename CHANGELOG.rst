@@ -14,6 +14,7 @@ Unreleased
 Fixed
 -----
 - Fixed type error in ``separate_watershed`` with scikit-image 0.21 (#921)
+- Fixed VDF creation from peaks using generators.VirtualDarkFieldGenerator.get_virtual_dark_field_images (#926)
 
 
 2023-04-06 - version 0.15.0
