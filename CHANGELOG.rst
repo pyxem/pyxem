@@ -11,10 +11,15 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ==========
 
+
+2023-05-08 - version 0.15.1
+===========================
+
 Fixed
 -----
 - Fixed type error in ``separate_watershed`` with scikit-image 0.21 (#921)
 - Fixed VDF creation from peaks using generators.VirtualDarkFieldGenerator.get_virtual_dark_field_images (#926)
+- Updating and correcting Zenodo (#924)
 
 
 2023-04-06 - version 0.15.0
