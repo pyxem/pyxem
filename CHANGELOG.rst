@@ -20,6 +20,7 @@ Fixed
 - Fixed type error in ``separate_watershed`` with scikit-image 0.21 (#921)
 - Fixed VDF creation from peaks using generators.VirtualDarkFieldGenerator.get_virtual_dark_field_images (#926)
 - Updating and correcting Zenodo (#924)
+- Bug fix for center_direct_beam and `half_square_width` (#928 Thanks to @PVacek )
 
 
 2023-04-06 - version 0.15.0
