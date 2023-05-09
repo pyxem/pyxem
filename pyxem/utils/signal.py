@@ -94,11 +94,11 @@ def transfer_navigation_axes(new_signal, old_signal):
     return new_signal
 
 
-def index2value(index, signal_axis):
+def value2index(index, signal_axis):
     if isinstance(index, int):
         return index
     else:
-        return signal_axis.index2value(index)
+        return signal_axis.value2index(index)
 
 
 def transfer_navigation_axes_to_signal_axes(new_signal, old_signal):
