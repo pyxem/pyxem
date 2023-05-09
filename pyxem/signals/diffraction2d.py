@@ -611,7 +611,12 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         name="lazy_result", since="0.14", removal="1.0.0", alternative="lazy_output"
     )
     def get_direct_beam_position(
-        self, method, lazy_output=None, signal_slice=None,half_square_width=None, **kwargs
+        self,
+        method,
+        lazy_output=None,
+        signal_slice=None,
+        half_square_width=None,
+        **kwargs,
     ):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern. Returns the shifts required to center the
@@ -654,8 +659,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         """
         if half_square_width is not None and signal_slice is not None:
-            raise ValueError("Only one of `signal_slice` or `half_sqare_width` "
-                             "can be defined")
+            raise ValueError(
+                "Only one of `signal_slice` or `half_sqare_width` " "can be defined"
+            )
         elif half_square_width is not None:
             signal_shape = self.axes_manager.signal_shape
             signal_center = np.array(signal_shape) / 2
@@ -666,7 +672,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             sig_slice = (min_x, max_x, min_y, max_y)
             signal_slice = sig_slice  # set signal slice for cropping
 
-        if signal_slice is not None: # Crop the data
+        if signal_slice is not None:  # Crop the data
             sig_axes = self.axes_manager.signal_axes
             low_x, high_x, low_y, high_y = signal_slice
             # Convert floats to indexes

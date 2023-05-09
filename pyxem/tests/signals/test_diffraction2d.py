@@ -775,10 +775,12 @@ class TestGetDirectBeamPosition:
     def test_fail_get_direct_beam(self):
         with pytest.raises(ValueError):
             s = self.s
-            s_shift = s.get_direct_beam_position(method="blur",
-                                                 sigma=2,
-                                                 signal_slice=(5,8,5,8),
-                                                 half_square_width=1,)
+            s_shift = s.get_direct_beam_position(
+                method="blur",
+                sigma=2,
+                signal_slice=(5, 8, 5, 8),
+                half_square_width=1,
+            )
 
     def test_center_of_mass(self):
         dx, dy = self.dx, self.dy
@@ -979,9 +981,7 @@ class TestCenterDirectBeam:
         s1 = s.deepcopy()
         s.center_direct_beam(method="blur", sigma=1)
         assert (s.data[:, :, 100, 100] == 1000).all()
-        s1.center_direct_beam(method="blur",
-                              sigma=1,
-                              half_square_width=5)
+        s1.center_direct_beam(method="blur", sigma=1, half_square_width=5)
         assert (s1.data[:, :, 100, 100] == 9).all()
 
     def test_align_kwargs(self):
