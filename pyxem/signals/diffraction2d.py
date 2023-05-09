@@ -645,6 +645,12 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             A tuple defining the (low_x,high_x, low_y, high_y) to slice the data before
             finding the direct beam. Equivalent to
             s.isig[low_x:high_x, low_y:high_y].get_direct_beam_position()+[low_x,low_y])
+        half_square_width : int
+            Half the side length of square that captures the direct beam in all
+            scans. Means that the centering algorithm is stable against
+            diffracted spots brighter than the direct beam. Crops the diffraction
+            pattern to `half_square_width` pixels around th center of the diffraction
+            pattern. Only one of `half_square_width` or signal_slice can be defined.
         **kwargs:
             Additional arguments accepted by :func:`~pyxem.utils.expt_utils.find_beam_center_blur`,
             :func:`~pyxem.utils.expt_utils.find_beam_center_interpolate`,
@@ -784,12 +790,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         method : str {'cross_correlate', 'blur', 'interpolate', 'center_of_mass'}
             Method used to estimate the direct beam position. The direct
             beam position can also be passed directly with the shifts parameter.
-        half_square_width : int
-            Half the side length of square that captures the direct beam in all
-            scans. Means that the centering algorithm is stable against
-            diffracted spots brighter than the direct beam. Crops the diffraction
-            pattern to `half_sqare_width` pixels around th center of the diffraction
-            pattern. Only one of `half_sqaure_width` or signal_slice can be defined.
         shifts : Signal, optional
             The position of the direct beam, which can either be passed with this
             parameter (shifts), or calculated on its own.
@@ -813,6 +813,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             Additional arguments accepted by :func:`~pyxem.utils.expt_utils.find_beam_center_blur`,
             :func:`~pyxem.utils.expt_utils.find_beam_center_interpolate`,
             :func:`~pyxem.utils.expt_utils.find_beam_offset_cross_correlation`,
+            :func:`~pyxem.signals.diffraction2d.Diffraction2D.get_direct_beam_position`,
             and :func:`~pyxem.signals.diffraction2d.Diffraction2D.center_of_mass`,
 
         Example
