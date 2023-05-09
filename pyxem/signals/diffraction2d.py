@@ -72,6 +72,7 @@ from pyxem.utils.dask_tools import (
 )
 from pyxem.utils.signal import (
     select_method_from_method_dict,
+    index2value,
     transfer_navigation_axes,
 )
 import pyxem.utils.pixelated_stem_tools as pst
@@ -654,8 +655,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         if signal_slice is not None:
             sig_axes = self.axes_manager.signal_axes
             low_x, high_x, low_y, high_y = signal_slice
-            low_x, high_x = sig_axes[0].value_range_to_indices(low_x, high_x)
-            low_y, high_y = sig_axes[1].value_range_to_indices(low_y, high_y)
+            low_x = index2value(low_x, sig_axes[0])
+            high_x = index2value(high_x,sig_axes[0])
+            low_y = index2value(low_y, sig_axes[1])
+            high_y = index2value(high_y, sig_axes[1])
             signal = self.isig[low_x:high_x, low_y:high_y]
         else:
             signal = self

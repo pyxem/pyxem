@@ -94,6 +94,13 @@ def transfer_navigation_axes(new_signal, old_signal):
     return new_signal
 
 
+def index2value(index, signal_axis):
+    if isinstance(index, int):
+        return index
+    else:
+        return signal_axis.index2value(index)
+
+
 def transfer_navigation_axes_to_signal_axes(new_signal, old_signal):
     """Transfers navigation axis calibrations from an old signal to the signal
     axes of a new signal produced from it by a method or a generator.
