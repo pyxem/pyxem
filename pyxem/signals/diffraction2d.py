@@ -614,7 +614,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         self, method, lazy_output=None, signal_slice=None, **kwargs
     ):
         """Estimate the direct beam position in each experimentally acquired
-        electron diffraction pattern.
+        electron diffraction pattern. Returns the shifts required to center the
+        diffraction pattern.
 
         Parameters
         ----------
@@ -655,6 +656,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         if signal_slice is not None:
             sig_axes = self.axes_manager.signal_axes
             low_x, high_x, low_y, high_y = signal_slice
+            # Convert floats to indexes
             low_x = value2index(low_x, sig_axes[0])
             high_x = value2index(high_x, sig_axes[0])
             low_y = value2index(low_y, sig_axes[1])
@@ -768,7 +770,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             scans. Means that the centering algorithm is stable against
             diffracted spots brighter than the direct beam. Crops the diffraction
             pattern to `half_sqare_width` pixels around th center of the diffraction
-            pattern.
+            pattern. Only one of `half_sqaure_width` or signal_slice can be defined.
         shifts : Signal, optional
             The position of the direct beam, which can either be passed with this
             parameter (shifts), or calculated on its own.
