@@ -772,6 +772,14 @@ class TestGetDirectBeamPosition:
             )
         assert s.axes_manager.navigation_shape == s_shift.axes_manager.navigation_shape
 
+    def test_fail_get_direct_beam(self):
+        with pytest.raises(ValueError):
+            s = self.s
+            s_shift = s.get_direct_beam_position(method="blur",
+                                                 sigma=2,
+                                                 signal_slice=(5,8,5,8),
+                                                 half_square_width=1,)
+
     def test_center_of_mass(self):
         dx, dy = self.dx, self.dy
         s, x_pos_list, y_pos_list = self.s, self.x_pos_list, self.y_pos_list
