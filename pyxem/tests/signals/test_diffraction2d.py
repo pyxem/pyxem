@@ -772,6 +772,16 @@ class TestGetDirectBeamPosition:
             )
         assert s.axes_manager.navigation_shape == s_shift.axes_manager.navigation_shape
 
+    def test_fail_get_direct_beam(self):
+        with pytest.raises(ValueError):
+            s = self.s
+            s_shift = s.get_direct_beam_position(
+                method="blur",
+                sigma=2,
+                signal_slice=(5, 8, 5, 8),
+                half_square_width=1,
+            )
+
     def test_center_of_mass(self):
         dx, dy = self.dx, self.dy
         s, x_pos_list, y_pos_list = self.s, self.x_pos_list, self.y_pos_list
@@ -959,6 +969,8 @@ class TestCenterDirectBeam:
         # Generating a larger dataset to check that half_square_width
         # works properly with the automatic chunking in dask_tools._get_dask_array
         s = Diffraction2D(np.zeros((10, 10, 200, 200)))
+        s.axes_manager.signal_axes[0].offset = 100
+        s.axes_manager.signal_axes[1].offset = 50
         x_pos_list = np.random.randint(100 - 2, 100 + 2, 10, dtype=np.int16)
         y_pos_list = np.random.randint(100 - 2, 100 + 2, 10, dtype=np.int16)
         for ix in range(len(x_pos_list)):

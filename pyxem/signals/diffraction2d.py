@@ -72,6 +72,7 @@ from pyxem.utils.dask_tools import (
 )
 from pyxem.utils.signal import (
     select_method_from_method_dict,
+    to_hyperspy_index,
     transfer_navigation_axes,
 )
 import pyxem.utils.pixelated_stem_tools as pst
@@ -610,10 +611,16 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         name="lazy_result", since="0.14", removal="1.0.0", alternative="lazy_output"
     )
     def get_direct_beam_position(
-        self, method, lazy_output=None, signal_slice=None, **kwargs
+        self,
+        method,
+        lazy_output=None,
+        signal_slice=None,
+        half_square_width=None,
+        **kwargs,
     ):
         """Estimate the direct beam position in each experimentally acquired
-        electron diffraction pattern.
+        electron diffraction pattern. Returns the shifts required to center the
+        diffraction pattern.
 
         Parameters
         ----------
@@ -638,6 +645,12 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             A tuple defining the (low_x,high_x, low_y, high_y) to slice the data before
             finding the direct beam. Equivalent to
             s.isig[low_x:high_x, low_y:high_y].get_direct_beam_position()+[low_x,low_y])
+        half_square_width : int
+            Half the side length of square that captures the direct beam in all
+            scans. Means that the centering algorithm is stable against
+            diffracted spots brighter than the direct beam. Crops the diffraction
+            pattern to `half_square_width` pixels around th center of the diffraction
+            pattern. Only one of `half_square_width` or signal_slice can be defined.
         **kwargs:
             Additional arguments accepted by :func:`~pyxem.utils.expt_utils.find_beam_center_blur`,
             :func:`~pyxem.utils.expt_utils.find_beam_center_interpolate`,
@@ -651,14 +664,33 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             signal index being the x-shift and the second the y-shift.
 
         """
-        if signal_slice is not None:
+        if half_square_width is not None and signal_slice is not None:
+            raise ValueError(
+                "Only one of `signal_slice` or `half_sqare_width` " "can be defined"
+            )
+        elif half_square_width is not None:
+            signal_shape = self.axes_manager.signal_shape
+            signal_center = np.array(signal_shape) / 2
+            min_x = int(signal_center[0] - half_square_width)
+            max_x = int(signal_center[0] + half_square_width)
+            min_y = int(signal_center[1] - half_square_width)
+            max_y = int(signal_center[1] + half_square_width)
+            signal_slice = (min_x, max_x, min_y, max_y)
+
+        if signal_slice is not None:  # Crop the data
             sig_axes = self.axes_manager.signal_axes
-            low_x, high_x, low_y, high_y = signal_slice
-            low_x, high_x = sig_axes[0].value_range_to_indices(low_x, high_x)
-            low_y, high_y = sig_axes[1].value_range_to_indices(low_y, high_y)
+            sig_axes = np.repeat(sig_axes, 2)
+            low_x, high_x, low_y, high_y = [
+                to_hyperspy_index(ind, ax)
+                for ind, ax in zip(
+                    signal_slice,
+                    sig_axes,
+                )
+            ]
             signal = self.isig[low_x:high_x, low_y:high_y]
         else:
             signal = self
+
         if "lazy_result" in kwargs:
             warnings.warn(
                 "lazy_result was replaced with lazy_output in version 0.14",
@@ -741,7 +773,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
     def center_direct_beam(
         self,
         method=None,
-        half_square_width=None,
         shifts=None,
         return_shifts=False,
         subpixel=True,
@@ -760,12 +791,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         method : str {'cross_correlate', 'blur', 'interpolate', 'center_of_mass'}
             Method used to estimate the direct beam position. The direct
             beam position can also be passed directly with the shifts parameter.
-        half_square_width : int
-            Half the side length of square that captures the direct beam in all
-            scans. Means that the centering algorithm is stable against
-            diffracted spots brighter than the direct beam. Crops the diffraction
-            pattern to `half_sqare_width` pixels around th center of the diffraction
-            pattern.
         shifts : Signal, optional
             The position of the direct beam, which can either be passed with this
             parameter (shifts), or calculated on its own.
@@ -789,6 +814,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             Additional arguments accepted by :func:`~pyxem.utils.expt_utils.find_beam_center_blur`,
             :func:`~pyxem.utils.expt_utils.find_beam_center_interpolate`,
             :func:`~pyxem.utils.expt_utils.find_beam_offset_cross_correlation`,
+            :func:`~pyxem.signals.diffraction2d.Diffraction2D.get_direct_beam_position`,
             and :func:`~pyxem.signals.diffraction2d.Diffraction2D.center_of_mass`,
 
         Example
@@ -818,21 +844,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             )
         if align_kwargs is None:
             align_kwargs = {}
-        signal_shape = self.axes_manager.signal_shape
-        signal_center = np.array(signal_shape) / 2
-        temp_signal = self
 
-        # Cropping the signal around the center alternatively use the signal_slice when
-        # Direct beam is not near the center.
         if shifts is None:
-            if half_square_width is not None:
-                min_x = int(signal_center[0] - half_square_width)
-                max_x = int(signal_center[0] + half_square_width)
-
-                min_y = int(signal_center[1] - half_square_width)
-                max_y = int(signal_center[1] + half_square_width)
-                sig_slice = (min_x, max_x, min_y, max_y)
-                kwargs["signal_slice"] = sig_slice
             shifts = self.get_direct_beam_position(
                 method=method, lazy_output=lazy_output, **kwargs
             )
