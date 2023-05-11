@@ -72,7 +72,7 @@ from pyxem.utils.dask_tools import (
 )
 from pyxem.utils.signal import (
     select_method_from_method_dict,
-    value2index,
+    to_hyperspy_index,
     transfer_navigation_axes,
 )
 import pyxem.utils.pixelated_stem_tools as pst
@@ -675,17 +675,18 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             max_x = int(signal_center[0] + half_square_width)
             min_y = int(signal_center[1] - half_square_width)
             max_y = int(signal_center[1] + half_square_width)
-            sig_slice = (min_x, max_x, min_y, max_y)
-            signal_slice = sig_slice  # set signal slice for cropping
+            signal_slice = (min_x, max_x, min_y, max_y)
 
         if signal_slice is not None:  # Crop the data
             sig_axes = self.axes_manager.signal_axes
-            low_x, high_x, low_y, high_y = signal_slice
-            # Convert floats to indexes
-            low_x = value2index(low_x, sig_axes[0])
-            high_x = value2index(high_x, sig_axes[0])
-            low_y = value2index(low_y, sig_axes[1])
-            high_y = value2index(high_y, sig_axes[1])
+            sig_axes = np.repeat(sig_axes, 2)
+            low_x, high_x, low_y, high_y = [
+                to_hyperspy_index(ind, ax)
+                for ind, ax in zip(
+                    signal_slice,
+                    sig_axes,
+                )
+            ]
             signal = self.isig[low_x:high_x, low_y:high_y]
         else:
             signal = self

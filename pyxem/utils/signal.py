@@ -94,7 +94,7 @@ def transfer_navigation_axes(new_signal, old_signal):
     return new_signal
 
 
-def value2index(index, signal_axis):
+def to_hyperspy_index(index, signal_axis):
     if isinstance(index, int):
         return index
     else:
