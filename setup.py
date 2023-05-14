@@ -82,7 +82,6 @@ setup(
         "dask",
         "diffsims       >= 0.5",
         "hyperspy       >= 1.7.0",  # significant improvements
-        "ipywidgets",
         "lmfit          >= 0.9.12",
         "matplotlib     >= 3.3",
         "numba",
