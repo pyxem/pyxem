@@ -3,7 +3,7 @@ Related projects
 ================
 
 This is a non-exhaustive list of related, open-source projects.  Each project has
-strengths/weaknesses so it is important to see what project is best for your use case.
+strengths/weaknesses, so it is important to see what project is best for your use case.
 
 In the HyperSpy ecosystem
 -------------------------
@@ -31,3 +31,5 @@ Other projects
 - `LiberTEM <https://libertem.github.io/LiberTEM/>`_: Python library for high-throughput
   distributed processing of large-scale binary data sets using a simplified MapReduce
   programming model.
+- `STEMDIFF <https://mirekslouf.github.io/stemdiff/docs/>`_: Python library for
+  converting a 4D-STEM dataset to a 2D-powder diffractogram.

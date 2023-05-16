@@ -1,5 +1,5 @@
 name = "pyxem"
-version = "0.15.1"
+version = "0.16.dev0"
 author = "Duncan Johnstone, Phillip Crout, Magnus Nord"
 copyright = "Copyright 2016-2023, The pyxem developers"
 # Contributors listed by original commiter, maintainers, then other
@@ -39,7 +39,7 @@ credits = [
     "Rob Tovey",
     "Sivert Dagenborg",
 ]
-license = "GPLv3"
+license = "GPLv3+"
 maintainer = "Duncan Johnstone, Phillip Crout, Magnus Nord, Carter Francis"
 email = "pyxem.team@gmail.com"
 status = "development"

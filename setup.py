@@ -82,6 +82,7 @@ setup(
         "dask",
         "diffsims       >= 0.5",
         "hyperspy       >= 1.7.0",  # significant improvements
+        "h5py",
         "ipywidgets",
         "lmfit          >= 0.9.12",
         "matplotlib     >= 3.3",
@@ -93,6 +94,8 @@ setup(
         "scikit-image   >= 0.19.0",
         "scikit-learn   >= 1.0",
         "scipy",
+        "tqdm",
+        "traits",
         "transforms3d",
     ],
     python_requires=">=3.7",
