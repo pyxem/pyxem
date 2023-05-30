@@ -77,7 +77,7 @@ Making changes
 
 Create a new feature branch::
 
-    git checkout master -b your-awesome-feature-name
+    git checkout main -b your-awesome-feature-name
 
 When you've made some changes you can view them with::
 
@@ -95,18 +95,18 @@ The ``-s`` makes sure that you sign your commit with your `GitHub-registered ema
 Keeping your branch up-to-date
 ==============================
 
-Switch to the ``master`` branch::
+Switch to the ``main`` branch::
 
-   git checkout master
+   git checkout main
 
-Fetch changes and update ``master``::
+Fetch changes and update ``main``::
 
-   git pull upstream master --tags
+   git pull upstream main --tags
 
 Update your feature branch::
 
    git checkout your-awesome-feature-name
-   git merge master
+   git merge main
 
 Sharing your changes
 ====================
@@ -117,12 +117,12 @@ Update your remote branch::
 
 You can then make a `pull request
 <https://guides.github.com/activities/forking/#making-a-pull-request>`_ to pyxem's
-``master`` branch. Good job!
+``main`` branch. Good job!
 
 Building and writing documentation
 ==================================
 
-We use `Sphinx <https://www.sphinx-doc.org/en/master/>`_ for documenting functionality.
+We use `Sphinx <https://www.sphinx-doc.org/en/main/>`_ for documenting functionality.
 Install necessary dependencies to build the documentation::
 
    pip install --editable .[doc]
@@ -134,7 +134,7 @@ Then, build the documentation from the ``doc`` directory::
 
 The documentation's HTML pages are built in the ``doc/_build/html`` directory from files
 in the `reStructuredText (reST)
-<https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html>`_ plaintext
+<https://www.sphinx-doc.org/en/main/usage/restructuredtext/basics.html>`_ plaintext
 markup language. They should be accessible in the browser by typing
 ``file:///your-absolute/path/to/pyxem/doc/_build/html/index.html`` in the address bar.
 
@@ -207,4 +207,4 @@ Continuous integration (CI)
 We use `GitHub Actions <https://github.com/pyxem/pyxem/actions>`_ to ensure that pyxem
 can be installed on Windows, macOS and Linux (Ubuntu). After a successful installation,
 the CI server runs the tests. After the tests return no errors, code coverage is
-reported to `Coveralls <https://coveralls.io/github/pyxem/pyxem?branch=master>`_.
+reported to `Coveralls <https://coveralls.io/github/pyxem/pyxem?branch=main>`_.

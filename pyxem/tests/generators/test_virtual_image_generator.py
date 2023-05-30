@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -23,6 +23,7 @@ import hyperspy.api as hs
 from pyxem.generators import VirtualImageGenerator, VirtualDarkFieldGenerator
 from pyxem.signals import (
     Diffraction2D,
+    DiffractionVectors2D,
     ElectronDiffraction2D,
     DiffractionVectors,
     VirtualDarkFieldImage,
@@ -31,8 +32,7 @@ from pyxem.signals import (
 
 @pytest.fixture(params=[np.array([[1, 1], [2, 2]])])
 def diffraction_vectors(request):
-    dvec = DiffractionVectors(request.param)
-    dvec.axes_manager.set_signal_dimension(1)
+    dvec = DiffractionVectors2D(request.param)
     return dvec
 
 
@@ -44,7 +44,52 @@ def vdf_generator(diffraction_pattern, diffraction_vectors):
     return VirtualDarkFieldGenerator(diffraction_pattern, diffraction_vectors)
 
 
+
+
 class TestVirtualDarkFieldGenerator:
+    def setup(self):
+        object1 = np.zeros((5, 5), dtype=bool)
+        object1[2:4, 2:4] = True
+        self.object1 = object1
+
+        object2 = np.zeros((5, 5), dtype=bool)
+        object2[1:3, 3:5] = True
+        self.object2 = object2
+
+        data = np.zeros((5, 5, 10, 10))
+
+        data[object1, 6, 7] = 7
+
+        data[object1, 2, 3] = 8
+
+        data[object2, 1, 4] = 9
+
+        data[object2, 4, 7] = 10
+
+        self.vectors = DiffractionVectors2D([[7, 6],
+                                             [3, 2],
+                                             [4, 1],
+                                             [7, 4]])
+
+        self.data = Diffraction2D(data)
+
+        self.vdf = VirtualDarkFieldGenerator(self.data, self.vectors)
+
+    def test_setup(self):
+        assert isinstance(self.vdf, VirtualDarkFieldGenerator)
+        assert isinstance(self.data, Diffraction2D)
+        assert isinstance(self.vectors, DiffractionVectors2D)
+
+    @pytest.mark.parametrize("radius, normalize", [(1.0, False), (1.0, True)])
+    def test_get_virtual_dark_field_images2(self, vdf_generator, radius, normalize):
+        vdfs = self.vdf.get_virtual_dark_field_images(radius, normalize)
+        assert isinstance(vdfs, VirtualDarkFieldImage)
+        for i, value in enumerate([7, 8, 9, 10]):
+            if normalize:
+                assert np.sum(vdfs.data[i]) == 4
+            else:
+                assert np.sum(vdfs.data[i]) == value * np.sum(self.object1)
+
     def test_vdf_generator_init_with_vectors(self, diffraction_pattern):
         dvm = DiffractionVectors(
             np.array(
@@ -55,11 +100,11 @@ class TestVirtualDarkFieldGenerator:
                 dtype=object,
             )
         )
-        dvm.axes_manager.set_signal_dimension(0)
-
+        assert isinstance(dvm, DiffractionVectors)
         vdfgen = VirtualDarkFieldGenerator(diffraction_pattern, dvm)
+
         assert isinstance(vdfgen.signal, ElectronDiffraction2D)
-        assert isinstance(vdfgen.vectors, DiffractionVectors)
+        assert isinstance(vdfgen.vectors, DiffractionVectors2D)
 
     @pytest.mark.parametrize("radius, normalize", [(4.0, False), (4.0, True)])
     def test_get_virtual_dark_field_images(self, vdf_generator, radius, normalize):
@@ -126,8 +171,6 @@ def test_vdf_generator_from_map(diffraction_pattern):
             dtype=object,
         )
     )
-    dvm.axes_manager.set_signal_dimension(0)
-
     vdfgen = VirtualImageGenerator(diffraction_pattern, dvm)
     assert isinstance(vdfgen, VirtualImageGenerator)
 

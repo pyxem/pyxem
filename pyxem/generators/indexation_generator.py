@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -122,7 +122,10 @@ class AcceleratedIndexationGenerator:
         self.library = diffraction_library
 
     def correlate(
-        self, n_largest=5, include_phases=None, **kwargs,
+        self,
+        n_largest=5,
+        include_phases=None,
+        **kwargs,
     ):
         """
         Correlates the library of simulated diffraction patterns with the

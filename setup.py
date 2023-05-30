@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #

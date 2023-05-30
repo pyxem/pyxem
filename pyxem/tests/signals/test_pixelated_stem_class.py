@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -66,7 +66,6 @@ class TestPlotting:
         s.plot(navigator=s_nav)
 
 
-@pytest.mark.slow
 class TestDiffraction2DFlipDiffraction:
     def test_flip_x(self):
         array = np.zeros(shape=(3, 4, 6, 10))
@@ -74,6 +73,9 @@ class TestDiffraction2DFlipDiffraction:
         s = Diffraction2D(array)
         assert (s.data[:, :, :, 5:] == 1).all()
         s_flip = s.flip_diffraction_x()
+        s.metadata.General.title = "Test"
+        assert s_flip.metadata == s.metadata
+        assert s_flip.metadata.General.title == "Test"
         assert (s_flip.data[:, :, :, 5:] == 0).all()
         assert (s_flip.data[:, :, :, :5] == 1).all()
 
@@ -82,7 +84,10 @@ class TestDiffraction2DFlipDiffraction:
         array[:, :, 3:, :] = 1
         s = Diffraction2D(array)
         assert (s.data[:, :, 3:, :] == 1).all()
+        s.metadata.General.title = "Test"
         s_flip = s.flip_diffraction_y()
+        assert s_flip.metadata == s.metadata
+        assert s_flip.metadata.General.title == "Test"
         assert (s_flip.data[:, :, 3:, :] == 0).all()
         assert (s_flip.data[:, :, :3, :] == 1).all()
 

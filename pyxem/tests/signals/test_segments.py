@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -28,6 +28,8 @@ from pyxem.signals import (
     DiffractionVectors,
     LearningSegment,
     VDFSegment,
+    DiffractionVectors2D,
+    Diffraction2D,
 )
 
 
@@ -160,8 +162,7 @@ class TestLearningSegment:
     ]
 )
 def unique_vectors(request):
-    uv = DiffractionVectors(request.param)
-    uv.axes_manager.set_signal_dimension(0)
+    uv = DiffractionVectors2D(request.param)
     return uv
 
 
@@ -180,133 +181,38 @@ def vdf_segments_cropped(vdf_segments):
 
 
 class TestVDFSegment:
-    def test_get_vdf_ncc_matrix(self, vdf_segments):
-        ncc = vdf_segments.get_ncc_matrix()
-        ans = np.array(
-            [
-                [
-                    1.0,
-                    -0.40125028,
-                    -0.31008684,
-                    -0.31008684,
-                    1.0,
-                    -0.40125028,
-                    -0.31008684,
-                    1.0,
-                    -0.31008684,
-                    -0.31008684,
-                ],
-                [
-                    -0.40125028,
-                    1.0,
-                    -0.43133109,
-                    0.10783277,
-                    -0.40125028,
-                    1.0,
-                    -0.43133109,
-                    -0.40125028,
-                    -0.43133109,
-                    0.10783277,
-                ],
-                [
-                    -0.31008684,
-                    -0.43133109,
-                    1.0,
-                    -0.25,
-                    -0.31008684,
-                    -0.43133109,
-                    1.0,
-                    -0.31008684,
-                    1.0,
-                    -0.25,
-                ],
-                [
-                    -0.31008684,
-                    0.10783277,
-                    -0.25,
-                    1.0,
-                    -0.31008684,
-                    0.10783277,
-                    -0.25,
-                    -0.31008684,
-                    -0.25,
-                    1.0,
-                ],
-                [
-                    1.0,
-                    -0.40125028,
-                    -0.31008684,
-                    -0.31008684,
-                    1.0,
-                    -0.40125028,
-                    -0.31008684,
-                    1.0,
-                    -0.31008684,
-                    -0.31008684,
-                ],
-                [
-                    -0.40125028,
-                    1.0,
-                    -0.43133109,
-                    0.10783277,
-                    -0.40125028,
-                    1.0,
-                    -0.43133109,
-                    -0.40125028,
-                    -0.43133109,
-                    0.10783277,
-                ],
-                [
-                    -0.31008684,
-                    -0.43133109,
-                    1.0,
-                    -0.25,
-                    -0.31008684,
-                    -0.43133109,
-                    1.0,
-                    -0.31008684,
-                    1.0,
-                    -0.25,
-                ],
-                [
-                    1.0,
-                    -0.40125028,
-                    -0.31008684,
-                    -0.31008684,
-                    1.0,
-                    -0.40125028,
-                    -0.31008684,
-                    1.0,
-                    -0.31008684,
-                    -0.31008684,
-                ],
-                [
-                    -0.31008684,
-                    -0.43133109,
-                    1.0,
-                    -0.25,
-                    -0.31008684,
-                    -0.43133109,
-                    1.0,
-                    -0.31008684,
-                    1.0,
-                    -0.25,
-                ],
-                [
-                    -0.31008684,
-                    0.10783277,
-                    -0.25,
-                    1.0,
-                    -0.31008684,
-                    0.10783277,
-                    -0.25,
-                    -0.31008684,
-                    -0.25,
-                    1.0,
-                ],
-            ]
-        )
-        np.testing.assert_almost_equal(ncc.data, ans)
+    def setup(self):
+        object1 = np.zeros((5, 5), dtype=bool)
+        object1[0:2, 0:2] = True
+        self.object1 = object1
+
+        object2 = np.zeros((5, 5), dtype=bool)
+        object2[3:5, 3:5] = True
+        self.object2 = object2
+
+        data = np.zeros((5, 5, 10, 10))
+
+        data[object1, 6, 7] = 7
+        data[object1, 2, 3] = 8
+        data[object2, 1, 4] = 9
+        data[object2, 4, 7] = 10
+
+        self.vectors = DiffractionVectors2D([[7, 6], [3, 2], [4, 1], [7, 4]])
+
+        self.data = Diffraction2D(data)
+
+        self.vdf = VirtualDarkFieldGenerator(self.data, self.vectors)
+        self.vdfs = self.vdf.get_virtual_dark_field_images(radius=1.0)
+        self.vdf_segments = self.vdfs.get_vdf_segments()
+
+    def test_get_vdf_ncc_matrix2(self):
+        ncc = self.vdf_segments.get_ncc_matrix()
+        assert ncc.data.shape == (4, 4)
+        # assert that the ncc for v1 and v2 == 1 and ncc for v3 and v4 == 1
+        np.testing.assert_array_almost_equal(ncc.data[:2, :2], np.ones((2, 2)))
+        np.testing.assert_array_almost_equal(ncc.data[2:, 2:], np.ones((2, 2)))
+
+        print(ncc.data)
 
     @pytest.mark.parametrize(
         "corr_threshold, vector_threshold," "segment_threshold",
