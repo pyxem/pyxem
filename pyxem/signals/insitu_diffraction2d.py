@@ -279,7 +279,7 @@ class InSituDiffraction2D(Diffraction2D):
         ----------
         time_axis: int
             Index of time axis. Default is 2
-        normalization: string
+        normalization: string, Default is 'split'
             Normalization format for time autocorrelation, 'split' or 'self'
         k1bin: int
             Binning factor for k1 axis
@@ -287,10 +287,10 @@ class InSituDiffraction2D(Diffraction2D):
             Binning factor for k2 axis
         tbin: int
             Binning factor for t axis
-        resample_time: int or np.array
+        resample_time: int or np.array, Default is None
             If int, time is resample into log linear with resample_time as
             number of sampling. If array, it is used as resampled time axis
-            instead. No resampling is performed if argument is not specified
+            instead. No resampling is performed if None
 
         Returns
         ---------
