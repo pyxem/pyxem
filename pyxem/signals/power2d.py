@@ -104,5 +104,4 @@ class Power2D(Signal2D):
 
 
 class LazyPower2D(LazySignal, Power2D):
-
     pass

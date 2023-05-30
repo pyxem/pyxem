@@ -50,7 +50,6 @@ class deprecated:
         alternative_is_function: bool = True,
         removal: Union[str, int, float, None] = None,
     ):
-
         """Visible deprecation warning.
         Parameters
         ----------
@@ -137,6 +136,7 @@ class deprecated_argument:
                 )
                 if self.alternative is not None:
                     msg += f"Use `{self.alternative}` instead. "
+                    kwargs[self.alternative] = kwargs.pop(self.name)
                 msg += f"See the documentation of `{func.__name__}()` for more details."
                 warnings.simplefilter(
                     action="always", category=np.VisibleDeprecationWarning

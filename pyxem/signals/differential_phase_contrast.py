@@ -415,7 +415,7 @@ class DPCSignal2D(Signal2D):
             wx, wy = 0.5, 0.5
 
             numerator = -1j * (wx * kx_grid * fx + wy * ky_grid * fy)
-            denominator = wx * kx_grid ** 2 + wy * ky_grid ** 2
+            denominator = wx * kx_grid**2 + wy * ky_grid**2
 
         # handle the division by zero in the central pixel
         # set the undefined/infinity pixel to 0
@@ -475,7 +475,7 @@ class DPCSignal2D(Signal2D):
             rotation = rotation - 30
         phase = np.arctan2(self.inav[0].data, self.inav[1].data) % (2 * np.pi)
         rgb_array = pst._get_rgb_phase_array(phase=phase, rotation=rotation)
-        signal_rgb = Signal1D(rgb_array * (2 ** 16 - 1))
+        signal_rgb = Signal1D(rgb_array * (2**16 - 1))
         signal_rgb.change_dtype("uint16")
         signal_rgb.change_dtype("rgb16")
         pst._copy_signal2d_axes_manager_metadata(self, signal_rgb)
@@ -539,7 +539,7 @@ class DPCSignal2D(Signal2D):
             rotation=rotation,
             magnitude_limits=magnitude_limits,
         )
-        signal_rgb = Signal1D(rgb_array * (2 ** 16 - 1))
+        signal_rgb = Signal1D(rgb_array * (2**16 - 1))
         signal_rgb.change_dtype("uint16")
         signal_rgb.change_dtype("rgb16")
         pst._copy_signal2d_axes_manager_metadata(self, signal_rgb)

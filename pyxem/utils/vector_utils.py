@@ -54,7 +54,7 @@ def detector_to_fourier(k_xy, wavelength, camera_length):
     # the wavelength. k_z is calculated courtesy of Pythagoras, then offset by
     # the Ewald sphere radius.
 
-    k_z = np.sqrt(1 / (wavelength ** 2) - np.sum(k_xy ** 2, axis=1)) - 1 / wavelength
+    k_z = np.sqrt(1 / (wavelength**2) - np.sum(k_xy**2, axis=1)) - 1 / wavelength
 
     # Stack the xy-vector and the z vector to get the full k
     k = np.hstack((k_xy, k_z[:, np.newaxis]))
@@ -336,6 +336,10 @@ def filter_vectors_near_basis(vectors, basis, distance=None):
     closest_vectors: array-like
         An array of vectors which are the closest to the basis considered.
     """
+    if len(vectors) == 0:
+        vectors = np.empty(basis.shape)
+        vectors[:, :] = np.nan
+        return vectors
     distance_mat = cdist(vectors, basis)
     closest_index = np.argmin(distance_mat, axis=0)
     min_distance = distance_mat[closest_index, np.arange(len(basis), dtype=int)]

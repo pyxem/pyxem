@@ -50,5 +50,5 @@ class ReducedIntensityCorrectionComponent(Component):
         c = self.c.value
         d = self.d.value
 
-        p = a * x + b * (x ** 2) + c * (x ** 3) + d * (x ** 4)
+        p = a * x + b * (x**2) + c * (x**3) + d * (x**4)
         return p

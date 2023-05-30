@@ -27,6 +27,7 @@ from pyxem.utils.vector_utils import detector_to_fourier
 from pyxem.utils.vector_utils import get_rotation_matrix_between_vectors
 from pyxem.utils.vector_utils import get_angle_cartesian
 from pyxem.utils.vector_utils import get_angle_cartesian_vec
+from pyxem.utils.vector_utils import filter_vectors_near_basis
 
 
 def test_calculate_norms():
@@ -49,8 +50,8 @@ def test_calculate_norms_ragged():
             np.array(
                 [
                     [0, 0, 1 / 0.025 - 40],
-                    [0, 1, np.sqrt(1 / (0.025 ** 2) - 1) - 40],
-                    [1, 1, np.sqrt(1 / (0.025 ** 2) - 1 - 1) - 40],
+                    [0, 1, np.sqrt(1 / (0.025**2) - 1) - 40],
+                    [1, 1, np.sqrt(1 / (0.025**2) - 1 - 1) - 40],
                 ]
             ),
         )
@@ -133,3 +134,22 @@ def test_get_angle_cartesian_vec_input_validation():
         match=r"shape of a .* and b .* must be the same",
     ):
         get_angle_cartesian_vec(np.empty((2, 3)), np.empty((5, 3)))
+
+
+def test_filter_near_basis():
+    basis_vectors = np.random.randint(0, 100, (10, 2))
+
+    shifts = np.random.rand(10, 2)
+    dist = np.linalg.norm(shifts, axis=1)
+    shifted = basis_vectors + shifts
+    filt = filter_vectors_near_basis(shifted, basis_vectors, distance=0.4)
+    is_nan = np.isnan(filt).sum(axis=1) > 0
+    np.testing.assert_array_equal(is_nan, dist > 0.4)
+
+
+def test_basis_filter_no_vectors():
+    basis_vectors = np.random.randint(0, 100, (10, 2))
+    vectors = np.empty((0, 2))
+    filt = filter_vectors_near_basis(vectors, basis_vectors, distance=0.4)
+    is_nan = np.isnan(filt).sum(axis=1) > 0
+    np.testing.assert_array_equal(is_nan, True)

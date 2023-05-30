@@ -11,21 +11,42 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ==========
 
+
+2023-05-08 - version 0.15.1
+===========================
+
+Fixed
+-----
+- Fixed type error in ``separate_watershed`` with scikit-image 0.21 (#921)
+- Fixed VDF creation from peaks using generators.VirtualDarkFieldGenerator.get_virtual_dark_field_images (#926)
+- Updating and correcting Zenodo (#924)
+- Bug fix for center_direct_beam and `half_square_width` (#928 Thanks to @PVacek )
+
+
+2023-04-06 - version 0.15.0
+===========================
+
 Added
 -----
 - Added damp_extrapolate_to_zero to ReducedIntensity1D
 - Added in deprecation wrapper class to wrap deprecated functions in pyxem.
 - Center-of-mass algorithm added to get_direct_beam_position (#845)
 - Added `VectorSignal1D` class to handle 1 dimensional signals
+- Added kwargs to find_beam_offset_cross_correlation allowing for parameters
+to be passed to `phase_cross_correlation` (#907)
+- Added `LazyVirtualDarkField` signal
 
 Changed
 -------
 - Sklearn is now required to be on the 1.0 series.
 - Changed `set_signal_dimension` to `Hyperspy.signals.BaseSignal.transpose`
 - Moved code from `VectorSignal` to `VectorSignal2D`.  Change is more inline with stated dimensions
+- `VectorSignal` pixel_calibration deprecated and replaced with scales.
 - Fixed bugs resulting from API change in hyperspy/hyperspy#3045. Markers explicitly initialized
 - DiffractionVectors.get_diffraction_pixels_map returns a ragged signal
 - VirtualDarkFieldImage.get_vdf_segment changed to properly handle setting of axes
+- Increased minimal version of scikit-image to >= 0.19.0
+- Increased minimal version of Matplotlib to >= 3.3
 
 Fixed
 -----
@@ -33,9 +54,12 @@ Fixed
 - Fixed error related to `DiffractionSignal2D.apply_affine_transformation` when multiple affine transformations are given. (#870)
 - Bugfix related to Numpy 1.24.0. Strict array creation with dtype=object is needed
   for ragged arrays. (#880 & #881)
+- Bug fix for doubling of inplane rotation in template matching.  (#905 & #853)
+- Bug fix for filtering vectors using a basis and DBSCAN
+- Bug fix for passing vector attributes when signal is copied or changed.
 
 
-2022-15-06 - version 0.14.2
+2022-06-15 - version 0.14.2
 ===========================
 
 Changed
@@ -48,7 +72,7 @@ Fixed
 - Fix bug in `get_DisplacementGradientMap` (#852)
 - Fix template matching bugs (originally fixed in #771 but omitted from 0.14 series by accident)
 
-2022-29-04 - version 0.14.1
+2022-04-29 - version 0.14.1
 ===========================
 
 Added
@@ -82,10 +106,10 @@ Changed
 ^^^^^^^
 - For developers: HyperSpy's `.map` function will now be used to process big datasets, instead of pyXem's `process_dask_array`
 
-2022-29-04 - version 0.14.0
+2022-04-29 - version 0.14.0
 ===========================
 
-The code contained in this version is identical to 0.14.1, the release was 
+The code contained in this version is identical to 0.14.1, the release was
 recreated to fix an error with the Zenodo files.
 
 

@@ -303,7 +303,7 @@ class VirtualDarkFieldGenerator(VirtualImageGenerator):
             VirtualDarkFieldImage object containing virtual dark field images
             for all unique vectors.
         """
-        roi_args_list = [(v[0], v[1], radius, 0) for v in self.vectors.data]
+        roi_args_list = [(v[1], v[0], radius, 0) for v in self.vectors.data]
         new_axis_dict = {"name": "Vector index"}
         vdfim = self._get_virtual_images(
             roi_args_list,

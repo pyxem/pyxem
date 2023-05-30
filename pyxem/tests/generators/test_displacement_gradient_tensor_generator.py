@@ -70,8 +70,9 @@ def generate_test_vectors(v):
 
 def generate_displacment_map(vectors, return_residuals=False):
     deformed = hs.signals.Signal2D(generate_test_vectors(vectors))
-    return get_DisplacementGradientMap(deformed, vectors,
-                                       return_residuals=return_residuals)
+    return get_DisplacementGradientMap(
+        deformed, vectors, return_residuals=return_residuals
+    )
 
 
 def generate_strain_map(vectors):
@@ -79,11 +80,7 @@ def generate_strain_map(vectors):
 
 
 class TestDisplacementGradientMap:
-
-    four_vectors = np.asarray([[1, 0],
-                               [0, 1],
-                               [1, -1],
-                               [1, 1]])
+    four_vectors = np.asarray([[1, 0], [0, 1], [1, -1], [1, 1]])
     left_handed = np.asarray(([1, 1], [1, -1.2]))
     xy_vectors = np.asarray([[1, 0], [0, 1]])
 
@@ -91,10 +88,7 @@ class TestDisplacementGradientMap:
         # reinitalizing to use inside functions...
         self.left_handed = np.asarray(([1, 1], [1, -1.2]))
         self.xy_vectors = np.asarray([[1, 0], [0, 1]])
-        self.four_vectors = np.asarray([[1, 0],
-                               [0, 1],
-                               [1, -1],
-                               [1, 1]])
+        self.four_vectors = np.asarray([[1, 0], [0, 1], [1, -1], [1, 1]])
 
     @pytest.mark.parametrize("four_vectors", (four_vectors,))
     def test_generate_test_vectors(self, four_vectors):
@@ -103,7 +97,7 @@ class TestDisplacementGradientMap:
         assert np.shape(test_vectors[0, 0]) == four_vectors.shape
         assert np.shape(test_vectors[0, 1]) == four_vectors.shape
 
-    @pytest.mark.parametrize("residuals", (True,False))
+    @pytest.mark.parametrize("residuals", (True, False))
     @pytest.mark.parametrize("vectors", (four_vectors, xy_vectors, left_handed))
     def test_generate_displacement_map(self, vectors, residuals):
         if residuals:
@@ -118,7 +112,7 @@ class TestDisplacementGradientMap:
         assert isinstance(dis_map, StrainMap)
 
     def test_results_returned_correctly_in_same_basis(self):
-        """ Basic test of the summary statement for this section """
+        """Basic test of the summary statement for this section"""
         xy = generate_strain_map(self.xy_vectors)
         lh = generate_strain_map(self.left_handed)
         fv = generate_strain_map(self.four_vectors)
@@ -126,7 +120,7 @@ class TestDisplacementGradientMap:
         np.testing.assert_almost_equal(xy.data, fv.data, decimal=2)
 
     def test_trivial_weight_function_case(self):
-        """ If weights are [1,1,1,1] the result should be the same as weights=None"""
+        """If weights are [1,1,1,1] the result should be the same as weights=None"""
         weights = [1, 1, 1, 1]
         xy = generate_strain_map(self.xy_vectors)
         deformed = hs.signals.Signal2D(generate_test_vectors(self.four_vectors))
@@ -136,7 +130,7 @@ class TestDisplacementGradientMap:
         np.testing.assert_almost_equal(xy.data, weight_strain_map.data, decimal=2)
 
     def test_weight_function_behaviour(self):
-        """ Confirms that  a weight function [1,1,2,2] on [a,a,b,b] gives (2a+4b)/6 as the strain"""
+        """Confirms that  a weight function [1,1,2,2] on [a,a,b,b] gives (2a+4b)/6 as the strain"""
         multi_vector_array = self.four_vectors
         strained_by_1pc_in_x = vector_operation(
             multi_vector_array, np.asarray([[1.01, 0], [0, 1]])
@@ -148,7 +142,9 @@ class TestDisplacementGradientMap:
         vectors = np.concatenate(
             (strained_by_1pc_in_x[:, :2], strained_by_2pc_in_x[:, 2:]), axis=1
         )
-        deformed = hs.signals.Signal2D(np.asarray([[vectors, vectors], [vectors, vectors]]))
+        deformed = hs.signals.Signal2D(
+            np.asarray([[vectors, vectors], [vectors, vectors]])
+        )
         strain_map = get_DisplacementGradientMap(
             deformed, multi_vector_array, weights=weights
         ).get_strain_maps()

@@ -22,8 +22,9 @@ import numpy as np
 from pyxem.signals.tensor_field import DisplacementGradientMap
 
 
-def get_DisplacementGradientMap(strained_vectors, unstrained_vectors, weights=None,
-                                return_residuals=False, **kwargs):
+def get_DisplacementGradientMap(
+    strained_vectors, unstrained_vectors, weights=None, return_residuals=False, **kwargs
+):
     r"""Calculates the displacement gradient tensor at each navigation position in a map.
 
     Compares vectors to determine the 2 x 2 matrix,
@@ -72,7 +73,8 @@ def get_DisplacementGradientMap(strained_vectors, unstrained_vectors, weights=No
         weights=weights,
         inplace=False,
         output_signal_size=(3, 3),
-        output_dtype=np.float64,**kwargs
+        output_dtype=np.float64,
+        **kwargs
     )
 
     if return_residuals:
@@ -82,14 +84,17 @@ def get_DisplacementGradientMap(strained_vectors, unstrained_vectors, weights=No
             weights=weights,
             inplace=False,
             output_dtype=np.float64,
-            return_residuals=True, **kwargs
+            return_residuals=True,
+            **kwargs
         )
         return DisplacementGradientMap(D), R
     else:
         return DisplacementGradientMap(D)
 
 
-def get_single_DisplacementGradientTensor(Vs, Vu=None, weights=None, return_residuals=False):
+def get_single_DisplacementGradientTensor(
+    Vs, Vu=None, weights=None, return_residuals=False
+):
     r"""Calculates the displacement gradient tensor from a pairs of vectors.
 
     Determines the 2 x 2 matrix, :math:`\\mathbf(L)`, that maps unstrained
@@ -137,12 +142,8 @@ def get_single_DisplacementGradientTensor(Vs, Vu=None, weights=None, return_resi
         weights = np.asarray(weights)
         # Need vectors normalized to the unstrained region otherwise the weighting breaks down
         norm = np.linalg.norm(Vu, axis=1)
-        Vs = (np.divide(Vs.T,
-                        np.linalg.norm(Vu, axis=1)) *
-              np.sqrt(weights)).T
-        Vu = (np.divide(Vu.T,
-                        np.linalg.norm(Vu, axis=1)) *
-              np.sqrt(weights)).T
+        Vs = (np.divide(Vs.T, np.linalg.norm(Vu, axis=1)) * np.sqrt(weights)).T
+        Vu = (np.divide(Vu.T, np.linalg.norm(Vu, axis=1)) * np.sqrt(weights)).T
     else:
         Vs, Vu = Vs, Vu
 

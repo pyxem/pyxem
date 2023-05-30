@@ -374,7 +374,7 @@ def _simulations_to_arrays(simulations, max_radius=None):
         y = j.calibrated_coordinates[:, 1]
         intensity = j.intensities
         if max_radius is not None:
-            condition = x ** 2 + y ** 2 < max_radius ** 2
+            condition = x**2 + y**2 < max_radius**2
             x = x[condition]
             y = y[condition]
             intensity = intensity[condition]
@@ -566,7 +566,7 @@ def _match_polar_to_polar_library_gpu(
 
 def _get_row_norms(array):
     """Get the norm of all rows in a 2D array"""
-    norms = ((array ** 2).sum(axis=1)) ** 0.5
+    norms = ((array**2).sum(axis=1)) ** 0.5
     return norms
 
 
@@ -1628,7 +1628,7 @@ def index_dataset_with_template_rotation(
         orimap[:, :, :, 2] = (
             orimap[:, :, :, 2] * res_index[:, :, :, 3]
         )  # multiply by the sign
-        orimap[:, :, :, 0] = res_index[:, :, :, 2] * delta_theta
+        orimap[:, :, :, 0] = res_index[:, :, :, 2] * delta_theta * phasemask
         # add to orients, there should be no overlap on pixels or N
         orients = orients + orimap
     result["orientation"] = orients

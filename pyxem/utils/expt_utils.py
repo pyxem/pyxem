@@ -22,10 +22,12 @@ import pyxem as pxm  # for ElectronDiffraction2D
 
 from scipy.interpolate import interp1d
 from skimage import transform as tf
+from skimage.feature import match_template
 from skimage import morphology, filters
 from skimage.draw import ellipse_perimeter
 from skimage.registration import phase_cross_correlation
 from tqdm import tqdm
+from packaging.version import Version
 
 from pyxem.utils.pyfai_utils import get_azimuthal_integrator
 from pyxem.utils.cuda_utils import is_cupy_array
@@ -91,7 +93,7 @@ def _cart2polar(x, y):
         Polar coordinates
 
     """
-    r = np.sqrt(x ** 2 + y ** 2)
+    r = np.sqrt(x**2 + y**2)
     theta = -np.arctan2(y, x)  # θ = 0 horizontal, +ve = anticlockwise
     return r, theta
 
@@ -298,9 +300,14 @@ def sigma_clip(z, azimuthal_integrator, npt_rad, npt_azim, mask=None, **kwargs):
     I : np.array()
         One-dimensional azimuthal integral of z.
     """
-    output = azimuthal_integrator.sigma_clip(
-        z, npt_rad=npt_rad, npt_azim=npt_azim, mask=mask, **kwargs
-    )
+    from pyFAI._version import version
+
+    if Version(version) >= Version("2023.2.0"):
+        output = azimuthal_integrator.sigma_clip_ng(z, npt=npt_rad, mask=mask, **kwargs)
+    else:
+        output = azimuthal_integrator.sigma_clip(
+            z, npt_rad=npt_rad, npt_azim=npt_azim, mask=mask, **kwargs
+        )
     return output[1]
 
 
@@ -342,7 +349,7 @@ def remove_dead(z, deadpixels):
         Two-dimensional data array containing z with dead pixels removed.
     """
     z_bar = np.copy(z)
-    for (i, j) in deadpixels:
+    for i, j in deadpixels:
         z_bar[i, j] = (z[i - 1, j] + z[i + 1, j] + z[i, j - 1] + z[i, j + 1]) / 4
 
     return z_bar
@@ -462,7 +469,7 @@ def circular_mask(shape, radius, center=None):
     l_x, l_y = shape
     x, y = center if center else (l_x / 2, l_y / 2)
     X, Y = np.ogrid[:l_x, :l_y]
-    mask = (X - x) ** 2 + (Y - y) ** 2 < radius ** 2
+    mask = (X - x) ** 2 + (Y - y) ** 2 < radius**2
     return mask
 
 
@@ -600,7 +607,7 @@ def find_beam_center_blur(z, sigma):
     return dispatcher.array(center)
 
 
-def find_beam_offset_cross_correlation(z, radius_start, radius_finish):
+def find_beam_offset_cross_correlation(z, radius_start, radius_finish, **kwargs):
     """Find the offset of the direct beam from the image center by a cross-correlation algorithm.
     The shift is calculated relative to an circle perimeter. The circle can be
     refined across a range of radii during the centring procedure to improve
@@ -609,12 +616,16 @@ def find_beam_offset_cross_correlation(z, radius_start, radius_finish):
 
     Parameters
     ----------
+    z: array-like
+        The two dimensional array/image that is operated on
     radius_start : int
         The lower bound for the radius of the central disc to be used in the
         alignment.
     radius_finish : int
         The upper bounds for the radius of the central disc to be used in the
         alignment.
+    **kwargs:
+        Any additional keyword arguments defined by :func:`skimage.registration.phase_cross_correlation`
 
     Returns
     -------
@@ -635,7 +646,9 @@ def find_beam_offset_cross_correlation(z, radius_start, radius_finish):
         hann2d = np.sqrt(np.outer(h0, h1))
         ref = hann2d * ref
         im = hann2d * z
-        shift, error, diffphase = phase_cross_correlation(ref, im, upsample_factor=10)
+        shift, error, diffphase = phase_cross_correlation(
+            ref, im, upsample_factor=10, **kwargs
+        )
         errRecord[ind] = error
         index_min = np.argmin(errRecord)
 
@@ -647,7 +660,9 @@ def find_beam_offset_cross_correlation(z, radius_start, radius_finish):
     hann2d = np.sqrt(np.outer(h0, h1))
     ref = hann2d * ref
     im = hann2d * z
-    shift, error, diffphase = phase_cross_correlation(ref, im, upsample_factor=100)
+    shift, error, diffphase = phase_cross_correlation(
+        ref, im, upsample_factor=100, **kwargs
+    )
 
     shift = shift[::-1]
     return shift - 0.5
@@ -710,7 +725,7 @@ def investigate_dog_background_removal_interactive(
         for j, std_dev_min in enumerate(std_dev_mins):
             gauss_processed[i, j] = sample_dp.subtract_diffraction_background(
                 "difference of gaussians",
-                lazy_result=False,
+                lazy_output=False,
                 min_sigma=std_dev_min,
                 max_sigma=std_dev_max,
                 show_progressbar=False,
@@ -730,3 +745,73 @@ def investigate_dog_background_removal_interactive(
 
     dp_gaussian.plot(cmap="viridis")
     return None
+
+
+def find_hot_pixels(z, threshold_multiplier=500, mask=None):
+    """Find single pixels which have much larger values compared to neighbors.
+
+    Finds pixels which have a gradient larger than the threshold multiplier.
+    These are extremely sharp peaks with values on average much larger than
+    the surrounding values.
+
+    Parameters
+    ----------
+    z : array-like
+        Frame to operate on
+    threshold_multiplier : scaler
+        Used to threshold the dif.
+    mask : NumPy array, optional
+        Array with bool values. The True values will be masked
+        (i.e. ignored). Must have the same shape as the two
+        last dimensions in dask_array.
+
+    """
+    # find the gradient of the image.
+    footprint = [[1, 1, 1], [1, 0, 1], [1, 1, 1]]
+    median = ndi.filters.median_filter(z, footprint=footprint)
+    hot_pixels = (z - median) > threshold_multiplier
+    if mask is not None:
+        hot_pixels[mask] = False
+    return hot_pixels
+
+
+def remove_bad_pixels(z, bad_pixels):
+    """Replace values in bad pixels with mean of neighbors.
+
+    Parameters
+    ----------
+    z : array-like
+        A single frame
+    bad_pixels : array-like
+        Must either have the same shape as dask_array,
+        or the same shape as the two last dimensions of dask_array.
+
+    Returns
+    -------
+    data_output : Dask array
+
+    Examples
+    --------
+    >>> import pyxem.utils.dask_tools as dt
+    >>> s = pxm.dummy_data.dummy_data.get_dead_pixel_signal(lazy=True)
+    >>> dead_pixels = dt._find_dead_pixels(s.data)
+    >>> data_output = dt._remove_bad_pixels(s.data, dead_pixels)
+
+    """
+    z[bad_pixels] = 0
+    bad_pixels_ind = np.transpose(np.array(np.where(bad_pixels)))
+    bad_slices = [tuple([slice(i - 1, i + 2) for i in ind]) for ind in bad_pixels_ind]
+    values = [np.sum(z[s]) / 8 for s in bad_slices]
+    z[bad_pixels] = values
+    return z
+
+
+def normalize_template_match(z, template, subtract_min=True, pad_input=True, **kwargs):
+    """Matches a template with an image z. Preformed a normalized cross-correlation
+    using the given templates. If subtract_min is True then the minimum value will
+     be subtracted from the correlation.
+    """
+    template_match = match_template(z, template, pad_input=pad_input, **kwargs)
+    if subtract_min:
+        template_match = template_match - np.min(template_match)
+    return template_match

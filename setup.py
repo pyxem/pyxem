@@ -37,6 +37,7 @@ extra_feature_requirements = {
     "tests": [
         "pytest     >= 5.0",
         "pytest-cov >= 2.8.1",
+        "pytest-xdist",
         "coveralls  >= 1.10",
         "coverage   >= 5.0",
     ],
@@ -81,17 +82,20 @@ setup(
         "dask",
         "diffsims       >= 0.5",
         "hyperspy       >= 1.7.0",  # significant improvements
+        "h5py",
         "ipywidgets",
         "lmfit          >= 0.9.12",
-        "matplotlib     >= 3.1.1",  # 3.1.0 failed
+        "matplotlib     >= 3.3",
         "numba",
         "numpy",
         "orix           >= 0.9",
         "psutil",
-        "pyfai",
-        "scikit-image   >= 0.17.0",
+        "pyfai",  # sigma clip function broken
+        "scikit-image   >= 0.19.0",
         "scikit-learn   >= 1.0",
         "scipy",
+        "tqdm",
+        "traits",
         "transforms3d",
     ],
     python_requires=">=3.7",
