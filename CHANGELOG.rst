@@ -11,6 +11,10 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ==========
 
+Fixed
+-----
+- Remove `ipywidgets` from requirements as it is not a dependency
+
 
 2023-05-08 - version 0.15.1
 ===========================
