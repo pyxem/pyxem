@@ -1414,3 +1414,10 @@ class TestFilter:
             method="difference_of_gaussians", sigma1=sigma1, sigma2=sigma2, inplace=True
         )
         np.testing.assert_array_almost_equal(new.data, three_section.data)
+
+    @pytest.mark.parametrize("lazy", [True, False])
+    def test_filter_signal_axes(self, three_section, lazy):
+        if lazy:
+            three_section = three_section.as_lazy()
+        three_section.filter_signal_axes("gaussian_filter", sigma=3)
+        assert three_section._lazy == lazy
