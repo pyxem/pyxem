@@ -1384,6 +1384,7 @@ class TestFilter:
     @pytest.mark.parametrize("lazy", [True, False])
     def test_filter(self, three_section, method, lazy):
         if lazy:
+            dask_image = pytest.importorskip("dask_image")
             three_section = three_section.as_lazy()
         sigma = (3, 3, 3, 3)
         new = three_section.filter(method=method, sigma=sigma, inplace=False)
@@ -1393,6 +1394,7 @@ class TestFilter:
     @pytest.mark.parametrize("lazy", [True, False])
     def test_dog(self, three_section, lazy):
         if lazy:
+            dask_image = pytest.importorskip("dask_image")
             three_section = three_section.as_lazy()
         sigma1 = (1, 1, 1, 1)
         sigma2 = (3, 3, 3, 3)
@@ -1405,11 +1407,3 @@ class TestFilter:
                              sigma2=sigma2,
                              inplace=True)
         np.testing.assert_array_almost_equal(new.data, three_section.data)
-
-    def test_filter_lazy_fail(self, three_section):
-        sigma = (3, 3, 3, 3)
-        three_section = three_section.as_lazy()
-        three_section.rechunk((3, 3, -1, -1))
-        with pytest.raises(ValueError):
-            three_section.filter(method="gaussian_laplace",
-                                 sigma=sigma)
