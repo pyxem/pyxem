@@ -1114,6 +1114,55 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         return self.map(
             normalize_template_match, template=ring, inplace=inplace, **kwargs
         )
+    def filter_signal_axes(self,
+                           method="gaussian_filter",
+                           **kwargs):
+        if isinstance(method, str):
+            name = "scipy.ndimage"
+            _method = getattr(import_module(name), method)
+        return self.map(_method, **kwargs)
+
+    def get_num_chunked_axes(self):
+        axes = np.arange(self.data.ndim)
+        unspanned_dim = set(axes) - set(self.spanned_dimensions())
+        chunked_dim = len(unspanned_dim)
+        return chunked_dim
+
+    def filter(self,
+               method="gaussian_laplace",
+               inplace=False,
+               **kwargs
+               ):
+        """ Filters the entire dataset given some ndimage filter. If the dataset is lazy
+        an appropriate filter from `dask-image` will be applied if applicable.
+
+        Additional considerations for lazy signals are given to the chunk structure of
+        some signal in order to maintain efficient computation.
+
+        If you only want to filter some of the dimensions.
+
+        """
+        if isinstance(method, str):
+            if method == "difference_of_gaussians":
+                if self._lazy:
+                    _method = difference_of_gaussians_lazy
+                else:
+                    _method = difference_of_gaussians
+            elif self._lazy:
+                name = "dask_image.ndfilters"
+                _method = getattr(import_module(name), method)
+            else:
+                name = "scipy.ndimage"
+                _method = getattr(import_module(name), method)
+        else:
+            _method = method
+
+        new_data = _method(self.data, **kwargs)
+        if inplace:
+            self.data= new_data
+            return
+        else:
+            return self._deepcopy_with_new_data(data=new_data)
 
     def template_match(self, template, inplace=False, **kwargs):
         """Template match the signal dimensions with a binary image.
