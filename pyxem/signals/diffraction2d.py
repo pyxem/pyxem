@@ -34,7 +34,10 @@ from hyperspy._signals.signal2d import LazySignal2D
 from hyperspy.misc.utils import isiterable
 from importlib import import_module
 
-from pyxem.utils.filter_utils import difference_of_gaussians_lazy, difference_of_gaussians
+from pyxem.utils.filter_utils import (
+    difference_of_gaussians_lazy,
+    difference_of_gaussians,
+)
 from pyxem.signals import (
     CommonDiffraction,
     DPCBaseSignal,
@@ -1116,9 +1119,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         return self.map(
             normalize_template_match, template=ring, inplace=inplace, **kwargs
         )
-    def filter_signal_axes(self,
-                           method="gaussian_filter",
-                           **kwargs):
+
+    def filter_signal_axes(self, method="gaussian_filter", **kwargs):
         if isinstance(method, str):
             name = "scipy.ndimage"
             _method = getattr(import_module(name), method)
@@ -1130,12 +1132,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         chunked_dim = len(unspanned_dim)
         return chunked_dim
 
-    def filter(self,
-               method="gaussian_laplace",
-               inplace=False,
-               **kwargs
-               ):
-        """ Filters the entire dataset given some ndimage filter. If the dataset is lazy
+    def filter(self, method="gaussian_laplace", inplace=False, **kwargs):
+        """Filters the entire dataset given some ndimage filter. If the dataset is lazy
         an appropriate filter from `dask-image` will be applied if applicable.
 
         Additional considerations for lazy signals are given to the chunk structure of
@@ -1161,7 +1159,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         new_data = _method(self.data, **kwargs)
         if inplace:
-            self.data= new_data
+            self.data = new_data
             return
         else:
             return self._deepcopy_with_new_data(data=new_data)

@@ -43,7 +43,7 @@ extra_feature_requirements = {
     ],
     "dev": ["black", "pre-commit >=1.16"],
     "gpu": ["cupy >= 9.0.0"],
-    "dask": ["dask-image", "distributed"]
+    "dask": ["dask-image", "distributed"],
 }
 
 
