@@ -15,6 +15,9 @@ Fixed
 -----
 - Remove `ipywidgets` from requirements as it is not a dependency
 
+Added
+-----
+- Add n-d and 2-d filters #935 for filtering datasets
 
 2023-05-08 - version 0.15.1
 ===========================
