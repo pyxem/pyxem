@@ -18,8 +18,6 @@
 
 
 import numpy as np
-from skimage import filters
-from skimage.feature import match_template
 from scipy.ndimage import rotate
 from skimage import morphology
 import dask.array as da
@@ -30,8 +28,8 @@ import warnings
 import hyperspy.api as hs
 from hyperspy.signals import Signal2D, BaseSignal
 from hyperspy._signals.lazy import LazySignal
-from hyperspy._signals.signal2d import LazySignal2D
 from hyperspy.misc.utils import isiterable
+from importlib import import_module
 
 from pyxem.signals import (
     CommonDiffraction,
@@ -1123,52 +1121,44 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         return self.map(
             normalize_template_match, template=ring, inplace=inplace, **kwargs
         )
-    def filter_signal_axes(self,
-                           method="gaussian_filter",
-                           **kwargs):
-        if isinstance(method, str):
-            name = "scipy.ndimage"
-            _method = getattr(import_module(name), method)
-        return self.map(_method, **kwargs)
-
-    def get_num_chunked_axes(self):
-        axes = np.arange(self.data.ndim)
-        unspanned_dim = set(axes) - set(self.spanned_dimensions())
-        chunked_dim = len(unspanned_dim)
-        return chunked_dim
 
     def filter(self,
-               method="gaussian_laplace",
+               func,
                inplace=False,
-               **kwargs
-               ):
-        """ Filters the entire dataset given some ndimage filter. If the dataset is lazy
-        an appropriate filter from `dask-image` will be applied if applicable.
+               **kwargs):
+        """Filters the entire dataset given some function applied to the data.
 
-        Additional considerations for lazy signals are given to the chunk structure of
-        some signal in order to maintain efficient computation.
+        The function must take a numpy or dask array as input and return a
+        numpy or dask array as output which has the same shape, and axes as
+        the input.
 
-        If you only want to filter some of the dimensions.
+        Parameters
+        ----------
+        func : function
+            Function to apply to the data. Must take a numpy or dask array as
+            input and return a numpy or dask array as output which has the
+            same shape as the input.
+        inplace : bool, optional
+            If True, the data is replaced by the filtered data. If False, a
+            new signal is returned. Default False.
+        **kwargs :
+            Passed to the function.
+
+        Examples
+        --------
+        >>> import pyxem as pxm
+        >>> from scipy.ndimage import gaussian_filter
+        >>> s = pxm.dummy_data.get_cbed_signal()
+        >>> s_filtered = s.filter(gaussian_filter, sigma=1)
 
         """
-        if isinstance(method, str):
-            if method == "difference_of_gaussians":
-                if self._lazy:
-                    _method = difference_of_gaussians_lazy
-                else:
-                    _method = difference_of_gaussians
-            elif self._lazy:
-                name = "dask_image.ndfilters"
-                _method = getattr(import_module(name), method)
-            else:
-                name = "scipy.ndimage"
-                _method = getattr(import_module(name), method)
-        else:
-            _method = method
+        new_data = func(self.data, **kwargs)
 
-        new_data = _method(self.data, **kwargs)
+        if new_data.shape != self.data.shape:
+            raise ValueError("The function must return an array with "
+                             "the same shape as the input.")
         if inplace:
-            self.data= new_data
+            self.data = new_data
             return
         else:
             return self._deepcopy_with_new_data(data=new_data)
@@ -1192,6 +1182,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Examples
         --------
+        >>> import pyxem as pxm
         >>> s = pxm.dummy_data.get_cbed_signal()
         >>> binary_image = np.random.randint(0, 2, (6, 6))
         >>> s_template = s.template_match_with_binary_image(
