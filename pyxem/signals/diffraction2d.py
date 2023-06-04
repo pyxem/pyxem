@@ -32,7 +32,9 @@ from hyperspy.signals import Signal2D, BaseSignal
 from hyperspy._signals.lazy import LazySignal
 from hyperspy._signals.signal2d import LazySignal2D
 from hyperspy.misc.utils import isiterable
+from importlib import import_module
 
+from pyxem.utils.filter_utils import difference_of_gaussians_lazy, difference_of_gaussians
 from pyxem.signals import (
     CommonDiffraction,
     DPCBaseSignal,

@@ -23,6 +23,7 @@ import hyperspy.api as hs
 from matplotlib import pyplot as plt
 from numpy.random import default_rng
 from skimage.draw import circle_perimeter_aa
+import scipy
 
 from pyxem.signals import (
     Diffraction1D,
