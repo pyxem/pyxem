@@ -177,6 +177,40 @@ class DiffractionVectors2D(Signal2D):
         else:
             return unique_peaks
 
+    def cluster_vectors(self,
+                        method="DBSCAN",
+                        real_space_columns=[0, 1],
+                        reciporical_space_columns=[2, 3],
+                        real_space_distance_threshold=1.,
+                        recip_space_distance_threshold=0.1,
+                        min_vectors=15
+                        ):
+        """This method clusters a list of vectors both in reciporical space and in real space.
+        The output is a list of vectors with a "label" which defines the cluster that each vector
+        belongs to.  Vectors with a label==0 are ignored.
+
+        Parameters
+        ----------
+        method: str
+            The method used to cluster the vectors
+        """
+        scale_factor = real_space_distance_threshold/recip_space_distance_threshold
+        real_vectors = self.data[:, real_space_columns]
+        recip_vectors = self.data[:, reciporical_space_columns]
+        real_vectors = real_vectors*scale_factor
+        vectors = np.stack(real_vectors, recip_vectors, axis=1)
+
+        if method == "DBSCAN":
+            clusters = DBSCAN(eps=recip_space_distance_threshold,
+                              min_samples=min_vectors,
+                              metric="euclidean").fit(vectors)
+        labels = clusters.labels_
+        vectors_and_labels = np.stack(self.data, labels[np.newaxis, :], axis=1)
+
+
+
+
+
     def get_magnitudes(self, out=None, rechunk=False):
         """
         Calculate the magnitude of diffraction vectors.
