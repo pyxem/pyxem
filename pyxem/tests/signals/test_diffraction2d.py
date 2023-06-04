@@ -1367,3 +1367,48 @@ class TestPlotNavigator:
         s_nav = Diffraction2D(np.zeros((2, 19)))
         s._navigator_probe = s_nav
         s.plot()
+
+
+class TestFilter:
+    @pytest.fixture
+    def three_section(self):
+        x = np.random.random((100, 50, 20, 20))
+        x[0:20, :, 5:7, 5:7] = x[0:20, :, 5:7, 5:7] + 10
+        x[20:60, :, 1:3, 14:16] = x[20:60, :, 1:3, 14:16] + 10
+        x[60:100, :, 6:8, 10:12] = x[60:100, :, 6:8, 10:12] + 10
+        d = Diffraction2D(x)
+        return d
+    @pytest.mark.parametrize("method", ["gaussian_filter",
+                                        scipy.ndimage.gaussian_filter, ])
+    @pytest.mark.parametrize("lazy", [True, False])
+    def test_filter(self, three_section, method, lazy):
+        if lazy:
+            three_section = three_section.as_lazy()
+        sigma = (3, 3, 3, 3)
+        new = three_section.filter(method=method, sigma=sigma, inplace=False)
+        three_section.filter(method=method, sigma=sigma, inplace=True)
+        np.testing.assert_array_almost_equal(new.data, three_section.data)
+
+    @pytest.mark.parametrize("lazy", [True, False])
+    def test_dog(self, three_section, lazy):
+        if lazy:
+            three_section = three_section.as_lazy()
+        sigma1 = (1, 1, 1, 1)
+        sigma2 = (3, 3, 3, 3)
+        new = three_section.filter(method="difference_of_gaussians",
+                                   sigma1=sigma1,
+                                   sigma2=sigma2,
+                                   inplace=False)
+        three_section.filter(method="difference_of_gaussians",
+                             sigma1=sigma1,
+                             sigma2=sigma2,
+                             inplace=True)
+        np.testing.assert_array_almost_equal(new.data, three_section.data)
+
+    def test_filter_lazy_fail(self, three_section):
+        sigma = (3, 3, 3, 3)
+        three_section = three_section.as_lazy()
+        three_section.rechunk((3, 3, -1, -1))
+        with pytest.raises(ValueError):
+            three_section.filter(method="gaussian_laplace",
+                                 sigma=sigma)
