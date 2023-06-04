@@ -18,8 +18,6 @@
 
 
 import numpy as np
-from skimage import filters
-from skimage.feature import match_template
 from scipy.ndimage import rotate
 from skimage import morphology
 import dask.array as da
@@ -30,7 +28,6 @@ import warnings
 import hyperspy.api as hs
 from hyperspy.signals import Signal2D, BaseSignal
 from hyperspy._signals.lazy import LazySignal
-from hyperspy._signals.signal2d import LazySignal2D
 from hyperspy.misc.utils import isiterable
 from importlib import import_module
 
@@ -1132,7 +1129,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         chunked_dim = len(unspanned_dim)
         return chunked_dim
 
-    def filter(self, method="gaussian_laplace", inplace=False, **kwargs):
+    def filter(self, method="gaussoan_filter", inplace=False, **kwargs):
         """Filters the entire dataset given some ndimage filter. If the dataset is lazy
         an appropriate filter from `dask-image` will be applied if applicable.
 
