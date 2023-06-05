@@ -181,10 +181,11 @@ class DiffractionVectors(BaseSignal):
             inplace=False,
             ragged=True,
         )
-        vectors = cls(gvectors)
-        vectors.scales = calibration
-        vectors.is_real_units = True
-        return vectors
+        gvectors.set_signal_type("diffraction_vectors")
+        #vectors = cls(gvectors)
+        gvectors.scales = calibration
+        gvectors.is_real_units = True
+        return gvectors
 
     @property
     def num_columns(self):
@@ -334,6 +335,9 @@ class DiffractionVectors(BaseSignal):
 
         column_offsets = np.append(column_offsets, offsets)
         column_scale = np.append(column_scale, scales)
+
+        vectors = vectors[np.logical_not(np.any(np.isnan(vectors), axis=1))]
+
 
         return DiffractionVectors2D(
             vectors, column_offsets=column_offsets, column_scale=column_scale
