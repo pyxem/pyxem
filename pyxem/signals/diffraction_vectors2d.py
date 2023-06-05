@@ -182,31 +182,42 @@ class DiffractionVectors2D(Signal2D):
                         real_space_columns=[0, 1],
                         reciporical_space_columns=[2, 3],
                         real_space_distance_threshold=1.,
-                        recip_space_distance_threshold=0.1,
-                        min_vectors=15
+                        recip_space_distance_threshold=0.4,
+                        min_samples=8,
+                        min_vectors=None,
                         ):
         """This method clusters a list of vectors both in reciporical space and in real space.
         The output is a list of vectors with a "label" which defines the cluster that each vector
-        belongs to.  Vectors with a label==0 are ignored.
+        belongs to.  Vectors with a label==-1 are outliers which are ignored.
 
         Parameters
         ----------
         method: str
             The method used to cluster the vectors
+        min_samples: int
+            Passed to DBSCAN this value should be around 2*num dimensions.
+        min_vectors: int
+            A strict check to limit clusters arising from less than `min_vectors`
+            vectors
         """
         scale_factor = real_space_distance_threshold/recip_space_distance_threshold
         real_vectors = self.data[:, real_space_columns]
         recip_vectors = self.data[:, reciporical_space_columns]
-        real_vectors = real_vectors*scale_factor
-        vectors = np.stack(real_vectors, recip_vectors, axis=1)
+        real_vectors = real_vectors/scale_factor
+        vectors = np.hstack([real_vectors, recip_vectors])
 
         if method == "DBSCAN":
             clusters = DBSCAN(eps=recip_space_distance_threshold,
-                              min_samples=min_vectors,
+                              min_samples=min_samples,
                               metric="euclidean").fit(vectors)
         labels = clusters.labels_
-        vectors_and_labels = np.stack(self.data, labels[np.newaxis, :], axis=1)
+        if min_vectors is not None:
+            label, counts = np.unique(labels, return_counts=True)
+            below_min_v = label[counts < min_vectors]
+            labels[np.isin(labels, below_min_v)]=-1
 
+        vectors_and_labels = np.hstack([self.data, labels[:, np.newaxis]])
+        return vectors_and_labels
 
 
 
