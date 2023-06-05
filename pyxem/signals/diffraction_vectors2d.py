@@ -217,10 +217,9 @@ class DiffractionVectors2D(Signal2D):
             labels[np.isin(labels, below_min_v)]=-1
 
         vectors_and_labels = np.hstack([self.data, labels[:, np.newaxis]])
-        return vectors_and_labels
-
-
-
+        new_signal = self._deepcopy_with_new_data(data=vectors_and_labels)
+        new_signal.set_signal_type("labeled_diffraction_vector")
+        return new_signal
 
     def get_magnitudes(self, out=None, rechunk=False):
         """
