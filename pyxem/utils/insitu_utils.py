@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -21,7 +21,7 @@ import scipy.ndimage as ndi
 import scipy.signal as ss
 
 
-def _register_drift_5d(data, shifts1, shifts2):
+def _register_drift_5d(data, shifts1, shifts2, order=1):
     """
     Register 5D data set using affine transformation
 
@@ -33,6 +33,9 @@ def _register_drift_5d(data, shifts1, shifts2):
         1D array for shifts in 1st real space direction or x in hyperspy indexing.
     shifts2: np.array
         1D array for shifts in 2nd real space direction or y in hyperspy indexing.
+    order: int
+        The order of the spline interpolation for affine transformation. Default
+        is 1, has to be in the range 0-5
 
     Returns
     -------
@@ -46,11 +49,11 @@ def _register_drift_5d(data, shifts1, shifts2):
         data_t[i, :, :, :, :] = ndi.affine_transform(data[i, :, :, :, :],
                                                      np.identity(4),
                                                      offset=(shifts1[i][0, 0, 0, 0], shifts2[i][0, 0, 0, 0], 0, 0),
-                                                     order=1)
+                                                     order=order)
     return data_t
 
 
-def _register_drift_2d(data, shift1, shift2):
+def _register_drift_2d(data, shift1, shift2, order=1):
     """
        Register 2D data set using affine transformation
 
@@ -62,6 +65,9 @@ def _register_drift_2d(data, shift1, shift2):
            shifts in 1st real space direction or x in hyperspy indexing.
        shift2: float
            shifts in 2nd real space direction or y in hyperspy indexing.
+       order: int
+           The order of the spline interpolation for affine transformation. Default
+           is 1, has to be in the range 0-5
 
        Returns
        -------
@@ -69,7 +75,7 @@ def _register_drift_2d(data, shift1, shift2):
            2D array after translation according to shift vectors
 
        """
-    data_t = ndi.affine_transform(data, np.identity(2), offset=(shift1, shift2), order=1)
+    data_t = ndi.affine_transform(data, np.identity(2), offset=(shift1, shift2), order=order)
     return data_t
 
 
@@ -106,7 +112,7 @@ def _g2_2d(data, normalization='split', k1bin=1, k2bin=1, tbin=1):
         overlap_factor = np.expand_dims(np.linspace(data.shape[-1], 1, data.shape[-1]), axis=(0, 1))
         norm_factor = norm[:, :, data.shape[-1]:0:-1] ** 2
         g2 = autocorr[:, :, data.shape[-1] - 1:] / norm_factor * overlap_factor
-    if normalization == 'split':
+    elif normalization == 'split':
         overlap_factor = np.expand_dims(np.linspace(data.shape[-1], 1, data.shape[-1]), axis=(0, 1))
         norm_factor = norm[:, :, data.shape[-1] - 1:] * norm[:, :, ::-1][:, :, data.shape[-1] - 1:]
         g2 = autocorr[:, :, data.shape[-1] - 1:] / norm_factor * overlap_factor

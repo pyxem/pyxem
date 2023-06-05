@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -85,7 +85,7 @@ class InSituDiffraction2D(Diffraction2D):
 
         return virtual_series
 
-    def get_drift_vectors(self, time_axis=2, **kwargs):
+    def get_drift_vectors(self, time_axis=2, reference='cascade', sub_pixel_factor=10, **kwargs):
         """
         Calculate real space drift vectors from time series of images
 
@@ -93,8 +93,14 @@ class InSituDiffraction2D(Diffraction2D):
         ----------
         s: Signal2D
             Time series of reconstructed images
+        reference: 'current', 'cascade', or 'stat'
+            reference argument passed to hs.signals.Signal2D.estimate_shift2D()
+            function. Default is 'cascade'
+        sub_pixel_factor: float
+            sub_pixel_factor passed to hs.signals.Signal2D.estimate_shift2D()
+            function. Default is 10
         **kwargs:
-            Passed to the hs.signals.Signal2D.estimate_shift2D() function
+            Passed to the get_time_series() function
 
         Returns
         -------
@@ -104,10 +110,8 @@ class InSituDiffraction2D(Diffraction2D):
         roi = kwargs.pop("roi", None)
         ref = self.get_time_series(roi=roi, time_axis=time_axis)
 
-        shift_reference = kwargs.pop("reference", "cascade")
-        sub_pixel = kwargs.pop("sub_pixel_factor", 10)
-        s = ref.estimate_shift2D(reference=shift_reference,
-                                 sub_pixel_factor=sub_pixel,
+        s = ref.estimate_shift2D(reference=reference,
+                                 sub_pixel_factor=sub_pixel_factor,
                                  **kwargs)
         shift_vectors = Signal1D(s)
 
@@ -116,7 +120,7 @@ class InSituDiffraction2D(Diffraction2D):
 
         return shift_vectors
 
-    def correct_real_space_drift(self, shifts=None, time_axis=2, lazy_result=True):
+    def correct_real_space_drift(self, shifts=None, time_axis=2, order=1, lazy_result=True):
         """
         Perform real space drift registration on the dataset.
 
@@ -129,6 +133,8 @@ class InSituDiffraction2D(Diffraction2D):
             Index of time axis. Default is 2
         lazy_result: bool, default True
             Whether to return lazy result.
+        order: int
+           The order of the spline interpolation for registration. Default is 1
 
         Returns
         ---------
@@ -170,6 +176,7 @@ class InSituDiffraction2D(Diffraction2D):
         mapped = data_clones.map_blocks(_register_drift_5d,
                                         shifts1=xdrift_dask,
                                         shifts2=ydrift_dask,
+                                        order=order,
                                         dtype='float32')
 
         registered_data = InSituDiffraction2D(
@@ -191,7 +198,7 @@ class InSituDiffraction2D(Diffraction2D):
 
         return registered_data
 
-    def correct_real_space_drift_fast(self, shifts=None, time_axis=2, lazy_result=True):
+    def correct_real_space_drift_fast(self, shifts=None, time_axis=2, order=1, **kwargs):
         """
         Perform real space drift registration on the dataset with fast performance
         over spatial axes. If signal is lazy, spatial axes must not be chunked
@@ -203,8 +210,10 @@ class InSituDiffraction2D(Diffraction2D):
             If None, shift vectors will be calculated automatically
         time_axis: int
             Index of time axis. Default is 2
-        lazy_result: bool, default True
-            Whether to return lazy result. Only relevant if signal is not lazy
+        order: int
+           The order of the spline interpolation for registration. Default is 1
+        **kwargs:
+            Passed to the hs.signal.BaseSignal.map() function
 
         Returns
         ---------
@@ -255,13 +264,13 @@ class InSituDiffraction2D(Diffraction2D):
         registered_data = s_transposed.map(_register_drift_2d,
                                            shift1=xs,
                                            shift2=ys,
-                                           inplace=False
+                                           order=order,
+                                           inplace=False,
+                                           **kwargs
                                            )
 
         registered_data_t = registered_data.transpose(navigation_axes=[-2, -1, -3])
         registered_data_t.set_signal_type("insitu_diffraction")
-        if self._lazy and not lazy_result:
-            registered_data_t.compute()
 
         return registered_data_t
 

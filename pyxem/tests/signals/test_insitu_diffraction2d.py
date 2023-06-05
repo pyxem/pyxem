@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -33,6 +33,10 @@ class TestTimeSeriesReconstruction:
         dc.axes_manager.signal_axes[1].scale = 0.1
         dc.axes_manager.signal_axes[1].name = "ky"
         return dc
+
+    def test_roll_time_axis(self, insitu_data):
+        rolled_data = insitu_data.roll_time_axis(0)
+        assert rolled_data.axes_manager.navigation_axes[2].size == insitu_data.axes_manager.navigation_axes[0].size
 
     @pytest.mark.parametrize("roi",
                              [hs.roi.CircleROI(1, 1, 0.5),
@@ -84,7 +88,8 @@ class TestCorrelation:
 
     def test_drift_corrected_g2_lazy(self, insitu_data):
         shifts = Signal1D(np.repeat(np.linspace(0, 2, 50)[:, np.newaxis], repeats=2, axis=1))
-        shifted_data = insitu_data.correct_real_space_drift(shifts=shifts)
+        lazy_data = insitu_data.as_lazy()
+        shifted_data = lazy_data.correct_real_space_drift(shifts=shifts)
         assert shifted_data._lazy
         assert isinstance(shifted_data, InSituDiffraction2D)
         g2_lazy = shifted_data.get_g2_2d_kresolved()
@@ -100,7 +105,7 @@ class TestCorrelation:
                               None]
                              )
     def test_fast_drift_corrected_g2_nonlazy(self, insitu_data, shifts):
-        shifted_data = insitu_data.correct_real_space_drift_fast(shifts=shifts, lazy_result=False)
+        shifted_data = insitu_data.correct_real_space_drift_fast(shifts=shifts)
         assert isinstance(shifted_data, InSituDiffraction2D)
 
         g2 = shifted_data.get_g2_2d_kresolved()
@@ -130,6 +135,13 @@ class TestCorrelation:
         num_index = ~np.isreal(mean_g2)
         np.testing.assert_allclose(np.ones((10, 10))[num_index], mean_g2[num_index], atol=0.1)
 
+    @pytest.mark.parametrize('normalization', ['self', 'split'])
+    def test_g2_normalization(self, insitu_data, normalization):
+        g2 = insitu_data.get_g2_2d_kresolved(normalization=normalization)
+        mean_g2 = g2.isig[:, :, 1:-1].mean(axis=[-1, -2, -3]).data
+        num_index = ~np.isreal(mean_g2)
+        np.testing.assert_allclose(np.ones((10, 10))[num_index], mean_g2[num_index], atol=0.1)
+
     @pytest.mark.parametrize("trs", [np.linspace(0, 10, 25), 10])
     @pytest.mark.parametrize("bins", [(2, 2, 5), (1, 4, 1)])
     def test_g2_bin_resample_time(self, insitu_data, trs, bins):
@@ -142,3 +154,15 @@ class TestCorrelation:
         mean_g2 = g2.isig[:, :, 1:-1].mean(axis=[-1, -2, -3]).data
         num_index = ~np.isreal(mean_g2)
         np.testing.assert_allclose(np.ones((10, 10))[num_index], mean_g2[num_index], atol=0.1)
+
+    def test_unrolled_time_axes(self, insitu_data):
+        rolled_data = insitu_data.roll_time_axis(0)
+        shifted_data = rolled_data.correct_real_space_drift(shifts=Signal1D(np.zeros((50, 2))),
+                                                            time_axis=1)
+        assert shifted_data.axes_manager.navigation_axes[2].size == insitu_data.axes_manager.navigation_axes[2].size
+        shifted_data_fast = rolled_data.correct_real_space_drift_fast(shifts=Signal1D(np.zeros((50, 2))),
+                                                            time_axis=1)
+        assert shifted_data_fast.axes_manager.navigation_axes[2].size ==\
+               insitu_data.axes_manager.navigation_axes[2].size
+        g2 = rolled_data.get_g2_2d_kresolved(time_axis=1)
+        assert g2.axes_manager.signal_axes[-1].size == insitu_data.axes_manager.navigation_axes[2].size
