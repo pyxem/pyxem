@@ -22,7 +22,7 @@ from scipy.spatial.distance import cdist
 from sklearn.cluster import DBSCAN
 import numpy as np
 
-from pyxem.utils.labeled_vector_utils import get_vector_dist
+from pyxem.utils.labeled_vector_utils import get_vector_dist, column_mean
 
 
 class LabeledDiffractionVectors2D(DiffractionVectors2D):
@@ -59,9 +59,9 @@ class LabeledDiffractionVectors2D(DiffractionVectors2D):
         hi = np.searchsorted(labels, sorted_index, side="right")
 
         if max_search is not None:
-            mean_pos = self.map_vectors(np.mean,
+            mean_pos = self.map_vectors(column_mean,
+                                        columns=[0, 1],
                                         label_index=-1,
-                                        axis=0,
                                         dtype=float,
                                         shape=(2,))
             dist_mat = cdist(mean_pos, mean_pos)
@@ -107,7 +107,7 @@ class LabeledDiffractionVectors2D(DiffractionVectors2D):
             is related to the label for each vector.
 
         """
-        vectors= self.data
+        vectors = self.data
         labels = vectors[:,label_index]
         label_order = labels.argsort()
         labels = labels[label_order]  # Order the labels
@@ -153,6 +153,7 @@ class LabeledDiffractionVectors2D(DiffractionVectors2D):
             print(f"{np.max(labels) + 1} : Clusters Found!")
             vectors_and_labels = np.hstack([vectors, new_labels[:, np.newaxis]])
             new_signal = self._deepcopy_with_new_data(data=vectors_and_labels)
+            new_signal.axes_manager.signal_axes[0].size = new_signal.axes_manager.signal_axes[0].size+1
             self.is_clustered = True
             return new_signal
 

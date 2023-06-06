@@ -41,3 +41,7 @@ def vectors2image(vectors,
     im = np.zeros(image_size)
     im[red_points[:, 0], red_points[:, 1]] = 1
     return im
+
+
+def column_mean(vectors, columns=[0, 1]):
+    return np.mean(vectors[:, columns], axis=0)
