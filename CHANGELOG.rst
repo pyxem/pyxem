@@ -14,6 +14,7 @@ Unreleased
 Fixed
 -----
 - Remove `ipywidgets` from requirements as it is not a dependency
+- Set skimage != to version 0.21.0 because of regression
 
 
 2023-05-08 - version 0.15.1
