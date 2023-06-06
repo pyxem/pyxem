@@ -21,13 +21,17 @@ from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
 from scipy.spatial.distance import cdist
 from sklearn.cluster import DBSCAN
 import numpy as np
+import matplotlib.pyplot as plt
 
-from pyxem.utils.labeled_vector_utils import get_vector_dist, column_mean
+from pyxem.utils.labeled_vector_utils import get_vector_dist, column_mean, vectors2image
 
 
 class LabeledDiffractionVectors2D(DiffractionVectors2D):
     """The labeled diffraction vectors 2d signal
     """
+    _signal_dimension = 2
+    _signal_type = "labeled_diffraction_vectors"
+
     @property
     def unique_counts(self):
         _, counts = np.unique(self.data, return_counts=True, axis=1)
@@ -35,18 +39,18 @@ class LabeledDiffractionVectors2D(DiffractionVectors2D):
 
     @property
     def is_clustered(self):
-        return self.metadata.Vectors["is_clustered"]
+        return self.metadata.get_item("Vectors.is_clustered", False)
 
     @is_clustered.setter
     def is_clustered(self, value):
-        self.metadata["Vectors.is_clustered"] = value
+        self.metadata.set_item("Vectors.is_clustered", value)
 
     def get_dist_matrix(self,
                         max_search=None
                         ):
         """Returns a distance matrix from a list of vectors with labels in the last column of the dataset.
         """
-        vectors=self.data
+        vectors = self.data
         max_label = int(np.max(vectors[:, -1])) + 1
         labels = vectors[:, -1]
         cross_corr_matrix = np.zeros((max_label, max_label))
@@ -108,7 +112,7 @@ class LabeledDiffractionVectors2D(DiffractionVectors2D):
 
         """
         vectors = self.data
-        labels = vectors[:,label_index]
+        labels = vectors[:, label_index]
         label_order = labels.argsort()
         labels = labels[label_order]  # Order the labels
         vectors = vectors[label_order]  # Order the vectors
@@ -153,12 +157,59 @@ class LabeledDiffractionVectors2D(DiffractionVectors2D):
             print(f"{np.max(labels) + 1} : Clusters Found!")
             vectors_and_labels = np.hstack([vectors, new_labels[:, np.newaxis]])
             new_signal = self._deepcopy_with_new_data(data=vectors_and_labels)
-            new_signal.axes_manager.signal_axes[0].size = new_signal.axes_manager.signal_axes[0].size+1
-            self.is_clustered = True
+            new_signal.axes_manager.signal_axes[0].size = new_signal.axes_manager.signal_axes[0].size + 1
+            new_signal.is_clustered = True
             return new_signal
 
-    def plot_clustered(self):
+    def plot_clustered(self,
+                       nav_columms=None,
+                       signal_columns=None,
+                       navigation_pixels=(105, 105),
+                       scales=None,
+                       offsets=None,
+                       labels=None,
+                       signal=None,
+                       figsize=None,):
+        if signal_columns is None:
+            signal_columns = [2, 3]
+        if nav_columms is None:
+            nav_columms = [0, 1]
+        if scales is None:
+            nav = self.data[:, nav_columms]
+            xscale = (np.max(nav[:, 0]) - np.min(nav[:, 0])) / (navigation_pixels[0]-1)
+            yscale = (np.max(nav[:, 1]) - np.min(nav[:, 1])) / (navigation_pixels[1]-1)
+            scales = (xscale, yscale)
+            print(scales)
+        if offsets is None:
+            nav = self.data[:, nav_columms]
+            offsets = (np.min(nav[:, 0]), np.min(nav[:, 1]))
         if not self.is_clustered:
             raise ValueError("You must first cluster the dataset using the "
                              "`cluster_labeled_vectors` function.")
-
+        num_clusters = int(np.max(self.data[:, -1]) + 1)
+        fig, axs = plt.subplots(2, num_clusters, figsize=figsize)
+        if labels is None:
+            labels = range(num_clusters)
+        for i in labels:
+            clustered_peaks = self.data[self.data[:, -1] == i]
+            unique_peaks = np.unique(clustered_peaks[:, -2])
+            for p in unique_peaks:
+                is_p = clustered_peaks[:, -2] == p
+                pks = clustered_peaks[is_p]
+                img = vectors2image(pks,
+                                    image_size=navigation_pixels,
+                                    scales=scales,
+                                    offsets=offsets,
+                                    indexes=nav_columms)
+                img[img == 0] = np.nan
+                ext = tuple((np.array(scales)*navigation_pixels)+offsets)
+                ext = (offsets[0], ext[0], offsets[1], ext[1])
+                axs[0, i].imshow(img,
+                                 alpha=0.2,
+                                 extent=ext)
+            if signal is not None:
+                axs[1, i].imshow(signal.data,
+                                 extent=signal.axes_manager.signal_extent)
+            axs[1, i].scatter(clustered_peaks[:, signal_columns[1]],
+                              clustered_peaks[:, signal_columns[0]])
+        return fig, axs

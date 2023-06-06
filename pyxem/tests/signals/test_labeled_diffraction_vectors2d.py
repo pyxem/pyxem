@@ -55,4 +55,9 @@ class TestLabeledDiffractionVectors2D:
         assert_array_equal(labeled_v.data[:, -1],
                            [0, 0, 1, 1, 0, 0, 1, 1])
         assert labeled_v.axes_manager.signal_shape == (4, 8)
+        print(labeled_v.metadata)
+        assert labeled_v.is_clustered 
 
+    def test_plot_cluster_labeled_vectors(self, labeled_array):
+        labeled_v = labeled_array.cluster_labeled_vectors()
+        labeled_v.plot_clustered()

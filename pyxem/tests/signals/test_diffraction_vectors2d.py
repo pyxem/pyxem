@@ -23,7 +23,7 @@ from sklearn.cluster import DBSCAN
 
 from hyperspy.signals import Signal2D
 
-from pyxem.signals import DiffractionVectors2D
+from pyxem.signals import DiffractionVectors2D, LabeledDiffractionVectors2D
 
 
 class TestDiffractionVectors2D:
@@ -77,3 +77,12 @@ class TestSingleDiffractionVectors2D:
         filtered_vectors = self.vector.filter_detector_edge(exclude_width=10)
         ans = np.array([[0.063776, 0.011958]])
         np.testing.assert_almost_equal(filtered_vectors.data, ans)
+
+    def test_cluster_vectors(self):
+        vectors = [[1,2,3,4],
+                   [1,2,3,3],
+                   [5,6,7,8],
+                   [5,6,7,9],]
+        v = DiffractionVectors2D(vectors)
+        clustered_v = v.cluster_vectors()
+        assert isinstance(clustered_v, LabeledDiffractionVectors2D)

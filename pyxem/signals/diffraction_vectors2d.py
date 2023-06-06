@@ -185,6 +185,7 @@ class DiffractionVectors2D(Signal2D):
                         recip_space_distance_threshold=0.4,
                         min_samples=8,
                         min_vectors=None,
+
                         ):
         """This method clusters a list of vectors both in reciporical space and in real space.
         The output is a list of vectors with a "label" which defines the cluster that each vector
@@ -218,7 +219,7 @@ class DiffractionVectors2D(Signal2D):
 
         vectors_and_labels = np.hstack([self.data, labels[:, np.newaxis]])
         new_signal = self._deepcopy_with_new_data(data=vectors_and_labels)
-        new_signal.set_signal_type("labeled_diffraction_vector")
+        new_signal.set_signal_type("labeled_diffraction_vectors")
         return new_signal
 
     def get_magnitudes(self, out=None, rechunk=False):
