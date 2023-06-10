@@ -48,6 +48,7 @@ from .strain_map import StrainMap
 from .correlation1d import Correlation1D
 from .tensor_field import DisplacementGradientMap
 from .virtual_dark_field_image import VirtualDarkFieldImage
+from .insitu_diffraction2d import InSituDiffraction2D
 
 
 __all__ = [
@@ -90,4 +91,5 @@ __all__ = [
     "Correlation1D",
     "DisplacementGradientMap",
     "VirtualDarkFieldImage",
+    "InSituDiffraction2D",
 ]
