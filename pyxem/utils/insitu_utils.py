@@ -46,40 +46,44 @@ def _register_drift_5d(data, shifts1, shifts2, order=1):
     data_t = np.zeros_like(data)
     time_size = len(shifts1)
     for i in range(time_size):
-        data_t[i, :, :, :, :] = ndi.affine_transform(data[i, :, :, :, :],
-                                                     np.identity(4),
-                                                     offset=(shifts1[i][0, 0, 0, 0], shifts2[i][0, 0, 0, 0], 0, 0),
-                                                     order=order)
+        data_t[i, :, :, :, :] = ndi.affine_transform(
+            data[i, :, :, :, :],
+            np.identity(4),
+            offset=(shifts1[i][0, 0, 0, 0], shifts2[i][0, 0, 0, 0], 0, 0),
+            order=order,
+        )
     return data_t
 
 
 def _register_drift_2d(data, shift1, shift2, order=1):
     """
-       Register 2D data set using affine transformation
+    Register 2D data set using affine transformation
 
-        Parameters
-       ----------
-       data: np.array or dask.array
-           Input image in 2D array (ry * rx)
-       shift1: float
-           shifts in 1st real space direction or x in hyperspy indexing.
-       shift2: float
-           shifts in 2nd real space direction or y in hyperspy indexing.
-       order: int
-           The order of the spline interpolation for affine transformation. Default
-           is 1, has to be in the range 0-5
+     Parameters
+    ----------
+    data: np.array or dask.array
+        Input image in 2D array (ry * rx)
+    shift1: float
+        shifts in 1st real space direction or x in hyperspy indexing.
+    shift2: float
+        shifts in 2nd real space direction or y in hyperspy indexing.
+    order: int
+        The order of the spline interpolation for affine transformation. Default
+        is 1, has to be in the range 0-5
 
-       Returns
-       -------
-       data_t: np.array
-           2D array after translation according to shift vectors
+    Returns
+    -------
+    data_t: np.array
+        2D array after translation according to shift vectors
 
-       """
-    data_t = ndi.affine_transform(data, np.identity(2), offset=(shift1, shift2), order=order)
+    """
+    data_t = ndi.affine_transform(
+        data, np.identity(2), offset=(shift1, shift2), order=order
+    )
     return data_t
 
 
-def _g2_2d(data, normalization='split', k1bin=1, k2bin=1, tbin=1):
+def _g2_2d(data, normalization="split", k1bin=1, k2bin=1, tbin=1):
     """
     Calculate k resolved g2(k,t) from I(t,k_r,k_phi)
 
@@ -102,23 +106,42 @@ def _g2_2d(data, normalization='split', k1bin=1, k2bin=1, tbin=1):
         Time correlation function g2(t,k_r,k_phi)
     """
     data = data.T
-    data = data.reshape((data.shape[0] // k1bin), k1bin, (data.shape[1] // k2bin), k2bin, (data.shape[2] // tbin),
-                        tbin).sum(5).sum(3).sum(1)
+    data = (
+        data.reshape(
+            (data.shape[0] // k1bin),
+            k1bin,
+            (data.shape[1] // k2bin),
+            k2bin,
+            (data.shape[2] // tbin),
+            tbin,
+        )
+        .sum(5)
+        .sum(3)
+        .sum(1)
+    )
 
     # Calculate autocorrelation along time axis
-    autocorr = ss.fftconvolve(data, data[:, :, ::-1], mode='full', axes=[-1])
-    norm = ss.fftconvolve(np.ones(data.shape), data[:, :, ::-1], mode='full', axes=[-1])
-    if normalization == 'self':
-        overlap_factor = np.expand_dims(np.linspace(data.shape[-1], 1, data.shape[-1]), axis=(0, 1))
-        norm_factor = norm[:, :, data.shape[-1]:0:-1] ** 2
-        g2 = autocorr[:, :, data.shape[-1] - 1:] / norm_factor * overlap_factor
-    elif normalization == 'split':
-        overlap_factor = np.expand_dims(np.linspace(data.shape[-1], 1, data.shape[-1]), axis=(0, 1))
-        norm_factor = norm[:, :, data.shape[-1] - 1:] * norm[:, :, ::-1][:, :, data.shape[-1] - 1:]
-        g2 = autocorr[:, :, data.shape[-1] - 1:] / norm_factor * overlap_factor
+    autocorr = ss.fftconvolve(data, data[:, :, ::-1], mode="full", axes=[-1])
+    norm = ss.fftconvolve(np.ones(data.shape), data[:, :, ::-1], mode="full", axes=[-1])
+    if normalization == "self":
+        overlap_factor = np.expand_dims(
+            np.linspace(data.shape[-1], 1, data.shape[-1]), axis=(0, 1)
+        )
+        norm_factor = norm[:, :, data.shape[-1] : 0 : -1] ** 2
+        g2 = autocorr[:, :, data.shape[-1] - 1 :] / norm_factor * overlap_factor
+    elif normalization == "split":
+        overlap_factor = np.expand_dims(
+            np.linspace(data.shape[-1], 1, data.shape[-1]), axis=(0, 1)
+        )
+        norm_factor = (
+            norm[:, :, data.shape[-1] - 1 :]
+            * norm[:, :, ::-1][:, :, data.shape[-1] - 1 :]
+        )
+        g2 = autocorr[:, :, data.shape[-1] - 1 :] / norm_factor * overlap_factor
     else:
         raise ValueError(
-            normalization + " not recognize, normalization must be chosen 'split' or 'self'"
+            normalization
+            + " not recognize, normalization must be chosen 'split' or 'self'"
         )
 
     return g2.T
@@ -145,7 +168,9 @@ def _get_resample_time(t_size, dt, t_rs_size):
     t_rs = np.zeros(t_rs_size, dtype=float)
 
     for i in range(t_rs_size):
-        t_rs[i] = np.power(10, np.log10(dt) + np.log10(t_size - 1) * i / (t_rs_size - 1))
+        t_rs[i] = np.power(
+            10, np.log10(dt) + np.log10(t_size - 1) * i / (t_rs_size - 1)
+        )
 
     return t_rs
 
@@ -171,5 +196,7 @@ def _interpolate_g2_2d(g2, t_rs, dt):
     t = np.round(t_rs / dt, 8)
     g2_l = g2[np.floor(t).astype(int)]
     g2_h = g2[np.ceil(t).astype(int)]
-    g2_rs = g2_l + (g2_h - g2_l) * (t - np.floor(t).astype(int))[:, np.newaxis, np.newaxis]
+    g2_rs = (
+        g2_l + (g2_h - g2_l) * (t - np.floor(t).astype(int))[:, np.newaxis, np.newaxis]
+    )
     return g2_rs
