@@ -29,7 +29,12 @@ pyxem is an extension of the hyperspy library for multi-dimensional data analysi
 **Basic Documentation is available** `here <https://pyxem.readthedocs.io/en/latest/>`__.
 
 If analysis using pyxem forms a part of published work please cite the DOI at the top of this page.
-In addition, we would appreciate an additional citation to the following paper if you use the orientation mapping capabilities:
+
+## Functionality with supporting manuscripts
+
+In addition to citing the package we would appreciate an additional citation to `methods papers' if you use the following capabilities:
+
+### Orientation Mapping
 
 ::
 
@@ -42,5 +47,11 @@ In addition, we would appreciate an additional citation to the following paper i
         publisher={Elsevier},
         doi={10.1016/j.ultramic.2022.113517}
     }
+
+### Strain Mapping 
+
+'Two-Dimensional Strain Mapping with Scanning Precession Electron Diffraction: An Investigation into Data Analysis Routines' by Crout et al. 
+which is freely avaliable at https://arxiv.org/abs/2307.01071
+
 
 pyxem is released under the GPL v3 license.
