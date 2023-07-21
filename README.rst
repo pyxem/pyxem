@@ -18,7 +18,7 @@
 .. |black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
 .. _black: https://github.com/psf/black
 
-pyxem is an open-source python library for multi-dimensional diffraction microscopy.
+pyxem is an open-source (GPL v3) python library for multi-dimensional diffraction microscopy.
 
 The package defines objects and functions for the analysis of numerous diffraction patterns. It has been primarily developed as a platform for hybrid diffraction-microscopy based on 4D scanning diffraction microscopy data in which a 2D diffraction pattern is recorded at every position in a 2D scan of a specimen.
 
@@ -28,8 +28,10 @@ pyxem is an extension of the hyperspy library for multi-dimensional data analysi
 
 **Basic Documentation is available** `here <https://pyxem.readthedocs.io/en/latest/>`__.
 
-If analysis using pyxem forms a part of published work please cite the DOI at the top of this page.
-In addition, we would appreciate an additional citation to the following paper if you use the orientation mapping capabilities:
+If analysis using pyxem forms a part of published work please cite the DOI at the top of this page. In addition to citing the package we would appreciate an additional citation to methods papers if you use the following capabilities:
+
+Orientation Mapping
+*******************
 
 ::
 
@@ -43,4 +45,8 @@ In addition, we would appreciate an additional citation to the following paper i
         doi={10.1016/j.ultramic.2022.113517}
     }
 
-pyxem is released under the GPL v3 license.
+Strain Mapping 
+**************
+
+*Two-Dimensional Strain Mapping with Scanning Precession Electron Diffraction: An Investigation into Data Analysis Routines* by Crout et al. 
+which is freely avaliable at https://arxiv.org/abs/2307.01071
