@@ -249,7 +249,7 @@ def _warp_polar_custom(
     T = dispatcher.linspace(0, 2 * dispatcher.pi, H).reshape(H, 1)
     R = dispatcher.linspace(0, radius, W).reshape(1, W)
     X = R * dispatcher.cos(T) + cx
-    Y = R * dispatcher.sin(T) + cy
+    Y = -R * dispatcher.sin(T) + cy
     coordinates = dispatcher.stack([Y, X])
     map_function = _get_map_function(dispatcher)
     polar = map_function(image.astype(precision), coordinates, order=order)
