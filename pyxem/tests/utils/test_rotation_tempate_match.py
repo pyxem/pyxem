@@ -95,6 +95,7 @@ def test_match_image_to_template(mock_sim, rot, dr, dt, nim, nt):
     )
     # generate an image from the template
     tim = np.zeros((40, 40))
+    y = 40 - y
     tim[np.rint(y).astype(np.int32), np.rint(x).astype(np.int32)] = 1.0
     # compare image and template and retrieve the same angle
     a, c = iutls.get_in_plane_rotation_correlation(
@@ -126,6 +127,7 @@ def test_match_image_to_template_gpu(mock_sim, rot, dr, dt, nim, nt):
     )
     # generate an image from the template
     tim = cp.zeros((40, 40))
+    y = 40 - y
     tim[np.rint(y).astype(np.int32), np.rint(x).astype(np.int32)] = 1.0
     # compare image and template and retrieve the same angle
     a, c = iutls.get_in_plane_rotation_correlation(
