@@ -275,7 +275,7 @@ class DPCSignal2D(Signal2D):
         autolim : bool, default True
         autolim_sigma : float, default 4
         magnitude_limits : tuple of floats, default None
-            Manually sets the value limits for the color signal.
+            Manually sets the value limits for the magnitude signal.
             For this, autolim needs to be False.
 
         Returns
@@ -506,7 +506,7 @@ class DPCSignal2D(Signal2D):
         autolim_sigma : float, default 4
         magnitude_limits : tuple of floats, default None
             Manually sets the value limits for the color signal.
-            autolim needs to be False.
+            For this, autolim needs to be False.
 
         Returns
         -------

@@ -228,6 +228,7 @@ class TestGetDpcSignal:
         s_random = DPCSignal2D(data_random)
         s_random.get_color_signal()
         s_random.get_color_signal(rotation=45)
+        s_random.get_color_signal(autolim=False, magnitude_limits=(0,30))
 
     def test_get_color_signal_zeros(self):
         s = DPCSignal2D(np.zeros((2, 100, 100)))
@@ -257,6 +258,7 @@ class TestGetDpcSignal:
             scalebar_size=10,
         )
         s.get_color_image_with_indicator(only_phase=True)
+        s.get_color_image_with_indicator(autolim=False, magnitude_limits=(0, 0.5))
         fig, ax = subplots()
         s.get_color_image_with_indicator(ax=ax)
 
