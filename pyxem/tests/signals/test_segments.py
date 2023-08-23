@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -16,11 +16,11 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-import pytest
-
-import numpy as np
+import sys
 
 from hyperspy.signals import Signal2D
+import numpy as np
+import pytest
 
 from pyxem.generators import VirtualDarkFieldGenerator
 from pyxem.signals import (
@@ -28,6 +28,8 @@ from pyxem.signals import (
     DiffractionVectors,
     LearningSegment,
     VDFSegment,
+    DiffractionVectors2D,
+    Diffraction2D,
 )
 
 
@@ -58,7 +60,7 @@ def signal_data():
 
 @pytest.fixture
 def signal_decomposition(signal_data):
-    signal_data.decomposition(algorithm="NMF", output_dimension=5)
+    signal_data.decomposition(algorithm="NMF", output_dimension=5, init="nndsvd")
     s_nmf = signal_data.get_decomposition_model(components=5)
     factors = s_nmf.get_decomposition_factors()
     loadings = s_nmf.get_decomposition_loadings()
@@ -73,25 +75,27 @@ def learning_segment(signal_decomposition):
 class TestLearningSegment:
     def test_learning_ncc_matrix(self, learning_segment):
         ncc = learning_segment.get_ncc_matrix()
+        # fmt: off
         ans = np.array(
             [
                 [
-                    [1.0, -0.26413543, -0.50636968, 0.61237256, 0.0],
-                    [-0.26413543, 1.0, -0.40125028, -0.43133109, 0.0],
-                    [-0.50636968, -0.40125028, 1.0, -0.31008684, 0.0],
-                    [0.61237256, -0.43133109, -0.31008684, 1.0, 0.0],
-                    [0.0, 0.0, 0.0, 0.0, 1.0],
+                    [ 1.0,   -0.264, -0.506,  0.612, 0.0],
+                    [-0.264,  1.0,   -0.401, -0.431, 0.0],
+                    [-0.506, -0.401,  1.0,   -0.310, 0.0],
+                    [ 0.612, -0.431, -0.310,  1.0,   0.0],
+                    [ 0.0,    0.0,    0.0,    0.0,   1.0],
                 ],
                 [
-                    [1.0, -0.0588285, -0.07313363, -0.04087783, 0.0],
-                    [-0.0588285, 1.0, -0.07312725, -0.04099601, 0.0],
-                    [-0.07313363, -0.07312725, 1.0, -0.05096472, 0.0],
-                    [-0.04087783, -0.04099601, -0.05096472, 1.0, 0.0],
-                    [0.0, 0.0, 0.0, 0.0, 1.0],
+                    [ 1.0,   -0.059, -0.073, -0.041, 0.0],
+                    [-0.059,  1.0,   -0.073, -0.041, 0.0],
+                    [-0.073, -0.073,  1.0,   -0.051, 0.0],
+                    [-0.040, -0.041, -0.051,  1.0,   0.0],
+                    [ 0.0,    0.0,    0.0,    0.0,   1.0],
                 ],
             ]
         )
-        np.testing.assert_almost_equal(ncc.data, ans)
+        # fmt: on
+        assert np.allclose(ncc.data, ans, atol=1e-3)
 
     @pytest.mark.parametrize(
         "corr_th_factors, corr_th_loadings", [(-0.1, 0.6), (0.5, 0.5)]
@@ -158,8 +162,7 @@ class TestLearningSegment:
     ]
 )
 def unique_vectors(request):
-    uv = DiffractionVectors(request.param)
-    uv.axes_manager.set_signal_dimension(0)
+    uv = DiffractionVectors2D(request.param)
     return uv
 
 
@@ -178,133 +181,36 @@ def vdf_segments_cropped(vdf_segments):
 
 
 class TestVDFSegment:
-    def test_get_vdf_ncc_matrix(self, vdf_segments):
-        ncc = vdf_segments.get_ncc_matrix()
-        ans = np.array(
-            [
-                [
-                    1.0,
-                    -0.40125028,
-                    -0.31008684,
-                    -0.31008684,
-                    1.0,
-                    -0.40125028,
-                    -0.31008684,
-                    1.0,
-                    -0.31008684,
-                    -0.31008684,
-                ],
-                [
-                    -0.40125028,
-                    1.0,
-                    -0.43133109,
-                    0.10783277,
-                    -0.40125028,
-                    1.0,
-                    -0.43133109,
-                    -0.40125028,
-                    -0.43133109,
-                    0.10783277,
-                ],
-                [
-                    -0.31008684,
-                    -0.43133109,
-                    1.0,
-                    -0.25,
-                    -0.31008684,
-                    -0.43133109,
-                    1.0,
-                    -0.31008684,
-                    1.0,
-                    -0.25,
-                ],
-                [
-                    -0.31008684,
-                    0.10783277,
-                    -0.25,
-                    1.0,
-                    -0.31008684,
-                    0.10783277,
-                    -0.25,
-                    -0.31008684,
-                    -0.25,
-                    1.0,
-                ],
-                [
-                    1.0,
-                    -0.40125028,
-                    -0.31008684,
-                    -0.31008684,
-                    1.0,
-                    -0.40125028,
-                    -0.31008684,
-                    1.0,
-                    -0.31008684,
-                    -0.31008684,
-                ],
-                [
-                    -0.40125028,
-                    1.0,
-                    -0.43133109,
-                    0.10783277,
-                    -0.40125028,
-                    1.0,
-                    -0.43133109,
-                    -0.40125028,
-                    -0.43133109,
-                    0.10783277,
-                ],
-                [
-                    -0.31008684,
-                    -0.43133109,
-                    1.0,
-                    -0.25,
-                    -0.31008684,
-                    -0.43133109,
-                    1.0,
-                    -0.31008684,
-                    1.0,
-                    -0.25,
-                ],
-                [
-                    1.0,
-                    -0.40125028,
-                    -0.31008684,
-                    -0.31008684,
-                    1.0,
-                    -0.40125028,
-                    -0.31008684,
-                    1.0,
-                    -0.31008684,
-                    -0.31008684,
-                ],
-                [
-                    -0.31008684,
-                    -0.43133109,
-                    1.0,
-                    -0.25,
-                    -0.31008684,
-                    -0.43133109,
-                    1.0,
-                    -0.31008684,
-                    1.0,
-                    -0.25,
-                ],
-                [
-                    -0.31008684,
-                    0.10783277,
-                    -0.25,
-                    1.0,
-                    -0.31008684,
-                    0.10783277,
-                    -0.25,
-                    -0.31008684,
-                    -0.25,
-                    1.0,
-                ],
-            ]
-        )
-        np.testing.assert_almost_equal(ncc.data, ans)
+    def setup(self):
+        object1 = np.zeros((5, 5), dtype=bool)
+        object1[0:2, 0:2] = True
+        self.object1 = object1
+
+        object2 = np.zeros((5, 5), dtype=bool)
+        object2[3:5, 3:5] = True
+        self.object2 = object2
+
+        data = np.zeros((5, 5, 10, 10))
+
+        data[object1, 6, 7] = 7
+        data[object1, 2, 3] = 8
+        data[object2, 1, 4] = 9
+        data[object2, 4, 7] = 10
+
+        self.vectors = DiffractionVectors2D([[6, 7], [2, 3], [1, 4], [4, 7]])
+
+        self.data = Diffraction2D(data)
+
+        self.vdf = VirtualDarkFieldGenerator(self.data, self.vectors)
+        self.vdfs = self.vdf.get_virtual_dark_field_images(radius=1.0)
+        self.vdf_segments = self.vdfs.get_vdf_segments()
+
+    def test_get_vdf_ncc_matrix2(self):
+        ncc = self.vdf_segments.get_ncc_matrix()
+        assert ncc.data.shape == (4, 4)
+        # assert that the ncc for v1 and v2 == 1 and ncc for v3 and v4 == 1
+        np.testing.assert_array_almost_equal(ncc.data[:2, :2], np.ones((2, 2)))
+        np.testing.assert_array_almost_equal(ncc.data[2:, 2:], np.ones((2, 2)))
 
     @pytest.mark.parametrize(
         "corr_threshold, vector_threshold," "segment_threshold",

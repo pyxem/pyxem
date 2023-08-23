@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -17,7 +17,6 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
 from hyperspy.signals import Signal2D
 from hyperspy._signals.lazy import LazySignal
 
@@ -27,6 +26,7 @@ from hyperspy.drawing.utils import plot_images
 
 class Power2D(Signal2D):
     """Signal class for the power spectrum of some Correlation"""
+
     _signal_type = "power"
 
     def __init__(self, *args, **kwargs):
@@ -104,5 +104,4 @@ class Power2D(Signal2D):
 
 
 class LazyPower2D(LazySignal, Power2D):
-
     pass

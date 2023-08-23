@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -23,7 +23,13 @@ import pytest
 from hyperspy.signals import Signal2D
 
 from pyxem.generators import VirtualDarkFieldGenerator
-from pyxem.signals import ElectronDiffraction2D, DiffractionVectors, VDFSegment
+from pyxem.signals import (
+    ElectronDiffraction2D,
+    DiffractionVectors,
+    VDFSegment,
+    DiffractionVectors2D,
+    VirtualDarkFieldImage,
+)
 
 
 @pytest.fixture(
@@ -43,8 +49,7 @@ from pyxem.signals import ElectronDiffraction2D, DiffractionVectors, VDFSegment
     ]
 )
 def unique_vectors(request):
-    uv = DiffractionVectors(request.param)
-    uv.axes_manager.set_signal_dimension(0)
+    uv = DiffractionVectors2D(request.param)
     return uv
 
 
@@ -84,6 +89,10 @@ def vdf_vector_images_seg(vdf_generator_seg):
 
 
 class TestVDFImage:
+    def test_init(self):
+        vdf = VirtualDarkFieldImage(data=np.ones((8, 10, 10)), vectors=unique_vectors)
+        assert isinstance(vdf, VirtualDarkFieldImage)
+
     @pytest.mark.parametrize(
         "min_distance, min_size, max_size,"
         "max_number_of_grains, marker_radius,"

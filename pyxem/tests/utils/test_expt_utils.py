@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -35,6 +35,7 @@ from pyxem.utils.expt_utils import (
     find_beam_center_interpolate,
     azimuthal_integrate1d,
     azimuthal_integrate2d,
+    find_hot_pixels,
 )
 
 
@@ -105,19 +106,19 @@ def test_polar2cart(r, theta, x, y):
 
 
 @pytest.mark.parametrize(
-    "z, center, calibration, g",
+    "z, center, calibration",
     [
         (
             np.array([[100, 100], [200, 200], [150, -150]]),
             np.array((127.5, 127.5)),
             0.0039,
-            np.array([-0.10725, -0.10725]),
         ),
     ],
 )
-def test_peaks_as_gvectors(z, center, calibration, g):
+def test_peaks_as_gvectors(z, center, calibration):
     gc = peaks_as_gvectors(z=z, center=center, calibration=calibration)
-    np.testing.assert_almost_equal(gc, g)
+    ans = (z - 127.5) * calibration
+    np.testing.assert_almost_equal(gc, ans)
 
 
 def test_remove_dead_pixels(dp_single):
@@ -127,7 +128,7 @@ def test_remove_dead_pixels(dp_single):
 
 
 def test_dog_background_removal_interactive(dp_single):
-    """ Test that this function runs without error """
+    """Test that this function runs without error"""
     z = dp_single
     sigma_max_list = np.arange(10, 20, 4)
     sigma_min_list = np.arange(5, 15, 6)
@@ -199,7 +200,7 @@ class TestAzimuthalIntegration:
     @pytest.fixture
     def radial_pattern(self):
         x, y = np.ogrid[-5:5, -5:5]
-        radial = (x ** 2 + y ** 2) * np.pi
+        radial = (x**2 + y**2) * np.pi
         radial[radial == 0] = 1
         return 100 / radial
 

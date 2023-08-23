@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -128,8 +128,12 @@ def _get_pixel_vectors(dp, vectors, calibration, center):
         for index in np.ndindex(dp.axes_manager.navigation_shape):
             islice = np.s_[index]
             vec = vector_pixels.inav[islice].data[0]
-            temp_min = vec.flatten().min()
-            temp_max = vec.flatten().max()
+            if len(vec) == 0:
+                temp_min = 0
+                temp_max = 0
+            else:
+                temp_min = vec.flatten().min()
+                temp_max = vec.flatten().max()
             if min_value > temp_min:
                 min_value = temp_min
             if max_value < temp_max:
@@ -225,9 +229,7 @@ def _com_experimental_square(z, vector, square_size):
         z, but with row and column zero set to 0
     """
     # Copy to make sure we don't change the dp
-    z_adpt = np.copy(
-        get_experimental_square(z, vector=vector, square_size=square_size)
-    )
+    z_adpt = np.copy(get_experimental_square(z, vector=vector, square_size=square_size))
     z_adpt[:, 0] = 0
     z_adpt[0, :] = 0
     return z_adpt
@@ -235,7 +237,9 @@ def _com_experimental_square(z, vector, square_size):
 
 def _center_of_mass_map(dp, vectors, square_size, center, calibration):
     if vectors.shape == (2,):
-        vectors = [vectors, ]
+        vectors = [
+            vectors,
+        ]
     shifts = np.zeros_like(vectors, dtype=np.float64)
     for i, vector in enumerate(vectors):
         expt_disc = _com_experimental_square(dp, vector, square_size)
@@ -392,6 +396,13 @@ class SubpixelrefinementGenerator:
             ragged=True,
         )
         self.vectors_out.set_signal_type("diffraction_vectors")
+        if not isinstance(self.vectors_init, DiffractionVectors):
+            self.vectors_out.scales = 1
+            self.vectors_out.offsets = 0
+        else:
+            self.vectors_out.scales = self.vectors_init.scales
+            self.vectors_out.offsets = self.vectors_init.offsets
+            self.vectors_out.detector_shape = self.vectors_init.detector_shape
 
         self.last_method = "center_of_mass_method"
         return self.vectors_out

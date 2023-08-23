@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -22,7 +22,8 @@ import numpy.linalg as la
 from tqdm import tqdm
 from hyperspy.components1d import Polynomial, Gaussian
 from hyperspy.signals import Signal2D
-from hyperspy.utils.markers import point, line_segment
+from hyperspy.drawing._markers.line_segment import LineSegment
+from hyperspy.drawing._markers.point import Point
 from hyperspy.misc.utils import isiterable
 
 import pyxem.utils.pixelated_stem_tools as pst
@@ -460,7 +461,7 @@ def _get_holz_angle(electron_wavelength, lattice_parameter):
     k0 = 1.0 / electron_wavelength
     kz = 1.0 / lattice_parameter
     in_root = kz * ((2 * k0) - kz)
-    sin_angle = (in_root ** 0.5) / k0
+    sin_angle = (in_root**0.5) / k0
     angle = math.asin(sin_angle)
     return angle
 
@@ -605,15 +606,15 @@ def _get_marker_list(
     marker_list = []
     if x_list is not None:
         for x, y in zip(x_list, y_list):
-            point_marker = point(x, y, color="red")
+            point_marker = Point(x, y, color="red")
             if name is not None:
                 point_marker.name = name + "_" + point_marker.name
             marker_list.append(point_marker)
     for i in range(len(xx)):
         if i == (len(xx) - 1):
-            line = line_segment(xx[i], yy[i], xx[0], yy[0], color="green")
+            line = LineSegment(xx[i], yy[i], xx[0], yy[0], color="green")
         else:
-            line = line_segment(xx[i], yy[i], xx[i + 1], yy[i + 1], color="green")
+            line = LineSegment(xx[i], yy[i], xx[i + 1], yy[i + 1], color="green")
         if name is not None:
             line.name = name + "_" + line.name
         marker_list.append(line)

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -599,11 +599,15 @@ def _get_max_positions(signal, mask=None, num_points=5000):
     flattened_array = data.flatten()
     if mask is not None:
         flattened_mask = mask.flatten()
-        flattened_array[flattened_mask]=0
+        flattened_array[flattened_mask] = 0
     # take top 5000 points make sure exclude zero beam
     indexes = np.argsort(flattened_array)
-    cords = np.array([np.floor_divide(indexes[-num_points:], i_shape[1]),
-            np.remainder(indexes[-num_points:], i_shape[1])])  # [x axis (row),y axis (col)]
+    cords = np.array(
+        [
+            np.floor_divide(indexes[-num_points:], i_shape[1]),
+            np.remainder(indexes[-num_points:], i_shape[1]),
+        ]
+    )  # [x axis (row),y axis (col)]
     return cords.T
 
 
@@ -612,17 +616,13 @@ def _ellipse_to_affine(major, minor, rot):
         temp = minor
         minor = major
         major = temp
-        rot = rot + np.pi/2
+        rot = rot + np.pi / 2
     rot = np.pi / 2 - rot
     if rot < 0:
-        rot = rot+np.pi
+        rot = rot + np.pi
 
-    Q = [[np.cos(rot), -np.sin(rot), 0],
-         [np.sin(rot), np.cos(rot), 0],
-         [0, 0, 1]]
-    S = [[1, 0, 0],
-         [0, minor / major, 0],
-         [0, 0, 1]]
+    Q = [[np.cos(rot), -np.sin(rot), 0], [np.sin(rot), np.cos(rot), 0], [0, 0, 1]]
+    S = [[1, 0, 0], [0, minor / major, 0], [0, 0, 1]]
     C = np.matmul(np.matmul(Q, S), np.transpose(Q))
     return C
 
@@ -690,13 +690,13 @@ def determine_ellipse(
                 pos,
                 xf=np.mean(pos[:, 0]),
                 yf=np.mean(pos[:, 1]),
-                rf_lim=np.shape(signal.data)[0]/5,
+                rf_lim=np.shape(signal.data)[0] / 5,
                 semi_len_min=np.std(pos[:, 1]),
-                semi_len_max=np.std(pos[:, 1])*2,
+                semi_len_max=np.std(pos[:, 1]) * 2,
                 semi_len_ratio_lim=1.2,
                 min_samples=6,
                 residual_threshold=20,
-                max_trails=1000
+                max_trails=1000,
             )
         else:
             el, _ = get_ellipse_model_ransac_single_frame(pos, **kwargs)

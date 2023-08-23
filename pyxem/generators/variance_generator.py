@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -27,6 +27,7 @@ from pyxem.utils.signal import (
     transfer_navigation_axes_to_signal_axes,
     transfer_signal_axes,
 )
+from pyxem.utils._deprecated import deprecated
 
 
 class VarianceGenerator:
@@ -40,12 +41,22 @@ class VarianceGenerator:
 
     """
 
+    @deprecated(
+        since="0.15",
+        alternative="pyxem.signals.diffraction2d.get_variance",
+        removal="1.0.0",
+    )
     def __init__(self, signal, *args, **kwargs):
         self.signal = signal
         self.thickness_filter = None
 
         # add a check for calibration
 
+    @deprecated(
+        since="0.15",
+        alternative="pyxem.signals.diffraction2d.get_variance",
+        removal="1.0.0",
+    )
     def get_diffraction_variance(self, dqe, set_data_type=None):
         """Calculates the variance in scattered intensity as a function of
         scattering vector.
@@ -93,6 +104,11 @@ class VarianceGenerator:
 
         return dv
 
+    @deprecated(
+        since="0.15",
+        alternative="pyxem.signals.diffraction2d.get_variance",
+        removal="1.0.0",
+    )
     def get_image_variance(self, dqe):
         """Calculates the variance in scattered intensity as a function of
         scattering vector. The calculated variance is normalised by the mean

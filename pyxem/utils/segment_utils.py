@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -54,7 +54,7 @@ def norm_cross_corr(image, template):
         corr = 0
     else:
         # no divide by zero to worry about now, normal corr definition in use
-        corr = np.sum(f * t) / np.sqrt(np.sum(f ** 2) * np.sum(t ** 2))
+        corr = np.sum(f * t) / np.sqrt(np.sum(f**2) * np.sum(t**2))
 
     return corr
 
@@ -123,10 +123,11 @@ def separate_watershed(
     """
 
     # Create a mask from the input VDF image.
-    if threshold:
+    if not isinstance(threshold, bool):
+        mask = vdf_temp > np.max(vdf_temp) * threshold
+    elif threshold:
         th = threshold_li(vdf_temp)
-        mask = np.zeros_like(vdf_temp)
-        mask[vdf_temp > th] = True
+        mask = vdf_temp > th
     else:
         mask = vdf_temp.astype("bool")
 
@@ -145,12 +146,14 @@ def separate_watershed(
     # Find the coordinates of the local maxima of the distance transform.
     local_maxi = peak_local_max(
         distance,
-        indices=False,
         min_distance=1,
         num_peaks=max_number_of_grains,
         exclude_border=exclude_border,
         threshold_rel=None,
     )
+    peak_mask = np.zeros_like(distance, dtype=bool)
+    peak_mask[tuple(local_maxi.T)] = True
+    local_maxi = peak_mask
     maxi_coord1 = np.where(local_maxi)
 
     # Discard maxima that are found at pixels that are connected to a
@@ -316,8 +319,8 @@ def get_gaussian2d(a, xo, yo, x, y, sigma):
     # TODO This function should be removed in view of its duplication within diffsims
     gaussian = (
         a
-        / (2 * np.pi * sigma ** 2)
-        * np.exp(-((x - xo) ** 2 + (y - yo) ** 2) / (2 * sigma ** 2))
+        / (2 * np.pi * sigma**2)
+        * np.exp(-((x - xo) ** 2 + (y - yo) ** 2) / (2 * sigma**2))
     )
 
     return gaussian

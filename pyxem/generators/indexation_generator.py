@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -38,9 +38,10 @@ from pyxem.utils.signal import (
     transfer_navigation_axes,
 )
 
+
 class IndexationGenerator:
     """Generates an indexer for data using a number of methods.
-    
+
     .. deprecated:: 0.14.0
     `IndexationGenerator` will be removed in pyxem 0.15.0
 
@@ -57,11 +58,14 @@ class IndexationGenerator:
     """
 
     def __init__(self, signal, diffraction_library):
-        raise ValueError("use AcceleratedIndexationGenerator or VectorIndexationGenerator")
+        raise ValueError(
+            "use AcceleratedIndexationGenerator or VectorIndexationGenerator"
+        )
+
 
 class TemplateIndexationGenerator:
     """Generates an indexer for data using a number of methods.
-    
+
     .. deprecated:: 0.14.0
     `TemplateIndexationGenerator` will be removed in pyxem 0.15.0
 
@@ -71,16 +75,19 @@ class TemplateIndexationGenerator:
         The signal of electron diffraction patterns to be indexed.
     diffraction_library : DiffractionLibrary
         The library of simulated diffraction patterns for indexation.
-        
+
     Returns
     -------
     ValueError : "use AcceleratedIndexationGenerator or VectorIndexationGenerator"
-    
-    
+
+
     """
 
     def __init__(self, signal, diffraction_library):
-        raise ValueError("use AcceleratedIndexationGenerator or VectorIndexationGenerator")
+        raise ValueError(
+            "use AcceleratedIndexationGenerator or VectorIndexationGenerator"
+        )
+
 
 class AcceleratedIndexationGenerator:
     """
@@ -99,22 +106,27 @@ class AcceleratedIndexationGenerator:
     To be used with minimal template libraries whereby the first euler
     angle is 0. It is this angle that is optimized during indexation.
     """
-    def __init__(self,signal,diffraction_library):
+
+    def __init__(self, signal, diffraction_library):
         # test that the first euler angle is always 0
 
         for phase in diffraction_library:
-            if not np.allclose(np.sum(diffraction_library[phase]["orientations"][:,0]), 0):
-                raise ValueError("Invalid diffraction library! Templates must be generated from orientations where "
-                        "the first Euler angle is 0")
+            if not np.allclose(
+                np.sum(diffraction_library[phase]["orientations"][:, 0]), 0
+            ):
+                raise ValueError(
+                    "Invalid diffraction library! Templates must be generated from orientations where "
+                    "the first Euler angle is 0"
+                )
         self.signal = signal
         self.library = diffraction_library
 
-
-    def correlate(self,
-                  n_largest=5,
-                  include_phases=None,
-                  **kwargs,
-                  ):
+    def correlate(
+        self,
+        n_largest=5,
+        include_phases=None,
+        **kwargs,
+    ):
         """
         Correlates the library of simulated diffraction patterns with the
         electron diffraction signal.
@@ -172,12 +184,11 @@ class AcceleratedIndexationGenerator:
         Internally, this code is compiled to LLVM machine code, so stack traces are often hard to follow on failure. As such it is
         important to be careful with your parameters selection.
         """
-        result =  index_dataset_with_template_rotation(self.signal,
-                                                    self.library,
-                                                    phases=include_phases,
-                                                    n_best=n_largest,
-                                                    **kwargs)
+        result = index_dataset_with_template_rotation(
+            self.signal, self.library, phases=include_phases, n_best=n_largest, **kwargs
+        )
         return result
+
 
 class ProfileIndexationGenerator:
     """Generates an indexer for data using a number of methods.

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -17,10 +17,9 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
 import numpy as np
 from skimage import filters
-from skimage.morphology import square
+from skimage.feature import match_template
 from scipy.ndimage import rotate
 from skimage import morphology
 import dask.array as da
@@ -53,12 +52,15 @@ from pyxem.utils.expt_utils import (
     azimuthal_integrate2d,
     gain_normalise,
     regional_filter,
+    remove_bad_pixels,
     circular_mask,
     find_beam_offset_cross_correlation,
+    normalize_template_match,
     convert_affine_to_transform,
     apply_transformation,
     find_beam_center_blur,
     find_beam_center_interpolate,
+    find_hot_pixels,
     integrate_radially,
     medfilt_1d,
     sigma_clip,
@@ -70,12 +72,21 @@ from pyxem.utils.dask_tools import (
 )
 from pyxem.utils.signal import (
     select_method_from_method_dict,
+    to_hyperspy_index,
     transfer_navigation_axes,
 )
 import pyxem.utils.pixelated_stem_tools as pst
 import pyxem.utils.dask_tools as dt
 import pyxem.utils.marker_tools as mt
 import pyxem.utils.ransac_ellipse_tools as ret
+from pyxem.utils._deprecated import deprecated, deprecated_argument
+
+from pyxem.utils.background_utils import (
+    _subtract_median,
+    _subtract_dog,
+    _subtract_hdome,
+    _subtract_radial_median,
+)
 
 
 class Diffraction2D(Signal2D, CommonDiffraction):
@@ -123,9 +134,17 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 convert_affine_to_transform, shape=shape, inplace=False
             )
 
+        if not keep_dtype:
+            out_dtype = float
+        else:
+            out_dtype = self.data.dtype
+
+        output_shape = kwargs.get("output_shape", shape)
         return self.map(
             apply_transformation,
             transformation=transformation,
+            output_dtype=out_dtype,
+            output_signal_size=output_shape,
             order=order,
             keep_dtype=keep_dtype,
             inplace=inplace,
@@ -275,7 +294,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         """
         s_out = self.copy()
         s_out.axes_manager = self.axes_manager.deepcopy()
-        s_out.metadata = self.metadata.deepcopy()
         s_out.data = np.flip(self.data, axis=-1)
         return s_out
 
@@ -306,7 +324,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         """
         s_out = self.copy()
         s_out.axes_manager = self.axes_manager.deepcopy()
-        s_out.metadata = self.metadata.deepcopy()
         s_out.data = np.flip(self.data, axis=-2)
         return s_out
 
@@ -362,80 +379,77 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             **kwargs,
         )
 
+    @deprecated_argument(
+        name="lazy_result", alternative="lazy_output", since="0.15.0", removal="1.0.0"
+    )
     def subtract_diffraction_background(
-        self, method="median kernel", lazy_result=True, show_progressbar=True, **kwargs
+        self, method="median kernel", inplace=False, **kwargs
     ):
         """Background subtraction of the diffraction data.
 
-        Parameters
-        ----------
-        method : str, optional
-            'difference of gaussians', 'median kernel', 'radial median', 'h-dome'
-            'h-dome' is for non-lazy data only. Default 'median kernel'.
-        lazy_result : bool, optional
-            If True (default), will return a LazyDiffraction2D object. If False,
-            will compute the result and return a Diffraction2D object.
-        show_progressbar : bool, optional
-            Default True
-        **kwargs :
-            To be passed to the method chosen: min_sigma/max_sigma, footprint,
-            centre_x,centre_y / h
+            Parameters
+            ----------
+            method : str, optional
+                'difference of gaussians', 'median kernel', 'radial median', 'h-dome'
+                 Default 'median kernel'.
 
-        Returns
-        -------
-        s : Diffraction2D or LazyDiffraction2D signal
+                 For `difference of gaussians the parameters min_sigma (default:1) and
+                 max_sigma(default:55) control the size of the gaussian kernels used.
 
-        Examples
-        --------
-        >>> s = pxm.dummy_data.get_cbed_signal()
-        >>> s_r = s.subtract_diffraction_background(method='median kernel',
-        ...     footprint=20, lazy_result=False, show_progressbar=False)
-        >>> s_r.plot()
+                 For `median kernel` the footprint(default:19) parameter detemines the
+                 footprint used to determine the median.
+
+                 For `radial median` the parameters center_x(default:128), center_y(default:128) are
+                 used to detmine the center of the pattern to use to determine the median.
+
+                 For `h-dome` the parameter h detemines the relative height of local peaks that
+                 are supressed.
+        max_sigma : float
+            lazy_output : bool, optional
+                If True (default), will return a LazyDiffraction2D object. If False,
+                will compute the result and return a Diffraction2D object.
+            show_progressbar : bool, optional
+                Default True
+            **kwargs :
+                To be passed to the method chosen: min_sigma/max_sigma, footprint,
+                centre_x,centre_y / h
+
+            Returns
+            -------
+            s : Diffraction2D or LazyDiffraction2D signal
+
+            Examples
+            --------
+            >>> s = pxm.dummy_data.get_cbed_signal()
+            >>> s_r = s.subtract_diffraction_background(method='median kernel',
+            ...     footprint=20, lazy_output=False, show_progressbar=False)
+            >>> s_r.plot()
 
         """
-
-        # Ugly, should look into making this lazy compatible
-        if method == "h-dome":
-            self.data = self.data / np.max(self.data)
-            bg_subtracted = self.map(regional_filter, inplace=False, **kwargs)
-            bg_subtracted.map(filters.rank.mean, selem=square(3))
-            bg_subtracted.data = bg_subtracted.data / np.max(bg_subtracted.data)
-            return bg_subtracted
-
-        dask_array = _get_dask_array(self)
-
-        if method == "difference of gaussians":
-            output_array = dt._background_removal_dog(dask_array, **kwargs)
-        elif method == "median kernel":
-            output_array = dt._background_removal_median(dask_array, **kwargs)
-        elif method == "radial median":
-            output_array = dt._background_removal_radial_median(dask_array, **kwargs)
-        else:
+        method_dict = {
+            "difference of gaussians": _subtract_dog,
+            "median kernel": _subtract_median,
+            "radial median": _subtract_radial_median,
+            "h-dome": _subtract_hdome,
+        }
+        if method not in method_dict:
             raise NotImplementedError(
-                "The method specified, '{}', is not implemented. "
-                "The different methods are: 'difference of gaussians',"
-                " 'median kernel','radial median' or 'h-dome'.".format(method)
+                f"The method specified, '{method}',"
+                f" is not implemented.  The different methods are:"
+                f" 'difference of gaussians','median kernel',"
+                f"'radial median' or 'h-dome'."
             )
+        subtraction_function = method_dict[method]
 
-        if not lazy_result:
-            if show_progressbar:
-                pbar = ProgressBar()
-                pbar.register()
-            output_array = output_array.compute()
-            if show_progressbar:
-                pbar.unregister()
-            s = Diffraction2D(output_array)
-        else:
-            s = LazyDiffraction2D(output_array)
-        pst._copy_signal_all_axes_metadata(self, s)
-        return s
+        return self.map(subtraction_function, inplace=inplace, **kwargs)
 
+    @deprecated_argument(
+        name="mask_array", since="0.15.0", removal="1.0.0", alternative="mask"
+    )
     def find_dead_pixels(
         self,
         dead_pixel_value=0,
-        mask_array=None,
-        lazy_result=False,
-        show_progressbar=True,
+        mask=None,
     ):
         """Find dead pixels in the diffraction images.
 
@@ -479,22 +493,20 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         correct_bad_pixels
 
         """
-        dask_array = _get_dask_array(self)
+        mean_signal = self.mean(axis=self.axes_manager.navigation_axes)
+        dead_pixels = mean_signal == dead_pixel_value
+        if mask is not None:
+            dead_pixels = dead_pixels * np.invert(mask)
+        return dead_pixels
 
-        dead_pixels = dt._find_dead_pixels(
-            dask_array, dead_pixel_value=dead_pixel_value, mask_array=mask_array
-        )
-        s_dead_pixels = LazySignal2D(dead_pixels)
-        if not lazy_result:
-            s_dead_pixels.compute(show_progressbar=show_progressbar)
-        return s_dead_pixels
-
+    @deprecated_argument(
+        name="mask_array", since="0.15.0", removal="1.0.0", alternative="mask"
+    )
+    @deprecated_argument(
+        name="lazy_result", since="0.15.0", removal="1.0.0", alternative="lazy_output"
+    )
     def find_hot_pixels(
-        self,
-        threshold_multiplier=500,
-        mask_array=None,
-        lazy_result=True,
-        show_progressbar=True,
+        self, threshold_multiplier=500, mask=None, inplace=False, **kwargs
     ):
         """Find hot pixels in the diffraction images.
 
@@ -533,8 +545,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Getting a non-lazy signal as output
 
-        >>> s_hot_pixels = s.find_hot_pixels(
-        ...     lazy_result=False, show_progressbar=False)
+        >>> s_hot_pixels = s.find_hot_pixels()
 
         See Also
         --------
@@ -542,24 +553,20 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         correct_bad_pixels
 
         """
-        dask_array = _get_dask_array(self)
-
-        hot_pixels = dt._find_hot_pixels(
-            dask_array, threshold_multiplier=threshold_multiplier, mask_array=mask_array
+        return self.map(
+            find_hot_pixels,
+            threshold_multiplier=threshold_multiplier,
+            mask=mask,
+            inplace=inplace,
+            **kwargs,
         )
 
-        s_hot_pixels = LazySignal2D(hot_pixels)
-        if not lazy_result:
-            s_hot_pixels.compute(show_progressbar=show_progressbar)
-        return s_hot_pixels
-
+    @deprecated_argument(
+        name="lazy_result", since="0.15.0", removal="1.0.0", alternative="lazy_output"
+    )
     def correct_bad_pixels(
         self,
         bad_pixel_array,
-        show_progressbar=True,
-        lazy_result=True,
-        inplace=True,
-        *args,
         **kwargs,
     ):
         """Correct bad (dead/hot) pixels by replacing their values with the mean value of neighbors.
@@ -570,7 +577,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             List of pixels to correct
         show_progressbar : bool, optional
             Default True
-        lazy_result : bool, optional
+        lazy_output : bool, optional
             When working lazily, determines if the result is computed. Default is True (ie. no .compute)
         inplace : bool, optional
             When working in memory, determines if operation is performed inplace, default is True. When
@@ -587,8 +594,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         Examples
         --------
         >>> s = pxm.dummy_data.get_hot_pixel_signal()
-        >>> s_hot_pixels = s.find_hot_pixels(
-        ...     show_progressbar=False, lazy_result=True)
+        >>> s_hot_pixels = s.find_hot_pixels()
         >>> s_corr = s.correct_bad_pixels(s_hot_pixels)
 
         See Also
@@ -597,29 +603,59 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         find_hot_pixels
 
         """
-        dask_array = self.data
-        bad_pixel_removed = dt._remove_bad_pixels(dask_array, bad_pixel_array.data)
-        s_bad_pixel_removed = LazyDiffraction2D(bad_pixel_removed)
-        pst._copy_signal2d_axes_manager_metadata(self, s_bad_pixel_removed)
-        if not lazy_result:
-            s_bad_pixel_removed.compute(show_progressbar=show_progressbar)
-        return s_bad_pixel_removed
+        return self.map(remove_bad_pixels, bad_pixels=bad_pixel_array, **kwargs)
 
     """ Direct beam and peak finding tools """
 
-    def get_direct_beam_position(self, method, lazy_output=None, **kwargs):
+    @deprecated_argument(
+        name="lazy_result", since="0.14", removal="1.0.0", alternative="lazy_output"
+    )
+    def get_direct_beam_position(
+        self,
+        method,
+        lazy_output=None,
+        signal_slice=None,
+        half_square_width=None,
+        **kwargs,
+    ):
         """Estimate the direct beam position in each experimentally acquired
-        electron diffraction pattern.
+        electron diffraction pattern. Returns the shifts required to center the
+        diffraction pattern.
 
         Parameters
         ----------
         method : str,
-            Must be one of "cross_correlate", "blur" or "interpolate"
-        lazy_result : optional
+            Must be one of "cross_correlate", "blur", "interpolate" or "center_of_mass".
+
+           "cross_correlate": Center finding using cross-correlation of circles of
+                `radius_start` to `radius_finish`.
+           "blur": Center finding by blurring each frame with a Gaussian kernel with
+                standard deviation `sigma` and finding the maximum.
+           "interpolate": Finding the center by summing along X/Y and finding the peak
+                for each axis independently. Data is blurred first using a Gaussian kernel
+                with standard deviation "sigma".
+           "center_of_mass": The center is found using a calculation of the center of mass.
+                Optionally a `mask` can be applied to focus on just the center of some
+                dataset. A threshold value can also be given to suppress contrast from
+                weaker diffraction features.
+        lazy_output : optional
             If True, s_shifts will be a lazy signal. If False, a non-lazy signal.
             By default, if the signal is (non-)lazy, the result will also be (non-)lazy.
+        signal_slice : None or tuple
+            A tuple defining the (low_x,high_x, low_y, high_y) to slice the data before
+            finding the direct beam. Equivalent to
+            s.isig[low_x:high_x, low_y:high_y].get_direct_beam_position()+[low_x,low_y])
+        half_square_width : int
+            Half the side length of square that captures the direct beam in all
+            scans. Means that the centering algorithm is stable against
+            diffracted spots brighter than the direct beam. Crops the diffraction
+            pattern to `half_square_width` pixels around th center of the diffraction
+            pattern. Only one of `half_square_width` or signal_slice can be defined.
         **kwargs:
-            Keyword arguments to be passed to the method function.
+            Additional arguments accepted by :func:`~pyxem.utils.expt_utils.find_beam_center_blur`,
+            :func:`~pyxem.utils.expt_utils.find_beam_center_interpolate`,
+            :func:`~pyxem.utils.expt_utils.find_beam_offset_cross_correlation`,
+            and :func:`~pyxem.signals.diffraction2d.Diffraction2D.center_of_mass`,
 
         Returns
         -------
@@ -628,67 +664,121 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             signal index being the x-shift and the second the y-shift.
 
         """
+        if half_square_width is not None and signal_slice is not None:
+            raise ValueError(
+                "Only one of `signal_slice` or `half_sqare_width` " "can be defined"
+            )
+        elif half_square_width is not None:
+            signal_shape = self.axes_manager.signal_shape
+            signal_center = np.array(signal_shape) / 2
+            min_x = int(signal_center[0] - half_square_width)
+            max_x = int(signal_center[0] + half_square_width)
+            min_y = int(signal_center[1] - half_square_width)
+            max_y = int(signal_center[1] + half_square_width)
+            signal_slice = (min_x, max_x, min_y, max_y)
+
+        if signal_slice is not None:  # Crop the data
+            sig_axes = self.axes_manager.signal_axes
+            sig_axes = np.repeat(sig_axes, 2)
+            low_x, high_x, low_y, high_y = [
+                to_hyperspy_index(ind, ax)
+                for ind, ax in zip(
+                    signal_slice,
+                    sig_axes,
+                )
+            ]
+            signal = self.isig[low_x:high_x, low_y:high_y]
+        else:
+            signal = self
+
         if "lazy_result" in kwargs:
-            warnings.warn("lazy_result was replaced with lazy_output in version 0.14",
-                          DeprecationWarning)
+            warnings.warn(
+                "lazy_result was replaced with lazy_output in version 0.14",
+                DeprecationWarning,
+            )
             lazy_output = kwargs.pop("lazy_result")
 
         if lazy_output is None:
-            lazy_output = self._lazy
+            lazy_output = signal._lazy
 
-        signal_shape = self.axes_manager.signal_shape
+        signal_shape = signal.axes_manager.signal_shape
         origin_coordinates = np.array(signal_shape) / 2
 
         method_dict = {
             "cross_correlate": find_beam_offset_cross_correlation,
             "blur": find_beam_center_blur,
             "interpolate": find_beam_center_interpolate,
+            "center_of_mass": None,
         }
 
-        method_function = select_method_from_method_dict(method, method_dict,
-                                                         print_help=False, **kwargs)
+        method_function = select_method_from_method_dict(
+            method, method_dict, print_help=False, **kwargs
+        )
 
         if method == "cross_correlate":
-            shifts = self.map(method_function,
-                              inplace=False,
-                              output_signal_size=(2,),
-                              output_dtype=np.float32,
-                              lazy_output=lazy_output,
-                              **kwargs,
-                              )
+            shifts = signal.map(
+                method_function,
+                inplace=False,
+                output_signal_size=(2,),
+                output_dtype=np.float32,
+                lazy_output=lazy_output,
+                **kwargs,
+            )
         elif method == "blur":
-            centers = self.map(method_function,
-                               inplace=False,
-                               output_signal_size=(2,),
-                               output_dtype=np.int16,
-                               lazy_output=lazy_output,
-                               **kwargs,
-                               )
+            centers = signal.map(
+                method_function,
+                inplace=False,
+                output_signal_size=(2,),
+                output_dtype=np.int16,
+                lazy_output=lazy_output,
+                **kwargs,
+            )
             shifts = -centers + origin_coordinates
         elif method == "interpolate":
-            centers = self.map(method_function,
-                               inplace=False,
-                               output_signal_size=(2,),
-                               output_dtype=np.float32,
-                               lazy_output=lazy_output,
-                               **kwargs,
-                               )
+            centers = signal.map(
+                method_function,
+                inplace=False,
+                output_signal_size=(2,),
+                output_dtype=np.float32,
+                lazy_output=lazy_output,
+                **kwargs,
+            )
             shifts = -centers + origin_coordinates
+        elif method == "center_of_mass":
+            if "mask" in kwargs and signal_slice is not None:
+                x, y, r = kwargs["mask"]
+                x = x - signal_slice[0]
+                y = y - signal_slice[1]
+                kwargs["mask"] = (x, y, r)
+            centers = signal.center_of_mass(
+                lazy_result=lazy_output,
+                show_progressbar=False,
+                **kwargs,
+            )
+            shifts = -centers.T + origin_coordinates
+
+        if signal_slice is not None:
+            shifted_center = [(low_x + high_x) / 2, (low_y + high_y) / 2]
+            unshifted_center = np.array(self.axes_manager.signal_shape) / 2
+            shift = np.subtract(unshifted_center, shifted_center)
+            shifts = shifts + shift
 
         shifts.set_signal_type("beam_shift")
 
         return shifts
 
+    @deprecated_argument(
+        name="lazy_result", since="0.15", removal="1.0.0", alternative="lazy_output"
+    )
     def center_direct_beam(
         self,
         method=None,
-        half_square_width=None,
         shifts=None,
         return_shifts=False,
         subpixel=True,
         lazy_output=None,
         align_kwargs=None,
-        inplace= True,
+        inplace=True,
         *args,
         **kwargs,
     ):
@@ -698,13 +788,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Parameters
         ----------
-        method : str {'cross_correlate', 'blur', 'interpolate'}
+        method : str {'cross_correlate', 'blur', 'interpolate', 'center_of_mass'}
             Method used to estimate the direct beam position. The direct
             beam position can also be passed directly with the shifts parameter.
-        half_square_width : int
-            Half the side length of square that captures the direct beam in all
-            scans. Means that the centering algorithm is stable against
-            diffracted spots brighter than the direct beam.
         shifts : Signal, optional
             The position of the direct beam, which can either be passed with this
             parameter (shifts), or calculated on its own.
@@ -717,7 +803,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             the diffraction patterns. This can lead to changes in the total intensity
             of the diffraction images, see Notes for more information. If False, the
             data is not interpolated. Default True.
-        lazy_result : optional
+        lazy_output : optional
             If True, the result will be a lazy signal. If False, a non-lazy signal.
             By default, if the signal is lazy, the result will also be lazy.
             If the signal is non-lazy, the result will be non-lazy.
@@ -725,7 +811,11 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             Parameters passed to the alignment function. See scipy.ndimage.shift
             for more information about the parameters.
         *args, **kwargs :
-            Passed to the function which estimate the direct beam position
+            Additional arguments accepted by :func:`~pyxem.utils.expt_utils.find_beam_center_blur`,
+            :func:`~pyxem.utils.expt_utils.find_beam_center_interpolate`,
+            :func:`~pyxem.utils.expt_utils.find_beam_offset_cross_correlation`,
+            :func:`~pyxem.signals.diffraction2d.Diffraction2D.get_direct_beam_position`,
+            and :func:`~pyxem.signals.diffraction2d.Diffraction2D.center_of_mass`,
 
         Example
         -------
@@ -745,10 +835,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         use a float dtype, which can be done by s.change_dtype('float32', rechunk=False).
 
         """
-        if "lazy_result" in kwargs:
-            warnings.warn("lazy_result was replaced with lazy_output in version 0.14",
-                          DeprecationWarning)
-            lazy_output = kwargs.pop("lazy_result")
         if (shifts is None) and (method is None):
             raise ValueError("Either method or shifts parameter must be specified")
         if (shifts is not None) and (method is not None):
@@ -759,35 +845,24 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         if align_kwargs is None:
             align_kwargs = {}
 
-        signal_shape = self.axes_manager.signal_shape
-        origin_coordinates = np.array(signal_shape) / 2
-        temp_signal = self
-
         if shifts is None:
-            if half_square_width is not None:
-                min_index = int(origin_coordinates[0] - half_square_width)
-                # fails if non-square dp
-                max_index = int(origin_coordinates[0] + half_square_width)
-                temp_signal = temp_signal.isig[min_index:max_index, min_index:max_index]
-            shifts = temp_signal.get_direct_beam_position(
-                method=method,
-                lazy_output=lazy_output,
-                **kwargs,
+            shifts = self.get_direct_beam_position(
+                method=method, lazy_output=lazy_output, **kwargs
             )
-
-        if not "order" in align_kwargs:
+        if "order" not in align_kwargs:
             if subpixel:
                 align_kwargs["order"] = 1
             else:
                 align_kwargs["order"] = 0
-        aligned = self.map(align_single_frame,
-                           shifts=shifts,
-                           inplace=inplace,
-                           lazy_output=lazy_output,
-                           output_dtype=self.data.dtype,
-                           output_signal_size=self.axes_manager.signal_shape[::-1],
-                           **align_kwargs)
-
+        aligned = self.map(
+            align_single_frame,
+            shifts=shifts,
+            inplace=inplace,
+            lazy_output=lazy_output,
+            output_dtype=self.data.dtype,
+            output_signal_size=self.axes_manager.signal_shape[::-1],
+            **align_kwargs,
+        )
 
         if return_shifts and inplace:
             return shifts
@@ -847,13 +922,17 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         )
         return s_out
 
+    @deprecated_argument(
+        since="0.15.0", name="lazy_result", alternative="lazy_output", removal="1.00.0"
+    )
     def center_of_mass(
         self,
         threshold=None,
         mask=None,
-        lazy_result=False,
+        lazy_output=False,
         show_progressbar=True,
         chunk_calculations=None,
+        **kwargs,
     ):
         """Get the centre of the STEM diffraction pattern using
         center of mass. Threshold can be set to only use the most
@@ -867,6 +946,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             this threshold value.
         mask : tuple (x, y, r), optional
             Round mask centered on x and y, with radius r.
+        signal_slice : tuple (low_x, high_x, low_y, high_y)
+            Slice the data. Equivilent to s.isig[low_x:high_x, low_y,
         lazy_result : bool, optional
             If True, will not compute the data directly, but
             return a lazy signal. Default False
@@ -917,7 +998,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         data = dt._center_of_mass_array(
             dask_array, threshold_value=threshold, mask_array=mask_array
         )
-        if lazy_result:
+        if lazy_output:
             if nav_dim == 2:
                 s_com = LazyDPCSignal2D(data)
             elif nav_dim == 1:
@@ -944,7 +1025,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             pst._copy_axes_object_metadata(nav_axes, sig_axes)
         return s_com
 
-    def template_match_disk(self, disk_r=4, lazy_result=True, show_progressbar=True):
+    @deprecated_argument(
+        name="lazy_result", alternative="lazy_output", since="0.15.0", removal="1.0.0"
+    )
+    def template_match_disk(self, disk_r=4, inplace=False, **kwargs):
         """Template match the signal dimensions with a disk.
 
         Used to find diffraction disks in convergent beam electron
@@ -954,7 +1038,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         ----------
         disk_r : scalar, optional
             Radius of the disk. Default 4.
-        lazy_result : bool, default True
+        lazy_output : bool, default True
             If True, will return a LazyDiffraction2D object. If False,
             will compute the result and return a Diffraction2D object.
         show_progressbar : bool, default True
@@ -973,18 +1057,18 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         See Also
         --------
         template_match_ring
-        template_match_with_binary_image
+        template_match
 
         """
         disk = morphology.disk(disk_r, self.data.dtype)
-        s = self.template_match_with_binary_image(
-            disk, lazy_result=lazy_result, show_progressbar=show_progressbar
+        return self.map(
+            normalize_template_match, template=disk, inplace=inplace, **kwargs
         )
-        return s
 
-    def template_match_ring(
-        self, r_inner=5, r_outer=7, lazy_result=True, show_progressbar=True
-    ):
+    @deprecated_argument(
+        name="lazy_result", alternative="lazy_output", since="0.15.0", removal="1.0.0"
+    )
+    def template_match_ring(self, r_inner=5, r_outer=7, inplace=False, **kwargs):
         """Template match the signal dimensions with a ring.
 
         Used to find diffraction rings in convergent beam electron
@@ -994,7 +1078,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         ----------
         r_inner, r_outer : scalar, optional
             Inner and outer radius of the rings.
-        lazy_result : bool, default True
+        lazy_output : bool, default True
             If True, will return a LazyDiffraction2D object. If False,
             will compute the result and return a Diffraction2D object.
         show_progressbar : bool, default True
@@ -1012,7 +1096,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         See Also
         --------
         template_match_disk
-        template_match_with_binary_image
+        template_match
 
         """
         if r_outer <= r_inner:
@@ -1027,13 +1111,49 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         ring_inner = morphology.disk(r_inner, dtype=bool)
         ring = morphology.disk(r_outer, dtype=bool)
         ring[edge_slice] = ring[edge_slice] ^ ring_inner
-        s = self.template_match_with_binary_image(
-            ring, lazy_result=lazy_result, show_progressbar=show_progressbar
+        return self.map(
+            normalize_template_match, template=ring, inplace=inplace, **kwargs
         )
-        return s
 
+    def template_match(self, template, inplace=False, **kwargs):
+        """Template match the signal dimensions with a binary image.
+
+        Used to find diffraction disks in convergent beam electron
+        diffraction data.
+
+        Might also work with non-binary images, but this haven't been
+        extensively tested.
+
+        Parameters
+        ----------
+        template : 2-D NumPy array
+
+        Returns
+        -------
+        template_match : Diffraction2D object
+
+        Examples
+        --------
+        >>> s = pxm.dummy_data.get_cbed_signal()
+        >>> binary_image = np.random.randint(0, 2, (6, 6))
+        >>> s_template = s.template_match_with_binary_image(
+        ...     binary_image, show_progressbar=False)
+        >>> s.plot()
+
+        See Also
+        --------
+        template_match_disk
+        template_match_ring
+
+        """
+
+        return self.map(
+            normalize_template_match, template=template, inplace=inplace, **kwargs
+        )
+
+    @deprecated(since="0.15.0", removal="1.0.0")
     def template_match_with_binary_image(
-        self, binary_image, lazy_result=True, show_progressbar=True
+        self, binary_image, lazy_result=True, show_progressbar=True, **kwargs
     ):
         """Template match the signal dimensions with a binary image.
 
@@ -1069,22 +1189,18 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         template_match_ring
 
         """
-        dask_array = _get_dask_array(self)
+        return self.template_match(
+            template=binary_image,
+            lazy_output=lazy_result,
+            show_progressbar=show_progressbar,
+            **kwargs,
+        )
 
-        output_array = dt._template_match_with_binary_image(dask_array, binary_image)
-        if not lazy_result:
-            if show_progressbar:
-                pbar = ProgressBar()
-                pbar.register()
-            output_array = output_array.compute()
-            if show_progressbar:
-                pbar.unregister()
-            s = Diffraction2D(output_array)
-        else:
-            s = LazyDiffraction2D(output_array)
-        pst._copy_signal_all_axes_metadata(self, s)
-        return s
-
+    @deprecated(
+        since="0.15",
+        alternative="hyperspy.signals.signal2d.find_peaks",
+        removal="1.0.0",
+    )
     def find_peaks_lazy(
         self, method="dog", lazy_result=True, show_progressbar=True, **kwargs
     ):
@@ -1523,25 +1639,25 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         if method == "Omega":
             one_d_integration = self.get_azimuthal_integral1d(npt=npt, **kwargs)
             variance = (
-                (one_d_integration ** 2).mean(axis=navigation_axes)
+                (one_d_integration**2).mean(axis=navigation_axes)
                 / one_d_integration.mean(axis=navigation_axes) ** 2
             ) - 1
             if dqe is not None:
                 sum_points = self.get_azimuthal_integral1d(
                     npt=npt, sum=True, **kwargs
                 ).mean(axis=navigation_axes)
-                variance = variance - ((sum_points ** -1) * dqe)
+                variance = variance - ((sum_points**-1) * dqe)
 
         elif method == "r":
             one_d_integration = self.get_azimuthal_integral1d(npt=npt, **kwargs)
-            integration_squared = (self ** 2).get_azimuthal_integral1d(
+            integration_squared = (self**2).get_azimuthal_integral1d(
                 npt=npt, **kwargs
             )
             # Full variance is the same as the unshifted phi=0 term in angular correlation
-            full_variance = (integration_squared / one_d_integration ** 2) - 1
+            full_variance = (integration_squared / one_d_integration**2) - 1
 
             if dqe is not None:
-                full_variance = full_variance - ((one_d_integration ** -1) * dqe)
+                full_variance = full_variance - ((one_d_integration**-1) * dqe)
 
             variance = full_variance.mean(axis=navigation_axes)
 
@@ -1553,19 +1669,19 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 axis=navigation_axes
             )
             integration_squared = (
-                (self ** 2)
+                (self**2)
                 .get_azimuthal_integral1d(npt=npt, **kwargs)
                 .mean(axis=navigation_axes)
             )
-            variance = (integration_squared / one_d_integration ** 2) - 1
+            variance = (integration_squared / one_d_integration**2) - 1
 
             if dqe is not None:
                 sum_int = self.get_azimuthal_integral1d(npt=npt, **kwargs).mean()
-                variance = variance - (sum_int ** -1) * (1 / dqe)
+                variance = variance - (sum_int**-1) * (1 / dqe)
 
         elif method == "VImage":
             variance_image = (
-                (self ** 2).mean(axis=navigation_axes)
+                (self**2).mean(axis=navigation_axes)
                 / self.mean(axis=navigation_axes) ** 2
             ) - 1
             if dqe is not None:
@@ -1577,9 +1693,19 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
     """ Methods associated with radial integration, not pyFAI based """
 
+    @deprecated(
+        since="0.15",
+        alternative="pyxem.signals.diffraction2d.get_azimuthal_integral1d",
+        removal="1.0.0",
+    )
     def radial_integration(self):
         raise Exception("radial_integration has been renamed radial_average")
 
+    @deprecated(
+        since="0.15",
+        alternative="pyxem.signals.diffraction2d.get_azimuthal_integral1d",
+        removal="1.0.0",
+    )
     def radial_average(
         self,
         centre_x=None,
@@ -1793,7 +1919,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
     def ai(self):
         try:
             return self.metadata.Signal["ai"]
-        except (AttributeError):
+        except AttributeError:
             raise ValueError("ai property is not currently set")
 
     def set_ai(
@@ -1845,6 +1971,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         self.metadata.set_item("Signal.ai", ai)
         return None
 
+    @deprecated_argument(
+        name="lazy_result", since="0.14", removal="1.0.0", alternative="lazy_output"
+    )
     def get_azimuthal_integral1d(
         self,
         npt,
@@ -1919,14 +2048,12 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> ds.get_azimuthal_integral1d(npt=100)
 
         """
-        if "lazy_result" in kwargs:
-            warnings.warn("lazy_result was replaced with lazy_output in version 0.14",
-                          DeprecationWarning)
-            kwargs["lazy_output"] = kwargs.pop("lazy_result")
         if "wavelength" in kwargs:
-            warnings.warn("The wavelength parameter was removed in 0.14. The wavelength "
-                          "can be set using the `set_ai` function or using `s.beam_energy`"
-                          " for `ElectronDiffraction2D` signals")
+            warnings.warn(
+                "The wavelength parameter was removed in 0.14. The wavelength "
+                "can be set using the `set_ai` function or using `s.beam_energy`"
+                " for `ElectronDiffraction2D` signals"
+            )
             kwargs.pop("wavelength")
 
         sig_shape = self.axes_manager.signal_shape
@@ -1955,7 +2082,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         k_axis.name = "Radius"
         k_axis.scale = (radial_range[1] - radial_range[0]) / npt
         k_axis.offset = radial_range[0]
-        
+
         return integration
 
     def get_azimuthal_integral2d(

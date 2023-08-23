@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -51,6 +51,7 @@ from pyxem.utils.polar_transform_utils import (
 
 try:
     import cupy as cp
+
     CUPY_INSTALLED = True
     import cupyx.scipy as spgpu
 except ImportError:
@@ -107,6 +108,7 @@ def get_nth_best_solution(
 
     return best_fit
 
+
 def index_magnitudes(z, simulation, tolerance):
     """Assigns hkl indices to peaks in the diffraction profile.
 
@@ -135,7 +137,7 @@ def index_magnitudes(z, simulation, tolerance):
         diffs = diff[np.where(diff < tolerance)]
 
         indices = np.array((hkls, diffs))
-        indexation[i] = np.array((mags.data[i], indices))
+        indexation[i] = np.array((mags.data[i], indices), dtype=object)
 
     return indexation
 
@@ -372,7 +374,7 @@ def _simulations_to_arrays(simulations, max_radius=None):
         y = j.calibrated_coordinates[:, 1]
         intensity = j.intensities
         if max_radius is not None:
-            condition = x ** 2 + y ** 2 < max_radius ** 2
+            condition = x**2 + y**2 < max_radius**2
             x = x[condition]
             y = y[condition]
             intensity = intensity[condition]
@@ -533,8 +535,12 @@ def _match_polar_to_polar_library_gpu(
     N is the number of templates and R the number of spots in the template
     with the maximum number of spots
     """
-    correlation = cp.empty((r_templates.shape[0], polar_image.shape[0]), dtype=cp.float32)
-    correlation_m = cp.empty((r_templates.shape[0], polar_image.shape[0]), dtype=cp.float32)
+    correlation = cp.empty(
+        (r_templates.shape[0], polar_image.shape[0]), dtype=cp.float32
+    )
+    correlation_m = cp.empty(
+        (r_templates.shape[0], polar_image.shape[0]), dtype=cp.float32
+    )
     threadsperblock = (1, TPB)
     blockspergrid = (r_templates.shape[0], int(np.ceil(polar_image.shape[0] / TPB)))
     _correlate_polar_image_to_library_gpu[blockspergrid, threadsperblock](
@@ -560,7 +566,7 @@ def _match_polar_to_polar_library_gpu(
 
 def _get_row_norms(array):
     """Get the norm of all rows in a 2D array"""
-    norms = ((array ** 2).sum(axis=1)) ** 0.5
+    norms = ((array**2).sum(axis=1)) ** 0.5
     return norms
 
 
@@ -1431,7 +1437,9 @@ def index_dataset_with_template_rotation(
     if target == "gpu":
         # an error will be raised if cupy is not available
         if not CUPY_INSTALLED:
-            raise ValueError("There must be a CUDA enabled GPU and cupy must be installed.")
+            raise ValueError(
+                "There must be a CUDA enabled GPU and cupy must be installed."
+            )
         dispatcher = cp
     else:
         dispatcher = np
@@ -1578,7 +1586,7 @@ def index_dataset_with_template_rotation(
         if target == "gpu":
             # let's base it on the size of the free GPU memory and array blocksize
             # this is probably too many workers!
-            max_gpu_mem = 0.6*cp.cuda.Device().mem_info[0]
+            max_gpu_mem = 0.6 * cp.cuda.Device().mem_info[0]
             blocksize = data.nbytes / data.npartitions
             max_workers = max_gpu_mem / blocksize
             if max_workers < parallel_workers:
@@ -1620,7 +1628,7 @@ def index_dataset_with_template_rotation(
         orimap[:, :, :, 2] = (
             orimap[:, :, :, 2] * res_index[:, :, :, 3]
         )  # multiply by the sign
-        orimap[:, :, :, 0] = res_index[:, :, :, 2] * delta_theta
+        orimap[:, :, :, 0] = res_index[:, :, :, 2] * delta_theta * phasemask
         # add to orients, there should be no overlap on pixels or N
         orients = orients + orimap
     result["orientation"] = orients
@@ -1711,7 +1719,7 @@ def results_dict_to_crystal_map(
     elif index is not None:
         euler = euler[:, index]  # Desired match only
     euler = euler.squeeze()  # Remove singleton dimensions
-    rotations = Rotation.from_euler(euler, convention="bunge", direction="crystal2lab")
+    rotations = Rotation.from_euler(euler)
 
     props = {}
     for key in ("correlation", "mirrored_template", "template_index"):

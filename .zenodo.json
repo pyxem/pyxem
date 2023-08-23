@@ -11,7 +11,9 @@
       "name":"Magnus Nord"
     },
     {
-      "name":"Carter Francis"
+      "name":"Carter Francis",
+      "orcid": "0000-0003-2564-1851",
+      "affiliation": "University of Wisconsin Madison"
     },
     {
       "name":"Joonatan Laulainen"
@@ -39,15 +41,15 @@
       "name":"Stef Smeets"
     },
     {
+      "name":"Håkon Wiik Ånes",
+      "orcid": "0000-0002-1213-2911",
+      "affiliation": "Norwegian University of Science and Technology"
+    },
+    {
       "name":"Andrew Ross"
     },
     {
       "name":"Joseph Broussard"
-    },
-    {
-      "name":"Håkon Wiik Ånes",
-      "orcid": "0000-0002-1213-2911",
-      "affiliation": "Norwegian University of Science and Technology"
     },
     {
       "name":"Sean Collins"
@@ -62,22 +64,27 @@
       "name":"Ida Hjorth"
     },
     {
+      "name":"Shuoyuan Huang",
+      "orcid":"0009-0008-9826-9425",
+      "affiliation": "University of Wisconsin Madison"
+    },
+    {
+      "name":"Endre Jacobsen"
+    },
+    {
       "name":"Mohsen Danaie"
     },
     {
       "name":"Andrew Herzing"
     },
     {
-      "name":"Endre Jacobsen"
-    },
-    {
       "name":"Tim Poon"
     },
     {
-      "name": "Tiarnan Doherty"
+      "name": "Sivert Dagenborg"
     },
     {
-      "name":"Shuoyuan Huang"
+      "name": "Tiarnan Doherty"
     },
     {
       "name":"Jedrzej Morzy"
@@ -89,10 +96,15 @@
       "name":"Tomas Ostasevicius"
     },
     {
+      "name": "Tor Inge Thorsen",
+      "affiliation": "Norwegian University of Science and Technology"
+    },
+    {
       "name":"Matt von Lany"
     },
     {
       "name":"Rob Tovey"
     }
+    
   ]
 }

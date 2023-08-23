@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -25,11 +25,11 @@ from pyxem.signals.common_diffraction import CommonDiffraction
 
 class Diffraction1D(CommonDiffraction, Signal1D):
     """Signal class for Electron Diffraction radial profiles."""
+
     _signal_type = "diffraction"
 
     pass
 
 
 class LazyDiffraction1D(LazySignal, Diffraction1D):
-
     pass

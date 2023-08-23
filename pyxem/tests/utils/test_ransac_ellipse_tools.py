@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -225,7 +225,7 @@ class TestGetClosestFocus:
 
     def test_horizontal_ellipse(self):
         x, y, a, b, r = 10, 20, 20, 10, 0
-        c = math.sqrt(a ** 2 - b ** 2)
+        c = math.sqrt(a**2 - b**2)
         xf0, yf0 = ret._get_closest_focus(20, 20, x, y, a, b, r)
         assert (xf0, yf0) == (x + c, y)
         xf1, yf1 = ret._get_closest_focus(5, 20, x, y, a, b, r)
@@ -233,7 +233,7 @@ class TestGetClosestFocus:
 
     def test_vertical_ellipse(self):
         x, y, a, b, r = 10, 20, 15, 10, math.pi / 2
-        c = math.sqrt(a ** 2 - b ** 2)
+        c = math.sqrt(a**2 - b**2)
         xf0, yf0 = ret._get_closest_focus(10, 30, x, y, a, b, r)
         assert (xf0, yf0) == (x, y + c)
         xf1, yf1 = ret._get_closest_focus(10, 10, x, y, a, b, r)
@@ -250,42 +250,42 @@ class TestEllipseCentreToFocus:
     def test_horizontal_ellipse(self):
         x, y, a, b, r = 10, 20, 20, 10, 0
         f0, f1 = ret._ellipse_centre_to_focus(x, y, a, b, r)
-        c = math.sqrt(a ** 2 - b ** 2)
+        c = math.sqrt(a**2 - b**2)
         assert f0 == (x + c, y)
         assert f1 == (x - c, y)
 
     def test_vertical_ellipse(self):
         x, y, a, b, r = 10, 20, 10, 5, math.pi / 2
         f0, f1 = ret._ellipse_centre_to_focus(x, y, a, b, r)
-        c = math.sqrt(a ** 2 - b ** 2)
+        c = math.sqrt(a**2 - b**2)
         assert f0 == (x, y + c)
         assert f1 == (x, y - c)
 
     def test_rotated45_ellipse(self):
         x, y, a, b, r = 10, 20, 10, 5, math.pi / 4
         f0, f1 = ret._ellipse_centre_to_focus(x, y, a, b, r)
-        c = math.sqrt(a ** 2 - b ** 2)
+        c = math.sqrt(a**2 - b**2)
         assert approx(f0) == (x + c * math.sin(r), y + c * math.cos(r))
         assert approx(f1) == (x - c * math.sin(r), y - c * math.cos(r))
 
     def test_rotated_negative45_ellipse(self):
         x, y, a, b, r = 10, 20, 10, 5, -math.pi / 4
         f0, f1 = ret._ellipse_centre_to_focus(x, y, a, b, r)
-        c = math.sqrt(a ** 2 - b ** 2)
+        c = math.sqrt(a**2 - b**2)
         assert approx(f0) == (x - c * math.sin(r), y - c * math.cos(r))
         assert approx(f1) == (x + c * math.sin(r), y + c * math.cos(r))
 
     def test_horizontal_negative(self):
         x, y, a, b, r = 5, 20, 20, 10, 0
         f0, f1 = ret._ellipse_centre_to_focus(x, y, a, b, r)
-        c = math.sqrt(a ** 2 - b ** 2)
+        c = math.sqrt(a**2 - b**2)
         assert approx(f0) == (x + c, y)
         assert approx(f1) == (x - c, y)
 
     def test_vertical_negative(self):
         x, y, a, b, r = 10, 5, 10, 20, 0
         f0, f1 = ret._ellipse_centre_to_focus(x, y, a, b, r)
-        c = math.sqrt(b ** 2 - a ** 2)
+        c = math.sqrt(b**2 - a**2)
         assert approx(f0) == (x, y + c)
         assert approx(f1) == (x, y - c)
 
@@ -593,8 +593,12 @@ class TestGetEllipseModelRansac:
         )
 
         for iy, ix in np.ndindex(xf.shape):
-            assert approx(xf[iy, ix], abs=0.0008) == ellipse_array0[iy, ix][1]
-            assert approx(yf[iy, ix], abs=0.0008) == ellipse_array0[iy, ix][0]
+            assert np.isclose(
+                xf[iy, ix], ellipse_array0[iy, ix][1], atol=1e-8, rtol=1e-3
+            )
+            assert np.isclose(
+                yf[iy, ix], ellipse_array0[iy, ix][0], atol=1e-8, rtol=1e-3
+            )
             assert inlier_array0[iy, ix].all()
             assert ellipse_array1[iy, ix] is None
             assert inlier_array1[iy, ix] is None
@@ -962,6 +966,7 @@ class TestGetEllipseMarkerListFromEllipseArray:
         assert_allclose(m3.data["x2"][()], xc_array)
         assert_allclose(m3.data["y2"][()], yc_array + sy_array)
 
+
 def test_full_ellipse_ransac_processing():
     xf, yf, a, b, r, nt = 100, 115, 45, 35, 0, 15
     data_points = ret.make_ellipse_data_points(xf, yf, a, b, r, nt)
@@ -975,7 +980,12 @@ def test_full_ellipse_ransac_processing():
 
     s = Diffraction2D(data)
     s_t = s.template_match_disk(disk_r=5)
-    peak_array = s_t.find_peaks_lazy(threshold=0.1, lazy_result=False)
+    peak_array = s_t.find_peaks(
+        method="difference_of_gaussian",
+        threshold=0.1,
+        lazy_output=False,
+        interactive=False,
+    ).data
 
     c = math.sqrt(math.pow(a, 2) - math.pow(b, 2))
     xc, yc = xf - c * math.cos(r), yf - c * math.sin(r)
@@ -1032,49 +1042,53 @@ class TestDetermineEllipse:
             mask = None
         t = np.ones((100, 100))
         x, y = np.ogrid[-45:55, -50:50]
-        t[x ** 2 + (y * 1.15) ** 2 < 40 ** 2] = 100
-        t[x ** 2 + (y * 1.15) ** 2 < 30 ** 2] = 1
+        t[x**2 + (y * 1.15) ** 2 < 40**2] = 100
+        t[x**2 + (y * 1.15) ** 2 < 30**2] = 1
         t = t + np.random.random((100, 100))
         center, affine = ret.determine_ellipse(t, mask=mask, use_ransac=ransac)
 
         np.testing.assert_array_almost_equal(
             affine,
-            [[1., 0, 0],
-            [0, 1.15, 0],
-            [0, 0, 1]],
+            [[1.0, 0, 0], [0, 1.15, 0], [0, 0, 1]],
             2,
         )
         np.testing.assert_array_almost_equal(center, [45, 50], 0)
 
-    @mark.parametrize('execution_number', range(5))
+    @mark.parametrize("execution_number", range(5))
     def test_determine_ellipse_rotated(self, execution_number):
-        angle = np.random.random()*np.pi
+        angle = np.random.random() * np.pi
         test_data = mdtd.MakeTestData(200, 200, default=False)
         test_data.add_disk(x0=100, y0=100, r=5, intensity=30)
-        test_data.add_ring_ellipse(x0=100, y0=100, semi_len0=64, semi_len1=70, rotation=angle)
+        test_data.add_ring_ellipse(
+            x0=100, y0=100, semi_len0=64, semi_len1=70, rotation=angle
+        )
         s = test_data.signal
         s.set_signal_type("electron_diffraction")
 
         mask = np.zeros_like(s.data, dtype=bool)
-        mask[100 - 20:100 + 20, 100 - 20:100 + 20] = True
-        center, affine = ret.determine_ellipse(s, mask=mask, use_ransac=False, num_points=2000)
+        mask[100 - 20 : 100 + 20, 100 - 20 : 100 + 20] = True
+        center, affine = ret.determine_ellipse(
+            s, mask=mask, use_ransac=False, num_points=2000
+        )
         s.unit = "k_nm^-1"
         s.beam_energy = 200
         s.axes_manager.signal_axes[0].scale = 0.1
         s.axes_manager.signal_axes[1].scale = 0.1
         s.set_ai(center=center, affine=affine)
         s_az = s.get_azimuthal_integral2d(npt=100)
-        assert (np.sum((s_az.sum(axis=0).isig[6:] > 1).data)<11)
+        assert np.sum((s_az.sum(axis=0).isig[6:] > 1).data) < 11
 
-    @mark.parametrize("rot", np.linspace(0, 2*np.pi, 10))
+    @mark.parametrize("rot", np.linspace(0, 2 * np.pi, 10))
     def test_determine_ellipse(self, rot):
         test_data = mdtd.MakeTestData(200, 200, default=False)
         test_data.add_disk(x0=100, y0=100, r=5, intensity=30)
-        test_data.add_ring_ellipse(x0=100, y0=100, semi_len0=63, semi_len1=70, rotation=rot)
+        test_data.add_ring_ellipse(
+            x0=100, y0=100, semi_len0=63, semi_len1=70, rotation=rot
+        )
         s = test_data.signal
         s.set_signal_type("electron_diffraction")
         mask = np.zeros_like(s.data, dtype=bool)
-        mask[100 - 20:100 + 20, 100 - 20:100 + 20] = True
+        mask[100 - 20 : 100 + 20, 100 - 20 : 100 + 20] = True
         center, affine = ret.determine_ellipse(s, mask=mask, use_ransac=False)
         s.unit = "k_nm^-1"
         s.beam_energy = 200
@@ -1082,13 +1096,13 @@ class TestDetermineEllipse:
         s.axes_manager.signal_axes[1].scale = 0.1
         s.set_ai(center=center, affine=affine)
         s_az = s.get_azimuthal_integral2d(npt=100)
-        assert (np.sum((s_az.sum(axis=0).isig[10:] > 1).data) < 10)
+        assert np.sum((s_az.sum(axis=0).isig[10:] > 1).data) < 10
 
     def test_get_max_pos(self):
         t = np.ones((100, 100))
         x, y = np.ogrid[-45:55, -50:50]
-        t[x ** 2 + (y * 1.15) ** 2 < 40 ** 2] = 100
-        t[x ** 2 + (y * 1.15) ** 2 < 30 ** 2] = 1
+        t[x**2 + (y * 1.15) ** 2 < 40**2] = 100
+        t[x**2 + (y * 1.15) ** 2 < 30**2] = 1
         t = t + np.random.random((100, 100))
         s = Signal2D(t)
         pos = ret._get_max_positions(s, num_points=100)

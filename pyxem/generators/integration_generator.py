@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -27,6 +27,7 @@ from scipy.ndimage import center_of_mass
 from hyperspy.signals import BaseSignal
 
 import logging
+
 _logger = logging.getLogger(__name__)
 
 from pyxem.generators.subpixelrefinement_generator import _get_pixel_vectors
@@ -127,7 +128,7 @@ def _get_intensities_summation_method(
 
     """
     if not n_max:  # pragma: no cover
-        n_max = box_inner ** 2
+        n_max = box_inner**2
 
     peaks = []
 
@@ -237,7 +238,7 @@ class IntegrationGenerator:
         )
 
         intensities = BaseSignal(intensities)
-        intensities.axes_manager.set_signal_dimension(0)
+        intensities = intensities.transpose(0)
 
         return intensities
 

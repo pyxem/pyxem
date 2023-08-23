@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -31,6 +31,7 @@ from pyxem.signals import (
     DiffractionVectors,
 )
 from pyxem.utils.indexation_utils import OrientationResult
+
 
 @pytest.fixture
 def sp_vector_match_result():
@@ -105,9 +106,11 @@ def dp_vector_match_result():
     )
     return VectorMatchingResults(res)
 
+
 @pytest.mark.skip(reason="This functionality is under limited support as of 0.14.0")
 def test_single_vector_get_crystallographic_map(sp_vector_match_result):
     _ = sp_vector_match_result.get_crystallographic_map()
+
 
 @pytest.mark.skip(reason="This functionality is under limited support as of 0.14.0")
 def test_double_vector_get_crystallographic_map(dp_vector_match_result):

@@ -75,7 +75,7 @@ def transfer_navigation_axes(new_signal, old_signal):
     new_signal : Signal
         The new signal with calibrated navigation axes.
     """
-    new_signal.axes_manager.set_signal_dimension(
+    new_signal.transpose(
         len(new_signal.data.shape) - old_signal.axes_manager.navigation_dimension
     )
 
@@ -92,6 +92,13 @@ def transfer_navigation_axes(new_signal, old_signal):
         ax_new.units = ax_old.units
 
     return new_signal
+
+
+def to_hyperspy_index(index, signal_axis):
+    if isinstance(index, int):
+        return index
+    else:
+        return signal_axis.value2index(index)
 
 
 def transfer_navigation_axes_to_signal_axes(new_signal, old_signal):

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -74,6 +74,7 @@ def crystal_from_vector_matching(z_matches):
 
     return results_array
 
+
 def _get_best_match(z):
     """Returns the match with the highest score for a given navigation pixel
 
@@ -89,6 +90,62 @@ def _get_best_match(z):
 
     """
     return z[np.argmax(z[:, -1]), :]
+
+
+def _get_phase_reliability(z):
+    """Returns the phase reliability (phase_alpha_best/phase_beta_best) for a given navigation pixel
+
+    Parameters
+    ----------
+    z : np.array
+        array with shape (5,n_matches), the 5 elements are phase, alpha, beta, gamma, score
+
+    Returns
+    -------
+    phase_reliabilty : float
+        np.inf if only one phase is avaliable
+    """
+    best_match = _get_best_match(z)
+    phase_best = best_match[0]
+    phase_best_score = best_match[4]
+
+    # mask for other phases
+    lower_phases = z[z[:, 0] != phase_best]
+    # needs a second phase, if none return np.inf
+    if lower_phases.size > 0:
+        phase_second = _get_best_match(lower_phases)
+        phase_second_score = phase_second[4]
+    else:
+        return np.inf
+
+    return phase_best_score / phase_second_score
+
+
+def _get_second_best_phase(z):
+    """Returns the the second best phase for a given navigation pixel
+
+    Parameters
+    ----------
+    z : np.array
+        array with shape (5,n_matches), the 5 elements are phase, alpha, beta, gamma, score
+
+    Returns
+    -------
+    phase_id : int
+        associated with the second best phase
+    """
+    best_match = _get_best_match(z)
+    phase_best = best_match[0]
+
+    # mask for other phases
+    lower_phases = z[z[:, 0] != phase_best]
+
+    # needs a second phase, if none return -1
+    if lower_phases.size > 0:
+        phase_second = _get_best_match(lower_phases)
+        return phase_second[4]
+    else:
+        return -1
 
 
 class GenericMatchingResults:
@@ -120,15 +177,28 @@ class GenericMatchingResults:
         y = xy[0].flatten()
 
         """ Tidies up so we can put these things into CrystalMap """
-        euler = np.column_stack((alpha, beta, gamma))
+        euler = np.deg2rad(np.vstack((alpha, beta, gamma)).T)
         rotations = Rotation.from_euler(
             euler, convention="bunge", direction="crystal2lab"
         )
-        properties = {"score": score}
+
+        """ add various properties """
+        phase_reliabilty = self.data.map(
+            _get_phase_reliability, inplace=False
+        ).data.flatten()
+        second_phase = self.data.map(
+            _get_second_best_phase, inplace=False
+        ).data.flatten()
+        properties = {
+            "score": score,
+            "phase_reliabilty": phase_reliabilty,
+            "second_phase": second_phase,
+        }
 
         return CrystalMap(
             rotations=rotations, phase_id=phase_id, x=x, y=y, prop=properties
         )
+
 
 class VectorMatchingResults(BaseSignal):
     """Vector matching results containing the top n best matching crystal

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -162,7 +162,7 @@ class TestFullDirectBeamCentering:
         s_beam_shift.make_linear_plane(mask=s_mask)
         s.center_direct_beam(shifts=s_beam_shift)
         s.compute()
-        np.testing.assert_almost_equal(s.data[:, :, 8, 8], 10,decimal=5)
+        np.testing.assert_almost_equal(s.data[:, :, 8, 8], 10, decimal=5)
         s.data[:, :, 8, 8] = 0
         s.data[1, 2, 3, 2] = 0
         np.testing.assert_almost_equal(s.data, 0.0, decimal=4)

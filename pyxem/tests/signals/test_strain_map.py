@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -48,7 +48,7 @@ def test__init__(Displacement_Grad_Map):
 
 
 def test_signal_axes_carry_through(Displacement_Grad_Map):
-    """ A strain map that is calibrated, should stay calibrated when we change basis """
+    """A strain map that is calibrated, should stay calibrated when we change basis"""
     strain_map = Displacement_Grad_Map.get_strain_maps()
     strain_map.axes_manager.signal_axes[1].units = "nm"
     strain_map.axes_manager.signal_axes[0].scale = 19
@@ -89,7 +89,7 @@ def test_90_degree_rotation(Displacement_Grad_Map):
 
 
 def test_going_back_and_forward_between_bases(Displacement_Grad_Map):
-    """ Checks that going via an intermediate strain map doesn't give incorrect answers"""
+    """Checks that going via an intermediate strain map doesn't give incorrect answers"""
     strain_original = Displacement_Grad_Map.get_strain_maps()
     local_D = Displacement_Grad_Map
     temp_strain = local_D.get_strain_maps()
@@ -120,7 +120,7 @@ def test_rotation(Displacement_Grad_Map):
 
 def test_trace(Displacement_Grad_Map):
     """
-    Basis does effect strain measurement, but we can simply calculate suitable invariants.
+    Basis does affect strain measurement, but we can simply calculate suitable invariants.
     See https://en.wikipedia.org/wiki/Infinitesimal_strain_theory for details.
     """
 

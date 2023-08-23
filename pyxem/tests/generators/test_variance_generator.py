@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -81,7 +81,6 @@ def variance_generator():
 class TestVarianceGenerator:
     @pytest.mark.parametrize("dqe", [0.5, 0.6])
     def test_get_diffraction_variance(self, variance_generator: VarianceGenerator, dqe):
-
         vardps = variance_generator.get_diffraction_variance(dqe)
         assert isinstance(vardps, DiffractionVariance2D)
 
@@ -296,7 +295,6 @@ class TestVarianceGenerator:
 
     @pytest.mark.parametrize("dqe", [0.5, 0.6])
     def test_get_image_variance(self, variance_generator: VarianceGenerator, dqe):
-
         varims = variance_generator.get_image_variance(dqe)
         assert isinstance(varims, ImageVariance)
 

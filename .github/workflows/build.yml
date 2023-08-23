@@ -2,41 +2,73 @@ name: build
 
 on:
   push:
-    branches: [master]
   pull_request:
-    branches: [master]
+    branches: [main]
+
+env:
+  MPLBACKEND: agg
 
 jobs:
+  code:
+    name: code style
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: psf/black@stable
+
   build-with-pip:
-    name: ${{ matrix.os }}/py${{ matrix.python-version }}/pip
+    name: ${{ matrix.os }}-py${{ matrix.python-version }}${{ matrix.LABEL }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
-    env:
-      MPLBACKEND: agg
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: [3.7, 3.8, 3.9]
+        python-version: ['3.9', '3.10']
+        include:
+          - os: ubuntu-latest
+            python-version: 3.7
+            DEPENDENCIES: diffsims==0.5.0 hyperspy==1.7.0 lmfit==0.9.12 matplotlib==3.3 orix==0.9.0 scikit-image==0.19.0 scikit-learn==1.0.0
+            LABEL: -oldest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Display versions
-        run: python -V; pip -V
+
       - name: Install dependencies and package
         shell: bash
-        run: pip install -U -e .'[tests]'
+        run: |
+          pip install -U -e .'[tests]'
+
+      - name: Install oldest supported versions
+        if: contains(matrix.LABEL, 'oldest')
+        run: |
+          pip install ${{ matrix.DEPENDENCIES }}
+
+      - name: Display Python, pip and package versions
+        run: |
+          python -V
+          pip -V
+          pip list
+
       - name: Run docstring tests
         continue-on-error: true
-        run: pytest --doctest-modules --ignore=pyxem/tests pyxem
+        run: |
+          pytest --doctest-modules --doctest-continue-on-failure --ignore-glob=pyxem/tests pyxem
+
       - name: Run tests
-        run: pytest --cov=pyxem --runslow --pyargs pyxem
+        run: |
+          pytest -n 2 --cov=pyxem --runslow --pyargs pyxem
+
       - name: Generate line coverage
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: coverage report --show-missing
+        run: |
+          coverage report --show-missing
+
       - name: Upload coverage to Coveralls
         if: ${{ matrix.os == 'ubuntu-latest' }}
         uses: AndreMiras/coveralls-python-action@develop
@@ -47,7 +79,7 @@ jobs:
     needs: build-with-pip
     runs-on: ubuntu-latest
     steps:
-    - name: Coveralls finished
-      uses: AndreMiras/coveralls-python-action@develop
-      with:
-        parallel-finished: true
+      - name: Coveralls finished
+        uses: AndreMiras/coveralls-python-action@develop
+        with:
+          parallel-finished: true

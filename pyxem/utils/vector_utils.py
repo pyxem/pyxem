@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -18,7 +18,7 @@
 
 import numpy as np
 import math
-
+from scipy.spatial.distance import cdist
 from transforms3d.axangles import axangle2mat
 
 
@@ -54,7 +54,7 @@ def detector_to_fourier(k_xy, wavelength, camera_length):
     # the wavelength. k_z is calculated courtesy of Pythagoras, then offset by
     # the Ewald sphere radius.
 
-    k_z = np.sqrt(1 / (wavelength ** 2) - np.sum(k_xy ** 2, axis=1)) - 1 / wavelength
+    k_z = np.sqrt(1 / (wavelength**2) - np.sum(k_xy**2, axis=1)) - 1 / wavelength
 
     # Stack the xy-vector and the z vector to get the full k
     k = np.hstack((k_xy, k_z[:, np.newaxis]))
@@ -314,3 +314,39 @@ def get_angle_cartesian(a, b):
     if denom == 0:
         return 0.0
     return math.acos(max(-1.0, min(1.0, np.dot(a, b) / denom)))
+
+
+def filter_vectors_near_basis(vectors, basis, distance=None):
+    """
+    Filter an array of vectors to only the list of closest vectors
+    to some set of basis vectors.  Only vectors within some `distance`
+    are considered.  If no vector is within the `distance` np.nan is
+    returned for that vector.
+
+    Parameters
+    ----------
+    vectors: array-like
+        A two dimensional array of vectors where each row identifies a new vector
+
+    basis: array-like
+        A two dimensional array of vectors where each row identifies a vector.
+
+    Returns
+    -------
+    closest_vectors: array-like
+        An array of vectors which are the closest to the basis considered.
+    """
+    if len(vectors) == 0:
+        vectors = np.empty(basis.shape)
+        vectors[:, :] = np.nan
+        return vectors
+    distance_mat = cdist(vectors, basis)
+    closest_index = np.argmin(distance_mat, axis=0)
+    min_distance = distance_mat[closest_index, np.arange(len(basis), dtype=int)]
+    closest_vectors = vectors[closest_index]
+    if distance is not None:
+        if closest_vectors.dtype == int:
+            closest_vectors = closest_vectors.astype(float)
+
+        closest_vectors[min_distance > distance, :] = np.nan
+    return closest_vectors

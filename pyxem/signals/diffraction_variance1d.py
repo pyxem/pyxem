@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -22,6 +22,7 @@ from pyxem.signals.diffraction1d import Diffraction1D
 
 class DiffractionVariance1D(Diffraction1D):
     """Signal class for one-dimensional diffraction variance."""
+
     _signal_type = "diffraction_variance"
 
     pass

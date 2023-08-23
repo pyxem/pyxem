@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -289,5 +289,5 @@ class TestEmptyCalibrationGenerator:
             rotation=10,
         )
         calgen.diffraction_calibration = (1, 1)
-        ai = calgen.to_ai(wavelength=(2.53 * 10 ** -12))
+        ai = calgen.to_ai(wavelength=(2.53 * 10**-12))
         assert isinstance(ai, AzimuthalIntegrator)

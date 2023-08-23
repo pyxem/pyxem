@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -26,6 +26,7 @@ class PairDistributionFunction1D(Signal1D):
     """Signal class for Pair Distribution Function (PDF) radial profiles
     as a function of distance r.
     """
+
     _signal_type = "pair_distribution_function"
 
     def normalise_signal(self, s_min=0, inplace=False, *args, **kwargs):

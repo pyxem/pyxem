@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -57,7 +57,7 @@ class TestCorrelation1D:
             angular_range=0.02,
             include_duplicates=True,
             normalize=True,
-            symmetries=[3,4,5,6,7,8],
+            symmetries=[3, 4, 5, 6, 7, 8],
         )
         np.testing.assert_array_almost_equal(sym_coeff.data, sym_coeff.data[0, 0, 0])
 

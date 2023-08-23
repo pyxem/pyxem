@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -15,10 +15,12 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+import warnings
 
 import numpy as np
 
 from hyperspy.signals import Signal2D
+from hyperspy._signals.lazy import LazySignal
 
 from pyxem.signals import DiffractionVectors, VDFSegment
 from pyxem.utils.signal import transfer_signal_axes
@@ -27,11 +29,23 @@ from pyxem.utils.segment_utils import separate_watershed
 
 class VirtualDarkFieldImage(Signal2D):
     """Signal class for virtual diffraction contrast images."""
+
     _signal_type = "virtual_dark_field"
 
     def __init__(self, *args, **kwargs):
+        _vectors = kwargs.pop("vectors", None)
         super().__init__(*args, **kwargs)
-        self.vectors = None
+        self.metadata.add_node("Vectors")
+        if _vectors is not None or "Vectors" not in self.metadata:
+            self.vectors = kwargs.pop("vectors", None)
+
+    @property
+    def vectors(self):
+        return self.metadata.Vectors
+
+    @vectors.setter
+    def vectors(self, value):
+        self.metadata.Vectors = value
 
     def get_vdf_segments(
         self,
@@ -93,6 +107,10 @@ class VirtualDarkFieldImage(Signal2D):
             VDFSegment object containing segments (i.e. grains) of
             single virtual dark field images with corresponding vectors.
         """
+        warnings.warn(
+            "Changed in version 0.15.0.  May cause unexpected"
+            "errors related to managing the proper axes."
+        )
         vdfs = self.copy()
         vectors = self.vectors.data
 
@@ -149,12 +167,8 @@ class VirtualDarkFieldImage(Signal2D):
         n = vdfsegs.segments.axes_manager.navigation_axes[0]
         n.name = "n"
         n.units = "number"
-        vdfsegs.vectors_of_segments.axes_manager.set_signal_dimension(1)
-        vdfsegs.vectors_of_segments = transfer_signal_axes(
-            vdfsegs.vectors_of_segments, self.vectors
-        )
-        n = vdfsegs.vectors_of_segments.axes_manager.navigation_axes[0]
-        n.name = "n"
-        n.units = "number"
-
         return vdfsegs
+
+
+class LazyVirtualDarkFieldImage(LazySignal, VirtualDarkFieldImage):
+    pass

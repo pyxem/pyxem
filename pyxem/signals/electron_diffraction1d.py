@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -23,6 +23,7 @@ from pyxem.signals.diffraction1d import Diffraction1D
 
 class ElectronDiffraction1D(Diffraction1D):
     """Signal class for Electron Diffraction radial profiles."""
+
     _signal_type = "electron_diffraction"
 
     def set_experimental_parameters(
@@ -118,5 +119,4 @@ class ElectronDiffraction1D(Diffraction1D):
 
 
 class LazyElectronDiffraction1D(LazySignal, ElectronDiffraction1D):
-
     pass

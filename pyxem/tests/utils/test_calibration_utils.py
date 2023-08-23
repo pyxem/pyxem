@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -22,7 +22,9 @@ import numpy as np
 from pyxem.utils import calibration_utils
 
 
-@pytest.mark.skip(reason="This functionality already smells, skipping while new things are built")
+@pytest.mark.skip(
+    reason="This functionality already smells, skipping while new things are built"
+)
 class TestCalibrations:
     def test_find_diffraction_calibration(
         self, test_patterns, test_lib_gen, test_library_phases

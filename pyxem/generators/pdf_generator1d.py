@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2022 The pyXem developers
+# Copyright 2016-2023 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -22,6 +22,7 @@ import numpy as np
 
 from pyxem.signals import PairDistributionFunction1D
 from pyxem.utils.signal import transfer_navigation_axes
+from pyxem.utils._deprecated import deprecated
 
 
 class PDFGenerator1D:
@@ -34,9 +35,19 @@ class PDFGenerator1D:
         A reduced intensity radial profile.
     """
 
+    @deprecated(
+        since="0.15",
+        alternative="pyxem.signals.diffraction2d.get_pdf",
+        removal="1.0.0",
+    )
     def __init__(self, signal, *args, **kwargs):
         self.signal = signal
 
+    @deprecated(
+        since="0.15",
+        alternative="pyxem.signals.diffraction2d.get_pdf",
+        removal="1.0.0",
+    )
     def get_pdf(self, s_min, s_max=None, r_min=0, r_max=20, r_increment=0.01):
         """Calculates the pdf from the reduced intensity signal.
 
