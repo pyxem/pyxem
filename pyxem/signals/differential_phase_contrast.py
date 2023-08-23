@@ -621,7 +621,10 @@ class DPCSignal2D(Signal2D):
             s = self.get_phase_signal(rotation=phase_rotation)
         else:
             s = self.get_color_signal(
-                rotation=phase_rotation, autolim=autolim, autolim_sigma=autolim_sigma, magnitude_limits=magnitude_limits
+                rotation=phase_rotation,
+                autolim=autolim,
+                autolim_sigma=autolim_sigma,
+                magnitude_limits=magnitude_limits,
             )
         s.change_dtype("uint16")
         s.change_dtype("float64")

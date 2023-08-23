@@ -228,7 +228,7 @@ class TestGetDpcSignal:
         s_random = DPCSignal2D(data_random)
         s_random.get_color_signal()
         s_random.get_color_signal(rotation=45)
-        s_random.get_color_signal(autolim=False, magnitude_limits=(0,30))
+        s_random.get_color_signal(autolim=False, magnitude_limits=(0, 30))
 
     def test_get_color_signal_zeros(self):
         s = DPCSignal2D(np.zeros((2, 100, 100)))
