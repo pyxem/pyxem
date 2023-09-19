@@ -134,34 +134,54 @@ class TestSimpleHyperspy:
         assert isinstance(diffraction_pattern, ElectronDiffraction2D)
 
     @pytest.mark.parametrize(
-        "calibration, center",
+        "calibration, center, pixels",
         [
-            (
-                1,
-                (4, 4),
-            ),
-            (0.017, (3, 3)),
-            (
-                0.5,
-                None,
-            ),
+            (1, (4, 4), True),
+            (0.5, (2, 2), False),
+            (0.5, None, False),
+            (0.5, None, True),
         ],
     )
     def test_set_diffraction_calibration(
-        self, diffraction_pattern, calibration, center
+        self, diffraction_pattern, calibration, center, pixels
     ):
-        calibrated_center = (
-            calibration * np.array(center) if center is not None else center
-        )
+        pattern_center = np.array(diffraction_pattern.axes_manager.signal_shape) // 2
         diffraction_pattern.set_diffraction_calibration(
-            calibration, center=calibrated_center
+            calibration, center=center, pixels=pixels
         )
         dx, dy = diffraction_pattern.axes_manager.signal_axes
+
+        # Check on axes manager values
         assert dx.scale == calibration and dy.scale == calibration
-        if center is not None:
+
+        # Check on data values as well
+        if center is not None and pixels:
             assert np.all(
                 diffraction_pattern.isig[0.0, 0.0].data
                 == diffraction_pattern.isig[center[0], center[1]].data
+            )
+            assert (
+                dx.offset == -center[0] * calibration
+                and dy.offset == -center[1] * calibration
+            )  # Check that axes manager offset is set correctly
+        elif center is not None and not pixels:
+            assert np.all(
+                diffraction_pattern.isig[0.0, 0.0].data
+                == diffraction_pattern.isig[
+                    int(center[0] / calibration), int(center[1] / calibration)
+                ].data
+            )
+            assert (
+                dx.offset == -center[0] and dy.offset == -center[1]
+            )  # Check that axes manager offset is set correctly
+        else:
+            assert np.all(
+                diffraction_pattern.isig[0.0, 0.0].data
+                == diffraction_pattern.isig[pattern_center[0], pattern_center[1]].data
+            )
+            assert (
+                dx.offset == -pattern_center[0] * calibration
+                and dy.offset == -pattern_center[1] * calibration
             )
 
 
