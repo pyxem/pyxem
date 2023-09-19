@@ -1028,9 +1028,19 @@ def _untangle_raw(data, hdr_info, stack_size):
 
 def reshape_4DSTEM(signal):
     width = signal.original_metadata.scan_X
-    signal.data = signal.data.reshape(floor(signal.data.shape[0] / width),
-                                      width,
-                                      *signal.axes_manager.signal_shape)
+    data = signal.data
+    remainder = signal.data.shape[0] % width
+    rows = signal.data.shape[0] // width
+    if remainder != 0:
+        # Add frame to finish a row
+        rows += 1
+        signal.data = da.concatenate(
+            (signal.data, da.zeros((width-remainder, *signal.axes_manager.signal_shape)))
+            )
+
+    signal.data = signal.data.reshape(
+        rows, width, *signal.axes_manager.signal_shape
+        )
     signal.axes_manager._axes.insert(0, signal.axes_manager[0].copy())
     signal.get_dimensions_from_data()
 
