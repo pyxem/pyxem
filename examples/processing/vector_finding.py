@@ -45,7 +45,7 @@ The template matching is done on the pixel grid.  To find the peak position more
 can be upsampled using the :class:`pyxem.generators.SubpixelrefinementGenerator` class.  This class takes a
 `DiffractionSignal2D` object and a `DiffractionVector` object as input.
 """
-
+"""
 from pyxem.generators.subpixelrefinement_generator import SubpixelrefinementGenerator
 subpixel_gen = SubpixelrefinementGenerator(s, pks)
 refined_peaks_com = subpixel_gen.center_of_mass_method(square_size=5)
@@ -66,4 +66,4 @@ markers3 = refined_peaks_xc.as_markers(colors='green',
 
 s.plot()
 s.add_marker([markers1, markers2, markers3])
-
+"""

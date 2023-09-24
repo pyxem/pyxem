@@ -2,7 +2,7 @@ import numpy as np
 from pyxem.dummy_data import make_diffraction_test_data as mdtd
 import hyperspy.api as hs
 
-def tilt_boundary_data(correct_pivot_point=True)
+def tilt_boundary_data(correct_pivot_point=True):
     di = mdtd.DiffractionTestImage(intensity_noise=False)
     di.add_disk(x=128, y=128, intensity=10.)  # Add a zero beam disk at the center
     di.add_cubic_disks(vx=20, vy=20, intensity=2., n=5)

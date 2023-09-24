@@ -27,6 +27,7 @@ from pyxem import detectors
 from pyxem import dummy_data
 from pyxem import generators
 from pyxem import signals
+from pyxem import data
 
 from pyxem.utils.io_utils import load_mib
 
@@ -39,6 +40,7 @@ __all__ = [
     "generators",
     "signals",
     "load_mib",
+    "data",
 ]
 
 __version__ = release_info.version
