@@ -33,15 +33,17 @@ master_doc = "index"
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = [
     "sphinxcontrib.bibtex",
-    "sphinx.ext.autodoc",
+    'sphinx_design',
+    'sphinx.ext.autodoc',
     "sphinx.ext.autosummary",
-    "sphinx.ext.intersphinx",
-    "sphinx.ext.mathjax",
-    "sphinx.ext.napoleon",
-    "sphinx.ext.linkcode",
-    "sphinx_autodoc_typehints",
-    "sphinx_copybutton",
-    "sphinx_gallery.load_style",
+    "sphinx.ext.githubpages",
+    'sphinx.ext.graphviz',
+    'sphinx.ext.mathjax',
+    'sphinx.ext.inheritance_diagram',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.napoleon',
+    'sphinx_gallery.gen_gallery',
+    'sphinx_copybutton',
     "nbsphinx",
 ]
 
@@ -72,7 +74,7 @@ templates_path = [
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for a
 # list of builtin themes.
-html_theme = "furo"
+html_theme = "pydata_sphinx_theme"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files, so
@@ -139,6 +141,23 @@ exclude_patterns = ["_build", "**.ipynb_checkpoints"]
 
 # sphinxcontrib-bibtex configuration
 bibtex_bibfiles = ["bibliography.bib"]
+
+# -- Sphinx-Gallery---------------
+# https://sphinx-gallery.github.io
+sphinx_gallery_conf = {
+    'examples_dirs': '../examples',   # path to your example scripts
+    'gallery_dirs': 'auto_examples',  # path to where to save gallery generated output
+    'filename_pattern': '.py',        # pattern to define which will be executed
+    'ignore_pattern': '_sgskip.py',   # pattern to define which will not be executed
+}
+
+autodoc_default_options = {
+    'show-inheritance': True,
+}
+
+graphviz_output_format = "svg"
+
+
 
 
 def linkcode_resolve(domain, info):

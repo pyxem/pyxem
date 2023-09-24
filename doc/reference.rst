@@ -205,15 +205,6 @@ ElectronDiffraction2D
     :undoc-members:
     :show-inheritance:
 
-TemplateMatchingResults
------------------------
-
-.. currentmodule:: pyxem.signals.TemplateMatchingResults
-
-.. autoclass:: pyxem.signals.TemplateMatchingResults
-    :members:
-    :undoc-members:
-    :show-inheritance:
 
 VectorMatchingResults
 ---------------------
