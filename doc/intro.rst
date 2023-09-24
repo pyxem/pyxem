@@ -31,7 +31,7 @@ active community of users and developers who are working to develop new tools fo
     and how to use it along with background information and explanations.
 
   .. grid-item-card::
-    :link: reference
+    :link: reference/index
     :link-type: doc
 
     :octicon:`code-square;2em;sd-text-info` Reference
