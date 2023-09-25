@@ -487,7 +487,7 @@ class TestMakeDiffractionTestDataDisksRing:
         test0.add_ring_ellipse(x0=50, y0=50, semi_len0=20, semi_len1=30)
         test1 = mdtd.MakeTestData(size_x=120, size_y=100)
         test1.add_ring_ellipse(x0=50, y0=50, semi_len0=20, semi_len1=30, rotation=1)
-        assert not (test0.signal.data == test1.signal.data).all()
+        assert not np.all(np.equal(test0.signal.data, test1.signal.data))
 
     def test_repr(self):
         test = mdtd.MakeTestData()
@@ -792,7 +792,8 @@ class TestMake4dPeakArrayTestData:
         semi0, semi1 = np.ones((2, 3)) * 5, np.ones((2, 3))
         pa0 = mdtd._make_4d_peak_array_test_data(xf, yf, semi0, semi1, rot0, nt=1000)
         pa1 = mdtd._make_4d_peak_array_test_data(xf, yf, semi0, semi1, rot1, nt=1000)
-        assert not np.array_equal(pa0, pa1)
+        for i in np.ndindex(pa1.shape):
+            assert not np.all(np.array_equal(pa0[i], pa1[i]))
 
     def test_nt(self):
         p = np.ones((2, 3))
