@@ -99,6 +99,7 @@ def plot_template_over_pattern(
             window_size=(pattern.shape[1], pattern.shape[0]),
             mirrored=mirrored_template,
         )
+        y = pattern.shape[0] - y
     else:
         raise NotImplementedError(
             "Only polar and cartesian are accepted coordinate systems"

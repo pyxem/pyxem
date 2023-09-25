@@ -110,9 +110,10 @@ def test_results_dict_to_crystal_map(test_library_phases_multi, test_lib_gen):
         test_pattern = diff_lib[phase_names[i]]["simulations"][
             j
         ].get_diffraction_pattern(**sim_kwargs)
+        test_pattern = np.flipud(test_pattern)
         test_set[idx] = test_pattern
 
-    test_set[0, 0] = rotate(test_set[0, 0], -30, reshape=False)
+    test_set[0, 0] = rotate(test_set[0, 0], 30, reshape=False)
     # Perform template matching
     n_best = 3
     results, phase_dict = index_dataset_with_template_rotation(

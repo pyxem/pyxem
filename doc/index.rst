@@ -46,6 +46,7 @@ User Guide and Workflows
     demos/08*
     demos/09*
     demos/10*
+    demos/12*
 
 .. toctree::
     :caption: Help
