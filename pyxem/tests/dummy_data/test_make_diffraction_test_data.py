@@ -792,7 +792,8 @@ class TestMake4dPeakArrayTestData:
         semi0, semi1 = np.ones((2, 3)) * 5, np.ones((2, 3))
         pa0 = mdtd._make_4d_peak_array_test_data(xf, yf, semi0, semi1, rot0, nt=1000)
         pa1 = mdtd._make_4d_peak_array_test_data(xf, yf, semi0, semi1, rot1, nt=1000)
-        assert not np.all(np.array_equal(pa0, pa1))
+        for i in np.ndindex(pa1.shape):
+            assert not np.all(np.array_equal(pa0[i], pa1[i]))
 
     def test_nt(self):
         p = np.ones((2, 3))
