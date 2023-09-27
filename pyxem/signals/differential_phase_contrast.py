@@ -299,10 +299,15 @@ class DPCSignal2D(Signal2D):
         magnitude = np.sqrt(inav02 + inav12)
 
         if autolim:
+            if magnitude_limits is not None:
+                raise ValueError(
+                    "If autolim==True then `magnitude_limits` must be set to None"
+                )
+
             magnitude_limits = pst._get_limits_from_array(
                 magnitude, sigma=autolim_sigma
             )
-        if magnitude_limits:
+        if magnitude_limits is not None:
             np.clip(magnitude, magnitude_limits[0], magnitude_limits[1], out=magnitude)
 
         signal = Signal2D(magnitude)
@@ -540,6 +545,11 @@ class DPCSignal2D(Signal2D):
         magnitude = np.sqrt(np.abs(inav0) ** 2 + np.abs(inav1) ** 2)
 
         if autolim:
+            if magnitude_limits is not None:
+                raise ValueError(
+                    "If autolim==True then `magnitude_limits` must be set to None"
+                )
+
             magnitude_limits = pst._get_limits_from_array(
                 magnitude, sigma=autolim_sigma
             )
