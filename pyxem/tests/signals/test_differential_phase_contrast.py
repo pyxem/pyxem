@@ -230,6 +230,17 @@ class TestGetDpcSignal:
         s_random.get_color_signal(rotation=45)
         s_random.get_color_signal(autolim=False, magnitude_limits=(0, 30))
 
+    def test_get_color_signal_errors(self):
+        array_x, array_y = np.meshgrid(range(64), range(64))
+        data_tilt = np.swapaxes(
+            np.dstack((array_x + array_y, np.fliplr(array_x) + array_y)), 0, 2
+        ).astype("float64")
+        data_random = data_tilt + np.random.random(size=(2, 64, 64)) * 10
+        s_random = DPCSignal2D(data_random)
+
+        with pytest.raises(ValueError):
+            s_random.get_color_signal(autolim=True, magnitude_limits=(0, 30))
+
     def test_get_color_signal_zeros(self):
         s = DPCSignal2D(np.zeros((2, 100, 100)))
         s_color = s.get_color_signal()
@@ -241,6 +252,12 @@ class TestGetDpcSignal:
         s = DPCSignal2D(np.zeros((2, 100, 100)))
         s_magnitude = s.get_magnitude_signal()
         assert (s_magnitude.data == 0).all()
+
+    def test_get_magnitude_signal_errors(self):
+        s = DPCSignal2D(np.zeros((2, 100, 100)))
+
+        with pytest.raises(ValueError):
+            s.get_color_signal(autolim=True, magnitude_limits=(0, 30))
 
     def test_get_phase_signal(self):
         s = DPCSignal2D(np.zeros((2, 100, 100)))
