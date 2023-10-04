@@ -1,11 +1,28 @@
-.. _reference:
+.. _api:
 
-#########
-Reference
-#########
+=============
+API reference
+=============
 
-.. toctree::
-    :caption: API Reference
-    :maxdepth: 2
+This reference manual describes the public functions, modules, and objects in pyxem.
 
-    signals/index
+There are brief examples included for many functions as well as links to more detailed
+explanations of the functionality.
+
+
+.. currentmodule:: pyxem
+
+
+.. rubric:: Modules
+
+.. autosummary::
+    :toctree: generated
+    :template: custom-module-template.rst
+
+    detectors
+    components
+    dummy_data
+    generators
+    libraries
+    signals
+    utils

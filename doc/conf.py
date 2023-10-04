@@ -145,6 +145,7 @@ bibtex_bibfiles = ["bibliography.bib"]
 # -- Sphinx-Gallery---------------
 # https://sphinx-gallery.github.io
 sphinx_gallery_conf = {
+    "backreferences_dir": "reference/generated",
     'examples_dirs': '../examples',   # path to your example scripts
     'gallery_dirs': 'auto_examples',  # path to where to save gallery generated output
     'filename_pattern': '.py',        # pattern to define which will be executed

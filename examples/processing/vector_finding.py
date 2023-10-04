@@ -67,3 +67,4 @@ markers3 = refined_peaks_xc.as_markers(colors='green',
 s.plot()
 s.add_marker([markers1, markers2, markers3])
 """
+# %%

@@ -16,7 +16,18 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Signals to be operated on. The basic unit of data"""
+"""Signal classes
+
+.. rubric:: Modules
+
+.. currentmodule:: pyxem.signals
+
+.. autosummary::
+    :toctree: ../generated/
+    :template: custom-module-template.rst
+
+"""
+
 
 from .common_diffraction import CommonDiffraction
 from .correlation2d import Correlation2D, LazyCorrelation2D
@@ -93,3 +104,8 @@ __all__ = [
     "VirtualDarkFieldImage",
     "InSituDiffraction2D",
 ]
+
+
+def __dir__():
+    return sorted(__all__)
+

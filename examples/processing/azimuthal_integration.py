@@ -7,3 +7,4 @@ Azimuthal Integration
 
 import pyxem as pxm
 
+# %%

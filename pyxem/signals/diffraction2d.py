@@ -1185,8 +1185,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         See Also
         --------
-        template_match_disk
-        template_match_ring
+        :ref:`signals.DiffractionSignal2D.template_match_disk`
+        :ref:`signals.DiffractionSignal2D.template_match_ring`
 
         """
         return self.template_match(
