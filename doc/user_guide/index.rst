@@ -2,9 +2,29 @@
   :maxdepth: 1
   :hidden:
 
+.. toctree::
+    :caption: Getting started
+    :maxdepth: 1
 
-  Getting Started <getting_started>
-  Installing <installing>
-  Loading_data <loading_data>
+    installing.rst
+    loading_data.rst
+    distributed_big_data.rst
 
-.. include:: getting_started.rst
+.. toctree::
+    :caption: Usage
+    :maxdepth: 3
+
+    ../tutorials/index.rst
+    ../auto_examples/index.rst
+
+.. toctree::
+    :caption: Resources
+
+    bibliography.rst
+    cite.rst
+    open_datasets_workflows.rst
+    related_projects.rst
+    License <https://github.com/pyxem/pyxem/blob/develop/LICENSE>
+
+.. include::
+    getting_started.rst

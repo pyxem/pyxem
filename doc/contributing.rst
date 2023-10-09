@@ -65,7 +65,7 @@ Code style
 
 The code making up pyxem is formatted closely following the `Style Guide for Python Code
 <https://www.python.org/dev/peps/pep-0008/>`_ with `The Black Code style
-<https://black.readthedocs.io/en/stable/the_black_code_style.html>`_. Note that
+<https://black.readthedocs.io/en/stable/the_black_code_style/index.html l>`_. Note that
 ``black`` won't format `docstrings <https://www.python.org/dev/peps/pep-0257/>`_.
 
 Package imports should be structured into three blocks with blank lines between

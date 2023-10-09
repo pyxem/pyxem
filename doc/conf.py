@@ -61,6 +61,7 @@ intersphinx_mapping = {
     "scipy": ("https://docs.scipy.org/doc/scipy", None),
     "skimage": ("https://scikit-image.org/docs/stable", None),
     "sklearn": ("https://scikit-learn.org/stable", None),
+    "rosettasciio": ("https://hyperspy.org/rosettasciio/", None),
 }
 
 # Add any paths that contain templates here, relative to this directory.
@@ -219,3 +220,15 @@ def linkcode_resolve(domain, info):
             return pre_link + "v%s/%s%s" % (pyxem.__version__, fn, linespec)
     else:
         return None
+
+# sphinx.ext.autodoc
+# ------------------
+# https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html
+autosummary_ignore_module_all = False
+autosummary_imported_members = True
+autodoc_typehints_format = "short"
+autodoc_default_options = {
+    "show-inheritance": True,
+}
+
+autosummary_generate = True

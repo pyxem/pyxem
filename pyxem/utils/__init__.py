@@ -17,3 +17,18 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 """Additional utility functions for processing signals."""
+
+
+from pyxem.utils.ransac_ellipse_tools import determine_ellipse
+from pyxem.utils.calibration_utils import find_diffraction_calibration
+from pyxem.utils.plotting_utils import plot_template_over_pattern
+
+__all__ = [
+    "determine_ellipse",
+    "find_diffraction_calibration",
+    "plot_template_over_pattern",
+]
+
+
+def __dir__():
+    return sorted(__all__)

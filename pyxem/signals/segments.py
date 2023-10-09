@@ -275,6 +275,9 @@ class LearningSegment:
 
 
 class VDFSegment:
+    """Signal classes for nanocrystal segmentation results obtained from
+    VDF images (VDFSegment).
+    """
     _signal_type = "vdf_segment"
 
     def __init__(self, segments, vectors_of_segments, intensities=None):

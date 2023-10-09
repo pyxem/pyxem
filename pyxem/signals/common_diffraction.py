@@ -30,6 +30,8 @@ OUT_SIGNAL_AXES_DOCSTRING = """out_signal_axes : None, iterable of int or string
 
 
 class CommonDiffraction:
+    """Common functions for all Diffraction Signals classes"""
+
     @property
     def unit(self):
         if self.axes_manager.signal_axes[0].units is Undefined:

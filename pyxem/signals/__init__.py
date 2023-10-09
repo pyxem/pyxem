@@ -16,16 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Signal classes
-
-.. rubric:: Modules
-
-.. currentmodule:: pyxem.signals
-
-.. autosummary::
-    :toctree: ../generated/
-    :template: custom-module-template.rst
-
+"""Signal classes for diffraction data.
 """
 
 
@@ -81,20 +72,13 @@ __all__ = [
     "DiffractionVectors1D",
     "DiffractionVectors2D",
     "Diffraction1D",
-    "LazyDiffraction1D",
     "Diffraction2D",
-    "LazyDiffraction2D",
     "ElectronDiffraction1D",
-    "LazyElectronDiffraction1D",
     "ElectronDiffraction2D",
-    "LazyElectronDiffraction2D",
-    "TemplateMatchingResults",
     "VectorMatchingResults",
     "PairDistributionFunction1D",
     "PolarDiffraction2D",
-    "LazyPolarDiffraction2D",
     "Power2D",
-    "LazyPower2D",
     "ReducedIntensity1D",
     "LearningSegment",
     "VDFSegment",

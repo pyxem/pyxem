@@ -10,20 +10,10 @@ We welcome contributions of all kinds, including bug reports,
 feature requests, documentation improvements, and code contributions.
 
 The best way to get started is to start using pyxem and share your workflows and data with
-us and the community. You can do this adding to the
+us and the community. You can do this by adding notebooks pyxem-demos` which will then be hosted in
+the :ref:`tutorials<Tutorials>` section of the documentation
 
-.. toctree::
-    :maxdepth: 2
-    :caption: Contributing Guide
+If you have snippits of code that you think would be useful to others, you can also add them to the
+:ref:`examples<_examples-index>` section of the documentation. This is a great way to share your
+workflows and data with the community!
 
-    intro.rst
-    git.rst
-    testing.rst
-    writing_docs.rst
-    coding_style.rst
-    lazy_computations.rst
-    plotting.rst
-    speeding_up_code.rst
-    writing_extensions.rst
-    useful_information.rst
-    maintenance.rst

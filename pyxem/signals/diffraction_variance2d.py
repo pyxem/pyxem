@@ -32,5 +32,5 @@ class DiffractionVariance2D(Diffraction2D):
 
 class ImageVariance(Signal2D):
     _signal_type = "image_variance"
-
+    """Signal class for image diffraction variance."""
     pass

@@ -115,11 +115,8 @@ def separate_watershed(
 
     References
     ----------
-    [1] http://scikit-image.org/docs/dev/auto_examples/segmentation/
-        plot_watershed.html
-    [2] http://scikit-image.org/docs/dev/auto_examples/xx_applications/
-        plot_coins_segmentation.html#sphx-glr-auto-examples-xx-
-        applications-plot-coins-segmentation-py
+    [1] https://scikit-image.org/docs/stable/auto_examples/segmentation/plot_watershed.html#sphx-glr-auto-examples-segmentation-plot-watershed-py
+    [2] https://scikit-image.org/docs/stable/auto_examples/segmentation/plot_marked_watershed.html#sphx-glr-auto-examples-segmentation-plot-marked-watershed-py
     """
 
     # Create a mask from the input VDF image.
