@@ -64,6 +64,11 @@ intersphinx_mapping = {
     "rosettasciio": ("https://hyperspy.org/rosettasciio/", None),
 }
 
+linkcheck_ignore = [
+    "https://doi.org/10.1002/smll.201904738",  # 403 Client Error: Forbidden for url
+]
+
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = [
     "_templates",

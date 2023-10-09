@@ -50,7 +50,7 @@ class BeamShift(Signal1D):
 
         This method does this, and replaces the original beam shift data with these
         fitted planes. The beam shift signal can then be directly used in the
-        Diffraction2D.center_direct_beam method.
+        :meth:`~pyxem.signals.Diffraction2D.center_direct_beam` method.
 
         Note that for very large regions, this linear plane will probably not
         approximate the beam shift very well. In those cases a higher order plane
@@ -87,10 +87,10 @@ class BeamShift(Signal1D):
         self.events.data_changed.trigger(None)
 
     def to_dpcsignal(self):
-        """Get DPCSignal from the BeamShift signal
+        """Get :class:`~pyxem.signals.DPCSignal` from the BeamShift signal
 
-        The DPCSignal class is focused on analysing the shifts of the beam, for example
-        caused by magnetic or electric fields.
+        The :class:`~pyxem.signals.DPCSignal` class is focused on analysing the shifts of the beam,
+        for example caused by magnetic or electric fields.
 
         In practice, the signal and navigation dimensions are switched.
 

@@ -1,3 +1,5 @@
+.. _contributing:
+
 ============
 Contributing
 ============
@@ -33,7 +35,7 @@ process of adding to the demos.
 Setting up a development installation
 =====================================
 
-You need a `fork <https://guides.github.com/activities/forking/#fork>`_ of the
+You need a `fork <https://docs.github.com/en/get-started/quickstart/contributing-to-projects#about-forking>`_ of the
 `repository <https://github.com/pyxem/pyxem>`_ in order to make changes to pyxem.
 
 Make a local copy of your forked repository and change directories::
@@ -65,7 +67,7 @@ Code style
 
 The code making up pyxem is formatted closely following the `Style Guide for Python Code
 <https://www.python.org/dev/peps/pep-0008/>`_ with `The Black Code style
-<https://black.readthedocs.io/en/stable/the_black_code_style/index.html l>`_. Note that
+<https://black.readthedocs.io/en/stable/the_black_code_style/index.html>`_. Note that
 ``black`` won't format `docstrings <https://www.python.org/dev/peps/pep-0257/>`_.
 
 Package imports should be structured into three blocks with blank lines between
@@ -122,7 +124,7 @@ You can then make a `pull request
 Building and writing documentation
 ==================================
 
-We use `Sphinx <https://www.sphinx-doc.org/en/main/>`_ for documenting functionality.
+We use `Sphinx <https://www.sphinx-doc.org/en/master/>`_ for documenting functionality.
 Install necessary dependencies to build the documentation::
 
    pip install --editable .[doc]
@@ -134,7 +136,7 @@ Then, build the documentation from the ``doc`` directory::
 
 The documentation's HTML pages are built in the ``doc/_build/html`` directory from files
 in the `reStructuredText (reST)
-<https://www.sphinx-doc.org/en/main/usage/restructuredtext/basics.html>`_ plaintext
+<https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html>`_ plaintext
 markup language. They should be accessible in the browser by typing
 ``file:///your-absolute/path/to/pyxem/doc/_build/html/index.html`` in the address bar.
 

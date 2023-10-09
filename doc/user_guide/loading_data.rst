@@ -5,8 +5,8 @@ Loading Data
 ############
 
 Data can be loaded from many different 4-D STEM detectors using the package
-:ref:`rosettasciio`. The file types currently supported are listed
-:ref:`here<rosettasciio.supported_filetypes>`
+`rosettasciio<https://hyperspy.org/rosettasciio>`_. The file types currently supported are listed
+`here<https://hyperspy.org/rosettasciio/supported_formats/index.html>`_
 
 We are always looking to add more detectors to the list. If you have a detector that you
 would like to see added, please raise an `issue<https://github.com/hyperspy/rosettasciio/issues>`_
@@ -16,7 +16,7 @@ We are also looking to add support for faster loading of data from detectors tha
 support.  This means adding support for distributed file loading, which allows for operating
 on data using multiple computers connected over a network.
 
-To load data from a file, we use the :func:`hyperspy.load` function.  This function
+To load data from a file, we use the :func:`~hyperspy.api.load` function.  This function
 automatically detects the file type and returns a hyperspy signal object.  For example,
 
 .. code-block:: python

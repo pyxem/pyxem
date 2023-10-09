@@ -25,23 +25,18 @@ from hyperspy.drawing.utils import plot_images
 
 
 class Power2D(Signal2D):
-    """Signal class for the power spectrum of some Correlation"""
+    """Signal class for the power spectrum of some Correlation
+
+
+    Parameters
+    ----------
+    *args
+        See :class:`~hyperspy._signals.signal2d.Signal2D`.
+    **kwargs
+        See :class:`~hyperspy._signals.signal2d.Signal2D`
+    """
 
     _signal_type = "power"
-
-    def __init__(self, *args, **kwargs):
-        """
-        Create a PolarDiffraction2D object from a numpy.ndarray.
-
-        Parameters
-        ----------
-        *args :
-            Passed to the __init__ of Signal2D. The first arg should be
-            a numpy.ndarray
-        **kwargs :
-            Passed to the __init__ of Signal2D
-        """
-        super().__init__(*args, **kwargs)
 
     def get_map(self, k_region=None, symmetry=None):
         """Creates a 2 dimensional map of from the power spectrum.

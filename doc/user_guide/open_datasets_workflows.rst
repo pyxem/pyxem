@@ -18,6 +18,6 @@ Here are some open datasets which are helpful for running some of the functions 
 
 
 Here are links to open analysis workflows, not included in the
-:ref:`user-guide-workflows`, demonstrating the functionality of Pyxem:
+:ref:`Tutorials`, demonstrating the functionality of Pyxem:
 
 #. Analysis workflows associated with the `orientation mapping paper <https://doi.org/10.1016/j.ultramic.2022.113517>`_: https://github.com/din14970/pyxem_template_matching_workflows/tree/v2.

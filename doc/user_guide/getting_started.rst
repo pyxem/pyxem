@@ -32,5 +32,5 @@ All of the HyperSpy documentation is relevant to pyxem, but specifically the
 lots of useful information on how to work with large datasets.
 
 Developers will also find the
-`HyperSpy Developer Guide <https://hyperspy.org/hyperspy-doc/dev/developer_guide/index.html>`_
+`HyperSpy Developer Guide <https://hyperspy.org/hyperspy-doc/current/dev_guide/intro.html>`_
 useful.

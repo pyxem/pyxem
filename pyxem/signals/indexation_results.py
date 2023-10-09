@@ -159,7 +159,7 @@ class GenericMatchingResults:
 
         Returns
         -------
-        orix.crystal_map.CrystalMap
+        :class:`~orix.crystal_map.CrystalMap`
 
         """
         _s = self.data.map(_get_best_match, inplace=False)

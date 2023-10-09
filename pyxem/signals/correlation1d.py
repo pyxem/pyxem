@@ -24,7 +24,15 @@ from pyxem.utils.correlation_utils import _get_interpolation_matrix, _symmetry_s
 
 
 class Correlation1D(Signal1D):
-    """Signal class for pearson correlation and symmetry coefficient."""
+    """Signal class for pearson correlation and symmetry coefficient.
+
+    Parameters
+    ----------
+    *args
+        See :class:`~hyperspy._signals.signal1d.Signal1D`.
+    **kwargs
+        See :class:`~hyperspy._signals.signal1d.Signal1D`
+    """
 
     _signal_type = "correlation"
 
