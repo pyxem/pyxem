@@ -121,39 +121,7 @@ You can then make a `pull request
 <https://guides.github.com/activities/forking/#making-a-pull-request>`_ to pyxem's
 ``main`` branch. Good job!
 
-Building and writing documentation
-==================================
 
-We use `Sphinx <https://www.sphinx-doc.org/en/master/>`_ for documenting functionality.
-Install necessary dependencies to build the documentation::
-
-   pip install --editable .[doc]
-
-Then, build the documentation from the ``doc`` directory::
-
-   cd doc
-   make html
-
-The documentation's HTML pages are built in the ``doc/_build/html`` directory from files
-in the `reStructuredText (reST)
-<https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html>`_ plaintext
-markup language. They should be accessible in the browser by typing
-``file:///your-absolute/path/to/pyxem/doc/_build/html/index.html`` in the address bar.
-
-Tips for writing Jupyter notebooks that are meant to be converted to reST text files by
-`nbsphinx <https://nbsphinx.readthedocs.io/en/latest/>`_:
-
-- Use ``_ = ax[0].imshow(...)`` to disable Matplotlib output if a Matplotlib
-  command is the last line in a cell.
-- Refer to our API reference with this general MD
-  ``[azimuthal_integrator2d()](reference.rst#pyxem.signals.DiffractionSignal2D.azimuthal_integrator2d)``.
-  Remember to add the parentheses ``()``.
-- Reference external APIs via standard MD like
-  ``[Signal2D](http://hyperspy.org/hyperspy-doc/current/api/hyperspy._signals.signal2d.html)``.
-- The Sphinx gallery thumbnail used for a notebook is set by adding the
-  ``nbsphinx-thumbnail`` tag to a code cell with an image output. The notebook
-  must be added to the gallery in the README.rst to be included in the
-  documentation pages.
 
 Deprecations
 ============
@@ -202,6 +170,51 @@ Docstring examples are tested
 `with pytest <https://docs.pytest.org/en/stable/doctest.html>`_ as well::
 
    pytest --doctest-modules --ignore-glob=pyxem/*/tests
+
+
+Building and writing documentation
+==================================
+
+We use `Sphinx <https://www.sphinx-doc.org/en/master/>`_ for documenting functionality.
+Install necessary dependencies to build the documentation::
+
+   pip install --editable .[doc]
+
+In addition, you will need to download the ``pyxem-demos`` repository and place it in the
+doc/tutorial directory. This is necessary to build the documentation.
+
+The easiest way to download the ``pyxem-demos`` repository is to use the ``git clone``
+command to checkout the repository.
+
+command::
+   cd doc/tutorial
+   git clone https://github.com/pyxem/pyxem-demos.git
+
+Then, build the documentation from the ``doc`` directory::
+
+   cd doc
+   make html
+
+The documentation's HTML pages are built in the ``doc/_build/html`` directory from files
+in the `reStructuredText (reST)
+<https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html>`_ plaintext
+markup language. They should be accessible in the browser by typing
+``file:///your-absolute/path/to/pyxem/doc/_build/html/index.html`` in the address bar.
+
+Tips for writing Jupyter notebooks that are meant to be converted to reST text files by
+`nbsphinx <https://nbsphinx.readthedocs.io/en/latest/>`_:
+
+- Use ``_ = ax[0].imshow(...)`` to disable Matplotlib output if a Matplotlib
+  command is the last line in a cell.
+- Refer to our API reference with this general MD
+  ``[azimuthal_integrator2d()](reference.rst#pyxem.signals.DiffractionSignal2D.azimuthal_integrator2d)``.
+  Remember to add the parentheses ``()``.
+- Reference external APIs via standard MD like
+  ``[Signal2D](http://hyperspy.org/hyperspy-doc/current/api/hyperspy._signals.signal2d.html)``.
+- The Sphinx gallery thumbnail used for a notebook is set by adding the
+  ``nbsphinx-thumbnail`` tag to a code cell with an image output. The notebook
+  must be added to the gallery in the README.rst to be included in the
+  documentation pages.
 
 Continuous integration (CI)
 ===========================
