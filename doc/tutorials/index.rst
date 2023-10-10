@@ -10,7 +10,7 @@ and show complete workflows for common tasks in electron microscopy.
 For smaller snippets of code, see the Examples section of the documentation.
 
 .. nbgallery::
-    :caption: User guide
+    :caption: I
     :glob:
     :maxdepth: 1
 

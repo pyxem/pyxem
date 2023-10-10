@@ -37,7 +37,7 @@ active community of users and developers who are working to develop new tools fo
     :octicon:`code-square;2em;sd-text-info` Reference
     ^^^
 
-    Documentation of the metadata specification and of the Application Progamming Interface (API),
+    Documentation of the metadata specification and of the Application Programming Interface (API),
     which describe how pyxem functions work and which parameters can be used.
 
   .. grid-item-card::
@@ -47,7 +47,7 @@ active community of users and developers who are working to develop new tools fo
     :octicon:`zap;2em;sd-text-info` Examples
     ^^^
 
-    Gallery of short examples illustrating simple tasks that can be performed with pyxems.
+    Gallery of short examples illustrating simple tasks that can be performed with pyxem.
 
   .. grid-item-card::
     :link: tutorials/index
