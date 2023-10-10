@@ -164,9 +164,7 @@ autodoc_default_options = {
 
 graphviz_output_format = "svg"
 
-
-
-
+# -- Linkcode ----------------------------------
 def linkcode_resolve(domain, info):
     """Determine the URL corresponding to Python object.
     This is taken from SciPy's conf.py:
@@ -237,3 +235,5 @@ autodoc_default_options = {
 }
 
 autosummary_generate = True
+
+
