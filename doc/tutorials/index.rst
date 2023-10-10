@@ -14,13 +14,13 @@ For smaller snippets of code, see the Examples section of the documentation.
     :glob:
     :maxdepth: 1
 
-    demos/00*
-    demos/01*
-    demos/02*
-    demos/03*
-    demos/05*
-    demos/06*
-    demos/07*
-    demos/08*
-    demos/09*
-    demos/10*
+    pyxem-demos/00*
+    pyxem-demos/01*
+    pyxem-demos/02*
+    pyxem-demos/03*
+    pyxem-demos/05*
+    pyxem-demos/06*
+    pyxem-demos/07*
+    pyxem-demos/08*
+    pyxem-demos/09*
+    pyxem-demos/10*
