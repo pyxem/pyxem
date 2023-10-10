@@ -26,7 +26,6 @@ exec(open("pyxem/release_info.py").read())  # grab version info
 # https://setuptools.readthedocs.io/en/latest/setuptools.html#declaring-extras-optional-features-with-their-own-dependencies
 extra_feature_requirements = {
     "doc": [
-        "furo",
         "nbsphinx                   >= 0.7",
         "sphinx                     >= 3.0.2",
         "sphinx-copybutton          >= 0.2.5",
@@ -34,6 +33,7 @@ extra_feature_requirements = {
         "sphinx-gallery             >= 0.6",
         "sphinxcontrib-bibtex       >= 1.0",
         "sphinx_design",
+        "pydata_sphinx_theme",
     ],
     "tests": [
         "pytest     >= 5.0",
