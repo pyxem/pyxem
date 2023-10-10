@@ -51,6 +51,7 @@ active community of users and developers who are working to develop new tools fo
 
   .. grid-item-card::
     :link: tutorials/index
+    :link-type: doc
 
     :octicon:`workflow;2em;sd-text-info` Tutorials
     ^^^
