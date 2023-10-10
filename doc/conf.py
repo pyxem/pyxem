@@ -27,6 +27,16 @@ author = release_info.author
 version = release_info.version
 release = release_info.version
 
+# The name of an image file (relative to this directory) to place at the top
+# of the sidebar.
+html_logo = '_static/logo.png'
+
+# The name of an image file (within the static path) to use as favicon of the
+# docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
+# pixels large.
+html_favicon = '_static/logo.ico'
+
+
 master_doc = "index"
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
@@ -81,6 +91,21 @@ templates_path = [
 # The theme to use for HTML and HTML Help pages.  See the documentation for a
 # list of builtin themes.
 html_theme = "pydata_sphinx_theme"
+
+html_theme_options = {
+    "github_url": "https://github.com/pyxem/pyxem",
+    "header_links_before_dropdown": 7,
+    "navigation_with_keys": False,
+    "show_toc_level": 2,
+    "use_edit_page_button": True,
+}
+
+html_context = {
+    "github_user": "pyxem",
+    "github_repo": "pyxem",
+    "github_version": "main",
+    "doc_path": "doc",
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files, so

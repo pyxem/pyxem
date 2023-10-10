@@ -1,10 +1,11 @@
 .. toctree::
-  :maxdepth: 1
-  :hidden:
+     :maxdepth: 1
+     :hidden:
 
 .. toctree::
     :caption: Getting started
     :maxdepth: 1
+    :hidden:
 
     installing.rst
     loading_data.rst
@@ -12,13 +13,15 @@
 
 .. toctree::
     :caption: Usage
-    :maxdepth: 3
+    :maxdepth: 2
+    :hidden:
 
     ../tutorials/index.rst
     ../auto_examples/index.rst
 
 .. toctree::
     :caption: Resources
+    :hidden:
 
     bibliography.rst
     cite.rst
@@ -27,4 +30,4 @@
     License <https://github.com/pyxem/pyxem/blob/develop/LICENSE>
 
 .. include::
-    getting_started.rst
+    intro.rst

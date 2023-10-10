@@ -8,7 +8,7 @@
   Examples <auto_examples/index>
   Tutorials <tutorials/index>
   Reference <reference/index>
-  Contribute <dev_guide/index>
+  Dev Guide <dev_guide/index>
   Changelog <changelog>
 
 .. include:: intro.rst

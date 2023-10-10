@@ -61,7 +61,7 @@ active community of users and developers who are working to develop new tools fo
     :link: dev_guide/index
     :link-type: doc
 
-    :octicon:`people;2em;sd-text-info` Contributing
+    :octicon:`people;2em;sd-text-info` Developer Guide
     ^^^
 
     pyxem is an open-source project and we welcome contributions of all kinds!
