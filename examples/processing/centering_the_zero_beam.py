@@ -32,9 +32,12 @@ hs.plot.plot_images(shifts.T)  # Plotting the shifts after making a linear plane
 # The zero beam can be centered using the :meth:`center_direct_beam` method.
 
 centered = s.center_direct_beam(shifts=shifts, inplace=False)
-pacbed_centered = centered.sum()  # Plotting the sum of the dataset to check that the zero beam is centered
-pacbed = s.sum()  # Plotting the sum of the dataset to check that the zero beam is centered
+pacbed_centered = (
+    centered.sum()
+)  # Plotting the sum of the dataset to check that the zero beam is centered
+pacbed = (
+    s.sum()
+)  # Plotting the sum of the dataset to check that the zero beam is centered
 
 hs.plot.plot_images([pacbed, pacbed_centered], label=["Original", "Centered"])
 # %%
-

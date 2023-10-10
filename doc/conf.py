@@ -29,12 +29,12 @@ release = release_info.version
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = '_static/logo.png'
+html_logo = "_static/logo.png"
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
-html_favicon = '_static/logo.ico'
+html_favicon = "_static/logo.ico"
 
 
 master_doc = "index"
@@ -43,17 +43,17 @@ master_doc = "index"
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = [
     "sphinxcontrib.bibtex",
-    'sphinx_design',
-    'sphinx.ext.autodoc',
+    "sphinx_design",
+    "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.githubpages",
-    'sphinx.ext.graphviz',
-    'sphinx.ext.mathjax',
-    'sphinx.ext.inheritance_diagram',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.napoleon',
-    'sphinx_gallery.gen_gallery',
-    'sphinx_copybutton',
+    "sphinx.ext.graphviz",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.inheritance_diagram",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.napoleon",
+    "sphinx_gallery.gen_gallery",
+    "sphinx_copybutton",
     "nbsphinx",
 ]
 
@@ -177,17 +177,18 @@ bibtex_bibfiles = ["bibliography.bib"]
 # https://sphinx-gallery.github.io
 sphinx_gallery_conf = {
     "backreferences_dir": "reference/generated",
-    'examples_dirs': '../examples',   # path to your example scripts
-    'gallery_dirs': 'auto_examples',  # path to where to save gallery generated output
-    'filename_pattern': '.py',        # pattern to define which will be executed
-    'ignore_pattern': '_sgskip.py',   # pattern to define which will not be executed
+    "examples_dirs": "../examples",  # path to your example scripts
+    "gallery_dirs": "auto_examples",  # path to where to save gallery generated output
+    "filename_pattern": ".py",  # pattern to define which will be executed
+    "ignore_pattern": "_sgskip.py",  # pattern to define which will not be executed
 }
 
 autodoc_default_options = {
-    'show-inheritance': True,
+    "show-inheritance": True,
 }
 
 graphviz_output_format = "svg"
+
 
 # -- Linkcode ----------------------------------
 def linkcode_resolve(domain, info):
@@ -249,6 +250,7 @@ def linkcode_resolve(domain, info):
     else:
         return None
 
+
 # sphinx.ext.autodoc
 # ------------------
 # https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html
@@ -260,5 +262,3 @@ autodoc_default_options = {
 }
 
 autosummary_generate = True
-
-

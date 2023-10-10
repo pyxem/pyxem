@@ -17,7 +17,6 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
 import numpy as np
 import pyxem.utils.pixelated_stem_tools as pst
 from hyperspy._signals.lazy import LazySignal
@@ -26,6 +25,7 @@ from hyperspy._signals.signal1d import Signal1D
 
 class BeamShift(Signal1D):
     """Signal class for working with shift of the direct beam."""
+
     _signal_type = "beam_shift"
 
     def make_linear_plane(self, mask=None):

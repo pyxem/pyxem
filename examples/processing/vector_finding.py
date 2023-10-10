@@ -10,6 +10,7 @@ Finding Diffraction Vectors
 
 from pyxem.data import tilt_boundary_data
 import hyperspy.api as hs
+
 s = tilt_boundary_data()
 # %%
 
@@ -31,8 +32,10 @@ temp_small = s.template_match_disk(disk_r=3)  # Too small
 temp = s.template_match_disk(disk_r=5)  # Just right
 temp_large = s.template_match_disk(disk_r=7)  # Too large
 ind = (5, 5)
-hs.plot.plot_images([temp_small.inav[ind], temp.inav[ind], temp_large.inav[ind]],
-                    label=["Too Small", "Just Right", "Too Large"])
+hs.plot.plot_images(
+    [temp_small.inav[ind], temp.inav[ind], temp_large.inav[ind]],
+    label=["Too Small", "Just Right", "Too Large"],
+)
 
 pks = temp.find_peaks(iteractive=False, threshold_abs=0.5, min_distance=5)
 # %%
