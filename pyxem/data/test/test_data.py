@@ -17,21 +17,24 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from pyxem.data import (pdnip_glass,
-                        zrnb_percipitate,
-                        au_grating,
-                        twinned_nanowire,
-                        sample_with_g,
-                        mgo_nanocrystals)
+from pyxem.data import (
+    pdnip_glass,
+    zrnb_percipitate,
+    au_grating,
+    twinned_nanowire,
+    sample_with_g,
+    mgo_nanocrystals,
+)
+
 
 class TestLoadData:
     def test_load_pdnip(self):
         s = pdnip_glass(allow_download=True)
-        assert s.axes_manager.signal_shape == (32, 32)
+        assert s.axes_manager.signal_shape == (128, 128)
 
     def test_load_zrnb_percipitate(self):
         s = zrnb_percipitate(allow_download=True)
-        assert s.axes_manager.signal_shape == (32, 32)
+        assert s.axes_manager.signal_shape == (128, 128)
 
     def test_load_au_grating(self):
         s = au_grating(allow_download=True)
@@ -47,4 +50,4 @@ class TestLoadData:
 
     def test_mgo(self):
         s = mgo_nanocrystals(allow_download=True)
-        assert s.axes_manager.signal_shape == (128, 128)
+        assert s.axes_manager.signal_shape == (144, 144)

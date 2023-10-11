@@ -168,19 +168,23 @@ nbsphinx_prolog = (
 # https://nbsphinx.readthedocs.io/en/0.8.0/never-execute.html
 nbsphinx_execute = "never"  # auto, always, never
 nbsphinx_allow_errors = True
-exclude_patterns = ["_build", "**.ipynb_checkpoints"]
+exclude_patterns = ["_build", "**.ipynb_checkpoints", "examples/*/*.ipynb"]
 
 # sphinxcontrib-bibtex configuration
 bibtex_bibfiles = ["bibliography.bib"]
+
 
 # -- Sphinx-Gallery---------------
 # https://sphinx-gallery.github.io
 sphinx_gallery_conf = {
     "backreferences_dir": "reference/generated",
+    "doc_module": ("pyxem",),
     "examples_dirs": "../examples",  # path to your example scripts
-    "gallery_dirs": "auto_examples",  # path to where to save gallery generated output
-    "filename_pattern": ".py",  # pattern to define which will be executed
+    "gallery_dirs": "examples",  # path to where to save gallery generated output
+    "filename_pattern": "^((?!sgskip).)*$",  # pattern to define which will be executed
     "ignore_pattern": "_sgskip.py",  # pattern to define which will not be executed
+    "reference_url": {"pyxem": None},
+    "show_memory": True,
 }
 
 autodoc_default_options = {

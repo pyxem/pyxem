@@ -41,7 +41,7 @@ active community of users and developers who are working to develop new tools fo
     which describe how pyxem functions work and which parameters can be used.
 
   .. grid-item-card::
-    :link: auto_examples/index
+    :link: examples/index
     :link-type: doc
 
     :octicon:`zap;2em;sd-text-info` Examples

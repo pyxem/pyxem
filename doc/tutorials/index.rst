@@ -24,3 +24,12 @@ For smaller snippets of code, see the Examples section of the documentation.
     pyxem-demos/08*
     pyxem-demos/09*
     pyxem-demos/10*
+
+.. nbgallery::
+    :caption: Orientation Mapping
+    :glob:
+    :maxdepth: 1
+
+    pyxem-demos/11*
+    pyxem-demos/12*
+

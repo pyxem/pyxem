@@ -5,7 +5,7 @@
 
   Introduction <intro>
   User Guide <user_guide/index>
-  Examples <auto_examples/index>
+  Examples <examples/index>
   Tutorials <tutorials/index>
   Reference <reference/index>
   Dev Guide <dev_guide/index>

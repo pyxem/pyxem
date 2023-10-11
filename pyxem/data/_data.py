@@ -32,11 +32,11 @@ marshall = pooch.create(
     version_dev="develop",
     env="PYXEM_DATA_DIR",
     registry=_file_names_hash,
-    urls=_urls,)
+    urls=_urls,
+)
 
 
-def au_grating(allow_download=False,
-               **kwargs):
+def au_grating(allow_download=False, **kwargs):
     """An au_grating 4-D STEM dataset used to show calibration.
 
     Parameters
@@ -55,8 +55,7 @@ def au_grating(allow_download=False,
     return hs.load(file_path, **kwargs)
 
 
-def pdnip_glass(allow_download=False,
-                **kwargs):
+def pdnip_glass(allow_download=False, **kwargs):
     """A small PdNiP glass 4-D STEM dataset.
 
     Parameters
@@ -71,14 +70,14 @@ def pdnip_glass(allow_download=False,
     >>> s.plot()
     """
     import zarr
+
     pdnip = Dataset("PdNiP.zspy")
     file_path = pdnip.fetch_file_path(allow_download=allow_download)
     store = zarr.ZipStore(file_path)  # for loading from zip
     return hs.load(store, **kwargs)
 
 
-def zrnb_percipitate(allow_download=False,
-                     **kwargs):
+def zrnb_percipitate(allow_download=False, **kwargs):
     """A small 4-D STEM dataset of a ZrNb precipitate for strain mapping.
 
     Parameters
@@ -93,13 +92,14 @@ def zrnb_percipitate(allow_download=False,
     >>> s.plot()
     """
     import zarr
+
     pdnip = Dataset("PdNiP.zspy")
     file_path = pdnip.fetch_file_path(allow_download=allow_download)
     store = zarr.ZipStore(file_path)  # for loading from zip
     return hs.load(store, **kwargs)
 
-def twinned_nanowire(allow_download=False,
-                     **kwargs):
+
+def twinned_nanowire(allow_download=False, **kwargs):
     """A small 4-D STEM dataset of a twinned nanowire for orientation mapping.
 
     Parameters
@@ -117,8 +117,8 @@ def twinned_nanowire(allow_download=False,
     file_path = nanowire.fetch_file_path(allow_download=allow_download)
     return hs.load(file_path, **kwargs)
 
-def sample_with_g(allow_download=False,
-                  **kwargs):
+
+def sample_with_g(allow_download=False, **kwargs):
     """A small 4-D STEM dataset of a twinned nanowire for orientation mapping.
 
     Parameters
@@ -133,13 +133,14 @@ def sample_with_g(allow_download=False,
     >>> s.plot()
     """
     import zarr
+
     sample = Dataset("sample_with_g.zspy")
     file_path = sample.fetch_file_path(allow_download=allow_download)
     store = zarr.ZipStore(file_path)  # for loading from zip
     return hs.load(store, **kwargs)
 
-def mgo_nanocrystals(allow_download=False,
-                  **kwargs):
+
+def mgo_nanocrystals(allow_download=False, **kwargs):
     """A small 4-D STEM dataset of overlapping MgO nanocrystals
 
     Parameters
@@ -154,10 +155,12 @@ def mgo_nanocrystals(allow_download=False,
     >>> s.plot()
     """
     import zarr
+
     sample = Dataset("mgo_nano.zspy")
     file_path = sample.fetch_file_path(allow_download=allow_download)
     store = zarr.ZipStore(file_path)  # for loading from zip
     return hs.load(store, **kwargs)
+
 
 class Dataset:
     file_relpath: Path

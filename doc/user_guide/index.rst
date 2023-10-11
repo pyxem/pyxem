@@ -17,7 +17,7 @@
     :hidden:
 
     ../tutorials/index.rst
-    ../auto_examples/index.rst
+    ../examples/index.rst
 
 .. toctree::
     :caption: Resources
