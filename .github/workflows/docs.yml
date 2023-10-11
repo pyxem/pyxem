@@ -43,7 +43,7 @@ jobs:
       - name: Install build docs
         shell: bash -l {0}
         run: |
-          pip install .[build-doc]
+          pip install .[doc]
 
       - name: Check links
         shell: bash -l {0}
