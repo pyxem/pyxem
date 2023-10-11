@@ -1,6 +1,0 @@
-"""
-Calibrating from a standard
-===========================
-"""
-
-# %%
