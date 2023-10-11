@@ -122,18 +122,16 @@ def load_mib(mib_path, reshape=True, flip=True, add_quadrant_gap=None):
     if reshape:
         # only attempt reshaping if it is not already reshaped!
         if len(data_pxm.data.shape) == 3 and reshape:
-            if om_dict["scan_X"] is None:
-                print(
-                    "This mib file appears to be TEM data. The stack is returned with no reshaping."
-                )
-                return data_pxm
+            if om_dict["scan_X"]:
+                print("reshaping using scan_x")
+                data_pxm = reshape_4DSTEM(data_pxm)
             # to catch single frames:
-            if data_pxm.axes_manager[0].size == 1:
+            elif data_pxm.axes_manager[0].size == 1:
                 print("This mib file is a single frame.")
                 return data_pxm
             # If the exposure time info not appearing in the header bits use reshape_4DSTEM_SumFrames
             # to reshape otherwise use reshape_4DSTEM_FlyBack function
-            if data_pxm.original_metadata.exposure_time is None:
+            elif data_pxm.original_metadata.exposure_time is None:
                 print("reshaping using sum frames intensity")
                 data_pxm, skip_ind = reshape_4DSTEM_SumFrames(data_pxm)
                 data_pxm.original_metadata.frames_number_skipped = skip_ind
@@ -141,8 +139,10 @@ def load_mib(mib_path, reshape=True, flip=True, add_quadrant_gap=None):
                 print("reshaping using flyback pixel")
                 data_pxm = reshape_4DSTEM_FlyBack(data_pxm)
             else:
-                print("reshaping using scan_x")
-                data_pxm = reshape_4DSTEM(data_pxm)
+                print(
+                    "This mib file appears to be TEM data. The stack is returned with no reshaping."
+                )
+                return data_pxm
     if flip:
         data_pxm.data = np.flip(data_pxm.data, axis=2)
     data_pxm.original_metadata.flip = flip
