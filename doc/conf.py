@@ -76,6 +76,8 @@ intersphinx_mapping = {
 
 linkcheck_ignore = [
     "https://doi.org/10.1002/smll.201904738",  # 403 Client Error: Forbidden for url
+    "http://dx.doi.org/10.1088/0965-0393/23/8/083501", # 403 Client Error: Forbidden for url
+
 ]
 
 

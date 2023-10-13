@@ -89,8 +89,7 @@ class DiffractionVectors2D(Signal2D):
 
         References
         ----------
-        [1] https://scikit-learn.org/stable/modules/generated/sklearn.
-            cluster.DBSCAN.html
+        [1] "https://scikit-learn.org/stable/modules/generated/sklearn.cluster.DBSCAN.html"
 
         Returns
         -------
