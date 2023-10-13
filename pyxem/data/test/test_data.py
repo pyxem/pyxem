@@ -25,13 +25,15 @@ from pyxem.data import (
     sample_with_g,
     mgo_nanocrystals,
 )
-
+import pytest
 
 class TestLoadData:
+    @pytest.mark.xfail(reason="Downloading large file takes too long")
     def test_load_pdnip(self):
         s = pdnip_glass(allow_download=True)
         assert s.axes_manager.signal_shape == (128, 128)
 
+    @pytest.mark.xfail(reason="Downloading large file takes too long")
     def test_load_zrnb_percipitate(self):
         s = zrnb_percipitate(allow_download=True)
         assert s.axes_manager.signal_shape == (128, 128)
@@ -40,14 +42,17 @@ class TestLoadData:
         s = au_grating(allow_download=True)
         assert s.axes_manager.signal_shape == (254, 254)
 
+    @pytest.mark.xfail(reason="Downloading large file takes too long")
     def test_load_twined_nanowire(self):
         s = twinned_nanowire(allow_download=True)
         assert s.axes_manager.signal_shape == (144, 144)
 
+    @pytest.mark.xfail(reason="Downloading large file takes too long")
     def test_sample_with_g(self):
         s = sample_with_g(allow_download=True)
         assert s.axes_manager.signal_shape == (256, 256)
 
+    @pytest.mark.xfail(reason="Downloading large file takes too long")
     def test_mgo(self):
         s = mgo_nanocrystals(allow_download=True)
         assert s.axes_manager.signal_shape == (144, 144)
