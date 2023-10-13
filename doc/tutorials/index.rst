@@ -20,11 +20,11 @@ For smaller snippets of code, see the Examples section of the documentation.
     pyxem-demos/03*
     pyxem-demos/07*
 
-
 .. nbgallery::
     :caption: Characterization
     :glob:
     :maxdepth: 1
+
     pyxem-demos/05*
     pyxem-demos/06*
     pyxem-demos/08*
