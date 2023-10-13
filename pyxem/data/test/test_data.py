@@ -27,6 +27,7 @@ from pyxem.data import (
 )
 import pytest
 
+
 class TestLoadData:
     @pytest.mark.xfail(reason="Downloading large file takes too long")
     def test_load_pdnip(self):

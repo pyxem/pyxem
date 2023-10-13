@@ -76,8 +76,7 @@ intersphinx_mapping = {
 
 linkcheck_ignore = [
     "https://doi.org/10.1002/smll.201904738",  # 403 Client Error: Forbidden for url
-    "http://dx.doi.org/10.1088/0965-0393/23/8/083501", # 403 Client Error: Forbidden for url
-
+    "http://dx.doi.org/10.1088/0965-0393/23/8/083501",  # 403 Client Error: Forbidden for url
 ]
 
 
@@ -168,7 +167,7 @@ nbsphinx_prolog = (
 """
 )
 # https://nbsphinx.readthedocs.io/en/0.8.0/never-execute.html
-nbsphinx_execute = "never"  # auto, always, never
+nbsphinx_execute = "always"  # auto, always, never
 nbsphinx_allow_errors = True
 exclude_patterns = ["_build", "**.ipynb_checkpoints", "examples/*/*.ipynb"]
 
