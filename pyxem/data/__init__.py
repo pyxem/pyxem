@@ -16,7 +16,18 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Example datasets for use when testing functionality."""
+"""Example datasets for use when testing functionality.
+
+Some datasets are packaged with the source code while others must be downloaded from the web.
+For more test datasets, see Open datasets.
+
+Datasets are placed in a local cache, in the location returned from pooch.os_cache("pyxem") by default.
+the location can be overwritten with a global PYXEM_DATA_DIR environment variable.
+
+With every new version of pyxem, a new directory of datasets with the version name
+is added to the cache directory. Any old directories are not deleted automatically, and should
+then be deleted manually if desired.
+"""
 
 from pyxem.data.simulated_tilt import tilt_boundary_data
 from pyxem.data._data import (
