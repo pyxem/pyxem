@@ -52,6 +52,8 @@ extensions = [
     "sphinx.ext.inheritance_diagram",
     "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
+    "sphinx.ext.linkcode",
+    "sphinx_codeautolink",
     "sphinx_gallery.gen_gallery",
     "sphinx_copybutton",
     "nbsphinx",
@@ -96,7 +98,7 @@ html_theme = "pydata_sphinx_theme"
 html_theme_options = {
     "github_url": "https://github.com/pyxem/pyxem",
     "header_links_before_dropdown": 7,
-    "navigation_with_keys": False,
+    "navigation_with_keys": True,
     "show_toc_level": 2,
     "use_edit_page_button": True,
 }

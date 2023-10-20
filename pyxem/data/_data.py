@@ -25,11 +25,11 @@ from typing import Optional, Union
 import os
 
 # Create a downloader object
-marshall = pooch.create(
+kipper = pooch.create(
     path=pooch.os_cache("pyxem"),
     base_url="",
     version=version.replace(".dev", "+"),
-    version_dev="develop",
+    version_dev="main",
     env="PYXEM_DATA_DIR",
     registry=_file_names_hash,
     urls=_urls,
@@ -43,11 +43,13 @@ def au_grating(allow_download=False, **kwargs):
     ----------
     **kwargs
         Keyword arguments passed to :func:`~hyperspy.api.load`.
+
     Examples
     --------
     >>> import pyxem as pxm
     >>> s = pxm.data.au_grating()
-    >>> s
+    >>> print(s)
+    <ElectronDiffraction2D, title: , dimensions: (|254, 254)>
     >>> s.plot()
     """
     grating = Dataset("au_xgrating_100kX.hspy")
@@ -62,11 +64,13 @@ def pdnip_glass(allow_download=False, **kwargs):
     ----------
     **kwargs
         Keyword arguments passed to :func:`~hyperspy.api.load`.
+
     Examples
     --------
     >>> import pyxem as pxm
     >>> s = pxm.data.pdnip_glass()
-    >>> s
+    >>> print(s)
+    <ElectronDiffraction2D, title: , dimensions: (128, 128|128, 128)>
     >>> s.plot()
     """
     import zarr
@@ -84,11 +88,13 @@ def zrnb_percipitate(allow_download=False, **kwargs):
     ----------
     **kwargs
         Keyword arguments passed to :func:`~hyperspy.api.load`.
+
     Examples
     --------
     >>> import pyxem as pxm
     >>> s = pxm.data.zrnb_percipitate()
-    >>> s
+    >>> print(s)
+    <ElectronDiffraction2D, title: , dimensions: (128, 128|128, 128)>
     >>> s.plot()
     """
     import zarr
@@ -106,11 +112,13 @@ def twinned_nanowire(allow_download=False, **kwargs):
     ----------
     **kwargs
         Keyword arguments passed to :func:`~hyperspy.api.load`.
+
     Examples
     --------
     >>> import pyxem as pxm
     >>> s = pxm.data.twinned_nanowire()
-    >>> s
+    >>> print(s)
+    <Diffraction2D, title: , dimensions: (30, 100|144, 144)>
     >>> s.plot()
     """
     nanowire = Dataset("twinned_nanowire.hdf5")
@@ -125,11 +133,13 @@ def sample_with_g(allow_download=False, **kwargs):
     ----------
     **kwargs
         Keyword arguments passed to :func:`~hyperspy.api.load`.
+
     Examples
     --------
     >>> import pyxem as pxm
     >>> s = pxm.data.sample_with_g()
-    >>> s
+    >>> print(s)
+    <ElectronDiffraction2D, title: , dimensions: (25, 26|256, 256)>
     >>> s.plot()
     """
     import zarr
@@ -147,11 +157,13 @@ def mgo_nanocrystals(allow_download=False, **kwargs):
     ----------
     **kwargs
         Keyword arguments passed to :func:`~hyperspy.api.load`.
+
     Examples
     --------
     >>> import pyxem as pxm
     >>> s = pxm.data.mgo_nanocrystals()
-    >>> s
+    >>> print(s)
+    <ElectronDiffraction2D, title: MgO Nano-Crystals, dimensions: (105, 105|144, 144)>
     >>> s.plot()
     """
     import zarr
@@ -180,7 +192,7 @@ class Dataset:
 
         file_relpath = file_relpath
         self.file_relpath = file_relpath
-        self.file_cache_path = Path(marshall.path) / self.file_relpath
+        self.file_cache_path = Path(kipper.path) / self.file_relpath
 
         self.expected_md5_hash = _file_names_hash[self.file_relpath_str]
 
@@ -240,13 +252,13 @@ class Dataset:
     def fetch_file_path_from_collection(
         self, downloader: pooch.HTTPDownloader
     ) -> file_path:  # pragma: no cover
-        file_paths = marshall.fetch(
+        file_paths = kipper.fetch(
             os.path.join("data", self.collection_name),
             downloader=downloader,
             processor=pooch.Unzip(extract_dir=self.file_directory),
         )
 
-        os.remove(os.path.join(marshall.path, "data", self.collection_name))
+        os.remove(os.path.join(kipper.path, "data", self.collection_name))
 
         # Ensure the file is in the collection
         desired_name = self.file_relpath.name
@@ -292,7 +304,7 @@ class Dataset:
             else:  # pragma: no cover
                 raise ValueError(
                     f"File {self.file_path_str} must be re-downloaded from the "
-                    f"repository file {self.url} to your local cache {marshall.path}. "
+                    f"repository file {self.url} to your local cache {kipper.path}. "
                     "Pass `allow_download=True` to allow this re-download."
                 )
         else:
@@ -304,8 +316,8 @@ class Dataset:
             else:
                 raise ValueError(
                     f"File {self.file_relpath_str} must be downloaded from the "
-                    f"repository file {self.url} to your local cache {marshall.path}. "
+                    f"repository file {self.url} to your local cache {kipper.path}. "
                     "Pass `allow_download=True` to allow this download."
                 )
 
-        return marshall.fetch(file_path, downloader=downloader)
+        return kipper.fetch(file_path, downloader=downloader)

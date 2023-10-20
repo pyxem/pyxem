@@ -3,7 +3,7 @@
 Big Data
 ---------
 
-4-D STEM datasets are large and difficult to work with.  In ``pyxem`` we get around this by
+4-D STEM datasets are large and difficult to work with.  In ``pyxem`` we try to get around this by
 using a lazy loading approach.  This means that the data is not loaded into memory until it is
 needed.
 
@@ -19,7 +19,7 @@ Loading and Plotting a Dataset
 ------------------------------
 
 Let's start by loading a dataset.  We will use the ``load`` function to load a dataset from
-hyperspy
+HyperSpy
 
 .. code-block:: python
 
@@ -27,23 +27,24 @@ hyperspy
     >>> s = hs.load("big_data.zspy", lazy=True)
     >>> s
 
-The dataset here is not loaded into memory here so this should happen instantaneously. We can
+The dataset here is not loaded into memory here, so this should happen instantaneously. We can
 then plot the dataset.
 
 .. code-block:: python
 
     >>> s.plot()
 
-Which (in general) will be very slow.  This is because the data is being loaded into memory and a
-navigator image is being generated before the plot is shown. In many cases a HAAADF dataset will be
-collected as well as a 4-D STEM dataset.  In this case we can set the navigator to the HAAADF dataset instead.
+Which (in general) will be very slow.  This is because entire dataset is loaded into memory (chuck by chunk)
+to create a navigator image. In many cases a HAADF dataset will be collected as well as a 4-D STEM dataset.
+In this case we can set the navigator to the HAADF dataset instead.
 
 .. code-block:: python
-    >>> haadf = hs.load("haadf.zspy") # load the HAAADF dataset
-    >>> s.naviagtor = haadf # set the navigator to the HAAADF dataset
+    >>> haadf = hs.load("haadf.zspy") # load the HAADF dataset
+    >>> s.navigator = haadf # set the navigator to the HAADF dataset
     >>> s.plot() # happens instantaneously
 
-This is much faster now to view the dataset!
+This is much faster as the navigator doesn't need to be computed and instead only 1 chunk needs to
+be loaded into memory before plotting!
 
 
 Distributed Computing

@@ -13,7 +13,7 @@ sphinx:
 
 
 # Set the version of Python and other tools
-# make demos is a custom command to fetch the demo notebooks
+# check-demos is a custom command to fetch the demo notebooks
 # from the pyxem/pyxem-demos repository
 build:
   os: ubuntu-22.04

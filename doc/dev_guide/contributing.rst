@@ -187,12 +187,8 @@ The easiest way to download the ``pyxem-demos`` repository is to use the ``git c
 command to checkout the repository.
 
 command::
-   cd doc/tutorial
-   git clone https://github.com/pyxem/pyxem-demos.git
-
-Then, build the documentation from the ``doc`` directory::
-
    cd doc
+   git clone https://github.com/pyxem/pyxem-demos.git tutorials/pyxem-demos || echo "You have already cloned this repo try using git pull to update the demos"
    make html
 
 The documentation's HTML pages are built in the ``doc/_build/html`` directory from files
@@ -206,10 +202,10 @@ Tips for writing Jupyter notebooks that are meant to be converted to reST text f
 
 - Use ``_ = ax[0].imshow(...)`` to disable Matplotlib output if a Matplotlib
   command is the last line in a cell.
-- Refer to our API reference with this general MD
+- Refer to our API reference with this general markdown syntax.
   ``[azimuthal_integrator2d()](reference.rst#pyxem.signals.DiffractionSignal2D.azimuthal_integrator2d)``.
   Remember to add the parentheses ``()``.
-- Reference external APIs via standard MD like
+- Reference external APIs via standard markdown like
   ``[Signal2D](http://hyperspy.org/hyperspy-doc/current/api/hyperspy._signals.signal2d.html)``.
 - The Sphinx gallery thumbnail used for a notebook is set by adding the
   ``nbsphinx-thumbnail`` tag to a code cell with an image output. The notebook

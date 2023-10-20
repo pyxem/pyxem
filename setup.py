@@ -33,6 +33,8 @@ extra_feature_requirements = {
         "sphinx-gallery             >= 0.6",
         "sphinxcontrib-bibtex       >= 1.0",
         "sphinx_design",
+        "sphinx-codeautolink",
+        "sphinxl"
         "pydata-sphinx-theme",
         "hyperspy-gui-ipywidgets",
     ],

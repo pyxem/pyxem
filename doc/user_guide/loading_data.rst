@@ -6,11 +6,11 @@ Loading Data
 
 Data can be loaded from many different 4-D STEM detectors using the package
 `rosettasciio<https://hyperspy.org/rosettasciio>`_. The file types currently supported are listed
-`here<https://hyperspy.org/rosettasciio/supported_formats/index.html>`_
+`here<https://hyperspy.org/rosettasciio/supported_formats/index.html>`_.
 
 We are always looking to add more detectors to the list. If you have a detector that you
 would like to see added, please raise an `issue<https://github.com/hyperspy/rosettasciio/issues>`_
-on the rosettasciio github page and we will do our best to work with you to add it.
+on the rosettasciio GitHub page and we will do our best to work with you to add it.
 
 We are also looking to add support for faster loading of data from detectors that we already
 support.  This means adding support for distributed file loading, which allows for operating

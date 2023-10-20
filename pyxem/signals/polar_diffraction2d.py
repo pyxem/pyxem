@@ -145,7 +145,7 @@ class PolarDiffraction2D(Signal2D):
             From :meth:`~hyperspy.signal.BaseSignal.map` inplace=True means the signal is
             overwritten.
         kwargs: dict
-            Any additional options for the :meth:`~hyperspy.signal.BaseSignal.map` function
+            Any additional options for the :meth:`~hyperspy.signal.BaseSignal.map` function.
         Returns
         -------
         correlation: Signal1D,

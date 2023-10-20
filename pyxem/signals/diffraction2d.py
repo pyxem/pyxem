@@ -112,7 +112,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         Parameters
         ----------
         D : array or Signal2D of arrays
-            3x3 :py: (or Signal2D thereof) specifying the affine transform
+            3x3 np.array (or Signal2D thereof) specifying the affine transform
             to be applied.
         order : 1,2,3,4 or 5
             The order of interpolation on the transform. Default is 1.
@@ -1194,8 +1194,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         See Also
         --------
-        :meth:`~pyxem.signals.DiffractionSignal2D.template_match_disk`
-        :meth:`~pyxem.signals.DiffractionSignal2D.template_match_ring`
+        `pyxem.signals.DiffractionSignal2D.template_match_disk`
+        `pyxem.signals.DiffractionSignal2D.template_match_ring`
 
         """
         return self.template_match(
