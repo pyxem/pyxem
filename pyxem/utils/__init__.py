@@ -28,7 +28,7 @@ __all__ = [
     "determine_ellipse",
     "find_diffraction_calibration",
     "plot_template_over_pattern",
-    "expt_utils"
+    "expt_utils",
 ]
 
 
