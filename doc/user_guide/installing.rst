@@ -25,7 +25,7 @@ into an existing environment. The easiest way to do this is using conda/mamba.
 
    ipympl is a backend for matplotlib that allows for interactive plotting in the Jupyter
    but is particularly a pain sometimes. If you have having trouble you can always change
-   your url from http://localhost:8888/lab to http://localhost:8888/notebooks and use the
+   your url from ``http://localhost:8888/lab`` to ``http://localhost:8888/notebooks`` and use the
    classic notebook instead. There are less features but it is more stable in my experience.
 
 ```
