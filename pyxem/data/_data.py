@@ -60,6 +60,8 @@ def au_grating(allow_download=False, **kwargs):
 def pdnip_glass(allow_download=False, **kwargs):
     """A small PdNiP glass 4-D STEM dataset.
 
+    Data can be acessed from https://zenodo.org/records/8429302
+
     Parameters
     ----------
     **kwargs
@@ -83,6 +85,8 @@ def pdnip_glass(allow_download=False, **kwargs):
 
 def zrnb_percipitate(allow_download=False, **kwargs):
     """A small 4-D STEM dataset of a ZrNb precipitate for strain mapping.
+
+    Data can be acessed from https://zenodo.org/records/8429302
 
     Parameters
     ----------
@@ -108,6 +112,8 @@ def zrnb_percipitate(allow_download=False, **kwargs):
 def twinned_nanowire(allow_download=False, **kwargs):
     """A small 4-D STEM dataset of a twinned nanowire for orientation mapping.
 
+    Data can be acessed from https://zenodo.org/records/8429302
+
     Parameters
     ----------
     **kwargs
@@ -128,6 +134,8 @@ def twinned_nanowire(allow_download=False, **kwargs):
 
 def sample_with_g(allow_download=False, **kwargs):
     """A small 4-D STEM dataset of a twinned nanowire for orientation mapping.
+
+    Data can be acessed from https://zenodo.org/records/8429302
 
     Parameters
     ----------
@@ -152,6 +160,8 @@ def sample_with_g(allow_download=False, **kwargs):
 
 def mgo_nanocrystals(allow_download=False, **kwargs):
     """A small 4-D STEM dataset of overlapping MgO nanocrystals
+
+    Data can be acessed from https://zenodo.org/records/8429302
 
     Parameters
     ----------
@@ -179,12 +189,10 @@ class Dataset:
     file_package_path: Path
     file_cache_path: Path
     expected_md5_hash: str = ""
-    collection_name: Optional[str] = None
 
     def __init__(
         self,
         file_relpath: Union[Path, str],
-        collection_name: Optional[str] = None,
     ) -> None:
         if isinstance(file_relpath, str):
             file_relpath = Path(file_relpath)
@@ -196,15 +204,10 @@ class Dataset:
 
         self.expected_md5_hash = _file_names_hash[self.file_relpath_str]
 
-        self.collection_name = collection_name
 
     @property
     def file_relpath_str(self) -> str:
         return self.file_relpath.as_posix()
-
-    @property
-    def is_in_collection(self) -> bool:
-        return self.collection_name is not None
 
     @property
     def is_in_package(self) -> bool:
@@ -244,36 +247,8 @@ class Dataset:
     def url(self) -> Union[str, None]:
         if self.file_relpath_str in _urls:
             return _urls[self.file_relpath_str]
-        elif self.is_in_collection and "data/" + self.collection_name in _urls:
-            return _urls["data/" + self.collection_name]
         else:
             return None
-
-    def fetch_file_path_from_collection(
-        self, downloader: pooch.HTTPDownloader
-    ) -> file_path:  # pragma: no cover
-        file_paths = kipper.fetch(
-            os.path.join("data", self.collection_name),
-            downloader=downloader,
-            processor=pooch.Unzip(extract_dir=self.file_directory),
-        )
-
-        os.remove(os.path.join(kipper.path, "data", self.collection_name))
-
-        # Ensure the file is in the collection
-        desired_name = self.file_relpath.name
-        for fpath in map(Path, file_paths):
-            if desired_name == fpath.name:
-                break
-        else:
-            raise ValueError(
-                f"File {self.file_relpath.name} not found in the collection "
-                f"{self.collection_name} at {self.url}. This is surprising. Please "
-                "report it to the developers at "
-                "https://github.com/pyxem/kikuchipy/issues/new."
-            )
-
-        return self.file_relpath_str
 
     def fetch_file_path(
         self, allow_download: bool = False, show_progressbar: Optional[bool] = None
@@ -297,10 +272,7 @@ class Dataset:
             if self.has_correct_hash:
                 file_path = self.file_relpath_str
             elif allow_download:  # pragma: no cover
-                if self.is_in_collection:
-                    file_path = self.fetch_file_path_from_collection(downloader)
-                else:
-                    file_path = self.file_relpath_str
+                file_path = self.file_relpath_str
             else:  # pragma: no cover
                 raise ValueError(
                     f"File {self.file_path_str} must be re-downloaded from the "
@@ -309,10 +281,7 @@ class Dataset:
                 )
         else:
             if allow_download:  # pragma: no cover
-                if self.is_in_collection:
-                    file_path = self.fetch_file_path_from_collection(downloader)
-                else:
-                    file_path = self.file_relpath_str
+                file_path = self.file_relpath_str
             else:
                 raise ValueError(
                     f"File {self.file_relpath_str} must be downloaded from the "
