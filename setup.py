@@ -34,7 +34,6 @@ extra_feature_requirements = {
         "sphinxcontrib-bibtex       >= 1.0",
         "sphinx_design",
         "sphinx-codeautolink",
-        "sphinxl"
         "pydata-sphinx-theme",
         "hyperspy-gui-ipywidgets",
     ],
