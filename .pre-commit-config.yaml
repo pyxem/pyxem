@@ -1,0 +1,10 @@
+repos:
+  - repo: https://github.com/psf/black
+    # Version can be updated by running "pre-commit autoupdate"
+    rev: 23.9.1
+    hooks:
+    - id: black
+ci:
+    # Don't run automatically on PRs, instead add the comment
+    # "pre-commit.ci autofix" on a pull request to manually trigger auto-fixing
+    autofix_prs: false

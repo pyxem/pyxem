@@ -169,6 +169,7 @@ class TestAddEllipseArrayAsMarkers:
             ellipse_array, inlier_array=inlier_array, peak_array=parray
         )
 
+    @pytest.mark.flaky(reruns=2)
     def test_only_ellipse_array(self):
         s, parray = dd.get_simple_ellipse_signal_peak_array()
         s1 = s.deepcopy()

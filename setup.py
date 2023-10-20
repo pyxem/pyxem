@@ -41,6 +41,7 @@ extra_feature_requirements = {
         "pytest     >= 5.0",
         "pytest-cov >= 2.8.1",
         "pytest-xdist",
+        "pytest-rerunfailures"
         "coveralls  >= 1.10",
         "coverage   >= 5.0",
     ],
