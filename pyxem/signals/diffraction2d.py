@@ -1194,8 +1194,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         See Also
         --------
-        `pyxem.signals.DiffractionSignal2D.template_match_disk`
-        `pyxem.signals.DiffractionSignal2D.template_match_ring`
+        :meth:`~pyxem.signals.DiffractionSignal2D.template_match_disk`
+        :meth:`~pyxem.signals.DiffractionSignal2D.template_match_ring`
 
         """
         return self.template_match(
