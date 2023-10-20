@@ -13,8 +13,8 @@ jobs:
     name: code style
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
       - uses: psf/black@stable
 
   build-with-pip:
