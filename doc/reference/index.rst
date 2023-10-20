@@ -20,6 +20,7 @@ explanations of the functionality.
     :template: custom-module-template.rst
 
     detectors
+    data
     components
     dummy_data
     generators
