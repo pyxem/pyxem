@@ -25,8 +25,7 @@ automatically detects the file type and returns a hyperspy signal object.  For e
     >>> s = hs.load("data/4DSTEM_simulation.hspy")
     >>> s # Signal2D object
 
-If we want to load the signal as a specific signal type,we can use the ``signal_type`` argument.
-For example,
+With some file formats, it is possible to assign the data to a suitable signal type when loading the file and when possible it is done automatically. For example, loading :external+rsciio:`.blo<blockfile-format>` will returns :class:`~.signals.ElecttronDiffraction2D` object but in situations, where a generic signal is returned, a domain-specific signal can be specified as follow:
 
 .. code-block:: python
 
