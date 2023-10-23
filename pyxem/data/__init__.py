@@ -46,5 +46,5 @@ __all__ = [
     "twinned_nanowire",
     "sample_with_g",
     "mgo_nanocrystals",
-    "tilt_boundary_data"
+    "tilt_boundary_data",
 ]
