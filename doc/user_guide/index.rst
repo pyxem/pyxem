@@ -23,6 +23,7 @@
     :caption: Resources
     :hidden:
 
+    reference/index.rst
     bibliography.rst
     cite.rst
     open_datasets_workflows.rst

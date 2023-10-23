@@ -2,10 +2,10 @@
 pyxem's Documentation
 =====================
 
-Pyxem is an open-source project working to bring together tools for the analysis of
-data from pixelated electron detectors. Based on the HyperSpy project, pyxem has an
-active community of users and developers who are working to develop new tools for
-4-D, 5-D STEM and other pixelated electron detector data.
+Pyxem is an open-source project working to bring together tools for the analysis of electron diffraction data, in
+particular data acquired from pixelated electron detectors. With its roots in the HyperSpy community, pyxem has an
+active community of users and developers who are working to provide advanced and state-of-the art tools for the
+analysis of 4-D, 5-D STEM and other pixelated electron detector data.
 
 .. grid:: 2 3 3 3
   :gutter: 2
