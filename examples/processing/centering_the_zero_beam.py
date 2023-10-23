@@ -6,10 +6,9 @@ Centering the Zero Beam
 # %%
 # Making a Dummy Dataset with a Zero Beam that systematically deviates from the center
 import hyperspy.api as hs
-from pyxem.data import tilt_boundary_data
+import pyxem as pxm
 
-
-s = tilt_boundary_data(correct_pivot_point=False)
+s = pxm.data.tilt_boundary_data(correct_pivot_point=False)
 
 # Getting the Position of the Zero beam
 # -------------------------------------

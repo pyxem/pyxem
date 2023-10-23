@@ -30,7 +30,3 @@ __all__ = [
     "plot_template_over_pattern",
     "expt_utils",
 ]
-
-
-def __dir__():
-    return sorted(__all__)

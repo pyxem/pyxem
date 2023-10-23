@@ -62,6 +62,8 @@ def pdnip_glass(allow_download=False, **kwargs):
 
     Data can be acessed from https://zenodo.org/records/8429302
 
+    Data liscenced under CC BY 4.0
+
     Parameters
     ----------
     **kwargs
@@ -85,6 +87,8 @@ def pdnip_glass(allow_download=False, **kwargs):
 
 def zrnb_percipitate(allow_download=False, **kwargs):
     """A small 4-D STEM dataset of a ZrNb precipitate for strain mapping.
+
+    Data liscenced under CC BY 4.0
 
     Data can be acessed from https://zenodo.org/records/8429302
 

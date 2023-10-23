@@ -88,7 +88,3 @@ __all__ = [
     "VirtualDarkFieldImage",
     "InSituDiffraction2D",
 ]
-
-
-def __dir__():
-    return sorted(__all__)

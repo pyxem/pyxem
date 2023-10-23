@@ -40,11 +40,16 @@ In this case we can set the navigator to the HAADF dataset instead.
 
 .. code-block:: python
     >>> haadf = hs.load("haadf.zspy") # load the HAADF dataset
-    >>> s.navigator = haadf # set the navigator to the HAADF dataset
-    >>> s.plot() # happens instantaneously
+    >>> s.plot(navigator=haadf) # happens instantaneously
 
 This is much faster as the navigator doesn't need to be computed and instead only 1 chunk needs to
 be loaded into memory before plotting!
+
+You can also set the navigator so that by default it is used when plotting.
+.. code-block:: python
+    >>> haadf = hs.load("haadf.zspy") # load the HAADF dataset
+    >>> s.navigator = haadf
+    >>> s.plot() # (navigator=haadf) happens instantaneously
 
 
 Distributed Computing

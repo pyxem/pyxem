@@ -8,10 +8,10 @@ Finding Diffraction Vectors
 # signal and then plot them using hyperspy's markers.
 
 
-from pyxem.data import tilt_boundary_data
+import pyxem as pxm
 import hyperspy.api as hs
 
-s = tilt_boundary_data()
+s = pxm.data.tilt_boundary_data()
 # %%
 
 s.find_peaks(iteractive=True)  # find the peaks using the interactive peak finder
