@@ -57,7 +57,7 @@ def au_grating(allow_download=False, **kwargs):
     return hs.load(file_path, **kwargs)
 
 
-def pdnip_glass(allow_download=False, **kwargs):
+def pdnip_glass(allow_download=False, **kwargs):  # pragma: no cover
     """A small PdNiP glass 4-D STEM dataset.
 
     Data can be acessed from https://zenodo.org/records/8429302
@@ -85,7 +85,7 @@ def pdnip_glass(allow_download=False, **kwargs):
     return hs.load(store, **kwargs)
 
 
-def zrnb_percipitate(allow_download=False, **kwargs):
+def zrnb_percipitate(allow_download=False, **kwargs):  # pragma: no cover
     """A small 4-D STEM dataset of a ZrNb precipitate for strain mapping.
 
     Data liscenced under CC BY 4.0
@@ -113,7 +113,7 @@ def zrnb_percipitate(allow_download=False, **kwargs):
     return hs.load(store, **kwargs)
 
 
-def twinned_nanowire(allow_download=False, **kwargs):
+def twinned_nanowire(allow_download=False, **kwargs):  # pragma: no cover
     """A small 4-D STEM dataset of a twinned nanowire for orientation mapping.
 
     Data can be acessed from https://zenodo.org/records/8429302
@@ -136,7 +136,7 @@ def twinned_nanowire(allow_download=False, **kwargs):
     return hs.load(file_path, **kwargs)
 
 
-def sample_with_g(allow_download=False, **kwargs):
+def sample_with_g(allow_download=False, **kwargs):  # pragma: no cover
     """A small 4-D STEM dataset of a twinned nanowire for orientation mapping.
 
     Data can be acessed from https://zenodo.org/records/8429302
@@ -162,7 +162,7 @@ def sample_with_g(allow_download=False, **kwargs):
     return hs.load(store, **kwargs)
 
 
-def mgo_nanocrystals(allow_download=False, **kwargs):
+def mgo_nanocrystals(allow_download=False, **kwargs):  # pragma: no cover
     """A small 4-D STEM dataset of overlapping MgO nanocrystals
 
     Data can be acessed from https://zenodo.org/records/8429302
