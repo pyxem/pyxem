@@ -73,4 +73,3 @@ class TestLoadData:
     def test_Dataset_url(self):
         pdnip = Dataset("PdNiP.zspy")
         assert "PdNiP.zspy" in pdnip.url
-
