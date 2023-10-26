@@ -221,15 +221,8 @@ class Dataset:
         return self.file_cache_path.exists()
 
     @property
-    def file_directory(self) -> Path:
-        return Path(os.path.join(*self.file_relpath.parts[1:-1]))
-
-    @property
     def file_path(self) -> Path:
-        if self.is_in_package:
-            return self.file_package_path
-        else:
-            return self.file_cache_path
+        return self.file_cache_path
 
     @property
     def file_path_str(self) -> str:
@@ -239,7 +232,7 @@ class Dataset:
     def md5_hash(self) -> Union[str, None]:
         if self.file_path.exists():
             return pooch.file_hash(self.file_path_str, alg="md5")
-        else:
+        else:  # pragma: no cover
             return None
 
     @property
@@ -260,18 +253,7 @@ class Dataset:
             show_progressbar = hs.preferences.General.show_progressbar
         downloader = pooch.HTTPDownloader(progressbar=show_progressbar)
 
-        if self.is_in_package:
-            if self.has_correct_hash:
-                # Bypass pooch since the file is not in the cache
-                return self.file_path_str
-            else:  # pragma: no cover
-                raise AttributeError(
-                    f"File {self.file_path_str} has incorrect MD5 hash {self.md5_hash}"
-                    f", while {self.expected_md5_hash.split(':')[1]} was expected. This"
-                    " is surprising. Please report it to the developers at "
-                    "https://github.com/pyxem/kikuchipy/issues/new."
-                )
-        elif self.is_in_cache:
+        if self.is_in_cache:
             if self.has_correct_hash:
                 file_path = self.file_relpath_str
             elif allow_download:  # pragma: no cover
@@ -282,8 +264,8 @@ class Dataset:
                     f"repository file {self.url} to your local cache {kipper.path}. "
                     "Pass `allow_download=True` to allow this re-download."
                 )
-        else:
-            if allow_download:  # pragma: no cover
+        else:  # pragma: no cover
+            if allow_download:
                 file_path = self.file_relpath_str
             else:
                 raise ValueError(

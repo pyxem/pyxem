@@ -26,6 +26,7 @@ from pyxem.data import (
     mgo_nanocrystals,
     tilt_boundary_data,
 )
+from pyxem.data._data import Dataset
 import pytest
 
 
@@ -68,3 +69,8 @@ class TestLoadData:
         tilt = tilt_boundary_data(correct_pivot_point=False)
         assert tilt.axes_manager.signal_shape == (256, 256)
         assert tilt.axes_manager.navigation_shape == (10, 10)
+
+    def test_Dataset_url(self):
+        pdnip = Dataset("PdNiP.zspy")
+        assert "PdNiP.zspy" in pdnip.url
+
