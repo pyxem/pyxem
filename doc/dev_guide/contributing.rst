@@ -183,13 +183,23 @@ Install necessary dependencies to build the documentation::
 In addition, you will need to download the ``pyxem-demos`` repository and place it in the
 doc/tutorial directory. This is necessary to build the documentation.
 
-The easiest way to download the ``pyxem-demos`` repository is to use the ``git clone``
-command to checkout the repository.
+The easiest way to download the ``pyxem-demos`` repository is to use the ``make demos``
+command which will clone the repository into the correct location.::
 
-command::
    cd doc
-   git clone https://github.com/pyxem/pyxem-demos.git tutorials/pyxem-demos || echo "You have already cloned this repo try using git pull to update the demos"
+   make demos
+
+Then build the documentation.
+
    make html
+
+If the build is successful, the documentation will be available in the
+``doc/_build/html`` directory. You can open the created ``index.html`` in the browser
+and inspect the documentation in more detail.
+
+.. note::
+   If you have already cloned the ``pyxem-demos`` repository, you can use the
+   ``make demos`` command again to update the repository to the latest version.
 
 The documentation's HTML pages are built in the ``doc/_build/html`` directory from files
 in the `reStructuredText (reST)
