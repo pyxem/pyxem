@@ -54,7 +54,8 @@ def plot_template_over_pattern(
         Type of marker used for the spots
     size_factor : float, optional
         Scaling factor for the spots. See notes on size.
-    **kwargs : See :meth:`~matplotlib.pyplot.imshow`
+    **kwargs :
+        See :meth:`~matplotlib.pyplot.imshow`
 
     Returns
     -------

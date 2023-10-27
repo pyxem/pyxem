@@ -59,7 +59,7 @@ class InSituDiffraction2D(Diffraction2D):
 
         Parameters
         ----------
-        roi: :obj:`hyperspy.roi.BaseInteractiveROI`
+        roi: :obj:`~hyperspy.roi.BaseInteractiveROI`
             Roi for virtual detector. If None, full roi of diffraction plane is used
         time_axis: int
             Index of time axis. Default is 2
@@ -90,17 +90,17 @@ class InSituDiffraction2D(Diffraction2D):
     ):
         """Calculate real space drift vectors from time series of images
 
-         Parameters
+        Parameters
         ----------
-        s: Signal2D
+        s: :class:`~hyperspy.api.signals.Signal2D`
             Time series of reconstructed images
         reference: 'current', 'cascade', or 'stat'
-            reference argument passed to :meth:`~hs.signals.Signal2D.estimate_shift2D`
+            reference argument passed to :meth:`~hyperspy.api.signals.Signal2D.estimate_shift2D`
             function. Default is 'cascade'
         sub_pixel_factor: float
-            sub_pixel_factor passed to :meth:`~hs.signals.Signal2D.estimate_shift2D`
+            sub_pixel_factor passed to :meth:`~hyperspy.api.signals.Signal2D.estimate_shift2D`
             function. Default is 10
-        **kwargs:
+        kwargs:
             Passed to the :meth:`~pyxem.signals.InSituDiffraction2D.get_time_series` function
 
         Returns
