@@ -97,10 +97,10 @@ class DisplacementGradientMap(Signal2D):
         """
         R, U = self.polar_decomposition()
 
-        e11 = -U.isig[0, 0].T + 1
+        e11 = np.reciprocal(U.isig[0, 0].T) - 1
         e12 = U.isig[0, 1].T
         e21 = U.isig[1, 0].T
-        e22 = -U.isig[1, 1].T + 1
+        e22 = np.reciprocal(U.isig[1, 1].T) - 1
         theta = R.map(_get_rotation_angle, inplace=False)
         theta = theta.transpose(2)
         strain_results = stack([e11, e22, e12, theta])
