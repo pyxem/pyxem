@@ -24,7 +24,15 @@ from pyxem.signals.common_diffraction import CommonDiffraction
 
 
 class Diffraction1D(CommonDiffraction, Signal1D):
-    """Signal class for Electron Diffraction radial profiles."""
+    """Signal class for Electron Diffraction radial profiles.
+
+    Parameters
+    ----------
+    *args
+        See :class:`~hyperspy._signals.signal1d.Signal1D`.
+    **kwargs
+        See :class:`~hyperspy._signals.signal1d.Signal1D`
+    """
 
     _signal_type = "diffraction"
 

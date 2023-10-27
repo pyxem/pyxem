@@ -21,7 +21,15 @@ from pyxem.signals.diffraction1d import Diffraction1D
 
 
 class DiffractionVariance1D(Diffraction1D):
-    """Signal class for one-dimensional diffraction variance."""
+    """Signal class for one-dimensional diffraction variance.
+
+    Parameters
+    ----------
+    *args
+        See :class:`~hyperspy._signals.signal1d.Signal1D`.
+    **kwargs
+        See :class:`~hyperspy._signals.signal1d.Signal1D`
+    """
 
     _signal_type = "diffraction_variance"
 

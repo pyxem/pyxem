@@ -40,6 +40,8 @@ class DiffractionVectors1D(Signal1D):
         The offsets for each column in the signal.  For converting the real values
         to pixel values in some image.
 
+
+
     """
 
     _signal_dimension = 1

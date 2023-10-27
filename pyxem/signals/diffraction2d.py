@@ -90,7 +90,15 @@ from pyxem.utils.background_utils import (
 
 
 class Diffraction2D(Signal2D, CommonDiffraction):
-    """Signal class for two-dimensional diffraction data in Cartesian coordinates."""
+    """Signal class for two-dimensional diffraction data in Cartesian coordinates.
+
+    Parameters
+    ----------
+    *args
+        See :class:`~hyperspy._signals.signal2d.Signal2D`.
+    **kwargs
+        See :class:`~hyperspy._signals.signal2d.Signal2D`
+    """
 
     _signal_type = "diffraction"
 
@@ -115,14 +123,15 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             If True (default), this signal is overwritten. Otherwise, returns a
             new signal.
         *args:
-            Arguments to be passed to map().
+            Arguments to be passed to :meth:`~hyperspy.signal.BaseSignal.map`.
         **kwargs:
-            Keyword arguments to be passed to map().
+            Keyword arguments to be passed to :meth:`~hyperspy.signal.BaseSignal.map`.
 
         Returns
         -------
             ElectronDiffraction2D Signal containing the affine Transformed
             diffraction patterns.
+
 
         """
 
@@ -365,9 +374,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             If True (default), this signal is overwritten. Otherwise, returns a
             new signal.
         *args:
-            Arguments to be passed to map().
+            Arguments to be passed to :meth:`~hyperspy.signal.BaseSignal.map`.
         **kwargs:
-            Keyword arguments to be passed to map().
+            Keyword arguments to be passed to :meth:`~hyperspy.signal.BaseSignal.map`.
 
         """
         return self.map(
@@ -583,13 +592,13 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             When working in memory, determines if operation is performed inplace, default is True. When
             working lazily the result will NOT be inplace.
         *args :
-            passed to .map() if working in memory
+            passed to :meth:`~hyperspy.signal.BaseSignal.map` if working in memory
         **kwargs :
-            passed to .map() if working in memory
+            passed to :meth:`~hyperspy.signal.BaseSignal.map` if working in memory
 
         Returns
         -------
-        signal_corrected : Diffraction2D or LazyDiffraction2D
+        signal_corrected: Diffraction2D or LazyDiffraction2D
 
         Examples
         --------
@@ -1185,8 +1194,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         See Also
         --------
-        template_match_disk
-        template_match_ring
+        :meth:`~pyxem.signals.DiffractionSignal2D.template_match_disk`
+        :meth:`~pyxem.signals.DiffractionSignal2D.template_match_ring`
 
         """
         return self.template_match(

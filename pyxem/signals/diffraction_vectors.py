@@ -65,7 +65,7 @@ def _find_max_length_peaks(peaks):
 
     Parameters
     ----------
-    peaks : :class:`pyxem.diffraction_vectors.DiffractionVectors`
+    peaks : :class:`~pyxem.diffraction_vectors.DiffractionVectors`
         Identified peaks in a diffraction signal.
 
     Returns
@@ -88,7 +88,7 @@ def generate_marker_inputs_from_peaks(peaks):
 
     Parameters
     ----------
-    peaks : :class:`pyxem.diffraction_vectors.DiffractionVectors`
+    peaks : :class:`~pyxem.diffraction_vectors.DiffractionVectors`
         Identifies peaks in a diffraction signal.
 
     Example
@@ -595,8 +595,7 @@ class DiffractionVectors(BaseSignal):
 
         References
         ----------
-        [1] https://scikit-learn.org/stable/modules/generated/sklearn.
-            cluster.DBSCAN.html
+        [1] https://scikit-learn.org/stable/modules/generated/sklearn.cluster.DBSCAN.html
 
         Returns
         -------

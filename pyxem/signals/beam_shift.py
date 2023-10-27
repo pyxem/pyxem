@@ -16,7 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Signal class for working with shift of the direct beam."""
 
 import numpy as np
 import pyxem.utils.pixelated_stem_tools as pst
@@ -25,6 +24,8 @@ from hyperspy._signals.signal1d import Signal1D
 
 
 class BeamShift(Signal1D):
+    """Signal class for working with shift of the direct beam."""
+
     _signal_type = "beam_shift"
 
     def make_linear_plane(self, mask=None):
@@ -49,7 +50,7 @@ class BeamShift(Signal1D):
 
         This method does this, and replaces the original beam shift data with these
         fitted planes. The beam shift signal can then be directly used in the
-        Diffraction2D.center_direct_beam method.
+        :meth:`~pyxem.signals.Diffraction2D.center_direct_beam` method.
 
         Note that for very large regions, this linear plane will probably not
         approximate the beam shift very well. In those cases a higher order plane
@@ -86,10 +87,10 @@ class BeamShift(Signal1D):
         self.events.data_changed.trigger(None)
 
     def to_dpcsignal(self):
-        """Get DPCSignal from the BeamShift signal
+        """Get :class:`~pyxem.signals.DPCSignal` from the BeamShift signal
 
-        The DPCSignal class is focused on analysing the shifts of the beam, for example
-        caused by magnetic or electric fields.
+        The :class:`~pyxem.signals.DPCSignal` class is focused on analysing the shifts of the beam,
+        for example caused by magnetic or electric fields.
 
         In practice, the signal and navigation dimensions are switched.
 

@@ -26,7 +26,15 @@ from pyxem.utils._deprecated import deprecated
 
 
 class PolarDiffraction2D(Signal2D):
-    """Signal class for two-dimensional diffraction data in polar coordinates."""
+    """Signal class for two-dimensional diffraction data in polar coordinates.
+
+    Parameters
+    ----------
+    *args
+        See :class:`~hyperspy._signals.signal2d.Signal2D`.
+    **kwargs
+        See :class:`~hyperspy._signals.signal2d.Signal2D`
+    """
 
     _signal_type = "polar_diffraction"
 
@@ -57,12 +65,6 @@ class PolarDiffraction2D(Signal2D):
         correlation: Signal2D
             The radial correlation for the signal2D, when inplace is False,
             otherwise None
-
-        Examples
-        --------
-        Basic example, no mask applied and normalization applied.
-        >polar.get_angular_correlation()
-        Angular correlation with a static matst for
 
         """
         correlation = self.map(
@@ -98,8 +100,10 @@ class PolarDiffraction2D(Signal2D):
          normalize: bool
              Normalize the radial correlation by the average value at some radius.
         inplace: bool
-            From hyperspy.signal.map(). inplace=True means the signal is
+            From :meth:`~hyperspy.signal.BaseSignal.map` inplace=True means the signal is
             overwritten.
+        kwargs: dict
+            Any additional options for the :meth:`~hyperspy.signal.BaseSignal.map` function
 
         Returns
         -------
@@ -138,9 +142,10 @@ class PolarDiffraction2D(Signal2D):
             value is in corresponding unit.
             If None (default), use the entire pattern .
         inplace: bool
-            From hyperspy.signal.map(). inplace=True means the signal is
+            From :meth:`~hyperspy.signal.BaseSignal.map` inplace=True means the signal is
             overwritten.
-
+        kwargs: dict
+            Any additional options for the :meth:`~hyperspy.signal.BaseSignal.map` function.
         Returns
         -------
         correlation: Signal1D,
@@ -200,8 +205,11 @@ class PolarDiffraction2D(Signal2D):
             value is in corresponding unit.
             If None (default), use the entire pattern .
         inplace: bool
-            From hyperspy.signal.map(). inplace=True means the signal is
+            From :meth:`~hyperspy.signal.BaseSignal.map` inplace=True means the signal is
             overwritten.
+        kwargs: dict
+            Any additional options for the :meth:`~hyperspy.signal.BaseSignal.map` function
+
 
         Returns
         -------

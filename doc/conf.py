@@ -27,21 +27,35 @@ author = release_info.author
 version = release_info.version
 release = release_info.version
 
+# The name of an image file (relative to this directory) to place at the top
+# of the sidebar.
+html_logo = "_static/logo.png"
+
+# The name of an image file (within the static path) to use as favicon of the
+# docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
+# pixels large.
+html_favicon = "_static/logo.ico"
+
+
 master_doc = "index"
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = [
     "sphinxcontrib.bibtex",
+    "sphinx_design",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
-    "sphinx.ext.intersphinx",
+    "sphinx.ext.githubpages",
+    "sphinx.ext.graphviz",
     "sphinx.ext.mathjax",
+    "sphinx.ext.inheritance_diagram",
+    "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
     "sphinx.ext.linkcode",
-    "sphinx_autodoc_typehints",
+    "sphinx_codeautolink",
+    "sphinx_gallery.gen_gallery",
     "sphinx_copybutton",
-    "sphinx_gallery.load_style",
     "nbsphinx",
 ]
 
@@ -59,7 +73,14 @@ intersphinx_mapping = {
     "scipy": ("https://docs.scipy.org/doc/scipy", None),
     "skimage": ("https://scikit-image.org/docs/stable", None),
     "sklearn": ("https://scikit-learn.org/stable", None),
+    "rosettasciio": ("https://hyperspy.org/rosettasciio/", None),
 }
+
+linkcheck_ignore = [
+    "https://doi.org/10.1002/smll.201904738",  # 403 Client Error: Forbidden for url
+    "http://dx.doi.org/10.1088/0965-0393/23/8/083501",  # 403 Client Error: Forbidden for url
+]
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = [
@@ -72,7 +93,22 @@ templates_path = [
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for a
 # list of builtin themes.
-html_theme = "furo"
+html_theme = "pydata_sphinx_theme"
+
+html_theme_options = {
+    "github_url": "https://github.com/pyxem/pyxem",
+    "header_links_before_dropdown": 7,
+    "navigation_with_keys": True,
+    "show_toc_level": 2,
+    "use_edit_page_button": True,
+}
+
+html_context = {
+    "github_user": "pyxem",
+    "github_repo": "pyxem",
+    "github_version": "main",
+    "doc_path": "doc",
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files, so
@@ -134,13 +170,35 @@ nbsphinx_prolog = (
 )
 # https://nbsphinx.readthedocs.io/en/0.8.0/never-execute.html
 nbsphinx_execute = "never"  # auto, always, never
+nbsphinx_kernel_name = "python3"
 nbsphinx_allow_errors = True
-exclude_patterns = ["_build", "**.ipynb_checkpoints"]
+exclude_patterns = ["_build", "**.ipynb_checkpoints", "examples/*/*.ipynb"]
 
 # sphinxcontrib-bibtex configuration
 bibtex_bibfiles = ["bibliography.bib"]
 
 
+# -- Sphinx-Gallery---------------
+# https://sphinx-gallery.github.io
+sphinx_gallery_conf = {
+    "backreferences_dir": "reference/generated",
+    "doc_module": ("pyxem",),
+    "examples_dirs": "../examples",  # path to your example scripts
+    "gallery_dirs": "examples",  # path to where to save gallery generated output
+    "filename_pattern": "^((?!sgskip).)*$",  # pattern to define which will be executed
+    "ignore_pattern": "_sgskip.py",  # pattern to define which will not be executed
+    "reference_url": {"pyxem": None},
+    "show_memory": True,
+}
+
+autodoc_default_options = {
+    "show-inheritance": True,
+}
+
+graphviz_output_format = "svg"
+
+
+# -- Linkcode ----------------------------------
 def linkcode_resolve(domain, info):
     """Determine the URL corresponding to Python object.
     This is taken from SciPy's conf.py:
@@ -199,3 +257,16 @@ def linkcode_resolve(domain, info):
             return pre_link + "v%s/%s%s" % (pyxem.__version__, fn, linespec)
     else:
         return None
+
+
+# sphinx.ext.autodoc
+# ------------------
+# https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html
+autosummary_ignore_module_all = False
+autosummary_imported_members = True
+autodoc_typehints_format = "short"
+autodoc_default_options = {
+    "show-inheritance": True,
+}
+
+autosummary_generate = True

@@ -663,7 +663,7 @@ def get_cbed_signal():
     return s_cbed
 
 
-def get_simple_ellipse_signal_peak_array():
+def get_simple_ellipse_signal_peak_array(seed=None):
     """Get a signal and peak array of an ellipse.
 
     Returns
@@ -676,11 +676,12 @@ def get_simple_ellipse_signal_peak_array():
     >>> s.add_peak_array_as_markers(peak_array, color='blue', size=30)
 
     """
-    xc = np.random.randint(95, 105, size=(4, 5))
-    yc = np.random.randint(95, 105, size=(4, 5))
-    semi0 = np.random.randint(55, 60, size=(4, 5))
-    semi1 = np.random.randint(75, 80, size=(4, 5))
-    rot = np.random.random(size=(4, 5)) * np.pi
+    rng = np.random.default_rng(seed=seed)
+    xc = rng.integers(95, 105, size=(4, 5))
+    yc = rng.integers(95, 105, size=(4, 5))
+    semi0 = rng.integers(55, 60, size=(4, 5))
+    semi1 = rng.integers(75, 80, size=(4, 5))
+    rot = rng.random(size=(4, 5)) * np.pi
     peak_array = mdtd._make_4d_peak_array_test_data(xc, yc, semi0, semi1, rot)
     s = Diffraction2D(np.zeros((4, 5, 200, 200)))
     return s, peak_array

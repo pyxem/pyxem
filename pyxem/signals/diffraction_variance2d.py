@@ -23,7 +23,15 @@ from pyxem.signals.diffraction2d import Diffraction2D
 
 
 class DiffractionVariance2D(Diffraction2D):
-    """Signal class for two-dimensional diffraction variance."""
+    """Signal class for two-dimensional diffraction variance.
+
+    Parameters
+    ----------
+    *args
+        See :class:`~hyperspy._signals.signal2d.Signal2D`.
+    **kwargs
+        See :class:`~hyperspy._signals.signal2d.Signal2D`
+    """
 
     _signal_type = "diffraction_variance"
 
@@ -32,5 +40,5 @@ class DiffractionVariance2D(Diffraction2D):
 
 class ImageVariance(Signal2D):
     _signal_type = "image_variance"
-
+    """Signal class for image diffraction variance."""
     pass

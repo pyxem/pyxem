@@ -52,7 +52,7 @@ class Correlation2D(Signal2D, CommonDiffraction):
          normalize: bool
              Normalize the radial correlation by the average value at some radius.
         inplace: bool
-            From hyperspy.signal.map(). inplace=True means the signal is
+            From :meth:`~hyperspy.signal.BaseSignal.map`. inplace=True means the signal is
             overwritten.
 
         Returns
@@ -79,7 +79,7 @@ class Correlation2D(Signal2D, CommonDiffraction):
         Parameters
         ----------
         inplace: bool
-            From hyperspy.signal.map(). inplace=True means the signal is
+            From :meth:`~hyperspy.signal.BaseSignal.map`. inplace=True means the signal is
             overwritten.
 
         Returns

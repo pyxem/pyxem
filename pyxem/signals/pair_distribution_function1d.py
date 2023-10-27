@@ -25,6 +25,13 @@ from pyxem.utils.pdf_utils import normalise_pdf_signal_to_max
 class PairDistributionFunction1D(Signal1D):
     """Signal class for Pair Distribution Function (PDF) radial profiles
     as a function of distance r.
+
+    Parameters
+    ----------
+    *args
+        See :class:`~hyperspy._signals.signal1d.Signal1D`.
+    **kwargs
+        See :class:`~hyperspy._signals.signal1d.Signal1D`
     """
 
     _signal_type = "pair_distribution_function"

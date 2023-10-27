@@ -38,23 +38,17 @@ import pyxem.utils.pixelated_stem_tools as pst
 
 
 class InSituDiffraction2D(Diffraction2D):
-    """Signal class for in-situ 4D-STEM data."""
+    """Signal class for in-situ 4D-STEM data.
+
+    Parameters
+    ----------
+    *args
+        See :class:`~hyperspy._signals.signal2d.Signal2D`.
+    **kwargs
+        See :class:`~hyperspy._signals.signal2d.Signal2D`
+    """
 
     _signal_type = "insitu_diffraction"
-
-    def __init__(self, *args, **kwargs):
-        """
-        Create a InsituDiffraction2D object from a numpy.ndarray or dask.array.
-
-        Parameters
-        ----------
-        *args :
-            Passed to the __init__ of Signal2D. The first arg should be
-            a numpy.ndarray or dask.array
-        **kwargs :
-            Passed to the __init__ of Signal2D.
-        """
-        super().__init__(*args, **kwargs)
 
     def roll_time_axis(self, time_axis):
         """Roll time axis to default index (2)"""
@@ -109,7 +103,7 @@ class InSituDiffraction2D(Diffraction2D):
             sub_pixel_factor passed to hs.signals.Signal2D.estimate_shift2D()
             function. Default is 10
         **kwargs:
-            Passed to the get_time_series() function
+            Passed to the :meth:`get_time_series` function
 
         Returns
         -------
@@ -235,7 +229,7 @@ class InSituDiffraction2D(Diffraction2D):
         order: int
            The order of the spline interpolation for registration. Default is 1
         **kwargs:
-            Passed to the hs.signal.BaseSignal.map() function
+            Passed to :meth:`~hyperspy.signal.BaseSignal.map`
 
         Returns
         ---------
@@ -332,7 +326,7 @@ class InSituDiffraction2D(Diffraction2D):
 
         Returns
         ---------
-        g2kt: Signal2D or Correlation2D?
+        g2kt: Signal2D or Correlation2D
             k resolved time correlation signal
         """
         if time_axis != 2:

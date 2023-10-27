@@ -205,11 +205,8 @@ class LearningSegment:
 
         References
         ----------
-        [1] http://scikit-image.org/docs/dev/auto_examples/segmentation/
-            plot_watershed.html
-        [2] http://scikit-image.org/docs/dev/auto_examples/xx_applications/
-            plot_coins_segmentation.html#sphx-glr-auto-examples-xx-
-            applications-plot-coins-segmentation-py
+        [1] http://scikit-image.org/docs/dev/auto_examples/segmentation/plot_watershed.html
+        [2] https://scikit-image.org/docs/dev/auto_examples/segmentation/plot_expand_labels.html#sphx-glr-auto-examples-segmentation-plot-expand-labels-py
 
         Returns
         -------
@@ -275,6 +272,10 @@ class LearningSegment:
 
 
 class VDFSegment:
+    """Signal classes for nanocrystal segmentation results obtained from
+    VDF images (VDFSegment).
+    """
+
     _signal_type = "vdf_segment"
 
     def __init__(self, segments, vectors_of_segments, intensities=None):

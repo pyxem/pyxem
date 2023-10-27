@@ -27,6 +27,13 @@ class ElectronDiffraction2D(Diffraction2D):
     """
     Signal class for two-dimensional electron diffraction data in Cartesian
     coordinates.
+
+    Parameters
+    ----------
+    *args
+        See :class:`~hyperspy._signals.signal2d.Signal2D`.
+    **kwargs
+        See :class:`~hyperspy._signals.signal2d.Signal2D`
     """
 
     _signal_type = "electron_diffraction"
