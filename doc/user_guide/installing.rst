@@ -1,4 +1,5 @@
 .. _Installation:
+
 ----------------
 Installing pyxem
 ----------------
@@ -28,9 +29,9 @@ into an existing environment. The easiest way to do this is using conda/mamba.
    your url from ``http://localhost:8888/lab`` to ``http://localhost:8888/notebooks`` and use the
    classic notebook instead. There are less features but it is more stable in my experience.
 
-```
+
     conda install -c conda-forge pyxem
-```
+
 
 
 Installing using pip
@@ -39,9 +40,8 @@ Installing using pip
 You can also install pyxem using pip if you want. In that case you can install pyxem
 using
 
-```
     pip install pyxem
-```
+
 
 Installing from source
 ----------------------
@@ -49,18 +49,18 @@ Installing from source
 If you want to install the development version of pyxem, you can install it from source.
 First clone the repository using
 
-```
+
     git clone https://github.com/pyxem/pyxem.git
-```
+
 
 Then navigate into the pyxem directory and install the dependencies using
 
-```
+
     pip install -r requirements.txt
-```
+
 
 Finally, install pyxem using
 
-```
+
     pip install -e .
-```
+

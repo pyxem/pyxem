@@ -55,8 +55,7 @@ class InSituDiffraction2D(Diffraction2D):
         return self.rollaxis(time_axis, 2)
 
     def get_time_series(self, roi=None, time_axis=2):
-        """
-        Create a intensity time series from virtual aperture defined by roi.
+        """Create a intensity time series from virtual aperture defined by roi.
 
         Parameters
         ----------
@@ -89,26 +88,24 @@ class InSituDiffraction2D(Diffraction2D):
     def get_drift_vectors(
         self, time_axis=2, reference="cascade", sub_pixel_factor=10, **kwargs
     ):
-        """
-        Calculate real space drift vectors from time series of images
+        """Calculate real space drift vectors from time series of images
 
          Parameters
         ----------
         s: Signal2D
             Time series of reconstructed images
         reference: 'current', 'cascade', or 'stat'
-            reference argument passed to hs.signals.Signal2D.estimate_shift2D()
+            reference argument passed to :meth:`~hs.signals.Signal2D.estimate_shift2D`
             function. Default is 'cascade'
         sub_pixel_factor: float
-            sub_pixel_factor passed to hs.signals.Signal2D.estimate_shift2D()
+            sub_pixel_factor passed to :meth:`~hs.signals.Signal2D.estimate_shift2D`
             function. Default is 10
         **kwargs:
-            Passed to the :meth:`get_time_series` function
+            Passed to the :meth:`~pyxem.signals.InSituDiffraction2D.get_time_series` function
 
         Returns
         -------
         shift_vectors
-
         """
         roi = kwargs.pop("roi", None)
         ref = self.get_time_series(roi=roi, time_axis=time_axis)

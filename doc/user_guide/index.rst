@@ -1,3 +1,5 @@
+.. _User Guide:
+
 .. toctree::
      :maxdepth: 1
      :hidden:
@@ -23,7 +25,7 @@
     :caption: Resources
     :hidden:
 
-    reference/index.rst
+    ../reference/index.rst
     bibliography.rst
     cite.rst
     open_datasets_workflows.rst

@@ -22,6 +22,7 @@ inquiries regarding the project? Feel free to
 repository.
 
 .. _setting-up-a-development-installation:
+
 First Time Contributing
 =======================
 
