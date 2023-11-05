@@ -129,8 +129,8 @@ def test_results_dict_to_crystal_map(test_library_phases_multi, test_lib_gen):
     orientation_result = results["orientation"][0, 0, 0, 0]
 
     assert (
-        np.remainder(abs(orientation_result), 15) < 1 or
-        np.remainder(abs(orientation_result), 30) < 1
+        np.remainder(abs(orientation_result), 15) < 1
+        or np.remainder(abs(orientation_result), 30) < 1
     )
 
     # Property names in `results`
