@@ -6,7 +6,7 @@ Installing pyxem
 
 There are a couple of different ways to install pyxem. The easiest way is to use the
 hyperspy-bundle. If you don't have much experience with managing Python environments, we
-highly recommend using the `hyperspy-bundle<https://hyperspy.org/hyperspy-bundle/download.html>`.
+highly recommend using the `hyperspy-bundle<https://hyperspy.org/hyperspy-bundle/download.html>_`.
 The bundle is a pre-configured Python environment that includes pyxem and all its dependencies.
 
 It includes many other packages that are useful for electron microscopy data analysis, such
@@ -28,39 +28,31 @@ into an existing environment. The easiest way to do this is using conda/mamba.
    but is particularly a pain sometimes. If you have having trouble you can always change
    your url from ``http://localhost:8888/lab`` to ``http://localhost:8888/notebooks`` and use the
    classic notebook instead. There are less features but it is more stable in my experience.
-
+::
 
     conda install -c conda-forge pyxem
-
-
 
 Installing using pip
 --------------------
 
 You can also install pyxem using pip if you want. In that case you can install pyxem
-using
+using::
 
     pip install pyxem
-
 
 Installing from source
 ----------------------
 
 If you want to install the development version of pyxem, you can install it from source.
-First clone the repository using
-
+First clone the repository using::
 
     git clone https://github.com/pyxem/pyxem.git
 
-
-Then navigate into the pyxem directory and install the dependencies using
-
+Then navigate into the pyxem directory and install the dependencies using::
 
     pip install -r requirements.txt
 
-
-Finally, install pyxem using
-
+Finally, install pyxem using::
 
     pip install -e .
 

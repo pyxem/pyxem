@@ -10,8 +10,8 @@ discuss how to work with large datasets in ``pyxem``.
 
 .. note::
     If you want more information on working with large datasets in ``pyxem``, please see the
-    `Big Data<https://hyperspy.org/hyperspy-doc/current/user_guide/big_data.html>_` section of
-    the `HyperSpy User Guide<https://hyperspy.org/hyperspy-doc/current/user_guide/index.html>_`.
+    `Big Data <https://hyperspy.org/hyperspy-doc/current/user_guide/big_data.html>_` section of
+    the `HyperSpy User Guide <https://hyperspy.org/hyperspy-doc/current/user_guide/index.html>_`.
 
 Loading and Plotting a Dataset
 ------------------------------
@@ -50,7 +50,7 @@ You can also set the navigator so that by default it is used when plotting.
 
     haadf = hs.load("haadf.zspy") # load the HAADF dataset
     s.navigator = haadf
-    s.plot() # (navigator=haadf) happens instantaneously
+    s.plot()
 
 
 Distributed Computing

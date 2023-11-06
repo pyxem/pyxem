@@ -42,9 +42,9 @@ class InSituDiffraction2D(Diffraction2D):
 
     Parameters
     ----------
-    *args
+    *args:
         See :class:`~hyperspy._signals.signal2d.Signal2D`.
-    **kwargs
+    **kwargs:
         See :class:`~hyperspy._signals.signal2d.Signal2D`
     """
 
@@ -100,7 +100,7 @@ class InSituDiffraction2D(Diffraction2D):
         sub_pixel_factor: float
             sub_pixel_factor passed to :meth:`~hyperspy.api.signals.Signal2D.estimate_shift2D`
             function. Default is 10
-        kwargs:
+        **kwargs:
             Passed to the :meth:`~pyxem.signals.InSituDiffraction2D.get_time_series` function
 
         Returns
