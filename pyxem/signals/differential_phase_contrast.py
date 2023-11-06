@@ -260,7 +260,9 @@ class DPCSignal2D(Signal2D):
         s_beam_shift.set_signal_type("beam_shift")
         return s_beam_shift
 
-    def get_magnitude_signal(self, autolim=True, autolim_sigma=4):
+    def get_magnitude_signal(
+        self, autolim=True, autolim_sigma=4, magnitude_limits=None
+    ):
         """Get DPC magnitude image visualized as greyscale.
 
         Converts the x and y beam shifts into a magnitude map, showing the
@@ -272,6 +274,9 @@ class DPCSignal2D(Signal2D):
         ----------
         autolim : bool, default True
         autolim_sigma : float, default 4
+        magnitude_limits : tuple of floats, default None
+            Manually sets the value limits for the magnitude signal.
+            For this, autolim needs to be False.
 
         Returns
         -------
@@ -292,11 +297,17 @@ class DPCSignal2D(Signal2D):
         inav02 = np.abs(self.inav[0].data) ** 2
         inav12 = np.abs(self.inav[1].data) ** 2
         magnitude = np.sqrt(inav02 + inav12)
-        magnitude_limits = None
+
         if autolim:
+            if magnitude_limits is not None:
+                raise ValueError(
+                    "If autolim==True then `magnitude_limits` must be set to None"
+                )
+
             magnitude_limits = pst._get_limits_from_array(
                 magnitude, sigma=autolim_sigma
             )
+        if magnitude_limits is not None:
             np.clip(magnitude, magnitude_limits[0], magnitude_limits[1], out=magnitude)
 
         signal = Signal2D(magnitude)
@@ -481,7 +492,9 @@ class DPCSignal2D(Signal2D):
         pst._copy_signal2d_axes_manager_metadata(self, signal_rgb)
         return signal_rgb
 
-    def get_color_signal(self, rotation=None, autolim=True, autolim_sigma=4):
+    def get_color_signal(
+        self, rotation=None, autolim=True, autolim_sigma=4, magnitude_limits=None
+    ):
         """Get DPC image visualized using continuous color scale.
 
         Converts the x and y beam shifts into an RGB array, showing the
@@ -496,6 +509,9 @@ class DPCSignal2D(Signal2D):
             scan direction and diffraction pattern rotation.
         autolim : bool, default True
         autolim_sigma : float, default 4
+        magnitude_limits : tuple of floats, default None
+            Manually sets the value limits for the color signal.
+            For this, autolim needs to be False.
 
         Returns
         -------
@@ -528,8 +544,12 @@ class DPCSignal2D(Signal2D):
         phase = np.arctan2(inav0, inav1) % (2 * np.pi)
         magnitude = np.sqrt(np.abs(inav0) ** 2 + np.abs(inav1) ** 2)
 
-        magnitude_limits = None
         if autolim:
+            if magnitude_limits is not None:
+                raise ValueError(
+                    "If autolim==True then `magnitude_limits` must be set to None"
+                )
+
             magnitude_limits = pst._get_limits_from_array(
                 magnitude, sigma=autolim_sigma
             )
@@ -552,6 +572,7 @@ class DPCSignal2D(Signal2D):
         only_phase=False,
         autolim=True,
         autolim_sigma=4,
+        magnitude_limits=None,
         scalebar_size=None,
         ax=None,
         ax_indicator=None,
@@ -570,6 +591,9 @@ class DPCSignal2D(Signal2D):
             If True, will only plot the phase.
         autolim : bool, default True
         autolim_sigma : float, default 4
+        magnitude_limits : tuple of floats, default None
+            Manually sets the value limits for the color signal.
+            For this, autolim needs to be False.
         scalebar_size : int, optional
         ax : Matplotlib subplot, optional
         ax_indicator : Matplotlib subplot, optional
@@ -607,7 +631,10 @@ class DPCSignal2D(Signal2D):
             s = self.get_phase_signal(rotation=phase_rotation)
         else:
             s = self.get_color_signal(
-                rotation=phase_rotation, autolim=autolim, autolim_sigma=autolim_sigma
+                rotation=phase_rotation,
+                autolim=autolim,
+                autolim_sigma=autolim_sigma,
+                magnitude_limits=magnitude_limits,
             )
         s.change_dtype("uint16")
         s.change_dtype("float64")

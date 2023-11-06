@@ -11,6 +11,10 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ==========
 
+Added
+-----
+- Added `magnitude_limits` to `DPCSignal2D` methods (#949)
+
 Fixed
 -----
 - Remove `ipywidgets` from requirements as it is not a dependency
