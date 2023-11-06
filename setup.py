@@ -36,6 +36,7 @@ extra_feature_requirements = {
         "sphinx-codeautolink",
         "pydata-sphinx-theme",
         "hyperspy-gui-ipywidgets",
+        "dask-image",
     ],
     "tests": [
         "pytest     >= 5.0",
