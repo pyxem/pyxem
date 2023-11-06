@@ -1382,7 +1382,7 @@ class TestFilter:
 
     @pytest.mark.parametrize("lazy", [True, False])
     def test_filter(self, three_section, lazy):
-        if lazy:
+        if lazy:  # pragma: no cover
             dask_image = pytest.importorskip("dask_image")
             from dask_image.ndfilters import gaussian_filter as gaussian_filter
 
