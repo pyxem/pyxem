@@ -16,6 +16,8 @@ Fixed
 - Remove `ipywidgets` from requirements as it is not a dependency
 - Set skimage != to version 0.21.0 because of regression
 - Do not reverse the y-axis of diffraction patterns when template matching (#925)
+- Fixed bug in :py:class:`pyxem.generators.indexation_generator.AcceleratedIndexationGenerator` when
+  passing orientations as tuples.
 
 
 2023-05-08 - version 0.15.1
