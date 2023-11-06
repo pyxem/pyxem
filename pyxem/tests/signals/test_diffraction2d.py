@@ -1385,22 +1385,19 @@ class TestFilter:
         if lazy:
             dask_image = pytest.importorskip("dask_image")
             from dask_image.ndfilters import gaussian_filter as gaussian_filter
+
             three_section = three_section.as_lazy()
         else:
             from scipy.ndimage import gaussian_filter
 
         sigma = (3, 3, 3, 3)
-        new = three_section.filter(func=gaussian_filter,
-                                   sigma=sigma,
-                                   inplace=False)
-        three_section.filter(func=gaussian_filter,
-                             sigma=sigma,
-                             inplace=True)
+        new = three_section.filter(func=gaussian_filter, sigma=sigma, inplace=False)
+        three_section.filter(func=gaussian_filter, sigma=sigma, inplace=True)
         np.testing.assert_array_almost_equal(new.data, three_section.data)
 
     def test_filter_fail(self, three_section):
         def small_func(x):
-            return x[1:, 1:,1:,1:]
+            return x[1:, 1:, 1:, 1:]
+
         with pytest.raises(ValueError):
-            new = three_section.filter(func=small_func,
-                                       inplace=False)
+            new = three_section.filter(func=small_func, inplace=False)

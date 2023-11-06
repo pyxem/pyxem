@@ -15,17 +15,20 @@ import numpy as np
 
 s = pxm.data.mgo_nanocrystals(allow_download=True)  # MgO nanocrystals dataset
 
-s_filtered = s.filter(gaussian_filter,
-                      sigma=1.0,
-                      inplace=False)  # Gaussian filter with sigma=1.0
+s_filtered = s.filter(
+    gaussian_filter, sigma=1.0, inplace=False
+)  # Gaussian filter with sigma=1.0
 
-s_filtered2 = s.filter(gaussian_filter,
-                       sigma=(1.0, 1.0, 0, 0),
-                       inplace=False)  # Only filter in real space
+s_filtered2 = s.filter(
+    gaussian_filter, sigma=(1.0, 1.0, 0, 0), inplace=False
+)  # Only filter in real space
 
-hs.plot.plot_images([s.inav[10,10], s_filtered.inav[10,10], s_filtered2.inav[10,10]],
-                    label=['Original', 'GaussFilt(all)', 'GaussFilt(real space)'],
-                    tight_layout=True, vmax="99th")
+hs.plot.plot_images(
+    [s.inav[10, 10], s_filtered.inav[10, 10], s_filtered2.inav[10, 10]],
+    label=["Original", "GaussFilt(all)", "GaussFilt(real space)"],
+    tight_layout=True,
+    vmax="99th",
+)
 
 # %%
 """
@@ -39,12 +42,14 @@ def custom_filter(array):
     return filtered - np.mean(filtered)
 
 
-s_filtered3 = s.filter(custom_filter,
-                       inplace=False)  # Custom filter
+s_filtered3 = s.filter(custom_filter, inplace=False)  # Custom filter
 
-hs.plot.plot_images([s.inav[10,10], s_filtered3.inav[10,10]],
-                    label=['Original', 'GaussFilt(Custom)'],
-                    tight_layout=True, vmax="99th")
+hs.plot.plot_images(
+    [s.inav[10, 10], s_filtered3.inav[10, 10]],
+    label=["Original", "GaussFilt(Custom)"],
+    tight_layout=True,
+    vmax="99th",
+)
 # %%
 
 """
@@ -54,11 +59,14 @@ version which operates on dask arrays.
 """
 
 s = s.as_lazy()  # Convert to lazy dataset
-s_filtered4 = s.filter(dask_gaussian_filter,
-                       sigma=1.0,
-                       inplace=False)  # Gaussian filter with sigma=1.0
+s_filtered4 = s.filter(
+    dask_gaussian_filter, sigma=1.0, inplace=False
+)  # Gaussian filter with sigma=1.0
 
-hs.plot.plot_images([s_filtered.inav[10,10], s_filtered4.inav[10,10]],
-                    label=['GaussFilt', 'GaussFilt(Lazy)'],
-                    tight_layout=True, vmax="99th")
+hs.plot.plot_images(
+    [s_filtered.inav[10, 10], s_filtered4.inav[10, 10]],
+    label=["GaussFilt", "GaussFilt(Lazy)"],
+    tight_layout=True,
+    vmax="99th",
+)
 # %%

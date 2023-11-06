@@ -1122,10 +1122,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             normalize_template_match, template=ring, inplace=inplace, **kwargs
         )
 
-    def filter(self,
-               func,
-               inplace=False,
-               **kwargs):
+    def filter(self, func, inplace=False, **kwargs):
         """Filters the entire dataset given some function applied to the data.
 
         The function must take a numpy or dask array as input and return a
@@ -1155,8 +1152,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         new_data = func(self.data, **kwargs)
 
         if new_data.shape != self.data.shape:
-            raise ValueError("The function must return an array with "
-                             "the same shape as the input.")
+            raise ValueError(
+                "The function must return an array with " "the same shape as the input."
+            )
         if inplace:
             self.data = new_data
             return
