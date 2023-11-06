@@ -23,6 +23,7 @@ import hyperspy.api as hs
 from matplotlib import pyplot as plt
 from numpy.random import default_rng
 from skimage.draw import circle_perimeter_aa
+import scipy
 
 from pyxem.signals import (
     Diffraction1D,
@@ -1367,3 +1368,36 @@ class TestPlotNavigator:
         s_nav = Diffraction2D(np.zeros((2, 19)))
         s._navigator_probe = s_nav
         s.plot()
+
+
+class TestFilter:
+    @pytest.fixture
+    def three_section(self):
+        x = np.random.random((100, 50, 20, 20))
+        x[0:20, :, 5:7, 5:7] = x[0:20, :, 5:7, 5:7] + 10
+        x[20:60, :, 1:3, 14:16] = x[20:60, :, 1:3, 14:16] + 10
+        x[60:100, :, 6:8, 10:12] = x[60:100, :, 6:8, 10:12] + 10
+        d = Diffraction2D(x)
+        return d
+
+    @pytest.mark.parametrize("lazy", [True, False])
+    def test_filter(self, three_section, lazy):
+        if lazy:  # pragma: no cover
+            dask_image = pytest.importorskip("dask_image")
+            from dask_image.ndfilters import gaussian_filter as gaussian_filter
+
+            three_section = three_section.as_lazy()
+        else:
+            from scipy.ndimage import gaussian_filter
+
+        sigma = (3, 3, 3, 3)
+        new = three_section.filter(func=gaussian_filter, sigma=sigma, inplace=False)
+        three_section.filter(func=gaussian_filter, sigma=sigma, inplace=True)
+        np.testing.assert_array_almost_equal(new.data, three_section.data)
+
+    def test_filter_fail(self, three_section):
+        def small_func(x):
+            return x[1:, 1:, 1:, 1:]
+
+        with pytest.raises(ValueError):
+            new = three_section.filter(func=small_func, inplace=False)

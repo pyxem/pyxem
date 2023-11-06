@@ -18,8 +18,6 @@
 
 
 import numpy as np
-from skimage import filters
-from skimage.feature import match_template
 from scipy.ndimage import rotate
 from skimage import morphology
 import dask.array as da
@@ -30,8 +28,8 @@ import warnings
 import hyperspy.api as hs
 from hyperspy.signals import Signal2D, BaseSignal
 from hyperspy._signals.lazy import LazySignal
-from hyperspy._signals.signal2d import LazySignal2D
 from hyperspy.misc.utils import isiterable
+from importlib import import_module
 
 from pyxem.signals import (
     CommonDiffraction,
@@ -1124,6 +1122,45 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             normalize_template_match, template=ring, inplace=inplace, **kwargs
         )
 
+    def filter(self, func, inplace=False, **kwargs):
+        """Filters the entire dataset given some function applied to the data.
+
+        The function must take a numpy or dask array as input and return a
+        numpy or dask array as output which has the same shape, and axes as
+        the input.
+
+        Parameters
+        ----------
+        func : function
+            Function to apply to the data. Must take a numpy or dask array as
+            input and return a numpy or dask array as output which has the
+            same shape as the input.
+        inplace : bool, optional
+            If True, the data is replaced by the filtered data. If False, a
+            new signal is returned. Default False.
+        **kwargs :
+            Passed to the function.
+
+        Examples
+        --------
+        >>> import pyxem as pxm
+        >>> from scipy.ndimage import gaussian_filter
+        >>> s = pxm.dummy_data.get_cbed_signal()
+        >>> s_filtered = s.filter(gaussian_filter, sigma=1)
+
+        """
+        new_data = func(self.data, **kwargs)
+
+        if new_data.shape != self.data.shape:
+            raise ValueError(
+                "The function must return an array with " "the same shape as the input."
+            )
+        if inplace:
+            self.data = new_data
+            return
+        else:
+            return self._deepcopy_with_new_data(data=new_data)
+
     def template_match(self, template, inplace=False, **kwargs):
         """Template match the signal dimensions with a binary image.
 
@@ -1143,6 +1180,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Examples
         --------
+        >>> import pyxem as pxm
         >>> s = pxm.dummy_data.get_cbed_signal()
         >>> binary_image = np.random.randint(0, 2, (6, 6))
         >>> s_template = s.template_match_with_binary_image(

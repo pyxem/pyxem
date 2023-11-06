@@ -17,6 +17,9 @@ Fixed
 - Set skimage != to version 0.21.0 because of regression
 - Do not reverse the y-axis of diffraction patterns when template matching (#925)
 
+Added
+-----
+- Add n-d and 2-d filters #935 for filtering datasets
 
 2023-05-08 - version 0.15.1
 ===========================
