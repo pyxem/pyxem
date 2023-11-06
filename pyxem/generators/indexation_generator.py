@@ -111,6 +111,9 @@ class AcceleratedIndexationGenerator:
         # test that the first euler angle is always 0
 
         for phase in diffraction_library:
+            diffraction_library[phase]["orientations"] = np.array(
+                diffraction_library[phase]["orientations"]
+            )
             if not np.allclose(
                 np.sum(diffraction_library[phase]["orientations"][:, 0]), 0
             ):
