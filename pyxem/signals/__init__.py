@@ -47,7 +47,7 @@ from .power2d import Power2D, LazyPower2D
 from .reduced_intensity1d import ReducedIntensity1D
 from .segments import LearningSegment, VDFSegment
 from .strain_map import StrainMap
-from .correlation1d import Correlation1D
+from .correlation1d import Correlation1D, LazyCorrelation1D
 from .tensor_field import DisplacementGradientMap
 from .virtual_dark_field_image import VirtualDarkFieldImage
 from .insitu_diffraction2d import InSituDiffraction2D
@@ -84,6 +84,7 @@ __all__ = [
     "VDFSegment",
     "StrainMap",
     "Correlation1D",
+    "LazyCorrelation1D",
     "DisplacementGradientMap",
     "VirtualDarkFieldImage",
     "InSituDiffraction2D",

@@ -221,6 +221,12 @@ signals:
     dtype: real
     lazy: False
     module: pyxem.signals.correlation1d
+  LazyCorrelation1D:
+    signal_type: correlation
+    signal_dimension: 1
+    dtype: real
+    lazy: True
+    module: pyxem.signals.correlation1d
   InSituDiffraction2D:
     signal_type: insitu_diffraction
     signal_dimension: 2

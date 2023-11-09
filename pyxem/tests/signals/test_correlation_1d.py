@@ -18,8 +18,9 @@
 
 import pytest
 import numpy as np
+import dask.array as da
 
-from pyxem.signals import Correlation1D, PolarDiffraction2D
+from pyxem.signals import Correlation1D, PolarDiffraction2D, LazyCorrelation1D
 
 
 class TestCorrelation1D:
@@ -86,3 +87,8 @@ class TestCorrelation1D:
             normalize=False,
         )
         np.testing.assert_almost_equal(sym_coeff.data[0, 0], 1)
+
+    def test_lazy(self, flat_pattern):
+        assert isinstance(flat_pattern, Correlation1D)
+        assert isinstance(flat_pattern.as_lazy(), LazyCorrelation1D)
+        assert isinstance(flat_pattern.as_lazy().data, da.Array)
