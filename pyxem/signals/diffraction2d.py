@@ -26,6 +26,7 @@ from tqdm import tqdm
 import warnings
 
 import hyperspy.api as hs
+from hyperspy.drawing._markers.points import Points
 from hyperspy.signals import Signal2D, BaseSignal
 from hyperspy._signals.lazy import LazySignal
 from hyperspy.misc.utils import isiterable
@@ -1483,7 +1484,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             super().plot(*args, **kwargs)
 
     def add_peak_array_as_markers(
-        self, peak_array, color="red", size=20, bool_array=None, bool_invert=False
+        self, peak_array,
+            permanent=True,
+            **kwargs
     ):
         """Add a peak array to the signal as HyperSpy markers.
 
@@ -1494,9 +1497,11 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             Default 'red'
         size : scalar, optional
             Default 20
-        bool_array : NumPy array
-            Must be the same size as peak_array
-        bool_invert : bool
+        permanent : bool, optional
+            Default False, if True the markers will be added to the
+            signal permanently.
+        **kwargs :
+            Passed to :py:class:`~hs.api.plot.markers.Points`
 
         Examples
         --------
@@ -1505,8 +1510,19 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> s.plot()
 
         """
-        markers = hs.plot.markers.Peaks(peak_array, color=color, size=size)
-        self.add_markers(markers)
+        if isinstance(peak_array, np.ndarray):
+            if peak_array.dtype == object:
+                markers = Points(peak_array.T,
+                             **kwargs)
+            else:
+                markers = Points(peak_array,
+                             **kwargs)
+        elif isinstance(peak_array, BaseSignal):
+            markers = Points.from_signal(peak_array,
+                                         **kwargs)
+        else:
+            raise TypeError("peak_array must be a NumPy array or a HyperSpy signal")
+        self.add_marker(markers,permanent=permanent)
 
     def add_ellipse_array_as_markers(
         self,

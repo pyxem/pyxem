@@ -92,7 +92,6 @@ class TestDiffraction2DFlipDiffraction:
         assert (s_flip.data[:, :, :3, :] == 1).all()
 
 
-@pytest.mark.slow
 class TestAddPeakArrayAsMarkers:
     def test_simple(self):
         s = Diffraction2D(np.zeros((2, 3, 100, 100)))
@@ -108,9 +107,9 @@ class TestAddPeakArrayAsMarkers:
         for index in np.ndindex(peak_array.shape):
             islice = np.s_[index]
             peak_array[islice] = np.random.randint(20, 80, (100, 2))
-        s.add_peak_array_as_markers(peak_array, color="blue")
-        marker0 = list(s.metadata.Markers)[9][1]
-        assert marker0.marker_properties["color"] == "blue"
+        s.add_peak_array_as_markers(peak_array, color=("blue",))
+        marker0 = list(s.metadata.Markers)[0][1]
+        assert marker0.kwargs["color"] == ("blue",)
 
     def test_size(self):
         s = Diffraction2D(np.zeros((2, 3, 100, 100)))
@@ -118,9 +117,9 @@ class TestAddPeakArrayAsMarkers:
         for index in np.ndindex(peak_array.shape):
             islice = np.s_[index]
             peak_array[islice] = np.random.randint(20, 80, (100, 2))
-        s.add_peak_array_as_markers(peak_array, size=13)
-        marker0 = list(s.metadata.Markers)[9][1]
-        assert marker0.get_data_position("size") == 13
+        s.add_peak_array_as_markers(peak_array, sizes=(13,))
+        marker = list(s.metadata.Markers)[0][1]
+        assert marker.kwargs["sizes"] == (13,)
 
     def test_3d_nav_dims(self):
         s = Diffraction2D(np.zeros((2, 3, 4, 100, 100)))
@@ -130,7 +129,7 @@ class TestAddPeakArrayAsMarkers:
             peak_array[islice] = np.random.randint(20, 80, (100, 2))
         s.add_peak_array_as_markers(peak_array)
         marker = list(s.metadata.Markers)[0][1]
-        assert marker.data["x1"][()].shape == (2, 3, 4)
+        assert marker.kwargs["offsets"][()].shape == (4, 3, 2)
 
     def test_1d_nav_dims(self):
         nav_dim = 3
@@ -141,14 +140,14 @@ class TestAddPeakArrayAsMarkers:
             peak_array[islice] = np.random.randint(20, 80, (100, 2))
         s.add_peak_array_as_markers(peak_array)
         marker = list(s.metadata.Markers)[0][1]
-        assert marker.data["x1"][()].shape == (3,)
+        assert marker.kwargs["offsets"].shape == (3,)
 
     def test_0d_nav_dims(self):
         s = Diffraction2D(np.zeros((100, 100)))
-        peak_array = np.random.randint(20, 80, size=(1, 1, 100, 2))
+        peak_array = np.random.randint(20, 80, size=(100, 2))
         s.add_peak_array_as_markers(peak_array)
         marker = list(s.metadata.Markers)[0][1]
-        assert marker.data["x1"].shape == ()
+        assert marker.kwargs["offsets"].dtype != object
 
 
 class TestAddEllipseArrayAsMarkers:
