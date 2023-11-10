@@ -416,6 +416,7 @@ def apply_transformation(z, transformation, keep_dtype, order=1, *args, **kwargs
     -----
     Generally used in combination with pyxem.expt_utils.convert_affine_to_transform
     """
+
     if keep_dtype is False:
         trans = tf.warp(z, transformation, order=order, *args, **kwargs)
     if keep_dtype is True:
@@ -423,7 +424,6 @@ def apply_transformation(z, transformation, keep_dtype, order=1, *args, **kwargs
             z, transformation, order=order, preserve_range=True, *args, **kwargs
         )
         trans = trans.astype(z.dtype)
-
     return trans
 
 

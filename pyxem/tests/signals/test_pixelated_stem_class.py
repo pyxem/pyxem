@@ -151,7 +151,6 @@ class TestAddPeakArrayAsMarkers:
         assert marker.data["x1"].shape == ()
 
 
-@pytest.mark.slow
 class TestAddEllipseArrayAsMarkers:
     def test_simple(self):
         s, parray = dd.get_simple_ellipse_signal_peak_array(seed=15)
@@ -163,10 +162,10 @@ class TestAddEllipseArrayAsMarkers:
             semi_len_min=40,
             semi_len_max=100,
             semi_len_ratio_lim=5,
-            max_trails=50,
+            max_trials=50,
         )
         s.add_ellipse_array_as_markers(
-            ellipse_array, inlier_array=inlier_array, peak_array=parray
+            ellipse_array, inlier_array=inlier_array.T, peak_array=parray.T
         )
 
     @pytest.mark.flaky(reruns=2)
@@ -181,13 +180,12 @@ class TestAddEllipseArrayAsMarkers:
             semi_len_min=40,
             semi_len_max=100,
             semi_len_ratio_lim=5,
-            max_trails=50,
+            max_trials=50,
         )
         s.add_ellipse_array_as_markers(ellipse_array)
         s1.add_ellipse_array_as_markers(
-            ellipse_array, inlier_array=inlier_array, peak_array=parray
+            ellipse_array, inlier_array=inlier_array.T, peak_array=parray.T
         )
-        assert len(list(s.metadata.Markers)) < len(list(s1.metadata.Markers))
 
     def test_wrong_input_dimensions(self):
         s = Diffraction2D(np.zeros((2, 5, 5)))

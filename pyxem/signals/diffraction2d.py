@@ -145,12 +145,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         else:
             out_dtype = self.data.dtype
 
-        output_shape = kwargs.get("output_shape", shape)
         return self.map(
             apply_transformation,
             transformation=transformation,
             output_dtype=out_dtype,
-            output_signal_size=output_shape,
             order=order,
             keep_dtype=keep_dtype,
             inplace=inplace,
@@ -1541,7 +1539,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         if len(self.data.shape) != 4:
             raise ValueError("Signal must be 4 dims to use this function")
 
-        markers = ret.ellipse_to_markers(ellipse_array, inlier_array, peak_array)
+        markers = ret.ellipse_to_markers(ellipse_array,
+                                         inlier=inlier_array,
+                                         points=peak_array)
 
         self.add_marker(markers)
 

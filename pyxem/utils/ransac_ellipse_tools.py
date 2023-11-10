@@ -265,7 +265,7 @@ def get_ellipse_model_ransac_single_frame(
     semi_len_ratio_lim=1.2,
     min_samples=6,
     residual_threshold=10,
-    max_trails=500,
+    max_trials=500,
 ):
     """Pick a random number of data points to fit an ellipse to.
 
@@ -293,7 +293,7 @@ def get_ellipse_model_ransac_single_frame(
         Minimum number of data points to fit the ellipse model to.
     residual_threshold : scalar, optional
         Maximum distance for a data point to be considered an inlier.
-    max_trails : scalar, optional
+    max_trials : scalar, optional
         Maximum number of tries for the ransac algorithm.
 
     Returns
@@ -309,7 +309,7 @@ def get_ellipse_model_ransac_single_frame(
     ...        np.arange(0, 2*np.pi, 0.5), params=(128, 130, 50, 60, 0.2))
     >>> ellipse_model, inliers = ret.get_ellipse_model_ransac_single_frame(
     ...        data, xf=128, yf=128, rf_lim=5, semi_len_min=45,
-    ...        semi_len_max=65, semi_len_ratio_lim=1.4, max_trails=1000)
+    ...        semi_len_max=65, semi_len_ratio_lim=1.4, max_trials=1000)
 
     """
     is_model_valid = partial(
@@ -334,7 +334,7 @@ def get_ellipse_model_ransac_single_frame(
             EllipseModel,
             min_samples=min_samples,
             residual_threshold=residual_threshold,
-            max_trials=max_trails,
+            max_trials=max_trials,
             is_model_valid=is_model_valid,
         )
         if model_ransac is not None:
@@ -357,7 +357,7 @@ def get_ellipse_model_ransac(
     semi_len_ratio_lim=1.2,
     min_samples=6,
     residual_threshold=10,
-    max_trails=500,
+    max_trials=500,
     show_progressbar=True,
 ):
     """Pick a random number of data points to fit an ellipse to.
@@ -386,7 +386,7 @@ def get_ellipse_model_ransac(
         Minimum number of data points to fit the ellipse model to.
     residual_threshold : scalar, optional
         Maximum distance for a data point to be considered an inlier.
-    max_trails : scalar, optional
+    max_trials : scalar, optional
         Maximum number of tries for the ransac algorithm.
     show_progressbar : bool, optional
         Default True
@@ -409,19 +409,24 @@ def get_ellipse_model_ransac(
     inlier_array = np.zeros(data.shape[:2], dtype=object)
     num_total = data.shape[0] * data.shape[1]
     t = tqdm(np.ndindex(data.shape[:2]), disable=not show_progressbar, total=num_total)
+
+    new_peaks = np.empty(data.shape, dtype=object)
+    for i in np.ndindex(data.shape):
+        new_peaks[i] = data[i][:, ::-1]
+
     for iy, ix in t:
         temp_xf, temp_yf = xf[iy, ix], yf[iy, ix]
         ellipse_model, inliers = get_ellipse_model_ransac_single_frame(
-            data[iy, ix],
-            xf=temp_yf,
-            yf=temp_xf,
+            new_peaks[iy, ix],  # reverse x,y for pixel units
+            xf=temp_xf,
+            yf=temp_yf,
             rf_lim=rf_lim,
             semi_len_min=semi_len_min,
             semi_len_max=semi_len_max,
             semi_len_ratio_lim=semi_len_ratio_lim,
             min_samples=min_samples,
             residual_threshold=residual_threshold,
-            max_trails=max_trails,
+            max_trials=max_trials,
         )
         if ellipse_model is not None:
             params = ellipse_model.params
@@ -497,9 +502,7 @@ def mask_peak_array(array, mask, invert=False):
         return masked_array
 
 
-def ellipse_to_markers(ellipse_array,
-                       points=None,
-                       inlier=None):
+def ellipse_to_markers(ellipse_array, points=None, inlier=None):
     """
 
     Parameters
@@ -512,6 +515,8 @@ def ellipse_to_markers(ellipse_array,
     -------
 
     """
+    if not isinstance(ellipse_array, np.ndarray):
+        ellipse_array = np.array(ellipse_array)
     ellipse_array = ellipse_array.T
     if ellipse_array.dtype == object:
         offsets = np.empty(ellipse_array.shape, dtype=object)
@@ -524,28 +529,30 @@ def ellipse_to_markers(ellipse_array,
             widths[i] = ellipse_array[i][2] * 2
             angles[i] = np.rad2deg(ellipse_array[i][4])
     else:
-        offsets = np.array([ellipse_array[:2], ])
+        offsets = np.array(
+            [
+                ellipse_array[:2],
+            ]
+        )
         heights = ellipse_array[3] * 2
         widths = ellipse_array[2] * 2
         angles = np.rad2deg(ellipse_array[4])
 
-    el = Ellipses(offsets=offsets,
-                  heights=heights,
-                  widths=widths,
-                  angles=angles,
-                  facecolor="none",
-                  edgecolor="white",
-                  lw=4
-                  )
+    el = Ellipses(
+        offsets=offsets,
+        heights=heights,
+        widths=widths,
+        angles=angles,
+        facecolor="none",
+        edgecolor="white",
+        lw=4,
+    )
 
     if points is not None and inlier is not None:
-
         in_points = Points(offsets=mask_peak_array(points, inlier), color="green")
-        out_points = Points(offsets=mask_peak_array(points,
-                                                    inlier,
-                                                    invert=True),
-                            color="red",
-                            alpha=0.5)
+        out_points = Points(
+            offsets=mask_peak_array(points, inlier, invert=True), color="red", alpha=0.5
+        )
         return el, in_points, out_points
     elif points is not None:
         points = Points(offsets=points, color="green", alpha=0.5)
@@ -623,7 +630,7 @@ def determine_ellipse(
                 semi_len_ratio_lim=1.2,
                 min_samples=6,
                 residual_threshold=20,
-                max_trails=1000,
+                max_trials=1000,
             )
         else:
             el, inlier = get_ellipse_model_ransac_single_frame(pos, **kwargs)
