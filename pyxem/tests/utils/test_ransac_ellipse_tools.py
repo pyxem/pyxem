@@ -326,7 +326,7 @@ class TestGetEllipseModelRansacSingleFrame:
             semi_len_ratio_lim=None,
             min_samples=20,
             residual_threshold=3,
-            max_trails=100,
+            max_trials=100,
         )
         assert inliers0[:-1].all()
         assert not inliers0[-1]
@@ -340,7 +340,7 @@ class TestGetEllipseModelRansacSingleFrame:
             semi_len_ratio_lim=None,
             min_samples=20,
             residual_threshold=6,
-            max_trails=100,
+            max_trials=100,
         )
         assert inliers1.all()
 
@@ -362,7 +362,7 @@ class TestGetEllipseModelRansacSingleFrame:
             semi_len_ratio_lim=2,
             min_samples=6,
             residual_threshold=10,
-            max_trails=100,
+            max_trials=100,
         )
         params0f = (xf, yf, a, b, r)
         params1f = ret._ellipse_model_centre_to_focus(*model_ransac.params, xf, yf)
@@ -385,7 +385,7 @@ class TestGetEllipseModelRansacSingleFrame:
             semi_len_ratio_lim=2,
             min_samples=5,
             residual_threshold=10,
-            max_trails=300,
+            max_trials=300,
         )
         params00f = (xf0, yf, a, b, r)
         params01f = ret._ellipse_model_centre_to_focus(*model_ransac0.params, xf0, yf)
@@ -401,7 +401,7 @@ class TestGetEllipseModelRansacSingleFrame:
             semi_len_ratio_lim=2,
             min_samples=5,
             residual_threshold=10,
-            max_trails=300,
+            max_trials=300,
         )
         params10f = (xf1, yf, a, b, r)
         params11f = ret._ellipse_model_centre_to_focus(*model_ransac1.params, xf1, yf)
@@ -423,7 +423,7 @@ class TestGetEllipseModelRansacSingleFrame:
             semi_len_ratio_lim=2,
             min_samples=5,
             residual_threshold=10,
-            max_trails=300,
+            max_trials=300,
         )
         params00f = (xf, yf0, a, b, r)
         params01f = ret._ellipse_model_centre_to_focus(*model_ransac0.params, xf, yf0)
@@ -439,7 +439,7 @@ class TestGetEllipseModelRansacSingleFrame:
             semi_len_ratio_lim=2,
             min_samples=5,
             residual_threshold=10,
-            max_trails=300,
+            max_trials=300,
         )
         params10f = (xf, yf1, a, b, r)
         params11f = ret._ellipse_model_centre_to_focus(*model_ransac1.params, xf, yf1)
@@ -458,7 +458,7 @@ class TestGetEllipseModelRansacSingleFrame:
             semi_len_ratio_lim=1.2,
             min_samples=5,
             residual_threshold=10,
-            max_trails=100,
+            max_trials=100,
         )
         params0f = (xf, yf, a, b, r)
         params1f = ret._ellipse_model_centre_to_focus(*model_ransac0.params, xf, yf)
@@ -475,7 +475,7 @@ class TestGetEllipseModelRansacSingleFrame:
             semi_len_ratio_lim=1.2,
             min_samples=5,
             residual_threshold=10,
-            max_trails=100,
+            max_trials=100,
         )
         assert model_ransac1 is None
 
@@ -492,7 +492,7 @@ class TestGetEllipseModelRansacSingleFrame:
             semi_len_ratio_lim=2,
             min_samples=6,
             residual_threshold=10,
-            max_trails=100,
+            max_trials=100,
         )
         params0f = (xf, yf, a, b, r)
         params1f = ret._ellipse_model_centre_to_focus(*model_ransac0.params, xf, yf)
@@ -509,7 +509,7 @@ class TestGetEllipseModelRansacSingleFrame:
             semi_len_ratio_lim=2,
             min_samples=6,
             residual_threshold=10,
-            max_trails=100,
+            max_trials=100,
         )
         assert model_ransac1 is None
 
@@ -526,7 +526,7 @@ class TestGetEllipseModelRansacSingleFrame:
             semi_len_ratio_lim=2,
             min_samples=6,
             residual_threshold=10,
-            max_trails=100,
+            max_trials=100,
         )
         params0f = (xf, yf, a, b, r)
         params1f = ret._ellipse_model_centre_to_focus(*model_ransac0.params, xf, yf)
@@ -543,7 +543,7 @@ class TestGetEllipseModelRansacSingleFrame:
             semi_len_ratio_lim=2,
             min_samples=6,
             residual_threshold=10,
-            max_trails=100,
+            max_trials=100,
         )
         assert model_ransac1 is None
 
@@ -555,7 +555,7 @@ class TestGetEllipseModelRansac:
         rot = np.zeros((2, 3))
         peak_array = mdtd._make_4d_peak_array_test_data(xc, yc, semi0, semi1, rot)
         ellipse_array, inlier_array = ret.get_ellipse_model_ransac(
-            peak_array, max_trails=50
+            peak_array, max_trials=50
         )
         assert ellipse_array.shape == xc.shape
         assert inlier_array.shape == xc.shape
@@ -578,7 +578,7 @@ class TestGetEllipseModelRansac:
             semi_len_max=65,
             semi_len_ratio_lim=1.2,
             min_samples=15,
-            max_trails=20,
+            max_trials=20,
         )
         ellipse_array1, inlier_array1 = ret.get_ellipse_model_ransac(
             peak_array,
@@ -589,15 +589,15 @@ class TestGetEllipseModelRansac:
             semi_len_max=65,
             semi_len_ratio_lim=1.2,
             min_samples=15,
-            max_trails=20,
+            max_trials=20,
         )
 
         for iy, ix in np.ndindex(xf.shape):
             assert np.isclose(
-                xf[iy, ix], ellipse_array0[iy, ix][1], atol=1e-8, rtol=1e-3
+                xf[iy, ix], ellipse_array0[iy, ix][0], atol=1e-8, rtol=1e-3
             )
             assert np.isclose(
-                yf[iy, ix], ellipse_array0[iy, ix][0], atol=1e-8, rtol=1e-3
+                yf[iy, ix], ellipse_array0[iy, ix][1], atol=1e-8, rtol=1e-3
             )
             assert inlier_array0[iy, ix].all()
             assert ellipse_array1[iy, ix] is None
@@ -621,7 +621,7 @@ class TestGetEllipseModelRansac:
             semi_len_max=150,
             semi_len_ratio_lim=1.7,
             min_samples=15,
-            max_trails=20,
+            max_trials=20,
         )
         for iy, ix in np.ndindex(xf.shape):
             semi_min = min(ellipse_array[iy, ix][2], ellipse_array[iy, ix][3])
@@ -647,7 +647,7 @@ class TestGetEllipseModelRansac:
             semi_len_max=150,
             semi_len_ratio_lim=1.7,
             min_samples=15,
-            max_trails=20,
+            max_trials=20,
         )
         ellipse_array1, inlier_array1 = ret.get_ellipse_model_ransac(
             peak_array,
@@ -658,7 +658,7 @@ class TestGetEllipseModelRansac:
             semi_len_max=150,
             semi_len_ratio_lim=1.01,
             min_samples=15,
-            max_trails=20,
+            max_trials=20,
         )
         for iy, ix in np.ndindex(xf.shape):
             ellipse_params0 = ellipse_array0[iy, ix]
@@ -687,7 +687,7 @@ class TestGetEllipseModelRansac:
             semi_len_max=195,
             semi_len_ratio_lim=1.11,
             min_samples=15,
-            max_trails=200,
+            max_trials=200,
         )
         ellipse_array1, inlier_array1 = ret.get_ellipse_model_ransac(
             peak_array,
@@ -698,7 +698,7 @@ class TestGetEllipseModelRansac:
             semi_len_max=195,
             semi_len_ratio_lim=2.0,
             min_samples=15,
-            max_trails=200,
+            max_trials=200,
         )
         semi_len_ratio_list = []
         for iy, ix in np.ndindex(xf.shape):
@@ -725,7 +725,7 @@ class TestGetEllipseModelRansac:
             semi_len_max=95,
             semi_len_ratio_lim=1.1,
             residual_threshold=1,
-            max_trails=100,
+            max_trials=100,
             min_samples=15,
         )
         ellipse_array1, inlier_array1 = ret.get_ellipse_model_ransac(
@@ -736,7 +736,7 @@ class TestGetEllipseModelRansac:
             semi_len_max=95,
             semi_len_ratio_lim=1.1,
             residual_threshold=5,
-            max_trails=100,
+            max_trials=100,
             min_samples=15,
         )
 
@@ -750,7 +750,9 @@ class TestGetEllipseModelRansac:
         xf, yf, rf_lim = 100, 100, 20
         semi_len_min, semi_len_max = 50, 100
         semi_len_ratio_lim = 1.15
-        peak_array = np.random.randint(0, 200, size=(10, 11, 200, 2))
+        peak_array = np.empty((10,11), dtype=object)
+        for ind in np.ndindex(peak_array.shape):
+            peak_array[ind] = np.random.randint(0, 200, size=(200, 2))
         ellipse_array, inlier_array = ret.get_ellipse_model_ransac(
             peak_array,
             xf=xf,
@@ -760,7 +762,7 @@ class TestGetEllipseModelRansac:
             semi_len_max=semi_len_max,
             semi_len_ratio_lim=semi_len_ratio_lim,
             min_samples=15,
-            max_trails=5,
+            max_trials=5,
         )
         for iy, ix in np.ndindex(peak_array.shape[:2]):
             if ellipse_array[iy, ix] is not None:
@@ -817,7 +819,7 @@ def test_full_ellipse_ransac_processing():
         semi_len_min=min(a, b) - 5,
         semi_len_max=max(a, b) + 5,
         semi_len_ratio_lim=5,
-        max_trails=50,
+        max_trials=50,
         min_samples=10,
     )
 
@@ -825,7 +827,9 @@ def test_full_ellipse_ransac_processing():
 
     for iy, ix in np.ndindex(ellipse_array.shape):
         ycf, xcf, bf, af, rf = ellipse_array[iy, ix]
-        compare_model_params((xcf, ycf, af, bf, rf), (xc, yc, a, b, r), abs=0.1)
+        # shifted by pi/2
+        compare_model_params((xcf, ycf, af, bf, rf+np.pi/2),
+                             (yc, xc, a, b, r), abs=0.1)
         assert inlier_array[iy, ix].all()
 
     s.add_ellipse_array_as_markers(ellipse_array)
