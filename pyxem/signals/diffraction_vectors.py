@@ -96,10 +96,7 @@ class DiffractionVectors(BaseSignal):
         self.has_intensity = False
 
     @classmethod
-    def from_peaks(cls,
-                   peaks,
-                   center=None,
-                   calibration=None):
+    def from_peaks(cls, peaks, center=None, calibration=None):
         """Takes a list of peak positions (pixel coordinates) and returns
         an instance of `Diffraction2D`
 
@@ -123,11 +120,18 @@ class DiffractionVectors(BaseSignal):
         if calibration is None and peaks.metadata.hasitem("Peaks.signal_axes"):
             calibration = [ax.scale for ax in peaks.metadata.Peaks.signal_axes]
         if not isiterable(calibration):
-            calibration = [calibration, calibration]  # same calibration for both dimensions
-        if peaks.data[(0,)*peaks.data.ndim].shape[0] == len(calibration)+1:
+            calibration = [
+                calibration,
+                calibration,
+            ]  # same calibration for both dimensions
+        if peaks.data[(0,) * peaks.data.ndim].shape[0] == len(calibration) + 1:
             # account for the intensity column
-            center = list(center) + [0, ]
-            calibration = list(calibration) + [1, ]
+            center = list(center) + [
+                0,
+            ]
+            calibration = list(calibration) + [
+                1,
+            ]
             has_intensity = True
         else:
             has_intensity = False
@@ -442,12 +446,13 @@ class DiffractionVectors(BaseSignal):
         return fig
 
     def to_markers(self, **kwargs):
-        return Points(offsets=self.data,
-                      **kwargs)
+        return Points(offsets=self.data, **kwargs)
 
-    @deprecated(since="0.17.0",
-                removal="1.0.0",
-                alternative="pyxem.signals.DiffractionVectors.to_markers")
+    @deprecated(
+        since="0.17.0",
+        removal="1.0.0",
+        alternative="pyxem.signals.DiffractionVectors.to_markers",
+    )
     def plot_diffraction_vectors_on_signal(self, signal, *args, **kwargs):
         """Plot the diffraction vectors on a signal.
 
@@ -462,7 +467,11 @@ class DiffractionVectors(BaseSignal):
             Keyword arguments passed to signal.plot()
         """
         signal.plot(*args, **kwargs)
-        marker = self.to_markers(color=["red", ])
+        marker = self.to_markers(
+            color=[
+                "red",
+            ]
+        )
         signal.add_marker(marker, plot_marker=True, permanent=False)
 
     def get_magnitudes(self, *args, **kwargs):

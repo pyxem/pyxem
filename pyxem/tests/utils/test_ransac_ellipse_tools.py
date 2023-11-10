@@ -750,7 +750,7 @@ class TestGetEllipseModelRansac:
         xf, yf, rf_lim = 100, 100, 20
         semi_len_min, semi_len_max = 50, 100
         semi_len_ratio_lim = 1.15
-        peak_array = np.empty((10,11), dtype=object)
+        peak_array = np.empty((10, 11), dtype=object)
         for ind in np.ndindex(peak_array.shape):
             peak_array[ind] = np.random.randint(0, 200, size=(200, 2))
         ellipse_array, inlier_array = ret.get_ellipse_model_ransac(
@@ -828,8 +828,9 @@ def test_full_ellipse_ransac_processing():
     for iy, ix in np.ndindex(ellipse_array.shape):
         ycf, xcf, bf, af, rf = ellipse_array[iy, ix]
         # shifted by pi/2
-        compare_model_params((xcf, ycf, af, bf, rf+np.pi/2),
-                             (yc, xc, a, b, r), abs=0.1)
+        compare_model_params(
+            (xcf, ycf, af, bf, rf + np.pi / 2), (yc, xc, a, b, r), abs=0.1
+        )
         assert inlier_array[iy, ix].all()
 
     s.add_ellipse_array_as_markers(ellipse_array)

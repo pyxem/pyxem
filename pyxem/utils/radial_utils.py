@@ -594,18 +594,19 @@ def _get_ellipse_from_parameters(x, y, semi_len0, semi_len1, rot, r_scale=0.05):
     return (xx, yy)
 
 
-def _get_marker_list(
-    ellipse_parameters, x_list=None, y_list=None
-):
+def _get_marker_list(ellipse_parameters, x_list=None, y_list=None):
     xC, yC, semi_len0, semi_len1, rot, ecce = _get_ellipse_parameters(
         ellipse_parameters
     )
     marker_list = []
     if x_list is not None:
-        offsets = np.array([x_list,y_list]).T
+        offsets = np.array([x_list, y_list]).T
         marker_list.append(Points(offsets=offsets))
     from pyxem.utils.ransac_ellipse_tools import ellipse_to_markers
-    marker_list.append(ellipse_to_markers(ellipse_array=[xC, yC, semi_len0, semi_len1, rot]))
+
+    marker_list.append(
+        ellipse_to_markers(ellipse_array=[xC, yC, semi_len0, semi_len1, rot])
+    )
     return marker_list
 
 
@@ -738,7 +739,9 @@ def fit_ellipses_to_signal(
         ellipse_list.append(output)
         marker_list.extend(
             _get_marker_list(
-                ellipse_parameters, x_list=x, y_list=y,
+                ellipse_parameters,
+                x_list=x,
+                y_list=y,
             )
         )
     s_m = s.deepcopy()

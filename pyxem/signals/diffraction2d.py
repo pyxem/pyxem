@@ -1483,11 +1483,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             kwargs["navigator"] = s_nav
             super().plot(*args, **kwargs)
 
-    def add_peak_array_as_markers(
-        self, peak_array,
-            permanent=True,
-            **kwargs
-    ):
+    def add_peak_array_as_markers(self, peak_array, permanent=True, **kwargs):
         """Add a peak array to the signal as HyperSpy markers.
 
         Parameters
@@ -1512,17 +1508,14 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         """
         if isinstance(peak_array, np.ndarray):
             if peak_array.dtype == object:
-                markers = Points(peak_array.T,
-                             **kwargs)
+                markers = Points(peak_array.T, **kwargs)
             else:
-                markers = Points(peak_array,
-                             **kwargs)
+                markers = Points(peak_array, **kwargs)
         elif isinstance(peak_array, BaseSignal):
-            markers = Points.from_signal(peak_array,
-                                         **kwargs)
+            markers = Points.from_signal(peak_array, **kwargs)
         else:
             raise TypeError("peak_array must be a NumPy array or a HyperSpy signal")
-        self.add_marker(markers,permanent=permanent)
+        self.add_marker(markers, permanent=permanent)
 
     def add_ellipse_array_as_markers(
         self,
@@ -1555,9 +1548,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         if len(self.data.shape) != 4:
             raise ValueError("Signal must be 4 dims to use this function")
 
-        markers = ret.ellipse_to_markers(ellipse_array,
-                                         inlier=inlier_array,
-                                         points=peak_array)
+        markers = ret.ellipse_to_markers(
+            ellipse_array, inlier=inlier_array, points=peak_array
+        )
 
         self.add_marker(markers)
 
