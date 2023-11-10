@@ -35,7 +35,7 @@ extra_feature_requirements = {
         "sphinx_design",
         "sphinx-codeautolink",
         "pydata-sphinx-theme",
-        "hyperspy-gui-ipywidgets",
+        "hyperspy_gui_ipywidgets @ git+https://github.com/ericpre/hyperspy_gui_ipywidgets.git@hyperspy2.0",
         "dask-image",
     ],
     "tests": [
@@ -87,7 +87,7 @@ setup(
     install_requires=[
         "dask",
         "diffsims       >= 0.5",
-        "hyperspy       >= 1.7.0, <2.0rc0",  # significant improvements
+        "hyperspy @ git+https://github.com/hyperspy/hyperspy.git@RELEASE_next_major"
         "h5py",
         "lmfit          >= 0.9.12",
         "matplotlib     >= 3.3",
