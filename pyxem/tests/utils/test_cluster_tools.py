@@ -426,9 +426,16 @@ class TestClusterAndSortPeakArray:
 class TestAddPeakDictsToSignal:
     def test_simple(self):
         peak_dicts = {}
-        peak_dicts["centre"] = randint(124, 132, size=(3, 4, 10, 2))
-        peak_dicts["rest"] = randint(204, 212, size=(3, 4, 5, 2))
-        peak_dicts["none"] = randint(10, 13, size=(3, 4, 2, 2))
+        center_arr = np.empty(shape=(4, 3), dtype=object)
+        rest_arr = np.empty(shape=(4, 3), dtype=object)
+        none_arr = np.empty(shape=(4, 3), dtype=object)
+        for ind in np.ndindex(center_arr.shape):
+            center_arr[ind] = np.random.randint(124, 132, size=(10, 2))
+            rest_arr[ind] = np.random.randint(204, 212, size=(5, 2))
+            none_arr[ind] = np.random.randint(10, 13, size=(2, 2))
+        peak_dicts["centre"] = center_arr
+        peak_dicts["rest"] = rest_arr
+        peak_dicts["none"] = none_arr
         s = Diffraction2D(np.zeros((3, 4, 256, 256)))
         ct._add_peak_dicts_to_signal(s, peak_dicts)
 
@@ -457,7 +464,7 @@ class TestSortedClusterDictToMarkerList:
         sorted_cluster_dict["rest"] = randint(50, 60, size=(3, 4, 3, 2))
         sorted_cluster_dict["none"] = randint(90, size=(3, 4, 1, 2))
         marker_list = ct._sorted_cluster_dict_to_marker_list(sorted_cluster_dict)
-        assert len(marker_list) == 2 + 3 + 1
+        assert len(marker_list) == 3
 
     def test_size(self):
         marker_size = 30

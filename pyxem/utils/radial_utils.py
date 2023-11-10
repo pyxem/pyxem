@@ -22,8 +22,8 @@ import numpy.linalg as la
 from tqdm import tqdm
 from hyperspy.components1d import Polynomial, Gaussian
 from hyperspy.signals import Signal2D
-from hyperspy.drawing._markers.line_segment import LineSegment
-from hyperspy.drawing._markers.point import Point
+from hyperspy.drawing._markers.lines import Lines
+from hyperspy.drawing._markers.points import Points
 from hyperspy.misc.utils import isiterable
 
 import pyxem.utils.pixelated_stem_tools as pst

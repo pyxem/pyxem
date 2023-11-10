@@ -25,7 +25,6 @@ from orix.crystal_map import CrystalMap
 from orix.quaternion import Rotation
 from transforms3d.euler import mat2euler
 
-from pyxem.signals.diffraction_vectors import generate_marker_inputs_from_peaks
 from pyxem.utils.indexation_utils import get_nth_best_solution
 from pyxem.utils.signal import transfer_navigation_axes
 

@@ -75,7 +75,6 @@ from pyxem.utils.signal import (
 )
 import pyxem.utils.pixelated_stem_tools as pst
 import pyxem.utils.dask_tools as dt
-import pyxem.utils.marker_tools as mt
 import pyxem.utils.ransac_ellipse_tools as ret
 from pyxem.utils._deprecated import deprecated, deprecated_argument
 
@@ -164,7 +163,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         shift_x,
         shift_y,
         interpolation_order=1,
-        parallel=True,
         inplace=False,
         show_progressbar=True,
     ):
@@ -185,10 +183,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             Note that in some low-signal and high noise datasets, using a
             non-zero order might lead to artifacts. See the docstring in
             scipy.ndimage.shift for more information. Default 1.
-        parallel : bool
-            If True, run the processing on several cores.
-            In most cases this should be True, but for debugging False can be
-            useful. Default True
         inplace : bool
             If True (default), the data is replaced by the result. Useful when
             working with very large datasets, as this avoids doubling the
@@ -230,7 +224,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             pst._shift_single_frame,
             inplace=inplace,
             ragged=False,
-            parallel=parallel,
             show_progressbar=show_progressbar,
             interpolation_order=interpolation_order,
             shift_x=s_shift_x,
@@ -239,7 +232,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         if not inplace:
             return s_shift
 
-    def rotate_diffraction(self, angle, parallel=True, show_progressbar=True):
+    def rotate_diffraction(self, angle, show_progressbar=True):
         """
         Rotate the diffraction dimensions.
 
@@ -247,8 +240,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         ----------
         angle : scalar
             Clockwise rotation in degrees.
-        parallel : bool
-            Default True
         show_progressbar : bool
             Default True
 
@@ -267,7 +258,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             ragged=False,
             angle=-angle,
             reshape=False,
-            parallel=parallel,
             inplace=False,
             show_progressbar=show_progressbar,
         )
@@ -922,7 +912,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             function=pst._threshold_and_mask_single_frame,
             ragged=False,
             inplace=False,
-            parallel=True,
             show_progressbar=show_progressbar,
             threshold=threshold,
             mask=mask,
@@ -1518,27 +1507,14 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> s.plot()
 
         """
-        mt.add_peak_array_to_signal_as_markers(
-            self,
-            peak_array,
-            color=color,
-            size=size,
-            bool_array=bool_array,
-            bool_invert=bool_invert,
-        )
+        markers = hs.plot.markers.Peaks(peak_array, color=color, size=size)
+        self.add_markers(markers)
 
     def add_ellipse_array_as_markers(
         self,
         ellipse_array,
         inlier_array=None,
         peak_array=None,
-        nr=20,
-        color_ellipse="blue",
-        linewidth=1,
-        linestyle="solid",
-        color_inlier="blue",
-        color_outlier="red",
-        point_size=20,
     ):
         """Add a ellipse parameters array to a signal as HyperSpy markers.
 
@@ -1549,19 +1525,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         ellipse_array : NumPy array
         inlier_array : NumPy array, optional
         peak_array : NumPy array, optional
-        nr : scalar, optional
-            Default 20
-        color_ellipse : string, optional
-            Default 'blue'
-        linewidth : scalar, optional
-            Default 1
-        linestyle : string, optional
-            Default 'solid'
-        color_inlier : string, optional
-            Default 'blue'
-        color_outlier : string, optional
-            Default 'red'
-        point_size : scalar, optional
 
         Examples
         --------
@@ -1577,21 +1540,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         """
         if len(self.data.shape) != 4:
             raise ValueError("Signal must be 4 dims to use this function")
-        marker_list = ret._get_ellipse_markers(
-            ellipse_array,
-            inlier_array,
-            peak_array,
-            nr=20,
-            color_ellipse="blue",
-            linewidth=1,
-            linestyle="solid",
-            color_inlier="blue",
-            color_outlier="red",
-            point_size=20,
-            signal_axes=self.axes_manager.signal_axes,
-        )
 
-        mt._add_permanent_markers_to_signal(self, marker_list)
+        markers = ret.ellipse_to_markers(ellipse_array, inlier_array, peak_array)
+
+        self.add_marker(markers)
 
     def angular_mask(self, angle0, angle1, centre_x_array=None, centre_y_array=None):
         """Get a bool array with True values between angle0 and angle1.
@@ -1759,7 +1711,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         centre_y=None,
         mask_array=None,
         normalize=True,
-        parallel=True,
         show_progressbar=True,
     ):
         """Radially average a pixelated STEM diffraction signal.
@@ -1783,10 +1734,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         normalize : bool, default True
             If true, the returned radial profile will be normalized by the
             number of bins used for each average.
-        parallel : bool, default True
-            If True, run the processing on several cores.
-            In most cases this should be True, but for debugging False can be
-            useful.
         show_progressbar : bool
             Default True
 
@@ -1849,7 +1796,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 mask=mask_array,
                 inplace=False,
                 ragged=False,
-                parallel=parallel,
                 radial_array_size=radial_array_size,
                 show_progressbar=show_progressbar,
                 lazy_output=False,
@@ -2192,10 +2138,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             Do some extra checks to ensure LUT/CSR is still valid. False is faster.
         show_progressbar: bool
             If True shows a progress bar for the mapping function
-        parallel: bool
-            If true launches paralell workers for the integration
         max_workers: int
-            The number of streams to initialize. Only used if parallel=True
+            The number of streams to initialize.
 
         Returns
         -------
@@ -2318,10 +2262,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             Do some extra checks to ensure LUT/CSR is still valid. False is faster.
         show_progressbar: bool
             If True shows a progress bar for the mapping function
-        parallel: bool
-            If true launches parallel workers for the integration
-        max_workers: int
-            The number of streams to initialize. Only used if parallel=True
 
         Returns
         -------
@@ -2425,10 +2365,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             Do some extra checks to ensure LUT/CSR is still valid. False is faster.
         show_progressbar: bool
             If True shows a progress bar for the mapping function
-        parallel: bool
-            If true launches parallel workers for the integration
-        max_workers: int
-            The number of streams to initialize. Only used if parallel=True
+
 
         Returns
         -------
@@ -2530,10 +2467,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             Do some extra checks to ensure LUT/CSR is still valid. False is faster.
         show_progressbar: bool
             If True shows a progress bar for the mapping function
-        parallel: bool
-            If true launches parallel workers for the integration
-        max_workers: int
-            The number of streams to initialize. Only used if parallel=True
+
 
         Returns
         -------

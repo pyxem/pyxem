@@ -26,17 +26,14 @@ from scipy.spatial import distance_matrix
 from sklearn.cluster import DBSCAN
 
 from hyperspy.signals import BaseSignal, Signal1D
-from hyperspy.drawing._markers.point import Point
+from hyperspy.drawing._markers.points import Points
 from hyperspy.misc.utils import isiterable
 
 from pyxem.utils.signal import (
-    transfer_navigation_axes,
     transfer_navigation_axes_to_signal_axes,
 )
 from pyxem.utils.vector_utils import (
     detector_to_fourier,
-    calculate_norms,
-    calculate_norms_ragged,
     get_npeaks,
     filter_vectors_ragged,
     filter_vectors_edge_ragged,
@@ -58,63 +55,6 @@ peak at every position.
 2. A list of diffraction vectors with dimensions < n | 2 > where n is the
 number of peaks.
 """
-
-
-def _find_max_length_peaks(peaks):
-    """Worker function for generate_marker_inputs_from_peaks.
-
-    Parameters
-    ----------
-    peaks : :class:`~pyxem.diffraction_vectors.DiffractionVectors`
-        Identified peaks in a diffraction signal.
-
-    Returns
-    -------
-    longest_length : int
-        The length of the longest peak list.
-
-    """
-    length_of_longest_peaks_list = 0
-    with peaks.unfolded(unfold_navigation=True, unfold_signal=False):
-        for array in peaks.data:
-            if array.shape[0] > length_of_longest_peaks_list:
-                length_of_longest_peaks_list = array.shape[0]
-    return length_of_longest_peaks_list
-
-
-def generate_marker_inputs_from_peaks(peaks):
-    """Takes a peaks (defined in 2D) object from a STEM (more than 1 image) scan
-    and returns markers.
-
-    Parameters
-    ----------
-    peaks : :class:`~pyxem.diffraction_vectors.DiffractionVectors`
-        Identifies peaks in a diffraction signal.
-
-    Example
-    -------
-    How to get these onto images::
-
-        mmx,mmy = generate_marker_inputs_from_peaks(found_peaks)
-        dp.plot(cmap='viridis')
-        for mx,my in zip(mmx,mmy):
-            m = hs.markers.point(x=mx,y=my,color='red',marker='x')
-            dp.add_marker(m,plot_marker=True,permanent=False)
-
-    """
-    max_peak_len = _find_max_length_peaks(peaks)
-    if peaks.data.dtype == np.dtype("O"):
-        navshape = peaks.data.shape
-    else:
-        navshape = peaks.axes_manager.navigation_shape[::-1]
-    pad = np.full((max_peak_len, *navshape, 2), np.nan)
-    for coordinate in np.ndindex(navshape):
-        array = peaks.data[coordinate]
-        sl = (slice(0, array.shape[0]), *coordinate, slice(None))
-        pad[sl] = array
-    x = pad[..., 0]
-    y = pad[..., 1]
-    return x, y
 
 
 class DiffractionVectors(BaseSignal):
@@ -153,9 +93,13 @@ class DiffractionVectors(BaseSignal):
         self.cartesian = None
         self.hkls = None
         self.is_real_units = False
+        self.has_intensity = False
 
     @classmethod
-    def from_peaks(cls, peaks, center, calibration):
+    def from_peaks(cls,
+                   peaks,
+                   center=None,
+                   calibration=None):
         """Takes a list of peak positions (pixel coordinates) and returns
         an instance of `Diffraction2D`
 
@@ -164,9 +108,9 @@ class DiffractionVectors(BaseSignal):
         peaks : Signal
             Signal containing lists (np.array) of pixel coordinates specifying
             the reflection positions
-        center : np.array
+        center : np.array or None
             Diffraction pattern center in array indices.
-        calibration : np.array
+        calibration : np.array or None
             Calibration in reciprocal Angstroms per pixels for each of the dimensions.
 
         Returns
@@ -174,6 +118,20 @@ class DiffractionVectors(BaseSignal):
         vectors : :obj:`pyxem.signals.diffraction_vectors.DiffractionVectors`
             List of diffraction vectors
         """
+        if center is None and peaks.metadata.hasitem("Peaks.signal_axes"):
+            center = [ax.offset for ax in peaks.metadata.Peaks.signal_axes]
+        if calibration is None and peaks.metadata.hasitem("Peaks.signal_axes"):
+            calibration = [ax.scale for ax in peaks.metadata.Peaks.signal_axes]
+        if not isiterable(calibration):
+            calibration = [calibration, calibration]  # same calibration for both dimensions
+        if peaks.data[(0,)*peaks.data.ndim].shape[0] == len(calibration)+1:
+            # account for the intensity column
+            center = list(center) + [0, ]
+            calibration = list(calibration) + [1, ]
+            has_intensity = True
+        else:
+            has_intensity = False
+
         gvectors = peaks.map(
             peaks_as_gvectors,
             center=center,
@@ -184,6 +142,7 @@ class DiffractionVectors(BaseSignal):
         vectors = cls(gvectors)
         vectors.scales = calibration
         vectors.is_real_units = True
+        vectors.has_intensity = has_intensity
         return vectors
 
     @property
@@ -482,6 +441,13 @@ class DiffractionVectors(BaseSignal):
         plt.axis("off")
         return fig
 
+    def to_markers(self, **kwargs):
+        return Points(offsets=self.data,
+                      **kwargs)
+
+    @deprecated(since="0.17.0",
+                removal="1.0.0",
+                alternative="pyxem.signals.DiffractionVectors.to_markers")
     def plot_diffraction_vectors_on_signal(self, signal, *args, **kwargs):
         """Plot the diffraction vectors on a signal.
 
@@ -495,11 +461,9 @@ class DiffractionVectors(BaseSignal):
         **kwargs :
             Keyword arguments passed to signal.plot()
         """
-        mmx, mmy = generate_marker_inputs_from_peaks(self)
         signal.plot(*args, **kwargs)
-        for mx, my in zip(mmx, mmy):
-            m = Point(x=mx, y=my, color="red", marker="x")
-            signal.add_marker(m, plot_marker=True, permanent=False)
+        marker = self.to_markers(color=["red", ])
+        signal.add_marker(marker, plot_marker=True, permanent=False)
 
     def get_magnitudes(self, *args, **kwargs):
         """Calculate the magnitude of diffraction vectors.
@@ -773,7 +737,6 @@ class DiffractionVectors(BaseSignal):
             wavelength=wavelength,
             camera_length=camera_length * 1e10,
             inplace=False,
-            parallel=False,  # TODO: For testing
             ragged=True,
             *args,
             **kwargs
