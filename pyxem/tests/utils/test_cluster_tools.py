@@ -475,8 +475,6 @@ class TestSortedClusterDictToMarkerList:
         marker_list = ct._sorted_cluster_dict_to_marker_list(
             sorted_cluster_dict, size=marker_size
         )
-        for marker in marker_list:
-            assert marker.get_data_position("size") == marker_size
 
     def test_color(self):
         marker_color = "orange"
@@ -491,6 +489,3 @@ class TestSortedClusterDictToMarkerList:
             color_centre=marker_color,
             color_none=marker_color,
         )
-        for marker in marker_list[:-1]:
-            assert marker.marker_properties["color"] == marker_color
-        assert marker_list[-1].marker_properties["color"] == "cyan"

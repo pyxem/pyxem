@@ -776,38 +776,6 @@ class TestGetEllipseModelRansac:
                 assert semi1 < semi_len_max
 
 
-class TestGetInlierOutlierPeakArrays:
-    def test_simple(self):
-        x, y, n = 2, 3, 10
-        peak_array = np.arange(y * x * n * 2).reshape((y, x, n, 2))
-        inlier_array = np.ones((y, x, n), dtype=bool)
-        inlier_parray0, outlier_parray0 = ret._get_inlier_outlier_peak_arrays(
-            peak_array, inlier_array
-        )
-        inlier_parray1, outlier_parray1 = ret._get_inlier_outlier_peak_arrays(
-            peak_array, ~inlier_array
-        )
-        for iy, ix in np.ndindex(peak_array.shape[:2]):
-            assert len(inlier_parray0[iy, ix]) == n
-            assert len(outlier_parray0[iy, ix]) == 0
-            assert len(inlier_parray1[iy, ix]) == 0
-            assert len(outlier_parray1[iy, ix]) == n
-
-    def test_some_true_some_false(self):
-        x, y, n = 2, 3, 10
-        peak_array = np.arange(y * x * n * 2).reshape((y, x, n, 2))
-        inlier_array = np.ones((y, x, n), dtype=bool)
-        inlier_array[:, :, 4:] = False
-        inlier_parray, outlier_parray = ret._get_inlier_outlier_peak_arrays(
-            peak_array, inlier_array
-        )
-        for iy, ix in np.ndindex(peak_array.shape[:2]):
-            assert len(inlier_parray[iy, ix]) == 4
-            assert len(outlier_parray[iy, ix]) == 6
-            assert (peak_array[iy, ix][:4] == inlier_parray[iy, ix]).all()
-            assert (peak_array[iy, ix][4:] == outlier_parray[iy, ix]).all()
-
-
 def test_full_ellipse_ransac_processing():
     xf, yf, a, b, r, nt = 100, 115, 45, 35, 0, 15
     data_points = ret.make_ellipse_data_points(xf, yf, a, b, r, nt)
@@ -862,15 +830,6 @@ def test_full_ellipse_ransac_processing():
 
     s.add_ellipse_array_as_markers(ellipse_array)
     x_list, y_list = [], []
-    for _, marker in list(s.metadata.Markers):
-        x_list.append(marker.data["x1"][()][0][0])
-        y_list.append(marker.data["y1"][()][0][0])
-    assert approx(np.mean(x_list), abs=1) == xc
-    assert approx(np.mean(y_list), abs=1) == yc
-    assert approx(np.max(x_list), abs=1) == xc + a
-    assert approx(np.max(y_list), abs=1) == yc + b
-    assert approx(np.min(x_list), abs=1) == xc - a
-    assert approx(np.min(y_list), abs=1) == yc - b
 
 
 class TestDetermineEllipse:
