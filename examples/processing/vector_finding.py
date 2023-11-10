@@ -39,6 +39,14 @@ hs.plot.plot_images(
 
 pks = temp.find_peaks(iteractive=False, threshold_abs=0.5, min_distance=5)
 # %%
+"""
+Plotting Peaks
+==============
+We can plot the peaks using hyperSpy's markers and DiffractionVectors.
+"""
+vectors = pxm.signals.DiffractionVectors.from_peaks(pks)
+s.plot()
+s.add_marker(vectors.as_markers(colors="red", sizes=0.1, alpha=0.5))
 
 """
 Subpixel Peak Fitting
