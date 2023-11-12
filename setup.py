@@ -87,7 +87,7 @@ setup(
     install_requires=[
         "dask",
         "diffsims       >= 0.5",
-        "hyperspy       >= 1.7.0",  # significant improvements
+        "hyperspy       >= 1.7.0, <2.0rc0",  # significant improvements
         "h5py",
         "lmfit          >= 0.9.12",
         "matplotlib     >= 3.3",
