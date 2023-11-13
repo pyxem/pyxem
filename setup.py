@@ -93,7 +93,7 @@ setup(
         "matplotlib     >= 3.3",
         "numba",
         "numpy",
-        "numexpr != 2.8.6",  # bug in 2.8.6 for greek letters need for pyfai
+        "numexpr        != 2.8.6",  # bug in 2.8.6 for greek letters need for pyfai
         "orix           >= 0.9",
         "psutil",
         "pyfai",  # sigma clip function broken
@@ -103,6 +103,7 @@ setup(
         "tqdm",
         "traits",
         "transforms3d",
+        "zarr",  # for fast saving/loading
     ],
     python_requires=">=3.7",
     package_data={
