@@ -115,10 +115,17 @@ class DiffractionVectors(BaseSignal):
         vectors : :obj:`pyxem.signals.diffraction_vectors.DiffractionVectors`
             List of diffraction vectors
         """
-        if center is None and peaks.metadata.hasitem("Peaks.signal_axes"):
-            center = [ax.offset for ax in peaks.metadata.Peaks.signal_axes]
-        if calibration is None and peaks.metadata.hasitem("Peaks.signal_axes"):
+        if center is None and peaks.metadata.has_item("Peaks.signal_axes"):
+            center = [-ax.offset/ax.scale for ax in peaks.metadata.Peaks.signal_axes]
+        else:
+            raise ValueError("A center and calibration must be provided unless the"
+                             "peaks.metadata.Peaks.signal_axes is set.")
+        if calibration is None and peaks.metadata.has_item("Peaks.signal_axes"):
             calibration = [ax.scale for ax in peaks.metadata.Peaks.signal_axes]
+        else:
+            raise ValueError("A center and calibration must be provided unless the"
+                             "peaks.metadata.Peaks.signal_axes is set.")
+
         if not isiterable(calibration):
             calibration = [
                 calibration,
