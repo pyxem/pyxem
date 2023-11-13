@@ -90,7 +90,7 @@ setup(
         "hyperspy @ git+https://github.com/hyperspy/hyperspy.git@RELEASE_next_major",
         "h5py",
         "lmfit          >= 0.9.12",
-        "matplotlib     >= 3.3",
+        "matplotlib     >= 3.4",
         "numba",
         "numpy",
         "numexpr        != 2.8.6",  # bug in 2.8.6 for greek letters need for pyfai
