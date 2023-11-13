@@ -57,6 +57,15 @@ number of peaks.
 """
 
 
+def reverse_pos(peaks, ind=2):
+    """Reverses the position of the peaks in the signal."""
+    new_data = peaks.copy()
+    for i in range(ind):
+        sl = ind - i - 1
+        new_data[..., i] = peaks[..., sl]
+    return new_data
+
+
 class DiffractionVectors(BaseSignal):
     """Crystallographic mapping results containing the best matching crystal
     phase and orientation at each navigation position with associated metrics.
@@ -116,19 +125,23 @@ class DiffractionVectors(BaseSignal):
             List of diffraction vectors
         """
         if center is None and peaks.metadata.has_item("Peaks.signal_axes"):
-            center = [-ax.offset/ax.scale for ax in peaks.metadata.Peaks.signal_axes]
+            center = [-ax.offset / ax.scale for ax in peaks.metadata.Peaks.signal_axes]
         elif center is not None:
-            pass # center is already set
+            pass  # center is already set
         else:
-            raise ValueError("A center and calibration must be provided unless the"
-                             "peaks.metadata.Peaks.signal_axes is set.")
+            raise ValueError(
+                "A center and calibration must be provided unless the"
+                "peaks.metadata.Peaks.signal_axes is set."
+            )
         if calibration is None and peaks.metadata.has_item("Peaks.signal_axes"):
             calibration = [ax.scale for ax in peaks.metadata.Peaks.signal_axes]
         elif calibration is not None:
             pass  # calibration is already set
         else:
-            raise ValueError("A center and calibration must be provided unless the"
-                             "peaks.metadata.Peaks.signal_axes is set.")
+            raise ValueError(
+                "A center and calibration must be provided unless the"
+                "peaks.metadata.Peaks.signal_axes is set."
+            )
 
         if not isiterable(calibration):
             calibration = [
@@ -457,7 +470,8 @@ class DiffractionVectors(BaseSignal):
         return fig
 
     def to_markers(self, **kwargs):
-        return Points(offsets=self.data, **kwargs)
+        new = self.map(reverse_pos, inplace=False, ragged=True)
+        return Points(offsets=new.data.T, **kwargs)
 
     @deprecated(
         since="0.17.0",
