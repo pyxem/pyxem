@@ -213,9 +213,8 @@ class TestInitVectors:
         )
         pixels = dv.pixel_vectors
 
-        for i in np.ndindex((2,2)):
-            np.testing.assert_almost_equal(peaks.data[i],
-                                           pixels[i])
+        for i in np.ndindex((2, 2)):
+            np.testing.assert_almost_equal(peaks.data[i], pixels[i])
 
     def test_initial_metadat(self, diffraction_vectors_map):
         assert diffraction_vectors_map.scales is None

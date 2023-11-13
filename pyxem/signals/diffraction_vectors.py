@@ -125,7 +125,9 @@ class DiffractionVectors(BaseSignal):
             List of diffraction vectors
         """
         if center is None and peaks.metadata.has_item("Peaks.signal_axes"):
-            center = [-ax.offset / ax.scale for ax in peaks.metadata.Peaks.signal_axes[::-1]]
+            center = [
+                -ax.offset / ax.scale for ax in peaks.metadata.Peaks.signal_axes[::-1]
+            ]
         elif center is not None:
             pass  # center is already set
         else:
@@ -160,11 +162,13 @@ class DiffractionVectors(BaseSignal):
         else:
             has_intensity = False
 
-        gvectors = peaks.map(lambda x, cen, cal: (x - cen) * cal,
-                             cal=calibration,
-                             cen=center,
-                             inplace=False,
-                             ragged=True)
+        gvectors = peaks.map(
+            lambda x, cen, cal: (x - cen) * cal,
+            cal=calibration,
+            cen=center,
+            inplace=False,
+            ragged=True,
+        )
         vectors = cls(gvectors)
         vectors.scales = calibration
         vectors.center = center  # set calibration first
@@ -174,18 +178,23 @@ class DiffractionVectors(BaseSignal):
     @property
     def pixel_vectors(self, scales=None, center=None):
         """Returns the diffraction vectors in pixel coordinates."""
-        if (scales is None and self.scales is None) or (center is None and self.offsets is None):
-            raise ValueError("The scales and offsets must be provided if "
-                             "not set in the metadata.")
+        if (scales is None and self.scales is None) or (
+            center is None and self.offsets is None
+        ):
+            raise ValueError(
+                "The scales and offsets must be provided if " "not set in the metadata."
+            )
         if scales is None:
             scales = self.scales
         if center is None:
             center = self.center
-        pixels = self.map(lambda x, cen, cal: x / cal + center,
-                             cal=scales,
-                             cen=center,
-                             inplace=False,
-                             ragged=True)
+        pixels = self.map(
+            lambda x, cen, cal: x / cal + center,
+            cal=scales,
+            cen=center,
+            inplace=False,
+            ragged=True,
+        )
         return pixels.data
 
     @property
@@ -231,6 +240,7 @@ class DiffractionVectors(BaseSignal):
             self.metadata.VectorMetadata["offsets"] = [
                 value,
             ] * self.num_columns
+
     @property
     def center(self):
         """The center of the diffraction pattern in pixels."""
