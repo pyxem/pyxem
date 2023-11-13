@@ -229,3 +229,35 @@ We use `GitHub Actions <https://github.com/pyxem/pyxem/actions>`_ to ensure that
 can be installed on Windows, macOS and Linux (Ubuntu). After a successful installation,
 the CI server runs the tests. After the tests return no errors, code coverage is
 reported to `Coveralls <https://coveralls.io/github/pyxem/pyxem?branch=main>`_.
+
+Making a release
+================
+
+We use `GitHub Actions <https://github.com/pyxem/pyxem/actions>`_ to automatically
+create a new release. Each time a new tag is pushed to the repository, the CI server
+will:
+
+1. Build the documentation and upload it to `Read the Docs
+   <https://pyxem.readthedocs.io/en/latest/>`_.
+2. Publish a new version of pyxem to `PyPI <https://pypi.org/project/pyxem/>`_.
+3. Create a new `GitHub release <https://github.com/pyxem/pyxem/releases>`_.
+4. Publish a new version of pyxem to ``zenodo``
+
+To make a new release, follow these steps:
+
+1. Update the version number in ``release_info.py``.
+2. Update the ``CHANGELOG.rst`` file with the new version number and a description of
+   the changes.
+3. Update the list of contributors in both the ``release_info.py`` and ``.zenodo.json``
+   files. __ Make sure that the Zenodo file is valid JSON __.
+4. Commit the changes and push them to the repository.
+5. Create a new tag with the "v" + version number (i.e. v0.16.0) and make a new release on GitHub.
+6. Wait for the CI server to finish the release process.
+
+Then you can increase the version number in ``release_info.py`` to the next minor version
+and add a dev suffix (i.e. 0.17.dev0).
+
+.. note::
+   If any of the steps fail, you can restart the CI server by clicking on the "Re-run
+   jobs" button on the GitHub Actions page. Sometimes the CI server fails because of
+   connections issues to zenodo or PyPI.

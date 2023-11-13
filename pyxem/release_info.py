@@ -30,7 +30,7 @@ credits = [
     "Mohsen Danaie",
     "Andrew Herzing",
     "Tim Poon",
-    "Sivert Dagenborg"
+    "Sivert Dagenborg",
     "Ruben Bjørge",
     "Tiarnan Doherty",
     "Affan Iqbal",
