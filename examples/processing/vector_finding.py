@@ -25,39 +25,10 @@ Template Matching
 The best method for finding peaks is usually through template matching.  In this case a disk with
 some radius is used as the template.  The radius of the disk should be chosen to be the same size
 as the diffraction spots.  The template matching is done using the :meth:`template_match_disk` method.
+
+This can also be done lazy, including the plotting of the markers!
 """
-
-
-temp_small = s.template_match_disk(disk_r=3)  # Too small
-temp = s.template_match_disk(disk_r=5)  # Just right
-"""
-Finding Diffraction Vectors
-===========================
-"""
-
-# %%
-# This example shows how to find the diffraction vectors for a given
-# signal and then plot them using hyperspy's markers.
-
-
-import pyxem as pxm
-import hyperspy.api as hs
-
-s = pxm.data.tilt_boundary_data()
-# %%
-
-# s.find_peaks(iteractive=True)  # find the peaks using the interactive peak finder
-
-# %%
-
-"""
-Template Matching
-=================
-
-The best method for finding peaks is usually through template matching.  In this case a disk with
-some radius is used as the template.  The radius of the disk should be chosen to be the same size
-as the diffraction spots.  The template matching is done using the :meth:`template_match_disk` method.
-"""
+s.axes_manager[2].scale = 0.3
 
 
 temp_small = s.template_match_disk(disk_r=3, subtract_min=False)  # Too small
@@ -82,7 +53,6 @@ vectors = pxm.signals.DiffractionVectors.from_peaks(
 s.plot()
 
 s.add_marker(vectors.to_markers(color="red", sizes=10, alpha=0.5))
-
 """
 Subpixel Peak Fitting
 =====================
