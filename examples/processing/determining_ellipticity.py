@@ -24,6 +24,7 @@ from skimage import morphology
 from scipy.signal import convolve2d
 from pyxem.signals.diffraction2d import Diffraction2D
 import math
+import numpy as np
 
 test_data = mdtd.MakeTestData(200, 200, default=False)
 test_data.add_disk(x0=100, y0=100, r=5, intensity=30)
