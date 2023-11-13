@@ -14,14 +14,18 @@ Unreleased
 Added
 -----
 - Added `magnitude_limits` to `DPCSignal2D` methods (#949)
+- Added :py:class:`~pyxem.signals.LazyCorrelation1D` for lazy Correlation1D signals
+- Improved the documentation and added Examples
+- Add N-D filtering using :py:meth:`~pyxem.signals.Diffraction2D.filter`
 
 Fixed
 -----
-- Remove `ipywidgets` from requirements as it is not a dependency
+- Remove ``ipywidgets`` from requirements as it is not a dependency
 - Set skimage != to version 0.21.0 because of regression
 - Do not reverse the y-axis of diffraction patterns when template matching (#925)
 - Fixed bug in :py:class:`pyxem.generators.indexation_generator.AcceleratedIndexationGenerator` when
   passing orientations as tuples.
+- Fix bug in calculating strain (#958)
 
 Added
 -----

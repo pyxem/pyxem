@@ -18,6 +18,8 @@
 
 
 from hyperspy.signals import Signal1D
+from hyperspy._signals.lazy import LazySignal
+
 import numpy as np
 from fractions import Fraction as frac
 from pyxem.utils.correlation_utils import _get_interpolation_matrix, _symmetry_stem
@@ -104,3 +106,7 @@ class Correlation1D(Signal1D):
         signals.axes_manager.signal_axes[0].offset = symmetries[0]
 
         return signals
+
+
+class LazyCorrelation1D(LazySignal, Correlation1D):
+    pass
