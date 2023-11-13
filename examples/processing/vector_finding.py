@@ -44,7 +44,7 @@ Plotting Peaks
 ==============
 We can plot the peaks using hyperSpy's markers and DiffractionVectors.
 """
-vectors = pxm.signals.DiffractionVectors.from_peaks(pks)
+vectors = pxm.signals.DiffractionVectors.from_peaks(pks)  # calibration is automatically set
 s.plot()
 s.add_marker(vectors.as_markers(colors="red", sizes=0.1, alpha=0.5))
 

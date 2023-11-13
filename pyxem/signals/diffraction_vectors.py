@@ -117,11 +117,15 @@ class DiffractionVectors(BaseSignal):
         """
         if center is None and peaks.metadata.has_item("Peaks.signal_axes"):
             center = [-ax.offset/ax.scale for ax in peaks.metadata.Peaks.signal_axes]
+        elif center is not None:
+            pass # center is already set
         else:
             raise ValueError("A center and calibration must be provided unless the"
                              "peaks.metadata.Peaks.signal_axes is set.")
         if calibration is None and peaks.metadata.has_item("Peaks.signal_axes"):
             calibration = [ax.scale for ax in peaks.metadata.Peaks.signal_axes]
+        elif calibration is not None:
+            pass  # calibration is already set
         else:
             raise ValueError("A center and calibration must be provided unless the"
                              "peaks.metadata.Peaks.signal_axes is set.")
