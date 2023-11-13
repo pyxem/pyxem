@@ -675,7 +675,7 @@ def peaks_as_gvectors(z, center, calibration):
     Parameters
     ----------
     z : numpy array
-        peak postitions as array indices.
+        peak positions as array indices.
     center : numpy array
         diffraction pattern center in array indices.
     calibration : float

@@ -200,6 +200,23 @@ class TestInitVectors:
                 calibration=(1.0, 1.0),
             )
 
+    def test_from_peaks_calibration_2_peaks(self, peaks):
+        peaks.metadata.add_node("Peaks.signal_axes")
+        peaks.metadata.Peaks.signal_axes = (
+            UniformDataAxis(scale=0.1, offset=-5.0, units="nm"),
+            UniformDataAxis(scale=0.1, offset=-5.0, units="nm"),
+        )
+        dv = DiffractionVectors.from_peaks(
+            peaks,
+            center=None,
+            calibration=None,
+        )
+        pixels = dv.pixel_vectors
+
+        for i in np.ndindex((2,2)):
+            np.testing.assert_almost_equal(peaks.data[i],
+                                           pixels[i])
+
     def test_initial_metadat(self, diffraction_vectors_map):
         assert diffraction_vectors_map.scales is None
         assert diffraction_vectors_map.metadata.VectorMetadata["scales"] == None
