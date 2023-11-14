@@ -42,9 +42,9 @@ class InSituDiffraction2D(Diffraction2D):
 
     Parameters
     ----------
-    *args
+    *args:
         See :class:`~hyperspy._signals.signal2d.Signal2D`.
-    **kwargs
+    **kwargs:
         See :class:`~hyperspy._signals.signal2d.Signal2D`
     """
 
@@ -55,12 +55,11 @@ class InSituDiffraction2D(Diffraction2D):
         return self.rollaxis(time_axis, 2)
 
     def get_time_series(self, roi=None, time_axis=2):
-        """
-        Create a intensity time series from virtual aperture defined by roi.
+        """Create a intensity time series from virtual aperture defined by roi.
 
         Parameters
         ----------
-        roi: :obj:`hyperspy.roi.BaseInteractiveROI`
+        roi: :obj:`~hyperspy.roi.BaseInteractiveROI`
             Roi for virtual detector. If None, full roi of diffraction plane is used
         time_axis: int
             Index of time axis. Default is 2
@@ -89,26 +88,24 @@ class InSituDiffraction2D(Diffraction2D):
     def get_drift_vectors(
         self, time_axis=2, reference="cascade", sub_pixel_factor=10, **kwargs
     ):
-        """
-        Calculate real space drift vectors from time series of images
+        """Calculate real space drift vectors from time series of images
 
-         Parameters
+        Parameters
         ----------
-        s: Signal2D
+        s: :class:`~hyperspy.api.signals.Signal2D`
             Time series of reconstructed images
         reference: 'current', 'cascade', or 'stat'
-            reference argument passed to hs.signals.Signal2D.estimate_shift2D()
+            reference argument passed to :meth:`~hyperspy.api.signals.Signal2D.estimate_shift2D`
             function. Default is 'cascade'
         sub_pixel_factor: float
-            sub_pixel_factor passed to hs.signals.Signal2D.estimate_shift2D()
+            sub_pixel_factor passed to :meth:`~hyperspy.api.signals.Signal2D.estimate_shift2D`
             function. Default is 10
         **kwargs:
-            Passed to the :meth:`get_time_series` function
+            Passed to the :meth:`~pyxem.signals.InSituDiffraction2D.get_time_series` function
 
         Returns
         -------
         shift_vectors
-
         """
         roi = kwargs.pop("roi", None)
         ref = self.get_time_series(roi=roi, time_axis=time_axis)

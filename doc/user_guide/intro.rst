@@ -1,5 +1,3 @@
-.. _User Guide:
-
 Where do I start?
 =================
 

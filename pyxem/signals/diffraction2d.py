@@ -1405,7 +1405,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         disk_r : int
             Radius of the disc chosen to take the mean value of
         lazy_result : bool, default True
-            If True, will return a LazyDiffraction2D object. If False,
+            If True, will return a :class:`~pyxem.signals.diffraction2d.LazyDiffraction2D` object. If False,
             will compute the result and return a Diffraction2D object.
         show_progressbar : bool, default True
 

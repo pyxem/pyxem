@@ -50,7 +50,7 @@ Added
 - Center-of-mass algorithm added to get_direct_beam_position (#845)
 - Added `VectorSignal1D` class to handle 1 dimensional signals
 - Added kwargs to find_beam_offset_cross_correlation allowing for parameters
-to be passed to `phase_cross_correlation` (#907)
+  to be passed to `phase_cross_correlation` (#907)
 - Added `LazyVirtualDarkField` signal
 
 Changed
@@ -108,6 +108,7 @@ Removed
 - lazy_* virtual imaging has been removed, use get_integrated_intensity (#722)
 - `big_data_utils` has been removed as this is not the modern way of attacking this problem
 - similarly, `TemplateIndexationGenerator` has been removed as the Accelerated approach is far better (#823)
+
 Fixed
 ^^^^^
 - Symmetry STEM Class updated to allow for better interpolation and lazy operation. (#809)

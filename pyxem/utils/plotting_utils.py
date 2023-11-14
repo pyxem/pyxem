@@ -23,14 +23,13 @@ def plot_template_over_pattern(
     size_factor=1.0,
     **kwargs
 ):
-    """
-    A quick utility function to plot a simulated pattern over an experimental image
+    """A quick utility function to plot a simulated pattern over an experimental image
 
     Parameters
     ----------
     pattern : 2D np.ndarray
         The diffraction pattern
-    simulation : diffsims.sims.diffraction_simulation.DiffractionSimulation
+    simulation : :class:`~diffsims.sims.diffraction_simulation.DiffractionSimulation`
         The simulated diffraction pattern. It must be calibrated.
     axis : matplotlib.AxesSubplot, optional
         An axis object on which to plot. If None is provided, one will be created.
@@ -38,7 +37,7 @@ def plot_template_over_pattern(
         An in-plane rotation angle to apply to the template in degrees
     max_r : float, optional
         Maximum radius to consider in the polar transform in pixel coordinates.
-        Will only influence the result if `coordinate_system`="polar".
+        Will only influence the result if ``coordinate_system="polar"``.
     find_direct_beam: bool, optional
         Roughly find the optimal direct beam position if it is not centered.
     direct_beam_position: 2-tuple
@@ -48,14 +47,15 @@ def plot_template_over_pattern(
         Whether to mirror the given template
     coordinate_system : str, optional
         Type of coordinate system to plot the image and template in. Either
-        `cartesian` or `polar`
+        ``cartesian`` or ``polar``
     marker_color : str, optional
         Color of the spot markers
     marker_type : str, optional
         Type of marker used for the spots
     size_factor : float, optional
         Scaling factor for the spots. See notes on size.
-    **kwargs : See imshow
+    **kwargs :
+        See :meth:`~matplotlib.pyplot.imshow`
 
     Returns
     -------
