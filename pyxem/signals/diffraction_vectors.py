@@ -154,6 +154,8 @@ class DiffractionVectors(BaseSignal):
         self.hkls = None
         self.is_real_units = False
         self.has_intensity = False
+        self.icol = ColumnSlicer(self)
+        self.irow = BoolSlicer(self)
 
         self.ivec = Slicer(self)
 
@@ -255,7 +257,9 @@ class DiffractionVectors(BaseSignal):
         )
         vectors.center = center
         vectors.has_intensity = has_intensity
+        vectors.column_names = column_names
         return vectors
+
 
     @property
     def pixel_vectors(self):
