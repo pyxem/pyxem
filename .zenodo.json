@@ -33,7 +33,9 @@
       "name":"Ben Martineau"
     },
     {
-      "name":"Tina Bergh"
+      "name":"Tina Bergh",
+      "orcid": "0000-0003-3757-3876",
+      "affiliation": "Norwegian University of Science and Technology"
     },
     {
       "name":"Niels Cautaerts",
@@ -86,7 +88,9 @@
       "name": "Sivert Dagenborg"
     },
     {
-      "name": "Ruben Bjørge"
+      "name": "Ruben Bjørge",
+      "orcid": "0000-0002-6310-7820",
+      "affiliation": "SINTEF Industry"
     },
     {
       "name":"Affan Iqbal"
