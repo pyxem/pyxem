@@ -157,6 +157,19 @@ class TestInitVectors:
             np.testing.assert_array_equal((peaks.data[i] - 50) * 0.1, dv.data[i])
         assert dv.scales == [0.1, 0.1]
 
+    def test_from_peaks_lazy(self, peaks):
+        peaks = peaks.as_lazy()
+        dv = DiffractionVectors.from_peaks(
+            peaks,
+            center=(50, 50),
+            calibration=0.1,
+        )
+        assert dv._lazy
+
+        for i in np.ndindex((2, 2)):
+            np.testing.assert_array_equal((peaks.data[i] - 50) * 0.1, dv.data[i])
+        assert dv.scales == [0.1, 0.1]
+
     def test_from_peaks_calibration(self, peaks):
         peaks.metadata.add_node("Peaks.signal_axes")
         peaks.metadata.Peaks.signal_axes = (
