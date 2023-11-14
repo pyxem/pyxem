@@ -7,6 +7,18 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_,
 and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
+Unreleased
+==========
+Added
+-----
+- LazyDiffractionVectors are now supported(#969)
+- DiffractionVectors now support intensity(#969)
+- Add Examples for vector_finding and determining_ellipticity(#969)
+
+Fixed
+-----
+- Update pyxem to work with hyperspy 2.0.0 (#969)
+- Fixed slow markers (#969)
 
 2023-11-14 - version 0.16.0
 ===========================
