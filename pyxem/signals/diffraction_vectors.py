@@ -25,6 +25,7 @@ import matplotlib.pyplot as plt
 from matplotlib.cm import get_cmap
 from scipy.spatial import distance_matrix
 from sklearn.cluster import DBSCAN
+import dask.array as da
 
 from hyperspy.signals import BaseSignal, Signal1D
 from hyperspy._signals.lazy import LazySignal
@@ -215,7 +216,12 @@ class DiffractionVectors(BaseSignal):
                 calibration,
                 calibration,
             ]  # same calibration for both dimensions
-        if peaks.data[(0,) * peaks.data.ndim].shape[1] == len(calibration) + 1:
+
+        if isinstance(peaks, LazySignal):
+            num_cols = peaks.data[(0,) * peaks.data.ndim].compute().shape[1]
+        else:
+            num_cols = peaks.data[(0,) * peaks.data.ndim].shape[1]
+        if num_cols == len(calibration) + 1:
             # account for the intensity column
             center = list(center) + [
                 0,
@@ -238,6 +244,8 @@ class DiffractionVectors(BaseSignal):
             ragged=True,
         )
         vectors = cls(gvectors)
+        if isinstance(peaks, LazySignal):
+            vectors = vectors.as_lazy()
         vectors.scales = calibration
         vectors.center = center  # set calibration first
         vectors.has_intensity = has_intensity
@@ -263,7 +271,7 @@ class DiffractionVectors(BaseSignal):
 
     @cached_property
     def num_columns(self):
-        if self._lazy:
+        if isinstance(self.data, da.Array):
             shape = self.data[self.data.ndim * (0,)].compute().shape
         else:
             shape = self.data[self.data.ndim * (0,)].shape
