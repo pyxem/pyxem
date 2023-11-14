@@ -92,8 +92,12 @@ class ColumnSlicer:
         else:
             raise ValueError("item must be a string or an int")
 
-        item = [item, ]
-        slic = self.signal.map(lambda x, item: x[..., item], item=item, inplace=False, ragged=True)
+        item = [
+            item,
+        ]
+        slic = self.signal.map(
+            lambda x, item: x[..., item], item=item, inplace=False, ragged=True
+        )
         slic.offsets = self.signal.offsets[item[0]]
         slic.scales = self.signal.scales[item[0]]
         return slic
@@ -168,35 +172,36 @@ class DiffractionVectors(BaseSignal):
         peaks : Signal
             Signal containing lists (np.array) of pixel coordinates specifying
             the reflection positions
-        center : np.array, or None
-            Diffraction pattern center in array indices. When None, the center
-            is taken from the peaks.metadata.Peaks.signal_axes if present.
-
-        calibration : np.array,float or None
+        center : np.array or None
+            Diffraction pattern center in array indices.
+        calibration : np.array or None
             Calibration in reciprocal Angstroms per pixels for each of the dimensions.
-            When None, the calibration is taken from the peaks.metadata.Peaks.signal_axes
-            if present. When a single value is given, the same calibration is used for
-            every dimensions.
+
         Returns
         -------
         vectors : :obj:`pyxem.signals.diffraction_vectors.DiffractionVectors`
             List of diffraction vectors
         """
-        if center is None or calibration is None:
-            if peaks.metadata.has_item("Peaks.signal_axes"):
-                center = [
-                    -ax.offset / ax.scale
-                    for ax in peaks.metadata.Peaks.signal_axes[::-1]
-                ]
-                calibration = [
-                    ax.scale for ax in peaks.metadata.Peaks.signal_axes[::-1]
-                ]
-            else:
-                raise ValueError(
-                    "A center and calibration must be provided unless the"
-                    "peaks.metadata.Peaks.signal_axes is given (usually by"
-                    "running the ``find_peaks`` function)."
-                )
+        if center is None and peaks.metadata.has_item("Peaks.signal_axes"):
+            center = [
+                -ax.offset / ax.scale for ax in peaks.metadata.Peaks.signal_axes[::-1]
+            ]
+        elif center is not None:
+            pass  # center is already set
+        else:
+            raise ValueError(
+                "A center and calibration must be provided unless the"
+                "peaks.metadata.Peaks.signal_axes is set."
+            )
+        if calibration is None and peaks.metadata.has_item("Peaks.signal_axes"):
+            calibration = [ax.scale for ax in peaks.metadata.Peaks.signal_axes[::-1]]
+        elif calibration is not None:
+            pass  # calibration is already set
+        else:
+            raise ValueError(
+                "A center and calibration must be provided unless the"
+                "peaks.metadata.Peaks.signal_axes is set."
+            )
 
         if column_names is None and peaks.metadata.has_item("Peaks.signal_axes"):
             column_names = [ax.name for ax in peaks.metadata.Peaks.signal_axes[::-1]]
@@ -591,19 +596,7 @@ class DiffractionVectors(BaseSignal):
         return fig
 
     def to_markers(self, **kwargs):
-        """
-        Convert the diffraction vectors to hyperspy markers.
-        Parameters
-        ----------
-        kwargs
-            Keyword arguments passed to the :class:`~hs.api.plot.markers.Points` constructor.
-        Returns
-        -------
-        markers : Points
-            The diffraction vectors as a hyperspy marker.
-
-        """
-        new = self.map(_reverse_pos, inplace=False, ragged=True)
+        new = self.map(reverse_pos, inplace=False, ragged=True)
         return Points(offsets=new.data.T, **kwargs)
 
     @deprecated(
