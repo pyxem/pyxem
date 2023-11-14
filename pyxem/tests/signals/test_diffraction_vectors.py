@@ -135,6 +135,17 @@ class TestInitVectors:
         peaks = BaseSignal(vectors, ragged=True)
         return peaks
 
+    @pytest.fixture()
+    def peaks_w_intensity(self):
+        vectors = np.empty((2, 2), dtype=object)
+        vectors[0, 0] = np.random.randint(0, 100, (5, 3))
+        vectors[0, 1] = np.random.randint(0, 100, (6, 3))
+        vectors[1, 0] = np.random.randint(0, 100, (7, 3))
+        vectors[1, 1] = np.random.randint(0, 100, (8, 3))
+
+        peaks = BaseSignal(vectors, ragged=True)
+        return peaks
+
     def test_from_peaks(self, peaks):
         dv = DiffractionVectors.from_peaks(
             peaks,
@@ -177,6 +188,23 @@ class TestInitVectors:
         for i in np.ndindex((2, 2)):
             np.testing.assert_almost_equal(
                 ((peaks.data[i]) * 0.1 - 5.0)[:, 0],
+                points.kwargs["offsets"][i[::-1]][:, 1],
+            )
+    def test_from_peaks_calibration_to_markers_with_intensity(self, peaks_w_intensity):
+        peaks_w_intensity.metadata.add_node("Peaks.signal_axes")
+        peaks_w_intensity.metadata.Peaks.signal_axes = (
+            UniformDataAxis(scale=0.1, offset=-5.0, units="nm"),
+            UniformDataAxis(scale=0.1, offset=-5.0, units="nm"),
+        )
+        dv = DiffractionVectors.from_peaks(
+            peaks_w_intensity,
+            center=None,
+            calibration=None,
+        )
+        points = dv.to_markers()
+        for i in np.ndindex((2, 2)):
+            np.testing.assert_almost_equal(
+                ((peaks_w_intensity.data[i]) * 0.1 - 5.0)[:, 0],
                 points.kwargs["offsets"][i[::-1]][:, 1],
             )
 
@@ -422,3 +450,30 @@ class TestDiffractingPixelsMap:
         answer = np.array([[1.0, 1.0], [1.0, 1.0]])
         xim = diffraction_vectors_map.get_diffracting_pixels_map(binary=True)
         assert np.allclose(xim, answer)
+
+class TestSlicingVectors:
+    @pytest.fixture()
+    def vectors(self):
+        vectors = np.empty((2, 2), dtype=object)
+        vectors[0, 0] = np.random.randint(-100, 100, (5, 2))
+        vectors[0, 1] = np.random.randint(-100, 100, (6, 2))
+        vectors[1, 0] = np.random.randint(-100, 100, (7, 2))
+        vectors[1, 1] = np.random.randint(-100, 100, (8, 2))
+        v = DiffractionVectors(vectors, scales=[0.1, 0.2],
+                           offsets=[10, 20],
+                           column_names=["x", "y"])
+
+        return v
+
+    def test_center(self, vectors):
+        np.testing.assert_almost_equal(vectors.center, (100, 100))
+
+    def test_icol(self, vectors):
+        vectors.icol[0]
+
+    def test_irow(self, vectors):
+        col = vectors.icol[0] < 0.5
+        slic = vectors.irow[col]
+        for i in np.ndindex((2, 2)):
+            assert np.all(slic.data[i][:, 0] < 0.5)
+

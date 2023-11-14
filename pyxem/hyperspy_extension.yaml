@@ -83,6 +83,12 @@ signals:
     dtype: real
     lazy: False
     module: pyxem.signals.diffraction_vectors
+  LazyDiffractionVectors:
+    signal_type: diffraction_vectors
+    signal_dimension: 0
+    dtype: real
+    lazy: True
+    module: pyxem.signals.diffraction_vectors
   DiffractionVectors1D:
     signal_type: diffraction_vectors
     signal_dimension: 1
