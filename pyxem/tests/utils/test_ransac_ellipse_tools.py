@@ -840,7 +840,11 @@ def test_full_ellipse_ransac_processing():
 class TestDetermineEllipse:
     @mark.parametrize("ransac", [True, False])
     @mark.parametrize("mask", [True, False])
-    def test_determine_ellipse(self, ransac, mask):
+    @mark.parametrize("return_params", [True, False])
+    @mark.parametrize("guess_starting_params", [True, False])
+    def test_determine_ellipse(
+        self, ransac, mask, return_params, guess_starting_params
+    ):
         if mask:
             mask = np.zeros((100, 100), dtype=bool)
             mask[40:50, :] = True
@@ -851,7 +855,15 @@ class TestDetermineEllipse:
         t[x**2 + (y * 1.15) ** 2 < 40**2] = 100
         t[x**2 + (y * 1.15) ** 2 < 30**2] = 1
         t = t + np.random.random((100, 100))
-        center, affine = ret.determine_ellipse(t, mask=mask, use_ransac=ransac)
+        ans = ret.determine_ellipse(
+            t,
+            mask=mask,
+            use_ransac=ransac,
+            return_params=return_params,
+            guess_starting_params=guess_starting_params,
+        )
+        center = ans[0]
+        affine = ans[1]
 
         np.testing.assert_array_almost_equal(
             affine,

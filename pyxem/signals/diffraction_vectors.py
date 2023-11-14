@@ -95,8 +95,8 @@ class DiffractionVectors(BaseSignal):
         if _offsets is not None or "offsets" not in self.metadata.VectorMetadata:
             self.metadata.VectorMetadata["offsets"] = _offsets
         if (
-                _detector_shape is not None
-                or "detector_shape" not in self.metadata.VectorMetadata
+            _detector_shape is not None
+            or "detector_shape" not in self.metadata.VectorMetadata
         ):
             self.metadata.VectorMetadata["detector_shape"] = _detector_shape
         self.cartesian = None
@@ -179,7 +179,7 @@ class DiffractionVectors(BaseSignal):
     def pixel_vectors(self, scales=None, center=None):
         """Returns the diffraction vectors in pixel coordinates."""
         if (scales is None and self.scales is None) or (
-                center is None and self.offsets is None
+            center is None and self.offsets is None
         ):
             raise ValueError(
                 "The scales and offsets must be provided if " "not set in the metadata."
@@ -220,8 +220,8 @@ class DiffractionVectors(BaseSignal):
             )
         else:
             self.metadata.VectorMetadata["scales"] = [
-                                                         value,
-                                                     ] * self.num_columns
+                value,
+            ] * self.num_columns
 
     @property
     def offsets(self):
@@ -238,8 +238,8 @@ class DiffractionVectors(BaseSignal):
             )
         else:
             self.metadata.VectorMetadata["offsets"] = [
-                                                          value,
-                                                      ] * self.num_columns
+                value,
+            ] * self.num_columns
 
     @property
     def center(self):
@@ -305,8 +305,8 @@ class DiffractionVectors(BaseSignal):
         return real_nav
 
     def flatten_diffraction_vectors(
-            self,
-            real_units=True,
+        self,
+        real_units=True,
     ):
         """Flattens the diffraction vectors into a `DiffractionVector2D` object.
 
@@ -340,15 +340,15 @@ class DiffractionVectors(BaseSignal):
 
         if self.offsets is None:
             column_offsets = [
-                                 None,
-                             ] * (vectors.shape[1] - len(self.axes_manager.navigation_axes))
+                None,
+            ] * (vectors.shape[1] - len(self.axes_manager.navigation_axes))
         else:
             column_offsets = self.offsets
 
         if self.scales is None:
             column_scale = [
-                               None,
-                           ] * (vectors.shape[1] - len(self.axes_manager.navigation_axes))
+                None,
+            ] * (vectors.shape[1] - len(self.axes_manager.navigation_axes))
         else:
             column_scale = self.scales
 
@@ -360,17 +360,17 @@ class DiffractionVectors(BaseSignal):
         )
 
     def plot_diffraction_vectors(
-            self,
-            xlim=1.0,
-            ylim=1.0,
-            unique_vectors=None,
-            distance_threshold=0.01,
-            method="distance_comparison",
-            min_samples=1,
-            image_to_plot_on=None,
-            image_cmap="gray",
-            plot_label_colors=False,
-            distance_threshold_all=0.005,
+        self,
+        xlim=1.0,
+        ylim=1.0,
+        unique_vectors=None,
+        distance_threshold=0.01,
+        method="distance_comparison",
+        min_samples=1,
+        image_to_plot_on=None,
+        image_cmap="gray",
+        plot_label_colors=False,
+        distance_threshold_all=0.005,
     ):  # pragma: no cover
         """Plot the unique diffraction vectors.
 
@@ -698,7 +698,7 @@ class DiffractionVectors(BaseSignal):
             of the DiffractionVectors2D class will be returned.
         """
         ragged = isinstance(basis, BaseSignal) and (
-                basis.axes_manager.navigation_shape == self.axes_manager.navigation_shape
+            basis.axes_manager.navigation_shape == self.axes_manager.navigation_shape
         )
         kwargs["ragged"] = ragged
         if not ragged:
@@ -730,12 +730,12 @@ class DiffractionVectors(BaseSignal):
             Diffraction vectors within allowed detector region.
         """
         x_threshold = (
-                self.scales[0] * (self.detector_shape[0] / 2)
-                - self.scales[0] * exclude_width
+            self.scales[0] * (self.detector_shape[0] / 2)
+            - self.scales[0] * exclude_width
         )
         y_threshold = (
-                self.scales[1] * (self.detector_shape[1] / 2)
-                - self.scales[1] * exclude_width
+            self.scales[1] * (self.detector_shape[1] / 2)
+            - self.scales[1] * exclude_width
         )
         filtered_vectors = self.map(
             filter_vectors_edge_ragged,
@@ -784,7 +784,7 @@ class DiffractionVectors(BaseSignal):
         return xim
 
     def calculate_cartesian_coordinates(
-            self, accelerating_voltage, camera_length, *args, **kwargs
+        self, accelerating_voltage, camera_length, *args, **kwargs
     ):
         """Get cartesian coordinates of the diffraction vectors.
 

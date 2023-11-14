@@ -22,7 +22,7 @@ from numpy.random import randint
 import dask.array as da
 from skimage import morphology
 
-from hyperspy.signals import Signal2D
+from hyperspy.signals import Signal2D, BaseSignal
 
 from pyxem.signals import Diffraction2D, LazyDiffraction2D
 import pyxem.utils.ransac_ellipse_tools as ret
@@ -110,6 +110,20 @@ class TestAddPeakArrayAsMarkers:
         s.add_peak_array_as_markers(peak_array, color=("blue",))
         marker0 = list(s.metadata.Markers)[0][1]
         assert marker0.kwargs["color"] == ("blue",)
+
+    def test_peak_array(self):
+        s = Diffraction2D(np.zeros((2, 3, 100, 100)))
+        peak_array = np.empty((3, 2), dtype=object)
+        for index in np.ndindex(peak_array.shape):
+            islice = np.s_[index]
+            peak_array[islice] = np.random.randint(20, 80, (100, 2))
+        pk = BaseSignal(peak_array)
+        s.add_peak_array_as_markers(pk)
+
+    def test_peak_array_error(self):
+        s = Diffraction2D(np.zeros((2, 3, 100, 100)))
+        with pytest.raises(TypeError):
+            s.add_peak_array_as_markers([1, 2, 3, 4])
 
     def test_size(self):
         s = Diffraction2D(np.zeros((2, 3, 100, 100)))

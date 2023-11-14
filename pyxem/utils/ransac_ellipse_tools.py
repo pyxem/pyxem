@@ -647,6 +647,6 @@ def determine_ellipse(
             return center, affine, el.params, pos
         else:
             return center, affine
-    else:
+    else:  # pragma: no cover
         warnings.warn("Ransac Ellipse detection did not converge")
         return None
