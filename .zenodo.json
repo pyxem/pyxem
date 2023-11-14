@@ -8,7 +8,9 @@
       "orcid": "0000-0001-5754-0938"
     },
     {
-      "name":"Magnus Nord"
+      "name":"Magnus Nord",
+      "orcid": "0000-0001-7981-5293",
+      "affiliation": "Norwegian University of Science and Technology"
     },
     {
       "name":"Carter Francis",
@@ -25,20 +27,19 @@
       "name":"Eirik Opheim"
     },
     {
+      "name":"Eric Prestat"
+    },
+    {
       "name":"Ben Martineau"
     },
     {
-      "name":"Tina Bergh"
-    },
-    {
-      "name":"Eric Prestat"
+      "name":"Tina Bergh",
+      "orcid": "0000-0003-3757-3876",
+      "affiliation": "Norwegian University of Science and Technology"
     },
     {
       "name":"Niels Cautaerts",
       "orcid": "0000-0002-6402-9879"
-    },
-    {
-      "name":"Stef Smeets"
     },
     {
       "name":"Håkon Wiik Ånes",
@@ -46,10 +47,18 @@
       "affiliation": "Norwegian University of Science and Technology"
     },
     {
+      "name":"Stef Smeets"
+    },
+    {
       "name":"Andrew Ross"
     },
     {
       "name":"Joseph Broussard"
+    },
+    {
+      "name":"Shuoyuan Huang",
+      "orcid":"0009-0008-9826-9425",
+      "affiliation": "University of Wisconsin Madison"
     },
     {
       "name":"Sean Collins"
@@ -62,11 +71,6 @@
     },
     {
       "name":"Ida Hjorth"
-    },
-    {
-      "name":"Shuoyuan Huang",
-      "orcid":"0009-0008-9826-9425",
-      "affiliation": "University of Wisconsin Madison"
     },
     {
       "name":"Endre Jacobsen"
@@ -84,14 +88,20 @@
       "name": "Sivert Dagenborg"
     },
     {
-      "name": "Tiarnan Doherty"
+      "name": "Ruben Bjørge",
+      "orcid": "0000-0002-6310-7820",
+      "affiliation": "SINTEF Industry"
+    },
+    {
+      "name":"Affan Iqbal"
     },
     {
       "name":"Jedrzej Morzy"
     },
     {
-      "name":"Affan Iqbal"
+      "name": "Tiarnan Doherty"
     },
+
     {
       "name":"Tomas Ostasevicius"
     },
@@ -104,7 +114,10 @@
     },
     {
       "name":"Rob Tovey"
+    },
+    {
+      "name": "Petr Vacek",
+      "orcid": "0000-0002-1625-9258"
     }
-    
   ]
 }

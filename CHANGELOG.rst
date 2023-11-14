@@ -8,8 +8,8 @@ The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`
 and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
 
-Unreleased
-==========
+2023-11-14 - version 0.16.0
+===========================
 
 Added
 -----
@@ -17,6 +17,7 @@ Added
 - Added :py:class:`~pyxem.signals.LazyCorrelation1D` for lazy Correlation1D signals
 - Improved the documentation and added Examples
 - Add N-D filtering using :py:meth:`~pyxem.signals.Diffraction2D.filter`
+- Add new :py:class:`pyxem.signals.InSituDiffraction2D` class for in-situ diffraction data
 
 Fixed
 -----
@@ -27,9 +28,6 @@ Fixed
   passing orientations as tuples.
 - Fix bug in calculating strain (#958)
 
-Added
------
-- Add n-d and 2-d filters #935 for filtering datasets
 
 2023-05-08 - version 0.15.1
 ===========================
