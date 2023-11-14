@@ -39,6 +39,7 @@ credits = [
     "Tor Inge Thorsen",
     "Matt von Lany",
     "Rob Tovey",
+    "Petr Vacek",
 ]
 license = "GPLv3+"
 maintainer = "Duncan Johnstone, Phillip Crout, Magnus Nord, Carter Francis"
