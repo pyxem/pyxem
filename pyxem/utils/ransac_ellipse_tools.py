@@ -580,7 +580,8 @@ def ellipse_to_markers(ellipse_array, points=None, inlier=None):
 
 
 def determine_ellipse(
-    signal,
+    signal=None,
+    pos=None,
     mask=None,
     num_points=1000,
     use_ransac=False,
@@ -635,7 +636,10 @@ def determine_ellipse(
     >>> s_corr = s.apply_affine_transformation(affine, inplace=False)
 
     """
-    pos = _get_max_positions(signal, mask=mask, num_points=num_points)
+    if signal is not None:
+        pos = _get_max_positions(signal, mask=mask, num_points=num_points)
+    elif pos is None:
+        raise ValueError("Either signal or pos must be specified")
     if use_ransac:
         if guess_starting_params:
             el, inlier = get_ellipse_model_ransac_single_frame(
