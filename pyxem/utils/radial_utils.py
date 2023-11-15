@@ -587,13 +587,6 @@ def _get_ellipse_parameters(g):
     return (xC, yC, semi_len0, semi_len1, rot, eccen)
 
 
-def _get_ellipse_from_parameters(x, y, semi_len0, semi_len1, rot, r_scale=0.05):
-    R = np.arange(0, 2 * np.pi, r_scale)
-    xx = x + semi_len0 * np.cos(R) * np.cos(rot) - semi_len1 * np.sin(R) * np.sin(rot)
-    yy = y + semi_len0 * np.cos(R) * np.sin(rot) + semi_len1 * np.sin(R) * np.cos(rot)
-    return (xx, yy)
-
-
 def _get_marker_list(ellipse_parameters, x_list=None, y_list=None):
     xC, yC, semi_len0, semi_len1, rot, ecce = _get_ellipse_parameters(
         ellipse_parameters

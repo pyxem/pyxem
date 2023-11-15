@@ -838,13 +838,10 @@ def test_full_ellipse_ransac_processing():
 
 
 class TestDetermineEllipse:
-    @mark.parametrize("ransac", [True, False])
     @mark.parametrize("mask", [True, False])
     @mark.parametrize("return_params", [True, False])
     @mark.parametrize("guess_starting_params", [True, False])
-    def test_determine_ellipse(
-        self, ransac, mask, return_params, guess_starting_params
-    ):
+    def test_determine_ellipse_ransac(self, mask, return_params, guess_starting_params):
         if mask:
             mask = np.zeros((100, 100), dtype=bool)
             mask[40:50, :] = True
@@ -858,7 +855,8 @@ class TestDetermineEllipse:
         ans = ret.determine_ellipse(
             t,
             mask=mask,
-            use_ransac=ransac,
+            use_ransac=True,
+            num_points=500,
             return_params=return_params,
             guess_starting_params=guess_starting_params,
         )
@@ -867,7 +865,36 @@ class TestDetermineEllipse:
 
         np.testing.assert_array_almost_equal(
             affine,
-            [[1.0, 0, 0], [0, 1.15, 0], [0, 0, 1]],
+            [[1.0, 0, 0], [0, 0.87, 0], [0, 0, 1]],
+            1,
+        )
+        np.testing.assert_array_almost_equal(center, [45, 50], 0)
+
+    @mark.parametrize("mask", [True, False])
+    @mark.parametrize("return_params", [True, False])
+    def test_determine_ellipse_no_ransac(self, mask, return_params):
+        if mask:
+            mask = np.zeros((100, 100), dtype=bool)
+            mask[40:50, :] = True
+        else:
+            mask = None
+        t = np.ones((100, 100))
+        x, y = np.ogrid[-45:55, -50:50]
+        t[x**2 + (y * 1.15) ** 2 < 40**2] = 100
+        t[x**2 + (y * 1.15) ** 2 < 30**2] = 1
+        t = t + np.random.random((100, 100))
+        ans = ret.determine_ellipse(
+            t,
+            mask=mask,
+            use_ransac=False,
+            return_params=return_params,
+        )
+        center = ans[0]
+        affine = ans[1]
+
+        np.testing.assert_array_almost_equal(
+            affine,
+            [[1.0, 0, 0], [0, 0.87, 0], [0, 0, 1]],
             2,
         )
         np.testing.assert_array_almost_equal(center, [45, 50], 0)
@@ -897,7 +924,7 @@ class TestDetermineEllipse:
         assert np.sum((s_az.sum(axis=0).isig[6:] > 1).data) < 11
 
     @mark.parametrize("rot", np.linspace(0, 2 * np.pi, 10))
-    def test_determine_ellipse(self, rot):
+    def test_determine_ellipse_ring(self, rot):
         test_data = mdtd.MakeTestData(200, 200, default=False)
         test_data.add_disk(x0=100, y0=100, r=5, intensity=30)
         test_data.add_ring_ellipse(
