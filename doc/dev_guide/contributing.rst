@@ -252,6 +252,7 @@ To make a new release, follow these steps:
    the changes.
 3. Update the list of contributors in both the ``release_info.py`` and ``.zenodo.json``
    files. __ Make sure that the Zenodo file is valid JSON __.
+4. Test that the release works by running the ``Test Publish`` action.
 4. Commit the changes and push them to the repository.
 5. Create a new tag with the "v" + version number (e.g. "v0.16.0") and make a new release on GitHub.
 6. Wait for the CI server to finish the release process.
