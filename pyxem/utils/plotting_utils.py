@@ -175,15 +175,17 @@ def plot_templates_over_signal(
 
     if n_best is None:
         n_best = n_best_indexed
-    
+
     if n_best > n_best_indexed:
-        raise ValueError("`n_best` cannot be larger than the amount of indexed solutions")
+        raise ValueError(
+            "`n_best` cannot be larger than the amount of indexed solutions"
+        )
 
     if direct_beam_position is None:
         direct_beam_position = (
             signal.axes_manager[0].size // 2,
             signal.axes_manager[1].size // 2,
-            )
+        )
 
     if marker_colors is None:
         marker_colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
@@ -216,24 +218,29 @@ def plot_templates_over_signal(
     result_signal = hs.signals.Signal1D(result_array)
     orientation_signal = hs.signals.Signal2D(result["orientation"])
     mirrored_template_signal = hs.signals.Signal1D(result["mirrored_template"])
-    
 
     def marker_func_generator(n: int):
-
         def marker_func(pattern, center, orientation, mirrored_template):
             angle = orientation[n, 0]
             pattern = pattern[n]
             mirrored_template = mirrored_template[n]
-            x, y, _ = get_template_cartesian_coordinates(pattern, center=center, in_plane_angle=angle, mirrored=mirrored_template)
-            y = signal.axes_manager.shape[1] - y # See https://github.com/pyxem/pyxem/issues/925
+            x, y, _ = get_template_cartesian_coordinates(
+                pattern, center=center, in_plane_angle=angle, mirrored=mirrored_template
+            )
+
+            # See https://github.com/pyxem/pyxem/issues/925
+            y = signal.axes_manager.shape[1] - y
+
             return np.array((x, y)).T
-        
-        # The inputs gets squeezed, this ensures any 1D inputs gets correcly accessed
+
+        # The inputs gets squeezed, this ensures they get correctly accessed
         if n_best_indexed == 1:
+
             def marker_func_1D(pattern, center, orientation, mirrored_template):
                 orientation = orientation.reshape(-1, 3)
                 mirrored_template = np.array([mirrored_template])
                 return marker_func(pattern, center, orientation, mirrored_template)
+
             return marker_func_1D
         else:
             return marker_func
@@ -241,15 +248,14 @@ def plot_templates_over_signal(
     signal.plot(**plot_kwargs)
     for i in range(n_best):
         markers = result_signal.map(
-            marker_func_generator(i), 
-            center=direct_beam_position, 
-            orientation=orientation_signal, 
-            mirrored_template=mirrored_template_signal, 
-            inplace=False, 
-            ragged=True, 
-            lazy_output=True
-            )
+            marker_func_generator(i),
+            center=direct_beam_position,
+            orientation=orientation_signal,
+            mirrored_template=mirrored_template_signal,
+            inplace=False,
+            ragged=True,
+            lazy_output=True,
+        )
         color = marker_colors[i % len(marker_colors)]
         m = hs.plot.markers.Points.from_signal(markers, color=color)
         signal.add_marker(m)
-    plt.gcf().legend()
