@@ -93,24 +93,28 @@ class ColumnSlicer:
         else:
             raise ValueError("item must be a string or an int")
 
-        item = [
-            item,
-        ]
+
+        item = [item,]
         slic = self.signal.map(
-            lambda x, item: x[..., item], item=item, inplace=False, ragged=True
+            lambda x, it: x[..., it], it=item, inplace=False, ragged=True
         )
         slic.offsets = self.signal.offsets[item[0]]
         slic.scales = self.signal.scales[item[0]]
         return slic
+
 
 class BoolSlicer:
     def __init__(self, signal):
         self.signal = signal
 
     def __getitem__(self, item):
-        slic = self.signal.map(lambda x, item: x[item], item=item, inplace=False, ragged=True)
-        return slic
-
+        if self.signal.ragged:
+            slic = self.signal.map(
+                lambda x, it: x[it], it=item, inplace=False, ragged=True
+            )
+            return slic
+        else:
+            return self.isig[item]
 
 
 class DiffractionVectors(BaseSignal):
@@ -139,23 +143,27 @@ class DiffractionVectors(BaseSignal):
         _column_names = kwargs.pop("column_names", None)
 
         super().__init__(*args, **kwargs)
+        self._set_up_vector(_scales, _offsets, _detector_shape, _column_names)
 
+    def _set_up_vector(
+        self, scales=None, offsets=None, detector_shape=None, column_names=None
+    ):
         self.metadata.add_node("VectorMetadata")
-        if _scales is not None or "scales" not in self.metadata.VectorMetadata:
-            self.metadata.VectorMetadata["scales"] = _scales
-        if _offsets is not None or "offsets" not in self.metadata.VectorMetadata:
-            self.metadata.VectorMetadata["offsets"] = _offsets
+        if scales is not None or "scales" not in self.metadata.VectorMetadata:
+            self.metadata.VectorMetadata["scales"] = scales
+        if offsets is not None or "offsets" not in self.metadata.VectorMetadata:
+            self.metadata.VectorMetadata["offsets"] = offsets
         if (
-            _detector_shape is not None
+            detector_shape is not None
             or "detector_shape" not in self.metadata.VectorMetadata
         ):
-            self.metadata.VectorMetadata["detector_shape"] = _detector_shape
+            self.metadata.VectorMetadata["detector_shape"] = detector_shape
 
         if (
-                _column_names is not None
-                or "column_names" not in self.metadata.VectorMetadata
+            column_names is not None
+            or "column_names" not in self.metadata.VectorMetadata
         ):
-            self.metadata.VectorMetadata["detector_shape"] = _detector_shape
+            self.metadata.VectorMetadata["column_names"] = column_names
         self.cartesian = None
         self.hkls = None
         self.is_real_units = False
@@ -233,25 +241,23 @@ class DiffractionVectors(BaseSignal):
         else:
             has_intensity = False
 
-        if peaks.data[(0,) * peaks.data.ndim].shape[1] == len(column_names)+1:
+        if num_cols == len(column_names) + 1:
             column_names = list(column_names) + ["intensity"]
 
-        gvectors = peaks.map(
+        vectors = peaks.map(
             lambda x, cen, cal: (x - cen) * cal,
             cal=calibration,
             cen=center,
             inplace=False,
             ragged=True,
         )
-        vectors = cls(gvectors)
+        vectors.set_signal_type("diffraction_vectors")
         if isinstance(peaks, LazySignal):
             vectors = vectors.as_lazy()
-        vectors.scales = calibration
-        vectors.center = center  # set calibration first
+        vectors._set_up_vector(scales=calibration, column_names=column_names)
+        vectors.center = center
         vectors.has_intensity = has_intensity
-        vectors.column_names = column_names
         return vectors
-
 
     @property
     def pixel_vectors(self):
@@ -311,6 +317,7 @@ class DiffractionVectors(BaseSignal):
             )
 
         self.metadata.VectorMetadata["column_names"] = value
+
     @property
     def offsets(self):
         return self.metadata.VectorMetadata["offsets"]
@@ -330,17 +337,24 @@ class DiffractionVectors(BaseSignal):
             ] * self.num_columns
 
     def __lt__(self, other):
-        return self.map(lambda x,other: x < other, other=other, inplace=False, ragged=True)
+        return self.map(
+            lambda x, other: x < other, other=other, inplace=False, ragged=True
+        )
 
     def __le__(self, other):
-        return self.map(lambda x,other: x <= other, other=other, inplace=False, ragged=True)
+        return self.map(
+            lambda x, other: x <= other, other=other, inplace=False, ragged=True
+        )
 
     def __gt__(self, other):
-        return self.map(lambda x,other: x > other, other=other, inplace=False, ragged=True)
+        return self.map(
+            lambda x, other: x > other, other=other, inplace=False, ragged=True
+        )
+
     def __ge__(self, other):
-        return self.map(lambda x,other: x >= other, other=other, inplace=False, ragged=True)
-
-
+        return self.map(
+            lambda x, other: x >= other, other=other, inplace=False, ragged=True
+        )
 
     @property
     def center(self):
@@ -604,7 +618,7 @@ class DiffractionVectors(BaseSignal):
         return fig
 
     def to_markers(self, **kwargs):
-        new = self.map(reverse_pos, inplace=False, ragged=True)
+        new = self.map(_reverse_pos, inplace=False, ragged=True)
         return Points(offsets=new.data.T, **kwargs)
 
     @deprecated(

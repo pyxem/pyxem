@@ -147,6 +147,8 @@ class TestInitVectors:
         return peaks
 
     def test_from_peaks(self, peaks):
+        peaks.axes_manager.navigation_axes[0].name = "x"
+        peaks.axes_manager.navigation_axes[1].name = "y"
         dv = DiffractionVectors.from_peaks(
             peaks,
             center=(50, 50),
@@ -156,6 +158,8 @@ class TestInitVectors:
         for i in np.ndindex((2, 2)):
             np.testing.assert_array_equal((peaks.data[i] - 50) * 0.1, dv.data[i])
         assert dv.scales == [0.1, 0.1]
+        assert dv.axes_manager[0].name == "x"
+        assert dv.axes_manager[1].name == "y"
 
     def test_from_peaks_lazy(self, peaks):
         peaks = peaks.as_lazy()
