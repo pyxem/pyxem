@@ -193,7 +193,27 @@ def plot_templates_over_signal(
             "Warning: not enough colors in `marker_colors` for `n_best` different colored marks. Colors will loop"
         )
 
-    result_signal = hs.signals.Signal1D(library[phase_key_dict[0]]["simulations"][result["template_index"]])
+    # Fetch an array of the results, with the correct phases
+    result_array = np.empty(
+        (signal.axes_manager[0].size, signal.axes_manager[1].size, n_best_indexed),
+        dtype=object,
+    )
+
+    for phase_ind, phase in phase_key_dict.items():
+        # Mask of where the results used the current phase
+        mask = result["phase_index"] == phase_ind
+
+        # Flat array of the simulations of the current phase
+        phase_library_simulations = library[phase]["simulations"]
+
+        # 2D array of simulations, using the indices from template matching.
+        # These might use the wrong phase
+        phase_library_simulations[result["template_index"]]
+
+        # Use the correct phase
+        result_array[mask] = phase_library_simulations[mask]
+
+    result_signal = hs.signals.Signal1D(result_array)
     orientation_signal = hs.signals.Signal2D(result["orientation"])
     mirrored_template_signal = hs.signals.Signal1D(result["mirrored_template"])
     
