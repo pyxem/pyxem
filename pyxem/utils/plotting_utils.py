@@ -3,7 +3,7 @@ from __future__ import annotations
 import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
-from hyperspy.utils.markers import point
+import hyperspy.api as hs
 from pyxem.utils.polar_transform_utils import (
     get_template_cartesian_coordinates,
     get_template_polar_coordinates,
@@ -125,7 +125,6 @@ def plot_templates_over_signal(
     result: dict,
     phase_key_dict: dict,
     n_best: int = None,
-    find_direct_beam: bool = False,
     direct_beam_position: tuple[int, int] = None,
     marker_colors: list[str] = None,
     marker_type: str = "x",
@@ -172,11 +171,19 @@ def plot_templates_over_signal(
     The spot marker sizes are scaled by the square root of their intensity
     """
 
-    if n_best is None:
-        n_best = result["template_index"].shape[2]
+    n_best_indexed = result["template_index"].shape[-1]
 
-    if direct_beam_position is None and not find_direct_beam:
-        direct_beam_position = (0, 0)
+    if n_best is None:
+        n_best = n_best_indexed
+    
+    if n_best > n_best_indexed:
+        raise ValueError("`n_best` cannot be larger than the amount of indexed solutions")
+
+    if direct_beam_position is None:
+        direct_beam_position = (
+            signal.axes_manager[0].size // 2,
+            signal.axes_manager[1].size // 2,
+            )
 
     if marker_colors is None:
         marker_colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
@@ -186,122 +193,43 @@ def plot_templates_over_signal(
             "Warning: not enough colors in `marker_colors` for `n_best` different colored marks. Colors will loop"
         )
 
-    # Add markers as iterable, recommended in hyperspy docs.
-    # Using a genenerator will hopefully reduce memory.
-    # To avoid scope errors, pass all variables as inputs
-    def _get_markers_iter(
-        signal,
-        library,
-        result,
-        phase_key_dict,
-        n_best,
-        find_direct_beam,
-        direct_beam_position,
-        marker_colors,
-        marker_type,
-        size_factor,
-        verbose,
-    ):
-        # Hyperspy wants one marker for all pixels in the navigation space,
-        # so we generate all the data for a given solution and then yield them
+    result_signal = hs.signals.Signal1D(library[phase_key_dict[0]]["simulations"][result["template_index"]])
+    orientation_signal = hs.signals.Signal2D(result["orientation"])
+    mirrored_template_signal = hs.signals.Signal1D(result["mirrored_template"])
+    
 
-        # Allocate space for all navigator pixels to potentially have the maximum amount of simulated diffraction spots
-        max_marker_count = max(
-            sim.intensities.size
-            for lib in library.values()
-            for sim in lib["simulations"]
-        )
+    def marker_func_generator(n: int):
 
-        shape = (
-            signal.axes_manager[1].size,
-            signal.axes_manager[0].size,
-            max_marker_count,
-        )
-
-        # Explicit zeroes instead of empty, since we won't fill all elements in the final axis
-        marker_data_x = np.zeros(shape)
-        marker_data_y = np.zeros(shape)
-        marker_data_i = np.zeros(shape)
-
-        for n in range(n_best):
-            color = marker_colors[n % len(marker_colors)]
-
-            # Generate data for a given solution index.
-            x_iter = range(signal.axes_manager[0].size)
-            if verbose:
-                x_iter = tqdm(x_iter)
-
-            for px in x_iter:
-                for py in range(signal.axes_manager[1].size):
-                    sim_sol_index = result["template_index"][py, px, n]
-                    mirrored_sol = result["mirrored_template"][py, px, n]
-                    in_plane_angle = result["orientation"][py, px, n, 0]
-
-                    phase_key = result["phase_index"][py, px, n]
-                    phase = phase_key_dict[phase_key]
-                    simulations = library[phase]["simulations"]
-                    pattern = simulations[sim_sol_index]
-
-                    if find_direct_beam:
-                        x, y = find_beam_center_blur(signal.inav[px, py], 1)
-
-                        # The result of `find_beam_center_blur` is in a corner.
-                        # Move to center of image
-                        x -= signal.axes_manager[2].size // 2
-                        y -= signal.axes_manager[3].size // 2
-                        direct_beam_position = (x, y)
-
-                    x, y, intensities = get_template_cartesian_coordinates(
-                        pattern,
-                        center=direct_beam_position,
-                        in_plane_angle=in_plane_angle,
-                        mirrored=mirrored_sol,
-                    )
-
-                    # See https://github.com/pyxem/pyxem/issues/925
-                    # Copied the solution from plot_template_over_pattern (#946)
-                    y = signal.axes_manager[1].size - y
-
-                    x *= signal.axes_manager[2].scale
-                    y *= signal.axes_manager[3].scale
-
-                    marker_count = len(x)
-                    marker_data_x[py, px, :marker_count] = x
-                    marker_data_y[py, px, :marker_count] = y
-                    marker_data_i[py, px, :marker_count] = intensities
-
-            marker_kwargs = {
-                "color": color,
-                "marker": marker_type,
-                "label": f"Solution index: {n}",
-            }
-
-            # Plot for the given solution index
-            for i in range(max_marker_count):
-                yield point(
-                    marker_data_x[..., i],
-                    marker_data_y[..., i],
-                    size=4 * np.sqrt(marker_data_i[..., i]) * size_factor,
-                    **marker_kwargs,
-                )
-                # We only need one set of labels per solution
-                if i == 0:
-                    marker_kwargs.pop("label")
+        def marker_func(pattern, center, orientation, mirrored_template):
+            angle = orientation[n, 0]
+            pattern = pattern[n]
+            mirrored_template = mirrored_template[n]
+            x, y, _ = get_template_cartesian_coordinates(pattern, center=center, in_plane_angle=angle, mirrored=mirrored_template)
+            y = signal.axes_manager.shape[1] - y # See https://github.com/pyxem/pyxem/issues/925
+            return np.array((x, y)).T
+        
+        # The inputs gets squeezed, this ensures any 1D inputs gets correcly accessed
+        if n_best_indexed == 1:
+            def marker_func_1D(pattern, center, orientation, mirrored_template):
+                orientation = orientation.reshape(-1, 3)
+                mirrored_template = np.array([mirrored_template])
+                return marker_func(pattern, center, orientation, mirrored_template)
+            return marker_func_1D
+        else:
+            return marker_func
 
     signal.plot(**plot_kwargs)
-    signal.add_marker(
-        _get_markers_iter(
-            signal,
-            library,
-            result,
-            phase_key_dict,
-            n_best,
-            find_direct_beam,
-            direct_beam_position,
-            marker_colors,
-            marker_type,
-            size_factor,
-            verbose,
-        )
-    )
+    for i in range(n_best):
+        markers = result_signal.map(
+            marker_func_generator(i), 
+            center=direct_beam_position, 
+            orientation=orientation_signal, 
+            mirrored_template=mirrored_template_signal, 
+            inplace=False, 
+            ragged=True, 
+            lazy_output=True
+            )
+        color = marker_colors[i % len(marker_colors)]
+        m = hs.plot.markers.Points.from_signal(markers, color=color)
+        signal.add_marker(m)
     plt.gcf().legend()
