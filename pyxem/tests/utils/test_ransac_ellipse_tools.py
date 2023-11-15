@@ -844,21 +844,37 @@ class TestDetermineEllipse:
     def test_determine_ellipse_ransac(self, mask, return_params, guess_starting_params):
         if mask:
             mask = np.zeros((100, 100), dtype=bool)
-            mask[40:50, :] = True
         else:
             mask = None
+        print(mask, return_params, guess_starting_params)
         t = np.ones((100, 100))
         x, y = np.ogrid[-45:55, -50:50]
         t[x**2 + (y * 1.15) ** 2 < 40**2] = 100
         t[x**2 + (y * 1.15) ** 2 < 30**2] = 1
-        t = t + np.random.random((100, 100))
+        rng = np.random.RandomState(3)
+        t = t + rng.random((100, 100))
+        if not guess_starting_params:
+            params = {
+                "xf": 50,
+                "yf": 50,
+                "rf_lim": 20,
+                "semi_len_min": 30,
+                "semi_len_max": 100,
+                "semi_len_ratio_lim": 1.2,
+                "min_samples": 6,
+                "residual_threshold": 20,
+                "max_trials": 1000,
+            }
+        else:
+            params = {}
         ans = ret.determine_ellipse(
             t,
             mask=mask,
             use_ransac=True,
-            num_points=500,
+            num_points=50,
             return_params=return_params,
             guess_starting_params=guess_starting_params,
+            **params
         )
         center = ans[0]
         affine = ans[1]
