@@ -93,7 +93,7 @@ def mock_library(mock_phase_key_dict):
     mock_sim_2 = Mock()
     mock_sim_2.calibrated_coordinates = np.array([[-1, -2, 0], [1, 2, 0], [-2, 1, 0]])
     mock_sim_2.intensities = np.array([1, 2, 10])
-    simlist = [mock_sim_1, mock_sim_2]
+    simlist = np.array([mock_sim_1, mock_sim_2])
     orientations = np.array(
         [
             [1, 2, 3],
@@ -108,18 +108,18 @@ def mock_library(mock_phase_key_dict):
 
 
 @pytest.mark.parametrize(
-    "n_best_sim, n_best, find_direct_beam, direct_beam_position, marker_colors",
+    "n_best_sim, n_best, direct_beam_position, marker_colors",
     [
         # fmt: off
-        (1, 1, False, None, None),
-        (2, 2, False, None, None),
-        (2, 1, False, None, None),
-        (1, 1, False, (0, 0), None),
-        (1, 1, False, (1, 0), None),
-        (1, 1, True, None, None),
-        (2, 2, False, None, ["red"]), # Prints a warning, but is still passes as colors will just loop
-        (2, 1, False, None, ["red"]*4),
-        (2, 2, False, None, ["red"]*2),
+        (1, 1, None, None),
+        (2, 2, None, None),
+        (2, 1, None, None),
+        (1, 1, (0, 0), None),
+        (1, 1, (1, 0), None),
+        (1, 1, None, None),
+        (2, 2, None, ["red"]), # Prints a warning, but is still passes as colors will just loop
+        (2, 1, None, ["red"]*4),
+        (2, 2, None, ["red"]*2),
         # fmt: on
     ],
 )
@@ -131,7 +131,6 @@ def test_plot_templates_over_signal(
     mock_phase_key_dict,
     n_best_sim,
     n_best,
-    find_direct_beam,
     direct_beam_position,
     marker_colors,
 ):
@@ -142,7 +141,6 @@ def test_plot_templates_over_signal(
         mock_result,
         mock_phase_key_dict,
         n_best,
-        find_direct_beam,
         direct_beam_position,
         marker_colors,
         verbose=False,
