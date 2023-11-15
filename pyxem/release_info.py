@@ -45,4 +45,3 @@ license = "GPLv3+"
 maintainer = "Duncan Johnstone, Phillip Crout, Magnus Nord, Carter Francis"
 email = "pyxem.team@gmail.com"
 status = "development"
-test = True
