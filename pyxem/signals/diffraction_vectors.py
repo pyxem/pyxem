@@ -143,11 +143,12 @@ class DiffractionVectors(BaseSignal):
         if center is None or calibration is None:
             if peaks.metadata.has_item("Peaks.signal_axes"):
                 center = [
-                    -ax.offset / ax.scale for ax in peaks.metadata.Peaks.signal_axes[::-1]
+                    -ax.offset / ax.scale
+                    for ax in peaks.metadata.Peaks.signal_axes[::-1]
                 ]
                 calibration = [
                     ax.scale for ax in peaks.metadata.Peaks.signal_axes[::-1]
-                    ]
+                ]
             else:
                 raise ValueError(
                     "A center and calibration must be provided unless the"

@@ -514,7 +514,7 @@ def mask_peak_array(array, mask, invert=False):
 
 
 def ellipse_to_markers(ellipse_array, points=None, inlier=None):
-    """ Convert an ellipse array to a :class:`hs.plot.markers.Ellipses` object. If points and
+    """Convert an ellipse array to a :class:`hs.plot.markers.Ellipses` object. If points and
     inlier are provided, then the points are also plotted. The inlier points are plotted in green
     and the outlier points are plotted in red.
 
@@ -565,7 +565,9 @@ def ellipse_to_markers(ellipse_array, points=None, inlier=None):
     )
 
     if points is not None and inlier is not None:
-        in_points = hs.plot.markers.Points(offsets=mask_peak_array(points, inlier), color="green")
+        in_points = hs.plot.markers.Points(
+            offsets=mask_peak_array(points, inlier), color="green"
+        )
         out_points = hs.plot.markers.Points(
             offsets=mask_peak_array(points, inlier, invert=True), color="red", alpha=0.5
         )
