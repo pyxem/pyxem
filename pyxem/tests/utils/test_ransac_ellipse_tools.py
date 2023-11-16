@@ -326,7 +326,7 @@ class TestGetEllipseModelRansacSingleFrame:
             semi_len_ratio_lim=None,
             min_samples=20,
             residual_threshold=3,
-            max_trails=100,
+            max_trials=100,
         )
         assert inliers0[:-1].all()
         assert not inliers0[-1]
@@ -340,7 +340,7 @@ class TestGetEllipseModelRansacSingleFrame:
             semi_len_ratio_lim=None,
             min_samples=20,
             residual_threshold=6,
-            max_trails=100,
+            max_trials=100,
         )
         assert inliers1.all()
 
@@ -362,7 +362,7 @@ class TestGetEllipseModelRansacSingleFrame:
             semi_len_ratio_lim=2,
             min_samples=6,
             residual_threshold=10,
-            max_trails=100,
+            max_trials=100,
         )
         params0f = (xf, yf, a, b, r)
         params1f = ret._ellipse_model_centre_to_focus(*model_ransac.params, xf, yf)
@@ -385,7 +385,7 @@ class TestGetEllipseModelRansacSingleFrame:
             semi_len_ratio_lim=2,
             min_samples=5,
             residual_threshold=10,
-            max_trails=300,
+            max_trials=300,
         )
         params00f = (xf0, yf, a, b, r)
         params01f = ret._ellipse_model_centre_to_focus(*model_ransac0.params, xf0, yf)
@@ -401,7 +401,7 @@ class TestGetEllipseModelRansacSingleFrame:
             semi_len_ratio_lim=2,
             min_samples=5,
             residual_threshold=10,
-            max_trails=300,
+            max_trials=300,
         )
         params10f = (xf1, yf, a, b, r)
         params11f = ret._ellipse_model_centre_to_focus(*model_ransac1.params, xf1, yf)
@@ -423,7 +423,7 @@ class TestGetEllipseModelRansacSingleFrame:
             semi_len_ratio_lim=2,
             min_samples=5,
             residual_threshold=10,
-            max_trails=300,
+            max_trials=300,
         )
         params00f = (xf, yf0, a, b, r)
         params01f = ret._ellipse_model_centre_to_focus(*model_ransac0.params, xf, yf0)
@@ -439,7 +439,7 @@ class TestGetEllipseModelRansacSingleFrame:
             semi_len_ratio_lim=2,
             min_samples=5,
             residual_threshold=10,
-            max_trails=300,
+            max_trials=300,
         )
         params10f = (xf, yf1, a, b, r)
         params11f = ret._ellipse_model_centre_to_focus(*model_ransac1.params, xf, yf1)
@@ -458,7 +458,7 @@ class TestGetEllipseModelRansacSingleFrame:
             semi_len_ratio_lim=1.2,
             min_samples=5,
             residual_threshold=10,
-            max_trails=100,
+            max_trials=100,
         )
         params0f = (xf, yf, a, b, r)
         params1f = ret._ellipse_model_centre_to_focus(*model_ransac0.params, xf, yf)
@@ -475,7 +475,7 @@ class TestGetEllipseModelRansacSingleFrame:
             semi_len_ratio_lim=1.2,
             min_samples=5,
             residual_threshold=10,
-            max_trails=100,
+            max_trials=100,
         )
         assert model_ransac1 is None
 
@@ -492,7 +492,7 @@ class TestGetEllipseModelRansacSingleFrame:
             semi_len_ratio_lim=2,
             min_samples=6,
             residual_threshold=10,
-            max_trails=100,
+            max_trials=100,
         )
         params0f = (xf, yf, a, b, r)
         params1f = ret._ellipse_model_centre_to_focus(*model_ransac0.params, xf, yf)
@@ -509,7 +509,7 @@ class TestGetEllipseModelRansacSingleFrame:
             semi_len_ratio_lim=2,
             min_samples=6,
             residual_threshold=10,
-            max_trails=100,
+            max_trials=100,
         )
         assert model_ransac1 is None
 
@@ -526,7 +526,7 @@ class TestGetEllipseModelRansacSingleFrame:
             semi_len_ratio_lim=2,
             min_samples=6,
             residual_threshold=10,
-            max_trails=100,
+            max_trials=100,
         )
         params0f = (xf, yf, a, b, r)
         params1f = ret._ellipse_model_centre_to_focus(*model_ransac0.params, xf, yf)
@@ -543,7 +543,7 @@ class TestGetEllipseModelRansacSingleFrame:
             semi_len_ratio_lim=2,
             min_samples=6,
             residual_threshold=10,
-            max_trails=100,
+            max_trials=100,
         )
         assert model_ransac1 is None
 
@@ -555,7 +555,7 @@ class TestGetEllipseModelRansac:
         rot = np.zeros((2, 3))
         peak_array = mdtd._make_4d_peak_array_test_data(xc, yc, semi0, semi1, rot)
         ellipse_array, inlier_array = ret.get_ellipse_model_ransac(
-            peak_array, max_trails=50
+            peak_array, max_trials=50
         )
         assert ellipse_array.shape == xc.shape
         assert inlier_array.shape == xc.shape
@@ -578,7 +578,7 @@ class TestGetEllipseModelRansac:
             semi_len_max=65,
             semi_len_ratio_lim=1.2,
             min_samples=15,
-            max_trails=20,
+            max_trials=20,
         )
         ellipse_array1, inlier_array1 = ret.get_ellipse_model_ransac(
             peak_array,
@@ -589,15 +589,15 @@ class TestGetEllipseModelRansac:
             semi_len_max=65,
             semi_len_ratio_lim=1.2,
             min_samples=15,
-            max_trails=20,
+            max_trials=20,
         )
 
         for iy, ix in np.ndindex(xf.shape):
             assert np.isclose(
-                xf[iy, ix], ellipse_array0[iy, ix][1], atol=1e-8, rtol=1e-3
+                xf[iy, ix], ellipse_array0[iy, ix][0], atol=1e-8, rtol=1e-3
             )
             assert np.isclose(
-                yf[iy, ix], ellipse_array0[iy, ix][0], atol=1e-8, rtol=1e-3
+                yf[iy, ix], ellipse_array0[iy, ix][1], atol=1e-8, rtol=1e-3
             )
             assert inlier_array0[iy, ix].all()
             assert ellipse_array1[iy, ix] is None
@@ -621,7 +621,7 @@ class TestGetEllipseModelRansac:
             semi_len_max=150,
             semi_len_ratio_lim=1.7,
             min_samples=15,
-            max_trails=20,
+            max_trials=20,
         )
         for iy, ix in np.ndindex(xf.shape):
             semi_min = min(ellipse_array[iy, ix][2], ellipse_array[iy, ix][3])
@@ -647,7 +647,7 @@ class TestGetEllipseModelRansac:
             semi_len_max=150,
             semi_len_ratio_lim=1.7,
             min_samples=15,
-            max_trails=20,
+            max_trials=20,
         )
         ellipse_array1, inlier_array1 = ret.get_ellipse_model_ransac(
             peak_array,
@@ -658,7 +658,7 @@ class TestGetEllipseModelRansac:
             semi_len_max=150,
             semi_len_ratio_lim=1.01,
             min_samples=15,
-            max_trails=20,
+            max_trials=20,
         )
         for iy, ix in np.ndindex(xf.shape):
             ellipse_params0 = ellipse_array0[iy, ix]
@@ -687,7 +687,7 @@ class TestGetEllipseModelRansac:
             semi_len_max=195,
             semi_len_ratio_lim=1.11,
             min_samples=15,
-            max_trails=200,
+            max_trials=200,
         )
         ellipse_array1, inlier_array1 = ret.get_ellipse_model_ransac(
             peak_array,
@@ -698,7 +698,7 @@ class TestGetEllipseModelRansac:
             semi_len_max=195,
             semi_len_ratio_lim=2.0,
             min_samples=15,
-            max_trails=200,
+            max_trials=200,
         )
         semi_len_ratio_list = []
         for iy, ix in np.ndindex(xf.shape):
@@ -725,7 +725,7 @@ class TestGetEllipseModelRansac:
             semi_len_max=95,
             semi_len_ratio_lim=1.1,
             residual_threshold=1,
-            max_trails=100,
+            max_trials=100,
             min_samples=15,
         )
         ellipse_array1, inlier_array1 = ret.get_ellipse_model_ransac(
@@ -736,7 +736,7 @@ class TestGetEllipseModelRansac:
             semi_len_max=95,
             semi_len_ratio_lim=1.1,
             residual_threshold=5,
-            max_trails=100,
+            max_trials=100,
             min_samples=15,
         )
 
@@ -750,7 +750,9 @@ class TestGetEllipseModelRansac:
         xf, yf, rf_lim = 100, 100, 20
         semi_len_min, semi_len_max = 50, 100
         semi_len_ratio_lim = 1.15
-        peak_array = np.random.randint(0, 200, size=(10, 11, 200, 2))
+        peak_array = np.empty((10, 11), dtype=object)
+        for ind in np.ndindex(peak_array.shape):
+            peak_array[ind] = np.random.randint(0, 200, size=(200, 2))
         ellipse_array, inlier_array = ret.get_ellipse_model_ransac(
             peak_array,
             xf=xf,
@@ -760,7 +762,7 @@ class TestGetEllipseModelRansac:
             semi_len_max=semi_len_max,
             semi_len_ratio_lim=semi_len_ratio_lim,
             min_samples=15,
-            max_trails=5,
+            max_trials=5,
         )
         for iy, ix in np.ndindex(peak_array.shape[:2]):
             if ellipse_array[iy, ix] is not None:
@@ -774,197 +776,6 @@ class TestGetEllipseModelRansac:
                 assert semi1 > semi_len_min
                 assert semi0 < semi_len_max
                 assert semi1 < semi_len_max
-
-
-class TestGetInlierOutlierPeakArrays:
-    def test_simple(self):
-        x, y, n = 2, 3, 10
-        peak_array = np.arange(y * x * n * 2).reshape((y, x, n, 2))
-        inlier_array = np.ones((y, x, n), dtype=bool)
-        inlier_parray0, outlier_parray0 = ret._get_inlier_outlier_peak_arrays(
-            peak_array, inlier_array
-        )
-        inlier_parray1, outlier_parray1 = ret._get_inlier_outlier_peak_arrays(
-            peak_array, ~inlier_array
-        )
-        for iy, ix in np.ndindex(peak_array.shape[:2]):
-            assert len(inlier_parray0[iy, ix]) == n
-            assert len(outlier_parray0[iy, ix]) == 0
-            assert len(inlier_parray1[iy, ix]) == 0
-            assert len(outlier_parray1[iy, ix]) == n
-
-    def test_some_true_some_false(self):
-        x, y, n = 2, 3, 10
-        peak_array = np.arange(y * x * n * 2).reshape((y, x, n, 2))
-        inlier_array = np.ones((y, x, n), dtype=bool)
-        inlier_array[:, :, 4:] = False
-        inlier_parray, outlier_parray = ret._get_inlier_outlier_peak_arrays(
-            peak_array, inlier_array
-        )
-        for iy, ix in np.ndindex(peak_array.shape[:2]):
-            assert len(inlier_parray[iy, ix]) == 4
-            assert len(outlier_parray[iy, ix]) == 6
-            assert (peak_array[iy, ix][:4] == inlier_parray[iy, ix]).all()
-            assert (peak_array[iy, ix][4:] == outlier_parray[iy, ix]).all()
-
-    def test_inlier_none(self):
-        x, y, n = 2, 3, 10
-        peak_array = np.arange(y * x * n * 2).reshape((y, x, n, 2))
-        inlier_array = np.empty((y, x), dtype=object)
-        for iy, ix in np.ndindex(inlier_array.shape):
-            inlier_array[iy, ix] = None
-
-        inlier_parray, outlier_parray = ret._get_inlier_outlier_peak_arrays(
-            peak_array, inlier_array
-        )
-
-        for iy, ix in np.ndindex(inlier_array.shape):
-            assert inlier_parray[iy, ix] is None
-            assert len(outlier_parray[iy, ix]) == n
-
-
-class TestGetLinesListFromEllipseParams:
-    def test_nr(self):
-        lines_list0 = ret._get_lines_list_from_ellipse_params((5, 5, 10, 15, 0), nr=5)
-        lines_list1 = ret._get_lines_list_from_ellipse_params((5, 5, 10, 15, 0), nr=9)
-        assert len(lines_list0) == 5
-        assert len(lines_list1) == 9
-
-    def test_correct_values(self):
-        y, x, sy, sx, r = 10.0, 20.0, 6.0, 5.0, 0.0
-        lines_list = ret._get_lines_list_from_ellipse_params((y, x, sy, sx, r), nr=4)
-        assert approx(lines_list[0]) == [y + sy, x, y, x + sx]
-        assert approx(lines_list[1]) == [y, x + sx, y - sy, x]
-        assert approx(lines_list[2]) == [y - sy, x, y, x - sx]
-        assert approx(lines_list[3]) == [y, x - sx, y + sy, x]
-
-
-class TestGetLinesArrayFromEllipseArray:
-    def test_correct_values(self):
-        xc_array = np.random.randint(10, 20, size=(2, 3))
-        yc_array = np.random.randint(30, 40, size=(2, 3))
-        sx_array = np.random.randint(70, 80, size=(2, 3))
-        sy_array = np.random.randint(89, 99, size=(2, 3))
-        ro_array = np.zeros((2, 3))
-        ellipse_array = np.empty((2, 3), dtype=object)
-        for iy, ix in np.ndindex(ellipse_array.shape):
-            xc, yc = xc_array[iy, ix], yc_array[iy, ix]
-            sx, sy = sx_array[iy, ix], sy_array[iy, ix]
-            ro = ro_array[iy, ix]
-            ellipse_array[iy, ix] = (yc, xc, sy, sx, ro)
-
-        lines_array = ret._get_lines_array_from_ellipse_array(ellipse_array, nr=4)
-        for iy, ix in np.ndindex(ellipse_array.shape):
-            xc, yc = xc_array[iy, ix], yc_array[iy, ix]
-            sx, sy = sx_array[iy, ix], sy_array[iy, ix]
-            ro = ro_array[iy, ix]
-            lines_list = lines_array[iy, ix]
-            assert approx(lines_list[0]) == [yc + sy, xc, yc, xc + sx]
-            assert approx(lines_list[1]) == [yc, xc + sx, yc - sy, xc]
-            assert approx(lines_list[2]) == [yc - sy, xc, yc, xc - sx]
-            assert approx(lines_list[3]) == [yc, xc - sx, yc + sy, xc]
-
-    def test_ellipse_array_none(self):
-        ellipse_array = np.empty(shape=(2, 3), dtype=object)
-        for ix, iy in np.ndindex(ellipse_array.shape):
-            ellipse_array[ix, iy] = None
-        lines_array = ret._get_lines_array_from_ellipse_array(ellipse_array)
-        for ix, iy in np.ndindex(lines_array.shape):
-            assert lines_array[ix, iy] is None
-
-    def test_nr(self):
-        nr0, nr1 = 5, 9
-        ellipse_array = np.random.randint(10, 100, size=(2, 3, 5))
-        lines_array0 = ret._get_lines_array_from_ellipse_array(ellipse_array, nr=nr0)
-        lines_array1 = ret._get_lines_array_from_ellipse_array(ellipse_array, nr=nr1)
-        for iy, ix in np.ndindex(lines_array0.shape):
-            assert len(lines_array0[iy, ix]) == nr0
-            assert len(lines_array1[iy, ix]) == nr1
-
-
-class TestGetEllipseMarkerListFromEllipseArray:
-    def test_nr(self):
-        nr0, nr1 = 5, 9
-        ellipse_array = np.random.randint(10, 100, size=(2, 3, 5))
-        marker_list0 = ret._get_ellipse_marker_list_from_ellipse_array(
-            ellipse_array, nr=nr0
-        )
-        marker_list1 = ret._get_ellipse_marker_list_from_ellipse_array(
-            ellipse_array, nr=nr1
-        )
-        assert len(marker_list0) == nr0
-        assert len(marker_list1) == nr1
-
-    def test_color(self):
-        color0, color1 = "blue", "green"
-        ellipse_array = np.random.randint(10, 100, size=(2, 3, 5))
-        marker_list0 = ret._get_ellipse_marker_list_from_ellipse_array(
-            ellipse_array, color=color0
-        )
-        marker_list1 = ret._get_ellipse_marker_list_from_ellipse_array(
-            ellipse_array, color=color1
-        )
-        for marker0, marker1 in zip(marker_list0, marker_list1):
-            assert marker0.marker_properties["color"] == color0
-            assert marker1.marker_properties["color"] == color1
-
-    def test_linestyle_linewidth(self):
-        linewidth0, linewidth1 = 12, 32
-        linestyle0, linestyle1 = "solid", "dashed"
-        ellipse_array = np.random.randint(10, 100, size=(2, 3, 5))
-        marker_list0 = ret._get_ellipse_marker_list_from_ellipse_array(
-            ellipse_array, linestyle=linestyle0, linewidth=linewidth0
-        )
-        marker_list1 = ret._get_ellipse_marker_list_from_ellipse_array(
-            ellipse_array, linestyle=linestyle1, linewidth=linewidth1
-        )
-        for marker0, marker1 in zip(marker_list0, marker_list1):
-            assert marker0.marker_properties["linestyle"] == linestyle0
-            assert marker1.marker_properties["linestyle"] == linestyle1
-            assert marker0.marker_properties["linewidth"] == linewidth0
-            assert marker1.marker_properties["linewidth"] == linewidth1
-
-    def test_correct_values(self):
-        xc_array = np.random.randint(120, 130, size=(2, 3))
-        yc_array = np.random.randint(130, 140, size=(2, 3))
-        sx_array = np.random.randint(70, 80, size=(2, 3))
-        sy_array = np.random.randint(89, 99, size=(2, 3))
-        ro_array = np.zeros((2, 3))
-        ellipse_array = np.empty((2, 3), dtype=object)
-        for iy, ix in np.ndindex(ellipse_array.shape):
-            xc, yc = xc_array[iy, ix], yc_array[iy, ix]
-            sx, sy = sx_array[iy, ix], sy_array[iy, ix]
-            ro = ro_array[iy, ix]
-            ellipse_array[iy, ix] = (yc, xc, sy, sx, ro)
-
-        nr = 4
-        marker_list = ret._get_ellipse_marker_list_from_ellipse_array(
-            ellipse_array, nr=nr
-        )
-        assert len(marker_list) == nr
-        for marker in marker_list:
-            assert marker.data["x1"][()].shape == xc_array.shape
-
-        m0, m1, m2, m3 = marker_list
-        assert_allclose(m0.data["x1"][()], xc_array)
-        assert_allclose(m0.data["y1"][()], yc_array + sy_array)
-        assert_allclose(m0.data["x2"][()], xc_array + sx_array)
-        assert_allclose(m0.data["y2"][()], yc_array)
-
-        assert_allclose(m1.data["x1"][()], xc_array + sx_array)
-        assert_allclose(m1.data["y1"][()], yc_array)
-        assert_allclose(m1.data["x2"][()], xc_array)
-        assert_allclose(m1.data["y2"][()], yc_array - sy_array)
-
-        assert_allclose(m2.data["x1"][()], xc_array)
-        assert_allclose(m2.data["y1"][()], yc_array - sy_array)
-        assert_allclose(m2.data["x2"][()], xc_array - sx_array)
-        assert_allclose(m2.data["y2"][()], yc_array)
-
-        assert_allclose(m3.data["x1"][()], xc_array - sx_array)
-        assert_allclose(m3.data["y1"][()], yc_array)
-        assert_allclose(m3.data["x2"][()], xc_array)
-        assert_allclose(m3.data["y2"][()], yc_array + sy_array)
 
 
 def test_full_ellipse_ransac_processing():
@@ -1008,33 +819,76 @@ def test_full_ellipse_ransac_processing():
         semi_len_min=min(a, b) - 5,
         semi_len_max=max(a, b) + 5,
         semi_len_ratio_lim=5,
-        max_trails=50,
+        max_trials=50,
         min_samples=10,
     )
+
     s.add_ellipse_array_as_markers(ellipse_array)
 
     for iy, ix in np.ndindex(ellipse_array.shape):
         ycf, xcf, bf, af, rf = ellipse_array[iy, ix]
-        compare_model_params((xcf, ycf, af, bf, rf), (xc, yc, a, b, r), abs=0.1)
+        # shifted by pi/2
+        compare_model_params(
+            (xcf, ycf, af, bf, rf + np.pi / 2), (yc, xc, a, b, r), abs=0.1
+        )
         assert inlier_array[iy, ix].all()
 
     s.add_ellipse_array_as_markers(ellipse_array)
     x_list, y_list = [], []
-    for _, marker in list(s.metadata.Markers):
-        x_list.append(marker.data["x1"][()][0][0])
-        y_list.append(marker.data["y1"][()][0][0])
-    assert approx(np.mean(x_list), abs=1) == xc
-    assert approx(np.mean(y_list), abs=1) == yc
-    assert approx(np.max(x_list), abs=1) == xc + a
-    assert approx(np.max(y_list), abs=1) == yc + b
-    assert approx(np.min(x_list), abs=1) == xc - a
-    assert approx(np.min(y_list), abs=1) == yc - b
 
 
 class TestDetermineEllipse:
-    @mark.parametrize("ransac", [True, False])
     @mark.parametrize("mask", [True, False])
-    def test_determine_ellipse(self, ransac, mask):
+    @mark.parametrize("return_params", [True, False])
+    @mark.parametrize("guess_starting_params", [True, False])
+    def test_determine_ellipse_ransac(self, mask, return_params, guess_starting_params):
+        if mask:
+            mask = np.zeros((100, 100), dtype=bool)
+        else:
+            mask = None
+        print(mask, return_params, guess_starting_params)
+        t = np.ones((100, 100))
+        x, y = np.ogrid[-45:55, -50:50]
+        t[x**2 + (y * 1.15) ** 2 < 40**2] = 100
+        t[x**2 + (y * 1.15) ** 2 < 30**2] = 1
+        rng = np.random.RandomState(3)
+        t = t + rng.random((100, 100))
+        if not guess_starting_params:
+            params = {
+                "xf": 50,
+                "yf": 50,
+                "rf_lim": 20,
+                "semi_len_min": 30,
+                "semi_len_max": 100,
+                "semi_len_ratio_lim": 1.2,
+                "min_samples": 6,
+                "residual_threshold": 20,
+                "max_trials": 1000,
+            }
+        else:
+            params = {}
+        ans = ret.determine_ellipse(
+            t,
+            mask=mask,
+            use_ransac=True,
+            num_points=50,
+            return_params=return_params,
+            guess_starting_params=guess_starting_params,
+            **params
+        )
+        center = ans[0]
+        affine = ans[1]
+
+        np.testing.assert_array_almost_equal(
+            affine,
+            [[1.0, 0, 0], [0, 0.87, 0], [0, 0, 1]],
+            1,
+        )
+        np.testing.assert_array_almost_equal(center, [45, 50], 0)
+
+    @mark.parametrize("mask", [True, False])
+    @mark.parametrize("return_params", [True, False])
+    def test_determine_ellipse_no_ransac(self, mask, return_params):
         if mask:
             mask = np.zeros((100, 100), dtype=bool)
             mask[40:50, :] = True
@@ -1045,11 +899,18 @@ class TestDetermineEllipse:
         t[x**2 + (y * 1.15) ** 2 < 40**2] = 100
         t[x**2 + (y * 1.15) ** 2 < 30**2] = 1
         t = t + np.random.random((100, 100))
-        center, affine = ret.determine_ellipse(t, mask=mask, use_ransac=ransac)
+        ans = ret.determine_ellipse(
+            t,
+            mask=mask,
+            use_ransac=False,
+            return_params=return_params,
+        )
+        center = ans[0]
+        affine = ans[1]
 
         np.testing.assert_array_almost_equal(
             affine,
-            [[1.0, 0, 0], [0, 1.15, 0], [0, 0, 1]],
+            [[1.0, 0, 0], [0, 0.87, 0], [0, 0, 1]],
             2,
         )
         np.testing.assert_array_almost_equal(center, [45, 50], 0)
@@ -1079,7 +940,7 @@ class TestDetermineEllipse:
         assert np.sum((s_az.sum(axis=0).isig[6:] > 1).data) < 11
 
     @mark.parametrize("rot", np.linspace(0, 2 * np.pi, 10))
-    def test_determine_ellipse(self, rot):
+    def test_determine_ellipse_ring(self, rot):
         test_data = mdtd.MakeTestData(200, 200, default=False)
         test_data.add_disk(x0=100, y0=100, r=5, intensity=30)
         test_data.add_ring_ellipse(

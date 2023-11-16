@@ -24,6 +24,7 @@ from hyperspy.signals import Signal2D
 from hyperspy.signal import BaseSignal
 
 from pyxem.signals import DiffractionVectors, DiffractionVectors2D, DiffractionVectors1D
+from hyperspy.axes import UniformDataAxis
 
 # DiffractionVectors correspond to a single list of vectors, a map of vectors
 # all of equal length, and the ragged case. A fixture is defined for each of
@@ -123,8 +124,8 @@ def test_get_cartesian_coordinates(diffraction_vectors_map):
 
 
 class TestInitVectors:
-    def test_from_peaks(self):
-        vectors = np.random.randint(0, 100, (2, 2, 10, 2))
+    @pytest.fixture()
+    def peaks(self):
         vectors = np.empty((2, 2), dtype=object)
         vectors[0, 0] = np.random.randint(0, 100, (5, 2))
         vectors[0, 1] = np.random.randint(0, 100, (6, 2))
@@ -132,7 +133,9 @@ class TestInitVectors:
         vectors[1, 1] = np.random.randint(0, 100, (8, 2))
 
         peaks = BaseSignal(vectors, ragged=True)
+        return peaks
 
+    def test_from_peaks(self, peaks):
         dv = DiffractionVectors.from_peaks(
             peaks,
             center=(50, 50),
@@ -140,8 +143,78 @@ class TestInitVectors:
         )
 
         for i in np.ndindex((2, 2)):
-            np.testing.assert_array_equal((vectors[i] - 50) * 0.1, dv.data[i])
+            np.testing.assert_array_equal((peaks.data[i] - 50) * 0.1, dv.data[i])
         assert dv.scales == [0.1, 0.1]
+
+    def test_from_peaks_calibration(self, peaks):
+        peaks.metadata.add_node("Peaks.signal_axes")
+        peaks.metadata.Peaks.signal_axes = (
+            UniformDataAxis(scale=0.1, offset=-5.0, units="nm"),
+            UniformDataAxis(scale=0.1, offset=-5.0, units="nm"),
+        )
+        dv = DiffractionVectors.from_peaks(
+            peaks,
+            center=None,
+            calibration=None,
+        )
+
+        for i in np.ndindex((2, 2)):
+            np.testing.assert_almost_equal((peaks.data[i]) * 0.1 - 5.0, dv.data[i])
+        assert dv.scales == [0.1, 0.1]
+
+    def test_from_peaks_calibration_to_markers(self, peaks):
+        peaks.metadata.add_node("Peaks.signal_axes")
+        peaks.metadata.Peaks.signal_axes = (
+            UniformDataAxis(scale=0.1, offset=-5.0, units="nm"),
+            UniformDataAxis(scale=0.1, offset=-5.0, units="nm"),
+        )
+        dv = DiffractionVectors.from_peaks(
+            peaks,
+            center=None,
+            calibration=None,
+        )
+        points = dv.to_markers()
+        for i in np.ndindex((2, 2)):
+            np.testing.assert_almost_equal(
+                ((peaks.data[i]) * 0.1 - 5.0)[:, 0],
+                points.kwargs["offsets"][i[::-1]][:, 1],
+            )
+
+    def test_from_peaks_calibration_error(self, peaks):
+        with pytest.raises(ValueError):
+            dv = DiffractionVectors.from_peaks(
+                peaks,
+                center=None,
+                calibration=None,
+            )
+        with pytest.raises(ValueError):
+            dv = DiffractionVectors.from_peaks(
+                peaks,
+                center=(1.0, 1.0),
+                calibration=None,
+            )
+        with pytest.raises(ValueError):
+            dv = DiffractionVectors.from_peaks(
+                peaks,
+                center=None,
+                calibration=(1.0, 1.0),
+            )
+
+    def test_from_peaks_calibration_2_peaks(self, peaks):
+        peaks.metadata.add_node("Peaks.signal_axes")
+        peaks.metadata.Peaks.signal_axes = (
+            UniformDataAxis(scale=0.1, offset=-5.0, units="nm"),
+            UniformDataAxis(scale=0.1, offset=-5.0, units="nm"),
+        )
+        dv = DiffractionVectors.from_peaks(
+            peaks,
+            center=None,
+            calibration=None,
+        )
+        pixels = dv.pixel_vectors
+
+        for i in np.ndindex((2, 2)):
+            np.testing.assert_almost_equal(peaks.data[i], pixels[i])
 
     def test_initial_metadat(self, diffraction_vectors_map):
         assert diffraction_vectors_map.scales is None

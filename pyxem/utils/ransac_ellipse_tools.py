@@ -24,7 +24,7 @@ from skimage.measure import EllipseModel, ransac
 import warnings
 from hyperspy.signals import BaseSignal
 from hyperspy.misc.utils import isiterable
-import pyxem.utils.marker_tools as mt
+import hyperspy.api as hs
 
 
 def is_ellipse_good(
@@ -263,7 +263,7 @@ def get_ellipse_model_ransac_single_frame(
     semi_len_ratio_lim=1.2,
     min_samples=6,
     residual_threshold=10,
-    max_trails=500,
+    max_trials=500,
 ):
     """Pick a random number of data points to fit an ellipse to.
 
@@ -291,7 +291,7 @@ def get_ellipse_model_ransac_single_frame(
         Minimum number of data points to fit the ellipse model to.
     residual_threshold : scalar, optional
         Maximum distance for a data point to be considered an inlier.
-    max_trails : scalar, optional
+    max_trials : scalar, optional
         Maximum number of tries for the ransac algorithm.
 
     Returns
@@ -307,7 +307,7 @@ def get_ellipse_model_ransac_single_frame(
     ...        np.arange(0, 2*np.pi, 0.5), params=(128, 130, 50, 60, 0.2))
     >>> ellipse_model, inliers = ret.get_ellipse_model_ransac_single_frame(
     ...        data, xf=128, yf=128, rf_lim=5, semi_len_min=45,
-    ...        semi_len_max=65, semi_len_ratio_lim=1.4, max_trails=1000)
+    ...        semi_len_max=65, semi_len_ratio_lim=1.4, max_trials=1000)
 
     """
     is_model_valid = partial(
@@ -332,7 +332,7 @@ def get_ellipse_model_ransac_single_frame(
             EllipseModel,
             min_samples=min_samples,
             residual_threshold=residual_threshold,
-            max_trials=max_trails,
+            max_trials=max_trials,
             is_model_valid=is_model_valid,
         )
         if model_ransac is not None:
@@ -355,7 +355,7 @@ def get_ellipse_model_ransac(
     semi_len_ratio_lim=1.2,
     min_samples=6,
     residual_threshold=10,
-    max_trails=500,
+    max_trials=500,
     show_progressbar=True,
 ):
     """Pick a random number of data points to fit an ellipse to.
@@ -369,7 +369,7 @@ def get_ellipse_model_ransac(
     data : NumPy array
         In the form [[[[x0, y0], [x1, y1], ...]]]
     xf, yf : scalar, optional
-        Default 128
+        Default 128 center of the diffraction pattern
     rf_lim : scalar, optional
         How far the ellipse centre can be from (xf, yf)
     semi_len_min, semi_len_max : scalar, optional
@@ -384,7 +384,7 @@ def get_ellipse_model_ransac(
         Minimum number of data points to fit the ellipse model to.
     residual_threshold : scalar, optional
         Maximum distance for a data point to be considered an inlier.
-    max_trails : scalar, optional
+    max_trials : scalar, optional
         Maximum number of tries for the ransac algorithm.
     show_progressbar : bool, optional
         Default True
@@ -407,19 +407,24 @@ def get_ellipse_model_ransac(
     inlier_array = np.zeros(data.shape[:2], dtype=object)
     num_total = data.shape[0] * data.shape[1]
     t = tqdm(np.ndindex(data.shape[:2]), disable=not show_progressbar, total=num_total)
+
+    new_peaks = np.empty(data.shape, dtype=object)
+    for i in np.ndindex(data.shape):
+        new_peaks[i] = data[i][:, ::-1]
+
     for iy, ix in t:
         temp_xf, temp_yf = xf[iy, ix], yf[iy, ix]
         ellipse_model, inliers = get_ellipse_model_ransac_single_frame(
-            data[iy, ix],
-            xf=temp_yf,
-            yf=temp_xf,
+            new_peaks[iy, ix],  # reverse x,y for pixel units
+            xf=temp_xf,
+            yf=temp_yf,
             rf_lim=rf_lim,
             semi_len_min=semi_len_min,
             semi_len_max=semi_len_max,
             semi_len_ratio_lim=semi_len_ratio_lim,
             min_samples=min_samples,
             residual_threshold=residual_threshold,
-            max_trails=max_trails,
+            max_trials=max_trials,
         )
         if ellipse_model is not None:
             params = ellipse_model.params
@@ -428,154 +433,6 @@ def get_ellipse_model_ransac(
         ellipse_array[iy, ix] = params
         inlier_array[iy, ix] = inliers
     return ellipse_array, inlier_array
-
-
-def _get_lines_list_from_ellipse_params(ellipse_params, nr=20):
-    """Get a line vector list from ellipse params.
-
-    Useful for making HyperSpy line segment markers.
-
-    Parameters
-    ----------
-    ellipse_params : tuple
-        (y, x, semi1, semi0, rotation)
-    nr : scalar, optional
-        Number of data points in the ellipse, default 20.
-
-    Returns
-    -------
-    lines_list : list of list
-        [[x0, y0, x1, y1], [x1, y1, x2, y2], ...]
-
-    Examples
-    --------
-    >>> import pyxem.utils.ransac_ellipse_tools as ret
-    >>> ellipse_params = (30, 70, 10, 20, 0.5)
-    >>> lines_list = ret._get_lines_list_from_ellipse_params(ellipse_params)
-
-    """
-    ellipse_data_array = make_ellipse_data_points(
-        *ellipse_params, nt=nr, use_focus=False
-    )
-    lines_list = []
-    for i in range(len(ellipse_data_array) - 1):
-        pos0 = ellipse_data_array[i]
-        pos1 = ellipse_data_array[i + 1]
-        lines_list.append([pos0[0], pos0[1], pos1[0], pos1[1]])
-    pos0, pos1 = ellipse_data_array[-1], ellipse_data_array[0]
-    lines_list.append([pos0[0], pos0[1], pos1[0], pos1[1]])
-    return lines_list
-
-
-def _get_lines_array_from_ellipse_array(ellipse_array, nr=20):
-    """Get a line vector array from ellipse params.
-
-    Useful for making HyperSpy line segment markers.
-
-    Parameters
-    ----------
-    ellipse_array : tuple
-        (y, x, semi1, semi0, rotation)
-    nr : scalar, optional
-        Number of data points in the ellipse, default 20.
-
-    Returns
-    -------
-    lines_array : NumPy array
-        [[[[x0, y0, x1, y1], [x1, y1, x2, y2], ...]]]
-
-    Examples
-    --------
-    >>> import pyxem.utils.ransac_ellipse_tools as ret
-    >>> ellipse_array = np.empty((2, 3), dtype=object)
-    >>> ellipse_array[0, 0] = (30, 70, 10, 20, 0.5)
-    >>> ellipse_array[1, 0] = (31, 69, 10, 21, 0.5)
-    >>> ellipse_array[0, 1] = (29, 68, 10, 21, 0.1)
-    >>> ellipse_array[0, 2] = (29, 68, 9, 21, 0.3)
-    >>> ellipse_array[1, 1] = (28, 71, 9, 21, 0.5)
-    >>> ellipse_array[1, 2] = (32, 68, 11, 22, 0.3)
-    >>> larray = ret._get_lines_array_from_ellipse_array(ellipse_array, nr=20)
-
-    """
-    lines_array = np.empty(ellipse_array.shape[:2], dtype=object)
-    for ix, iy in np.ndindex(ellipse_array.shape[:2]):
-        ellipse_params = ellipse_array[ix, iy]
-        if ellipse_params is not None:
-            lines_list = _get_lines_list_from_ellipse_params(ellipse_params, nr=nr)
-            lines_array[ix, iy] = lines_list
-        else:
-            lines_array[ix, iy] = None
-    return lines_array
-
-
-def _get_inlier_outlier_peak_arrays(peak_array, inlier_array):
-    inlier_peak_array = np.empty(peak_array.shape[:2], dtype=object)
-    outlier_peak_array = np.empty(peak_array.shape[:2], dtype=object)
-    for ix, iy in np.ndindex(peak_array.shape[:2]):
-        inliers = inlier_array[ix, iy]
-        if inliers is not None:
-            outliers = ~inlier_array[ix, iy]
-            inlier_peaks = peak_array[ix, iy][inliers]
-            outlier_peaks = peak_array[ix, iy][outliers]
-        else:
-            inlier_peaks = None
-            outlier_peaks = peak_array[ix, iy]
-        inlier_peak_array[ix, iy] = inlier_peaks
-        outlier_peak_array[ix, iy] = outlier_peaks
-    return inlier_peak_array, outlier_peak_array
-
-
-def _get_ellipse_marker_list_from_ellipse_array(
-    ellipse_array, nr=20, signal_axes=None, color="red", linewidth=1, linestyle="solid"
-):
-    lines_array = _get_lines_array_from_ellipse_array(ellipse_array, nr=nr)
-    marker_lines_list = mt._get_4d_line_segment_list(
-        lines_array,
-        signal_axes=signal_axes,
-        color=color,
-        linewidth=linewidth,
-        linestyle=linestyle,
-    )
-    return marker_lines_list
-
-
-def _get_ellipse_markers(
-    ellipse_array,
-    inlier_array=None,
-    peak_array=None,
-    nr=20,
-    signal_axes=None,
-    color_ellipse="blue",
-    linewidth=1,
-    linestyle="solid",
-    color_inlier="blue",
-    color_outlier="red",
-    point_size=20,
-):
-    marker_list = _get_ellipse_marker_list_from_ellipse_array(
-        ellipse_array,
-        nr=nr,
-        signal_axes=signal_axes,
-        color=color_ellipse,
-        linewidth=linewidth,
-        linestyle=linestyle,
-    )
-    if inlier_array is not None:
-        inlier_parray, outlier_parray = _get_inlier_outlier_peak_arrays(
-            peak_array, inlier_array
-        )
-        marker_in_list = mt._get_4d_points_marker_list(
-            inlier_parray, signal_axes=signal_axes, color=color_inlier, size=point_size
-        )
-        marker_out_list = mt._get_4d_points_marker_list(
-            outlier_parray,
-            signal_axes=signal_axes,
-            color=color_outlier,
-            size=point_size,
-        )
-        marker_list.extend(marker_in_list)
-        marker_list.extend(marker_out_list)
-    return marker_list
 
 
 def _get_max_positions(signal, mask=None, num_points=5000):
@@ -625,6 +482,101 @@ def _ellipse_to_affine(major, minor, rot):
     S = [[1, 0, 0], [0, minor / major, 0], [0, 0, 1]]
     C = np.matmul(np.matmul(Q, S), np.transpose(Q))
     return C
+
+
+def mask_peak_array(array, mask, invert=False):
+    """Return only the peaks in the array which are not masked. Works for
+    both ragged and non-ragged arrays.
+
+    Parameters
+    ----------
+    array: np.ndarray
+        The array of peaks to be masked. Can be ragged or non-ragged.
+    mask: np.ndarray
+        The mask to be applied to the array. If the array is ragged, the mask
+        must be ragged as well.
+    invert: bool
+        If True, the mask is inverted.
+    """
+    if array.dtype != object:
+        if invert:
+            mask = np.logical_not(mask)
+        return array[mask]
+    else:
+        masked_array = np.empty(array.shape, dtype=object)
+        for i in np.ndindex(array.shape):
+            if invert:
+                m = np.logical_not(mask[i])
+            else:
+                m = mask[i]
+            masked_array[i] = array[i][m]
+        return masked_array
+
+
+def ellipse_to_markers(ellipse_array, points=None, inlier=None):
+    """Convert an ellipse array to a :class:`hs.plot.markers.Ellipses` object. If points and
+    inlier are provided, then the points are also plotted. The inlier points are plotted in green
+    and the outlier points are plotted in red.
+
+    Parameters
+    ----------
+    ellipse_array: np.ndarray
+        The array of ellipses parameters in the form [x_c, y_c, semi_len0, semi_len1, rotation]
+    points: np.ndarray
+        The array of points to be plotted. If None, then no points are plotted.
+    inlier:np.ndarray
+        The bool array of inlier points. If None, then no points are plotted.
+
+    Returns
+    -------
+
+    """
+    if not isinstance(ellipse_array, np.ndarray):
+        ellipse_array = np.array(ellipse_array)
+    ellipse_array = ellipse_array.T
+    if ellipse_array.dtype == object:
+        offsets = np.empty(ellipse_array.shape, dtype=object)
+        heights = np.empty(ellipse_array.shape, dtype=object)
+        widths = np.empty(ellipse_array.shape, dtype=object)
+        angles = np.empty(ellipse_array.shape, dtype=object)
+        for i in np.ndindex(ellipse_array.shape):
+            offsets[i] = ellipse_array[i][:2]
+            heights[i] = ellipse_array[i][3] * 2
+            widths[i] = ellipse_array[i][2] * 2
+            angles[i] = np.rad2deg(ellipse_array[i][4])
+    else:
+        offsets = np.array(
+            [
+                ellipse_array[:2],
+            ]
+        )
+        heights = ellipse_array[3] * 2
+        widths = ellipse_array[2] * 2
+        angles = np.rad2deg(ellipse_array[4])
+
+    el = hs.plot.markers.Ellipses(
+        offsets=offsets,
+        heights=heights,
+        widths=widths,
+        angles=angles,
+        facecolor="none",
+        edgecolor="white",
+        lw=4,
+    )
+
+    if points is not None and inlier is not None:
+        in_points = hs.plot.markers.Points(
+            offsets=mask_peak_array(points, inlier), color="green"
+        )
+        out_points = hs.plot.markers.Points(
+            offsets=mask_peak_array(points, inlier, invert=True), color="red", alpha=0.5
+        )
+        return el, in_points, out_points
+    elif points is not None:
+        points = hs.plot.markers.Points(offsets=points, color="green", alpha=0.5)
+        return el, points
+    else:
+        return el
 
 
 def determine_ellipse(
@@ -686,7 +638,7 @@ def determine_ellipse(
     pos = _get_max_positions(signal, mask=mask, num_points=num_points)
     if use_ransac:
         if guess_starting_params:
-            el, _ = get_ellipse_model_ransac_single_frame(
+            el, inlier = get_ellipse_model_ransac_single_frame(
                 pos,
                 xf=np.mean(pos[:, 0]),
                 yf=np.mean(pos[:, 1]),
@@ -696,10 +648,10 @@ def determine_ellipse(
                 semi_len_ratio_lim=1.2,
                 min_samples=6,
                 residual_threshold=20,
-                max_trails=1000,
+                max_trials=1000,
             )
         else:
-            el, _ = get_ellipse_model_ransac_single_frame(pos, **kwargs)
+            el, inlier = get_ellipse_model_ransac_single_frame(pos, **kwargs)
     else:
         e = EllipseModel()
         converge = e.estimate(data=pos)
@@ -707,10 +659,12 @@ def determine_ellipse(
     if el is not None:
         affine = _ellipse_to_affine(el.params[3], el.params[2], el.params[4])
         center = (el.params[0], el.params[1])
-        if return_params:
-            return center, affine, el.params
+        if return_params and use_ransac:
+            return center, affine, el.params, pos, inlier
+        elif return_params:
+            return center, affine, el.params, pos
         else:
             return center, affine
-    else:
+    else:  # pragma: no cover
         warnings.warn("Ransac Ellipse detection did not converge")
         return None

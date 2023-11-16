@@ -19,7 +19,7 @@
 import numpy as np
 from sklearn import cluster
 from hyperspy.misc.utils import isiterable
-import pyxem.utils.marker_tools as mt
+import hyperspy.api as hs
 
 
 def _find_nearest(array, value):
@@ -446,15 +446,28 @@ def _add_peak_dicts_to_signal(
     >>> s.plot()
 
     """
-    mt.add_peak_array_to_signal_as_markers(
-        signal, peak_dicts["centre"], color=color_centre, size=size
+    center_points = hs.plot.markers.Points(
+        peak_dicts["centre"],
+        color=color_centre,
+        sizes=[
+            size,
+        ],
     )
-    mt.add_peak_array_to_signal_as_markers(
-        signal, peak_dicts["rest"], color=color_rest, size=size
+    rest_points = hs.plot.markers.Points(
+        peak_dicts["rest"],
+        color=color_rest,
+        sizes=[
+            size,
+        ],
     )
-    mt.add_peak_array_to_signal_as_markers(
-        signal, peak_dicts["none"], color=color_none, size=size
+    none_points = hs.plot.markers.Points(
+        peak_dicts["none"],
+        color=color_none,
+        sizes=[
+            size,
+        ],
     )
+    signal.add_marker([center_points, rest_points, none_points])
 
 
 def _sorted_cluster_dict_to_marker_list(
@@ -486,9 +499,16 @@ def _sorted_cluster_dict_to_marker_list(
     --------
     >>> from numpy.random import randint
     >>> sorted_cluster_dict = {}
-    >>> sorted_cluster_dict['centre'] = randint(10, size=(3, 4, 10, 2))
-    >>> sorted_cluster_dict['rest'] = randint(50, 60, size=(3, 4, 10, 2))
-    >>> sorted_cluster_dict['none'] = randint(90, size=(3, 4, 2, 2))
+    >>> center_arr = np.empty((3,4), dtype=object)
+    >>> rest_arr = np.empty((3,4), dtype=object)
+    >>> none_arr = np.empty((3,4), dtype=object)
+    >>> for i in np.ndindex((3,4)):
+    ...     center_arr[i] = randint(10, size=(10, 2))
+    ...     rest_arr[i] = randint(50, 60, size=(10, 2))
+    ...     none_arr[i] = randint(90, size=(2, 2))
+    >>> sorted_cluster_dict['centre'] = center_arr
+    >>> sorted_cluster_dict['rest'] = rest_arr
+    >>> sorted_cluster_dict['none'] = none_arr
     >>> import pyxem.utils.cluster_tools as ct
     >>> marker_list = ct._sorted_cluster_dict_to_marker_list(
     ...     sorted_cluster_dict)
@@ -503,6 +523,7 @@ def _sorted_cluster_dict_to_marker_list(
     ...     color_none='purple', size=15)
 
     """
+
     marker_list = []
     for label, cluster_list in sorted_cluster_dict.items():
         if label == "centre":
@@ -513,8 +534,8 @@ def _sorted_cluster_dict_to_marker_list(
             color = color_none
         else:
             color = "cyan"
-        temp_markers = mt._get_4d_points_marker_list(
-            cluster_list, signal_axes=signal_axes, color=color, size=size
+
+        marker_list.append(
+            hs.plot.markers.Points(cluster_list, color=color, size=size),
         )
-        marker_list.extend(temp_markers)
     return marker_list

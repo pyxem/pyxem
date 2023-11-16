@@ -26,17 +26,14 @@ from scipy.spatial import distance_matrix
 from sklearn.cluster import DBSCAN
 
 from hyperspy.signals import BaseSignal, Signal1D
-from hyperspy.drawing._markers.point import Point
+from hyperspy.drawing._markers.points import Points
 from hyperspy.misc.utils import isiterable
 
 from pyxem.utils.signal import (
-    transfer_navigation_axes,
     transfer_navigation_axes_to_signal_axes,
 )
 from pyxem.utils.vector_utils import (
     detector_to_fourier,
-    calculate_norms,
-    calculate_norms_ragged,
     get_npeaks,
     filter_vectors_ragged,
     filter_vectors_edge_ragged,
@@ -60,61 +57,25 @@ number of peaks.
 """
 
 
-def _find_max_length_peaks(peaks):
-    """Worker function for generate_marker_inputs_from_peaks.
+def _reverse_pos(peaks, ind=2):
+    """Reverses the position of the peaks in the signal.
+
+    This is useful for plotting the peaks on top of a hyperspy signal as the returned peaks are in
+    reverse order to the hyperspy markers. Only points up to the index are reversed.
 
     Parameters
     ----------
-    peaks : :class:`~pyxem.diffraction_vectors.DiffractionVectors`
-        Identified peaks in a diffraction signal.
-
-    Returns
-    -------
-    longest_length : int
-        The length of the longest peak list.
+    peaks : np.array
+        Array of peaks to be reversed.
+    ind : int
+        The index of the position to be reversed.
 
     """
-    length_of_longest_peaks_list = 0
-    with peaks.unfolded(unfold_navigation=True, unfold_signal=False):
-        for array in peaks.data:
-            if array.shape[0] > length_of_longest_peaks_list:
-                length_of_longest_peaks_list = array.shape[0]
-    return length_of_longest_peaks_list
-
-
-def generate_marker_inputs_from_peaks(peaks):
-    """Takes a peaks (defined in 2D) object from a STEM (more than 1 image) scan
-    and returns markers.
-
-    Parameters
-    ----------
-    peaks : :class:`~pyxem.diffraction_vectors.DiffractionVectors`
-        Identifies peaks in a diffraction signal.
-
-    Example
-    -------
-    How to get these onto images::
-
-        mmx,mmy = generate_marker_inputs_from_peaks(found_peaks)
-        dp.plot(cmap='viridis')
-        for mx,my in zip(mmx,mmy):
-            m = hs.markers.point(x=mx,y=my,color='red',marker='x')
-            dp.add_marker(m,plot_marker=True,permanent=False)
-
-    """
-    max_peak_len = _find_max_length_peaks(peaks)
-    if peaks.data.dtype == np.dtype("O"):
-        navshape = peaks.data.shape
-    else:
-        navshape = peaks.axes_manager.navigation_shape[::-1]
-    pad = np.full((max_peak_len, *navshape, 2), np.nan)
-    for coordinate in np.ndindex(navshape):
-        array = peaks.data[coordinate]
-        sl = (slice(0, array.shape[0]), *coordinate, slice(None))
-        pad[sl] = array
-    x = pad[..., 0]
-    y = pad[..., 1]
-    return x, y
+    new_data = peaks.copy()
+    for i in range(ind):
+        sl = ind - i - 1
+        new_data[..., i] = peaks[..., sl]
+    return new_data
 
 
 class DiffractionVectors(BaseSignal):
@@ -141,7 +102,7 @@ class DiffractionVectors(BaseSignal):
         super().__init__(*args, **kwargs)
 
         self.metadata.add_node("VectorMetadata")
-        if _scales is not None or not "scales" in self.metadata.VectorMetadata:
+        if _scales is not None or "scales" not in self.metadata.VectorMetadata:
             self.metadata.VectorMetadata["scales"] = _scales
         if _offsets is not None or "offsets" not in self.metadata.VectorMetadata:
             self.metadata.VectorMetadata["offsets"] = _offsets
@@ -153,9 +114,10 @@ class DiffractionVectors(BaseSignal):
         self.cartesian = None
         self.hkls = None
         self.is_real_units = False
+        self.has_intensity = False
 
     @classmethod
-    def from_peaks(cls, peaks, center, calibration):
+    def from_peaks(cls, peaks, center=None, calibration=None):
         """Takes a list of peak positions (pixel coordinates) and returns
         an instance of `Diffraction2D`
 
@@ -164,27 +126,87 @@ class DiffractionVectors(BaseSignal):
         peaks : Signal
             Signal containing lists (np.array) of pixel coordinates specifying
             the reflection positions
-        center : np.array
-            Diffraction pattern center in array indices.
-        calibration : np.array
-            Calibration in reciprocal Angstroms per pixels for each of the dimensions.
+        center : np.array, or None
+            Diffraction pattern center in array indices. When None, the center
+            is taken from the peaks.metadata.Peaks.signal_axes if present.
 
+        calibration : np.array,float or None
+            Calibration in reciprocal Angstroms per pixels for each of the dimensions.
+            When None, the calibration is taken from the peaks.metadata.Peaks.signal_axes
+            if present. When a single value is given, the same calibration is used for
+            every dimensions.
         Returns
         -------
         vectors : :obj:`pyxem.signals.diffraction_vectors.DiffractionVectors`
             List of diffraction vectors
         """
+        if center is None or calibration is None:
+            if peaks.metadata.has_item("Peaks.signal_axes"):
+                center = [
+                    -ax.offset / ax.scale
+                    for ax in peaks.metadata.Peaks.signal_axes[::-1]
+                ]
+                calibration = [
+                    ax.scale for ax in peaks.metadata.Peaks.signal_axes[::-1]
+                ]
+            else:
+                raise ValueError(
+                    "A center and calibration must be provided unless the"
+                    "peaks.metadata.Peaks.signal_axes is given (usually by"
+                    "running the ``find_peaks`` function)."
+                )
+
+        if not isiterable(calibration):
+            calibration = [
+                calibration,
+                calibration,
+            ]  # same calibration for both dimensions
+        if peaks.data[(0,) * peaks.data.ndim].shape[0] == len(calibration) + 1:
+            # account for the intensity column
+            center = list(center) + [
+                0,
+            ]
+            calibration = list(calibration) + [
+                1,
+            ]
+            has_intensity = True
+        else:
+            has_intensity = False
+
         gvectors = peaks.map(
-            peaks_as_gvectors,
-            center=center,
-            calibration=calibration,
+            lambda x, cen, cal: (x - cen) * cal,
+            cal=calibration,
+            cen=center,
             inplace=False,
             ragged=True,
         )
         vectors = cls(gvectors)
         vectors.scales = calibration
-        vectors.is_real_units = True
+        vectors.center = center  # set calibration first
+        vectors.has_intensity = has_intensity
         return vectors
+
+    @property
+    def pixel_vectors(self, scales=None, center=None):
+        """Returns the diffraction vectors in pixel coordinates."""
+        if (scales is None and self.scales is None) or (
+            center is None and self.offsets is None
+        ):
+            raise ValueError(
+                "The scales and offsets must be provided if " "not set in the metadata."
+            )
+        if scales is None:
+            scales = self.scales
+        if center is None:
+            center = self.center
+        pixels = self.map(
+            lambda x, cen, cal: x / cal + center,
+            cal=scales,
+            cen=center,
+            inplace=False,
+            ragged=True,
+        )
+        return pixels.data
 
     @property
     def num_columns(self):
@@ -229,6 +251,15 @@ class DiffractionVectors(BaseSignal):
             self.metadata.VectorMetadata["offsets"] = [
                 value,
             ] * self.num_columns
+
+    @property
+    def center(self):
+        """The center of the diffraction pattern in pixels."""
+        return np.divide(self.offsets, self.scales)
+
+    @center.setter
+    def center(self, value):
+        self.offsets = np.multiply(value, self.scales)
 
     @property
     @deprecated(
@@ -482,6 +513,27 @@ class DiffractionVectors(BaseSignal):
         plt.axis("off")
         return fig
 
+    def to_markers(self, **kwargs):
+        """
+        Convert the diffraction vectors to hyperspy markers.
+        Parameters
+        ----------
+        kwargs
+            Keyword arguments passed to the :class:`~hs.api.plot.markers.Points` constructor.
+        Returns
+        -------
+        markers : Points
+            The diffraction vectors as a hyperspy marker.
+
+        """
+        new = self.map(_reverse_pos, inplace=False, ragged=True)
+        return Points(offsets=new.data.T, **kwargs)
+
+    @deprecated(
+        since="0.17.0",
+        removal="1.0.0",
+        alternative="pyxem.signals.DiffractionVectors.to_markers",
+    )
     def plot_diffraction_vectors_on_signal(self, signal, *args, **kwargs):
         """Plot the diffraction vectors on a signal.
 
@@ -495,11 +547,13 @@ class DiffractionVectors(BaseSignal):
         **kwargs :
             Keyword arguments passed to signal.plot()
         """
-        mmx, mmy = generate_marker_inputs_from_peaks(self)
         signal.plot(*args, **kwargs)
-        for mx, my in zip(mmx, mmy):
-            m = Point(x=mx, y=my, color="red", marker="x")
-            signal.add_marker(m, plot_marker=True, permanent=False)
+        marker = self.to_markers(
+            color=[
+                "red",
+            ]
+        )
+        signal.add_marker(marker, plot_marker=True, permanent=False)
 
     def get_magnitudes(self, *args, **kwargs):
         """Calculate the magnitude of diffraction vectors.
@@ -773,7 +827,6 @@ class DiffractionVectors(BaseSignal):
             wavelength=wavelength,
             camera_length=camera_length * 1e10,
             inplace=False,
-            parallel=False,  # TODO: For testing
             ragged=True,
             *args,
             **kwargs

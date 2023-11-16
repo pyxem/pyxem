@@ -22,10 +22,8 @@ import numpy.linalg as la
 from tqdm import tqdm
 from hyperspy.components1d import Polynomial, Gaussian
 from hyperspy.signals import Signal2D
-from hyperspy.drawing._markers.line_segment import LineSegment
-from hyperspy.drawing._markers.point import Point
 from hyperspy.misc.utils import isiterable
-
+import hyperspy.api as hs
 import pyxem.utils.pixelated_stem_tools as pst
 
 
@@ -587,37 +585,19 @@ def _get_ellipse_parameters(g):
     return (xC, yC, semi_len0, semi_len1, rot, eccen)
 
 
-def _get_ellipse_from_parameters(x, y, semi_len0, semi_len1, rot, r_scale=0.05):
-    R = np.arange(0, 2 * np.pi, r_scale)
-    xx = x + semi_len0 * np.cos(R) * np.cos(rot) - semi_len1 * np.sin(R) * np.sin(rot)
-    yy = y + semi_len0 * np.cos(R) * np.sin(rot) + semi_len1 * np.sin(R) * np.cos(rot)
-    return (xx, yy)
-
-
-def _get_marker_list(
-    ellipse_parameters, x_list=None, y_list=None, name=None, r_scale=0.05
-):
+def _get_marker_list(ellipse_parameters, x_list=None, y_list=None):
     xC, yC, semi_len0, semi_len1, rot, ecce = _get_ellipse_parameters(
         ellipse_parameters
     )
-    xx, yy = _get_ellipse_from_parameters(
-        xC, yC, semi_len0, semi_len1, rot, r_scale=r_scale
-    )
     marker_list = []
     if x_list is not None:
-        for x, y in zip(x_list, y_list):
-            point_marker = Point(x, y, color="red")
-            if name is not None:
-                point_marker.name = name + "_" + point_marker.name
-            marker_list.append(point_marker)
-    for i in range(len(xx)):
-        if i == (len(xx) - 1):
-            line = LineSegment(xx[i], yy[i], xx[0], yy[0], color="green")
-        else:
-            line = LineSegment(xx[i], yy[i], xx[i + 1], yy[i + 1], color="green")
-        if name is not None:
-            line.name = name + "_" + line.name
-        marker_list.append(line)
+        offsets = np.array([x_list, y_list]).T
+        marker_list.append(hs.plot.markers.Points(offsets=offsets))
+    from pyxem.utils.ransac_ellipse_tools import ellipse_to_markers
+
+    marker_list.append(
+        ellipse_to_markers(ellipse_array=[xC, yC, semi_len0, semi_len1, rot])
+    )
     return marker_list
 
 
@@ -750,7 +730,9 @@ def fit_ellipses_to_signal(
         ellipse_list.append(output)
         marker_list.extend(
             _get_marker_list(
-                ellipse_parameters, x_list=x, y_list=y, name="circle" + str(i)
+                ellipse_parameters,
+                x_list=x,
+                y_list=y,
             )
         )
     s_m = s.deepcopy()

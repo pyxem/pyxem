@@ -22,7 +22,7 @@ from numpy.random import randint
 import dask.array as da
 from skimage import morphology
 
-from hyperspy.signals import Signal2D
+from hyperspy.signals import Signal2D, BaseSignal
 
 from pyxem.signals import Diffraction2D, LazyDiffraction2D
 import pyxem.utils.ransac_ellipse_tools as ret
@@ -92,7 +92,6 @@ class TestDiffraction2DFlipDiffraction:
         assert (s_flip.data[:, :, :3, :] == 1).all()
 
 
-@pytest.mark.slow
 class TestAddPeakArrayAsMarkers:
     def test_simple(self):
         s = Diffraction2D(np.zeros((2, 3, 100, 100)))
@@ -108,9 +107,23 @@ class TestAddPeakArrayAsMarkers:
         for index in np.ndindex(peak_array.shape):
             islice = np.s_[index]
             peak_array[islice] = np.random.randint(20, 80, (100, 2))
-        s.add_peak_array_as_markers(peak_array, color="blue")
-        marker0 = list(s.metadata.Markers)[9][1]
-        assert marker0.marker_properties["color"] == "blue"
+        s.add_peak_array_as_markers(peak_array, color=("blue",))
+        marker0 = list(s.metadata.Markers)[0][1]
+        assert marker0.kwargs["color"] == ("blue",)
+
+    def test_peak_array(self):
+        s = Diffraction2D(np.zeros((2, 3, 100, 100)))
+        peak_array = np.empty((3, 2), dtype=object)
+        for index in np.ndindex(peak_array.shape):
+            islice = np.s_[index]
+            peak_array[islice] = np.random.randint(20, 80, (100, 2))
+        pk = BaseSignal(peak_array)
+        s.add_peak_array_as_markers(pk)
+
+    def test_peak_array_error(self):
+        s = Diffraction2D(np.zeros((2, 3, 100, 100)))
+        with pytest.raises(TypeError):
+            s.add_peak_array_as_markers([1, 2, 3, 4])
 
     def test_size(self):
         s = Diffraction2D(np.zeros((2, 3, 100, 100)))
@@ -118,9 +131,9 @@ class TestAddPeakArrayAsMarkers:
         for index in np.ndindex(peak_array.shape):
             islice = np.s_[index]
             peak_array[islice] = np.random.randint(20, 80, (100, 2))
-        s.add_peak_array_as_markers(peak_array, size=13)
-        marker0 = list(s.metadata.Markers)[9][1]
-        assert marker0.get_data_position("size") == 13
+        s.add_peak_array_as_markers(peak_array, sizes=(13,))
+        marker = list(s.metadata.Markers)[0][1]
+        assert marker.kwargs["sizes"] == (13,)
 
     def test_3d_nav_dims(self):
         s = Diffraction2D(np.zeros((2, 3, 4, 100, 100)))
@@ -130,7 +143,7 @@ class TestAddPeakArrayAsMarkers:
             peak_array[islice] = np.random.randint(20, 80, (100, 2))
         s.add_peak_array_as_markers(peak_array)
         marker = list(s.metadata.Markers)[0][1]
-        assert marker.data["x1"][()].shape == (2, 3, 4)
+        assert marker.kwargs["offsets"][()].shape == (4, 3, 2)
 
     def test_1d_nav_dims(self):
         nav_dim = 3
@@ -141,17 +154,16 @@ class TestAddPeakArrayAsMarkers:
             peak_array[islice] = np.random.randint(20, 80, (100, 2))
         s.add_peak_array_as_markers(peak_array)
         marker = list(s.metadata.Markers)[0][1]
-        assert marker.data["x1"][()].shape == (3,)
+        assert marker.kwargs["offsets"].shape == (3,)
 
     def test_0d_nav_dims(self):
         s = Diffraction2D(np.zeros((100, 100)))
-        peak_array = np.random.randint(20, 80, size=(1, 1, 100, 2))
+        peak_array = np.random.randint(20, 80, size=(100, 2))
         s.add_peak_array_as_markers(peak_array)
         marker = list(s.metadata.Markers)[0][1]
-        assert marker.data["x1"].shape == ()
+        assert marker.kwargs["offsets"].dtype != object
 
 
-@pytest.mark.slow
 class TestAddEllipseArrayAsMarkers:
     def test_simple(self):
         s, parray = dd.get_simple_ellipse_signal_peak_array(seed=15)
@@ -163,10 +175,10 @@ class TestAddEllipseArrayAsMarkers:
             semi_len_min=40,
             semi_len_max=100,
             semi_len_ratio_lim=5,
-            max_trails=50,
+            max_trials=50,
         )
         s.add_ellipse_array_as_markers(
-            ellipse_array, inlier_array=inlier_array, peak_array=parray
+            ellipse_array, inlier_array=inlier_array.T, peak_array=parray.T
         )
 
     @pytest.mark.flaky(reruns=2)
@@ -181,13 +193,12 @@ class TestAddEllipseArrayAsMarkers:
             semi_len_min=40,
             semi_len_max=100,
             semi_len_ratio_lim=5,
-            max_trails=50,
+            max_trials=50,
         )
         s.add_ellipse_array_as_markers(ellipse_array)
         s1.add_ellipse_array_as_markers(
-            ellipse_array, inlier_array=inlier_array, peak_array=parray
+            ellipse_array, inlier_array=inlier_array.T, peak_array=parray.T
         )
-        assert len(list(s.metadata.Markers)) < len(list(s1.metadata.Markers))
 
     def test_wrong_input_dimensions(self):
         s = Diffraction2D(np.zeros((2, 5, 5)))
