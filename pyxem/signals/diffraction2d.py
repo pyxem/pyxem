@@ -26,7 +26,6 @@ from tqdm import tqdm
 import warnings
 
 import hyperspy.api as hs
-from hyperspy.drawing._markers.points import Points
 from hyperspy.signals import Signal2D, BaseSignal
 from hyperspy._signals.lazy import LazySignal
 from hyperspy.misc.utils import isiterable
@@ -1483,6 +1482,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             kwargs["navigator"] = s_nav
             super().plot(*args, **kwargs)
 
+    @deprecated(since="0.16.0", removal="1.0.0")
     def add_peak_array_as_markers(self, peak_array, permanent=True, **kwargs):
         """Add a peak array to the signal as HyperSpy markers.
 
@@ -1508,11 +1508,11 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         """
         if isinstance(peak_array, np.ndarray):
             if peak_array.dtype == object:
-                markers = Points(peak_array.T, **kwargs)
+                markers = hs.plot.markers.Points(peak_array.T, **kwargs)
             else:
-                markers = Points(peak_array, **kwargs)
+                markers = hs.plot.markers.Points(peak_array, **kwargs)
         elif isinstance(peak_array, BaseSignal):
-            markers = Points.from_signal(peak_array, **kwargs)
+            markers = hs.plot.markers.Points.from_signal(peak_array, **kwargs)
         else:
             raise TypeError("peak_array must be a NumPy array or a HyperSpy signal")
         self.add_marker(markers, permanent=permanent)
@@ -1530,19 +1530,22 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         Parameters
         ----------
         ellipse_array : NumPy array
+            Array with ellipse parameters in the form (xc, yc, semi0, semi1, rot)
         inlier_array : NumPy array, optional
+            The inlier array is a boolean array returned by the
+            :meth:`~pyxem.utils.ransac_ellipse_tools.determine_ellipse` algorithm to indicate which
+            points were used to fit the ellipse.
         peak_array : NumPy array, optional
+            All of the points used to fit the ellipse.
 
         Examples
         --------
-        >>> s, parray = pxm.dummy_data.get_simple_ellipse_signal_peak_array()
-        >>> import pyxem.utils.ransac_ellipse_tools as ret
-        >>> ellipse_array, inlier_array = ret.get_ellipse_model_ransac(
-        ...     parray, xf=95, yf=95, rf_lim=20, semi_len_min=40,
-        ...     semi_len_max=100, semi_len_ratio_lim=5, max_trails=50)
-        >>> s.add_ellipse_array_as_markers(
-        ...     ellipse_array, inlier_array=inlier_array, peak_array=parray)
+        >>> s, _ = pxm.dummy_data.get_simple_ellipse_signal_peak_array()
+        >>> ellipse_array = [128, 128, 20, 20, 0] # (xc, yc, semi0, semi1, rot)
+        >>> ellipse_array = [[128, ]]
         >>> s.plot()
+        >>> e = s.add_ellipse_array_as_markers(ellipse_array)
+
 
         """
         if len(self.data.shape) != 4:

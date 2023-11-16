@@ -57,8 +57,20 @@ number of peaks.
 """
 
 
-def reverse_pos(peaks, ind=2):
-    """Reverses the position of the peaks in the signal."""
+def _reverse_pos(peaks, ind=2):
+    """Reverses the position of the peaks in the signal.
+
+    This is useful for plotting the peaks on top of a hyperspy signal as the returned peaks are in
+    reverse order to the hyperspy markers. Only points up to the index are reversed.
+
+    Parameters
+    ----------
+    peaks : np.array
+        Array of peaks to be reversed.
+    ind : int
+        The index of the position to be reversed.
+
+    """
     new_data = peaks.copy()
     for i in range(ind):
         sl = ind - i - 1
@@ -114,36 +126,34 @@ class DiffractionVectors(BaseSignal):
         peaks : Signal
             Signal containing lists (np.array) of pixel coordinates specifying
             the reflection positions
-        center : np.array or None
-            Diffraction pattern center in array indices.
-        calibration : np.array or None
-            Calibration in reciprocal Angstroms per pixels for each of the dimensions.
+        center : np.array, or None
+            Diffraction pattern center in array indices. When None, the center
+            is taken from the peaks.metadata.Peaks.signal_axes if present.
 
+        calibration : np.array,float or None
+            Calibration in reciprocal Angstroms per pixels for each of the dimensions.
+            When None, the calibration is taken from the peaks.metadata.Peaks.signal_axes
+            if present. When a single value is given, the same calibration is used for
+            every dimensions.
         Returns
         -------
         vectors : :obj:`pyxem.signals.diffraction_vectors.DiffractionVectors`
             List of diffraction vectors
         """
-        if center is None and peaks.metadata.has_item("Peaks.signal_axes"):
-            center = [
-                -ax.offset / ax.scale for ax in peaks.metadata.Peaks.signal_axes[::-1]
-            ]
-        elif center is not None:
-            pass  # center is already set
-        else:
-            raise ValueError(
-                "A center and calibration must be provided unless the"
-                "peaks.metadata.Peaks.signal_axes is set."
-            )
-        if calibration is None and peaks.metadata.has_item("Peaks.signal_axes"):
-            calibration = [ax.scale for ax in peaks.metadata.Peaks.signal_axes[::-1]]
-        elif calibration is not None:
-            pass  # calibration is already set
-        else:
-            raise ValueError(
-                "A center and calibration must be provided unless the"
-                "peaks.metadata.Peaks.signal_axes is set."
-            )
+        if center is None or calibration is None:
+            if peaks.metadata.has_item("Peaks.signal_axes"):
+                center = [
+                    -ax.offset / ax.scale for ax in peaks.metadata.Peaks.signal_axes[::-1]
+                ]
+                calibration = [
+                    ax.scale for ax in peaks.metadata.Peaks.signal_axes[::-1]
+                    ]
+            else:
+                raise ValueError(
+                    "A center and calibration must be provided unless the"
+                    "peaks.metadata.Peaks.signal_axes is given (usually by"
+                    "running the ``find_peaks`` function)."
+                )
 
         if not isiterable(calibration):
             calibration = [
@@ -503,7 +513,19 @@ class DiffractionVectors(BaseSignal):
         return fig
 
     def to_markers(self, **kwargs):
-        new = self.map(reverse_pos, inplace=False, ragged=True)
+        """
+        Convert the diffraction vectors to hyperspy markers.
+        Parameters
+        ----------
+        kwargs
+            Keyword arguments passed to the :class:`~hs.api.plot.markers.Points` constructor.
+        Returns
+        -------
+        markers : Points
+            The diffraction vectors as a hyperspy marker.
+
+        """
+        new = self.map(_reverse_pos, inplace=False, ragged=True)
         return Points(offsets=new.data.T, **kwargs)
 
     @deprecated(

@@ -19,6 +19,7 @@ Fixed
 -----
 - Update pyxem to work with hyperspy 2.0.0 (#969)
 - Fixed slow markers (#969)
+- Removed parallel and max_workers keywords in favor of using dask (#969)
 
 2023-11-14 - version 0.16.0
 ===========================

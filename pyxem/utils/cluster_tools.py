@@ -19,8 +19,7 @@
 import numpy as np
 from sklearn import cluster
 from hyperspy.misc.utils import isiterable
-from hyperspy.drawing._markers.points import Points
-
+import hyperspy.api as hs
 
 def _find_nearest(array, value):
     array = np.asarray(array)
@@ -446,21 +445,21 @@ def _add_peak_dicts_to_signal(
     >>> s.plot()
 
     """
-    center_points = Points(
+    center_points = hs.plot.markers.Points(
         peak_dicts["centre"],
         color=color_centre,
         sizes=[
             size,
         ],
     )
-    rest_points = Points(
+    rest_points = hs.plot.markers.Points(
         peak_dicts["rest"],
         color=color_rest,
         sizes=[
             size,
         ],
     )
-    none_points = Points(
+    none_points = hs.plot.markers.Points(
         peak_dicts["none"],
         color=color_none,
         sizes=[
@@ -536,6 +535,6 @@ def _sorted_cluster_dict_to_marker_list(
             color = "cyan"
 
         marker_list.append(
-            Points(cluster_list, color=color, size=size),
+            hs.plot.markers.Points(cluster_list, color=color, size=size),
         )
     return marker_list

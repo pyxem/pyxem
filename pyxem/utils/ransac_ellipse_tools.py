@@ -24,9 +24,7 @@ from skimage.measure import EllipseModel, ransac
 import warnings
 from hyperspy.signals import BaseSignal
 from hyperspy.misc.utils import isiterable
-
-from hyperspy.drawing._markers.ellipses import Ellipses
-from hyperspy.drawing._markers.points import Points
+import hyperspy.api as hs
 
 
 def is_ellipse_good(
@@ -487,6 +485,19 @@ def _ellipse_to_affine(major, minor, rot):
 
 
 def mask_peak_array(array, mask, invert=False):
+    """Return only the peaks in the array which are not masked. Works for
+    both ragged and non-ragged arrays.
+
+    Parameters
+    ----------
+    array: np.ndarray
+        The array of peaks to be masked. Can be ragged or non-ragged.
+    mask: np.ndarray
+        The mask to be applied to the array. If the array is ragged, the mask
+        must be ragged as well.
+    invert: bool
+        If True, the mask is inverted.
+    """
     if array.dtype != object:
         if invert:
             mask = np.logical_not(mask)
@@ -503,13 +514,18 @@ def mask_peak_array(array, mask, invert=False):
 
 
 def ellipse_to_markers(ellipse_array, points=None, inlier=None):
-    """
+    """ Convert an ellipse array to a :class:`hs.plot.markers.Ellipses` object. If points and
+    inlier are provided, then the points are also plotted. The inlier points are plotted in green
+    and the outlier points are plotted in red.
 
     Parameters
     ----------
-    ellipse_array
-    points
-    inlier
+    ellipse_array: np.ndarray
+        The array of ellipses parameters in the form [x_c, y_c, semi_len0, semi_len1, rotation]
+    points: np.ndarray
+        The array of points to be plotted. If None, then no points are plotted.
+    inlier:np.ndarray
+        The bool array of inlier points. If None, then no points are plotted.
 
     Returns
     -------
@@ -538,7 +554,7 @@ def ellipse_to_markers(ellipse_array, points=None, inlier=None):
         widths = ellipse_array[2] * 2
         angles = np.rad2deg(ellipse_array[4])
 
-    el = Ellipses(
+    el = hs.plot.markers.Ellipses(
         offsets=offsets,
         heights=heights,
         widths=widths,
@@ -549,13 +565,13 @@ def ellipse_to_markers(ellipse_array, points=None, inlier=None):
     )
 
     if points is not None and inlier is not None:
-        in_points = Points(offsets=mask_peak_array(points, inlier), color="green")
-        out_points = Points(
+        in_points = hs.plot.markers.Points(offsets=mask_peak_array(points, inlier), color="green")
+        out_points = hs.plot.markers.Points(
             offsets=mask_peak_array(points, inlier, invert=True), color="red", alpha=0.5
         )
         return el, in_points, out_points
     elif points is not None:
-        points = Points(offsets=points, color="green", alpha=0.5)
+        points = hs.plot.markers.Points(offsets=points, color="green", alpha=0.5)
         return el, points
     else:
         return el

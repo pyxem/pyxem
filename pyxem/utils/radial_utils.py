@@ -22,10 +22,8 @@ import numpy.linalg as la
 from tqdm import tqdm
 from hyperspy.components1d import Polynomial, Gaussian
 from hyperspy.signals import Signal2D
-from hyperspy.drawing._markers.lines import Lines
-from hyperspy.drawing._markers.points import Points
 from hyperspy.misc.utils import isiterable
-
+import hyperspy.api as hs
 import pyxem.utils.pixelated_stem_tools as pst
 
 
@@ -594,7 +592,7 @@ def _get_marker_list(ellipse_parameters, x_list=None, y_list=None):
     marker_list = []
     if x_list is not None:
         offsets = np.array([x_list, y_list]).T
-        marker_list.append(Points(offsets=offsets))
+        marker_list.append(hs.plot.markers.Points(offsets=offsets))
     from pyxem.utils.ransac_ellipse_tools import ellipse_to_markers
 
     marker_list.append(
