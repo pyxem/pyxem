@@ -32,7 +32,7 @@ from pyxem.utils.labeled_vector_utils import (
     column_mean,
     vectors2image,
     convert_to_markers,
-    points_to_poly_collection,
+    points_to_polygon,
 )
 
 
@@ -126,41 +126,6 @@ class LabeledDiffractionVectors2D(DiffractionVectors2D):
             ans[i] = func(vectors[l:h], **kwargs)
         return ans
 
-    def cluster_labeled_vectors(
-        self, method="DBSCAN", metric="mean_nn", eps=2, max_search=None, min_samples=2
-    ):
-        vectors = self.data
-        if metric == "mean_nn":
-            if max_search is None:
-                max_search = eps * 10
-            dist_matrix = self.get_dist_matrix(max_search=max_search)
-        elif isinstance(metric, np.ndarray):
-            dist_matrix = metric
-        else:
-            raise (
-                ValueError(
-                    f"The metric: {metric} must be one of ['mean_nn'] or"
-                    f"a numpy distance matrix"
-                )
-            )
-
-        if method == "DBSCAN":
-            d = DBSCAN(eps=eps, min_samples=min_samples, metric="precomputed").fit(
-                dist_matrix
-            )
-            labels = d.labels_
-            initial_labels = vectors[:, -1].astype(int)
-            new_labels = labels[initial_labels]
-            new_labels[initial_labels == -1] = -1
-            print(f"{np.max(labels) + 1} : Clusters Found!")
-            vectors_and_labels = np.hstack([vectors, new_labels[:, np.newaxis]])
-            new_signal = self._deepcopy_with_new_data(data=vectors_and_labels)
-            new_signal.axes_manager.signal_axes[0].size = (
-                new_signal.axes_manager.signal_axes[0].size + 1
-            )
-            new_signal.is_clustered = True
-            return new_signal
-
     def plot_clustered(
         self,
         nav_columms=None,
@@ -223,18 +188,44 @@ class LabeledDiffractionVectors2D(DiffractionVectors2D):
             )
         return fig, axs
 
-    def cluster_labeled_vectors(self, eps=2, min_samples=2):
-        mean_pos = self.map_vectors(
-            column_mean, columns=[0, 1], label_index=-1, dtype=float, shape=(2,)
+    def cluster_labeled_vectors(
+        self, method, columns=None, preprocessing="mean",replace_nan=-100, **kwargs
+    ):
+        """A function to cluster the labeled vectors in the dataset.
+
+        Parameters
+        ----------
+        method: sklearn.base.ClusterMixin
+            The clustering method to be used. This is a class that implements the ``fit`` method
+        columns: None or list
+            The columns to be used for clustering. If None, the first two columns are used
+        preprocessing: str or callable
+            The function to be applied to each label clustering. If 'mean', the mean of the
+            vectors is used. If callable, the function is applied to each label and the result
+            is used for clustering.
+        """
+        if columns is None:
+            columns = [0, 1]
+        if preprocessing == "mean":
+            preprocessing = column_mean
+            kwargs = {"label_index": -1, "dtype": float, "shape": (2,)}
+        elif callable(preprocessing):
+            preprocessing = preprocessing
+        else:
+            raise ValueError("The preprocessing must be either 'mean' or a function")
+        to_cluster_vectors = self.map_vectors(
+            preprocessing,
+            columns=columns,
+            **kwargs,
         )
-        vectors = self.data
-        clustering = OPTICS(min_samples=min_samples, max_eps=eps).fit(mean_pos)
+        to_cluster_vectors[np.isnan(to_cluster_vectors)] = replace_nan
+        clustering = method.fit(to_cluster_vectors)
         labels = clustering.labels_
         initial_labels = self.data[:, -1].astype(int)
         new_labels = labels[initial_labels]
         new_labels[initial_labels == -1] = -1
         print(f"{np.max(labels) + 1} : Clusters Found!")
-        vectors_and_labels = np.hstack([vectors, new_labels[:, np.newaxis]])
+        vectors_and_labels = np.hstack([self.data, new_labels[:, np.newaxis]])
         new_signal = self._deepcopy_with_new_data(data=vectors_and_labels)
         new_signal.axes_manager.signal_axes[0].size = (
             new_signal.axes_manager.signal_axes[0].size + 1
@@ -242,17 +233,17 @@ class LabeledDiffractionVectors2D(DiffractionVectors2D):
         new_signal.is_clustered = True
         return new_signal
 
-    def to_markers(self, signal, label_index=-1, get_polygons=False, **kwargs):
+    def to_markers(self, signal, get_polygons=False,num_points=10, **kwargs):
         marker_list = []
 
         offsets, colors, colors_by_index = convert_to_markers(self, signal)
-        points = hs.plot.markers.Points(offsets=offsets, color=colors, **kwargs)
+        points = hs.plot.markers.Points(offsets=offsets.T, color=colors.T, **kwargs)
         marker_list.append(points)
         if get_polygons:
-            verts = self.map_vectors(points_to_poly_collection, dtype=object)
+            verts = self.map_vectors(points_to_polygon, num_points=num_points, dtype=object)
+            verts = list(verts)
             polygons = hs.plot.markers.Polygons(
                 verts=verts, alpha=0.5, color=colors_by_index, linewidth=2
             )
             marker_list.append(polygons)
         return marker_list
-

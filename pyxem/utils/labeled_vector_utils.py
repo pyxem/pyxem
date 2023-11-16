@@ -1,6 +1,9 @@
-import numpy as np
 import itertools
+from copy import deepcopy
+
+import numpy as np
 from scipy.spatial.distance import cdist
+from scipy.spatial import ConvexHull
 
 
 # =============================================
@@ -40,23 +43,6 @@ def get_vector_dist(v1, v2):
     d = cdist(v1, v2)
     distance = np.mean([np.mean(np.min(d, axis=0)), np.mean(np.min(d, axis=1))])
     return distance
-
-
-def vectors2image(
-    vectors,
-    image_size,
-    scales,
-    offsets,
-        indexes=None,
-):
-    if indexes is None:
-        indexes = [0, 1]
-    red_points = vectors[:, indexes]
-    red_points = np.round((red_points / scales) - offsets)
-    red_points = red_points.astype(int)
-    im = np.zeros(image_size)
-    im[red_points[:, 0], red_points[:, 1]] = 1
-    return im
 
 
 def column_mean(vectors, columns=None):
@@ -142,7 +128,7 @@ def get_three_angles(
     intensity_threshold=None,
     accept_threshold=0.05,
     min_k=0.05,
-    return_min=True,
+    return_reduced=True,
     min_angle=None,
 ):
     """
@@ -158,9 +144,32 @@ def get_three_angles(
            |    angle b
            |
            o
+
+    Parameters
+    ----------
+    pks : np.ndarray
+        The diffraction vectors to be analyzed
+    k_index : int, optional
+        The index of the radial component of the diffraction vectors, by default 0
+    angle_index : int, optional
+        The index of the angular component of the diffraction vectors, by default 1
+    intensity_index : int, optional
+        The index of the intensity component of the diffraction vectors, by default 2
+    intensity_threshold : float, optional
+        The minimum intensity of the diffraction vectors to be considered, by default None
+    accept_threshold : float, optional
+        The maximum difference between angle a and angle b to be considered the same angle,
+        by default 0.05
+    min_k : float, optional
+        The minimum difference between the radial component of the diffraction vectors to be
+        considered from the same feature, by default 0.05
+    return_reduced : bool, optional
+        Whether to return the reduced angle.
+    min_angle: float, optional
+        The minimum angle between two diffraction vectors. This ignores small angles which are
+        likely to be from the same feature or unphysical.
     """
     three_angles = []
-    min_angles = []
     combos, combo_k = get_filtered_combinations(
         pks,
         3,
@@ -181,7 +190,7 @@ def get_three_angles(
                 np.abs((angular_seperations - min_sep)) < accept_threshold
             )
             if is_symetric:
-                if not return_min:
+                if not return_reduced:
                     for a in angular_seperations:
                         three_angles.append(a)
                     three_angles.append(min_sep)
@@ -206,14 +215,9 @@ def get_three_angles(
     return np.array(three_angles)
 
 
-
-
 ##############################
 # Plotting Diffraction Vectors
 ##############################
-from scipy.spatial import ConvexHull, convex_hull_plot_2d, QhullError
-import numpy as np
-from copy import deepcopy
 
 
 def vectors2image(
@@ -221,10 +225,11 @@ def vectors2image(
     image_size,
     scales,
     offsets,
-    indexes=[0, 1],
+    indexes=None,
 ):
+    if indexes is None:
+        indexes = [0, 1]
     red_points = vectors[:, indexes]
-    im = np.zeros(image_size)
     image_range = (
         (offsets[0], offsets[0] + image_size[0] * scales[0]),
         (offsets[1], offsets[1] + image_size[1] * scales[1]),
@@ -241,6 +246,40 @@ def points_to_poly_collection(points, hull_index=(0, 1)):
     except:
         return np.array([[0, 0], [0, 0], [0, 0]])
     return hull.points[hull.vertices]
+
+
+def points_to_polygon(points, num_points=50):
+    if len(points) == 0:
+        return np.array([[0, 0], [0, 0], [0, 0]])
+    sorted_points = points[np.argsort(points[:, 0])]
+    min_x = sorted_points[0, 0]
+    max_x = sorted_points[-1, 0]
+    sorted_index = np.linspace(min_x, max_x, num_points)
+
+    lo = np.searchsorted(sorted_points[:, 0], sorted_index[:-1], side="left")
+    hi = np.searchsorted(sorted_points[:, 0], sorted_index[1:], side="right")
+
+    min_points = []
+    for l, h, x in zip(lo, hi, sorted_index):
+        if l == h:
+            pass
+        else:
+            min_points.append(
+                [
+                    np.min(sorted_points[l:h][:, 1]),
+                    x,
+                ]
+            )
+
+    max_points = []
+    for l, h, x in zip(lo, hi, sorted_index):
+        if l == h:
+            pass
+        else:
+            max_points.append([np.max(sorted_points[l:h][:, 1]), x])
+    all_points = min_points + max_points[::-1]
+    all_points = np.array(all_points)
+    return all_points
 
 
 def angles_to_markers(angles, signal, k=4.0, polar=True, return_marker=False, **kwargs):
@@ -280,7 +319,10 @@ def angles_to_markers(angles, signal, k=4.0, polar=True, return_marker=False, **
     return by_ind_peaks, by_ind_colors, colors_by_index
 
 
-def convert_to_markers(peaks, signal,):
+def convert_to_markers(
+    peaks,
+    signal,
+):
     new_peaks = deepcopy(peaks.data)
     x_axis, y_axis = signal.axes_manager.navigation_axes
     new_peaks[:, 0] = np.round((new_peaks[:, 0] - x_axis.offset) / x_axis.scale)
