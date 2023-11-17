@@ -130,6 +130,44 @@ def plot_templates_over_signal(
     verbose: bool = True,
     **plot_kwargs
     ):
+    """
+    Display an interactive plot of the diffraction signal, 
+    with simulated diffraction patterns corresponding to template matching results displayed on top.
+
+    Parameters
+    ----------
+    signal : hyperspy.signals.Signal2D
+        The 4D-STEM dataset.
+    library : diffsims.libraries.diffraction_library.DiffractionLibrary
+        The library of simulated diffraction patterns.
+    result : dict
+        Template matching results dictionary containing keys: phase_index, template_index,
+        orientation, correlation, and mirrored_template. 
+        Returned from pyxem.utils.indexation_utils.index_dataset_with_template_rotation.
+    phase_key_dict: dictionary
+        A small dictionary to translate the integers in the phase_index array
+        to phase names in the original template library.
+        Returned from pyxem.utils.indexation_utils.index_dataset_with_template_rotation.
+    n_best : int, optional
+        Number of solutions to plot. If None, defaults to all solutions.
+    find_direct_beam: bool, optional
+        Roughly find the optimal direct beam position if it is not centered.
+    direct_beam_position: 2-tuple
+        The (x, y) position of the direct beam in pixel coordinates. Takes
+        precedence over `find_direct_beam`
+    marker_colors : list of str, optional
+        Colors of the spot markers. Must be at least n_best long.
+        Defaults to matplotlib's default color cycle
+    marker_type : str, optional
+        Type of marker used for the spots
+    size_factor : float, optional
+        Scaling factor for the spots. See notes on size.
+    **plot_kwargs : Keyword arguments passed to signal.plot
+
+    Notes
+    -----
+    The spot marker sizes are scaled by the square root of their intensity
+    """
 
     if n_best is None:
         n_best = result["template_index"].shape[2]
