@@ -256,6 +256,10 @@ def plot_templates_over_signal(
                         mirrored=mirrored_sol,
                     )
 
+                    # See https://github.com/pyxem/pyxem/issues/925
+                    # Copied the solution from plot_template_over_pattern (#946)
+                    y = signal.axes_manager[1].size - y
+
                     x *= signal.axes_manager[2].scale
                     y *= signal.axes_manager[3].scale
 
