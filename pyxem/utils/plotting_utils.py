@@ -202,7 +202,7 @@ def plot_templates_over_signal(
         # so we generate all the data for a given solution and then yield them
 
         # Allocate space for all navigator pixels to potentially have the maximum amount of simulated diffraction spots
-        max_marker_count = max(len(sim) for lib in library.values() for sim in lib["simulations"])
+        max_marker_count = max(sim.intensities.size for lib in library.values() for sim in lib["simulations"])
 
         shape = (signal.axes_manager[1].size, signal.axes_manager[0].size, max_marker_count)
 
