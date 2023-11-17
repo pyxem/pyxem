@@ -110,6 +110,7 @@ def mock_library(mock_phase_key_dict):
 @pytest.mark.parametrize(
     "n_best_sim, n_best, find_direct_beam, direct_beam_position, marker_colors",
     [
+        # fmt: off
         (1, 1, False, None, None),
         (2, 2, False, None, None),
         (2, 1, False, None, None),
@@ -119,6 +120,7 @@ def mock_library(mock_phase_key_dict):
         (2, 2, False, None, ["red"]), # Prints a warning, but is still passes as colors will just loop
         (2, 1, False, None, ["red"]*4),
         (2, 2, False, None, ["red"]*2),
+        # fmt: on
     ],
 )
 @pytest.mark.slow
