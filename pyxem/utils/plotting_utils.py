@@ -210,10 +210,10 @@ def plot_templates_over_signal(
 
         # 2D array of simulations, using the indices from template matching.
         # These might use the wrong phase
-        phase_library_simulations[result["template_index"]]
+        sim_array = phase_library_simulations[result["template_index"]]
 
         # Use the correct phase
-        result_array[mask] = phase_library_simulations[mask]
+        result_array[mask] = sim_array[mask]
 
     result_signal = hs.signals.Signal1D(result_array)
     orientation_signal = hs.signals.Signal2D(result["orientation"])
