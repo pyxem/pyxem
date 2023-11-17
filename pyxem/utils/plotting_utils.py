@@ -156,7 +156,7 @@ def plot_templates_over_signal(
         The (x, y) position of the direct beam in pixel coordinates. Takes
         precedence over `find_direct_beam`
     marker_colors : list of str, optional
-        Colors of the spot markers. Must be at least n_best long.
+        Colors of the spot markers. Should be at least n_best long, otherwise colors will loop.
         Defaults to matplotlib's default color cycle
     marker_type : str, optional
         Type of marker used for the spots
@@ -179,7 +179,7 @@ def plot_templates_over_signal(
         marker_colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
 
     if len(marker_colors) < n_best:
-        print("Warning: not enough colors in `marker_colors` for `n_best` different colored marks")
+        print("Warning: not enough colors in `marker_colors` for `n_best` different colored marks. Colors will loop")
 
     # Add markers as iterable, recommended in hyperspy docs.
     # Using a genenerator will hopefully reduce memory.
