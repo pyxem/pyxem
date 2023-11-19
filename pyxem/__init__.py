@@ -29,8 +29,6 @@ from pyxem import generators
 from pyxem import signals
 from pyxem import data
 
-from pyxem.utils.io_utils import load_mib
-
 from . import release_info
 
 __all__ = [
@@ -39,7 +37,6 @@ __all__ = [
     "dummy_data",
     "generators",
     "signals",
-    "load_mib",
     "data",
 ]
 
