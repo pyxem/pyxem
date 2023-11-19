@@ -21,6 +21,10 @@ Fixed
 - Fixed slow markers (#969)
 - Removed parallel and max_workers keywords in favor of using dask (#969)
 
+Removed
+-------
+- Removed MIB reader (#979) in favor of https://github.com/hyperspy/rosettasciio/pull/174
+
 2023-11-14 - version 0.16.0
 ===========================
 
