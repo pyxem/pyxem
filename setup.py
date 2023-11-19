@@ -74,6 +74,7 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "Development Status :: 4 - Beta",
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
@@ -95,6 +96,7 @@ setup(
         "numpy",
         "numexpr        != 2.8.6",  # bug in 2.8.6 for greek letters need for pyfai
         "orix           >= 0.9",
+        "pooch",
         "psutil",
         "pyfai",  # sigma clip function broken
         "scikit-image   >= 0.19.0, !=0.21.0",  # regression in ellipse fitting"
