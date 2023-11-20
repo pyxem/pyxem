@@ -25,8 +25,10 @@ from sklearn.cluster import DBSCAN
 
 from hyperspy.signals import Signal2D
 
+from pyxem.signals import DiffractionVectors
 
-class DiffractionVectors2D(Signal2D):
+
+class DiffractionVectors2D(DiffractionVectors, Signal2D):
     """Crystallographic mapping results containing the best matching crystal
     phase and orientation at each navigation position with associated metrics.
 
@@ -44,9 +46,6 @@ class DiffractionVectors2D(Signal2D):
     _signal_type = "diffraction_vectors"
 
     def __init__(self, *args, **kwargs):
-        self.column_scale = kwargs.pop("column_scale", None)
-        self.column_offsets = kwargs.pop("column_offsets", None)
-        self.detector_shape = kwargs.pop("detector_shape", None)
         super().__init__(*args, **kwargs)
 
     def get_unique_vectors(
@@ -187,6 +186,21 @@ class DiffractionVectors2D(Signal2D):
         return self._apply_function_on_data_and_remove_axis(
             np.linalg.norm, axes=axis, out=out, rechunk=rechunk
         )
+
+    def __lt__(self, other):
+        return self._deepcopy_with_new_data(self.data < other)
+
+    def __le__(self, other):
+        return self._deepcopy_with_new_data(self.data <= other)
+
+    def __gt__(self, other):
+        return self._deepcopy_with_new_data(self.data > other)
+
+    def __ge__(self, other):
+        return self._deepcopy_with_new_data(self.data >= other)
+
+    def from_peaks(cls, **kwargs):
+        raise NotImplementedError("This method is not implemented for 2D vectors")
 
     def filter_magnitude(self, min_magnitude, max_magnitude, *args, **kwargs):
         """Filter the diffraction vectors to accept only those with a magnitude

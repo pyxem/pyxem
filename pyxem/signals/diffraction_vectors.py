@@ -43,7 +43,6 @@ from pyxem.utils.vector_utils import (
     filter_vectors_near_basis,
 )
 from pyxem.utils.expt_utils import peaks_as_gvectors
-from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
 from pyxem.utils._deprecated import deprecated
 
 """
@@ -93,13 +92,25 @@ class ColumnSlicer:
         else:
             raise ValueError("item must be a string or an int")
 
-
-        item = [item,]
+        item = [
+            item,
+        ]
         slic = self.signal.map(
-            lambda x, it: x[..., it], it=item, inplace=False, ragged=True
+            lambda x, it: x[..., it],
+            it=item,
+            inplace=False,
+            ragged=self.signal._is_object_dtype,
         )
-        slic.offsets = self.signal.offsets[item[0]]
-        slic.scales = self.signal.scales[item[0]]
+        if not self.signal._is_object_dtype:  # potential bug upstream
+            slic.data = slic.data[..., np.newaxis]
+        if self.signal.scales is not None:
+            slic.scales = self.signal.scales[item[0]]
+        if self.signal.offsets is not None:
+            slic.offsets = self.signal.offsets[item[0]]
+        if self.signal.column_names is not None:
+            slic.column_names = [
+                self.signal.column_names[item[0]],
+            ]
         return slic
 
 
@@ -108,13 +119,8 @@ class BoolSlicer:
         self.signal = signal
 
     def __getitem__(self, item):
-        if self.signal.ragged:
-            slic = self.signal.map(
-                lambda x, it: x[it], it=item, inplace=False, ragged=True
-            )
-            return slic
-        else:
-            return self.isig[item]
+        slic = self.signal.map(lambda x, it: x[it], it=item, inplace=False, ragged=True)
+        return slic
 
 
 class DiffractionVectors(BaseSignal):
@@ -275,16 +281,23 @@ class DiffractionVectors(BaseSignal):
         )
         return pixels.data
 
+    @property
+    def _is_object_dtype(self):
+        return self.data.dtype.kind == "O"
+
     @cached_property
     def num_columns(self):
-        if isinstance(self.data, da.Array):
-            shape = self.data[self.data.ndim * (0,)].compute().shape
+        if self._is_object_dtype:
+            if isinstance(self.data, da.Array):
+                shape = self.data[self.data.ndim * (0,)].compute().shape
+            else:
+                shape = self.data[self.data.ndim * (0,)].shape
+            if shape is None:
+                return 0
+            else:
+                return shape[1]
         else:
-            shape = self.data[self.data.ndim * (0,)].shape
-        if shape is None:
-            return 0
-        else:
-            return shape[1]
+            return self.data.shape[-1]
 
     @property
     def scales(self):
@@ -312,8 +325,8 @@ class DiffractionVectors(BaseSignal):
     def column_names(self, value):
         if len(value) != self.num_columns:
             raise ValueError(
-                "The len of the scales parameter must equal the number of"
-                "columns in the underlying vector data."
+                f"The len of the column_names parameter: {len(value)} must equal the"
+                f" number of columns in the underlying vector data: {self.num_columns}."
             )
 
         self.metadata.VectorMetadata["column_names"] = value
@@ -419,6 +432,15 @@ class DiffractionVectors(BaseSignal):
             )
         return real_nav
 
+    @property
+    def num_rows(self):
+        if self._is_object_dtype:
+            return None
+        elif len(self.axes_manager.signal_axes) == 1:
+            return 1
+        else:
+            return self.data.shape[-2]
+
     def flatten_diffraction_vectors(
         self,
         real_units=True,
@@ -435,17 +457,27 @@ class DiffractionVectors(BaseSignal):
             If the navigation dimension should be flattened based on the pixel position
             or the real value as determined by the scale and offset.
         """
+        from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
+
         nav_positions = self._get_navigation_positions(
             flatten=True, real_units=real_units
         )
+        if self.axes_manager._navigation_shape_in_array == ():
+            return self
 
-        vectors = np.vstack(
-            [
-                np.hstack([np.tile(nav_pos, (len(self.data[ind]), 1)), self.data[ind]])
-                for ind, nav_pos in zip(np.ndindex(self.data.shape), nav_positions)
-            ]
-        )
-
+        if self._is_object_dtype:
+            vectors = np.vstack(
+                [
+                    np.hstack(
+                        [np.tile(nav_pos, (len(self.data[ind]), 1)), self.data[ind]]
+                    )
+                    for ind, nav_pos in zip(np.ndindex(self.data.shape), nav_positions)
+                ]
+            )
+        else:
+            navs = np.repeat(nav_positions, self.num_rows, axis=0)
+            data = self.data.reshape((-1, self.num_columns))
+            vectors = np.vstack((navs, data))
         if real_units:
             scales = [a.scale for a in self.axes_manager.navigation_axes]
             offsets = [a.offset for a in self.axes_manager.navigation_axes]
@@ -784,7 +816,7 @@ class DiffractionVectors(BaseSignal):
             inplace=False,
             ragged=True,
             *args,
-            **kwargs
+            **kwargs,
         )
         return filtered_vectors
 
@@ -859,7 +891,7 @@ class DiffractionVectors(BaseSignal):
             inplace=False,
             ragged=True,
             *args,
-            **kwargs
+            **kwargs,
         )
         return filtered_vectors
 
@@ -921,7 +953,7 @@ class DiffractionVectors(BaseSignal):
             inplace=False,
             ragged=True,
             *args,
-            **kwargs
+            **kwargs,
         )
 
 
