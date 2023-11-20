@@ -120,6 +120,8 @@ class TestVector2DSubclass:
     def test_to_markers(self, vectors):
         markers = vectors.to_markers()
         assert isinstance(markers, hs.plot.markers.Points)
+        s = Signal2D(np.ones((2, 2, 10, 10)))
+        s.add_marker(markers)
 
     def test_gt(self, vectors):
         gt_vectors = vectors > 1.1

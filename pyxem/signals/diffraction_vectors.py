@@ -73,10 +73,9 @@ def _reverse_pos(peaks, ind=2):
         The index of the position to be reversed.
 
     """
-    new_data = peaks.copy()
+    new_data = np.empty(peaks.shape[:-1] + (2,))
     for i in range(ind):
-        sl = ind - i - 1
-        new_data[..., i] = peaks[..., sl]
+        new_data[..., (-i - 1)] = peaks[..., i]
     return new_data
 
 

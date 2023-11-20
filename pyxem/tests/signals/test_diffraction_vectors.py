@@ -225,6 +225,8 @@ class TestInitVectors:
                 ((peaks_w_intensity.data[i]) * 0.1 - 5.0)[:, 0],
                 points.kwargs["offsets"][i[::-1]][:, 1],
             )
+        s = Signal2D(np.ones((2, 2, 10, 10)))
+        s.add_marker(points)
 
     def test_from_peaks_calibration_error(self, peaks):
         with pytest.raises(ValueError):
