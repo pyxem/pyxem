@@ -14,12 +14,17 @@ Added
 - LazyDiffractionVectors are now supported(#969)
 - DiffractionVectors now support intensity(#969)
 - Add Examples for vector_finding and determining_ellipticity(#969)
+- Add slicing methods to DiffractionVectors using ``icol`` and ``irow`` (#972)
+- :class:`~pyxem.signals.DiffractionVectors` now explicitly handles lazy signals (#972)
+
 
 Fixed
 -----
 - Update pyxem to work with hyperspy 2.0.0 (#969)
 - Fixed slow markers (#969)
 - Removed parallel and max_workers keywords in favor of using dask (#969)
+- :class:`~pyxem.signals.DiffractionVectors2D` now extends :class:`~pyxem.signals.DiffractionVectors`
+  for a more consistent API (#972)
 - Fix :meth:`~pyxem.data.zrnb_precipitate` dataset to point to proper dataset
 
 Removed
