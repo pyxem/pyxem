@@ -23,7 +23,8 @@ from sklearn.cluster import DBSCAN
 from hyperspy.signals import Signal2D
 from hyperspy.signal import BaseSignal
 
-from pyxem.signals import DiffractionVectors, DiffractionVectors2D, PolarVectors
+from pyxem.signals import DiffractionVectors, DiffractionVectors2D, DiffractionVectors1D, PolarVectors
+import pyxem.dummy_data.make_diffraction_test_data as mtd
 from hyperspy.axes import UniformDataAxis
 
 # DiffractionVectors correspond to a single list of vectors, a map of vectors
@@ -332,7 +333,25 @@ class TestInitVectors:
             100,
         ]
 
+class TestSubpixelRefinement:
 
+    def test_subpixel_refinement(self):
+        import pyxem.dummy_data.make_diffraction_test_data as mdtd
+        import pyxem as pxm
+        import numpy as np
+        di = mdtd.DiffractionTestImage(intensity_noise=False)
+        di.add_disk(x=128, y=128, intensity=10.0)  # Add a zero beam disk at the center
+        di.add_cubic_disks(vx=20, vy=20, intensity=2.0, n=5)
+        di.add_background_lorentz()
+        dtd = mdtd.DiffractionTestDataset(10, 10, 256, 256)
+        position_array = np.ones((10, 10), dtype=bool)
+        position_array[:5] = False
+        dtd.add_diffraction_image(di)
+        s = dtd.get_signal()
+        temp = s.template_match_disk(disk_r=5, subtract_min=False)
+        pks = temp.find_peaks(threshold_abs=0.4, interactive=False)
+        dv = pxm.signals.DiffractionVectors.from_peaks(pks)
+        dv.subpixel_refine(s, method="cross-correlation", disk_r=5, upsample_factor=2)
 class TestConvertVectors:
     @pytest.mark.parametrize("real_units", (True, False))
     def test_flatten_vectors(self, diffraction_vectors_map, real_units):

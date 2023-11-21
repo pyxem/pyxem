@@ -47,6 +47,14 @@ from pyxem.utils.vector_utils import (
 )
 
 from pyxem.utils._slicers import Slicer
+
+from pyxem.utils.subpixel_utils import (
+    _conventional_xc_map,
+    _center_of_mass_map,
+    _reference_xc_map,
+    get_simulated_disc,
+)
+
 from pyxem.utils._deprecated import deprecated
 
 """
@@ -260,6 +268,70 @@ class DiffractionVectors(BaseSignal):
         vectors.column_names = column_names
         return vectors
 
+    def subpixel_refine(
+        self,
+        signal,
+        method="center-of-mass",
+        disk_r=None,
+        upsample_factor=10,
+        square_size=10,
+        **kwargs,
+    ):
+        """
+        Refine the positions of the diffraction vectors using subpixel
+        interpolation.
+
+        Parameters
+        ----------
+        signal : Signal
+            The signal which will be used to refine the diffraction vectors.
+        method : str
+            The method used to refine the diffraction vectors. Currently
+            supported methods are 'cross-correlation' and 'phase-correlation',
+            and "center-of-mass".
+
+
+        Returns
+        -------
+        refined_vectors : DiffractionVectors
+            The refined vectors.
+        """
+        method_dict = {
+            "cross-correlation": _conventional_xc_map,
+            "phase-correlation": _reference_xc_map,
+            "center-of-mass": _center_of_mass_map,
+        }
+        if method is "center-of-mass":
+            if disk_r is not None or upsample_factor is not None:
+                warn(
+                    "The disk_r and upsample_factor parameters are not used for the center-of-mass method."
+                )
+        else:
+            kwargs["upsample_factor"] = upsample_factor
+            kwargs["kernel"] = get_simulated_disc(square_size, disk_r)
+        kwargs["square_size"] = square_size
+
+        signal_axes = signal.axes_manager.signal_axes
+        offsets = [ax.offset for ax in signal_axes]
+        scales = [ax.scale for ax in signal_axes]
+
+        funct = method_dict[method]
+        pixels = self.pixel_vectors
+        refined_vectors = signal.map(
+            funct,
+            vectors=pixels,
+            inplace=False,
+            ragged=True,
+            offsets=offsets,
+            scales=scales,
+            **kwargs,
+        )
+        refined_vectors.set_signal_type("diffraction_vectors")
+        refined_vectors._set_up_vector(
+            scales=self.scales, column_names=self.column_names
+        )
+        return refined_vectors
+
     @property
     def pixel_vectors(self):
         """Returns the diffraction vectors in pixel coordinates."""
@@ -268,13 +340,13 @@ class DiffractionVectors(BaseSignal):
                 "The pixel vectors cannot be calculated without a calibration."
             )
         pixels = self.map(
-            lambda x, cen, cal: x / cal + self.center,
+            lambda x, cen, cal: np.round(x / cal + cen).astype(int),
             cal=self.scales,
             cen=self.center,
             inplace=False,
             ragged=True,
         )
-        return pixels.data
+        return pixels
 
     @property
     def _is_object_dtype(self):
