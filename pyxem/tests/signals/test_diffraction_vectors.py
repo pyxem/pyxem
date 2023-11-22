@@ -522,37 +522,43 @@ class TestSlicingVectors:
 
     @pytest.mark.parametrize("index", (0, "x"))
     def test_icol(self, vectors, index):
-        slic = vectors.icol[index]
+        slic = vectors.ivec[index]
         for i in np.ndindex((2, 2)):
             np.testing.assert_almost_equal(slic.data[i][:, 0], vectors.data[i][:, 0])
 
-    def test_icol_error(self, vectors):
-        with pytest.raises(ValueError):
-            vectors.icol[[0, 1]]
+    @pytest.mark.parametrize("index", ([0, 1], ["x", "y"]))
+    def test_column_slicing2(self, vectors, index):
+        slic = vectors.ivec[index]
+        for i in np.ndindex((2, 2)):
+            np.testing.assert_almost_equal(slic.data[i][:, [0, 1]], vectors.data[i])
 
-    def test_irow_lt(self, vectors):
-        col = vectors.icol[0] < 0.5
-        slic = vectors.irow[col]
+    def test_row_lt(self, vectors):
+        col = vectors.ivec[0] < 0.5
+        slic = vectors.ivec[:, col]
         for i in np.ndindex((2, 2)):
             assert np.all(slic.data[i][:, 0] < 0.5)
 
-    def test_irow_gt(self, vectors):
-        col = vectors.icol[0] > 0.5
-        slic = vectors.irow[col]
+    def test_row_gt(self, vectors):
+        col = vectors.ivec[0] > 0.5
+        slic = vectors.ivec[:, col]
         for i in np.ndindex((2, 2)):
             assert np.all(slic.data[i][:, 0] > 0.5)
 
-    def test_irow_gte(self, vectors):
-        col = vectors.icol[0] >= 0.5
-        slic = vectors.irow[col]
+    def test_row_gte(self, vectors):
+        col = vectors.ivec[0] >= 0.5
+        slic = vectors.ivec[:, col]
         for i in np.ndindex((2, 2)):
             assert np.all(slic.data[i][:, 0] >= 0.5)
 
-    def test_irow_lte(self, vectors):
-        col = vectors.icol[0] <= 0.5
-        slic = vectors.irow[col]
+    def test_row_lte(self, vectors):
+        col = vectors.ivec[0] <= 0.5
+        slic = vectors.ivec[:, col]
         for i in np.ndindex((2, 2)):
             assert np.all(slic.data[i][:, 0] <= 0.5)
+
+    def test_vector_slicing_error(self, vectors):
+        with pytest.raises(ValueError):
+            vectors.ivec[0, 0, 0]
 
     def test_num_columns(self, vectors):
         assert vectors.num_columns == 2

@@ -23,14 +23,14 @@ vectors = pxm.signals.DiffractionVectors.from_peaks(
     pks
 )  # calibration is automatically set
 
-# Plotting all of the vectors
+# Plotting all the vectors
 
 s.plot()
 all_vectors = vectors.to_markers(color="red", sizes=10, alpha=0.5)
 s.add_marker(all_vectors)
 # %%
 
-slic_vectors = (vectors.irow[vectors.icol[0] < 10]).to_markers(
+slic_vectors = (vectors.ivec[:, vectors.ivec[0] < 10]).to_markers(
     color="green", sizes=5, alpha=0.5
 )
 
@@ -39,14 +39,14 @@ s.add_marker([all_vectors, slic_vectors])
 
 # %%
 slic_vectors = (
-    vectors.irow[(vectors.icol[0] > 0) * (vectors.icol[0] < 10)]
+    vectors.ivec[:, (vectors.ivec[0] > 0) * (vectors.ivec[0] < 10)]
 ).to_markers(color="w", sizes=5, alpha=0.5)
 s.plot()
 s.add_marker([all_vectors, slic_vectors])
 # %%
 
-vect_magnitudes = (vectors.icol[0] ** 2 + vectors.icol[1] ** 2) ** 0.5
-slic_vectors = vectors.irow[vect_magnitudes < 20].to_markers(
+vect_magnitudes = (vectors.ivec[0] ** 2 + vectors.ivec[1] ** 2) ** 0.5
+slic_vectors = vectors.ivec[:, vect_magnitudes < 20].to_markers(
     color="w", sizes=5, alpha=0.5
 )
 s.plot()
@@ -55,7 +55,7 @@ s.add_marker([all_vectors, slic_vectors])
 # %%
 
 
-slic_vectors = (vectors.irow[vectors.icol["intensity"] < 0.5]).to_markers(
+slic_vectors = (vectors.ivec[:, vectors.ivec["intensity"] < 0.5]).to_markers(
     color="w", sizes=5, alpha=0.5
 )
 s.plot()

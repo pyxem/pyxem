@@ -100,7 +100,7 @@ class TestVector2DSubclass:
 
     @pytest.mark.parametrize("item", [0, "x"])
     def test_slice(self, vectors, item):
-        sliced = vectors.icol[item]
+        sliced = vectors.ivec[item]
         assert isinstance(sliced, DiffractionVectors2D)
         assert isinstance(sliced, Signal2D)
         assert sliced.axes_manager.signal_shape == (1, 20)

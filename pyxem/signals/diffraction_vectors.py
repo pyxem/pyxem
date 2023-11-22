@@ -42,7 +42,7 @@ from pyxem.utils.vector_utils import (
     filter_vectors_edge_ragged,
     filter_vectors_near_basis,
 )
-from pyxem.utils.expt_utils import peaks_as_gvectors
+from pyxem.utils._slicers import Slicer
 from pyxem.utils._deprecated import deprecated
 
 """
@@ -79,54 +79,12 @@ def _reverse_pos(peaks, ind=2):
     return new_data
 
 
-class ColumnSlicer:
-    def __init__(self, signal):
-        self.signal = signal
-
-    def __getitem__(self, item):
-        if isinstance(item, str):
-            item = self.signal.column_names.index(item)
-        elif isinstance(item, int):
-            pass
-        else:
-            raise ValueError("item must be a string or an int")
-
-        item = [
-            item,
-        ]
-        slic = self.signal.map(
-            lambda x, it: x[..., it],
-            it=item,
-            inplace=False,
-            ragged=self.signal._is_object_dtype,
-        )
-        if not self.signal._is_object_dtype:  # potential bug upstream
-            slic.data = slic.data[..., np.newaxis]
-        if self.signal.scales is not None:
-            slic.scales = self.signal.scales[item[0]]
-        if self.signal.offsets is not None:
-            slic.offsets = self.signal.offsets[item[0]]
-        if self.signal.column_names is not None:
-            slic.column_names = [
-                self.signal.column_names[item[0]],
-            ]
-        return slic
-
-
-class BoolSlicer:
-    def __init__(self, signal):
-        self.signal = signal
-
-    def __getitem__(self, item):
-        slic = self.signal.map(lambda x, it: x[it], it=item, inplace=False, ragged=True)
-        return slic
-
-
 class DiffractionVectors(BaseSignal):
     """Class for diffraction vectors in reciprocal space.
 
     Diffraction vectors are defined as the vectors from the center of the
-    diffraction pattern to the diffraction peaks.
+    diffraction pattern to the diffraction peaks. Note the DiffractionVectors
+    class is likely to change as the API for diffraction vectors is developed.
 
     Attributes
     ----------
@@ -173,8 +131,8 @@ class DiffractionVectors(BaseSignal):
         self.hkls = None
         self.is_real_units = False
         self.has_intensity = False
-        self.icol = ColumnSlicer(self)
-        self.irow = BoolSlicer(self)
+
+        self.ivec = Slicer(self)
 
     @classmethod
     def from_peaks(cls, peaks, center=None, calibration=None, column_names=None):
@@ -309,7 +267,7 @@ class DiffractionVectors(BaseSignal):
         elif isiterable(value) and len(value) != self.num_columns:
             raise ValueError(
                 "The len of the scales parameter must equal the number of"
-                "columns in the underlying vector data."
+                " columns in the underlying vector data."
             )
         else:
             self.metadata.VectorMetadata["scales"] = [
