@@ -108,7 +108,9 @@ class DiffractionVectors(BaseSignal):
             table += f"<th><center>{col}</center></th>"
         table += "</tr>"
 
-        vectors = self._get_current_data()[0]
+        vectors = self._get_current_data()
+        if vectors.dtype.kind == "O":
+            vectors = vectors[0]
         for i, row in enumerate(vectors):
             table += "<tr>"
             table += f"<td><center>{i}</center></td>"
@@ -522,8 +524,21 @@ class DiffractionVectors(BaseSignal):
         column_offsets = np.append(column_offsets, offsets)
         column_scale = np.append(column_scale, scales)
 
+        column_names = [
+            a.name for a in self.axes_manager.navigation_axes
+        ] + self.column_names
+
+        if real_units:
+            units = [a.units for a in self.axes_manager.navigation_axes] + self.units
+        else:
+            units = ["pixels"] * len(self.axes_manager.navigation_axes) + self.units
+
         return DiffractionVectors2D(
-            vectors, column_offsets=column_offsets, column_scale=column_scale
+            vectors,
+            column_offsets=column_offsets,
+            column_scale=column_scale,
+            units=units,
+            column_names=column_names,
         )
 
     def plot_diffraction_vectors(
