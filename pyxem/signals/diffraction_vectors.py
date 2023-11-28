@@ -154,8 +154,6 @@ class DiffractionVectors(BaseSignal):
         self.hkls = None
         self.is_real_units = False
         self.has_intensity = False
-        self.icol = ColumnSlicer(self)
-        self.irow = BoolSlicer(self)
 
         self.ivec = Slicer(self)
 
