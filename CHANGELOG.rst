@@ -14,8 +14,9 @@ Added
 - LazyDiffractionVectors are now supported(#969)
 - DiffractionVectors now support intensity(#969)
 - Add Examples for vector_finding and determining_ellipticity(#969)
-- Add slicing methods to DiffractionVectors using ``icol`` and ``irow`` (#972)
+- Add slicing methods to DiffractionVectors using ``ivec`` (#972)
 - :class:`~pyxem.signals.DiffractionVectors` now explicitly handles lazy signals (#972)
+- Added html representation for non-lazy :class:`~pyxem.signals.DiffractionVectors` (#972)
 
 
 Fixed
