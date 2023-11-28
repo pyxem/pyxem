@@ -85,12 +85,49 @@ class DiffractionVectors(BaseSignal):
         _offsets = kwargs.pop("offsets", None)
         _detector_shape = kwargs.pop("detector_shape", None)
         _column_names = kwargs.pop("column_names", None)
+        _units = kwargs.pop("units", None)
 
         super().__init__(*args, **kwargs)
-        self._set_up_vector(_scales, _offsets, _detector_shape, _column_names)
+        self._set_up_vector(_scales, _offsets, _detector_shape, _column_names, _units)
+
+    def _repr_html_(self):
+        table = '<table align="center">'
+        table += f'<tr><td colspan= "{self.num_columns + 1}"> <center> {self.__str__()[1:-1]} </center></td></tr>'
+        table += (
+            f'<tr><td colspan= "{self.num_columns + 1}"> <center> Current Index:{self.axes_manager.indices} '
+            f"</center> </td></tr>"
+        )
+        table += f'<tr><td colspan= "{self.num_columns + 1}">  </td></tr>'
+
+        table += "<tr><th>column_names:</th>"
+        for col in self.column_names:
+            table += f"<th><center>{col}</center></th>"
+        table += "</tr>"
+        table += "<th>units:</th>"
+        for col in self.units:
+            table += f"<th><center>{col}</center></th>"
+        table += "</tr>"
+
+        vectors = self._get_current_data()[0]
+        for i, row in enumerate(vectors):
+            table += "<tr>"
+            table += f"<td><center>{i}</center></td>"
+            for col in row:
+                table += f"<td><center>{col}</center></td>"
+            table += "</tr>"
+            if i > 10:
+                table += f'<tr><td colspan= "{self.num_columns + 1}"> ... </td></tr>'
+                break
+        table += "</table>"
+        return table
 
     def _set_up_vector(
-        self, scales=None, offsets=None, detector_shape=None, column_names=None
+        self,
+        scales=None,
+        offsets=None,
+        detector_shape=None,
+        column_names=None,
+        units=None,
     ):
         self.metadata.add_node("VectorMetadata")
         if scales is not None or "scales" not in self.metadata.VectorMetadata:
@@ -108,6 +145,9 @@ class DiffractionVectors(BaseSignal):
             or "column_names" not in self.metadata.VectorMetadata
         ):
             self.metadata.VectorMetadata["column_names"] = column_names
+        if units is not None or "units" not in self.metadata.VectorMetadata:
+            self.metadata.VectorMetadata["units"] = units
+
         self.cartesian = None
         self.hkls = None
         self.is_real_units = False
@@ -116,7 +156,9 @@ class DiffractionVectors(BaseSignal):
         self.ivec = Slicer(self)
 
     @classmethod
-    def from_peaks(cls, peaks, center=None, calibration=None, column_names=None):
+    def from_peaks(
+        cls, peaks, center=None, calibration=None, column_names=None, units=None
+    ):
         """Takes a list of peak positions (pixel coordinates) and returns
         an instance of `Diffraction2D`
 
@@ -163,6 +205,13 @@ class DiffractionVectors(BaseSignal):
         else:
             column_names = ["x", "y"]
 
+        if units is None and peaks.metadata.has_item("Peaks.signal_axes"):
+            units = [ax.units for ax in peaks.metadata.Peaks.signal_axes[::-1]]
+        elif units is not None:
+            pass
+        else:
+            units = ["", ""]
+
         if not isiterable(calibration):
             calibration = [
                 calibration,
@@ -187,6 +236,7 @@ class DiffractionVectors(BaseSignal):
 
         if num_cols == len(column_names) + 1:
             column_names = list(column_names) + ["intensity"]
+            units = list(units) + ["a.u."]
 
         vectors = peaks.map(
             lambda x, cen, cal: (x - cen) * cal,
@@ -198,7 +248,9 @@ class DiffractionVectors(BaseSignal):
         vectors.set_signal_type("diffraction_vectors")
         if isinstance(peaks, LazySignal):
             vectors = vectors.as_lazy()
-        vectors._set_up_vector(scales=calibration, column_names=column_names)
+        vectors._set_up_vector(
+            scales=calibration, column_names=column_names, units=units
+        )
         vectors.center = center
         vectors.has_intensity = has_intensity
         return vectors
@@ -238,6 +290,29 @@ class DiffractionVectors(BaseSignal):
             return self.data.shape[-1]
 
     @property
+    def units(self):
+        if self.metadata.VectorMetadata["units"] is None:
+            return [
+                None,
+            ] * self.num_columns
+        else:
+            return self.metadata.VectorMetadata["units"]
+
+    @units.setter
+    def units(self, value):
+        if isiterable(value) and len(value) == self.num_columns:
+            self.metadata.VectorMetadata["units"] = value
+        elif isiterable(value) and len(value) != self.num_columns:
+            raise ValueError(
+                "The len of the units parameter must equal the number of"
+                " columns in the underlying vector data."
+            )
+        else:
+            self.metadata.VectorMetadata["units"] = [
+                value,
+            ] * self.num_columns
+
+    @property
     def scales(self):
         return self.metadata.VectorMetadata["scales"]
 
@@ -257,10 +332,17 @@ class DiffractionVectors(BaseSignal):
 
     @property
     def column_names(self):
-        return self.metadata.VectorMetadata["column_names"]
+        if self.metadata.VectorMetadata["column_names"] is None:
+            return [
+                None,
+            ] * self.num_columns
+        else:
+            return self.metadata.VectorMetadata["column_names"]
 
     @column_names.setter
     def column_names(self, value):
+        if value is None:
+            value = [f"column_{i}" for i in range(self.num_columns)]
         if len(value) != self.num_columns:
             raise ValueError(
                 f"The len of the column_names parameter: {len(value)} must equal the"

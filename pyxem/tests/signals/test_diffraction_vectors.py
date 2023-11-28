@@ -517,6 +517,10 @@ class TestSlicingVectors:
 
         return v
 
+    def test_repr(self, vectors):
+        repr = vectors._repr_html_()
+        assert isinstance(repr, str)
+
     def test_center(self, vectors):
         np.testing.assert_almost_equal(vectors.center, (100, 100))
 
