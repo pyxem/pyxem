@@ -350,3 +350,23 @@ def filter_vectors_near_basis(vectors, basis, distance=None):
 
         closest_vectors[min_distance > distance, :] = np.nan
     return closest_vectors
+
+
+def _reverse_pos(peaks, ind=2):
+    """Reverses the position of the peaks in the signal.
+
+    This is useful for plotting the peaks on top of a hyperspy signal as the returned peaks are in
+    reverse order to the hyperspy markers. Only points up to the index are reversed.
+
+    Parameters
+    ----------
+    peaks : np.array
+        Array of peaks to be reversed.
+    ind : int
+        The index of the position to be reversed.
+
+    """
+    new_data = np.empty(peaks.shape[:-1] + (2,))
+    for i in range(ind):
+        new_data[..., (-i - 1)] = peaks[..., i]
+    return new_data

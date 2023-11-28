@@ -41,6 +41,7 @@ from pyxem.utils.vector_utils import (
     filter_vectors_ragged,
     filter_vectors_edge_ragged,
     filter_vectors_near_basis,
+    _reverse_pos,
 )
 from pyxem.utils._slicers import Slicer
 from pyxem.utils._deprecated import deprecated
@@ -57,26 +58,6 @@ peak at every position.
 2. A list of diffraction vectors with dimensions < n | 2 > where n is the
 number of peaks.
 """
-
-
-def _reverse_pos(peaks, ind=2):
-    """Reverses the position of the peaks in the signal.
-
-    This is useful for plotting the peaks on top of a hyperspy signal as the returned peaks are in
-    reverse order to the hyperspy markers. Only points up to the index are reversed.
-
-    Parameters
-    ----------
-    peaks : np.array
-        Array of peaks to be reversed.
-    ind : int
-        The index of the position to be reversed.
-
-    """
-    new_data = np.empty(peaks.shape[:-1] + (2,))
-    for i in range(ind):
-        new_data[..., (-i - 1)] = peaks[..., i]
-    return new_data
 
 
 class DiffractionVectors(BaseSignal):
