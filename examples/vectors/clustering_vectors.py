@@ -1,4 +1,8 @@
 """
+==================
+Clustering Vectors
+==================
+
 This can be used to segment a 4-D STEM dataset into different clusters based on the diffraction
 pattern at each real space position.
 """
@@ -27,7 +31,7 @@ flat_vectors = (
 scan = DBSCAN(eps=1.0, min_samples=2)
 # It is very important that we first normalize the real and reciprocal space distances
 # The column scale factors map the real space and reciprocal space distances to the same scale
-# Here this means that the clustering algorithm operates on 6 nm in real space and .1 nm^-1 in
+# Here this means that the clustering algorithm operates on 10 nm in real space and .1 nm^-1 in
 # reciprocal space based on the units for the vectors.
 clustered = flat_vectors.cluster(
     scan, column_scale_factors=[10, 10, 0.05, 0.05], min_vectors=40
@@ -54,6 +58,7 @@ plt.scatter(vect[:, 1], vect[:, 0])
 clusterer = DBSCAN(min_samples=2, eps=20)
 
 clustered2 = clustered.cluster_labeled_vectors(method=clusterer)
+m, p = clustered2.to_markers(s, alpha=0.8, get_polygons=True)
 
 # This clustering is decent.  It shows that there might be some small tilt boundaries in the data
 # which segment some of the nano-crystals into different clusters.  It also shows the effect of using

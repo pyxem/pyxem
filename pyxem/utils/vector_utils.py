@@ -376,3 +376,29 @@ def _reverse_pos(peaks, ind=2):
     for i in range(ind):
         new_data[..., (-i - 1)] = peaks[..., i]
     return new_data
+
+
+def cluster(data, method, columns, column_scale_factors, min_vectors=None):
+    vectors = data[:, columns]
+    vectors = vectors / np.array(column_scale_factors)
+    clusters = method.fit(vectors)
+    labels = clusters.labels_
+    if min_vectors is not None:
+        label, counts = np.unique(labels, return_counts=True)
+        below_min_v = label[counts < min_vectors]
+        labels[np.isin(labels, below_min_v)] = -1
+    vectors_and_labels = np.hstack([data, labels[:, np.newaxis]])
+    return vectors_and_labels
+
+
+def only_signal_axes(func):
+    def wrapper(*args, **kwargs):
+        self = args[0]
+        if self.has_navigation_axis:
+            raise ValueError(
+                "This function is not supported for signals with a navigation axis"
+            )
+
+        return func(*args, **kwargs)
+
+    return wrapper

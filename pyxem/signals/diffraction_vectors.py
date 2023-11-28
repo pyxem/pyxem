@@ -42,6 +42,7 @@ from pyxem.utils.vector_utils import (
     filter_vectors_edge_ragged,
     filter_vectors_near_basis,
     _reverse_pos,
+    cluster,
 )
 from pyxem.utils._slicers import Slicer
 from pyxem.utils._deprecated import deprecated
@@ -86,7 +87,6 @@ class DiffractionVectors(BaseSignal):
         _detector_shape = kwargs.pop("detector_shape", None)
         _column_names = kwargs.pop("column_names", None)
         _units = kwargs.pop("units", None)
-
         super().__init__(*args, **kwargs)
         self._set_up_vector(_scales, _offsets, _detector_shape, _column_names, _units)
 
@@ -257,7 +257,6 @@ class DiffractionVectors(BaseSignal):
         vectors.has_intensity = has_intensity
         vectors.column_names = column_names
         return vectors
-
 
     @property
     def pixel_vectors(self):
@@ -781,6 +780,55 @@ class DiffractionVectors(BaseSignal):
 
         return ghis
 
+    def cluster(
+        self,
+        method,
+        columns=None,
+        column_scale_factors=None,
+        min_vectors=None,
+    ):
+        """This method clusters a list of vectors both in reciprocal space and in real space.
+        The output is a list of vectors with a "label" which defines the cluster that each vector
+        belongs to.  Vectors with a label==-1 are outliers which are ignored.
+        Parameters
+        ----------
+        method: sklearn.base.ClusterMixin
+            The method used to cluster the vectors
+        columns: list
+            The columns of the data to use for clustering.
+        column_scale_factors: list
+            The scale factors to apply to the columns of the data.
+        min_vectors: int
+            A strict check to limit clusters arising from less than `min_vectors`
+            vectors
+        """
+        if column_scale_factors is None:
+            column_scale_factors = [
+                1.0,
+            ] * self.data.shape[-1]
+        if columns is None:
+            columns = list(range(self.data.shape[-1]))
+
+        new_signal = self.map(
+            cluster,
+            inplace=False,
+            method=method,
+            columns=columns,
+            column_scale_factors=column_scale_factors,
+            min_vectors=min_vectors,
+        )
+        new_signal.column_names = self.column_names + ["cluster"]
+        new_signal.units = self.units + ["n.a."]
+
+        if self.has_navigation_axis:
+            new_signal.set_signal_type("labeled_diffraction_vectors")
+
+        return new_signal
+
+    @property
+    def has_navigation_axis(self):
+        return False
+
     def get_unique_vectors(self, *args, **kwargs):
         """Returns diffraction vectors considered unique by:
         strict comparison, distance comparison with a specified
@@ -830,8 +878,8 @@ class DiffractionVectors(BaseSignal):
         return flattened_vectors.get_unique_vectors(*args, **kwargs)
 
     def filter_magnitude(self, min_magnitude, max_magnitude, *args, **kwargs):
-        """Filter the diffraction vectors to accept only those with a magnitude
-        within a user specified range.
+        """
+        Filter the diffraction vectors to accept only those with a magnitude within a user specified range.
 
         Parameters
         ----------

@@ -272,42 +272,8 @@ class DiffractionVectors2D(DiffractionVectors, Signal2D):
 
         return DiffractionVectors2D(new_data)
 
-    def cluster(self,
-                        method,
-                        columns=None,
-                        column_scale_factors=None,
-                        min_vectors=None,
-                        ):
-        """This method clusters a list of vectors both in reciporical space and in real space.
-        The output is a list of vectors with a "label" which defines the cluster that each vector
-        belongs to.  Vectors with a label==-1 are outliers which are ignored.
-        Parameters
-        ----------
-        method: sklearn.base.ClusterMixin
-            The method used to cluster the vectors
-        columns: list
-            The columns of the data to use for clustering.
-        column_scale_factors: list
-            The scale factors to apply to the columns of the data.
-        min_vectors: int
-            A strict check to limit clusters arising from less than `min_vectors`
-            vectors
-        """
-        if column_scale_factors is None:
-            column_scale_factors = [1., 1., 1., 1.]
-        if columns is None:
-            columns = [0, 1, 2, 3]
-        vectors = self.data[:, columns]
-        vectors = vectors / np.array(column_scale_factors)
-        clusters = method.fit(vectors)
-        labels = clusters.labels_
-        if min_vectors is not None:
-            label, counts = np.unique(labels, return_counts=True)
-            below_min_v = label[counts < min_vectors]
-            labels[np.isin(labels, below_min_v)] = -1
+    # Functions that only work for 2D Vectors with no navigation axis
 
-        vectors_and_labels = np.hstack([self.data, labels[:, np.newaxis]])
-        new_signal = self._deepcopy_with_new_data(data=vectors_and_labels)
-        new_signal.set_signal_type("labeled_diffraction_vectors")
-        return new_signal
-
+    @property
+    def has_navigation_axis(self):
+        return len(self.axes_manager.navigation_axes) > 0

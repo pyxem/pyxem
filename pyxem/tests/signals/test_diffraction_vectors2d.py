@@ -79,6 +79,15 @@ class TestSingleDiffractionVectors2D:
         ans = np.array([[0.063776, 0.011958]])
         np.testing.assert_almost_equal(filtered_vectors.data, ans)
 
+    def test_cluster(self):
+        clusterer = DBSCAN(eps=0.1, min_samples=2)
+        clustered = self.vector.cluster(clusterer)
+        assert clustered.data.shape[1] == 3
+        assert clustered.data.shape[0] == 8
+        assert clustered.axes_manager.signal_axes[0].size == 3
+        assert clustered.ivec["cluster"].data.shape[0] == 8
+        assert isinstance(clustered, DiffractionVectors2D)
+
 
 class TestVector2DSubclass:
     @pytest.fixture()

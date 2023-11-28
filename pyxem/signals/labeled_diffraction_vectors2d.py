@@ -19,21 +19,19 @@
 
 from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
 from scipy.spatial.distance import cdist
-from sklearn.cluster import DBSCAN
 import numpy as np
 import matplotlib.pyplot as plt
 
 
-from sklearn.cluster import OPTICS
 import hyperspy.api as hs
 
 from pyxem.utils.labeled_vector_utils import (
-    get_vector_dist,
     column_mean,
     vectors2image,
     convert_to_markers,
     points_to_polygon,
 )
+from pyxem.utils.vector_utils import only_signal_axes
 
 
 class LabeledDiffractionVectors2D(DiffractionVectors2D):
@@ -42,52 +40,7 @@ class LabeledDiffractionVectors2D(DiffractionVectors2D):
     _signal_dimension = 2
     _signal_type = "labeled_diffraction_vectors"
 
-    @property
-    def unique_counts(self):
-        _, counts = np.unique(self.data, return_counts=True, axis=1)
-        return
-
-    @property
-    def is_clustered(self):
-        return self.metadata.get_item("Vectors.is_clustered", False)
-
-    @is_clustered.setter
-    def is_clustered(self, value):
-        self.metadata.set_item("Vectors.is_clustered", value)
-
-    def get_dist_matrix(self, max_search=None):
-        """Returns a distance matrix from a list of vectors with labels in the last column of the dataset."""
-        vectors = self.data
-        max_label = int(np.max(vectors[:, -1])) + 1
-        labels = vectors[:, -1]
-        cross_corr_matrix = np.zeros((max_label, max_label))
-        label_order = labels.argsort()
-        labels = labels[label_order]  # Order the labels
-        vectors = vectors[label_order]  # Order the vectors
-
-        sorted_index = np.arange(max_label)
-        lo = np.searchsorted(labels, sorted_index, side="left")
-        hi = np.searchsorted(labels, sorted_index, side="right")
-
-        if max_search is not None:
-            mean_pos = self.map_vectors(
-                column_mean, columns=[0, 1], label_index=-1, dtype=float, shape=(2,)
-            )
-            dist_mat = cdist(mean_pos, mean_pos)
-
-            in_range = dist_mat < max_search
-        else:
-            in_range = np.ones((max_label, max_label))
-        for i, (l, h) in enumerate(zip(lo, hi)):
-            v1 = vectors[l:h][:, :2]
-            for j, (l2, h2) in enumerate(zip(lo, hi)):
-                if in_range[i, j]:
-                    v2 = vectors[l2:h2][:, :2]
-                    cross_corr_matrix[i, j] = get_vector_dist(v1, v2)
-                else:
-                    cross_corr_matrix[i, j] = 10000
-        return cross_corr_matrix
-
+    @only_signal_axes
     def map_vectors(self, func, dtype, label_index=-1, shape=None, **kwargs):
         """
         Parameters
@@ -126,6 +79,7 @@ class LabeledDiffractionVectors2D(DiffractionVectors2D):
             ans[i] = func(vectors[l:h], **kwargs)
         return ans
 
+    @only_signal_axes
     def plot_clustered(
         self,
         nav_columms=None,
@@ -188,8 +142,9 @@ class LabeledDiffractionVectors2D(DiffractionVectors2D):
             )
         return fig, axs
 
+    @only_signal_axes
     def cluster_labeled_vectors(
-        self, method, columns=None, preprocessing="mean",replace_nan=-100, **kwargs
+        self, method, columns=None, preprocessing="mean", replace_nan=-100, **kwargs
     ):
         """A function to cluster the labeled vectors in the dataset.
 
@@ -233,14 +188,17 @@ class LabeledDiffractionVectors2D(DiffractionVectors2D):
         new_signal.is_clustered = True
         return new_signal
 
-    def to_markers(self, signal, get_polygons=False,num_points=10, **kwargs):
+    @only_signal_axes
+    def to_markers(self, signal, get_polygons=False, num_points=10, **kwargs):
         marker_list = []
 
         offsets, colors, colors_by_index = convert_to_markers(self, signal)
         points = hs.plot.markers.Points(offsets=offsets.T, color=colors.T, **kwargs)
         marker_list.append(points)
         if get_polygons:
-            verts = self.map_vectors(points_to_polygon, num_points=num_points, dtype=object)
+            verts = self.map_vectors(
+                points_to_polygon, num_points=num_points, dtype=object
+            )
             verts = list(verts)
             polygons = hs.plot.markers.Polygons(
                 verts=verts, alpha=0.5, color=colors_by_index, linewidth=2
