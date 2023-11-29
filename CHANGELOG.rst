@@ -80,6 +80,11 @@ Fixed
   passing orientations as tuples.
 - Fix bug in calculating strain (#958)
 
+Changed
+-------
+- Subpixel refinement now a function of the :py:class:`~pyxem.signals.DiffractionVectors` class (#980)
+- The :py:class:`~pyxem.generators.SubpixelrefinementGenerator` class has been deprecated (#980)
+
 
 2023-05-08 - version 0.15.1
 ===========================
