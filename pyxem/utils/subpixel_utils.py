@@ -1,5 +1,22 @@
+# -*- coding: utf-8 -*-
+# Copyright 2016-2023 The pyXem developers
+#
+# This file is part of pyXem.
+#
+# pyXem is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# pyXem is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+
 import numpy as np
-from skimage.registration import phase_cross_correlation
 from skimage.transform import rescale
 from skimage import draw
 
@@ -26,12 +43,9 @@ def get_experimental_square(z, vector, square_size):
     """
     if square_size % 2 != 0:
         raise ValueError("'square_size' must be an even number")
-
-    # Pad the image with zeros to avoid edge effects
-    z = np.pad(z, square_size, mode="reflect")
-    cx, cy, half_ss = vector[0], vector[1], int(square_size / 2)
-
-    _z = z[cy: cy + half_ss*2, cx: cx + half_ss*2]
+    # reverse the order of the vector
+    cx, cy, half_ss = vector[1], vector[0], int(square_size / 2)
+    _z = z[cy-half_ss: cy + half_ss+1, cx-half_ss: cx + half_ss+1]
     return _z
 
 
@@ -86,7 +100,7 @@ def _center_of_mass_hs(z):
     h, w = z.shape
     cx = np.sum(dx * np.arange(w))
     cy = np.sum(dy * np.arange(h))
-    return cx, cy
+    return cy, cx
 
 
 def _com_experimental_square(z, vector, square_size):
@@ -113,21 +127,22 @@ def _com_experimental_square(z, vector, square_size):
     z_adpt[0, :] = 0
     return z_adpt
 
+
 def _conventional_xc(slic, kernel, upsample_factor):
     """Takes two images of disc and finds the shift between them using
     conventional cross correlation.
     """
+    half_ss = int((slic.shape[0]) / 2)
     slic = rescale(slic, upsample_factor, order=1,
             mode='reflect')
     kernel = rescale(kernel, upsample_factor, order=1,
             mode='reflect')
 
     temp = normalize_template_match(slic, kernel)
-    max = np.unravel_index(np.argmax(temp), temp.shape)
-    shifts = np.array(max) - np.array(kernel.shape) / 2
-    shifts = np.flip(shifts)/upsample_factor  # to comply with hyperspy conventions - see issue#490
-    shifts = shifts+1
+    max = np.array(np.unravel_index(np.argmax(temp), temp.shape))
+    shifts = np.array(max)/upsample_factor - half_ss
     return shifts
+
 #####################################################
 # Methods for subpixel refinement on a set of vectors
 #####################################################
@@ -140,22 +155,14 @@ def _center_of_mass_map(dp, vectors, square_size, offsets, scales):
         ]
     shifts = np.zeros_like(vectors, dtype=np.float64)
     for i, vector in enumerate(vectors):
-        expt_disc = _com_experimental_square(dp, vector, square_size)
-        shifts[i] = [a - square_size / 2 for a in _center_of_mass_hs(expt_disc)]
+        square = get_experimental_square(dp, vector, square_size)
+        shifts[i] = [a - square_size / 2 for a in _center_of_mass_hs(square)]
     return (vectors + shifts) * scales + offsets
 
 
 def _conventional_xc_map(
         dp, vectors, kernel, square_size, upsample_factor, offsets, scales
 ):
-    shifts = np.zeros_like(vectors, dtype=np.float64)
-    for i, vector in enumerate(vectors):
-        expt_disc = get_experimental_square(dp, vector, square_size)
-        shifts[i] = _conventional_xc(expt_disc, kernel, upsample_factor)
-    return (vectors + shifts) * scales + offsets
-
-
-def _reference_xc_map(dp, vectors, kernel, square_size, upsample_factor, offsets, scales):
     shifts = np.zeros_like(vectors, dtype=np.float64)
     for i, vector in enumerate(vectors):
         expt_disc = get_experimental_square(dp, vector, square_size)

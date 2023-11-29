@@ -19,11 +19,14 @@
 import pytest
 import numpy as np
 from sklearn.cluster import DBSCAN
+from skimage.draw import disk
+from skimage.morphology import disk as disk2
 
 from hyperspy.signals import Signal2D
 from hyperspy.signal import BaseSignal
 
 from pyxem.signals import DiffractionVectors, DiffractionVectors2D, DiffractionVectors1D, PolarVectors
+from pyxem.utils.subpixel_utils import _center_of_mass_hs, get_experimental_square, _conventional_xc
 import pyxem.dummy_data.make_diffraction_test_data as mtd
 from hyperspy.axes import UniformDataAxis
 
@@ -643,19 +646,3 @@ class TestSlicingVectors:
         assert vectors.num_columns == 2
         lazy_vectors = vectors.as_lazy()
         assert lazy_vectors.num_columns == 2
-
-
-class TestDiffractionVectors:
-    def test_polar(self):
-        vectors = np.empty((2, 2), dtype=object)
-        for i in np.ndindex((2, 2)):
-            vectors[i] = np.array([[0.0, 1.0, 0.5], [1.0, 0.0, 0.5]]).T
-        dv = DiffractionVectors(vectors)
-        pol = dv.to_polar()
-        assert isinstance(pol, PolarVectors)
-        np.testing.assert_almost_equal(
-            pol.data[0, 0],
-            np.array([[1.0, 1.0, 0.7071068], [np.pi / 2, 0, np.pi / 4]]).T,
-        )
-        cart = pol.to_cartesian()  # test going back to cartesian
-        np.testing.assert_almost_equal(cart.data[0, 0], vectors[0, 0])

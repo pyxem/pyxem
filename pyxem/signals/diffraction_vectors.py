@@ -16,7 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-import itertools
 from functools import cached_property
 from warnings import warn
 
@@ -51,7 +50,6 @@ from pyxem.utils._slicers import Slicer
 from pyxem.utils.subpixel_utils import (
     _conventional_xc_map,
     _center_of_mass_map,
-    _reference_xc_map,
     get_simulated_disc,
 )
 
@@ -191,10 +189,10 @@ class DiffractionVectors(BaseSignal):
         """
         if center is None and peaks.metadata.has_item("Peaks.signal_axes"):
             center = [
-                -ax.offset / ax.scale for ax in peaks.metadata.Peaks.signal_axes[::-1]
+                ax.offset / ax.scale for ax in peaks.metadata.Peaks.signal_axes[::-1]
             ]
         elif center is not None:
-            pass  # center is already set
+            center = -np.array(center)
         else:
             raise ValueError(
                 "A center and calibration must be provided unless the"
@@ -251,7 +249,7 @@ class DiffractionVectors(BaseSignal):
             units = list(units) + ["a.u."]
 
         vectors = peaks.map(
-            lambda x, cen, cal: (x - cen) * cal,
+            lambda x, cen, cal: (x + cen) * cal,
             cal=calibration,
             cen=center,
             inplace=False,
@@ -273,7 +271,7 @@ class DiffractionVectors(BaseSignal):
         signal,
         method="center-of-mass",
         disk_r=None,
-        upsample_factor=10,
+        upsample_factor=2,
         square_size=10,
         **kwargs,
     ):
@@ -298,10 +296,13 @@ class DiffractionVectors(BaseSignal):
         """
         method_dict = {
             "cross-correlation": _conventional_xc_map,
-            "phase-correlation": _reference_xc_map,
             "center-of-mass": _center_of_mass_map,
         }
-        if method is "center-of-mass":
+        if method not in method_dict:
+            raise ValueError(
+                f"The method parameter must be one of {list(method_dict.keys())}"
+            )
+        if method == "center-of-mass":
             if disk_r is not None or upsample_factor is not None:
                 warn(
                     "The disk_r and upsample_factor parameters are not used for the center-of-mass method."
@@ -316,7 +317,9 @@ class DiffractionVectors(BaseSignal):
         scales = [ax.scale for ax in signal_axes]
 
         funct = method_dict[method]
-        pixels = self.pixel_vectors
+        pixels = self.get_pixel_vectors(offsets=offsets, scales=scales,
+                                        shape=signal.axes_manager._signal_shape_in_array,
+                                        square_size=square_size)
         refined_vectors = signal.map(
             funct,
             vectors=pixels,
@@ -332,17 +335,27 @@ class DiffractionVectors(BaseSignal):
         )
         return refined_vectors
 
-    @property
-    def pixel_vectors(self):
+    def get_pixel_vectors(self, offsets=None, scales=None,
+                          square_size=None, shape=None):
         """Returns the diffraction vectors in pixel coordinates."""
-        if self.scales is None or self.center is None:
-            raise ValueError(
-                "The pixel vectors cannot be calculated without a calibration."
-            )
-        pixels = self.map(
-            lambda x, cen, cal: np.round(x / cal + cen).astype(int),
-            cal=self.scales,
-            cen=self.center,
+        if offsets is None:
+            offsets = self.offsets
+        if scales is None:
+            scales = self.scales
+
+        def get_pixels(x, off, scale, square_size=None, shape=None):
+            pixels = np.round((x - off)/scale).astype(int)
+            if square_size is not None and shape is not None:
+                pixels = pixels[np.all(pixels > (square_size/2)+1, axis=1)]
+                pixels = pixels[np.all(np.array(shape) - pixels > (square_size/2)+1, axis=1)]
+            return pixels
+
+
+        pixels = self.map(get_pixels,
+            off=offsets,
+            scale=scales,
+            square_size=square_size,
+            shape=shape,
             inplace=False,
             ragged=True,
         )

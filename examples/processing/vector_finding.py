@@ -58,21 +58,22 @@ Subpixel Peak Fitting
 =====================
 
 The template matching is done on the pixel grid.  To find the peak position more accurately the correlation
-can be upsampled using the :func:`pyxem.signals.DiffractionVectors.subpixel_refine` method.  This method takes a
+can be up-sampled using the :func:`pyxem.signals.DiffractionVectors.subpixel_refine` method.  This method takes a
 `DiffractionSignal2D` object and uses that to refine the peak positions.
-"""
-refined_peaks_com = vectors.subpixel_refine("center_of_mass", square_size=5)
-refined_peaks_xc = vectors.subpixel_refine(
-    "cross-correlation", disk_r=5, upsample_factor=2, square_size=5
-)
-refined_peaks_pxc = vectors.subpixel_refine(
-    "phase_cross_correlation", disk_r=5, upsample_factor=2, square_size=5
-)
-markers1 = refined_peaks_com.as_markers(colors="red", sizes=0.1, alpha=0.5)
-markers2 = refined_peaks_xc.as_markers(colors="blue", sizes=0.1, alhpa=0.5)
 
-markers3 = refined_peaks_pxc.as_markers(colors="green", sizes=0.1, alhpa=0.5)
+This only really works up to the nyquist frequency so most up-sampling of greater than 2 has little improvement and 
+greatly increases the computation time. 
+"""
+refined_peaks_com = vectors.subpixel_refine(s, "center-of-mass", square_size=20)
+refined_peaks_xc = vectors.subpixel_refine(s, "cross-correlation", square_size=20, upsample_factor=2, disk_r=5)
+
+markers2 = refined_peaks_com.to_markers(color="blue", sizes=10, alpha=0.25)
+markers3 = refined_peaks_xc.to_markers(color="green", sizes=10, alpha=0.25)
+
 
 s.plot()
-s.add_marker([markers1, markers2, markers3])
+s.add_marker(vectors.to_markers(color="red", sizes=10, alpha=0.25))
+s.add_marker(markers2)
+s.add_marker(markers3)
+
 # %%
