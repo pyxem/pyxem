@@ -34,8 +34,7 @@ scan = DBSCAN(eps=1.0, min_samples=2)
 # Here this means that the clustering algorithm operates on 10 nm in real space and .1 nm^-1 in
 # reciprocal space based on the units for the vectors.
 clustered = flat_vectors.cluster(
-    scan, column_scale_factors=[10, 10, 0.05, 0.05], min_vectors=40
-)
+    scan, column_scale_factors=[10, 10, 0.05, 0.05],columns=[0,1,2,3], min_vectors=40)
 m, p = clustered.to_markers(s, alpha=0.8, get_polygons=True)
 s.plot()
 s.add_marker(m)
@@ -64,8 +63,8 @@ m, p = clustered2.to_markers(s, alpha=0.8, get_polygons=True)
 # which segment some of the nano-crystals into different clusters.  It also shows the effect of using
 # a phosphor screen which has some pretty severe after glow.  This results in a smearing of the
 # features and elongated clusters along the scan direction.
-
 s.plot()
 s.add_marker(m)
 s.add_marker(p, plot_on_signal=False)
 # %%
+

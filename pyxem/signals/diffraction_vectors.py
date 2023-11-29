@@ -820,7 +820,7 @@ class DiffractionVectors(BaseSignal):
         new_signal.column_names = self.column_names + ["cluster"]
         new_signal.units = self.units + ["n.a."]
 
-        if self.has_navigation_axis:
+        if not self.has_navigation_axis:
             new_signal.set_signal_type("labeled_diffraction_vectors")
 
         return new_signal
