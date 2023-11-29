@@ -317,9 +317,12 @@ class DiffractionVectors(BaseSignal):
         scales = [ax.scale for ax in signal_axes]
 
         funct = method_dict[method]
-        pixels = self.get_pixel_vectors(offsets=offsets, scales=scales,
-                                        shape=signal.axes_manager._signal_shape_in_array,
-                                        square_size=square_size)
+        pixels = self.get_pixel_vectors(
+            offsets=offsets,
+            scales=scales,
+            shape=signal.axes_manager._signal_shape_in_array,
+            square_size=square_size,
+        )
         refined_vectors = signal.map(
             funct,
             vectors=pixels,
@@ -335,8 +338,9 @@ class DiffractionVectors(BaseSignal):
         )
         return refined_vectors
 
-    def get_pixel_vectors(self, offsets=None, scales=None,
-                          square_size=None, shape=None):
+    def get_pixel_vectors(
+        self, offsets=None, scales=None, square_size=None, shape=None
+    ):
         """Returns the diffraction vectors in pixel coordinates."""
         if offsets is None:
             offsets = self.offsets
@@ -344,14 +348,16 @@ class DiffractionVectors(BaseSignal):
             scales = self.scales
 
         def get_pixels(x, off, scale, square_size=None, shape=None):
-            pixels = np.round((x - off)/scale).astype(int)
+            pixels = np.round((x - off) / scale).astype(int)
             if square_size is not None and shape is not None:
-                pixels = pixels[np.all(pixels > (square_size/2)+1, axis=1)]
-                pixels = pixels[np.all(np.array(shape) - pixels > (square_size/2)+1, axis=1)]
+                pixels = pixels[np.all(pixels > (square_size / 2) + 1, axis=1)]
+                pixels = pixels[
+                    np.all(np.array(shape) - pixels > (square_size / 2) + 1, axis=1)
+                ]
             return pixels
 
-
-        pixels = self.map(get_pixels,
+        pixels = self.map(
+            get_pixels,
             off=offsets,
             scale=scales,
             square_size=square_size,

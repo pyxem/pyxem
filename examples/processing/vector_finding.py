@@ -65,7 +65,9 @@ This only really works up to the nyquist frequency so most up-sampling of greate
 greatly increases the computation time. 
 """
 refined_peaks_com = vectors.subpixel_refine(s, "center-of-mass", square_size=20)
-refined_peaks_xc = vectors.subpixel_refine(s, "cross-correlation", square_size=20, upsample_factor=2, disk_r=5)
+refined_peaks_xc = vectors.subpixel_refine(
+    s, "cross-correlation", square_size=20, upsample_factor=2, disk_r=5
+)
 
 markers2 = refined_peaks_com.to_markers(color="blue", sizes=10, alpha=0.25)
 markers3 = refined_peaks_xc.to_markers(color="green", sizes=10, alpha=0.25)

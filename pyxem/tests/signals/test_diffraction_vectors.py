@@ -28,6 +28,12 @@ from hyperspy.signal import BaseSignal
 from pyxem.signals import DiffractionVectors, DiffractionVectors2D, DiffractionVectors1D, PolarVectors
 from pyxem.utils.subpixel_utils import _center_of_mass_hs, get_experimental_square, _conventional_xc
 import pyxem.dummy_data.make_diffraction_test_data as mtd
+from pyxem.signals import DiffractionVectors, DiffractionVectors2D, DiffractionVectors1D
+from pyxem.utils.subpixel_utils import (
+    _center_of_mass_hs,
+    get_experimental_square,
+    _conventional_xc,
+)
 from hyperspy.axes import UniformDataAxis
 
 # DiffractionVectors correspond to a single list of vectors, a map of vectors
@@ -336,12 +342,31 @@ class TestInitVectors:
             100,
         ]
 
-class TestSubpixelRefinement:
 
-    def test_subpixel_refinement(self):
+class TestSubpixelRefinement:
+    def test_com_accuracy(self):
+        xx, yy = disk(center=(45, 50), radius=10)
+        cir = np.zeros((100, 100))
+        cir[xx, yy] = 1
+        sq = get_experimental_square(cir, (47, 50), 30)
+        cen = _center_of_mass_hs(sq)
+        assert np.allclose(np.array(cen) - 15, (-2.0, 0.0))
+
+    def test_conventional_xc_accuracy(self):
+        xx, yy = disk(center=(45, 50), radius=10)
+        kernel = disk2(radius=10)
+        cir = np.random.random((100, 100))
+
+        cir[xx, yy] += 10
+        sq = get_experimental_square(cir, (47, 50), 30)
+        cen = _conventional_xc(sq, kernel, upsample_factor=1)
+        assert np.allclose(np.array(cen), (-2.0, 0.0))
+
+    def test_subpixel_refinement_com(self):
         import pyxem.dummy_data.make_diffraction_test_data as mdtd
         import pyxem as pxm
         import numpy as np
+
         di = mdtd.DiffractionTestImage(intensity_noise=False)
         di.add_disk(x=128, y=128, intensity=10.0)  # Add a zero beam disk at the center
         di.add_cubic_disks(vx=20, vy=20, intensity=2.0, n=5)
@@ -354,7 +379,28 @@ class TestSubpixelRefinement:
         temp = s.template_match_disk(disk_r=5, subtract_min=False)
         pks = temp.find_peaks(threshold_abs=0.4, interactive=False)
         dv = pxm.signals.DiffractionVectors.from_peaks(pks)
-        dv.subpixel_refine(s, method="cross-correlation", disk_r=5, upsample_factor=2)
+        dv.subpixel_refine(s, method="center-of-mass")
+
+    def test_subpixel_refinement_xc(self):
+        import pyxem.dummy_data.make_diffraction_test_data as mdtd
+        import pyxem as pxm
+        import numpy as np
+
+        di = mdtd.DiffractionTestImage(intensity_noise=False)
+        di.add_disk(x=128, y=128, intensity=10.0)  # Add a zero beam disk at the center
+        di.add_cubic_disks(vx=20, vy=20, intensity=2.0, n=5)
+        di.add_background_lorentz()
+        dtd = mdtd.DiffractionTestDataset(10, 10, 256, 256)
+        position_array = np.ones((10, 10), dtype=bool)
+        position_array[:5] = False
+        dtd.add_diffraction_image(di)
+        s = dtd.get_signal()
+        temp = s.template_match_disk(disk_r=5, subtract_min=False)
+        pks = temp.find_peaks(threshold_abs=0.4, interactive=False)
+        dv = pxm.signals.DiffractionVectors.from_peaks(pks)
+        dv.subpixel_refine(s, method="cross-correlation", upsample_factor=2, disk_r=5)
+
+
 class TestConvertVectors:
     @pytest.mark.parametrize("real_units", (True, False))
     def test_flatten_vectors(self, diffraction_vectors_map, real_units):

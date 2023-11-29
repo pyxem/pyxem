@@ -45,7 +45,7 @@ def get_experimental_square(z, vector, square_size):
         raise ValueError("'square_size' must be an even number")
     # reverse the order of the vector
     cx, cy, half_ss = vector[1], vector[0], int(square_size / 2)
-    _z = z[cy-half_ss: cy + half_ss+1, cx-half_ss: cx + half_ss+1]
+    _z = z[cy - half_ss : cy + half_ss + 1, cx - half_ss : cx + half_ss + 1]
     return _z
 
 
@@ -133,15 +133,14 @@ def _conventional_xc(slic, kernel, upsample_factor):
     conventional cross correlation.
     """
     half_ss = int((slic.shape[0]) / 2)
-    slic = rescale(slic, upsample_factor, order=1,
-            mode='reflect')
-    kernel = rescale(kernel, upsample_factor, order=1,
-            mode='reflect')
+    slic = rescale(slic, upsample_factor, order=1, mode="reflect")
+    kernel = rescale(kernel, upsample_factor, order=1, mode="reflect")
 
     temp = normalize_template_match(slic, kernel)
     max = np.array(np.unravel_index(np.argmax(temp), temp.shape))
-    shifts = np.array(max)/upsample_factor - half_ss
+    shifts = np.array(max) / upsample_factor - half_ss
     return shifts
+
 
 #####################################################
 # Methods for subpixel refinement on a set of vectors
@@ -161,7 +160,7 @@ def _center_of_mass_map(dp, vectors, square_size, offsets, scales):
 
 
 def _conventional_xc_map(
-        dp, vectors, kernel, square_size, upsample_factor, offsets, scales
+    dp, vectors, kernel, square_size, upsample_factor, offsets, scales
 ):
     shifts = np.zeros_like(vectors, dtype=np.float64)
     for i, vector in enumerate(vectors):

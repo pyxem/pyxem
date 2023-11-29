@@ -268,7 +268,11 @@ class SubpixelrefinementGenerator:
 
     """
 
-    @deprecated(since="0.17.0", removal="1.0.0", alternative="pyxem.signals.DiffractionVectors.subpixel_refine")
+    @deprecated(
+        since="0.17.0",
+        removal="1.0.0",
+        alternative="pyxem.signals.DiffractionVectors.subpixel_refine",
+    )
     def __init__(self, dp, vectors):
         self.dp = dp
         self.vectors_init = vectors
