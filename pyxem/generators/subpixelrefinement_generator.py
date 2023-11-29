@@ -21,6 +21,7 @@
 import numpy as np
 from skimage.registration import phase_cross_correlation
 from skimage import draw
+from pyxem.utils._deprecated import deprecated
 
 from pyxem.signals import DiffractionVectors
 
@@ -267,6 +268,7 @@ class SubpixelrefinementGenerator:
 
     """
 
+    @deprecated(since="0.17.0", removal="1.0.0", alternative="pyxem.signals.DiffractionVectors.subpixel_refine")
     def __init__(self, dp, vectors):
         self.dp = dp
         self.vectors_init = vectors
