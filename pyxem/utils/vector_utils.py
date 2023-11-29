@@ -402,3 +402,42 @@ def only_signal_axes(func):
         return func(*args, **kwargs)
 
     return wrapper
+
+
+def vectors_to_polar(vectors):
+    """Converts a list of vectors to polar coordinates.
+
+    Parameters
+    ----------
+    vectors : np.array()
+        Array of vectors.
+
+    Returns
+    -------
+    polar_vectors : np.array()
+        Array of vectors in polar coordinates.
+    """
+
+    polar_vectors = np.empty(vectors.shape)
+    polar_vectors[:, 0] = np.linalg.norm(vectors, axis=1)
+    polar_vectors[:, 1] = np.arctan2(vectors[:, 1], vectors[:, 0])
+    polar_vectors[:, 2:] = vectors[:, 2:]
+    return polar_vectors
+
+
+def to_cart_three_angles(vectors):
+    k = vectors[:, 0]
+    delta_phi = vectors[:, 1]
+    min_angle = vectors[:, 2]
+    angles = np.repeat(min_angle, 3)
+    angles[1::3] += delta_phi
+    angles[2::3] += delta_phi * 2
+    k = np.repeat(k, 3)
+
+    return np.vstack([k * np.cos(angles), k * np.sin(angles)]).T
+
+
+def polar_to_cartesian(vectors):
+    k = vectors[:, 0]
+    phi = vectors[:, 1]
+    return np.vstack([k * np.cos(phi), k * np.sin(phi)]).T

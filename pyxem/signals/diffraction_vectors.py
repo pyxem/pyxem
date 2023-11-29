@@ -43,7 +43,9 @@ from pyxem.utils.vector_utils import (
     filter_vectors_near_basis,
     _reverse_pos,
     cluster,
+vectors_to_polar,
 )
+
 from pyxem.utils._slicers import Slicer
 from pyxem.utils._deprecated import deprecated
 
@@ -993,6 +995,22 @@ class DiffractionVectors(BaseSignal):
             **kwargs,
         )
         return filtered_vectors
+
+    def to_polar(self):
+        """Convert the diffraction vectors to polar coordinates.
+
+        Returns
+        -------
+        polar_vectors : DiffractionVectors
+            Diffraction vectors in polar coordinates.
+        """
+        polar_vectors = self.map(vectors_to_polar, inplace=False, ragged=True)
+        polar_vectors.set_signal_type("polar_vectors")
+        polar_vectors.column_names[0] = "r"
+        polar_vectors.column_names[1] = "theta"
+        polar_vectors.units[0] = self.units[0]
+        polar_vectors.units[1] = "rad"
+        return polar_vectors
 
     def get_diffracting_pixels_map(self, in_range=None, binary=False):
         """Map of the number of vectors at each navigation position.

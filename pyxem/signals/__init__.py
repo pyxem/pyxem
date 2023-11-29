@@ -38,6 +38,7 @@ from .diffraction_vectors2d import DiffractionVectors2D
 from .diffraction_vectors1d import DiffractionVectors1D
 from .diffraction1d import Diffraction1D, LazyDiffraction1D
 from .diffraction2d import Diffraction2D, LazyDiffraction2D
+from .polar_vectors import PolarVectors
 from .electron_diffraction1d import ElectronDiffraction1D, LazyElectronDiffraction1D
 from .electron_diffraction2d import ElectronDiffraction2D, LazyElectronDiffraction2D
 from .indexation_results import VectorMatchingResults
@@ -78,6 +79,7 @@ __all__ = [
     "VectorMatchingResults",
     "PairDistributionFunction1D",
     "PolarDiffraction2D",
+    "PolarVectors",
     "Power2D",
     "ReducedIntensity1D",
     "LearningSegment",

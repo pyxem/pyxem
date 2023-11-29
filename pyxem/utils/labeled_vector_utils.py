@@ -72,20 +72,19 @@ def get_filtered_combinations(
     This filter is useful for finding high intensity features but not losing lower intensity
     paired features which contribute to symmetry etc.
     """
+    if intensity_threshold is not None and intensity_index is not None:
+        intensity = pks[:, intensity_index]
+        intensity_bool = intensity > intensity_threshold
+        pks = pks[intensity_bool]
+    else:
+        intensity = np.ones(len(pks))
     angles = pks[:, angle_index]
     k = pks[:, radial_index]
 
     angle_combos = list(itertools.combinations(angles, num))
     k_combos = list(itertools.combinations(k, num))
-    # Filtering out combinations with only diffraction from vectors below the intensity threshold
-    if intensity_threshold is not None and intensity_index is not None:
-        intensity = pks[:, intensity_index]
-        intensity_combos = itertools.combinations(intensity, num)
-        has_min_intensity = np.array(
-            [any(np.array(i) > intensity_threshold) for i in intensity_combos]
-        )
-    else:
-        has_min_intensity = True
+    intensity_combos = list(itertools.combinations(intensity, num))
+
     # Filtering out combinations where there are two peaks close to each other
     if min_angle is not None:
         above_angle = np.array(
@@ -102,22 +101,30 @@ def get_filtered_combinations(
     else:
         above_angle = True
     # Filtering out combinations of diffraction vectors at different values for k.
+    # This could be faster if we sort the values by k first and then only get the combinations
+    # of the values within a certain range.
     if min_k is not None:
         in_k_range = np.array(
             [np.mean(np.abs(np.subtract(np.mean(k), k))) < min_k for k in k_combos]
         )
     else:
         in_k_range = True
-    in_combos = above_angle * has_min_intensity * in_k_range
+    in_combos = above_angle * in_k_range
     if np.all(in_combos):
         combos = angle_combos
         combos_k = [np.mean(ks) for ks in k_combos]
+        combo_inten = [np.mean(inten) for inten in intensity_combos]
     else:
         combos = [c for c, in_c in zip(angle_combos, in_combos) if in_c]
         combos_k = [
             np.mean(ks) for ks, in_range in zip(k_combos, in_combos) if in_range
         ]
-    return combos, combos_k
+        combo_inten = [
+            np.mean(intens)
+            for intens, in_range in zip(intensity_combos, in_combos)
+            if in_range
+        ]
+    return combos, combos_k, combo_inten
 
 
 def get_three_angles(
@@ -128,7 +135,6 @@ def get_three_angles(
     intensity_threshold=None,
     accept_threshold=0.05,
     min_k=0.05,
-    return_reduced=True,
     min_angle=None,
 ):
     """
@@ -170,7 +176,7 @@ def get_three_angles(
         likely to be from the same feature or unphysical.
     """
     three_angles = []
-    combos, combo_k = get_filtered_combinations(
+    combos, combo_k, combo_inten = get_filtered_combinations(
         pks,
         3,
         radial_index=k_index,
@@ -180,38 +186,35 @@ def get_three_angles(
         min_angle=min_angle,
         min_k=min_k,
     )
-    for c, k in zip(combos, combo_k):
+    for c, k, inten in zip(combos, combo_k, combo_inten):
         angular_seperations = get_angles(c)
         try:
             min_ind = np.argmin(angular_seperations)
             min_sep = angular_seperations[min_ind]
             angular_seperations = np.delete(angular_seperations, min_ind)
-            is_symetric = np.any(
-                np.abs((angular_seperations - min_sep)) < accept_threshold
-            )
+            in_range = np.abs((angular_seperations - min_sep)) < accept_threshold
+            is_symetric = np.any(in_range)
             if is_symetric:
-                if not return_reduced:
-                    for a in angular_seperations:
-                        three_angles.append(a)
-                    three_angles.append(min_sep)
-                else:
-                    min_angle = np.min(c)
-                    num_times = np.round(min_angle / min_sep)
-                    three_angles.append(
-                        [
-                            min_angle,
-                            min_sep,
-                            np.abs(min_angle - (num_times * min_sep)),
-                            k,
-                        ]
-                    )
+                # take the average of the two smaller angles
+                avg_sep = np.mean((np.array(angular_seperations)[in_range][0], min_sep))
+                min_angle = np.min(c)
+                num_times = np.round(min_angle / min_sep)
+                three_angles.append(
+                    [
+                        k,
+                        avg_sep,
+                        min_angle,
+                        inten,
+                        np.abs(min_angle - (num_times * min_sep)),
+                    ]
+                )
         except ValueError:
             print("error")
             print(c)
             print(combos)
             pass
     if len(three_angles) == 0:
-        three_angles = np.empty((0, 4))
+        three_angles = np.empty((0, 5))
     return np.array(three_angles)
 
 
