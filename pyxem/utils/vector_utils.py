@@ -316,7 +316,7 @@ def get_angle_cartesian(a, b):
     return math.acos(max(-1.0, min(1.0, np.dot(a, b) / denom)))
 
 
-def filter_vectors_near_basis(vectors, basis, columns=[0,1], distance=None):
+def filter_vectors_near_basis(vectors, basis, columns=[0, 1], distance=None):
     """
     Filter an array of vectors to only the list of closest vectors
     to some set of basis vectors.  Only vectors within some `distance`

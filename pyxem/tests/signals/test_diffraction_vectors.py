@@ -493,13 +493,15 @@ class TestFilterVectors:
         assert isinstance(filtered_vectors, DiffractionVectors)
 
     def test_filter_detector_edge_map(self, diffraction_vectors_map):
-        diffraction_vectors_map.detector_shape = (260, 240)
-        diffraction_vectors_map.pixel_calibration = 0.001
-        filtered_vectors = diffraction_vectors_map.filter_detector_edge(exclude_width=2)
+        vectors = diffraction_vectors_map.deepcopy()
+        vectors.detector_shape = (260, 240)
+        vectors.pixel_calibration = 0.001
+
+        filtered_vectors = vectors.filter_detector_edge(exclude_width=2)
         ans = np.array([[-0.117587, 0.113601]])
         np.testing.assert_almost_equal(filtered_vectors.data[0, 0], ans)
 
-    def test_filter_basis(self, diffraction_vectors_map):
+    def test_filter_basis(self):
         basis = np.array(
             [
                 [0.089685, 0.292971],
@@ -511,15 +513,21 @@ class TestFilterVectors:
                 [-0.117587, 0.113601],
             ]
         )
-        filtered = diffraction_vectors_map.filter_basis(basis=basis, distance=0.1)
+        arr = np.empty(2, dtype=object)
+        arr[0] = basis
+        arr[1] = basis[:-1]
+        vect = DiffractionVectors(arr)
+        filtered = vect.filter_basis(basis=basis, distance=0.1)
         assert isinstance(filtered, DiffractionVectors2D)
-        np.testing.assert_almost_equal(filtered.data[0, 0], basis)
+        np.testing.assert_almost_equal(filtered.data[0], basis)
 
-    def test_filter_basis_ragged(self,diffraction_vectors_map):
-        filtered = diffraction_vectors_map.filter_basis(basis=diffraction_vectors_map, distance=0.1)
+    def test_filter_basis_ragged(self, diffraction_vectors_map):
+        basis = diffraction_vectors_map.deepcopy()
+        filtered = diffraction_vectors_map.filter_basis(basis=basis, distance=0.1)
         assert isinstance(filtered, DiffractionVectors)
-        np.testing.assert_almost_equal(filtered.data[0, 0], diffraction_vectors_map.data[0, 0])
-
+        np.testing.assert_almost_equal(
+            filtered.data[0, 0], diffraction_vectors_map.data[0, 0]
+        )
 
 
 class TestDiffractingPixelsMap:

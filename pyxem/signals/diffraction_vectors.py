@@ -302,7 +302,11 @@ class DiffractionVectors(BaseSignal):
 
     @units.setter
     def units(self, value):
-        if isiterable(value) and len(value) == self.num_columns and not isinstance(value, str):
+        if (
+            isiterable(value)
+            and len(value) == self.num_columns
+            and not isinstance(value, str)
+        ):
             self.metadata.VectorMetadata["units"] = value
         elif isiterable(value) and len(value) != self.num_columns:
             raise ValueError(
@@ -894,7 +898,11 @@ class DiffractionVectors(BaseSignal):
             kwargs["output_dtype"] = float
 
         filtered_vectors = self.map(
-            filter_vectors_near_basis, basis=basis, distance=distance, inplace=False, **kwargs
+            filter_vectors_near_basis,
+            basis=basis,
+            distance=distance,
+            inplace=False,
+            **kwargs,
         )
         return filtered_vectors
 
