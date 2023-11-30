@@ -302,7 +302,7 @@ class DiffractionVectors(BaseSignal):
 
     @units.setter
     def units(self, value):
-        if isiterable(value) and len(value) == self.num_columns:
+        if isiterable(value) and len(value) == self.num_columns and not isinstance(value, str):
             self.metadata.VectorMetadata["units"] = value
         elif isiterable(value) and len(value) != self.num_columns:
             raise ValueError(
@@ -855,20 +855,26 @@ class DiffractionVectors(BaseSignal):
         )
         return filtered_vectors
 
-    def filter_basis(self, basis, distance=0.5, **kwargs):
+    def filter_basis(self, basis, distance=0.5, columns=[0, 1], **kwargs):
         """
-        Filter vectors to only the set of vectors which is close
-        to a basis set of vectors. If there is no vector within the `distance`
+
+        Filter vectors to only the set of vectors which is close to a basis set of vectors.
+
+        If there is no vector within the `distance`
         parameter of the vector np.`nan` will be returned.
 
         Parameters
         ----------
         basis: array-like or BaseSignal
-            The set of vectors to be compared.
+            The set of vectors to be compared. This should have the same
+            number of columns as the length of the ``columns`` parameter.
         distance: float
             The distance between vectors and basis which detemine if the vector
             is associated with the basis vector. If no vector is inside the
             distance np.nan will be returned.
+        columns: list
+            The columns of the basis to be used for comparison. The default
+            is the first two columns (kx, ky) in most cases.
         kwargs: dict
             Any other parameters passed to the `hyperspy.BaseSignal.Map` function.
         Returns
@@ -888,7 +894,7 @@ class DiffractionVectors(BaseSignal):
             kwargs["output_dtype"] = float
 
         filtered_vectors = self.map(
-            filter_vectors_near_basis, basis=basis, distance=distance, **kwargs
+            filter_vectors_near_basis, basis=basis, distance=distance, inplace=False, **kwargs
         )
         return filtered_vectors
 

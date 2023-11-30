@@ -21,7 +21,7 @@ import pytest
 import numpy as np
 from sklearn.cluster import DBSCAN
 
-from hyperspy.signals import Signal2D
+from hyperspy.signals import Signal2D, BaseSignal
 import hyperspy.api as hs
 
 from pyxem.signals import DiffractionVectors2D
@@ -138,3 +138,10 @@ class TestVector2DSubclass:
     def test_lte(self, vectors):
         lt_vectors = vectors <= 1.1
         np.testing.assert_array_equal(True, lt_vectors.data)
+
+    def test_num_rows(self, vectors):
+        assert vectors.num_rows == 20
+
+    def test_from_peaks(self):
+        with pytest.raises(NotImplementedError):
+            DiffractionVectors2D.from_peaks(BaseSignal(np.ones((2, 2, 10, 10))))
