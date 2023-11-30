@@ -113,6 +113,12 @@ signals:
     dtype: real
     lazy: False
     module: pyxem.signals.polar_vectors
+  LazyPolarVectors:
+    signal_type: polar_vectors
+    signal_dimension: 0
+    dtype: real
+    lazy: True
+    module: pyxem.signals.polar_vectors
   VectorMatchingResults:
     signal_type: vector_matching
     signal_dimension: 0

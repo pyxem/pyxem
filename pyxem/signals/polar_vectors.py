@@ -15,7 +15,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
-import numpy as np
+
+from hyperspy._signals.lazy import LazySignal
 
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.utils.labeled_vector_utils import get_three_angles
@@ -140,3 +141,7 @@ class PolarVectors(DiffractionVectors):
         else:
             vectors = self
         return vectors.to_markers(**kwargs)
+
+
+class LazyPolarVectors(LazySignal, PolarVectors):
+    pass

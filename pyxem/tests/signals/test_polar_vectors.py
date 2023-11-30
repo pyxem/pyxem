@@ -16,8 +16,11 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 import pytest
-from pyxem.signals.polar_vectors import PolarVectors
+
 import numpy as np
+from hyperspy._signals.lazy import LazySignal
+
+from pyxem.signals.polar_vectors import PolarVectors, LazyPolarVectors
 
 
 class TestDiffractionVectors:
@@ -53,3 +56,11 @@ class TestDiffractionVectors:
     def test_get_inscribed_angles_to_markers(self, polar_vectors):
         angles = polar_vectors.get_angles()
         angles.to_markers()
+
+    def test_as_lazy(self, polar_vectors):
+        lazy = polar_vectors.as_lazy()
+        assert isinstance(lazy, LazySignal)
+        assert isinstance(lazy, LazyPolarVectors)
+        assert lazy.data.shape == (5,)
+        assert lazy.data[0].compute().shape == (2, 3)
+        assert lazy.column_names == ["k", "phi", "intensity"]
