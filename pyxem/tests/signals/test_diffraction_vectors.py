@@ -640,4 +640,3 @@ class TestDiffractionVectors:
         )
         cart = pol.to_cartesian()  # test going back to cartesian
         np.testing.assert_almost_equal(cart.data[0, 0], vectors[0, 0])
-

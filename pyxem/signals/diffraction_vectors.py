@@ -43,7 +43,7 @@ from pyxem.utils.vector_utils import (
     filter_vectors_near_basis,
     _reverse_pos,
     cluster,
-vectors_to_polar,
+    vectors_to_polar,
 )
 
 from pyxem.utils._slicers import Slicer

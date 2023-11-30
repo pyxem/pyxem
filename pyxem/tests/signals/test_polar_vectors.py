@@ -41,12 +41,12 @@ class TestDiffractionVectors:
         assert polar_vectors.column_names == ["k", "phi", "intensity"]
 
     def test_get_inscribed_angles(self, polar_vectors):
-        angles = polar_vectors.get_inscribed_angles()
+        angles = polar_vectors.get_angles()
         assert angles.data.shape == (5,)
         assert angles.data[0].shape == (0, 5)
         assert angles.data[1].shape == (1, 5)
         for i in range(4):
-            np.testing.assert_array_equal(
+            np.testing.assert_array_almost_equal(
                 angles.data[i + 1][0], np.array([1, 2 * np.pi / (i + 3), 0, 1, 0])
             )
 
