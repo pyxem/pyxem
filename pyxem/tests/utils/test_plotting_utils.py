@@ -143,5 +143,4 @@ def test_plot_templates_over_signal(
         n_best,
         direct_beam_position,
         marker_colors,
-        verbose=False,
     )
