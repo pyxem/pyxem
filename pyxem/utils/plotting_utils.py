@@ -127,9 +127,6 @@ def plot_templates_over_signal(
     n_best: int = None,
     direct_beam_position: tuple[int, int] = None,
     marker_colors: list[str] = None,
-    marker_type: str = "x",
-    size_factor: float = 1.0,
-    verbose: bool = True,
     **plot_kwargs,
 ):
     """
@@ -146,29 +143,19 @@ def plot_templates_over_signal(
         Template matching results dictionary containing keys: phase_index, template_index,
         orientation, correlation, and mirrored_template.
         Returned from pyxem.utils.indexation_utils.index_dataset_with_template_rotation.
-    phase_key_dict: dictionary
+    phase_key_dict: dict
         A small dictionary to translate the integers in the phase_index array
         to phase names in the original template library.
         Returned from pyxem.utils.indexation_utils.index_dataset_with_template_rotation.
     n_best : int, optional
         Number of solutions to plot. If None, defaults to all solutions.
-    find_direct_beam: bool, optional
-        Roughly find the optimal direct beam position if it is not centered.
     direct_beam_position: 2-tuple
-        The (x, y) position of the direct beam in pixel coordinates. Takes
-        precedence over `find_direct_beam`
+        The (x, y) position of the direct beam in pixel coordinates.
+        If None, defaults to the center of the image, i.e. (0, 0).
     marker_colors : list of str, optional
         Colors of the spot markers. Should be at least n_best long, otherwise colors will loop.
         Defaults to matplotlib's default color cycle
-    marker_type : str, optional
-        Type of marker used for the spots
-    size_factor : float, optional
-        Scaling factor for the spots. See notes on size.
     **plot_kwargs : Keyword arguments passed to signal.plot
-
-    Notes
-    -----
-    The spot marker sizes are scaled by the square root of their intensity
     """
 
     n_best_indexed = result["template_index"].shape[-1]
@@ -182,10 +169,7 @@ def plot_templates_over_signal(
         )
 
     if direct_beam_position is None:
-        direct_beam_position = (
-            signal.axes_manager[0].size // 2,
-            signal.axes_manager[1].size // 2,
-        )
+        direct_beam_position = (0, 0)
 
     if marker_colors is None:
         marker_colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
@@ -196,8 +180,8 @@ def plot_templates_over_signal(
         )
 
     # Fetch an array of the results, with the correct phases
-    result_array = np.empty(
-        (signal.axes_manager[0].size, signal.axes_manager[1].size, n_best_indexed),
+    result_libraries_array = np.empty(
+        (signal.axes_manager[1].size, signal.axes_manager[0].size, n_best_indexed),
         dtype=object,
     )
 
@@ -213,23 +197,28 @@ def plot_templates_over_signal(
         sim_array = phase_library_simulations[result["template_index"]]
 
         # Use the correct phase
-        result_array[mask] = sim_array[mask]
+        result_libraries_array[mask] = sim_array[mask]
 
-    result_signal = hs.signals.Signal1D(result_array)
+    result_libraries_signal = hs.signals.Signal1D(result_libraries_array)
     orientation_signal = hs.signals.Signal2D(result["orientation"])
     mirrored_template_signal = hs.signals.Signal1D(result["mirrored_template"])
 
-    def marker_func_generator(n: int):
+    def marker_func_factory(n: int):
         def marker_func(pattern, center, orientation, mirrored_template):
-            angle = orientation[n, 0]
+            angle = orientation[n, 0]  # 1st ZXZ Euler angle is the in-plane rotation
             pattern = pattern[n]
             mirrored_template = mirrored_template[n]
+
             x, y, _ = get_template_cartesian_coordinates(
                 pattern, center=center, in_plane_angle=angle, mirrored=mirrored_template
             )
 
             # See https://github.com/pyxem/pyxem/issues/925
-            y = signal.axes_manager.shape[1] - y
+            # y = signal.axes_manager.shape[3] - y
+            y = -y
+
+            x *= signal.axes_manager[2].scale
+            y *= signal.axes_manager[3].scale
 
             return np.array((x, y)).T
 
@@ -247,8 +236,8 @@ def plot_templates_over_signal(
 
     signal.plot(**plot_kwargs)
     for i in range(n_best):
-        markers = result_signal.map(
-            marker_func_generator(i),
+        markers = result_libraries_signal.map(
+            marker_func_factory(i),
             center=direct_beam_position,
             orientation=orientation_signal,
             mirrored_template=mirrored_template_signal,
