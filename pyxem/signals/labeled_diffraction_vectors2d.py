@@ -144,7 +144,7 @@ class LabeledDiffractionVectors2D(DiffractionVectors2D):
 
     @only_signal_axes
     def cluster_labeled_vectors(
-        self, method, columns=None, preprocessing="mean", replace_nan=-100, **kwargs
+        self, method, columns=None, preprocessing="mean", **kwargs
     ):
         """A function to cluster the labeled vectors in the dataset.
 
@@ -173,11 +173,17 @@ class LabeledDiffractionVectors2D(DiffractionVectors2D):
             columns=columns,
             **kwargs,
         )
-        to_cluster_vectors[np.isnan(to_cluster_vectors)] = replace_nan
+        # Remove the nan values but we need to keep track of the original labels
+        not_nan = np.logical_not(np.any(np.isnan(to_cluster_vectors), axis=1))
+        num_labels = len(to_cluster_vectors)
+        to_cluster_vectors = to_cluster_vectors[not_nan]
         clustering = method.fit(to_cluster_vectors)
         labels = clustering.labels_
         initial_labels = self.data[:, -1].astype(int)
-        new_labels = labels[initial_labels]
+        # Replace the values with the original
+        actual_labels = np.full(num_labels, -1)
+        actual_labels[not_nan] = labels
+        new_labels = actual_labels[initial_labels]
         new_labels[initial_labels == -1] = -1
         print(f"{np.max(labels) + 1} : Clusters Found!")
         vectors_and_labels = np.hstack([self.data, new_labels[:, np.newaxis]])
