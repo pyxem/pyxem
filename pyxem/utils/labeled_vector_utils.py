@@ -81,49 +81,50 @@ def get_filtered_combinations(
     angles = pks[:, angle_index]
     k = pks[:, radial_index]
 
-    angle_combos = list(itertools.combinations(angles, num))
-    k_combos = list(itertools.combinations(k, num))
-    intensity_combos = list(itertools.combinations(intensity, num))
+    angle_combos = np.array(list(itertools.combinations(angles, num)))
+    k_combos = np.array(list(itertools.combinations(k, num)))
+    intensity_combos = np.array(list(itertools.combinations(intensity, num)))
 
     # Filtering out combinations where there are two peaks close to each other
     if min_angle is not None:
-        above_angle = np.array(
-            [
-                all(
-                    [
-                        np.abs(np.subtract(*c)) > min_angle
-                        for c in itertools.combinations(a, 2)
-                    ]
-                )
-                for a in angle_combos
-            ]
+        in_range = (
+            np.abs(angle_combos[:, :, np.newaxis] - angle_combos[:, np.newaxis, :])
+            < min_angle
         )
+
+        above_angle = np.any(
+            np.sum(
+                in_range,
+                axis=1,
+            )
+            > 1,
+            axis=1,
+        )
+
     else:
         above_angle = True
     # Filtering out combinations of diffraction vectors at different values for k.
     # This could be faster if we sort the values by k first and then only get the combinations
     # of the values within a certain range.
-    if min_k is not None:
-        in_k_range = np.array(
-            [np.mean(np.abs(np.subtract(np.mean(k), k))) < min_k for k in k_combos]
-        )
+    if min_k is not None and len(k_combos) > 0:
+        mean_k = np.mean(k_combos, axis=1)
+        abs_k = np.abs(np.subtract(k_combos, mean_k[:, np.newaxis]))
+        in_k_range = np.mean(abs_k, axis=1) < min_k
     else:
         in_k_range = True
     in_combos = above_angle * in_k_range
-    if np.all(in_combos):
+    if len(angle_combos) == 0:
         combos = angle_combos
-        combos_k = [np.mean(ks) for ks in k_combos]
-        combo_inten = [np.mean(inten) for inten in intensity_combos]
+        combos_k = []
+        combo_inten = []
+    elif np.all(in_combos):
+        combos = angle_combos
+        combos_k = np.mean(k_combos, axis=1)
+        combo_inten = np.mean(intensity_combos, axis=1)
     else:
-        combos = [c for c, in_c in zip(angle_combos, in_combos) if in_c]
-        combos_k = [
-            np.mean(ks) for ks, in_range in zip(k_combos, in_combos) if in_range
-        ]
-        combo_inten = [
-            np.mean(intens)
-            for intens, in_range in zip(intensity_combos, in_combos)
-            if in_range
-        ]
+        combos = angle_combos[in_combos]
+        combos_k = np.mean(k_combos[in_combos], axis=1)
+        combo_inten = np.mean(intensity_combos[in_combos], axis=1)
     return combos, combos_k, combo_inten
 
 
