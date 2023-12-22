@@ -85,7 +85,7 @@ def pdnip_glass(allow_download=False, **kwargs):  # pragma: no cover
     return hs.load(store, **kwargs)
 
 
-def zrnb_percipitate(allow_download=False, **kwargs):  # pragma: no cover
+def zrnb_precipitate(allow_download=False, **kwargs):  # pragma: no cover
     """A small 4-D STEM dataset of a ZrNb precipitate for strain mapping.
 
     Data liscenced under CC BY 4.0
@@ -107,8 +107,8 @@ def zrnb_percipitate(allow_download=False, **kwargs):  # pragma: no cover
     """
     import zarr
 
-    pdnip = Dataset("PdNiP.zspy")
-    file_path = pdnip.fetch_file_path(allow_download=allow_download)
+    zrnb = Dataset("ZrNbPrecipitate.zspy")
+    file_path = zrnb.fetch_file_path(allow_download=allow_download)
     store = zarr.ZipStore(file_path)  # for loading from zip
     return hs.load(store, **kwargs)
 

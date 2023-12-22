@@ -19,7 +19,7 @@
 
 from pyxem.data import (
     pdnip_glass,
-    zrnb_percipitate,
+    zrnb_precipitate,
     au_grating,
     twinned_nanowire,
     sample_with_g,
@@ -37,8 +37,8 @@ class TestLoadData:
         assert s.axes_manager.signal_shape == (128, 128)
 
     @pytest.mark.skip(reason="Downloading large file takes too long")
-    def test_load_zrnb_percipitate(self):  # pragma: no cover
-        s = zrnb_percipitate(allow_download=True)
+    def test_load_zrnb_precipitate(self):  # pragma: no cover
+        s = zrnb_precipitate(allow_download=True)
         assert s.axes_manager.signal_shape == (128, 128)
 
     def test_load_au_grating(self):
