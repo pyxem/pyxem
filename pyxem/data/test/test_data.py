@@ -39,7 +39,7 @@ class TestLoadData:
     @pytest.mark.skip(reason="Downloading large file takes too long")
     def test_load_zrnb_precipitate(self):  # pragma: no cover
         s = zrnb_precipitate(allow_download=True)
-        assert s.axes_manager.signal_shape == (128, 128)
+        assert s.axes_manager.signal_shape == (256, 256)
 
     def test_load_au_grating(self):
         s = au_grating(allow_download=True)

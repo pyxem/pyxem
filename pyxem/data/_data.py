@@ -107,7 +107,7 @@ def zrnb_precipitate(allow_download=False, **kwargs):  # pragma: no cover
     """
     import zarr
 
-    zrnb = Dataset("ZrNbPrecipitate.zspy")
+    zrnb = Dataset("ZrNbPercipitate.zspy")
     file_path = zrnb.fetch_file_path(allow_download=allow_download)
     store = zarr.ZipStore(file_path)  # for loading from zip
     return hs.load(store, **kwargs)
@@ -133,7 +133,7 @@ def twinned_nanowire(allow_download=False, **kwargs):  # pragma: no cover
     """
     nanowire = Dataset("twinned_nanowire.hdf5")
     file_path = nanowire.fetch_file_path(allow_download=allow_download)
-    return hs.load(file_path, **kwargs)
+    return hs.load(file_path, **kwargs, reader="hspy")
 
 
 def sample_with_g(allow_download=False, **kwargs):  # pragma: no cover
