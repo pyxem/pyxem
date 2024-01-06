@@ -33,7 +33,7 @@ from pyxem.data.simulated_tilt import tilt_boundary_data
 from pyxem.data._data import (
     au_grating,
     pdnip_glass,
-    zrnb_percipitate,
+    zrnb_precipitate,
     twinned_nanowire,
     sample_with_g,
     mgo_nanocrystals,
@@ -42,7 +42,7 @@ from pyxem.data._data import (
 __all__ = [
     "au_grating",
     "pdnip_glass",
-    "zrnb_percipitate",
+    "zrnb_precipitate",
     "twinned_nanowire",
     "sample_with_g",
     "mgo_nanocrystals",
