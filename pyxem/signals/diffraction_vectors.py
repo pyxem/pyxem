@@ -792,6 +792,7 @@ class DiffractionVectors(BaseSignal):
         """This method clusters a list of vectors both in reciprocal space and in real space.
         The output is a list of vectors with a "label" which defines the cluster that each vector
         belongs to.  Vectors with a label==-1 are outliers which are ignored.
+
         Parameters
         ----------
         method: sklearn.base.ClusterMixin

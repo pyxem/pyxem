@@ -73,9 +73,10 @@ class TestDiffractionVectors:
         assert angles.data[1].shape == (1, 5)
         assert angles.data[2].shape == (1, 5)  # repeated angle
 
-    def test_get_inscribed_angles_to_markers(self, polar_vectors):
+    @pytest.mark.parametrize("cartesian", [True, False])
+    def test_get_inscribed_angles_to_markers(self, polar_vectors, cartesian):
         angles = polar_vectors.get_angles()
-        angles.to_markers()
+        angles.to_markers(cartesian=cartesian)
 
     def test_as_lazy(self, polar_vectors):
         lazy = polar_vectors.as_lazy()

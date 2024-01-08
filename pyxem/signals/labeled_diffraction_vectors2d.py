@@ -114,6 +114,8 @@ class LabeledDiffractionVectors2D(DiffractionVectors2D):
                 "`cluster_labeled_vectors` function."
             )
         num_clusters = int(np.max(self.data[:, -1]) + 1)
+        if num_clusters == 0:
+            raise ValueError("No clusters found!")
         fig, axs = plt.subplots(2, num_clusters, figsize=figsize)
         if labels is None:
             labels = range(num_clusters)
@@ -192,15 +194,14 @@ class LabeledDiffractionVectors2D(DiffractionVectors2D):
             new_signal.axes_manager.signal_axes[0].size + 1
         )
         new_signal.is_clustered = True
+        new_signal.column_names = self.column_names + ["cluster_label"]
+        new_signal.units = self.units + ["n.a."]
         return new_signal
 
     @only_signal_axes
     def to_markers(self, signal, get_polygons=False, num_points=10, **kwargs):
-        marker_list = []
-
         offsets, colors, colors_by_index = convert_to_markers(self, signal)
         points = hs.plot.markers.Points(offsets=offsets.T, color=colors.T, **kwargs)
-        marker_list.append(points)
         if get_polygons:
             verts = self.map_vectors(
                 points_to_polygon, num_points=num_points, dtype=object
@@ -209,5 +210,5 @@ class LabeledDiffractionVectors2D(DiffractionVectors2D):
             polygons = hs.plot.markers.Polygons(
                 verts=verts, alpha=0.5, color=colors_by_index, linewidth=2
             )
-            marker_list.append(polygons)
-        return marker_list
+            return points, polygons
+        return points
