@@ -53,6 +53,26 @@ class TestDiffractionVectors:
                 angles.data[i + 1][0], np.array([1, 2 * np.pi / (i + 3), 0, 1, 0])
             )
 
+    @pytest.mark.parametrize("intensity_threshold", [None, 0.5])
+    @pytest.mark.parametrize("min_k", [None, 0.3])
+    def test_get_inscribed_angles(
+        self,
+        polar_vectors,
+        intensity_threshold,
+        min_k,
+    ):
+        polar_vectors.data[2][0, 1] = 2 * np.pi / 3
+        angles = polar_vectors.get_angles(
+            intensity_threshold=intensity_threshold,
+            min_k=min_k,
+            accept_threshold=0.1,
+            min_angle=0.05,
+        )
+        assert angles.data.shape == (5,)
+        assert angles.data[0].shape == (0, 5)
+        assert angles.data[1].shape == (1, 5)
+        assert angles.data[2].shape == (1, 5)  # repeated angle
+
     def test_get_inscribed_angles_to_markers(self, polar_vectors):
         angles = polar_vectors.get_angles()
         angles.to_markers()

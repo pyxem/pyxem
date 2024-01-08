@@ -97,7 +97,7 @@ def calculate_norms_ragged(z):
     return np.asarray(norms)
 
 
-def filter_vectors_ragged(z, min_magnitude, max_magnitude, columns=[0,1]):
+def filter_vectors_ragged(z, min_magnitude, max_magnitude, columns=[0, 1]):
     """Filters the diffraction vectors to accept only those with magnitudes
     within a user specified range.
 

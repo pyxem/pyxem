@@ -44,6 +44,20 @@ class PolarVectors(DiffractionVectors):
 
         Parameters
         ----------
+        intensity_index : int, optional
+            The column index of the intensity column.  The default is 2.
+        intensity_threshold : float, optional
+            The minimum intensity for a vector to be considered.  The default is None.
+        accept_threshold : float, optional
+            The maximum difference between the inscribed angle and the
+            reduced angle for the inscribed angle to be accepted.  The default is 0.05.
+        min_k : float, optional
+            The minimum average delta k between the three vectors
+             for a angle to be considered.  The default is 0.05.
+        min_angle : float, optional
+            The minimum inscribed angle for an angle to be considered.  The default is None.
+            Which means that two vectors even with a small angle between them will be
+            considered.
         *args:
             Arguments to be passed to map().
         **kwargs:

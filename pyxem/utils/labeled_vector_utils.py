@@ -85,6 +85,8 @@ def get_filtered_combinations(
     k_combos = np.array(list(itertools.combinations(k, num)))
     intensity_combos = np.array(list(itertools.combinations(intensity, num)))
 
+    if len(angle_combos) == 0:
+        angle_combos = np.zeros(shape=(0, 3))
     # Filtering out combinations where there are two peaks close to each other
     if min_angle is not None:
         in_range = (
@@ -97,9 +99,9 @@ def get_filtered_combinations(
                 in_range,
                 axis=1,
             )
-            > 1,
+            < 2,
             axis=1,
-        )
+        )  # See if there are two angles that are too close to each other
 
     else:
         above_angle = True
