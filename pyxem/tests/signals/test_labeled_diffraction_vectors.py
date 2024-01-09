@@ -103,8 +103,31 @@ class TestLabelledDiffractionVectors:
         with pytest.raises(ValueError):
             labeled_vectors.cluster_labeled_vectors(method=scan, preprocessing="fail")
 
-    def test_plot_cluster_labeled_vectors(self, labeled_vectors):
+    def test_plot_cluster_labeled_vectors_error(self, labeled_vectors):
         scan = DBSCAN()
         clust = labeled_vectors.cluster_labeled_vectors(method=scan)
         with pytest.raises(ValueError):
             clust.plot_clustered()
+
+        with pytest.raises(ValueError):
+            labeled_vectors.plot_clustered()
+
+    def test_plot_cluster_labeled_vectors(self):
+        vectors = np.reshape(np.arange(1000), (100, 10))
+        labels = np.repeat(np.arange(10), 10)
+        vectors = np.hstack((vectors, labels[:, np.newaxis]))
+        columns = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "label"]
+        vectors[:50, 0] = 10
+        vectors[:50, 1] = 10
+        vectors[50:, 0] = 20
+        vectors[50:, 1] = 20
+        labeled_vectors = LabeledDiffractionVectors2D(
+            data=vectors, column_names=columns
+        )
+        scan = DBSCAN()
+        clust = labeled_vectors.cluster_labeled_vectors(method=scan)
+        clust.plot_clustered()
+
+        clust.plot_clustered(labels=[0, 1])
+        s = ElectronDiffraction2D(np.zeros((10, 10)))
+        clust.plot_clustered(signal=s)

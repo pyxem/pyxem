@@ -43,7 +43,7 @@ class TestDiffractionVectors:
         assert polar_vectors.data[0].shape == (2, 3)
         assert polar_vectors.column_names == ["k", "phi", "intensity"]
 
-    def test_get_inscribed_angles(self, polar_vectors):
+    def test_get_inscribed_angles_value(self, polar_vectors):
         angles = polar_vectors.get_angles()
         assert angles.data.shape == (5,)
         assert angles.data[0].shape == (0, 5)

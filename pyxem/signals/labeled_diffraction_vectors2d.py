@@ -40,6 +40,18 @@ class LabeledDiffractionVectors2D(DiffractionVectors2D):
     _signal_dimension = 2
     _signal_type = "labeled_diffraction_vectors"
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.is_clustered = False
+
+    @property
+    def is_clustered(self):
+        return self.metadata.VectorMetadata["is_clustered"]
+
+    @is_clustered.setter
+    def is_clustered(self, value):
+        self.metadata.VectorMetadata["is_clustered"] = value
+
     @only_signal_axes
     def map_vectors(self, func, dtype, label_index=-1, shape=None, **kwargs):
         """
