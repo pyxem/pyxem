@@ -81,7 +81,7 @@ class TestSingleDiffractionVectors2D:
 
     def test_cluster(self):
         clusterer = DBSCAN(eps=0.1, min_samples=2)
-        clustered = self.vector.cluster(clusterer)
+        clustered = self.vector.cluster(clusterer, min_vectors=3)
         assert clustered.data.shape[1] == 3
         assert clustered.data.shape[0] == 8
         assert clustered.axes_manager.signal_axes[0].size == 3
