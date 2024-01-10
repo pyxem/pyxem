@@ -401,23 +401,28 @@ def only_signal_axes(func):
     return wrapper
 
 
-def vectors_to_polar(vectors):
+def vectors_to_polar(vectors, columns=None):
     """Converts a list of vectors to polar coordinates.
 
     Parameters
     ----------
     vectors : np.array()
         Array of vectors.
+    columns:
+        The x and y columns to be used to calculate the
+        polar vector.
+
 
     Returns
     -------
     polar_vectors : np.array()
         Array of vectors in polar coordinates.
     """
-
+    if columns is None:
+        columns = [0, 1]
     polar_vectors = np.empty(vectors.shape)
-    polar_vectors[:, 0] = np.linalg.norm(vectors, axis=1)
-    polar_vectors[:, 1] = np.arctan2(vectors[:, 1], vectors[:, 0])
+    polar_vectors[:, 0] = np.linalg.norm(vectors[:, columns], axis=1)
+    polar_vectors[:, 1] = np.arctan2(vectors[:, columns[1]], vectors[:, columns[0]])
     polar_vectors[:, 2:] = vectors[:, 2:]
     return polar_vectors
 
