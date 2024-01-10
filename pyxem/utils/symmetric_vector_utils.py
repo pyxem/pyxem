@@ -84,6 +84,7 @@ def get_filtered_combinations(
         intensity = pks[:, intensity_index]
         intensity_bool = intensity > intensity_threshold
         pks = pks[intensity_bool]
+        intensity = intensity[intensity_bool]
     else:
         intensity = np.ones(len(pks))
     angles = pks[:, angle_index]
