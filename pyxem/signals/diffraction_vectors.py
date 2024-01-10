@@ -17,6 +17,7 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import itertools
+from functools import cached_property
 from warnings import warn
 
 import numpy as np
@@ -24,8 +25,10 @@ import matplotlib.pyplot as plt
 from matplotlib.cm import get_cmap
 from scipy.spatial import distance_matrix
 from sklearn.cluster import DBSCAN
+import dask.array as da
 
 from hyperspy.signals import BaseSignal, Signal1D
+from hyperspy._signals.lazy import LazySignal
 from hyperspy.drawing._markers.points import Points
 from hyperspy.misc.utils import isiterable
 
@@ -38,9 +41,9 @@ from pyxem.utils.vector_utils import (
     filter_vectors_ragged,
     filter_vectors_edge_ragged,
     filter_vectors_near_basis,
+    _reverse_pos,
 )
-from pyxem.utils.expt_utils import peaks_as_gvectors
-from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
+from pyxem.utils._slicers import Slicer
 from pyxem.utils._deprecated import deprecated
 
 """
@@ -57,30 +60,12 @@ number of peaks.
 """
 
 
-def _reverse_pos(peaks, ind=2):
-    """Reverses the position of the peaks in the signal.
-
-    This is useful for plotting the peaks on top of a hyperspy signal as the returned peaks are in
-    reverse order to the hyperspy markers. Only points up to the index are reversed.
-
-    Parameters
-    ----------
-    peaks : np.array
-        Array of peaks to be reversed.
-    ind : int
-        The index of the position to be reversed.
-
-    """
-    new_data = peaks.copy()
-    for i in range(ind):
-        sl = ind - i - 1
-        new_data[..., i] = peaks[..., sl]
-    return new_data
-
-
 class DiffractionVectors(BaseSignal):
-    """Crystallographic mapping results containing the best matching crystal
-    phase and orientation at each navigation position with associated metrics.
+    """Class for diffraction vectors in reciprocal space.
+
+    Diffraction vectors are defined as the vectors from the center of the
+    diffraction pattern to the diffraction peaks. Note the DiffractionVectors
+    class is likely to change as the API for diffraction vectors is developed.
 
     Attributes
     ----------
@@ -99,25 +84,83 @@ class DiffractionVectors(BaseSignal):
         _scales = kwargs.pop("scales", None)
         _offsets = kwargs.pop("offsets", None)
         _detector_shape = kwargs.pop("detector_shape", None)
-        super().__init__(*args, **kwargs)
+        _column_names = kwargs.pop("column_names", None)
+        _units = kwargs.pop("units", None)
 
+        super().__init__(*args, **kwargs)
+        self._set_up_vector(_scales, _offsets, _detector_shape, _column_names, _units)
+
+    def _repr_html_(self):
+        table = '<table align="center">'
+        table += f'<tr><td colspan= "{self.num_columns + 1}"> <center> {self.__str__()[1:-1]} </center></td></tr>'
+        table += (
+            f'<tr><td colspan= "{self.num_columns + 1}"> <center> Current Index:{self.axes_manager.indices} '
+            f"</center> </td></tr>"
+        )
+        table += f'<tr><td colspan= "{self.num_columns + 1}">  </td></tr>'
+
+        table += "<tr><th>column_names:</th>"
+        for col in self.column_names:
+            table += f"<th><center>{col}</center></th>"
+        table += "</tr>"
+        table += "<th>units:</th>"
+        for col in self.units:
+            table += f"<th><center>{col}</center></th>"
+        table += "</tr>"
+
+        vectors = self._get_current_data()
+        if vectors.dtype.kind == "O":
+            vectors = vectors[0]
+        for i, row in enumerate(vectors):
+            table += "<tr>"
+            table += f"<td><center>{i}</center></td>"
+            for col in row:
+                table += f"<td><center>{col}</center></td>"
+            table += "</tr>"
+            if i > 10:
+                table += f'<tr><td colspan= "{self.num_columns + 1}"> ... </td></tr>'
+                break
+        table += "</table>"
+        return table
+
+    def _set_up_vector(
+        self,
+        scales=None,
+        offsets=None,
+        detector_shape=None,
+        column_names=None,
+        units=None,
+    ):
         self.metadata.add_node("VectorMetadata")
-        if _scales is not None or "scales" not in self.metadata.VectorMetadata:
-            self.metadata.VectorMetadata["scales"] = _scales
-        if _offsets is not None or "offsets" not in self.metadata.VectorMetadata:
-            self.metadata.VectorMetadata["offsets"] = _offsets
+        if scales is not None or "scales" not in self.metadata.VectorMetadata:
+            self.metadata.VectorMetadata["scales"] = scales
+        if offsets is not None or "offsets" not in self.metadata.VectorMetadata:
+            self.metadata.VectorMetadata["offsets"] = offsets
         if (
-            _detector_shape is not None
+            detector_shape is not None
             or "detector_shape" not in self.metadata.VectorMetadata
         ):
-            self.metadata.VectorMetadata["detector_shape"] = _detector_shape
+            self.metadata.VectorMetadata["detector_shape"] = detector_shape
+
+        if (
+            column_names is not None
+            or "column_names" not in self.metadata.VectorMetadata
+        ):
+            self.metadata.VectorMetadata["column_names"] = column_names
+        if units is not None or "units" not in self.metadata.VectorMetadata:
+            self.metadata.VectorMetadata["units"] = units
+
         self.cartesian = None
         self.hkls = None
         self.is_real_units = False
         self.has_intensity = False
 
+        self.ivec = Slicer(self)
+
     @classmethod
-    def from_peaks(cls, peaks, center=None, calibration=None):
+    def from_peaks(
+        cls, peaks, center=None, calibration=None, column_names=None, units=None
+    ):
         """Takes a list of peak positions (pixel coordinates) and returns
         an instance of `Diffraction2D`
 
@@ -126,42 +169,62 @@ class DiffractionVectors(BaseSignal):
         peaks : Signal
             Signal containing lists (np.array) of pixel coordinates specifying
             the reflection positions
-        center : np.array, or None
-            Diffraction pattern center in array indices. When None, the center
-            is taken from the peaks.metadata.Peaks.signal_axes if present.
-
-        calibration : np.array,float or None
+        center : np.array or None
+            Diffraction pattern center in array indices.
+        calibration : np.array or None
             Calibration in reciprocal Angstroms per pixels for each of the dimensions.
-            When None, the calibration is taken from the peaks.metadata.Peaks.signal_axes
-            if present. When a single value is given, the same calibration is used for
-            every dimensions.
+
         Returns
         -------
         vectors : :obj:`pyxem.signals.diffraction_vectors.DiffractionVectors`
             List of diffraction vectors
         """
-        if center is None or calibration is None:
-            if peaks.metadata.has_item("Peaks.signal_axes"):
-                center = [
-                    -ax.offset / ax.scale
-                    for ax in peaks.metadata.Peaks.signal_axes[::-1]
-                ]
-                calibration = [
-                    ax.scale for ax in peaks.metadata.Peaks.signal_axes[::-1]
-                ]
-            else:
-                raise ValueError(
-                    "A center and calibration must be provided unless the"
-                    "peaks.metadata.Peaks.signal_axes is given (usually by"
-                    "running the ``find_peaks`` function)."
-                )
+        if center is None and peaks.metadata.has_item("Peaks.signal_axes"):
+            center = [
+                -ax.offset / ax.scale for ax in peaks.metadata.Peaks.signal_axes[::-1]
+            ]
+        elif center is not None:
+            pass  # center is already set
+        else:
+            raise ValueError(
+                "A center and calibration must be provided unless the"
+                "peaks.metadata.Peaks.signal_axes is set."
+            )
+        if calibration is None and peaks.metadata.has_item("Peaks.signal_axes"):
+            calibration = [ax.scale for ax in peaks.metadata.Peaks.signal_axes[::-1]]
+        elif calibration is not None:
+            pass  # calibration is already set
+        else:
+            raise ValueError(
+                "A center and calibration must be provided unless the"
+                "peaks.metadata.Peaks.signal_axes is set."
+            )
+
+        if column_names is None and peaks.metadata.has_item("Peaks.signal_axes"):
+            column_names = [ax.name for ax in peaks.metadata.Peaks.signal_axes[::-1]]
+        elif column_names is not None:
+            pass
+        else:
+            column_names = ["x", "y"]
+
+        if units is None and peaks.metadata.has_item("Peaks.signal_axes"):
+            units = [ax.units for ax in peaks.metadata.Peaks.signal_axes[::-1]]
+        elif units is not None:
+            pass
+        else:
+            units = ["", ""]
 
         if not isiterable(calibration):
             calibration = [
                 calibration,
                 calibration,
             ]  # same calibration for both dimensions
-        if peaks.data[(0,) * peaks.data.ndim].shape[0] == len(calibration) + 1:
+
+        if isinstance(peaks, LazySignal):
+            num_cols = peaks.data[(0,) * peaks.data.ndim].compute().shape[1]
+        else:
+            num_cols = peaks.data[(0,) * peaks.data.ndim].shape[1]
+        if num_cols == len(calibration) + 1:
             # account for the intensity column
             center = list(center) + [
                 0,
@@ -173,48 +236,87 @@ class DiffractionVectors(BaseSignal):
         else:
             has_intensity = False
 
-        gvectors = peaks.map(
+        if num_cols == len(column_names) + 1:
+            column_names = list(column_names) + ["intensity"]
+            units = list(units) + ["a.u."]
+
+        vectors = peaks.map(
             lambda x, cen, cal: (x - cen) * cal,
             cal=calibration,
             cen=center,
             inplace=False,
             ragged=True,
         )
-        vectors = cls(gvectors)
-        vectors.scales = calibration
-        vectors.center = center  # set calibration first
+        vectors.set_signal_type("diffraction_vectors")
+        if isinstance(peaks, LazySignal):
+            vectors = vectors.as_lazy()
+        vectors._set_up_vector(
+            scales=calibration, column_names=column_names, units=units
+        )
+        vectors.center = center
         vectors.has_intensity = has_intensity
         return vectors
 
     @property
-    def pixel_vectors(self, scales=None, center=None):
+    def pixel_vectors(self):
         """Returns the diffraction vectors in pixel coordinates."""
-        if (scales is None and self.scales is None) or (
-            center is None and self.offsets is None
-        ):
+        if self.scales is None or self.center is None:
             raise ValueError(
-                "The scales and offsets must be provided if " "not set in the metadata."
+                "The pixel vectors cannot be calculated without a calibration."
             )
-        if scales is None:
-            scales = self.scales
-        if center is None:
-            center = self.center
         pixels = self.map(
-            lambda x, cen, cal: x / cal + center,
-            cal=scales,
-            cen=center,
+            lambda x, cen, cal: x / cal + self.center,
+            cal=self.scales,
+            cen=self.center,
             inplace=False,
             ragged=True,
         )
         return pixels.data
 
     @property
+    def _is_object_dtype(self):
+        return self.data.dtype.kind == "O"
+
+    @cached_property
     def num_columns(self):
-        shape = self.data[self.data.ndim * (0,)].shape
-        if shape is None:
-            return 0
+        if self._is_object_dtype:
+            if isinstance(self.data, da.Array):
+                shape = self.data[self.data.ndim * (0,)].compute().shape
+            else:
+                shape = self.data[self.data.ndim * (0,)].shape
+            if shape is None:
+                return 0
+            else:
+                return shape[1]
         else:
-            return shape[1]
+            return self.data.shape[-1]
+
+    @property
+    def units(self):
+        if self.metadata.VectorMetadata["units"] is None:
+            return [
+                None,
+            ] * self.num_columns
+        else:
+            return self.metadata.VectorMetadata["units"]
+
+    @units.setter
+    def units(self, value):
+        if (
+            isiterable(value)
+            and len(value) == self.num_columns
+            and not isinstance(value, str)
+        ):
+            self.metadata.VectorMetadata["units"] = value
+        elif isiterable(value) and len(value) != self.num_columns:
+            raise ValueError(
+                "The len of the units parameter must equal the number of"
+                " columns in the underlying vector data."
+            )
+        else:
+            self.metadata.VectorMetadata["units"] = [
+                value,
+            ] * self.num_columns
 
     @property
     def scales(self):
@@ -227,12 +329,33 @@ class DiffractionVectors(BaseSignal):
         elif isiterable(value) and len(value) != self.num_columns:
             raise ValueError(
                 "The len of the scales parameter must equal the number of"
-                "columns in the underlying vector data."
+                " columns in the underlying vector data."
             )
         else:
             self.metadata.VectorMetadata["scales"] = [
                 value,
             ] * self.num_columns
+
+    @property
+    def column_names(self):
+        if self.metadata.VectorMetadata["column_names"] is None:
+            return [
+                None,
+            ] * self.num_columns
+        else:
+            return self.metadata.VectorMetadata["column_names"]
+
+    @column_names.setter
+    def column_names(self, value):
+        if value is None:
+            value = [f"column_{i}" for i in range(self.num_columns)]
+        if len(value) != self.num_columns:
+            raise ValueError(
+                f"The len of the column_names parameter: {len(value)} must equal the"
+                f" number of columns in the underlying vector data: {self.num_columns}."
+            )
+
+        self.metadata.VectorMetadata["column_names"] = value
 
     @property
     def offsets(self):
@@ -251,6 +374,26 @@ class DiffractionVectors(BaseSignal):
             self.metadata.VectorMetadata["offsets"] = [
                 value,
             ] * self.num_columns
+
+    def __lt__(self, other):
+        return self.map(
+            lambda x, other: x < other, other=other, inplace=False, ragged=True
+        )
+
+    def __le__(self, other):
+        return self.map(
+            lambda x, other: x <= other, other=other, inplace=False, ragged=True
+        )
+
+    def __gt__(self, other):
+        return self.map(
+            lambda x, other: x > other, other=other, inplace=False, ragged=True
+        )
+
+    def __ge__(self, other):
+        return self.map(
+            lambda x, other: x >= other, other=other, inplace=False, ragged=True
+        )
 
     @property
     def center(self):
@@ -315,6 +458,15 @@ class DiffractionVectors(BaseSignal):
             )
         return real_nav
 
+    @property
+    def num_rows(self):
+        if self._is_object_dtype:
+            return None
+        elif len(self.axes_manager.signal_axes) == 1:
+            return 1
+        else:
+            return self.data.shape[-2]
+
     def flatten_diffraction_vectors(
         self,
         real_units=True,
@@ -331,17 +483,27 @@ class DiffractionVectors(BaseSignal):
             If the navigation dimension should be flattened based on the pixel position
             or the real value as determined by the scale and offset.
         """
+        from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
+
         nav_positions = self._get_navigation_positions(
             flatten=True, real_units=real_units
         )
+        if self.axes_manager._navigation_shape_in_array == ():
+            return self
 
-        vectors = np.vstack(
-            [
-                np.hstack([np.tile(nav_pos, (len(self.data[ind]), 1)), self.data[ind]])
-                for ind, nav_pos in zip(np.ndindex(self.data.shape), nav_positions)
-            ]
-        )
-
+        if self._is_object_dtype:
+            vectors = np.vstack(
+                [
+                    np.hstack(
+                        [np.tile(nav_pos, (len(self.data[ind]), 1)), self.data[ind]]
+                    )
+                    for ind, nav_pos in zip(np.ndindex(self.data.shape), nav_positions)
+                ]
+            )
+        else:
+            navs = np.repeat(nav_positions, self.num_rows, axis=0)
+            data = self.data.reshape((-1, self.num_columns))
+            vectors = np.vstack((navs, data))
         if real_units:
             scales = [a.scale for a in self.axes_manager.navigation_axes]
             offsets = [a.offset for a in self.axes_manager.navigation_axes]
@@ -366,8 +528,21 @@ class DiffractionVectors(BaseSignal):
         column_offsets = np.append(column_offsets, offsets)
         column_scale = np.append(column_scale, scales)
 
+        column_names = [
+            a.name for a in self.axes_manager.navigation_axes
+        ] + self.column_names
+
+        if real_units:
+            units = [a.units for a in self.axes_manager.navigation_axes] + self.units
+        else:
+            units = ["pixels"] * len(self.axes_manager.navigation_axes) + self.units
+
         return DiffractionVectors2D(
-            vectors, column_offsets=column_offsets, column_scale=column_scale
+            vectors,
+            column_offsets=column_offsets,
+            column_scale=column_scale,
+            units=units,
+            column_names=column_names,
         )
 
     def plot_diffraction_vectors(
@@ -514,18 +689,6 @@ class DiffractionVectors(BaseSignal):
         return fig
 
     def to_markers(self, **kwargs):
-        """
-        Convert the diffraction vectors to hyperspy markers.
-        Parameters
-        ----------
-        kwargs
-            Keyword arguments passed to the :class:`~hs.api.plot.markers.Points` constructor.
-        Returns
-        -------
-        markers : Points
-            The diffraction vectors as a hyperspy marker.
-
-        """
         new = self.map(_reverse_pos, inplace=False, ragged=True)
         return Points(offsets=new.data.T, **kwargs)
 
@@ -692,24 +855,30 @@ class DiffractionVectors(BaseSignal):
             inplace=False,
             ragged=True,
             *args,
-            **kwargs
+            **kwargs,
         )
         return filtered_vectors
 
-    def filter_basis(self, basis, distance=0.5, **kwargs):
+    def filter_basis(self, basis, distance=0.5, columns=[0, 1], **kwargs):
         """
-        Filter vectors to only the set of vectors which is close
-        to a basis set of vectors. If there is no vector within the `distance`
+
+        Filter vectors to only the set of vectors which is close to a basis set of vectors.
+
+        If there is no vector within the `distance`
         parameter of the vector np.`nan` will be returned.
 
         Parameters
         ----------
         basis: array-like or BaseSignal
-            The set of vectors to be compared.
+            The set of vectors to be compared. This should have the same
+            number of columns as the length of the ``columns`` parameter.
         distance: float
             The distance between vectors and basis which detemine if the vector
             is associated with the basis vector. If no vector is inside the
             distance np.nan will be returned.
+        columns: list
+            The columns of the basis to be used for comparison. The default
+            is the first two columns (kx, ky) in most cases.
         kwargs: dict
             Any other parameters passed to the `hyperspy.BaseSignal.Map` function.
         Returns
@@ -729,7 +898,11 @@ class DiffractionVectors(BaseSignal):
             kwargs["output_dtype"] = float
 
         filtered_vectors = self.map(
-            filter_vectors_near_basis, basis=basis, distance=distance, **kwargs
+            filter_vectors_near_basis,
+            basis=basis,
+            distance=distance,
+            inplace=False,
+            **kwargs,
         )
         return filtered_vectors
 
@@ -767,7 +940,7 @@ class DiffractionVectors(BaseSignal):
             inplace=False,
             ragged=True,
             *args,
-            **kwargs
+            **kwargs,
         )
         return filtered_vectors
 
@@ -829,5 +1002,9 @@ class DiffractionVectors(BaseSignal):
             inplace=False,
             ragged=True,
             *args,
-            **kwargs
+            **kwargs,
         )
+
+
+class LazyDiffractionVectors(LazySignal, DiffractionVectors):
+    pass

@@ -316,7 +316,7 @@ def get_angle_cartesian(a, b):
     return math.acos(max(-1.0, min(1.0, np.dot(a, b) / denom)))
 
 
-def filter_vectors_near_basis(vectors, basis, distance=None):
+def filter_vectors_near_basis(vectors, basis, columns=[0, 1], distance=None):
     """
     Filter an array of vectors to only the list of closest vectors
     to some set of basis vectors.  Only vectors within some `distance`
@@ -331,11 +331,17 @@ def filter_vectors_near_basis(vectors, basis, distance=None):
     basis: array-like
         A two dimensional array of vectors where each row identifies a vector.
 
+    columns: list
+        A list of columns to consider when comparing vectors.  The default is [0,1]
+
     Returns
     -------
     closest_vectors: array-like
         An array of vectors which are the closest to the basis considered.
     """
+    vectors = vectors[:, columns]
+    if basis.ndim == 1:  # possible bug in hyperspy map with iterating basis
+        basis = basis.reshape(1, -1)
     if len(vectors) == 0:
         vectors = np.empty(basis.shape)
         vectors[:, :] = np.nan
@@ -350,3 +356,23 @@ def filter_vectors_near_basis(vectors, basis, distance=None):
 
         closest_vectors[min_distance > distance, :] = np.nan
     return closest_vectors
+
+
+def _reverse_pos(peaks, ind=2):
+    """Reverses the position of the peaks in the signal.
+
+    This is useful for plotting the peaks on top of a hyperspy signal as the returned peaks are in
+    reverse order to the hyperspy markers. Only points up to the index are reversed.
+
+    Parameters
+    ----------
+    peaks : np.array
+        Array of peaks to be reversed.
+    ind : int
+        The index of the position to be reversed.
+
+    """
+    new_data = np.empty(peaks.shape[:-1] + (2,))
+    for i in range(ind):
+        new_data[..., (-i - 1)] = peaks[..., i]
+    return new_data

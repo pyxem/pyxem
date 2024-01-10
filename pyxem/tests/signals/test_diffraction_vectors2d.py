@@ -21,7 +21,8 @@ import pytest
 import numpy as np
 from sklearn.cluster import DBSCAN
 
-from hyperspy.signals import Signal2D
+from hyperspy.signals import Signal2D, BaseSignal
+import hyperspy.api as hs
 
 from pyxem.signals import DiffractionVectors2D
 
@@ -77,3 +78,70 @@ class TestSingleDiffractionVectors2D:
         filtered_vectors = self.vector.filter_detector_edge(exclude_width=10)
         ans = np.array([[0.063776, 0.011958]])
         np.testing.assert_almost_equal(filtered_vectors.data, ans)
+
+
+class TestVector2DSubclass:
+    @pytest.fixture()
+    def vectors(self):
+        vectors = np.random.random((2, 2, 20, 2))
+        v = DiffractionVectors2D(vectors)
+        v.offsets = np.array([0, 0])
+        v.scales = np.array([1, 1])
+        v.column_names = ["x", "y"]
+        return v
+
+    def test_setup(self, vectors):
+        assert isinstance(vectors, DiffractionVectors2D)
+        assert isinstance(vectors, Signal2D)
+        assert vectors.axes_manager.signal_shape == (2, 20)
+        assert vectors.column_names == ["x", "y"]
+        np.testing.assert_array_equal(vectors.scales, [1, 1])
+        np.testing.assert_array_equal(vectors.offsets, [0, 0])
+
+    @pytest.mark.parametrize("item", [0, "x"])
+    def test_slice(self, vectors, item):
+        sliced = vectors.ivec[item]
+        assert isinstance(sliced, DiffractionVectors2D)
+        assert isinstance(sliced, Signal2D)
+        assert sliced.axes_manager.signal_shape == (1, 20)
+        assert sliced.column_names == ["x"]
+
+    def test_flatten(self, vectors):
+        flatten_diffraction_vectors = vectors.flatten_diffraction_vectors()
+        assert isinstance(flatten_diffraction_vectors, DiffractionVectors2D)
+
+    def test_flatten_twice(self, vectors):
+        flatten_diffraction_vectors = vectors.flatten_diffraction_vectors()
+        flatten_diffraction_vectors = (
+            flatten_diffraction_vectors.flatten_diffraction_vectors()
+        )
+        assert isinstance(flatten_diffraction_vectors, DiffractionVectors2D)
+
+    def test_to_markers(self, vectors):
+        markers = vectors.to_markers()
+        assert isinstance(markers, hs.plot.markers.Points)
+        s = Signal2D(np.ones((2, 2, 10, 10)))
+        s.add_marker(markers)
+
+    def test_gt(self, vectors):
+        gt_vectors = vectors > 1.1
+        np.testing.assert_array_equal(False, gt_vectors.data)
+
+    def test_gte(self, vectors):
+        gt_vectors = vectors >= 1.1
+        np.testing.assert_array_equal(False, gt_vectors.data)
+
+    def test_lt(self, vectors):
+        lt_vectors = vectors < 1.1
+        np.testing.assert_array_equal(True, lt_vectors.data)
+
+    def test_lte(self, vectors):
+        lt_vectors = vectors <= 1.1
+        np.testing.assert_array_equal(True, lt_vectors.data)
+
+    def test_num_rows(self, vectors):
+        assert vectors.num_rows == 20
+
+    def test_from_peaks(self):
+        with pytest.raises(NotImplementedError):
+            DiffractionVectors2D.from_peaks(BaseSignal(np.ones((2, 2, 10, 10))))

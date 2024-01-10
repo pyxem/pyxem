@@ -135,12 +135,47 @@ class TestInitVectors:
         peaks = BaseSignal(vectors, ragged=True)
         return peaks
 
-    def test_from_peaks(self, peaks):
+    @pytest.fixture()
+    def peaks_w_intensity(self):
+        vectors = np.empty((2, 2), dtype=object)
+        vectors[0, 0] = np.random.randint(0, 100, (5, 3))
+        vectors[0, 1] = np.random.randint(0, 100, (6, 3))
+        vectors[1, 0] = np.random.randint(0, 100, (7, 3))
+        vectors[1, 1] = np.random.randint(0, 100, (8, 3))
+
+        peaks = BaseSignal(vectors, ragged=True)
+        return peaks
+
+    @pytest.mark.parametrize("column_names", (None, ["x", "y"]))
+    @pytest.mark.parametrize("units", (None, ["nm", "nm"]))
+    def test_from_peaks(self, peaks, column_names, units):
+        peaks.axes_manager.navigation_axes[0].name = "x"
+        peaks.axes_manager.navigation_axes[1].name = "y"
+        dv = DiffractionVectors.from_peaks(
+            peaks,
+            center=(50, 50),
+            calibration=0.1,
+            column_names=column_names,
+            units=units,
+        )
+
+        for i in np.ndindex((2, 2)):
+            np.testing.assert_array_equal((peaks.data[i] - 50) * 0.1, dv.data[i])
+        assert dv.scales == [0.1, 0.1]
+        assert dv.axes_manager[0].name == "x"
+        assert dv.axes_manager[1].name == "y"
+        assert dv.column_names == ["x", "y"]
+        if units is not None:
+            assert dv.units == ["nm", "nm"]
+
+    def test_from_peaks_lazy(self, peaks):
+        peaks = peaks.as_lazy()
         dv = DiffractionVectors.from_peaks(
             peaks,
             center=(50, 50),
             calibration=0.1,
         )
+        assert dv._lazy
 
         for i in np.ndindex((2, 2)):
             np.testing.assert_array_equal((peaks.data[i] - 50) * 0.1, dv.data[i])
@@ -180,6 +215,26 @@ class TestInitVectors:
                 points.kwargs["offsets"][i[::-1]][:, 1],
             )
 
+    def test_from_peaks_calibration_to_markers_with_intensity(self, peaks_w_intensity):
+        peaks_w_intensity.metadata.add_node("Peaks.signal_axes")
+        peaks_w_intensity.metadata.Peaks.signal_axes = (
+            UniformDataAxis(scale=0.1, offset=-5.0, units="nm"),
+            UniformDataAxis(scale=0.1, offset=-5.0, units="nm"),
+        )
+        dv = DiffractionVectors.from_peaks(
+            peaks_w_intensity,
+            center=None,
+            calibration=None,
+        )
+        points = dv.to_markers()
+        for i in np.ndindex((2, 2)):
+            np.testing.assert_almost_equal(
+                ((peaks_w_intensity.data[i]) * 0.1 - 5.0)[:, 0],
+                points.kwargs["offsets"][i[::-1]][:, 1],
+            )
+        s = Signal2D(np.ones((2, 2, 10, 10)))
+        s.add_marker(points)
+
     def test_from_peaks_calibration_error(self, peaks):
         with pytest.raises(ValueError):
             dv = DiffractionVectors.from_peaks(
@@ -216,7 +271,7 @@ class TestInitVectors:
         for i in np.ndindex((2, 2)):
             np.testing.assert_almost_equal(peaks.data[i], pixels[i])
 
-    def test_initial_metadat(self, diffraction_vectors_map):
+    def test_initial_metadata(self, diffraction_vectors_map):
         assert diffraction_vectors_map.scales is None
         assert diffraction_vectors_map.metadata.VectorMetadata["scales"] == None
 
@@ -225,6 +280,44 @@ class TestInitVectors:
 
         assert diffraction_vectors_map.detector_shape is None
         assert diffraction_vectors_map.metadata.VectorMetadata["detector_shape"] == None
+
+    def test_set_scales(self, diffraction_vectors_map):
+        diffraction_vectors_map.scales = 0.1
+        assert diffraction_vectors_map.scales == [0.1, 0.1]
+        assert (
+            diffraction_vectors_map.scales == diffraction_vectors_map.pixel_calibration
+        )
+
+    def test_scales_error(self, diffraction_vectors_map):
+        with pytest.raises(ValueError):
+            diffraction_vectors_map.scales = [1, 2, 3]
+
+    def test_set_column_names_error(self, diffraction_vectors_map):
+        with pytest.raises(ValueError):
+            diffraction_vectors_map.column_names = ["x", "y", "z"]
+
+    def test_set_units_error(self, diffraction_vectors_map):
+        with pytest.raises(ValueError):
+            diffraction_vectors_map.units = ["x", "y", "z"]
+
+    def test_set_units_singleton(self, diffraction_vectors_map):
+        diffraction_vectors_map.units = "nm"
+        assert diffraction_vectors_map.units == ["nm", "nm"]
+
+    def test_set_column_names(self, diffraction_vectors_map):
+        diffraction_vectors_map.column_names = ["x", "y"]
+        assert diffraction_vectors_map.column_names == ["x", "y"]
+
+    def test_set_column_names_none(self, diffraction_vectors_map):
+        diffraction_vectors_map.column_names = None
+        assert diffraction_vectors_map.column_names == ["column_0", "column_1"]
+
+    def test_num_rows(self, diffraction_vectors_map):
+        assert diffraction_vectors_map.num_rows is None
+
+    def test_set_offsets_error(self, diffraction_vectors_map):
+        with pytest.raises(ValueError):
+            diffraction_vectors_map.offsets = [1, 2, 3]
 
     def test_setting_metadat(self, diffraction_vectors_map):
         diffraction_vectors_map.scales = 0.1
@@ -246,6 +339,14 @@ class TestConvertVectors:
         vectors = diffraction_vectors_map.flatten_diffraction_vectors(
             real_units=real_units
         )
+        assert isinstance(vectors, DiffractionVectors2D)
+        assert vectors.data.shape == (32, 4)
+
+    def test_flatten_vectors_with_set_metadata(self, diffraction_vectors_map):
+        diffraction_vectors_map.scales = [0.1, 0.1]
+        diffraction_vectors_map.offsets = [1, 1]
+        vectors = diffraction_vectors_map.flatten_diffraction_vectors(real_units=True)
+
         assert isinstance(vectors, DiffractionVectors2D)
         assert vectors.data.shape == (32, 4)
 
@@ -392,11 +493,41 @@ class TestFilterVectors:
         assert isinstance(filtered_vectors, DiffractionVectors)
 
     def test_filter_detector_edge_map(self, diffraction_vectors_map):
-        diffraction_vectors_map.detector_shape = (260, 240)
-        diffraction_vectors_map.pixel_calibration = 0.001
-        filtered_vectors = diffraction_vectors_map.filter_detector_edge(exclude_width=2)
+        vectors = diffraction_vectors_map.deepcopy()
+        vectors.detector_shape = (260, 240)
+        vectors.pixel_calibration = 0.001
+
+        filtered_vectors = vectors.filter_detector_edge(exclude_width=2)
         ans = np.array([[-0.117587, 0.113601]])
         np.testing.assert_almost_equal(filtered_vectors.data[0, 0], ans)
+
+    def test_filter_basis(self):
+        basis = np.array(
+            [
+                [0.089685, 0.292971],
+                [0.017937, 0.277027],
+                [-0.069755, 0.257097],
+                [-0.165419, 0.241153],
+                [0.049825, 0.149475],
+                [-0.037867, 0.129545],
+                [-0.117587, 0.113601],
+            ]
+        )
+        arr = np.empty(2, dtype=object)
+        arr[0] = basis
+        arr[1] = basis[:-1]
+        vect = DiffractionVectors(arr)
+        filtered = vect.filter_basis(basis=basis, distance=0.1)
+        assert isinstance(filtered, DiffractionVectors2D)
+        np.testing.assert_almost_equal(filtered.data[0], basis)
+
+    def test_filter_basis_ragged(self, diffraction_vectors_map):
+        basis = diffraction_vectors_map.deepcopy()
+        filtered = diffraction_vectors_map.filter_basis(basis=basis, distance=0.1)
+        assert isinstance(filtered, DiffractionVectors)
+        np.testing.assert_almost_equal(
+            filtered.data[0, 0], diffraction_vectors_map.data[0, 0]
+        )
 
 
 class TestDiffractingPixelsMap:
@@ -422,3 +553,74 @@ class TestDiffractingPixelsMap:
         answer = np.array([[1.0, 1.0], [1.0, 1.0]])
         xim = diffraction_vectors_map.get_diffracting_pixels_map(binary=True)
         assert np.allclose(xim, answer)
+
+
+class TestSlicingVectors:
+    @pytest.fixture()
+    def vectors(self):
+        vectors = np.empty((2, 2), dtype=object)
+        vectors[0, 0] = np.random.randint(-100, 100, (20, 2))
+        vectors[0, 1] = np.random.randint(-100, 100, (6, 2))
+        vectors[1, 0] = np.random.randint(-100, 100, (7, 2))
+        vectors[1, 1] = np.random.randint(-100, 100, (8, 2))
+        v = DiffractionVectors(
+            vectors, scales=[0.1, 0.2], offsets=[10, 20], column_names=["x", "y"]
+        )
+
+        return v
+
+    def test_repr(self, vectors):
+        repr = vectors._repr_html_()
+        assert isinstance(repr, str)
+
+    def test_center(self, vectors):
+        np.testing.assert_almost_equal(vectors.center, (100, 100))
+
+    @pytest.mark.parametrize("index", (0, "x", ("x",)))
+    def test_column(self, vectors, index):
+        slic = vectors.ivec[index]
+        for i in np.ndindex((2, 2)):
+            np.testing.assert_almost_equal(slic.data[i][:, 0], vectors.data[i][:, 0])
+
+    def test_column_error(self, vectors):
+        with pytest.raises(ValueError):
+            vectors.ivec[5.5]
+
+    @pytest.mark.parametrize("index", ([0, 1], ["x", "y"]))
+    def test_column_slicing2(self, vectors, index):
+        slic = vectors.ivec[index]
+        for i in np.ndindex((2, 2)):
+            np.testing.assert_almost_equal(slic.data[i][:, [0, 1]], vectors.data[i])
+
+    def test_row_lt(self, vectors):
+        col = vectors.ivec[0] < 0.5
+        slic = vectors.ivec[:, col]
+        for i in np.ndindex((2, 2)):
+            assert np.all(slic.data[i][:, 0] < 0.5)
+
+    def test_row_gt(self, vectors):
+        col = vectors.ivec[0] > 0.5
+        slic = vectors.ivec[:, col]
+        for i in np.ndindex((2, 2)):
+            assert np.all(slic.data[i][:, 0] > 0.5)
+
+    def test_row_gte(self, vectors):
+        col = vectors.ivec[0] >= 0.5
+        slic = vectors.ivec[:, col]
+        for i in np.ndindex((2, 2)):
+            assert np.all(slic.data[i][:, 0] >= 0.5)
+
+    def test_row_lte(self, vectors):
+        col = vectors.ivec[0] <= 0.5
+        slic = vectors.ivec[:, col]
+        for i in np.ndindex((2, 2)):
+            assert np.all(slic.data[i][:, 0] <= 0.5)
+
+    def test_vector_slicing_error(self, vectors):
+        with pytest.raises(ValueError):
+            vectors.ivec[0, 0, 0]
+
+    def test_num_columns(self, vectors):
+        assert vectors.num_columns == 2
+        lazy_vectors = vectors.as_lazy()
+        assert lazy_vectors.num_columns == 2
