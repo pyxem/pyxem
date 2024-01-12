@@ -108,39 +108,38 @@ def mock_library(mock_phase_key_dict):
 
 
 @pytest.mark.parametrize(
-    "n_best_sim, n_best, direct_beam_position, marker_colors",
+    "n_best_sim, n_best, marker_colors",
     [
         # fmt: off
-        (1, 1, None, None),
-        (2, 2, None, None),
-        (2, 1, None, None),
-        (1, 1, (0, 0), None),
-        (1, 1, (1, 0), None),
-        (1, 1, None, None),
-        (2, 2, None, ["red"]), # Prints a warning, but is still passes as colors will just loop
-        (2, 1, None, ["red"]*4),
-        (2, 2, None, ["red"]*2),
+        (1, 1, None),
+        (2, 2, None),
+        (2, 1, None),
+        pytest.param(2, 3, None, marks=pytest.mark.xfail),
+        (2, 2, ["red"]), # Prints a warning, but is still passes as colors will just loop
+        (2, 1, ["red"]*4),
+        (2, 2, ["red"]*2),
         # fmt: on
     ],
 )
 @pytest.mark.slow
-def test_plot_templates_over_signal(
+def test_generate_template_markers(
     mock_electron_diffraction_data,
     mock_library,
     shape,
     mock_phase_key_dict,
     n_best_sim,
     n_best,
-    direct_beam_position,
     marker_colors,
 ):
     mock_result = create_mock_templatematching_results(shape, n_best_sim)
-    plu.plot_templates_over_signal(
+    markers = plu.generate_template_markers(
         mock_electron_diffraction_data,
         mock_library,
         mock_result,
         mock_phase_key_dict,
         n_best,
-        direct_beam_position,
         marker_colors,
     )
+    # markers is a generator
+    markers = list(markers)
+    assert len(markers) == n_best

@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from typing import Iterator
+
 import matplotlib.pyplot as plt
 import numpy as np
-from tqdm import tqdm
 import hyperspy.api as hs
 from pyxem.utils.polar_transform_utils import (
     get_template_cartesian_coordinates,
@@ -119,7 +120,7 @@ def plot_template_over_pattern(
     return (ax, im, sp)
 
 
-def plot_templates_over_signal(
+def generate_template_markers(
     signal,
     library,
     result: dict,
@@ -127,11 +128,12 @@ def plot_templates_over_signal(
     n_best: int = None,
     direct_beam_position: tuple[int, int] = None,
     marker_colors: list[str] = None,
-    **plot_kwargs,
-):
+    scale_markers: bool = True,
+    size_factor: float = 1.0,
+) -> Iterator[hs.plot.markers.Markers]:
     """
-    Display an interactive plot of the diffraction signal,
-    with simulated diffraction patterns corresponding to template matching results displayed on top.
+    Generate markers of simulated diffraction patterns corresponding to template matching results.
+    These can be added to a signal plot for template matching result inspection.
 
     Parameters
     ----------
@@ -155,7 +157,31 @@ def plot_templates_over_signal(
     marker_colors : list of str, optional
         Colors of the spot markers. Should be at least n_best long, otherwise colors will loop.
         Defaults to matplotlib's default color cycle
-    **plot_kwargs : Keyword arguments passed to signal.plot
+    scale_markers: bool, optional
+        Whether to scale the markers. Defaults to True. See notes on size.
+    size_factor : float, optional
+        Scaling factor for the spots. See notes on size.
+
+    Examples
+    --------
+    >>> # Get some data
+    >>> from pyxem.generators.indexation_generator import AcceleratedIndexationGenerator
+    >>> from pyxem.dummy_data import get_nanobeam_electron_diffraction_signal
+    >>> from diffsims.libraries.diffraction_library import load_DiffractionLibrary
+    >>> diff_lib = load_DiffractionLibrary('your/pickled/diffraction/library.pickle', safety=True)
+    >>> s = get_nanobeam_electron_diffraction_signal()
+    >>> indexer = AcceleratedIndexationGenerator(s, diff_lib)
+    >>> indexation_results, phase_dict = indexer.correlate()
+
+    >>> # Make and show the markers
+    >>> from pyxem.utils.plotting_utils import generate_template_markers
+    >>> markers = generate_template_markers(s, diff_lib, indexation_results, phase_dict, n_best = 1)
+    >>> s.plot()
+    >>> s.add_marker(markers)
+
+    Notes
+    -----
+    The spot marker sizes are scaled by the square root of their intensity
     """
 
     n_best_indexed = result["template_index"].shape[-1]
@@ -203,6 +229,7 @@ def plot_templates_over_signal(
     orientation_signal = hs.signals.Signal2D(result["orientation"])
     mirrored_template_signal = hs.signals.Signal1D(result["mirrored_template"])
 
+    # Functions to use `result_libraries_signal.map`
     def marker_func_factory(n: int):
         def marker_func(pattern, center, orientation, mirrored_template):
             angle = orientation[n, 0]  # 1st ZXZ Euler angle is the in-plane rotation
@@ -214,7 +241,6 @@ def plot_templates_over_signal(
             )
 
             # See https://github.com/pyxem/pyxem/issues/925
-            # y = signal.axes_manager.shape[3] - y
             y = -y
 
             x *= signal.axes_manager[2].scale
@@ -234,10 +260,23 @@ def plot_templates_over_signal(
         else:
             return marker_func
 
-    signal.plot(**plot_kwargs)
-    for i in range(n_best):
-        markers = result_libraries_signal.map(
-            marker_func_factory(i),
+    # Due to the arrays being ragged,
+    # having a seperate function is easier than trying to extract the intensities from the
+    # `get_template_cartesian_coordinates`-call in the above function
+    def intensities_func(pattern, center, orientation, mirrored_template, n):
+        angle = orientation[n, 0]  # 1st ZXZ Euler angle is the in-plane rotation
+        pattern = pattern[n]
+        mirrored_template = mirrored_template[n]
+
+        _, _, intensities = get_template_cartesian_coordinates(
+            pattern, center=center, in_plane_angle=angle, mirrored=mirrored_template
+        )
+        return np.sqrt(intensities) * size_factor
+
+    # Generate the markers
+    for n in range(n_best):
+        markers_signal = result_libraries_signal.map(
+            marker_func_factory(n),
             center=direct_beam_position,
             orientation=orientation_signal,
             mirrored_template=mirrored_template_signal,
@@ -245,6 +284,21 @@ def plot_templates_over_signal(
             ragged=True,
             lazy_output=True,
         )
-        color = marker_colors[i % len(marker_colors)]
-        m = hs.plot.markers.Points.from_signal(markers, color=color)
-        signal.add_marker(m)
+        if scale_markers:
+            intensities = result_libraries_signal.map(
+                intensities_func,
+                center=direct_beam_position,
+                orientation=orientation_signal,
+                mirrored_template=mirrored_template_signal,
+                n=n,
+                inplace=False,
+                ragged=True,
+                lazy_output=True,
+            ).data.T
+        else:
+            intensities = 10
+        color = marker_colors[n % len(marker_colors)]
+        markers = hs.plot.markers.Points.from_signal(
+            markers_signal, sizes=intensities, color=color
+        )
+        yield markers
