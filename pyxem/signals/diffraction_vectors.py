@@ -788,6 +788,7 @@ class DiffractionVectors(BaseSignal):
         columns=None,
         column_scale_factors=None,
         min_vectors=None,
+        remove_nan=True,
     ):
         """This method clusters a list of vectors both in reciprocal space and in real space.
         The output is a list of vectors with a "label" which defines the cluster that each vector
@@ -804,6 +805,8 @@ class DiffractionVectors(BaseSignal):
         min_vectors: int
             A strict check to limit clusters arising from less than `min_vectors`
             vectors
+        remove_nan: bool
+            If True, vectors with NaN values are removed before clustering
         """
         if column_scale_factors is None:
             column_scale_factors = [
@@ -819,6 +822,7 @@ class DiffractionVectors(BaseSignal):
             columns=columns,
             column_scale_factors=column_scale_factors,
             min_vectors=min_vectors,
+            remove_nan=remove_nan,
         )
         new_signal.column_names = self.column_names + ["cluster"]
         new_signal.units = self.units + ["n.a."]

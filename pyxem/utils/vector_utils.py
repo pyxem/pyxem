@@ -375,8 +375,14 @@ def _reverse_pos(peaks, ind=2):
     return new_data
 
 
-def cluster(data, method, columns, column_scale_factors, min_vectors=None):
+def cluster(
+    data, method, columns, column_scale_factors, min_vectors=None, remove_nan=True
+):
     vectors = data[:, columns]
+    if remove_nan:
+        isnan = ~np.isnan(vectors).any(axis=1)
+        vectors = vectors[isnan]
+        data = data[isnan]
     vectors = vectors / np.array(column_scale_factors)
     clusters = method.fit(vectors)
     labels = clusters.labels_

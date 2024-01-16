@@ -46,14 +46,6 @@ class TestLabelledDiffractionVectors:
         assert result.shape == (10,)
         assert np.all(result == 10)  # all labels have 10 vectors
 
-    def test_map_vectors(self, labeled_vectors):
-        def func(x):
-            return np.shape(x)[0]
-
-        result = labeled_vectors.map_vectors(func, dtype=np.float64)
-        assert result.shape == (10,)
-        assert np.all(result == 10)  # all labels have 10 vectors
-
     def test_map_vectors_with_shape(self, labeled_vectors):
         def func(x):
             return np.shape(x)
