@@ -19,7 +19,6 @@ import pyxem
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.append("../")
 
-
 # Project information
 project = "pyxem"
 copyright = release_info.copyright
