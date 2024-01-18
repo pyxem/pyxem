@@ -25,8 +25,17 @@ from skimage.morphology import disk as disk2
 from hyperspy.signals import Signal2D
 from hyperspy.signal import BaseSignal
 
-from pyxem.signals import DiffractionVectors, DiffractionVectors2D, DiffractionVectors1D, PolarVectors
-from pyxem.utils.subpixel_utils import _center_of_mass_hs, get_experimental_square, _conventional_xc
+from pyxem.signals import (
+    DiffractionVectors,
+    DiffractionVectors2D,
+    DiffractionVectors1D,
+    PolarVectors,
+)
+from pyxem.utils.subpixel_utils import (
+    _center_of_mass_hs,
+    get_experimental_square,
+    _conventional_xc,
+)
 import pyxem.dummy_data.make_diffraction_test_data as mtd
 from pyxem.signals import DiffractionVectors, DiffractionVectors2D, DiffractionVectors1D
 from pyxem.utils.subpixel_utils import (
@@ -279,7 +288,7 @@ class TestInitVectors:
         pixels = dv.pixel_vectors
 
         for i in np.ndindex((2, 2)):
-            np.testing.assert_almost_equal(peaks.data[i], pixels[i])
+            np.testing.assert_almost_equal(peaks.data[i], pixels.data[i])
 
     def test_initial_metadata(self, diffraction_vectors_map):
         assert diffraction_vectors_map.scales is None

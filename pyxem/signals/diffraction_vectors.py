@@ -338,6 +338,10 @@ class DiffractionVectors(BaseSignal):
         )
         return refined_vectors
 
+    @property
+    def pixel_vectors(self):
+        return self.get_pixel_vectors()
+
     def get_pixel_vectors(
         self, offsets=None, scales=None, square_size=None, shape=None
     ):
