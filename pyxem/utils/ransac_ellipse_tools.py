@@ -591,14 +591,16 @@ def determine_ellipse(
 ):
     """
     This method starts by taking some number of points which are the most intense
-    in the signal.  It then takes those points and guesses some starting parameters
-    for the `get_ellipse_model_ransac_single_frame` function. From there it will try
-    to determine the ellipse parameters.
+    in the signal or those points can be directly passed.  It then takes those points
+    and guesses some starting parameters for the `get_ellipse_model_ransac_single_frame`
+    function. From there it will try to determine the ellipse parameters.
 
     Parameters
     -----------
     signal : Signal2D
         The signal of interest.
+    pos : np.ndarray
+        The positions of the points to be used to determine the ellipse.
     mask : Array-like
         The mask to be applied to the data.  The True values are ignored.
     num_points : int

@@ -92,16 +92,19 @@ class PolarVectors(DiffractionVectors):
         return angles
 
     @property
-    def delta_phi(self):
-        """Return the delta phi column."""
+    def has_delta_phi(self):
+        """If the polar vector has the delta phi column.
+
+        If True, the vectors are in the form (r, delta phi, min-angle) as a result of the
+         ``get_angles method``.  If False, the vectors are in the form (r, theta)."""
         return self.column_names[1] == "delta phi"
 
-    def to_cartesian(self, delta_angle=None):
+    def to_cartesian(self, has_delta_angle=None):
         """Convert the vectors to cartesian coordinates.
 
         Parameters
         ----------
-        delta_angle : bool
+        has_delta_angle : bool
             If True, the vectors are in the form (r, delta phi, min-angle).  If False,
             the vectors are in the form (r, theta).
 
@@ -110,9 +113,9 @@ class PolarVectors(DiffractionVectors):
         DiffractionVectors
             The vectors in cartesian coordinates.
         """
-        if delta_angle is None:
-            delta_angle = self.delta_phi
-        if delta_angle:
+        if has_delta_angle is None:
+            has_delta_angle = self.has_delta_phi
+        if has_delta_angle:
             cartesian_vectors = self.map(
                 to_cart_three_angles,
                 inplace=False,
@@ -129,12 +132,12 @@ class PolarVectors(DiffractionVectors):
         cartesian_vectors.set_signal_type("diffraction_vectors")
         return cartesian_vectors
 
-    def to_markers(self, delta_angle=None, cartesian=True, **kwargs):
+    def to_markers(self, has_delta_angle=None, cartesian=True, **kwargs):
         """Convert the vectors to markers to be plotted on a signal.
 
         Parameters
         ----------
-        delta_angle : bool, optional
+        has_delta_angle : bool, optional
             If the vectors are polar in the form (r, theta), then this parameter should
             be set to False.  If the vectors are in the form (r, delta phi, min-angle), then
             this parameter should be set to True.  The default is None which will infer
@@ -151,7 +154,7 @@ class PolarVectors(DiffractionVectors):
             A Point object containing the markers.
         """
         if cartesian:
-            vectors = self.to_cartesian(delta_angle=delta_angle)
+            vectors = self.to_cartesian(has_delta_angle=has_delta_angle)
         else:
             vectors = self
         return vectors.to_markers(**kwargs)
