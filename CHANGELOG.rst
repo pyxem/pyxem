@@ -21,6 +21,10 @@ Added
 - Added clustering methods using :func:`pyxem.signals.DiffractionVectors.cluster` (#981)
 - Added :class:`pyxem.signals.LabeledDiffractionVectors` for labeled diffraction vectors after clustering (#981)
 
+Changed
+-------
+- Revised the pyxem logo banner and favicon (#988)
+
 Fixed
 -----
 - Update pyxem to work with hyperspy 2.0.0 (#969)
