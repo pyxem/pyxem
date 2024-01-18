@@ -103,6 +103,9 @@ html_theme_options = {
     "navigation_with_keys": True,
     "show_toc_level": 2,
     "use_edit_page_button": True,
+    "announcement": "Check out the Free "
+    " <a href='https://www.ntnu.edu/web/temgemini/nordtemhub'>(Big) Data analysis of 4D-STEM</a> "
+    " workshop in Trondheim, Norway, 11-13 June 2024",
 }
 
 html_context = {
