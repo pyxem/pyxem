@@ -98,7 +98,7 @@ setup(
         "orix           >= 0.9",
         "pooch",
         "psutil",
-        "pyfai",  # sigma clip function broken
+        "pyfai           <= 2023.9.0",  # breaking changes
         "scikit-image   >= 0.19.0, !=0.21.0",  # regression in ellipse fitting"
         "scikit-learn   >= 1.0",
         "scipy",

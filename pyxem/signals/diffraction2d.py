@@ -382,44 +382,37 @@ class Diffraction2D(Signal2D, CommonDiffraction):
     ):
         """Background subtraction of the diffraction data.
 
-            Parameters
-            ----------
-            method : str, optional
-                'difference of gaussians', 'median kernel', 'radial median', 'h-dome'
-                 Default 'median kernel'.
+        Parameters
+        ----------
+        method : str, optional
+            'difference of gaussians', 'median kernel', 'radial median', 'h-dome'
+            Default 'median kernel'.
 
-                 For `difference of gaussians the parameters min_sigma (default:1) and
-                 max_sigma(default:55) control the size of the gaussian kernels used.
+            For `difference of gaussians` the parameters min_sigma (default:1) and
+            max_sigma(default:55) control the size of the gaussian kernels used.
 
-                 For `median kernel` the footprint(default:19) parameter detemines the
-                 footprint used to determine the median.
+            For `median kernel` the footprint(default:19) parameter detemines the
+            footprint used to determine the median.
 
-                 For `radial median` the parameters center_x(default:128), center_y(default:128) are
-                 used to detmine the center of the pattern to use to determine the median.
+            For `radial median` the parameters center_x(default:128), center_y(default:128) are
+            used to detmine the center of the pattern to use to determine the median.
 
-                 For `h-dome` the parameter h detemines the relative height of local peaks that
-                 are supressed.
-        max_sigma : float
-            lazy_output : bool, optional
-                If True (default), will return a LazyDiffraction2D object. If False,
-                will compute the result and return a Diffraction2D object.
-            show_progressbar : bool, optional
-                Default True
-            **kwargs :
+            For `h-dome` the parameter h detemines the relative height of local peaks that
+            are supressed.
+        **kwargs :
                 To be passed to the method chosen: min_sigma/max_sigma, footprint,
                 centre_x,centre_y / h
 
-            Returns
-            -------
-            s : Diffraction2D or LazyDiffraction2D signal
+        Returns
+        -------
+        s : Diffraction2D or LazyDiffraction2D signal
 
-            Examples
-            --------
-            >>> s = pxm.dummy_data.get_cbed_signal()
-            >>> s_r = s.subtract_diffraction_background(method='median kernel',
-            ...     footprint=20, lazy_output=False, show_progressbar=False)
-            >>> s_r.plot()
-
+        Examples
+        --------
+        >>> s = pxm.dummy_data.get_cbed_signal()
+        >>> s_r = s.subtract_diffraction_background(method='median kernel',
+        ...     footprint=20, lazy_output=False, show_progressbar=False)
+        >>> s_r.plot()
         """
         method_dict = {
             "difference of gaussians": _subtract_dog,

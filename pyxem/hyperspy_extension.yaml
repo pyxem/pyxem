@@ -101,6 +101,24 @@ signals:
     dtype: real
     lazy: False
     module: pyxem.signals.diffraction_vectors2d
+  LabeledDiffractionVectors2D:
+    signal_type: labeled_diffraction_vectors
+    signal_dimension: 2
+    dtype: real
+    lazy: False
+    module: pyxem.signals.labeled_diffraction_vectors2d
+  PolarVectors:
+    signal_type: polar_vectors
+    signal_dimension: 0
+    dtype: real
+    lazy: False
+    module: pyxem.signals.polar_vectors
+  LazyPolarVectors:
+    signal_type: polar_vectors
+    signal_dimension: 0
+    dtype: real
+    lazy: True
+    module: pyxem.signals.polar_vectors
   VectorMatchingResults:
     signal_type: vector_matching
     signal_dimension: 0

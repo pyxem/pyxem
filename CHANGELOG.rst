@@ -17,7 +17,9 @@ Added
 - Add slicing methods to DiffractionVectors using ``ivec`` (#972)
 - :class:`~pyxem.signals.DiffractionVectors` now explicitly handles lazy signals (#972)
 - Added html representation for non-lazy :class:`~pyxem.signals.DiffractionVectors` (#972)
-
+- Added :class:`pyxem.signals.PolarVectors` for polar vectors (#981)
+- Added clustering methods using :func:`pyxem.signals.DiffractionVectors.cluster` (#981)
+- Added :class:`pyxem.signals.LabeledDiffractionVectors` for labeled diffraction vectors after clustering (#981)
 
 Fixed
 -----

@@ -29,17 +29,10 @@ from pyxem.signals import DiffractionVectors
 
 
 class DiffractionVectors2D(DiffractionVectors, Signal2D):
-    """Crystallographic mapping results containing the best matching crystal
-    phase and orientation at each navigation position with associated metrics.
+    """DiffractionVectors signal with the same number of vectors at each navigation
+    position.
 
-    Attributes
-    ----------
-    cartesian : np.array()
-        Array of 3-vectors describing Cartesian coordinates associated with
-        each diffraction vector.
-    hkls : np.array()
-        Array of Miller indices associated with each diffraction vector
-        following indexation.
+    This class can also be used to represent a list of vectors with no navigation axis.
     """
 
     _signal_dimension = 2
@@ -271,3 +264,9 @@ class DiffractionVectors2D(DiffractionVectors, Signal2D):
         new_data = self.data[inbounds]
 
         return DiffractionVectors2D(new_data)
+
+    # Functions that only work for 2D Vectors with no navigation axis
+
+    @property
+    def has_navigation_axis(self):
+        return len(self.axes_manager.navigation_axes) > 0

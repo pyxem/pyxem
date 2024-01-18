@@ -38,6 +38,7 @@ from .diffraction_vectors2d import DiffractionVectors2D
 from .diffraction_vectors1d import DiffractionVectors1D
 from .diffraction1d import Diffraction1D, LazyDiffraction1D
 from .diffraction2d import Diffraction2D, LazyDiffraction2D
+from .polar_vectors import PolarVectors, LazyPolarVectors
 from .electron_diffraction1d import ElectronDiffraction1D, LazyElectronDiffraction1D
 from .electron_diffraction2d import ElectronDiffraction2D, LazyElectronDiffraction2D
 from .indexation_results import VectorMatchingResults
@@ -51,6 +52,7 @@ from .correlation1d import Correlation1D, LazyCorrelation1D
 from .tensor_field import DisplacementGradientMap
 from .virtual_dark_field_image import VirtualDarkFieldImage
 from .insitu_diffraction2d import InSituDiffraction2D
+from .labeled_diffraction_vectors2d import LabeledDiffractionVectors2D
 
 
 __all__ = [
@@ -78,6 +80,8 @@ __all__ = [
     "VectorMatchingResults",
     "PairDistributionFunction1D",
     "PolarDiffraction2D",
+    "PolarVectors",
+    "LazyPolarVectors",
     "Power2D",
     "ReducedIntensity1D",
     "LearningSegment",
@@ -88,4 +92,5 @@ __all__ = [
     "DisplacementGradientMap",
     "VirtualDarkFieldImage",
     "InSituDiffraction2D",
+    "LabeledDiffractionVectors2D",
 ]

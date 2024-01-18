@@ -97,7 +97,7 @@ def calculate_norms_ragged(z):
     return np.asarray(norms)
 
 
-def filter_vectors_ragged(z, min_magnitude, max_magnitude):
+def filter_vectors_ragged(z, min_magnitude, max_magnitude, columns=[0, 1]):
     """Filters the diffraction vectors to accept only those with magnitudes
     within a user specified range.
 
@@ -114,10 +114,7 @@ def filter_vectors_ragged(z, min_magnitude, max_magnitude):
         Diffraction vectors within allowed magnitude tolerances.
     """
     # Calculate norms
-    norms = []
-    for i in z:
-        norms.append(np.linalg.norm(i))
-    norms = np.asarray(norms)
+    norms = np.linalg.norm(z[:, columns], axis=1)
     # Filter based on norms
     norms[norms < min_magnitude] = 0
     norms[norms > max_magnitude] = 0
@@ -376,3 +373,79 @@ def _reverse_pos(peaks, ind=2):
     for i in range(ind):
         new_data[..., (-i - 1)] = peaks[..., i]
     return new_data
+
+
+def cluster(
+    data, method, columns, column_scale_factors, min_vectors=None, remove_nan=True
+):
+    vectors = data[:, columns]
+    if remove_nan:
+        isnan = ~np.isnan(vectors).any(axis=1)
+        vectors = vectors[isnan]
+        data = data[isnan]
+    vectors = vectors / np.array(column_scale_factors)
+    clusters = method.fit(vectors)
+    labels = clusters.labels_
+    if min_vectors is not None:
+        label, counts = np.unique(labels, return_counts=True)
+        below_min_v = label[counts < min_vectors]
+        labels[np.isin(labels, below_min_v)] = -1
+    vectors_and_labels = np.hstack([data, labels[:, np.newaxis]])
+    return vectors_and_labels
+
+
+def only_signal_axes(func):
+    def wrapper(*args, **kwargs):
+        self = args[0]
+        if self.has_navigation_axis:
+            raise ValueError(
+                "This function is not supported for signals with a navigation axis"
+            )
+
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+def vectors_to_polar(vectors, columns=None):
+    """Converts a list of vectors to polar coordinates.
+
+    Parameters
+    ----------
+    vectors : np.array()
+        Array of vectors.
+    columns:
+        The x and y columns to be used to calculate the
+        polar vector.
+
+
+    Returns
+    -------
+    polar_vectors : np.array()
+        Array of vectors in polar coordinates.
+    """
+    if columns is None:
+        columns = [0, 1]
+    polar_vectors = np.empty(vectors.shape)
+    polar_vectors[:, 0] = np.linalg.norm(vectors[:, columns], axis=1)
+    polar_vectors[:, 1] = np.arctan2(vectors[:, columns[1]], vectors[:, columns[0]])
+    polar_vectors[:, 2:] = vectors[:, 2:]
+    return polar_vectors
+
+
+def to_cart_three_angles(vectors):
+    k = vectors[:, 0]
+    delta_phi = vectors[:, 1]
+    min_angle = vectors[:, 2]
+    angles = np.repeat(min_angle, 3)
+    angles[1::3] += delta_phi
+    angles[2::3] += delta_phi * 2
+    k = np.repeat(k, 3)
+
+    return np.vstack([k * np.cos(angles), k * np.sin(angles)]).T
+
+
+def polar_to_cartesian(vectors):
+    k = vectors[:, 0]
+    phi = vectors[:, 1]
+    return np.vstack([k * np.cos(phi), k * np.sin(phi)]).T
