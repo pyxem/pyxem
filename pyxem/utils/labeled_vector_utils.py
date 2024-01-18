@@ -2,7 +2,6 @@ import itertools
 from copy import deepcopy
 
 import numpy as np
-from scipy.spatial.distance import cdist
 from scipy.spatial import ConvexHull
 
 
@@ -27,6 +26,27 @@ def vectors2image(
     offsets,
     indexes=None,
 ):
+    """
+    Convert a set of vectors to an image by binning the vectors into a 2D histogram.
+
+    Parameters
+    ----------
+    vectors: np.ndarray
+        The vectors to be binned
+    image_size  : tuple
+        The size of the image to be produced
+    scales: tuple
+        The scales of the image to be produced
+    offsets: tuple
+        The offsets of the image to be produced
+    indexes: tuple
+        The indexes of the vectors to be used to create the image.
+        If None, the first two columns are used.
+
+    Returns
+    -------
+
+    """
     if indexes is None:
         indexes = [0, 1]
     red_points = vectors[:, indexes]
@@ -49,6 +69,25 @@ def points_to_poly_collection(points, hull_index=(0, 1)):
 
 
 def points_to_polygon(points, num_points=50):
+    """
+    Convert a set of points to a polygon by creating a polygon. The method takes the points
+    given and finds the outermost points to create the polygon. The number of points in the
+    polygon defines the resolution of the polygon.
+
+    Parameters
+    ----------
+    points: np.ndarray
+        The points to be used to create the polygon (N x 2)
+    num_points
+        The number of points on each side (top, bottom, left, right) of the polygon
+        used to create the edges of the polygon.
+
+    Returns
+    -------
+    np.ndarray
+        The vertices of the polygon
+
+    """
     if len(points) == 0:
         return np.array([[0, 0], [0, 0], [0, 0]])
     sorted_points = points[np.argsort(points[:, 0])]
@@ -86,6 +125,22 @@ def convert_to_markers(
     peaks,
     signal,
 ):
+    """
+    Convert a set of (flattened) peaks to a set of markers for plotting. Note that the
+    function below only works for 4D signals.
+
+
+    Parameters
+    ----------
+    peaks: DiffractionVectors2D
+        The peaks to be converted to markers
+    signal: pyxem.signals.Signal2D
+        The 4-D signal to plot the peaks on
+
+    Returns
+    -------
+
+    """
     new_peaks = deepcopy(peaks.data)
     x_axis, y_axis = signal.axes_manager.navigation_axes
     new_peaks[:, 0] = np.round((new_peaks[:, 0] - x_axis.offset) / x_axis.scale)

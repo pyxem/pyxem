@@ -39,6 +39,7 @@ class PolarVectors(DiffractionVectors):
         accept_threshold=0.05,
         min_k=0.05,
         min_angle=None,
+        **kwargs
     ):
         """Calculate the angles between pairs of 3 diffraction vectors.
 
@@ -58,8 +59,6 @@ class PolarVectors(DiffractionVectors):
             The minimum inscribed angle for an angle to be considered.  The default is None.
             Which means that two vectors even with a small angle between them will be
             considered.
-        *args:
-            Arguments to be passed to map().
         **kwargs:
             Keyword arguments to map().
 
@@ -82,6 +81,7 @@ class PolarVectors(DiffractionVectors):
             min_angle=min_angle,
             inplace=False,
             ragged=True,
+            **kwargs,
         )
         # set the column names
         col_names = ["k", "delta phi", "min-angle", "intensity", "reduced-angle"]

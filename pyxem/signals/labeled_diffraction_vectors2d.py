@@ -103,6 +103,27 @@ class LabeledDiffractionVectors2D(DiffractionVectors2D):
         signal=None,
         figsize=None,
     ):
+        """Plot the clustered vectors and the characteristic diffraction patterns
+
+        Parameters
+        ----------
+        nav_columms: None or list
+            The columns to be used for the navigation axes
+        signal_columns: None or list
+            The columns to be used for the signal axes
+        navigation_pixels: tuple
+            The number of pixels in the navigation axes
+        scales: None or tuple
+            The scales for the navigation axes
+        offsets: None or tuple
+            The offsets for the navigation axes
+        labels: None or list
+            The labels to be plotted
+        signal: None or pyxem.signals.ElectronDiffraction2D
+            The signal to be plotted on the
+        figsize: None or tuple
+            The figure size to be used
+        """
         if signal_columns is None:
             signal_columns = [2, 3]
         if nav_columms is None:
@@ -212,6 +233,27 @@ class LabeledDiffractionVectors2D(DiffractionVectors2D):
 
     @only_signal_axes
     def to_markers(self, signal, get_polygons=False, num_points=10, **kwargs):
+        """Convert the labeled vectors to markers
+
+        Parameters
+        ----------
+        signal: pyxem.signals.ElectronDiffraction2D
+            The signal which the markers will be plotted on
+        get_polygons: bool
+            If True, both the vectors and the polygons will be returned
+        num_points: int
+            The number of points to be used to create the polygon
+        kwargs:
+            Any additional arguments to be passed to the :class:`~hyperspy.api.plot.Points` Maker
+
+        Returns
+        -------
+        points:
+            The points to be plotted
+        polygons:
+            The polygons to be plotted. Only returned if `get_polygons` is True
+
+        """
         offsets, colors, colors_by_index = convert_to_markers(self, signal)
         points = hs.plot.markers.Points(offsets=offsets.T, color=colors.T, **kwargs)
         if get_polygons:
