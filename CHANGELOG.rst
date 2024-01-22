@@ -7,8 +7,8 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_,
 and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
-Unreleased
-==========
+2024-01-05 - version 0.17.0
+===========================
 Added
 -----
 - LazyDiffractionVectors are now supported(#969)
@@ -37,6 +37,7 @@ Fixed
 Removed
 -------
 - Removed MIB reader (#979) in favor of https://github.com/hyperspy/rosettasciio/pull/174
+- Support for Hyperspy 1.x.x is not supported.  Use pyxem 0.16.0 instead if using Hyperspy 1.x.x (#969)
 
 2023-11-14 - version 0.16.0
 ===========================
