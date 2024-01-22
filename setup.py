@@ -35,7 +35,7 @@ extra_feature_requirements = {
         "sphinx_design",
         "sphinx-codeautolink",
         "pydata-sphinx-theme",
-        "hyperspy_gui_ipywidgets @ git+https://github.com/ericpre/hyperspy_gui_ipywidgets.git@hyperspy2.0",
+        "hyperspy_gui_ipywidgets    >= 2.0",
         "dask-image",
     ],
     "tests": [
