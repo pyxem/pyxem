@@ -254,7 +254,7 @@ class Calibration:
             radial_range = (0, max_range)
         # Get the slices and factors for the integration
         slices, factors = self._get_slices_and_factors(npt, npt_azim, radial_range)
-        return slices, factors
+        return slices, factors, radial_range
 
     def _get_slices_and_factors(self, npt, npt_azim, radial_range):
 
@@ -264,10 +264,10 @@ class Calibration:
         # get the min and max indices for each control point using the axes
         min_x = np.min(
             np.searchsorted(self.axes[0], control_points[:, :, 0], side="left"), axis=1
-        ).astype(int)
+        ).astype(int)-1
         min_y = np.min(
             np.searchsorted(self.axes[1], control_points[:, :, 1], side="left"), axis=1
-        ).astype(int)
+        ).astype(int)-1
 
         max_x = np.max(
             np.searchsorted(self.axes[0], control_points[:, :, 0], side="right"), axis=1
@@ -289,6 +289,11 @@ class Calibration:
         slices[slices[:, 1] > max_y_ind, 1] = max_y_ind
         slices[slices[:, 2] > max_x_ind, 2] = max_x_ind
         slices[slices[:, 3] > max_y_ind, 3] = max_y_ind
+
+        slices[slices[:, 0] < 0, 0] = 0
+        slices[slices[:, 1] < 0, 1] = 0
+        slices[slices[:, 2] < 0, 2] = 0
+        slices[slices[:, 3] < 0, 3] = 0
 
         factors = _get_factors(control_points, slices, self.axes)
         return slices, factors
