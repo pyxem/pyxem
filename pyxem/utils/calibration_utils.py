@@ -26,7 +26,7 @@ from hyperspy.axes import UniformDataAxis
 
 from pyxem.utils.indexation_utils import index_dataset_with_template_rotation
 from pyxem.utils.azimuthal_utils import _get_control_points, _get_factors
-from pyfai_utils import
+
 
 class Calibration:
     """
@@ -58,8 +58,6 @@ class Calibration:
     def __init__(
         self,
         signal,
-        affine=None,
-        mask=None,
     ):
         """A class to hold the parameters for an Azimuthal Integrator.
 
@@ -71,8 +69,12 @@ class Calibration:
             A boolean array to be added to the integrator.
         """
         self.signal = signal
-        self.affine = affine
-        self.mask = mask
+        self.affine = None
+        self.mask = None
+
+        self.real_pixel_size = None
+        self.detector_distance = None
+
 
     def scale(self, scale, center=None, unit="k_nm^-1"):
         """
@@ -80,7 +82,7 @@ class Calibration:
         a flat Ewald sphere.
         """
         if center is None:
-            offsets = -(self.signal.axes_manager.signal_shape / 2) * scale
+            offsets = -(np.array(self.signal.axes_manager.signal_shape) / 2) * scale
         for ax, off in zip(self.signal.axes_manager.signal_axes, offsets):
             ax.scale = scale
             ax.offset = off
@@ -123,6 +125,11 @@ class Calibration:
             raise ValueError("Must provide either beam_energy or wavelength")
         elif beam_energy is not None:
             wavelength = get_electron_wavelength(beam_energy)
+
+        # We need these values to properly set the axes
+        self.real_pixel_size = pixel_size
+        self.detector_distance = detector_distance
+
         unit_factors = {
             "k_nm^-1": 1,
             "k_A^-1": 0.1,
@@ -134,8 +141,7 @@ class Calibration:
                 f"Unit {unit} not recognized. Must be one of {unit_factors.keys()}"
             )
         if center is None:
-            center = -(self.signal.axes_manager.signal_shape / 2)
-
+            center = (np.array(self.signal.axes_manager.signal_shape) / 2)
         x_pixels = np.arange(-center[0], self.shape[0] - center[0])
         y_pixels = np.arange(-center[1], self.shape[1] - center[1])
 
@@ -149,7 +155,7 @@ class Calibration:
         y_axes = np.sin(y_angles) * (1 / wavelength) * unit_factors[unit]
 
         for ax, axis in zip(self.signal.axes_manager.signal_axes, [x_axes, y_axes]):
-            if not isinstance(ax, hs.axes.DataAxis):
+            if isinstance(ax, UniformDataAxis):
                 ax.convert_to_non_uniform_axis()
             ax.axis = axis
 
@@ -177,6 +183,7 @@ class Calibration:
             return self.signalmetadata.Acquisition_instrument.TEM["beam_energy"]
         except AttributeError:
             return None
+
     @beam_energy.setter
     def beam_energy(self, energy):
         self.signal.metadata.set_item("Acquisition_instrument.TEM.beam_energy", energy)
@@ -185,7 +192,7 @@ class Calibration:
     def wavelength(self):
         """Return the beam wavelength in nm^-1"""
         try:
-            return self.signalmetadata.Acquisition_instrument.TEM["wavelength"]
+            return self.signal.metadata.Acquisition_instrument.TEM["wavelength"]
         except AttributeError:
             return None
 
@@ -193,10 +200,18 @@ class Calibration:
     def wavelength(self, wavelength):
         self.signal.metadata.set_item("Acquisition_instrument.TEM.wavelength", wavelength)
 
+    @property
+    def flat_ewald(self):
+        """If the ewald sphere is flat return True"""
+        return isinstance(self.signal.axes_manager.signal_axes[0], UniformDataAxis)
+
+    @property
+    def unit(self):
+        return self.signal.axes_manager.signal_axes[0].units
+
     def __repr__(self):
-        is_flat = isinstance(self.signal.axes_manager.signal_axes[0], UniformDataAxis)
         rep_str = f"Calibration for {self.signal}, Ewald sphere: "
-        if is_flat:
+        if self.flat_ewald:
             rep_str += "flat"
         else:
             rep_str += f"{self.beam_energy} keV"
@@ -235,7 +250,7 @@ class Calibration:
             from itertools import combinations
 
             edges = np.reshape([[ax[0] ** 2, ax[-1] ** 2] for ax in self.axes], -1)
-            max_range = np.max(np.power(np.sum(combinations(edges, 2), axis=1), 0.5))
+            max_range = np.max(np.power(np.sum(list(combinations(edges, 2)), axis=1), 0.5))
             radial_range = (0, max_range)
         # Get the slices and factors for the integration
         slices, factors = self._get_slices_and_factors(npt, npt_azim, radial_range)
@@ -248,21 +263,33 @@ class Calibration:
 
         # get the min and max indices for each control point using the axes
         min_x = np.min(
-            np.searchsorted(control_points[:, :, 0], self.axes[0], side="left"), axis=1
+            np.searchsorted(self.axes[0], control_points[:, :, 0], side="left"), axis=1
         ).astype(int)
         min_y = np.min(
-            np.searchsorted(control_points[:, :, 1], self.axes[1], side="left"), axis=1
+            np.searchsorted(self.axes[1], control_points[:, :, 1], side="left"), axis=1
         ).astype(int)
 
-        max_x = np.min(
-            np.searchsorted(control_points[:, :, 0], self.axes[0], side="right"), axis=1
+        max_x = np.max(
+            np.searchsorted(self.axes[0], control_points[:, :, 0], side="right"), axis=1
         ).astype(int)
-        max_y = np.min(
-            np.searchsorted(control_points[:, :, 1], self.axes[1], side="right"), axis=1
+        max_y = np.max(
+            np.searchsorted(self.axes[1], control_points[:, :, 1], side="right"), axis=1
         ).astype(int)
+        # Note that if a point is outside the range of the axes it will be set to the
+        # maximum value of the axis+1 and 0 if it is below the minimum value of the axis.
         slices = np.array(
             [[mx, my, mxx, myy] for mx, my, mxx, myy in zip(min_x, min_y, max_x, max_y)]
         )
+        max_y_ind = len(self.axes[1]) - 1
+        max_x_ind = len(self.axes[0]) - 1
+
+        # set the slices to be within the range of the axes.  If the entire slice is outside
+        # the range of the axes then set the slice to be the maximum value of the axis
+        slices[slices[:, 0] > max_x_ind, 0] = max_x_ind
+        slices[slices[:, 1] > max_y_ind, 1] = max_y_ind
+        slices[slices[:, 2] > max_x_ind, 2] = max_x_ind
+        slices[slices[:, 3] > max_y_ind, 3] = max_y_ind
+
         factors = _get_factors(control_points, slices, self.axes)
         return slices, factors
 
@@ -273,7 +300,27 @@ class Calibration:
         Returns
         -------
         """
-        pass
+        from pyFAI.detectors import Detector
+        from pyxem.utils.pyfai_utils import _get_setup, get_azimuthal_integrator
+        if self.flat_ewald:
+            pixel_scale = [ax.scale for ax in self.axes]
+            setup = _get_setup(wavelength=self.wavelength,
+                   unit = self.unit,
+                   pixel_scale=pixel_scale,)
+            detector, dist, radial_range = setup
+        else:
+            detector = Detector(pixel1=self.real_pixel_size, pixel2=self.real_pixel_size,)
+            dist = self.detector_distance
+
+        ai = get_azimuthal_integrator(
+                detector=detector,
+                detector_distance=dist,
+                shape=self.shape,
+                center=self.center,
+                affine=self.affine,
+                wavelength=self.wavelength,
+            )
+        return ai
 
 
 def find_diffraction_calibration(

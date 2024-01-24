@@ -19,7 +19,49 @@
 import pytest
 import numpy as np
 
+from hyperspy.axes import UniformDataAxis
+
 from pyxem.utils import calibration_utils
+from pyxem.utils.calibration_utils import Calibration
+from pyxem.signals import Diffraction2D
+
+class TestCalibrationClass:
+    @pytest.fixture
+    def calibration(self):
+        s = Diffraction2D(np.zeros((10, 10)))
+        return Calibration(s)
+
+
+    def test_init(self, calibration):
+        assert isinstance(calibration, Calibration)
+
+    def test_set_scale(self, calibration):
+        calibration.scale(scale=0.01)
+        assert calibration.signal.axes_manager[0].scale == 0.01
+        assert calibration.signal.axes_manager[1].scale == 0.01
+        assert calibration.signal.axes_manager[0].units == 'k_nm^-1'
+        assert calibration.signal.axes_manager[1].units == 'k_nm^-1'
+        assert calibration.signal.axes_manager[0].offset == -0.05
+        assert calibration.signal.axes_manager[1].offset == -0.05
+        assert calibration.flat_ewald == True
+
+
+    def test_set_detector(self, calibration):
+        calibration.detector(pixel_size=15e-6,  # 15 um
+                             detector_distance=3.8e-2,  # 38 mm
+                             beam_energy=200,  # 200 keV
+                             )
+        assert not isinstance(calibration.signal.axes_manager[0], UniformDataAxis)
+        diff_arr = np.diff(calibration.signal.axes_manager[0].axis)  # assume mostly flat.
+        assert np.allclose(diff_arr, diff_arr[0],)
+        assert calibration.flat_ewald == False
+
+    def test_get_slices2d(self, calibration):
+        calibration.scale(scale=0.01)
+        slices, factors = calibration.get_slices2d(5, 90)
+        assert len(slices) == 5*90
+        assert len(factors) == 5*90
+
 
 
 @pytest.mark.skip(
