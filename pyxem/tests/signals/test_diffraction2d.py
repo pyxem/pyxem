@@ -552,11 +552,14 @@ class TestAzimuthalIntegral2d:
             npt=10, npt_azim=15, radial_range=[0, 0.5], sum=True, mask=mask
         )
 
-    def test_internal_azimuthal_integration(self, ones):
-        ones.calibrate.scale(1)
-        az = ones.get_azimuthal_integral2d(npt=10)
-        # make sure that the intensity is the same
-        assert np.sum(az.data) == np.sum(ones.data)
+    def test_internal_azimuthal_integration(self, ring):
+        ring.calibrate.scale(1)
+        az = ring.get_azimuthal_integral2d(npt=40, npt_azim=100, radial_range=(0,40))
+        ring_sum = np.sum(az.data, axis=1)
+        assert ring_sum.shape == (40,)
+        assert np.allclose(ring_sum, np.pi*2*range(1,40))
+
+
 
 class TestPyFAIIntegration:
     @pytest.fixture

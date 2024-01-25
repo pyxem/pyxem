@@ -15,8 +15,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
-
-
+import numba
 import numpy as np
 from scipy.ndimage import rotate
 from skimage import morphology
@@ -63,6 +62,7 @@ from pyxem.utils.expt_utils import (
     medfilt_1d,
     sigma_clip,
 )
+from pyxem.utils.azimuthal_utils import slice_radial_integrate
 from pyxem.utils.dask_tools import (
     _get_dask_array,
     get_signal_dimension_host_chunk_slice,
@@ -84,6 +84,7 @@ from pyxem.utils.background_utils import (
     _subtract_hdome,
     _subtract_radial_median,
 )
+from pyxem.utils.calibration_utils import Calibration
 
 
 class Diffraction2D(Signal2D, CommonDiffraction):
@@ -100,6 +101,20 @@ class Diffraction2D(Signal2D, CommonDiffraction):
     _signal_type = "diffraction"
 
     """ Methods that make geometrical changes to a diffraction pattern """
+    def __init__(self, *args, **kwargs):
+        """
+        Create a Diffraction2D object from numpy.ndarray.
+
+        Parameters
+        ----------
+        *args :
+            Passed to the __init__ of Signal2D. The first arg should be
+            numpy.ndarray
+        **kwargs :
+            Passed to the __init__ of Signal2D
+        """
+        super().__init__(*args, **kwargs)
+        self.calibrate = Calibration(self)
 
     def apply_affine_transformation(
         self, D, order=1, keep_dtype=False, inplace=True, *args, **kwargs
@@ -2089,7 +2104,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         radial_range=None,
         azimuth_range=None,
         inplace=False,
-        method="splitpixel",
+        method="splitpixel_pyxem",
         sum=False,
         correctSolidAngle=True,
         **kwargs,
@@ -2164,27 +2179,43 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> ds.get_azimuthal_integral2d(npt_rad=100)
 
         """
-        sig_shape = self.axes_manager.signal_shape
-        if radial_range is None:
-            radial_range = _get_radial_extent(
-                ai=self.ai, shape=sig_shape, unit=self.unit
+        if method == "splitpixel_pyxem":
+            # get_slices2d should be sped up in the future by
+            # getting rid of shapely and using numba on the for loop
+            slices, factors, radial_range = self.calibrate.get_slices2d(npt, npt_azim, radial_range=radial_range)
+
+
+            integration = self.map(slice_radial_integrate,
+                                   slices=slices,
+                                   factors=factors,
+                                   factors_slice=factors_slice,
+                                   npt_rad=npt,
+                                   npt_azim=npt_azim,
+                                   inplace=inplace,
+                                   **kwargs)
+
+        else:
+            sig_shape = self.axes_manager.signal_shape
+            if radial_range is None:
+                radial_range = _get_radial_extent(
+                    ai=self.ai, shape=sig_shape, unit=self.unit
+                )
+                radial_range[0] = 0
+            integration = self.map(
+                azimuthal_integrate2d,
+                azimuthal_integrator=self.ai,
+                npt_rad=npt,
+                npt_azim=npt_azim,
+                azimuth_range=azimuth_range,
+                radial_range=radial_range,
+                method=method,
+                inplace=inplace,
+                unit=self.unit,
+                mask=mask,
+                sum=sum,
+                correctSolidAngle=correctSolidAngle,
+                **kwargs,
             )
-            radial_range[0] = 0
-        integration = self.map(
-            azimuthal_integrate2d,
-            azimuthal_integrator=self.ai,
-            npt_rad=npt,
-            npt_azim=npt_azim,
-            azimuth_range=azimuth_range,
-            radial_range=radial_range,
-            method=method,
-            inplace=inplace,
-            unit=self.unit,
-            mask=mask,
-            sum=sum,
-            correctSolidAngle=correctSolidAngle,
-            **kwargs,
-        )
 
         s = self if inplace else integration
         s.set_signal_type("polar_diffraction")
