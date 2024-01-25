@@ -253,8 +253,8 @@ class Calibration:
             max_range = np.max(np.power(np.sum(list(combinations(edges, 2)), axis=1), 0.5))
             radial_range = (0, max_range)
         # Get the slices and factors for the integration
-        slices, factors = self._get_slices_and_factors(npt, npt_azim, radial_range)
-        return slices, factors, radial_range
+        slices, factors, factors_slice = self._get_slices_and_factors(npt, npt_azim, radial_range)
+        return slices, factors, factors_slice, radial_range
 
     def _get_slices_and_factors(self, npt, npt_azim, radial_range):
 
@@ -295,8 +295,8 @@ class Calibration:
         slices[slices[:, 2] < 0, 2] = 0
         slices[slices[:, 3] < 0, 3] = 0
 
-        factors = _get_factors(control_points, slices, self.axes)
-        return slices, factors
+        factors, factors_slice = _get_factors(control_points, slices, self.axes)
+        return slices, factors, factors_slice
 
     def to_pyfai(self):
         """

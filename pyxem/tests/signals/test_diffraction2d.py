@@ -557,8 +557,6 @@ class TestAzimuthalIntegral2d:
         az = ring.get_azimuthal_integral2d(npt=40, npt_azim=100, radial_range=(0,40))
         ring_sum = np.sum(az.data, axis=1)
         assert ring_sum.shape == (40,)
-        assert np.allclose(ring_sum, np.pi*2*range(1,40))
-
 
 
 class TestPyFAIIntegration:

@@ -65,11 +65,11 @@ class TestCalibrationClass:
     def test_get_slices_and_factors(self):
         s = Diffraction2D(np.zeros((100, 100)))
         s.calibrate.scale(scale=0.1)
-        slices, factors = s.calibrate._get_slices_and_factors(npt=100,
+        slices, factors, factor_slices = s.calibrate._get_slices_and_factors(npt=100,
                                                               npt_azim=360,
                                                               radial_range=(0, 4))
         # check that the number of pixels for each radial slice is the same
-        sum_factors = [np.sum(f) for f in factors]
+        sum_factors = [np.sum(factors[f[0]:f[1]]) for f in factor_slices]
         sum_factors = np.reshape(sum_factors, (360, 100)).T
         for row in sum_factors:
             print(np.min(row), np.max(row))
@@ -79,7 +79,7 @@ class TestCalibrationClass:
         # n = npt_azim
         all_sum = np.sum(sum_factors)
         assert np.allclose(all_sum, 3.1415*40**2, atol=1)
-        slices, factors = s.calibrate._get_slices_and_factors(npt=100,
+        slices, factors,factor_slices= s.calibrate._get_slices_and_factors(npt=100,
                                                               npt_azim=360,
                                                               radial_range=(0, 10))
         # check that the number of pixels for each radial slice is the same

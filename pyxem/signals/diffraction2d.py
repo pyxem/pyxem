@@ -2182,9 +2182,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         if method == "splitpixel_pyxem":
             # get_slices2d should be sped up in the future by
             # getting rid of shapely and using numba on the for loop
-            slices, factors, radial_range = self.calibrate.get_slices2d(npt, npt_azim, radial_range=radial_range)
-
-
+            slices, factors, factors_slice, radial_range = self.calibrate.get_slices2d(npt,
+                                                                                       npt_azim,
+                                                                                       radial_range=radial_range)
             integration = self.map(slice_radial_integrate,
                                    slices=slices,
                                    factors=factors,
