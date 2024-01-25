@@ -20,8 +20,10 @@ import numpy as np
 from diffsims.utils.atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
 from diffsims.utils.lobato_scattering_params import ATOMIC_SCATTERING_PARAMS_LOBATO
 from scipy import special
+from _deprecated import deprecated
 
 
+@deprecated(since="0.18.0", removal="1.0.0")
 def subtract_pattern(z, pattern, *args, **kwargs):
     """Used by hs.map in the ReducedIntensityGenerator1D to subtract a background
     pattern.
@@ -41,6 +43,7 @@ def subtract_pattern(z, pattern, *args, **kwargs):
     return z - pattern
 
 
+@deprecated(since="0.18.0", removal="1.0.0")
 def mask_from_pattern(z, pattern, *args, **kwargs):
     """Used by hs.map in the ReducedIntensityGenerator1D to mask using a
     background pattern.
