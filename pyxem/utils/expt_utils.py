@@ -690,7 +690,8 @@ def peaks_as_gvectors(z, center, calibration):
     g = (z - center) * calibration
     return g
 
-@deprecated(since="0.18.0",removal="1.0.0")
+
+@deprecated(since="0.18.0", removal="1.0.0")
 def investigate_dog_background_removal_interactive(
     sample_dp, std_dev_maxs, std_dev_mins
 ):
