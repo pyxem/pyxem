@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-# TODO: Delete come 1.0.0
+# TODO: Delete the whole module come 1.0.0
 
 from pyxem.utils._deprecated import deprecated
 from pyxem.signals.reduced_intensity1d import (
