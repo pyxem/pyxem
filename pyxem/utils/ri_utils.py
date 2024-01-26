@@ -20,7 +20,7 @@ import numpy as np
 from diffsims.utils.atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
 from diffsims.utils.lobato_scattering_params import ATOMIC_SCATTERING_PARAMS_LOBATO
 from scipy import special
-from _deprecated import deprecated
+from pyxem.utils._deprecated import deprecated
 
 
 @deprecated(since="0.18.0", removal="1.0.0")
