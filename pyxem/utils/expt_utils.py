@@ -31,7 +31,7 @@ from packaging.version import Version
 
 from pyxem.utils.pyfai_utils import get_azimuthal_integrator
 from pyxem.utils.cuda_utils import is_cupy_array
-
+from pyxem.utils._deprecated import deprecated
 
 try:
     import cupy as cp
@@ -690,7 +690,7 @@ def peaks_as_gvectors(z, center, calibration):
     g = (z - center) * calibration
     return g
 
-
+@deprecated(since="0.18.0",removal="1.0.0")
 def investigate_dog_background_removal_interactive(
     sample_dp, std_dev_maxs, std_dev_mins
 ):
