@@ -26,6 +26,7 @@ from hyperspy.axes import UniformDataAxis
 
 from pyxem.utils.indexation_utils import index_dataset_with_template_rotation
 from pyxem.utils._azimuthal_utils import _get_control_points, _get_factors
+from pyxem.utils._deprecated import deprecated
 
 
 class Calibration:
@@ -400,6 +401,9 @@ class Calibration:
         return ai
 
 
+@deprecated(
+    since="0.18.0", removal="1.0.0", alternative="pyxem.signals.Diffraction2D.calibrate"
+)
 def find_diffraction_calibration(
     patterns,
     calibration_guess,
