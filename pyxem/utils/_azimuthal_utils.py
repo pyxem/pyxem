@@ -25,7 +25,7 @@ import numba
 
 
 @numba.njit
-def slice_radial_integrate(img, factors, factors_slice, slices, npt_rad, npt_azim):
+def _slice_radial_integrate(img, factors, factors_slice, slices, npt_rad, npt_azim):
     """Slice the image into small chunks and multiply by the factors.
 
     Parameters

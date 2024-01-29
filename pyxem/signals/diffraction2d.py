@@ -62,7 +62,7 @@ from pyxem.utils.expt_utils import (
     medfilt_1d,
     sigma_clip,
 )
-from pyxem.utils.azimuthal_utils import slice_radial_integrate
+from pyxem.utils._azimuthal_utils import _slice_radial_integrate
 from pyxem.utils.dask_tools import (
     _get_dask_array,
     get_signal_dimension_host_chunk_slice,
@@ -2145,7 +2145,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         method: str
             Can be “numpy”, “cython”, “BBox” or “splitpixel”, “lut”, “csr”,
             “nosplit_csr”, “full_csr”, “lut_ocl” and “csr_ocl” if you want
-            to go on GPU. To Specify the device: “csr_ocl_1,2”
+            to go on GPU. To Specify the device: “csr_ocl_1,2”.  For pure
+            pyxem based methods use "splitpixel_pyxem".
         sum: bool
             If true the radial integration is returned rather then the Azimuthal Integration.
         correctSolidAngle: bool
@@ -2190,14 +2191,15 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> ds.get_azimuthal_integral2d(npt_rad=100)
 
         """
-        if method == "splitpixel_pyxem":
+        usepyfai = method not in ["splitpixel_pyxem"]
+        if not usepyfai:
             # get_slices2d should be sped up in the future by
             # getting rid of shapely and using numba on the for loop
             slices, factors, factors_slice, radial_range = self.calibrate.get_slices2d(
                 npt, npt_azim, radial_range=radial_range
             )
             integration = self.map(
-                slice_radial_integrate,
+                _slice_radial_integrate,
                 slices=slices,
                 factors=factors,
                 factors_slice=factors_slice,
