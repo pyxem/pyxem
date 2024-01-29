@@ -489,7 +489,7 @@ class TestDiffraction2DCenterOfMass:
         s.data[:, :, 1, -2] = 60
 
         # The extra values are ignored due to thresholding and mask
-        s_com0 = s.center_of_mass(threshold=2, mask=(60, 50, 50))
+        s_com0 = s.center_of_mass(threshold=3, mask=(60, 50, 50))
         assert (s_com0.inav[0].data == x).all()
         assert (s_com0.inav[1].data == y).all()
 
@@ -499,7 +499,7 @@ class TestDiffraction2DCenterOfMass:
         assert not (s_com1.inav[1].data == y).all()
 
         # The extra values are not ignored
-        s_com3 = s.center_of_mass(threshold=2)
+        s_com3 = s.center_of_mass(threshold=3)
         assert not (s_com3.inav[0].data == x).all()
         assert not (s_com3.inav[1].data == y).all()
 
