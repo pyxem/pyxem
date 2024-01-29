@@ -554,7 +554,7 @@ class TestAzimuthalIntegral2d:
 
     def test_internal_azimuthal_integration(self, ring):
         ring.calibrate(scale=1)
-        az = ring.get_azimuthal_integral2d(npt=40, npt_azim=100, radial_range=(0,40))
+        az = ring.get_azimuthal_integral2d(npt=40, npt_azim=100, radial_range=(0, 40))
         ring_sum = np.sum(az.data, axis=1)
         assert ring_sum.shape == (40,)
 

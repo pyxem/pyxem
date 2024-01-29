@@ -101,6 +101,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
     _signal_type = "diffraction"
 
     """ Methods that make geometrical changes to a diffraction pattern """
+
     def __init__(self, *args, **kwargs):
         """
         Create a Diffraction2D object from numpy.ndarray.
@@ -1938,7 +1939,11 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         except AttributeError:
             raise ValueError("ai property is not currently set")
 
-    @deprecated(since="0.18", removal="1.0.0", alternative="pyxem.signals.diffraction2d.calibrate")
+    @deprecated(
+        since="0.18",
+        removal="1.0.0",
+        alternative="pyxem.signals.diffraction2d.calibrate",
+    )
     def set_ai(
         self, center=None, wavelength=None, affine=None, radial_range=None, **kwargs
     ):
@@ -2188,17 +2193,19 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         if method == "splitpixel_pyxem":
             # get_slices2d should be sped up in the future by
             # getting rid of shapely and using numba on the for loop
-            slices, factors, factors_slice, radial_range = self.calibrate.get_slices2d(npt,
-                                                                                       npt_azim,
-                                                                                       radial_range=radial_range)
-            integration = self.map(slice_radial_integrate,
-                                   slices=slices,
-                                   factors=factors,
-                                   factors_slice=factors_slice,
-                                   npt_rad=npt,
-                                   npt_azim=npt_azim,
-                                   inplace=inplace,
-                                   **kwargs)
+            slices, factors, factors_slice, radial_range = self.calibrate.get_slices2d(
+                npt, npt_azim, radial_range=radial_range
+            )
+            integration = self.map(
+                slice_radial_integrate,
+                slices=slices,
+                factors=factors,
+                factors_slice=factors_slice,
+                npt_rad=npt,
+                npt_azim=npt_azim,
+                inplace=inplace,
+                **kwargs,
+            )
 
         else:
             sig_shape = self.axes_manager.signal_shape

@@ -26,31 +26,34 @@ import numba
 
 @numba.njit
 def slice_radial_integrate(img, factors, factors_slice, slices, npt_rad, npt_azim):
-        """Slice the image into small chunks and multiply by the factors.
+    """Slice the image into small chunks and multiply by the factors.
 
-        Parameters
-        ----------
-        img: np.array
-            The image to be sliced
-        factors:
-            The factors to multiply the slices by
-        slices:
-            The slices to slice the image by
-        npt_rad:
-            The number of radial points
-        npt_azim:
-            The number of azimuthal points
+    Parameters
+    ----------
+    img: np.array
+        The image to be sliced
+    factors:
+        The factors to multiply the slices by
+    slices:
+        The slices to slice the image by
+    npt_rad:
+        The number of radial points
+    npt_azim:
+        The number of azimuthal points
 
-        Note
-        ----
-        This function is much faster with numba than without. There is probably a factor
-        of 2-10 speedup that could be achieved  by using cython or c++ instead of python
+    Note
+    ----
+    This function is much faster with numba than without. There is probably a factor
+    of 2-10 speedup that could be achieved  by using cython or c++ instead of python
 
-        """
-        val = np.empty(slices.shape[0])
-        for i, (s, f) in enumerate(zip(slices, factors_slice)):
-            val[i] = np.sum(img[s[0]:s[2], s[1]:s[3]] * factors[f[0]:f[1]].reshape((s[2]-s[0], s[3]-s[1])))
-        return val.reshape((npt_azim, npt_rad)).T
+    """
+    val = np.empty(slices.shape[0])
+    for i, (s, f) in enumerate(zip(slices, factors_slice)):
+        val[i] = np.sum(
+            img[s[0] : s[2], s[1] : s[3]]
+            * factors[f[0] : f[1]].reshape((s[2] - s[0], s[3] - s[1]))
+        )
+    return val.reshape((npt_azim, npt_rad)).T
 
 
 def _get_factors(control_points, slices, axes):
@@ -71,7 +74,9 @@ def _get_factors(control_points, slices, axes):
             for j, y in enumerate(y_edges):
                 b = box(axes[0][x], axes[1][y], axes[0][x + 1], axes[1][y + 1])
                 boxes.append(b)
-        factors += list(shapely.area(shapely.intersection(boxes, p))/shapely.area(boxes))
+        factors += list(
+            shapely.area(shapely.intersection(boxes, p)) / shapely.area(boxes)
+        )
         factors_slice.append([start, start + len(boxes)])
         start += len(boxes)
     return np.array(factors), np.array(factors_slice)

@@ -70,7 +70,7 @@ class TestCalibrationClass:
             npt=100, npt_azim=360, radial_range=(0, 4)
         )
         # check that the number of pixels for each radial slice is the same
-        sum_factors = [np.sum(factors[f[0]: f[1]]) for f in factor_slices]
+        sum_factors = [np.sum(factors[f[0] : f[1]]) for f in factor_slices]
         sum_factors = np.reshape(sum_factors, (360, 100)).T
         for row in sum_factors:
             print(np.min(row), np.max(row))
@@ -84,7 +84,7 @@ class TestCalibrationClass:
             npt=100, npt_azim=360, radial_range=(0, 15)
         )
         # check that the number of pixels for each radial slice is the same
-        sum_factors = [np.sum(factors[f[0]: f[1]]) for f in factor_slices]
+        sum_factors = [np.sum(factors[f[0] : f[1]]) for f in factor_slices]
         sum_factors = np.reshape(sum_factors, (360, 100)).T
         # Check that the total number of pixels accounted for is equal to the area of the circle
         # Up to rounding due to the fact that we are actually finding the area of an n-gon where
@@ -92,7 +92,7 @@ class TestCalibrationClass:
         all_sum = np.sum(sum_factors)
         # For some reason we are missing 1 row/ column of pixels on the edge
         # of the image so this is 9801 instead of 10000!
-        #assert np.allclose(all_sum, 10000, atol=1)
+        # assert np.allclose(all_sum, 10000, atol=1)
 
 
 @pytest.mark.skip(
