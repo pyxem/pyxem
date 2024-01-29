@@ -186,11 +186,8 @@ class Calibration:
         """
 
         if beam_energy is None and wavelength is None:
-            try:  # try to get the wavelength from the metadata
-                wavelength = self.signal.metadata.get_item(
-                    "Acquisition_instrument.TEM.wavelength"
-                )
-            except KeyError:
+            wavelength = self.wavelength
+            if wavelength is None:
                 raise ValueError("Must provide either beam_energy or wavelength")
         elif beam_energy is not None:
             wavelength = get_electron_wavelength(beam_energy)

@@ -35,11 +35,44 @@ class TestCalibrationClass:
     def test_init(self, calibration):
         assert isinstance(calibration, Calibration)
 
+    def test_set_center(self, calibration):
+        calibration(center=(5, 5))
+        assert calibration.signal.axes_manager[0].offset == -5
+        assert calibration.signal.axes_manager[1].offset == -5
+        assert calibration.flat_ewald is True
+
+    def test_set_beam_energy(self, calibration):
+        calibration(beam_energy=200)
+        assert calibration.beam_energy == 200
+        assert calibration.wavelength is not None
+
+    def test_set_wavelength(self, calibration):
+        calibration(wavelength=0.02508)
+        assert calibration.wavelength == 0.02508
+
     def test_set_scale(self, calibration):
         calibration(scale=0.01)
         assert calibration.signal.axes_manager[0].scale == 0.01
         assert calibration.signal.axes_manager[1].scale == 0.01
         assert calibration.flat_ewald is True
+
+    def test_set_failure(self, calibration):
+        assert calibration.wavelength is None
+        assert calibration.beam_energy is None
+        with pytest.raises(ValueError):
+            calibration.detector(pixel_size=0.1, detector_distance=1)
+        calibration.beam_energy = 200
+        calibration.detector(pixel_size=0.1, detector_distance=1)
+        calibration.detector(
+            pixel_size=0.1, detector_distance=1, beam_energy=200, units="k_nm^-1"
+        )
+        assert calibration.flat_ewald is False
+        with pytest.raises(ValueError):
+            calibration(scale=0.01)
+        assert calibration.scale is None
+        with pytest.raises(ValueError):
+            calibration(center=(5, 5))
+        assert calibration.center == [5, 5]
 
     def test_set_detector(self, calibration):
         calibration.detector(
