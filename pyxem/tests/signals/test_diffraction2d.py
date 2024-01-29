@@ -1138,7 +1138,7 @@ class TestDiffraction2DPeakPositionRefinement:
 class TestSubtractingDiffractionBackground:
     method1 = ["difference of gaussians", "median kernel", "radial median", "h-dome"]
 
-    def setup(self):
+    def setup_method(self):
         self.data = np.random.rand(3, 2, 20, 15)
         self.data[:, :, 10:12, 7:9] = 100
         self.dp = Diffraction2D(self.data)

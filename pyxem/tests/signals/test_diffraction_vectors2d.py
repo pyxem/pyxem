@@ -28,7 +28,7 @@ from pyxem.signals import DiffractionVectors2D
 
 
 class TestDiffractionVectors2D:
-    def setup(self):
+    def setup_method(self):
         vectors = np.reshape(np.repeat(np.arange(0, 100), 2), (50, 4))
         self.vector = DiffractionVectors2D(vectors)
 
@@ -49,7 +49,7 @@ class TestDiffractionVectors2D:
 
 
 class TestSingleDiffractionVectors2D:
-    def setup(self):
+    def setup_method(self):
         self.data = np.array(
             [
                 [0.063776, 0.011958],

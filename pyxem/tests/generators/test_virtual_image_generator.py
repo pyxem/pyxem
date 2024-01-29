@@ -45,7 +45,7 @@ def vdf_generator(diffraction_pattern, diffraction_vectors):
 
 
 class TestVirtualDarkFieldGenerator:
-    def setup(self):
+    def setup_method(self):
         object1 = np.zeros((5, 5), dtype=bool)
         object1[2:4, 2:4] = True
         self.object1 = object1
