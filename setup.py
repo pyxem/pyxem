@@ -46,7 +46,7 @@ extra_feature_requirements = {
         "coveralls  >= 1.10",
         "coverage   >= 5.0",
     ],
-    "dev": ["black", "pre-commit >=1.16"],
+    "dev": ["black ~= 24.1", "pre-commit >=1.16"],
     "gpu": ["cupy >= 9.0.0"],
     "dask": ["dask-image", "distributed"],
 }
@@ -101,6 +101,7 @@ setup(
         "pyfai           <= 2023.9.0",  # breaking changes
         "scikit-image   >= 0.19.0, !=0.21.0",  # regression in ellipse fitting"
         "scikit-learn   >= 1.0",
+        "shapely        > 2.0.0",  # major changes
         "scipy",
         "tqdm",
         "traits",

@@ -1,3 +1,21 @@
+# -*- coding: utf-8 -*-
+# Copyright 2016-2024 The pyXem developers
+#
+# This file is part of pyXem.
+#
+# pyXem is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# pyXem is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+
 import numpy as np
 
 
@@ -52,9 +70,9 @@ def _correlation(z, axis=0, mask=None, wrap=True, normalize=True):
         number_unmasked = np.fft.irfft(
             mask_fft * np.conjugate(mask_fft), axis=axis
         ).real
-        number_unmasked[
-            number_unmasked < 1
-        ] = 1  # get rid of divide by zero error for completely masked rows
+        number_unmasked[number_unmasked < 1] = (
+            1  # get rid of divide by zero error for completely masked rows
+        )
         z[m] = 0
 
     # fast method uses a FFT and is a process which is O(n) = n log(n)
@@ -139,9 +157,9 @@ def _pearson_correlation(z, mask=None, mode="full"):
         mask_bool = ~m
         mask_fft = np.fft.fft(mask_bool, axis=1)
         n_unmasked = np.fft.ifft(mask_fft * mask_fft.conj()).real
-        n_unmasked[
-            n_unmasked < 1
-        ] = 1  # avoid dividing by zero for completely masked rows
+        n_unmasked[n_unmasked < 1] = (
+            1  # avoid dividing by zero for completely masked rows
+        )
         z[m] = 0  # set masked pixels to zero
         fft_intensity = np.divide(np.fft.fft(z, axis=1), n_unmasked)
         a = np.multiply(

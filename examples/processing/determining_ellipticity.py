@@ -13,7 +13,6 @@ Note that this workflow might change (simplify and improve!) in the future as py
 1.0.0 is developed/released.
 """
 
-
 ########################################################################################
 # First, we import the necessary packages and make a single test diffraction pattern.
 import pyxem.dummy_data.make_diffraction_test_data as mdtd

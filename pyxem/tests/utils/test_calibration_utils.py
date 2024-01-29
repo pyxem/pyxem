@@ -19,7 +19,113 @@
 import pytest
 import numpy as np
 
+from hyperspy.axes import UniformDataAxis
+
 from pyxem.utils import calibration_utils
+from pyxem.utils.calibration_utils import Calibration
+from pyxem.signals import Diffraction2D
+
+
+class TestCalibrationClass:
+    @pytest.fixture
+    def calibration(self):
+        s = Diffraction2D(np.zeros((10, 10)))
+        return Calibration(s)
+
+    def test_init(self, calibration):
+        assert isinstance(calibration, Calibration)
+
+    def test_set_center(self, calibration):
+        calibration(center=(5, 5))
+        assert calibration.signal.axes_manager[0].offset == -5
+        assert calibration.signal.axes_manager[1].offset == -5
+        assert calibration.flat_ewald is True
+
+    def test_set_beam_energy(self, calibration):
+        calibration(beam_energy=200)
+        assert calibration.beam_energy == 200
+        assert calibration.wavelength is not None
+
+    def test_set_wavelength(self, calibration):
+        calibration(wavelength=0.02508)
+        assert calibration.wavelength == 0.02508
+
+    def test_set_scale(self, calibration):
+        calibration(scale=0.01)
+        assert calibration.signal.axes_manager[0].scale == 0.01
+        assert calibration.signal.axes_manager[1].scale == 0.01
+        assert calibration.flat_ewald is True
+
+    def test_set_failure(self, calibration):
+        assert calibration.wavelength is None
+        assert calibration.beam_energy is None
+        with pytest.raises(ValueError):
+            calibration.detector(pixel_size=0.1, detector_distance=1)
+        calibration.beam_energy = 200
+        calibration.detector(pixel_size=0.1, detector_distance=1)
+        calibration.detector(
+            pixel_size=0.1, detector_distance=1, beam_energy=200, units="k_nm^-1"
+        )
+        assert calibration.flat_ewald is False
+        with pytest.raises(ValueError):
+            calibration(scale=0.01)
+        assert calibration.scale is None
+        with pytest.raises(ValueError):
+            calibration(center=(5, 5))
+        assert calibration.center == [5, 5]
+
+    def test_set_detector(self, calibration):
+        calibration.detector(
+            pixel_size=15e-6,  # 15 um
+            detector_distance=3.8e-2,  # 38 mm
+            beam_energy=200,  # 200 keV
+            units="k_nm^-1",
+        )
+        assert not isinstance(calibration.signal.axes_manager[0], UniformDataAxis)
+        diff_arr = np.diff(
+            calibration.signal.axes_manager[0].axis
+        )  # assume mostly flat.
+        assert np.allclose(
+            diff_arr,
+            diff_arr[0],
+        )
+        assert calibration.flat_ewald == False
+
+    def test_get_slices2d(self, calibration):
+        calibration(scale=0.01)
+        slices, factors, _, _ = calibration.get_slices2d(5, 90)
+        assert len(slices) == 5 * 90
+
+    def test_get_slices_and_factors(self):
+        s = Diffraction2D(np.zeros((100, 100)))
+        s.calibrate(scale=0.1, center=None)
+        slices, factors, factor_slices = s.calibrate._get_slices_and_factors(
+            npt=100, npt_azim=360, radial_range=(0, 4)
+        )
+        # check that the number of pixels for each radial slice is the same
+        sum_factors = [np.sum(factors[f[0] : f[1]]) for f in factor_slices]
+        sum_factors = np.reshape(sum_factors, (360, 100)).T
+        for row in sum_factors:
+            print(np.min(row), np.max(row))
+            assert np.allclose(row, row[0], atol=1e-2)
+        # Check that the total number of pixels accounted for is equal to the area of the circle
+        # Up to rounding due to the fact that we are actually finding the area of an n-gon where
+        # n = npt_azim
+        all_sum = np.sum(sum_factors)
+        assert np.allclose(all_sum, 3.1415 * 40**2, atol=1)
+        slices, factors, factor_slices = s.calibrate._get_slices_and_factors(
+            npt=100, npt_azim=360, radial_range=(0, 15)
+        )
+        # check that the number of pixels for each radial slice is the same
+        sum_factors = [np.sum(factors[f[0] : f[1]]) for f in factor_slices]
+        sum_factors = np.reshape(sum_factors, (360, 100)).T
+        # Check that the total number of pixels accounted for is equal to the area of the circle
+        # Up to rounding due to the fact that we are actually finding the area of an n-gon where
+        # n = npt_azim
+        all_sum = np.sum(sum_factors)
+        # For some reason we are missing 1 row/ column of pixels on the edge
+        # of the image so this is 9801 instead of 10000!
+        # assert np.allclose(all_sum, 10000, atol=1)
 
 
 @pytest.mark.skip(

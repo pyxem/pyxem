@@ -19,7 +19,6 @@ from hyperspy.signals import Signal1D
 
 
 class DiffractionVectors1D(Signal1D):
-
     """A Collection of Diffraction Vectors with a defined 1D set of vectors.
 
     For every navigation position there is specifically one vector that represents
