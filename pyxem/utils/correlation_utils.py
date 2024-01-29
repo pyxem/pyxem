@@ -70,9 +70,9 @@ def _correlation(z, axis=0, mask=None, wrap=True, normalize=True):
         number_unmasked = np.fft.irfft(
             mask_fft * np.conjugate(mask_fft), axis=axis
         ).real
-        number_unmasked[number_unmasked < 1] = (
-            1  # get rid of divide by zero error for completely masked rows
-        )
+        number_unmasked[
+            number_unmasked < 1
+        ] = 1  # get rid of divide by zero error for completely masked rows
         z[m] = 0
 
     # fast method uses a FFT and is a process which is O(n) = n log(n)
@@ -157,9 +157,9 @@ def _pearson_correlation(z, mask=None, mode="full"):
         mask_bool = ~m
         mask_fft = np.fft.fft(mask_bool, axis=1)
         n_unmasked = np.fft.ifft(mask_fft * mask_fft.conj()).real
-        n_unmasked[n_unmasked < 1] = (
-            1  # avoid dividing by zero for completely masked rows
-        )
+        n_unmasked[
+            n_unmasked < 1
+        ] = 1  # avoid dividing by zero for completely masked rows
         z[m] = 0  # set masked pixels to zero
         fft_intensity = np.divide(np.fft.fft(z, axis=1), n_unmasked)
         a = np.multiply(

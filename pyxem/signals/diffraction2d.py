@@ -1670,7 +1670,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         elif method == "r":
             one_d_integration = self.get_azimuthal_integral1d(npt=npt, **kwargs)
-            integration_squared = (self**2).get_azimuthal_integral1d(npt=npt, **kwargs)
+            integration_squared = (self**2).get_azimuthal_integral1d(
+                npt=npt, **kwargs
+            )
             # Full variance is the same as the unshifted phi=0 term in angular correlation
             full_variance = (integration_squared / one_d_integration**2) - 1
 
