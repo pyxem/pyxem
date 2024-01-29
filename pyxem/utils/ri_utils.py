@@ -16,12 +16,19 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-import numpy as np
-from diffsims.utils.atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
-from diffsims.utils.lobato_scattering_params import ATOMIC_SCATTERING_PARAMS_LOBATO
-from scipy import special
+# TODO: Delete the whole module come 1.0.0
+
+from pyxem.utils._deprecated import deprecated
+from pyxem.signals.reduced_intensity1d import (
+    _damp_ri_exponential,
+    _damp_ri_extrapolate_to_zero,
+    _damp_ri_lorch,
+    _damp_ri_low_q_region_erfc,
+    _damp_ri_updated_lorch,
+)
 
 
+@deprecated(since="0.18.0", removal="1.0.0")
 def subtract_pattern(z, pattern, *args, **kwargs):
     """Used by hs.map in the ReducedIntensityGenerator1D to subtract a background
     pattern.
@@ -41,6 +48,7 @@ def subtract_pattern(z, pattern, *args, **kwargs):
     return z - pattern
 
 
+@deprecated(since="0.18.0", removal="1.0.0")
 def mask_from_pattern(z, pattern, *args, **kwargs):
     """Used by hs.map in the ReducedIntensityGenerator1D to mask using a
     background pattern.
@@ -65,6 +73,7 @@ def mask_from_pattern(z, pattern, *args, **kwargs):
     return z * pattern
 
 
+@deprecated(since="0.18.0", removal="1.0.0")
 def damp_ri_exponential(z, b, s_scale, s_size, s_offset, *args, **kwargs):
     """Used by hs.map in the ReducedIntensity1D to damp the reduced
     intensity signal to reduce noise in the high s region by a factor of
@@ -86,11 +95,10 @@ def damp_ri_exponential(z, b, s_scale, s_size, s_offset, *args, **kwargs):
         Keyword arguments to be passed to map().
     """
 
-    scattering_axis = s_scale * np.arange(s_size, dtype="float64") + s_offset
-    damping_term = np.exp(-b * np.square(scattering_axis))
-    return z * damping_term
+    return _damp_ri_exponential(z, b, s_scale, s_size, s_offset, *args, **kwargs)
 
 
+@deprecated(since="0.18.0", removal="1.0.0")
 def damp_ri_lorch(z, s_max, s_scale, s_size, s_offset, *args, **kwargs):
     """Used by hs.map in the ReducedIntensity1D to damp the reduced
     intensity signal to reduce noise in the high s region by a factor of
@@ -112,14 +120,10 @@ def damp_ri_lorch(z, s_max, s_scale, s_size, s_offset, *args, **kwargs):
         Keyword arguments to be passed to map().
     """
 
-    delta = np.pi / s_max
-
-    scattering_axis = s_scale * np.arange(s_size, dtype="float64") + s_offset
-    damping_term = np.sin(delta * scattering_axis) / (delta * scattering_axis)
-    damping_term = np.nan_to_num(damping_term)
-    return z * damping_term
+    return _damp_ri_lorch(z, s_max, s_scale, s_size, s_offset, *args, **kwargs)
 
 
+@deprecated(since="0.18.0", removal="1.0.0")
 def damp_ri_updated_lorch(z, s_max, s_scale, s_size, s_offset, *args, **kwargs):
     """Used by hs.map in the ReducedIntensity1D to damp the reduced
     intensity signal to reduce noise in the high s region by a factor of
@@ -146,21 +150,10 @@ def damp_ri_updated_lorch(z, s_max, s_scale, s_size, s_offset, *args, **kwargs):
         Keyword arguments to be passed to map().
     """
 
-    delta = np.pi / s_max
-
-    scattering_axis = s_scale * np.arange(s_size, dtype="float64") + s_offset
-    exponent_array = 3 * np.ones(scattering_axis.shape)
-    cubic_array = np.power(scattering_axis, exponent_array)
-    multiplicative_term = np.divide(3 / (delta**3), cubic_array)
-    sine_term = np.sin(delta * scattering_axis) - delta * scattering_axis * np.cos(
-        delta * scattering_axis
-    )
-
-    damping_term = multiplicative_term * sine_term
-    damping_term = np.nan_to_num(damping_term)
-    return z * damping_term
+    return _damp_ri_updated_lorch(z, s_max, s_scale, s_size, s_offset, *args, **kwargs)
 
 
+@deprecated(since="0.18.0", removal="1.0.0")
 def damp_ri_extrapolate_to_zero(z, s_min, s_scale, s_size, s_offset, *args, **kwargs):
     """Used by hs.map in the ReducedIntensity1D to extrapolate the reduced
     intensity signal to zero below s_min.
@@ -181,17 +174,12 @@ def damp_ri_extrapolate_to_zero(z, s_min, s_scale, s_size, s_offset, *args, **kw
         Keyword arguments to be passed to map().
     """
 
-    s_min_num = int((s_min - s_offset) / s_scale)
-
-    s_min_val = z[s_min_num]
-    extrapolated_vals = np.arange(s_min_num) * s_scale + s_offset
-    extrapolated_vals *= s_min_val / extrapolated_vals[-1]  # scale zero to one
-
-    z[:s_min_num] = extrapolated_vals
-
-    return z
+    return _damp_ri_extrapolate_to_zero(
+        z, s_min, s_scale, s_size, s_offset, *args, **kwargs
+    )
 
 
+@deprecated(since="0.18.0", removal="1.0.0")
 def damp_ri_low_q_region_erfc(
     z, scale, offset, s_scale, s_size, s_offset, *args, **kwargs
 ):
@@ -218,7 +206,6 @@ def damp_ri_low_q_region_erfc(
         Keyword arguments to be passed to map().
     """
 
-    scattering_axis = s_scale * np.arange(s_size, dtype="float64") + s_offset
-
-    damping_term = (special.erf(scattering_axis * scale - offset) + 1) / 2
-    return z * damping_term
+    return _damp_ri_low_q_region_erfc(
+        z, scale, offset, s_scale, s_size, s_offset, *args, **kwargs
+    )

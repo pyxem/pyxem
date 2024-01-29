@@ -18,19 +18,16 @@
 
 
 from hyperspy.signals import Signal1D
+import numpy as np
 
 from pyxem.components import ReducedIntensityCorrectionComponent
-from pyxem.utils.ri_utils import (
-    damp_ri_exponential,
-    damp_ri_lorch,
-    damp_ri_updated_lorch,
-    damp_ri_extrapolate_to_zero,
-    damp_ri_low_q_region_erfc,
-)
+from diffsims.utils.atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
+from diffsims.utils.lobato_scattering_params import ATOMIC_SCATTERING_PARAMS_LOBATO
+from scipy import special
 
 
 class ReducedIntensity1D(Signal1D):
-    """Signal class for Reduced Intensity profiles as a fucntion of scattering vector."""
+    """Signal class for Reduced Intensity profiles as a function of scattering vector."""
 
     _signal_type = "reduced_intensity"
 
@@ -56,7 +53,7 @@ class ReducedIntensity1D(Signal1D):
         s_offset = self.axes_manager.signal_axes[0].offset
 
         return self.map(
-            damp_ri_exponential,
+            _damp_ri_exponential,
             b=b,
             s_scale=s_scale,
             s_size=s_size,
@@ -96,7 +93,7 @@ class ReducedIntensity1D(Signal1D):
             s_max = s_scale * s_size + s_offset
 
         return self.map(
-            damp_ri_lorch,
+            _damp_ri_lorch,
             s_max=s_max,
             s_scale=s_scale,
             s_size=s_size,
@@ -137,7 +134,7 @@ class ReducedIntensity1D(Signal1D):
             s_max = s_scale * s_size + s_offset
 
         return self.map(
-            damp_ri_updated_lorch,
+            _damp_ri_updated_lorch,
             s_max=s_max,
             s_scale=s_scale,
             s_size=s_size,
@@ -165,7 +162,7 @@ class ReducedIntensity1D(Signal1D):
         s_offset = self.axes_manager.signal_axes[0].offset
 
         return self.map(
-            damp_ri_extrapolate_to_zero,
+            _damp_ri_extrapolate_to_zero,
             s_min=s_min,
             s_scale=s_scale,
             s_size=s_size,
@@ -200,7 +197,7 @@ class ReducedIntensity1D(Signal1D):
         s_offset = self.axes_manager.signal_axes[0].offset
 
         return self.map(
-            damp_ri_low_q_region_erfc,
+            _damp_ri_low_q_region_erfc,
             scale=scale,
             offset=offset,
             s_scale=s_scale,
@@ -262,4 +259,159 @@ class ReducedIntensity1D(Signal1D):
 
         self.data = self.data - fit_value
 
-        return
+        return None
+
+
+def _damp_ri_exponential(z, b, s_scale, s_size, s_offset, *args, **kwargs):
+    """Used by hs.map in the ReducedIntensity1D to damp the reduced
+    intensity signal to reduce noise in the high s region by a factor of
+    exp(-b*(s^2)), where b is the damping parameter.
+
+    Parameters
+    ----------
+    z : np.array
+        A reduced intensity np.array to be transformed.
+    b : float
+        The damping parameter.
+    scale : float
+        The scattering vector calibation of the reduced intensity array.
+    size : int
+        The size of the reduced intensity signal. (in pixels)
+    *args:
+        Arguments to be passed to map().
+    **kwargs:
+        Keyword arguments to be passed to map().
+    """
+
+    scattering_axis = s_scale * np.arange(s_size, dtype="float64") + s_offset
+    damping_term = np.exp(-b * np.square(scattering_axis))
+    return z * damping_term
+
+
+def _damp_ri_lorch(z, s_max, s_scale, s_size, s_offset, *args, **kwargs):
+    """Damp the reduced intensity signal to reduce noise in the high s region by a factor of
+    sin(s*delta) / (s*delta), where delta = pi / s_max. (from Lorch 1969).
+
+    Parameters
+    ----------
+    z : np.array
+        A reduced intensity np.array to be transformed.
+    s_max : float
+        The maximum s value to be used for transformation to PDF.
+    scale : float
+        The scattering vector calibation of the reduced intensity array.
+    size : int
+        The size of the reduced intensity signal. (in pixels)
+    *args:
+        Arguments to be passed to map().
+    **kwargs:
+        Keyword arguments to be passed to map().
+    """
+
+    delta = np.pi / s_max
+
+    scattering_axis = s_scale * np.arange(s_size, dtype="float64") + s_offset
+    damping_term = np.sin(delta * scattering_axis) / (delta * scattering_axis)
+    damping_term = np.nan_to_num(damping_term)
+    return z * damping_term
+
+
+def _damp_ri_updated_lorch(z, s_max, s_scale, s_size, s_offset, *args, **kwargs):
+    """Damp the reduced intensity signal to reduce noise in the high s region by a factor of
+    3 / (s*delta)^3 (sin(s*delta)-s*delta(cos(s*delta))),
+    where delta = pi / s_max.
+
+    From "Extracting the pair distribution function from white-beam X-ray
+    total scattering data", Soper & Barney, (2011).
+
+    Parameters
+    ----------
+    z : np.array
+        A reduced intensity np.array to be transformed.
+    s_max : float
+        The damping parameter, which need not be the maximum scattering
+        vector s to be used for the PDF transform.
+    scale : float
+        The scattering vector calibation of the reduced intensity array.
+    size : int
+        The size of the reduced intensity signal. (in pixels)
+    *args:
+        Arguments to be passed to map().
+    **kwargs:
+        Keyword arguments to be passed to map().
+    """
+
+    delta = np.pi / s_max
+
+    scattering_axis = s_scale * np.arange(s_size, dtype="float64") + s_offset
+    exponent_array = 3 * np.ones(scattering_axis.shape)
+    cubic_array = np.power(scattering_axis, exponent_array)
+    multiplicative_term = np.divide(3 / (delta**3), cubic_array)
+    sine_term = np.sin(delta * scattering_axis) - delta * scattering_axis * np.cos(
+        delta * scattering_axis
+    )
+
+    damping_term = multiplicative_term * sine_term
+    damping_term = np.nan_to_num(damping_term)
+    return z * damping_term
+
+
+def _damp_ri_extrapolate_to_zero(z, s_min, s_scale, s_size, s_offset, *args, **kwargs):
+    """Extrapolate the reduced intensity signal to zero below s_min.
+
+    Parameters
+    ----------
+    z : np.array
+        A reduced intensity np.array to be transformed.
+    s_min : float
+        Value of s below which data is extrapolated to zero.
+    scale : float
+        The scattering vector calibation of the reduced intensity array.
+    size : int
+        The size of the reduced intensity signal. (in pixels)
+    *args:
+        Arguments to be passed to map().
+    **kwargs:
+        Keyword arguments to be passed to map().
+    """
+
+    s_min_num = int((s_min - s_offset) / s_scale)
+
+    s_min_val = z[s_min_num]
+    extrapolated_vals = np.arange(s_min_num) * s_scale + s_offset
+    extrapolated_vals *= s_min_val / extrapolated_vals[-1]  # scale zero to one
+
+    z[:s_min_num] = extrapolated_vals
+
+    return z
+
+
+def _damp_ri_low_q_region_erfc(
+    z, scale, offset, s_scale, s_size, s_offset, *args, **kwargs
+):
+    """Damp the reduced intensity signal in the low q region as a correction to central beam
+    effects. The reduced intensity profile is damped by
+    (erf(scale * s - offset) + 1) / 2
+
+    Parameters
+    ----------
+    z : np.array
+        A reduced intensity np.array to be transformed.
+    scale : float
+        A scalar multiplier for s in the error function
+    offset : float
+        A scalar offset affecting the error function.
+    scale : float
+        The scattering vector calibration of the reduced intensity array.
+    size : int
+        The size of the reduced intensity signal. (in pixels)
+    *args:
+        Arguments to be passed to map().
+    **kwargs:
+        Keyword arguments to be passed to map().
+    """
+
+    scattering_axis = s_scale * np.arange(s_size, dtype="float64") + s_offset
+
+    damping_term = (special.erf(scattering_axis * scale - offset) + 1) / 2
+    return z * damping_term

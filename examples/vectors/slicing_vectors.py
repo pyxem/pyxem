@@ -9,6 +9,7 @@ boolean array are supported.
 Additionally, lazy operations are supported and can be chained together. These are often faster
 than their non-lazy counterparts as ``dask`` very effectively prunes the computation graph.
 """
+
 import pyxem as pxm
 import hyperspy.api as hs
 
