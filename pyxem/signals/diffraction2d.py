@@ -996,6 +996,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             mask_array = np.invert(mask_array)
         else:
             mask_array = None
+
+        self.map()
         if self._lazy:
             dask_array = self.data.rechunk(chunk_calculations)
         else:

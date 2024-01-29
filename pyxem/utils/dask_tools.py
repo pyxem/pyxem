@@ -18,6 +18,7 @@
 
 import numpy as np
 import dask.array as da
+from scipy import ndimage
 from skimage.feature import match_template, blob_dog, blob_log
 import scipy.ndimage as ndi
 from skimage import morphology
@@ -800,6 +801,32 @@ def _peak_find_log(dask_array, **kwargs):
     )
     return output_array
 
+def center_of_mass(x, threshold_value=None, mask_array=None):
+    """Find center of mass of some image x.
+
+    The center of mass can be calculated using a mask and threshold.
+        Parameters
+    ----------
+    x : np.array
+        2D array
+    threshold_value : scalar, optional
+    mask_array : NumPy array, optional
+        Array with bool values. The True values will be masked
+        (i.e. ignored).
+    """
+
+    if mask_array is not None:
+        if not mask_array.shape == x.shape:
+            raise ValueError(
+                "mask_array ({0}) must have same shape as x ({1})".format(mask_array.shape, x.shape)
+            )
+        x = x * np.invert(mask_array)
+    if threshold_value is not None:
+        x = _threshold_array(
+            x, threshold_value=threshold_value, mask_array=mask_array
+        )
+    x = np.ma.masked_array(x, mask=np.isnan(x))
+    return ndimage.measurements.center_of_mass(x)
 
 def _center_of_mass_array(dask_array, threshold_value=None, mask_array=None):
     """Find center of mass of last two dimensions for a dask array.
@@ -843,8 +870,10 @@ def _center_of_mass_array(dask_array, threshold_value=None, mask_array=None):
     >>> output = output_dask.compute()
 
     """
+
+
     det_shape = dask_array.shape[-2:]
-    y_grad, x_grad = np.mgrid[0 : det_shape[0], 0 : det_shape[1]]
+    y_grad, x_grad = np.mgrid[0: det_shape[0], 0: det_shape[1]]
     y_grad, x_grad = y_grad.astype(np.float64), x_grad.astype(np.float64)
     sum_array = np.ones_like(x_grad)
 
