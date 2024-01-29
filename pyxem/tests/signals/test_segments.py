@@ -181,7 +181,7 @@ def vdf_segments_cropped(vdf_segments):
 
 
 class TestVDFSegment:
-    def setup(self):
+    def setup_method(self):
         object1 = np.zeros((5, 5), dtype=bool)
         object1[0:2, 0:2] = True
         self.object1 = object1

@@ -84,7 +84,7 @@ class TestDisplacementGradientMap:
     left_handed = np.asarray(([1, 1], [1, -1.2]))
     xy_vectors = np.asarray([[1, 0], [0, 1]])
 
-    def setup(self):
+    def setup_method(self):
         # reinitalizing to use inside functions...
         self.left_handed = np.asarray(([1, 1], [1, -1.2]))
         self.xy_vectors = np.asarray([[1, 0], [0, 1]])
