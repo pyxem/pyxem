@@ -1710,7 +1710,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         return variance
 
     """ Methods associated with radial integration, not pyFAI based """
-    
+
     @deprecated(
         since="0.17",
         alternative="pyxem.signals.diffraction2d.azimuthal_integral2d",
