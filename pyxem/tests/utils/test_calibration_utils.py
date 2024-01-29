@@ -41,6 +41,17 @@ class TestCalibrationClass:
         assert calibration.signal.axes_manager[1].offset == -5
         assert calibration.flat_ewald is True
 
+    def test_set_units(self, calibration):
+        calibration(units="k_nm^-1")
+        assert calibration.signal.axes_manager[0].units == "k_nm^-1"
+        assert calibration.signal.axes_manager[1].units == "k_nm^-1"
+        assert calibration.units == ["k_nm^-1", "k_nm^-1"]
+
+    def test_set_mask(self, calibration):
+        calibration(mask=np.ones((10, 10)))
+        assert calibration.mask is not None
+        assert calibration.mask.shape == (10, 10)
+
     def test_set_beam_energy(self, calibration):
         calibration(beam_energy=200)
         assert calibration.beam_energy == 200
@@ -54,6 +65,7 @@ class TestCalibrationClass:
         calibration(scale=0.01)
         assert calibration.signal.axes_manager[0].scale == 0.01
         assert calibration.signal.axes_manager[1].scale == 0.01
+        assert calibration.scale == [0.01, 0.01]
         assert calibration.flat_ewald is True
 
     def test_set_failure(self, calibration):
@@ -73,6 +85,9 @@ class TestCalibrationClass:
         with pytest.raises(ValueError):
             calibration(center=(5, 5))
         assert calibration.center == [5, 5]
+
+        with pytest.raises(ValueError):
+            calibration.detector(pixel_size=0.1, detector_distance=1, units="nm^-1")
 
     def test_set_detector(self, calibration):
         calibration.detector(
