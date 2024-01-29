@@ -53,11 +53,13 @@ class TestCalibrationClass:
         assert calibration.mask.shape == (10, 10)
 
     def test_set_beam_energy(self, calibration):
+        assert calibration.beam_energy is None
         calibration(beam_energy=200)
         assert calibration.beam_energy == 200
         assert calibration.wavelength is not None
 
     def test_set_wavelength(self, calibration):
+        assert calibration.wavelength is None
         calibration(wavelength=0.02508)
         assert calibration.wavelength == 0.02508
 
@@ -141,3 +143,30 @@ class TestCalibrationClass:
         # For some reason we are missing 1 row/ column of pixels on the edge
         # of the image so this is 9801 instead of 10000!
         # assert np.allclose(all_sum, 10000, atol=1)
+
+    def test_to_string(self, calibration):
+        assert (
+            str(calibration)
+            == "Calibration for <Diffraction2D, title: , dimensions: (|10, 10)>, "
+            "Ewald sphere: flat, shape: (10, 10), affine: False, mask: False"
+        )
+
+    def test_to_pyfai_no_unit(self, calibration):
+        with pytest.raises(KeyError):
+            calibration.to_pyfai()
+
+    def test_to_pyfai_flat(self, calibration):
+        from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
+
+        calibration.units = "k_nm^-1"
+        calibration.beam_energy = 200
+        ai = calibration.to_pyfai()
+        assert isinstance(ai, AzimuthalIntegrator)
+
+    def test_to_pyfai_curved(self, calibration):
+        from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
+
+        calibration.beam_energy = 200
+        calibration.detector(pixel_size=1, detector_distance=1, units="k_nm^-1")
+        ai = calibration.to_pyfai()
+        assert isinstance(ai, AzimuthalIntegrator)

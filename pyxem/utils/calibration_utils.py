@@ -366,10 +366,14 @@ class Calibration:
         from pyxem.utils.pyfai_utils import _get_setup, get_azimuthal_integrator
 
         if self.flat_ewald:
-            pixel_scale = [ax.scale for ax in self.axes]
+            pixel_scale = self.scale
+            if self.wavelength is None:
+                raise ValueError(
+                    "The wavelength must be set before converting to a pyfai AzimuthalIntegrator"
+                )
             setup = _get_setup(
                 wavelength=self.wavelength,
-                unit=self.units[0],
+                pyxem_unit=self.units[0],
                 pixel_scale=pixel_scale,
             )
             detector, dist, radial_range = setup
