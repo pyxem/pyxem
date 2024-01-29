@@ -14,6 +14,10 @@ Fixed
 -----
 - Fixed pytest failure. Changed `setup` --> `setup_method` (#997)
 
+Added
+-----
+- Added `pyxem.utils.calibration_utils.Calibration` class  for calibrating the signal axes of a 4-D STEM dataset(#993)
+
 Deprecated
 ----------
 - The module & all functions within `utils.reduced_intensity1d` are deprecated in favour of using the methods of `ReducedIntensity1D` (#994).

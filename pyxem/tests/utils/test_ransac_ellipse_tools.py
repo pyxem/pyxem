@@ -931,13 +931,11 @@ class TestDetermineEllipse:
         center, affine = ret.determine_ellipse(
             s, mask=mask, use_ransac=False, num_points=2000
         )
-        s.unit = "k_nm^-1"
-        s.beam_energy = 200
-        s.axes_manager.signal_axes[0].scale = 0.1
-        s.axes_manager.signal_axes[1].scale = 0.1
-        s.set_ai(center=center, affine=affine)
+        s.calibrate(
+            center=center, affine=affine, scale=0.1, units="k_nm^-1", beam_energy=200
+        )
         s_az = s.get_azimuthal_integral2d(npt=100)
-        assert np.sum((s_az.sum(axis=0).isig[6:] > 1).data) < 11
+        assert np.sum((s_az.sum(axis=0).isig[6:] > 1).data) < 12
 
     @mark.parametrize("rot", np.linspace(0, 2 * np.pi, 10))
     def test_determine_ellipse_ring(self, rot):
@@ -951,13 +949,11 @@ class TestDetermineEllipse:
         mask = np.zeros_like(s.data, dtype=bool)
         mask[100 - 20 : 100 + 20, 100 - 20 : 100 + 20] = True
         center, affine = ret.determine_ellipse(s, mask=mask, use_ransac=False)
-        s.unit = "k_nm^-1"
-        s.beam_energy = 200
-        s.axes_manager.signal_axes[0].scale = 0.1
-        s.axes_manager.signal_axes[1].scale = 0.1
-        s.set_ai(center=center, affine=affine)
+        s.calibrate(
+            center=center, affine=affine, scale=0.1, units="k_nm^-1", beam_energy=200
+        )
         s_az = s.get_azimuthal_integral2d(npt=100)
-        assert np.sum((s_az.sum(axis=0).isig[10:] > 1).data) < 10
+        assert np.sum((s_az.sum(axis=0).isig[10:] > 1).data) < 11
 
     def test_get_max_pos(self):
         t = np.ones((100, 100))

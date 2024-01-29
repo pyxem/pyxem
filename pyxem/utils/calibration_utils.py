@@ -18,9 +18,386 @@
 
 
 import numpy as np
+import json
 
-from diffsims.generators.library_generator import DiffractionLibraryGenerator
+from diffsims.utils.sim_utils import get_electron_wavelength
+import hyperspy.api as hs
+from hyperspy.axes import UniformDataAxis
+
 from pyxem.utils.indexation_utils import index_dataset_with_template_rotation
+from pyxem.utils._azimuthal_utils import _get_control_points, _get_factors
+
+
+class Calibration:
+    """
+    This is a class to hold the calibration parameters for some dataset
+    and the methods for calibrating the dataset.
+
+    It is designed to hold information about the affine transformation
+    and the mask to apply to the data for something like a beam stop.
+
+    There are 2 ways to set the calibration:
+    1. You can set the calibration with a known reciprocal space pixel size.  This will assume
+       a flat ewald sphere.
+
+    2. You can set the calibration directly with a known real pixel size, beam energy/wavelength,
+       and detector distance. This is the most accurate method but requires detailed calibration
+       information that is not trivial to acquire.  In most cases option 1 is sufficient.
+
+    If you set the pixel size with `hyperSpy.axes_manager.signal_axes[0].scale = 0.1`
+    it will default to the first method. The underlying data will be stored in the metadata
+    of the signal to be used later.
+    """
+
+    def __init__(
+        self,
+        signal,
+    ):
+        """A class to hold the parameters for an Azimuthal Integrator.
+
+        Parameters
+        ----------
+        affine: (3x3)
+            The affine transformation to apply to the data
+        mask:
+            A boolean array to be added to the integrator.
+        """
+        self.signal = signal
+
+    def __call__(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+    @property
+    def affine(self):
+        """Set the affine transformation to apply to the data."""
+        try:
+            return self.signal.metadata.get_item("General.affine_transformation")
+        except KeyError:
+            return None
+
+    @affine.setter
+    def affine(self, affine):
+        self.signal.metadata.set_item("General.affine_transformation", affine)
+
+    @property
+    def mask(self):
+        """Set the mask to apply to the data."""
+        return self.signal.metadata.get_item("General.mask")
+
+    @mask.setter
+    def mask(self, mask):
+        self.signal.metadata.set_item("General.mask", mask)
+
+    @property
+    def scale(self):
+        """Return the scale in pixels"""
+        if self.flat_ewald:
+            return [s.scale for s in self.signal.axes_manager.signal_axes]
+        else:
+            return None
+
+    @scale.setter
+    def scale(self, scale):
+        """Set the scale in pixels"""
+        if not self.flat_ewald:
+            raise ValueError("Scale can only be set if the ewald sphere is flat")
+        center = self.center  # save the center
+        for ax, c in zip(self.signal.axes_manager.signal_axes, center):
+            ax.scale = scale
+            ax.offset = -c * scale
+
+    @property
+    def units(self):
+        return [s.units for s in self.signal.axes_manager.signal_axes]
+
+    @units.setter
+    def units(self, units):
+        # maybe consider converting the scales as well?
+        for ax in self.signal.axes_manager.signal_axes:
+            ax.units = units
+
+    @property
+    def wavelength(self):
+        try:
+            return self.signal.metadata.get_item(
+                "Acquisition_instrument.TEM.wavelength"
+            )
+        except KeyError:
+            return None
+
+    @wavelength.setter
+    def wavelength(self, wavelength):
+        self.signal.metadata.set_item(
+            "Acquisition_instrument.TEM.wavelength", wavelength
+        )
+
+    @property
+    def beam_energy(self):
+        try:
+            return self.signal.metadata.get_item(
+                "Acquisition_instrument.TEM.beam_energy"
+            )
+        except KeyError:
+            return None
+
+    @beam_energy.setter
+    def beam_energy(self, beam_energy):
+        self.signal.metadata.set_item(
+            "Acquisition_instrument.TEM.beam_energy", beam_energy
+        )
+        self.signal.metadata.set_item(
+            "Acquisition_instrument.TEM.wavelength",
+            get_electron_wavelength(beam_energy),
+        )
+
+    def detector(
+        self,
+        pixel_size,
+        detector_distance,
+        beam_energy=None,
+        wavelength=None,
+        center=None,
+        units="k_nm^-1",
+    ):
+        """
+        Calibrate the signal with a known pixel size, detector distance, and beam energy/wavelength.
+
+
+        This sets the signal axes to be a `~hyperspy.axes.DataAxis` instead of a UniformAxis to
+        account for the Ewald sphere curvature. This is the most accurate method of calibration
+        but requires a known beam energy/wavelength and detector distance or to calibrate the
+        experimental configuration with a known standard.
+
+        Parameters
+        ----------
+        pixel_size: float
+            The pixel size in meter.
+        detector_distance: float
+            The detector distance in meter.
+        beam_energy: float
+            The beam energy in keV.
+        wavelength: float
+            The beam wavelength in nm^-1.
+        center: list
+            The center of the signal in pixels.
+        unit: str
+            The unit to calculate the radial extent with.
+        """
+
+        if beam_energy is None and wavelength is None:
+            wavelength = self.wavelength
+            if wavelength is None:
+                raise ValueError("Must provide either beam_energy or wavelength")
+        elif beam_energy is not None:
+            wavelength = get_electron_wavelength(beam_energy)
+            self.beam_energy = beam_energy
+        self.wavelength = wavelength
+        # We need these values to properly set the axes
+        self.signal.metadata.set_item(
+            "Acquisition_instrument.TEM.pixel_size", pixel_size
+        )
+        self.signal.metadata.set_item(
+            "Acquisition_instrument.TEM.detector_distance", detector_distance
+        )
+
+        unit_factors = {
+            "k_nm^-1": 1,
+            "k_A^-1": 0.1,
+            "q_nm^-1": 1 / (2 * np.pi),
+            "q_A^-1": 0.1 / (2 * np.pi),
+        }
+        if units not in unit_factors.keys():
+            raise ValueError(
+                f"Unit {units} not recognized. Must be one of {unit_factors.keys()}"
+            )
+        if center is None:
+            center = np.array(self.signal.axes_manager.signal_shape) / 2
+        x_pixels = np.arange(-center[0], self.shape[0] - center[0])
+        y_pixels = np.arange(-center[1], self.shape[1] - center[1])
+
+        x_pixels *= pixel_size
+        y_pixels *= pixel_size
+
+        x_angles = np.arctan(x_pixels / detector_distance)
+        y_angles = np.arctan(y_pixels / detector_distance)
+
+        x_axes = np.sin(x_angles) * (1 / wavelength) * unit_factors[units]
+        y_axes = np.sin(y_angles) * (1 / wavelength) * unit_factors[units]
+
+        for ax, axis in zip(self.signal.axes_manager.signal_axes, [x_axes, y_axes]):
+            if isinstance(ax, UniformDataAxis):
+                ax.convert_to_non_uniform_axis()
+            ax.axis = axis
+        self.units = units
+
+    @property
+    def shape(self):
+        return self.signal.axes_manager.signal_shape
+
+    @property
+    def flat_ewald(self):
+        """If the ewald sphere is flat return True"""
+        return isinstance(self.signal.axes_manager.signal_axes[0], UniformDataAxis)
+
+    def __repr__(self):
+        rep_str = f"Calibration for {self.signal}, Ewald sphere: "
+        if self.flat_ewald:
+            rep_str += "flat"
+        else:
+            rep_str += f"curved"
+        rep_str += f", shape: {self.shape}, affine: {self.affine is not None},"
+        rep_str += f" mask: {self.mask is not None}"
+        return rep_str
+
+    @property
+    def axes(self):
+        return [ax.axis for ax in self.signal.axes_manager.signal_axes]
+
+    def get_slices2d(self, npt, npt_azim, radial_range=None):
+        """Get the slices and factors for some image that can be used to
+        slice the image for 2d integration.
+
+        Parameters
+        ----------
+        npt: int
+            The number of radial points
+        npt_azim:
+            The number of azimuthal points
+        """
+        # get the max radial range from the axes
+        if radial_range is None:
+            from itertools import combinations
+
+            edges = np.reshape([[ax[0] ** 2, ax[-1] ** 2] for ax in self.axes], -1)
+            max_range = np.max(
+                np.power(np.sum(list(combinations(edges, 2)), axis=1), 0.5)
+            )
+            radial_range = (0, max_range)
+        # Get the slices and factors for the integration
+        slices, factors, factors_slice = self._get_slices_and_factors(
+            npt, npt_azim, radial_range
+        )
+        return slices, factors, factors_slice, radial_range
+
+    def _get_slices_and_factors(self, npt, npt_azim, radial_range):
+        # get the points which bound each azimuthal pixel
+        control_points = _get_control_points(npt, npt_azim, radial_range, self.affine)
+
+        # get the min and max indices for each control point using the axes
+        min_x = (
+            np.min(
+                np.searchsorted(self.axes[0], control_points[:, :, 0], side="left"),
+                axis=1,
+            ).astype(int)
+            - 1
+        )
+        min_y = (
+            np.min(
+                np.searchsorted(self.axes[1], control_points[:, :, 1], side="left"),
+                axis=1,
+            ).astype(int)
+            - 1
+        )
+
+        max_x = np.max(
+            np.searchsorted(self.axes[0], control_points[:, :, 0], side="right"), axis=1
+        ).astype(int)
+        max_y = np.max(
+            np.searchsorted(self.axes[1], control_points[:, :, 1], side="right"), axis=1
+        ).astype(int)
+        # Note that if a point is outside the range of the axes it will be set to the
+        # maximum value of the axis+1 and 0 if it is below the minimum value of the axis.
+        slices = np.array(
+            [[mx, my, mxx, myy] for mx, my, mxx, myy in zip(min_x, min_y, max_x, max_y)]
+        )
+        max_y_ind = len(self.axes[1]) - 1
+        max_x_ind = len(self.axes[0]) - 1
+
+        # set the slices to be within the range of the axes.  If the entire slice is outside
+        # the range of the axes then set the slice to be the maximum value of the axis
+        slices[slices[:, 0] > max_x_ind, 0] = max_x_ind
+        slices[slices[:, 1] > max_y_ind, 1] = max_y_ind
+        slices[slices[:, 2] > max_x_ind, 2] = max_x_ind
+        slices[slices[:, 3] > max_y_ind, 3] = max_y_ind
+
+        slices[slices[:, 0] < 0, 0] = 0
+        slices[slices[:, 1] < 0, 1] = 0
+        slices[slices[:, 2] < 0, 2] = 0
+        slices[slices[:, 3] < 0, 3] = 0
+
+        factors, factors_slice = _get_factors(control_points, slices, self.axes)
+        return slices, factors, factors_slice
+
+    @property
+    def center(self):
+        """Return the center in pixels"""
+        if self.flat_ewald:
+            return [-s.offset / s.scale for s in self.signal.axes_manager.signal_axes]
+        else:
+            return [
+                np.argmin(np.abs(s.axis)) for s in self.signal.axes_manager.signal_axes
+            ]
+
+    @center.setter
+    def center(self, center=None):
+        """Set the center in pixels"""
+        if not self.flat_ewald:
+            raise ValueError(
+                "To set the center of a curved ewald sphere "
+                "use the s.calibrate.detector method"
+            )
+        if center is None:
+            for ax in self.signal.axes_manager.signal_axes:
+                ax.offset = -ax.scale * (ax.size / 2)
+        else:
+            for ax, off in zip(self.signal.axes_manager.signal_axes, center):
+                ax.offset = -off * ax.scale
+
+    def to_pyfai(self):
+        """
+        Convert the calibration to a pyfai AzimuthalIntegrator.
+
+        Returns
+        -------
+        """
+        from pyFAI.detectors import Detector
+        from pyxem.utils.pyfai_utils import _get_setup, get_azimuthal_integrator
+
+        if self.flat_ewald:
+            pixel_scale = [ax.scale for ax in self.axes]
+            setup = _get_setup(
+                wavelength=self.wavelength,
+                unit=self.units[0],
+                pixel_scale=pixel_scale,
+            )
+            detector, dist, radial_range = setup
+        else:
+            try:
+                pixel_size = self.signal.metadata.get_item(
+                    "Acquisition_instrument.TEM.pixel_size"
+                )
+                dist = self.signal.metadata.get_item(
+                    "Acquisition_instrument.TEM.detector_distance"
+                )
+            except KeyError:
+                raise ValueError(
+                    "The dector must be first initialized with the s.calibrate.detector method"
+                )
+            detector = Detector(
+                pixel1=pixel_size,
+                pixel2=pixel_size,
+            )
+
+        ai = get_azimuthal_integrator(
+            detector=detector,
+            detector_distance=dist,
+            shape=self.shape,
+            center=self.center,
+            affine=self.affine,
+            wavelength=self.wavelength,
+        )
+        return ai
 
 
 def find_diffraction_calibration(
@@ -30,7 +407,7 @@ def find_diffraction_calibration(
     lib_gen,
     size,
     max_excitation_error=0.01,
-    **kwargs
+    **kwargs,
 ):
     """Finds the diffraction calibration for a pattern or set of patterns by maximizing correlation scores.
 
@@ -80,7 +457,7 @@ def find_diffraction_calibration(
         size,
         num_patterns,
         max_excitation_error,
-        **kwargs
+        **kwargs,
     )
     full_corrlines = np.append(full_corrlines, corrlines, axis=0)
 
@@ -97,7 +474,7 @@ def find_diffraction_calibration(
         size,
         num_patterns,
         max_excitation_error,
-        **kwargs
+        **kwargs,
     )
     full_corrlines = np.append(full_corrlines, corrlines, axis=0)
 
@@ -117,7 +494,7 @@ def find_diffraction_calibration(
         size,
         num_patterns,
         max_excitation_error,
-        **kwargs
+        **kwargs,
     )
     full_corrlines = np.append(full_corrlines, corrlines, axis=0)
     found_cals = full_corrlines[full_corrlines[:, 1, :].argmax(axis=0), 0, 0]
@@ -135,7 +512,7 @@ def _calibration_iteration(
     size,
     num_patterns,
     max_excitation_error,
-    **kwargs
+    **kwargs,
 ):
     """For use in find_diffraction_calibration.  Controls the iteration of _create_check_diflib over a set of steps.
 
@@ -178,7 +555,7 @@ def _calibration_iteration(
             library_phases,
             lib_gen,
             max_excitation_error,
-            **kwargs
+            **kwargs,
         )
         corrlines = np.append(corrlines, temp_line, axis=0)
 
@@ -189,7 +566,7 @@ def _calibration_iteration(
             library_phases,
             lib_gen,
             max_excitation_error,
-            **kwargs
+            **kwargs,
         )
         corrlines = np.append(corrlines, temp_line, axis=0)
 
