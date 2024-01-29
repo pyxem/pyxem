@@ -118,5 +118,7 @@ def _get_control_points(npt, npt_azim, radial_range, affine):
 
     # apply the affine transformation to the control points
     if affine is not None:
-        control_points = np.matmul(control_points, affine[:2, :2].T) + affine[:2, 2]
+        affine[0, 1] = -affine[0, 1]  # changing the rotation direction
+        affine[1, 0] = -affine[1, 0]
+        control_points = np.dot(control_points, affine[:2, :2])
     return control_points

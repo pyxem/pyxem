@@ -461,7 +461,7 @@ class TestAzimuthalIntegral2d:
         np.testing.assert_almost_equal(peak[0], 3, decimal=1)
         ring.unit = "k_A^-1"
         ring.set_ai(wavelength=2.5e-12)
-        az = ring.get_azimuthal_integral2d(npt=500)
+        az = ring.get_azimuthal_integral2d(npt=500, method="bbox")
         peak = np.argmax(az.sum(axis=0)).data * az.axes_manager[1].scale
         np.testing.assert_almost_equal(peak[0], 3, decimal=1)
 
@@ -553,7 +553,7 @@ class TestAzimuthalIntegral2d:
         )
 
     def test_internal_azimuthal_integration(self, ring):
-        ring.calibrate.scale(1)
+        ring.calibrate(scale=1)
         az = ring.get_azimuthal_integral2d(npt=40, npt_azim=100, radial_range=(0,40))
         ring_sum = np.sum(az.data, axis=1)
         assert ring_sum.shape == (40,)

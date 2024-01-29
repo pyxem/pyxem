@@ -1828,6 +1828,11 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             "angular_slice_radial_average"
         )
 
+    @deprecated(
+        since="0.17",
+        alternative="pyxem.signals.diffraction2d.azimuthal_integral2d",
+        removal="1.0.0",
+    )
     def angular_slice_radial_average(
         self,
         angleN=20,
@@ -1933,6 +1938,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         except AttributeError:
             raise ValueError("ai property is not currently set")
 
+    @deprecated(since="0.18", removal="1.0.0", alternative="pyxem.signals.diffraction2d.calibrate")
     def set_ai(
         self, center=None, wavelength=None, affine=None, radial_range=None, **kwargs
     ):
