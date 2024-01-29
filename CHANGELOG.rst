@@ -22,6 +22,10 @@ Deprecated
 ----------
 - The module & all functions within `utils.reduced_intensity1d` are deprecated in favour of using the methods of `ReducedIntensity1D` (#994).
 
+Deleted
+-------
+- Several expired methods of `Diffraction2D` associated with radial integration (#998)
+
 2024-01-05 - version 0.17.0
 ===========================
 Added
