@@ -105,7 +105,7 @@ class VirtualDarkFieldImage(Signal2D):
             single virtual dark field images with corresponding vectors.
         """
         warnings.warn(
-            "Changed in version 0.15.0.  May cause unexpected"
+            "Changed in version 0.15.0.  May cause unexpected "
             "errors related to managing the proper axes."
         )
         vdfs = self.copy()
