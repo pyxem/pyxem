@@ -72,10 +72,7 @@ class Calibration:
     @property
     def affine(self):
         """Set the affine transformation to apply to the data."""
-        try:
-            return self.signal.metadata.get_item("General.affine_transformation")
-        except KeyError:
-            return None
+        return self.signal.metadata.get_item("General.affine_transformation")
 
     @affine.setter
     def affine(self, affine):
@@ -120,12 +117,7 @@ class Calibration:
 
     @property
     def wavelength(self):
-        try:
-            return self.signal.metadata.get_item(
-                "Acquisition_instrument.TEM.wavelength"
-            )
-        except KeyError:
-            return None
+        return self.signal.metadata.get_item("Acquisition_instrument.TEM.wavelength")
 
     @wavelength.setter
     def wavelength(self, wavelength):
@@ -378,14 +370,13 @@ class Calibration:
             )
             detector, dist, radial_range = setup
         else:
-            try:
-                pixel_size = self.signal.metadata.get_item(
-                    "Acquisition_instrument.TEM.pixel_size"
-                )
-                dist = self.signal.metadata.get_item(
-                    "Acquisition_instrument.TEM.detector_distance"
-                )
-            except KeyError:
+            pixel_size = self.signal.metadata.get_item(
+                "Acquisition_instrument.TEM.pixel_size"
+            )
+            dist = self.signal.metadata.get_item(
+                "Acquisition_instrument.TEM.detector_distance"
+            )
+            if pixel_size is None or dist is None:
                 raise ValueError(
                     "The dector must be first initialized with the s.calibrate.detector method"
                 )

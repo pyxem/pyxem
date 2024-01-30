@@ -52,6 +52,13 @@ class TestCalibrationClass:
         assert calibration.mask is not None
         assert calibration.mask.shape == (10, 10)
 
+    def test_set_affine(self, calibration):
+        assert calibration.affine is None
+        calibration(affine=np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]))
+        np.testing.assert_array_equal(
+            calibration.affine, np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+        )
+
     def test_set_beam_energy(self, calibration):
         assert calibration.beam_energy is None
         calibration(beam_energy=200)
@@ -150,6 +157,14 @@ class TestCalibrationClass:
             == "Calibration for <Diffraction2D, title: , dimensions: (|10, 10)>, "
             "Ewald sphere: flat, shape: (10, 10), affine: False, mask: False"
         )
+        calibration.detector(
+            pixel_size=15e-6, detector_distance=3.8e-2, beam_energy=200, units="k_nm^-1"
+        )
+        assert (
+            str(calibration)
+            == "Calibration for <Diffraction2D, title: , dimensions: (|10, 10)>, "
+            "Ewald sphere: curved, shape: (10, 10), affine: False, mask: False"
+        )
 
     def test_to_pyfai_no_unit(self, calibration):
         with pytest.raises(ValueError):
@@ -170,3 +185,9 @@ class TestCalibrationClass:
         calibration.detector(pixel_size=1, detector_distance=1, units="k_nm^-1")
         ai = calibration.to_pyfai()
         assert isinstance(ai, AzimuthalIntegrator)
+
+    def test_to_pyfai_failure(self, calibration):
+        calibration.signal.axes_manager.signal_axes[0].convert_to_non_uniform_axis()
+        calibration.signal.axes_manager.signal_axes[1].convert_to_non_uniform_axis()
+        with pytest.raises(ValueError):
+            ai = calibration.to_pyfai()
