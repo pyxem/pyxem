@@ -9,14 +9,6 @@ env:
   MPLBACKEND: agg
 
 jobs:
-  code:
-    name: code style
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v4
-      - uses: psf/black@stable
-
   build-with-pip:
     name: ${{ matrix.os }}-py${{ matrix.python-version }}${{ matrix.LABEL }}
     runs-on: ${{ matrix.os }}
@@ -25,7 +17,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.9', '3.10', "3.11"]
+        python-version: ["3.9", "3.10", "3.11"]
         include:
           - os: ubuntu-latest
             python-version: 3.8
