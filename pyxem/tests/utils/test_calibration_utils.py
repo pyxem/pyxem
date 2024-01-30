@@ -152,7 +152,7 @@ class TestCalibrationClass:
         )
 
     def test_to_pyfai_no_unit(self, calibration):
-        with pytest.raises(KeyError):
+        with pytest.raises(ValueError):
             calibration.to_pyfai()
 
     def test_to_pyfai_flat(self, calibration):
