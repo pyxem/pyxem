@@ -226,7 +226,7 @@ class Calibration:
 
     @property
     def shape(self):
-        return self.signal.axes_manager.signal_shape
+        return self.signal.axes_manager.signal_shape[::-1]
 
     @property
     def flat_ewald(self):
@@ -245,7 +245,7 @@ class Calibration:
 
     @property
     def axes(self):
-        return [ax.axis for ax in self.signal.axes_manager.signal_axes]
+        return [ax.axis for ax in self.signal.axes_manager.signal_axes][::-1]
 
     def get_slices2d(self, npt, npt_azim, radial_range=None):
         """Get the slices and factors for some image that can be used to
