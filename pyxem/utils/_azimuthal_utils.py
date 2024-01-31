@@ -26,7 +26,7 @@ import numba
 
 @numba.njit
 def _slice_radial_integrate(
-    img, factors, factors_slice, slices, npt_rad, npt_azim
+    img, factors, factors_slice, slices, npt_rad, npt_azim, mask=None,
 ):  # pragma: no cover
     """Slice the image into small chunks and multiply by the factors.
 
@@ -49,6 +49,8 @@ def _slice_radial_integrate(
     of 2-10 speedup that could be achieved  by using cython or c++ instead of python
 
     """
+    if mask is not None:
+        img = img * np.logical_not(mask)
     val = np.empty(slices.shape[0])
     for i, (s, f) in enumerate(zip(slices, factors_slice)):
         val[i] = np.sum(
@@ -59,7 +61,7 @@ def _slice_radial_integrate(
 
 
 @numba.njit
-def _slice_radial_integrate1d(img, indexes, factors, factor_slices):  # pragma: no cover
+def _slice_radial_integrate1d(img, indexes, factors, factor_slices, mask=None):  # pragma: no cover
     """Slice the image into small chunks and multiply by the factors.
 
     Parameters
@@ -82,6 +84,8 @@ def _slice_radial_integrate1d(img, indexes, factors, factor_slices):  # pragma: 
     of 2-10 speedup that could be achieved  by using cython or c++ instead of python
 
     """
+    if mask is not None:
+        img = img * np.logical_not(mask)
     ans = np.empty(len(factor_slices) - 1)
     for i in range(len(factor_slices) - 1):
         ind = indexes[factor_slices[i] : factor_slices[i + 1]]

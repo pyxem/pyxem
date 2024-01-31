@@ -28,6 +28,7 @@ from hyperspy.signals import Signal2D, BaseSignal
 from hyperspy._signals.lazy import LazySignal
 from hyperspy.misc.utils import isiterable
 from importlib import import_module
+from hyperspy.axes import UniformDataAxis
 
 from pyxem.signals import (
     CommonDiffraction,
@@ -1971,12 +1972,15 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             indexes, facts, factor_slices, radial_range = self.calibrate.get_slices1d(
                 npt, radial_range=radial_range
             )
+            if mask is None:
+                mask = self.calibrate.mask
             integration = self.map(
                 _slice_radial_integrate1d,
                 indexes=indexes,
                 factors=facts,
                 factor_slices=factor_slices,
                 inplace=inplace,
+                mask=mask,
                 **kwargs,
             )
         else:
@@ -2008,9 +2012,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 **kwargs,
             )
         s = self if inplace else integration
-
-        # Dealing with axis changes
         k_axis = s.axes_manager.signal_axes[0]
+        if not isinstance(k_axis, UniformDataAxis):
+            k_axis.convert_to_uniform_axis()
+        # Dealing with axis changes
         k_axis.name = "Radius"
         k_axis.scale = (radial_range[1] - radial_range[0]) / npt
         k_axis.offset = radial_range[0]
@@ -2108,6 +2113,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             slices, factors, factors_slice, radial_range = self.calibrate.get_slices2d(
                 npt, npt_azim, radial_range=radial_range
             )
+            if mask is None:
+                mask = self.calibrate.mask
             integration = self.map(
                 _slice_radial_integrate,
                 slices=slices,
@@ -2116,6 +2123,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 npt_rad=npt,
                 npt_azim=npt_azim,
                 inplace=inplace,
+                mask=mask,
                 **kwargs,
             )
 
@@ -2148,6 +2156,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         # Dealing with axis changes
         t_axis = s.axes_manager.signal_axes[0]
         k_axis = s.axes_manager.signal_axes[1]
+        if not isinstance(k_axis, UniformDataAxis):
+            k_axis.convert_to_uniform_axis()
+        if not isinstance(t_axis, UniformDataAxis):
+            t_axis.convert_to_uniform_axis()
         t_axis.name = "Radians"
         t_axis.units = "Rad"
 
