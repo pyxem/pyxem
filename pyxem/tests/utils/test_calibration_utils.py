@@ -151,6 +151,18 @@ class TestCalibrationClass:
         # of the image so this is 9801 instead of 10000!
         # assert np.allclose(all_sum, 10000, atol=1)
 
+    def test_get_slices_and_factors1d(self):
+        s = Diffraction2D(np.zeros((100, 100)))
+        s.calibrate(scale=0.1, center=None)
+        slices, factors, factor_slices, _ = s.calibrate.get_slices1d(
+            100, radial_range=(0, 4)
+        )
+        # check that the number of pixels for each radial slice is the same
+        for i in range(len(factor_slices) - 1):
+            sl = factors[factor_slices[i] : factor_slices[i + 1]]
+            print(np.sum(sl))
+        np.testing.assert_almost_equal(np.sum(factors), 3.1415 * 40**2, decimal=0)
+
     def test_to_string(self, calibration):
         assert (
             str(calibration)

@@ -1967,8 +1967,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 _slice_radial_integrate1d,
                 indexes=indexes,
                 factors=facts,
-                factors_slice=factor_slices,
-                npt_rad=npt,
+                factor_slices=factor_slices,
                 inplace=inplace,
                 **kwargs,
             )

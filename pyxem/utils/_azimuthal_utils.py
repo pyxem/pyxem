@@ -56,8 +56,8 @@ def _slice_radial_integrate(img, factors, factors_slice, slices, npt_rad, npt_az
     return val.reshape((npt_azim, npt_rad)).T
 
 
-@numba.njit
-def _slice_radial_integrate1d(img, indexes, factors, factor_slices, npt_rad):
+# @numba.njit
+def _slice_radial_integrate1d(img, indexes, factors, factor_slices):
     """Slice the image into small chunks and multiply by the factors.
 
     Parameters
@@ -83,10 +83,10 @@ def _slice_radial_integrate1d(img, indexes, factors, factor_slices, npt_rad):
     ans = np.empty(len(factor_slices - 1))
     for i in range(len(factor_slices) - 1):
         ind = indexes[factor_slices[i] : factor_slices[i + 1]]
-        factors = factors[factor_slices[i] : factor_slices[i + 1]]
+        f = factors[factor_slices[i] : factor_slices[i + 1]]
         total = 0.0
-        for index, f in zip(ind, factors):
-            total = total + np.sum(img[index[0], index[1]] * factors)
+        for index, fa in zip(ind, f):
+            total = total + np.sum(img[index[0], index[1]] * fa)
         ans[i] = total
     return ans
 

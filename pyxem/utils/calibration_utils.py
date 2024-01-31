@@ -307,6 +307,10 @@ class Calibration:
         slices, factors, factors_slice, radial_range = self.get_slices2d(
             npt, 360, radial_range
         )
+        slices = slices.reshape((npt_azim, npt, 4)).swapaxes(0, 1).reshape((-1, 4))
+        factors_slice = (
+            factors_slice.reshape((npt_azim, npt, 2)).swapaxes(0, 1).reshape((-1, 2))
+        )
 
         # convert into 1d slices
         indexes = []
@@ -322,7 +326,12 @@ class Calibration:
             inds = np.argwhere(test)
             indexes.append(inds)
             facts.append(test[inds[:, 0], inds[:, 1]])
-        factor_slices = np.cumsum([len(f) for f in facts])
+        factor_slices = np.cumsum(
+            [
+                0,
+            ]
+            + [len(f) for f in facts]
+        )
         indexes, facts = np.vstack(indexes), np.hstack(facts)
         return indexes, facts, factor_slices, radial_range
 

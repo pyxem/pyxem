@@ -120,6 +120,19 @@ class TestAzimuthalIntegral1d:
         az = ones.get_azimuthal_integral1d(npt=10, correctSolidAngle=False)
         np.testing.assert_array_equal(az.data[0:8], np.ones(8))
 
+    def test_1d_azimuthal_integral_pyxem(self, ones):
+        ones.calibrate.center = None
+        ones.calibrate.scale = 0.2
+        az = ones.get_azimuthal_integral1d(
+            npt=10,
+            method="splitpixel_pyxem",
+            inplace=True,
+            radial_range=[0.0, 0.8],
+        )
+        assert isinstance(ones, Diffraction1D)
+        np.testing.assert_almost_equal(np.sum(ones.data), np.pi * 4**2, decimal=0)
+        assert az is None
+
     def test_1d_azimuthal_integral_inplace(self, ones):
         ones.set_ai()
         az = ones.get_azimuthal_integral1d(
