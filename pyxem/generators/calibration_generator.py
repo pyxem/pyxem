@@ -33,6 +33,7 @@ from diffsims.utils.ring_pattern_utils import (
 
 from pyxem.signals import ElectronDiffraction2D
 from pyxem.utils.pyfai_utils import get_azimuthal_integrator, _get_setup
+from pyxem.utils._deprecated import deprecated
 
 
 class CalibrationGenerator:
@@ -45,6 +46,11 @@ class CalibrationGenerator:
 
     """
 
+    @deprecated(
+        since="0.18.0",
+        removal="1.0.0",
+        alternative="pyxem.signals.Diffraction2D.calibrate",
+    )
     def __init__(
         self, diffraction_pattern=None, grating_image=None, calibration_standard=None
     ):

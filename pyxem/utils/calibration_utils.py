@@ -26,6 +26,7 @@ from hyperspy.axes import UniformDataAxis
 
 from pyxem.utils.indexation_utils import index_dataset_with_template_rotation
 from pyxem.utils._azimuthal_utils import _get_control_points, _get_factors
+from pyxem.utils._deprecated import deprecated
 
 
 class Calibration:
@@ -71,10 +72,7 @@ class Calibration:
     @property
     def affine(self):
         """Set the affine transformation to apply to the data."""
-        try:
-            return self.signal.metadata.get_item("General.affine_transformation")
-        except KeyError:
-            return None
+        return self.signal.metadata.get_item("General.affine_transformation")
 
     @affine.setter
     def affine(self, affine):
@@ -119,12 +117,7 @@ class Calibration:
 
     @property
     def wavelength(self):
-        try:
-            return self.signal.metadata.get_item(
-                "Acquisition_instrument.TEM.wavelength"
-            )
-        except KeyError:
-            return None
+        return self.signal.metadata.get_item("Acquisition_instrument.TEM.wavelength")
 
     @wavelength.setter
     def wavelength(self, wavelength):
@@ -365,22 +358,25 @@ class Calibration:
         from pyxem.utils.pyfai_utils import _get_setup, get_azimuthal_integrator
 
         if self.flat_ewald:
-            pixel_scale = [ax.scale for ax in self.axes]
+            pixel_scale = self.scale
+            if self.wavelength is None:
+                raise ValueError(
+                    "The wavelength must be set before converting to a pyfai AzimuthalIntegrator"
+                )
             setup = _get_setup(
                 wavelength=self.wavelength,
-                unit=self.units[0],
+                pyxem_unit=self.units[0],
                 pixel_scale=pixel_scale,
             )
             detector, dist, radial_range = setup
         else:
-            try:
-                pixel_size = self.signal.metadata.get_item(
-                    "Acquisition_instrument.TEM.pixel_size"
-                )
-                dist = self.signal.metadata.get_item(
-                    "Acquisition_instrument.TEM.detector_distance"
-                )
-            except KeyError:
+            pixel_size = self.signal.metadata.get_item(
+                "Acquisition_instrument.TEM.pixel_size"
+            )
+            dist = self.signal.metadata.get_item(
+                "Acquisition_instrument.TEM.detector_distance"
+            )
+            if pixel_size is None or dist is None:
                 raise ValueError(
                     "The dector must be first initialized with the s.calibrate.detector method"
                 )
@@ -400,6 +396,9 @@ class Calibration:
         return ai
 
 
+@deprecated(
+    since="0.18.0", removal="1.0.0", alternative="pyxem.signals.Diffraction2D.calibrate"
+)
 def find_diffraction_calibration(
     patterns,
     calibration_guess,

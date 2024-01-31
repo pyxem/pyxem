@@ -41,12 +41,32 @@ class TestCalibrationClass:
         assert calibration.signal.axes_manager[1].offset == -5
         assert calibration.flat_ewald is True
 
+    def test_set_units(self, calibration):
+        calibration(units="k_nm^-1")
+        assert calibration.signal.axes_manager[0].units == "k_nm^-1"
+        assert calibration.signal.axes_manager[1].units == "k_nm^-1"
+        assert calibration.units == ["k_nm^-1", "k_nm^-1"]
+
+    def test_set_mask(self, calibration):
+        calibration(mask=np.ones((10, 10)))
+        assert calibration.mask is not None
+        assert calibration.mask.shape == (10, 10)
+
+    def test_set_affine(self, calibration):
+        assert calibration.affine is None
+        calibration(affine=np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]))
+        np.testing.assert_array_equal(
+            calibration.affine, np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+        )
+
     def test_set_beam_energy(self, calibration):
+        assert calibration.beam_energy is None
         calibration(beam_energy=200)
         assert calibration.beam_energy == 200
         assert calibration.wavelength is not None
 
     def test_set_wavelength(self, calibration):
+        assert calibration.wavelength is None
         calibration(wavelength=0.02508)
         assert calibration.wavelength == 0.02508
 
@@ -54,6 +74,7 @@ class TestCalibrationClass:
         calibration(scale=0.01)
         assert calibration.signal.axes_manager[0].scale == 0.01
         assert calibration.signal.axes_manager[1].scale == 0.01
+        assert calibration.scale == [0.01, 0.01]
         assert calibration.flat_ewald is True
 
     def test_set_failure(self, calibration):
@@ -73,6 +94,9 @@ class TestCalibrationClass:
         with pytest.raises(ValueError):
             calibration(center=(5, 5))
         assert calibration.center == [5, 5]
+
+        with pytest.raises(ValueError):
+            calibration.detector(pixel_size=0.1, detector_distance=1, units="nm^-1")
 
     def test_set_detector(self, calibration):
         calibration.detector(
@@ -127,69 +151,43 @@ class TestCalibrationClass:
         # of the image so this is 9801 instead of 10000!
         # assert np.allclose(all_sum, 10000, atol=1)
 
-
-@pytest.mark.skip(
-    reason="This functionality already smells, skipping while new things are built"
-)
-class TestCalibrations:
-    def test_find_diffraction_calibration(
-        self, test_patterns, test_lib_gen, test_library_phases
-    ):
-        cal, corrlines, cals = calibration_utils.find_diffraction_calibration(
-            test_patterns,
-            0.0097,
-            test_library_phases,
-            test_lib_gen,
-            10,
-            max_excitation_error=0.08,
+    def test_to_string(self, calibration):
+        assert (
+            str(calibration)
+            == "Calibration for <Diffraction2D, title: , dimensions: (|10, 10)>, "
+            "Ewald sphere: flat, shape: (10, 10), affine: False, mask: False"
         )
-        np.testing.assert_allclose(
-            cals, np.array([0.009991, 0.010088, 0.009991]), atol=1e-6
+        calibration.detector(
+            pixel_size=15e-6, detector_distance=3.8e-2, beam_energy=200, units="k_nm^-1"
+        )
+        assert (
+            str(calibration)
+            == "Calibration for <Diffraction2D, title: , dimensions: (|10, 10)>, "
+            "Ewald sphere: curved, shape: (10, 10), affine: False, mask: False"
         )
 
-    def test_calibration_iteration(
-        self, test_patterns, test_lib_gen, test_library_phases
-    ):
-        test_corrlines = calibration_utils._calibration_iteration(
-            test_patterns,
-            0.0097,
-            test_library_phases,
-            test_lib_gen,
-            0.0097 * 0.01,
-            2,
-            3,
-            max_excitation_error=0.08,
-        )
-        true_corrlines = np.array(
-            [
-                [
-                    [0.0097, 0.0097, 0.0097],
-                    [0.085312, 0.056166, 0.0],
-                ],
-                [
-                    [0.0097, 0.0097, 0.0097],
-                    [0.085312, 0.056166, 0.0],
-                ],
-            ]
-        )
-        np.testing.assert_allclose(
-            test_corrlines,
-            true_corrlines,
-            atol=1e-6,
-        )
+    def test_to_pyfai_no_unit(self, calibration):
+        with pytest.raises(ValueError):
+            calibration.to_pyfai()
 
-    def test_create_check_diflib(
-        self, test_patterns, test_lib_gen, test_library_phases
-    ):
-        test_corrs = calibration_utils._create_check_diflib(
-            test_patterns,
-            0.0097,
-            test_library_phases,
-            test_lib_gen,
-            max_excitation_error=0.08,
-        )
-        np.testing.assert_allclose(
-            test_corrs,
-            np.array([0.085313, 0.056166, 0.0]),
-            atol=1e-6,
-        )
+    def test_to_pyfai_flat(self, calibration):
+        from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
+
+        calibration.units = "k_nm^-1"
+        calibration.beam_energy = 200
+        ai = calibration.to_pyfai()
+        assert isinstance(ai, AzimuthalIntegrator)
+
+    def test_to_pyfai_curved(self, calibration):
+        from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
+
+        calibration.beam_energy = 200
+        calibration.detector(pixel_size=1, detector_distance=1, units="k_nm^-1")
+        ai = calibration.to_pyfai()
+        assert isinstance(ai, AzimuthalIntegrator)
+
+    def test_to_pyfai_failure(self, calibration):
+        calibration.signal.axes_manager.signal_axes[0].convert_to_non_uniform_axis()
+        calibration.signal.axes_manager.signal_axes[1].convert_to_non_uniform_axis()
+        with pytest.raises(ValueError):
+            ai = calibration.to_pyfai()
