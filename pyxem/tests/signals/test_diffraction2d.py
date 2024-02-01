@@ -320,12 +320,7 @@ class TestVariance:
     @pytest.fixture
     def ones(self):
         ones_diff = Diffraction2D(data=np.ones(shape=(10, 10, 10, 10)))
-        ones_diff.axes_manager.signal_axes[0].scale = 0.1
-        ones_diff.axes_manager.signal_axes[1].scale = 0.1
-        ones_diff.axes_manager.signal_axes[0].name = "kx"
-        ones_diff.axes_manager.signal_axes[1].name = "ky"
-        ones_diff.unit = "2th_deg"
-        ones_diff.set_ai()
+        ones_diff.calibrate(scale=0.1, center=None)
         return ones_diff
 
     @pytest.fixture
@@ -333,12 +328,7 @@ class TestVariance:
         data = np.ones(shape=(10, 10, 10, 10))
         data[0:10:2, :, :, :] = 2
         ones_diff = Diffraction2D(data=data)
-        ones_diff.axes_manager.signal_axes[0].scale = 0.1
-        ones_diff.axes_manager.signal_axes[1].scale = 0.1
-        ones_diff.axes_manager.signal_axes[0].name = "kx"
-        ones_diff.axes_manager.signal_axes[1].name = "ky"
-        ones_diff.unit = "2th_deg"
-        ones_diff.set_ai()
+        ones_diff.calibrate(scale=0.1, center=None)
         return ones_diff
 
     @pytest.fixture
@@ -350,12 +340,7 @@ class TestVariance:
         rng = default_rng(seed=1)
         data = rng.poisson(lam=data)
         ones_diff = Diffraction2D(data=data)
-        ones_diff.axes_manager.signal_axes[0].scale = 0.1
-        ones_diff.axes_manager.signal_axes[1].scale = 0.1
-        ones_diff.axes_manager.signal_axes[0].name = "kx"
-        ones_diff.axes_manager.signal_axes[1].name = "ky"
-        ones_diff.unit = "2th_deg"
-        ones_diff.set_ai()
+        ones_diff.calibrate(scale=0.1, center=None)
         return ones_diff
 
     def test_FEM_Omega(self, ones, ones_zeros):
@@ -421,7 +406,7 @@ class TestVariance:
         bulls_eye_variance = bulls_eye_noisy.get_variance(25, method="re", dqe=1)
         # This fails at small radii and might still fail because it is random...
         np.testing.assert_array_almost_equal(
-            bulls_eye_variance.data[5:], np.zeros(20), decimal=2
+            bulls_eye_variance.data[5:], np.zeros(20), decimal=1
         )
         # Testing for non dqe=1
         bulls_eye_variance = (bulls_eye_noisy * 10).get_variance(

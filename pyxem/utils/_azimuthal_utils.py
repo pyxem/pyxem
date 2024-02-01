@@ -68,7 +68,7 @@ def _slice_radial_integrate(
 
 @numba.njit
 def _slice_radial_integrate1d(
-    img, indexes, factors, factor_slices, mask=None
+    img, indexes, factors, factor_slices, mask=None, mean=False
 ):  # pragma: no cover
     """Slice the image into small chunks and multiply by the factors.
 
@@ -82,9 +82,10 @@ def _slice_radial_integrate1d(
         The percentage of the pixel for each radial bin associated with some index
     factor_slices:
         The slices to slice the factors and the indexes by
-    npt_rad:
-        The number of radial points
-
+    mask:
+        The mask to apply to the image
+    mean:
+        If True, return the mean of the pixels in the slice rather than the sum
 
     Note
     ----
@@ -101,6 +102,14 @@ def _slice_radial_integrate1d(
         total = 0.0
         for index, fa in zip(ind, f):
             total = total + img[index[0], index[1]] * fa
+        if mean:
+            total_f = 0.0
+            if mask is not None:
+                total_f = total_f + mask[ind[0], ind[1]] * fa
+            else:
+                for index, fa in zip(ind, f):
+                    total_f = total_f + fa
+            total = total / total_f
         ans[i] = total
     return ans
 
