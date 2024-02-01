@@ -38,7 +38,7 @@ There are also other things you can account for with azimuthal integration, such
 effects of the Ewald sphere.  This can be done by calibrating with a known detector distance,
 and beam energy.
 
-Here we just show what might be the effect of just calibrating with the first peak vs. calibrating
+Here we just show the effect of just calibrating with the first peak vs. calibrating
 with the known beam energy and detector distance. For things like accurate template matching good
 calibration can be important when matching to high diffraction vectors. The calibration example gives 
 more information on how to get the correct values for your microscope/setup.
@@ -88,3 +88,4 @@ nano_crystals.calibrate(mask=mask, affine=affine)
 nano_crystals.get_azimuthal_integral2d(
     npt=100, npt_azim=360, inplace=False
 ).sum().plot()
+# %%
