@@ -21,7 +21,14 @@ import numpy as np
 
 from shapely import Polygon, box
 import shapely
-import numba
+from numba import cuda
+
+try:
+    import cupy
+
+    CUPY_INSTALLED = True
+except ImportError:
+    CUPY_INSTALLED = False
 
 
 @numba.njit
@@ -64,6 +71,56 @@ def _slice_radial_integrate(
             * factors[f[0] : f[1]].reshape((s[2] - s[0], s[3] - s[1]))
         )
     return val.reshape((npt_azim, npt_rad)).T
+
+
+@cuda.jit
+def _slice_radial_integrate_cupy(
+    img, factors, factors_slice, slices, npt_rad, npt_azim, val
+):
+    """Slice the image into small chunks and multiply by the factors.
+    Parameters
+    ----------
+    img: np.array
+        The image to be sliced
+    factors:
+        The factors to multiply the slices by
+    slices:
+        The slices to slice the image by
+    npt_rad:
+        The number of radial points
+    npt_azim:
+        The number of azimuthal points
+    Note
+    ----
+    This function is run by every single thread once!
+    """
+    tx = cuda.threadIdx.x  # current thread
+    bx = cuda.blockIdx.x  # Current block
+    bw = cuda.blockDim.x  # Should be equal to blocks!
+    x = tx + bx * bw
+    if x < val.shape[0]:  # account for slices out of range!
+        factors_ind = factors_slice[x]
+        current_slice = slices[x]
+        sum = 0
+        ind = 0
+        for i in range(current_slice[0], current_slice[2]):
+            for j in range(current_slice[1], current_slice[3]):
+                sum += factors[ind + factors_ind[0]] * img[i, j]
+                ind += 1
+        val[x] = sum
+    return
+
+
+def slice_radial_integrate_cupy(image, factors, factor_slices, slices):
+    blocks = 141
+    threads = 256
+    val = cupy.empty(slices.shape[0])
+    _slice_radial_integrate_cupy[blocks, threads](
+        image, factors, factor_slices, slices, 100, 360, val
+    )
+    val_reshaped = val.reshape(360, 100).T
+    del val
+    return val_reshaped
 
 
 @numba.njit
