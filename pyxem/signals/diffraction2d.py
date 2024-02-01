@@ -15,7 +15,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
-import numba
 import numpy as np
 from scipy.ndimage import rotate
 from skimage import morphology
@@ -62,7 +61,10 @@ from pyxem.utils.expt_utils import (
     medfilt_1d,
     sigma_clip,
 )
-from pyxem.utils._azimuthal_utils import _slice_radial_integrate
+from pyxem.utils._azimuthal_utils import (
+    _slice_radial_integrate,
+    _slice_radial_integrate1d,
+)
 from pyxem.utils.dask_tools import (
     _get_dask_array,
     get_signal_dimension_host_chunk_slice,
@@ -1657,20 +1659,26 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             )
 
         if method == "Omega":
-            one_d_integration = self.get_azimuthal_integral1d(npt=npt, **kwargs)
+            one_d_integration = self.get_azimuthal_integral1d(
+                npt=npt, method="bbox", **kwargs
+            )
             variance = (
                 (one_d_integration**2).mean(axis=navigation_axes)
                 / one_d_integration.mean(axis=navigation_axes) ** 2
             ) - 1
             if dqe is not None:
                 sum_points = self.get_azimuthal_integral1d(
-                    npt=npt, sum=True, **kwargs
+                    method="bbox", npt=npt, sum=True, **kwargs
                 ).mean(axis=navigation_axes)
                 variance = variance - ((sum_points**-1) * dqe)
 
         elif method == "r":
-            one_d_integration = self.get_azimuthal_integral1d(npt=npt, **kwargs)
-            integration_squared = (self**2).get_azimuthal_integral1d(npt=npt, **kwargs)
+            one_d_integration = self.get_azimuthal_integral1d(
+                npt=npt, method="bbox", **kwargs
+            )
+            integration_squared = (self**2).get_azimuthal_integral1d(
+                method="bbox", npt=npt, **kwargs
+            )
             # Full variance is the same as the unshifted phi=0 term in angular correlation
             full_variance = (integration_squared / one_d_integration**2) - 1
 
@@ -1683,18 +1691,20 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 return variance, full_variance
 
         elif method == "re":
-            one_d_integration = self.get_azimuthal_integral1d(npt=npt, **kwargs).mean(
-                axis=navigation_axes
-            )
+            one_d_integration = self.get_azimuthal_integral1d(
+                npt=npt, method="bbox", **kwargs
+            ).mean(axis=navigation_axes)
             integration_squared = (
                 (self**2)
-                .get_azimuthal_integral1d(npt=npt, **kwargs)
+                .get_azimuthal_integral1d(npt=npt, method="bbox", **kwargs)
                 .mean(axis=navigation_axes)
             )
             variance = (integration_squared / one_d_integration**2) - 1
 
             if dqe is not None:
-                sum_int = self.get_azimuthal_integral1d(npt=npt, **kwargs).mean()
+                sum_int = self.get_azimuthal_integral1d(
+                    npt=npt, method="bbox", **kwargs
+                ).mean()
                 variance = variance - (sum_int**-1) * (1 / dqe)
 
         elif method == "VImage":
@@ -1706,7 +1716,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 variance_image = variance_image - (
                     self.sum(axis=navigation_axes) ** -1
                 ) * (1 / dqe)
-            variance = variance_image.get_azimuthal_integral1d(npt=npt, **kwargs)
+            variance = variance_image.get_azimuthal_integral1d(
+                npt=npt, method="bbox", **kwargs
+            )
         return variance
 
     """ Methods associated with radial integration, not pyFAI based """
@@ -1885,7 +1897,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         radial_range=None,
         azimuth_range=None,
         inplace=False,
-        method="splitpixel",
+        method="splitpixel_pyxem",
         sum=False,
         **kwargs,
     ):
@@ -1952,33 +1964,49 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> ds.get_azimuthal_integral1d(npt=100)
 
         """
-        if "wavelength" in kwargs:
-            warnings.warn(
-                "The wavelength parameter was removed in 0.14. The wavelength "
-                "can be set using the `set_ai` function or using `s.beam_energy`"
-                " for `ElectronDiffraction2D` signals"
+        usepyfai = method not in ["splitpixel_pyxem"]
+        if not usepyfai:
+            # get_slices1d should be sped up in the future by
+            # getting rid of shapely and using numba on the for loop
+            indexes, facts, factor_slices, radial_range = self.calibrate.get_slices1d(
+                npt, radial_range=radial_range
             )
-            kwargs.pop("wavelength")
+            integration = self.map(
+                _slice_radial_integrate1d,
+                indexes=indexes,
+                factors=facts,
+                factor_slices=factor_slices,
+                inplace=inplace,
+                **kwargs,
+            )
+        else:
+            if "wavelength" in kwargs:
+                warnings.warn(
+                    "The wavelength parameter was removed in 0.14. The wavelength "
+                    "can be set using the `set_ai` function or using `s.beam_energy`"
+                    " for `ElectronDiffraction2D` signals"
+                )
+                kwargs.pop("wavelength")
 
-        sig_shape = self.axes_manager.signal_shape
-        if radial_range is None:
-            radial_range = _get_radial_extent(
-                ai=self.ai, shape=sig_shape, unit=self.unit
+            sig_shape = self.axes_manager.signal_shape
+            if radial_range is None:
+                radial_range = _get_radial_extent(
+                    ai=self.ai, shape=sig_shape, unit=self.unit
+                )
+                radial_range[0] = 0
+            integration = self.map(
+                azimuthal_integrate1d,
+                azimuthal_integrator=self.ai,
+                npt_rad=npt,
+                azimuth_range=azimuth_range,
+                radial_range=radial_range,
+                method=method,
+                inplace=inplace,
+                unit=self.unit,
+                mask=mask,
+                sum=sum,
+                **kwargs,
             )
-            radial_range[0] = 0
-        integration = self.map(
-            azimuthal_integrate1d,
-            azimuthal_integrator=self.ai,
-            npt_rad=npt,
-            azimuth_range=azimuth_range,
-            radial_range=radial_range,
-            method=method,
-            inplace=inplace,
-            unit=self.unit,
-            mask=mask,
-            sum=sum,
-            **kwargs,
-        )
         s = self if inplace else integration
 
         # Dealing with axis changes

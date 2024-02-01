@@ -25,7 +25,9 @@ import numba
 
 
 @numba.njit
-def _slice_radial_integrate(img, factors, factors_slice, slices, npt_rad, npt_azim):
+def _slice_radial_integrate(
+    img, factors, factors_slice, slices, npt_rad, npt_azim
+):  # pragma: no cover
     """Slice the image into small chunks and multiply by the factors.
 
     Parameters
@@ -54,6 +56,41 @@ def _slice_radial_integrate(img, factors, factors_slice, slices, npt_rad, npt_az
             * factors[f[0] : f[1]].reshape((s[2] - s[0], s[3] - s[1]))
         )
     return val.reshape((npt_azim, npt_rad)).T
+
+
+@numba.njit
+def _slice_radial_integrate1d(img, indexes, factors, factor_slices):  # pragma: no cover
+    """Slice the image into small chunks and multiply by the factors.
+
+    Parameters
+    ----------
+    img: np.array
+        The image to be sliced
+    indexes:
+        The indexes of the pixels to multiply by the `factors`
+    factors:
+        The percentage of the pixel for each radial bin associated with some index
+    factor_slices:
+        The slices to slice the factors and the indexes by
+    npt_rad:
+        The number of radial points
+
+
+    Note
+    ----
+    This function is much faster with numba than without. There is probably a factor
+    of 2-10 speedup that could be achieved  by using cython or c++ instead of python
+
+    """
+    ans = np.empty(len(factor_slices) - 1)
+    for i in range(len(factor_slices) - 1):
+        ind = indexes[factor_slices[i] : factor_slices[i + 1]]
+        f = factors[factor_slices[i] : factor_slices[i + 1]]
+        total = 0.0
+        for index, fa in zip(ind, f):
+            total = total + img[index[0], index[1]] * fa
+        ans[i] = total
+    return ans
 
 
 def _get_factors(control_points, slices, axes):

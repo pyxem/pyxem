@@ -226,7 +226,7 @@ class Calibration:
 
     @property
     def shape(self):
-        return self.signal.axes_manager.signal_shape
+        return self.signal.axes_manager.signal_shape[::-1]
 
     @property
     def flat_ewald(self):
@@ -245,7 +245,7 @@ class Calibration:
 
     @property
     def axes(self):
-        return [ax.axis for ax in self.signal.axes_manager.signal_axes]
+        return [ax.axis for ax in self.signal.axes_manager.signal_axes][::-1]
 
     def get_slices2d(self, npt, npt_azim, radial_range=None):
         """Get the slices and factors for some image that can be used to
@@ -258,7 +258,14 @@ class Calibration:
         npt_azim:
             The number of azimuthal points
         """
-        # get the max radial range from the axes
+        radial_range = self._get_radial_range(radial_range)
+        # Get the slices and factors for the integration
+        slices, factors, factors_slice = self._get_slices_and_factors(
+            npt, npt_azim, radial_range
+        )
+        return slices, factors, factors_slice, radial_range
+
+    def _get_radial_range(self, radial_range=None):
         if radial_range is None:
             from itertools import combinations
 
@@ -267,11 +274,66 @@ class Calibration:
                 np.power(np.sum(list(combinations(edges, 2)), axis=1), 0.5)
             )
             radial_range = (0, max_range)
-        # Get the slices and factors for the integration
-        slices, factors, factors_slice = self._get_slices_and_factors(
-            npt, npt_azim, radial_range
+        return radial_range
+
+    def get_slices1d(self, npt, radial_range=None):
+        """Get the slices and factors for some image that can be used to
+        slice the image for 1d integration.
+
+        Parameters
+        ----------
+        npt: int
+            The number of radial points
+        radial_range: tuple
+            The range of the radial extent
+
+        Returns
+        -------
+        indexes: np.ndarray (n, 2)
+            The indexes of the pixels to integrate flattened
+        factors: np.ndarray (n)
+            The factors(representing the pixel fraction) to multiply each pixel value by
+        factor_slices: np.ndarray (npt+1)
+            The start and end index of the factors for each slice such that for some
+            slice i, factors[factor_slices[i]:factor_slices[i+1]] is the factors for that radial slice
+        radial_range: tuple
+            The range of the radial extent used for the integration
+
+        """
+        # reuse the 2d method as it is actually fairly fast
+        # and can be much faster if we spend time with numba
+        npt_azim = 360  # approximate a circle with a 360-gon... Using a circle is harder/ not much better
+
+        slices, factors, factors_slice, radial_range = self.get_slices2d(
+            npt, 360, radial_range
         )
-        return slices, factors, factors_slice, radial_range
+        slices = slices.reshape((npt_azim, npt, 4)).swapaxes(0, 1).reshape((-1, 4))
+        factors_slice = (
+            factors_slice.reshape((npt_azim, npt, 2)).swapaxes(0, 1).reshape((-1, 2))
+        )
+
+        # convert into 1d slices
+        indexes = []
+        facts = []
+        for i in range(npt):
+            test = np.zeros(self.shape)
+            for j in range(npt_azim):
+                ind = i * npt_azim + j
+                sl = slices[ind]
+                test[sl[0] : sl[2], sl[1] : sl[3]] += factors[
+                    factors_slice[ind][0] : factors_slice[ind][1]
+                ].reshape((sl[2] - sl[0], sl[3] - sl[1]))
+            inds = np.argwhere(test)
+            indexes.append(inds)
+            facts.append(test[inds[:, 0], inds[:, 1]])
+        factor_slices = np.cumsum(
+            [
+                0,
+            ]
+            + [len(f) for f in facts]
+        )
+        indexes, facts = np.vstack(indexes), np.hstack(facts)
+        return indexes, facts, factor_slices, radial_range
 
     def _get_slices_and_factors(self, npt, npt_azim, radial_range):
         # get the points which bound each azimuthal pixel
