@@ -26,7 +26,13 @@ import numba
 
 @numba.njit
 def _slice_radial_integrate(
-    img, factors, factors_slice, slices, npt_rad, npt_azim, mask=None,
+    img,
+    factors,
+    factors_slice,
+    slices,
+    npt_rad,
+    npt_azim,
+    mask=None,
 ):  # pragma: no cover
     """Slice the image into small chunks and multiply by the factors.
 
@@ -61,7 +67,9 @@ def _slice_radial_integrate(
 
 
 @numba.njit
-def _slice_radial_integrate1d(img, indexes, factors, factor_slices, mask=None):  # pragma: no cover
+def _slice_radial_integrate1d(
+    img, indexes, factors, factor_slices, mask=None
+):  # pragma: no cover
     """Slice the image into small chunks and multiply by the factors.
 
     Parameters
