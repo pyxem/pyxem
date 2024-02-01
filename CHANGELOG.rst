@@ -17,6 +17,7 @@ Fixed
 Added
 -----
 - Added `pyxem.utils.calibration_utils.Calibration` class  for calibrating the signal axes of a 4-D STEM dataset(#993)
+- Added `pyxem.signals.Diffraction2D.get_azimuthal_integral1D` method to calculate the azimuthal integral of a 2D diffraction pattern (#1008)
 
 Deprecated
 ----------
