@@ -47,7 +47,7 @@ from pyxem.utils.vector_utils import (
 
 from pyxem.utils._slicers import Slicer
 
-from pyxem.utils.subpixel_utils import (
+from pyxem.utils._subpixel_utils import (
     _conventional_xc_map,
     _center_of_mass_map,
     get_simulated_disc,
@@ -285,9 +285,16 @@ class DiffractionVectors(BaseSignal):
             The signal which will be used to refine the diffraction vectors.
         method : str
             The method used to refine the diffraction vectors. Currently
-            supported methods are 'cross-correlation' and 'phase-correlation',
+            supported methods are 'cross-correlation' and
             and "center-of-mass".
-
+        disk_r : int or None
+            The radius of the disk used for the cross-correlation method in pixels.
+        upsample_factor : int
+            The upsample factor used for the cross-correlation method.
+        square_size : int
+            The size of the square used for both the center-of-mass and cross-correlation methods.
+        kwargs : dict
+            Additional keyword arguments to be passed to the map method.
 
         Returns
         -------
@@ -302,12 +309,7 @@ class DiffractionVectors(BaseSignal):
             raise ValueError(
                 f"The method parameter must be one of {list(method_dict.keys())}"
             )
-        if method == "center-of-mass":
-            if disk_r is not None or upsample_factor is not None:
-                warn(
-                    "The disk_r and upsample_factor parameters are not used for the center-of-mass method."
-                )
-        else:
+        if method == "cross-correlation":
             kwargs["upsample_factor"] = upsample_factor
             kwargs["kernel"] = get_simulated_disc(square_size, disk_r)
         kwargs["square_size"] = square_size
