@@ -120,7 +120,7 @@ def _slice_radial_integrate_cupy(
     blocks = npt_rad
     threads = int(np.ceil(npt_azim / 32) * 32)  # round up to nearest multiple of 32
     val = cupy.empty(slices.shape[0])
-    _slice_radial_integrate_cupy[blocks, threads](
+    __slice_radial_integrate_cupy[blocks, threads](
         image, factors, factor_slices, slices, val
     )
     val_reshaped = val.reshape(npt_azim, npt_rad).T

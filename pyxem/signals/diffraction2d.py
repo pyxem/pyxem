@@ -2091,10 +2091,12 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                     _slice_radial_integrate_cupy,
                     slices=slices,
                     factors=factors,
-                    factors_slice=factors_slice,
+                    factor_slices=factors_slice,
                     npt_rad=npt,
                     npt_azim=npt_azim,
                     inplace=inplace,
+                    output_signal_size=(npt, npt_azim),
+                    output_dtype=float,
                     **kwargs,
                 )
             else:
