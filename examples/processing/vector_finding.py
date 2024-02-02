@@ -61,8 +61,8 @@ The template matching is done on the pixel grid.  To find the peak position more
 can be up-sampled using the :func:`pyxem.signals.DiffractionVectors.subpixel_refine` method.  This method takes a
 `DiffractionSignal2D` object and uses that to refine the peak positions.
 
-This only really works up to the nyquist frequency so most up-sampling of greater than 2 has little improvement and 
-greatly increases the computation time. 
+This only really works up to up-sampling of 2-4. There is little improvement with increased up-sampling while 
+it greatly increases the computation time. 
 """
 refined_peaks_com = vectors.subpixel_refine(s, "center-of-mass", square_size=20)
 refined_peaks_xc = vectors.subpixel_refine(
