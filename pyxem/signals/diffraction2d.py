@@ -2081,7 +2081,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             slices, factors, factors_slice, radial_range = self.calibrate.get_slices2d(
                 npt, npt_azim, radial_range=radial_range
             )
-            if self._gpu and CUPY_INSTALLED:
+            if self._gpu and CUPY_INSTALLED:  # pragma: no cover
                 from pyxem.utils._azimuthal_utils import _slice_radial_integrate_cupy
 
                 slices = cp.asarray(slices)

@@ -27,7 +27,7 @@ import numba
 try:
     import cupy
 
-    CUPY_INSTALLED = True
+    CUPY_INSTALLED = True  # pragma: no cover
 except ImportError:
     CUPY_INSTALLED = False
 
@@ -78,7 +78,9 @@ def _slice_radial_integrate(
 
 
 @cuda.jit
-def __slice_radial_integrate_cupy(img, factors, factors_slice, slices, val):
+def __slice_radial_integrate_cupy(
+    img, factors, factors_slice, slices, val
+):  # pragma: no cover
     """Slice the image into small chunks and multiply by the factors.
     Parameters
     ----------
@@ -115,7 +117,7 @@ def __slice_radial_integrate_cupy(img, factors, factors_slice, slices, val):
 
 def _slice_radial_integrate_cupy(
     image, factors, factor_slices, slices, npt_rad, npt_azim
-):
+):  # pragma: no cover
     # This should result in fairly good occupancy on most GPUs.
     # We could try to optimize this further by operating on the entire chunk of
     # diffraction patterns at once. This would require a change in the way the

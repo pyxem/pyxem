@@ -36,7 +36,7 @@ OUT_SIGNAL_AXES_DOCSTRING = """out_signal_axes : None, iterable of int or string
 class CommonDiffraction:
     """Common functions for all Diffraction Signals classes"""
 
-    def to_gpu(self):
+    def to_gpu(self):  # pragma: no cover
         """Transfer the data to the GPU.
 
         Returns
@@ -59,7 +59,7 @@ class CommonDiffraction:
             self.data = cp.asarray(self.data)  # pass all the data to the GPU
         self._gpu = True
 
-    def from_gpu(self):
+    def from_gpu(self):  # pragma: no cover
         """Transfer the data from the GPU to the CPU."""
 
         try:
