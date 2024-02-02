@@ -22,6 +22,7 @@ import numpy as np
 from shapely import Polygon, box
 import shapely
 from numba import cuda
+import numba
 
 try:
     import cupy
@@ -74,9 +75,7 @@ def _slice_radial_integrate(
 
 
 @cuda.jit
-def _slice_radial_integrate_cupy(
-    img, factors, factors_slice, slices, npt_rad, npt_azim, val
-):
+def __slice_radial_integrate_cupy(img, factors, factors_slice, slices, val):
     """Slice the image into small chunks and multiply by the factors.
     Parameters
     ----------
@@ -111,14 +110,20 @@ def _slice_radial_integrate_cupy(
     return
 
 
-def slice_radial_integrate_cupy(image, factors, factor_slices, slices):
-    blocks = 141
-    threads = 256
+def _slice_radial_integrate_cupy(
+    image, factors, factor_slices, slices, npt_rad, npt_azim
+):
+    # This should result in fairly good occupancy on most GPUs.
+    # We could try to optimize this further by operating on the entire chunk of
+    # diffraction patterns at once. This would require a change in the way the
+    # map function operates upstream. (might not be worth it :))
+    blocks = npt_rad
+    threads = int(np.ceil(npt_azim / 32) * 32)  # round up to nearest multiple of 32
     val = cupy.empty(slices.shape[0])
     _slice_radial_integrate_cupy[blocks, threads](
-        image, factors, factor_slices, slices, 100, 360, val
+        image, factors, factor_slices, slices, val
     )
-    val_reshaped = val.reshape(360, 100).T
+    val_reshaped = val.reshape(npt_azim, npt_rad).T
     del val
     return val_reshaped
 
@@ -146,9 +151,9 @@ def _slice_radial_integrate1d(
 
     Note
     ----
-    This function is much faster with numba than without. There is probably a factor
-    of 2-10 speedup that could be achieved  by using cython or c++ instead of python
-
+    This function is much faster with numba than without. Additionally,  a GPU version of
+    this function is not implemented because it is a bit more complicated than the 2D
+    version and doesn't perform well using the `map` function.
     """
     if mask is not None:
         img = img * np.logical_not(mask)
