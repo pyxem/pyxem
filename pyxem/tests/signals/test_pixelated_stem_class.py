@@ -24,6 +24,7 @@ from skimage import morphology
 
 from hyperspy.signals import Signal2D, BaseSignal
 
+import pyxem.signals
 from pyxem.signals import Diffraction2D, LazyDiffraction2D
 import pyxem.utils.ransac_ellipse_tools as ret
 from pyxem.dummy_data import make_diffraction_test_data as mdtd
@@ -610,7 +611,6 @@ class TestDiffraction2DCenterOfMass:
         assert com_sig_extent == lazy_com_sig_extent
 
     def test_lazy_result(self):
-        data = da.ones((10, 10, 20, 20), chunks=(10, 10, 10, 10))
         s_lazy = LazyDiffraction2D(data)
         s_lazy_com = s_lazy.center_of_mass(lazy_result=True)
         assert s_lazy_com._lazy
@@ -625,6 +625,12 @@ class TestDiffraction2DCenterOfMass:
         s_lazy_0d_com = s_lazy_0d.center_of_mass(lazy_result=True)
         assert s_lazy_0d_com._lazy
         assert s_lazy_0d_com.axes_manager.signal_shape == ()
+
+    def test_center_of_mass_inplace(self):
+        d = Diffraction2D(np.zeros((10, 10, 20, 20)))
+        com = d.center_of_mass(inplace=True)
+        assert isinstance(d, pyxem.signals.DPCSignal1D)
+        assert com is None
 
 
 class TestDiffraction2DAngleSector:

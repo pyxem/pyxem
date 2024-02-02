@@ -986,10 +986,13 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             center_of_mass, threshold=threshold, mask=mask, inplace=inplace, **kwargs
         )
         if inplace:
-            ans = self
-        ans = ans.T
-        ans.set_signal_type("dpc")
-        ans.axes_manager.navigation_axes[0].name = "Beam position"
+            self.T
+            self.set_signal_type("dpc")
+            self.axes_manager.navigation_axes[0].name = "Beam position"
+        else:
+            ans = ans.T
+            ans.set_signal_type("dpc")
+            ans.axes_manager.navigation_axes[0].name = "Beam position"
         return ans
 
     @deprecated_argument(
