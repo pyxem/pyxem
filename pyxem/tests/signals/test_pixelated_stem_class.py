@@ -611,6 +611,7 @@ class TestDiffraction2DCenterOfMass:
         assert com_sig_extent == lazy_com_sig_extent
 
     def test_lazy_result(self):
+        data = da.ones((10, 10, 20, 20), chunks=(10, 10, 10, 10))
         s_lazy = LazyDiffraction2D(data)
         s_lazy_com = s_lazy.center_of_mass(lazy_result=True)
         assert s_lazy_com._lazy
