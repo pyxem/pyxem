@@ -949,7 +949,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             The thresholding will be done at mean times
             this threshold value.
         mask : tuple (x, y, r), optional
-            Round mask centered on x and y, with radius r.
+            Round mask centered on x and y, with radius r. These are pixel values rather
+            than physical units. Default None which means no mask is used.
 
         Returns
         -------
