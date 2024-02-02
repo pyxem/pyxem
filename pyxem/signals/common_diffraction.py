@@ -24,6 +24,7 @@ import hyperspy.api as hs
 
 from traits.trait_base import Undefined
 from pyxem.utils.virtual_images_utils import normalize_virtual_images
+from importlib import import_module
 
 
 OUT_SIGNAL_AXES_DOCSTRING = """out_signal_axes : None, iterable of int or string
