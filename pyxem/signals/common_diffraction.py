@@ -35,6 +35,45 @@ OUT_SIGNAL_AXES_DOCSTRING = """out_signal_axes : None, iterable of int or string
 class CommonDiffraction:
     """Common functions for all Diffraction Signals classes"""
 
+    def to_gpu(self):
+        """Transfer the data to the GPU.
+
+        Returns
+        -------
+        Diffraction2D
+            The data on the GPU.
+        """
+        try:
+            cp = import_module("cupy")
+        except ImportError:
+            raise ImportError(
+                "The cupy package is required to use this method. "
+                "Please install it using `conda install cupy`."
+            )
+        if self._lazy:
+            self.data = self.data.map_blocks(
+                cp.asarray
+            )  # pass chunk-wise the data to GPU
+        else:
+            self.data = cp.asarray(self.data)  # pass all the data to the GPU
+        self._gpu = True
+
+    def from_gpu(self):
+        """Transfer the data from the GPU to the CPU."""
+
+        try:
+            cp = import_module("cupy")
+        except ImportError:
+            raise ImportError(
+                "The cupy package is required to use this method. "
+                "Please install it using `conda install cupy`."
+            )
+        if self._lazy:
+            self.data = self.data.map_blocks(cp.asnumpy)
+        else:
+            self.data = cp.asnumpy(self.data)
+        self._gpu = False
+
     @property
     def unit(self):
         if self.axes_manager.signal_axes[0].units is Undefined:
