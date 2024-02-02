@@ -32,7 +32,7 @@ except ImportError:
     CUPY_INSTALLED = False
 
 
-@numba.njit(parallel=True)
+@numba.njit(parallel=True, nogil=True)
 def _slice_radial_integrate(
     img,
     factors,
