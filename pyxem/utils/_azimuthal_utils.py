@@ -21,7 +21,7 @@ import numpy as np
 
 from shapely import Polygon, box
 import shapely
-from numba import cuda
+from numba import cuda, prange
 import numba
 
 try:
@@ -32,7 +32,7 @@ except ImportError:
     CUPY_INSTALLED = False
 
 
-@numba.njit
+@numba.njit(parallel=True)
 def _slice_radial_integrate(
     img,
     factors,
@@ -66,10 +66,13 @@ def _slice_radial_integrate(
     if mask is not None:
         img = img * np.logical_not(mask)
     val = np.empty(slices.shape[0])
-    for i, (s, f) in enumerate(zip(slices, factors_slice)):
+
+    for i in prange(len(factors_slice)):
         val[i] = np.sum(
-            img[s[0] : s[2], s[1] : s[3]]
-            * factors[f[0] : f[1]].reshape((s[2] - s[0], s[3] - s[1]))
+            img[slices[i][0] : slices[i][2], slices[i][1] : slices[i][3]]
+            * factors[factors_slice[i][0] : factors_slice[i][1]].reshape(
+                (slices[i][2] - slices[i][0], slices[i][3] - slices[i][1])
+            )
         )
     return val.reshape((npt_azim, npt_rad)).T
 
