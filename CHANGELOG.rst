@@ -13,6 +13,7 @@ Unreleased
 Fixed
 -----
 - Fixed pytest failure. Changed `setup` --> `setup_method` (#997)
+- `pyxem.signals.Diffraction2D.center_of_mass` now uses the `map` function. (#1005)
 
 Added
 -----
