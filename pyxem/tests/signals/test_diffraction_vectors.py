@@ -29,7 +29,7 @@ from hyperspy.signal import BaseSignal
 from pyxem.signals import DiffractionVectors, DiffractionVectors2D
 from pyxem.utils._subpixel_utils import (
     _center_of_mass_hs,
-    get_experimental_square,
+    _get_experimental_square,
     _conventional_xc,
 )
 from hyperspy.axes import UniformDataAxis
@@ -346,7 +346,7 @@ class TestSubpixelRefinement:
         xx, yy = disk(center=(45, 50), radius=10)
         cir = np.zeros((100, 100))
         cir[xx, yy] = 1
-        sq = get_experimental_square(cir, (47, 50), 30)
+        sq = _get_experimental_square(cir, (47, 50), 30)
         cen = _center_of_mass_hs(sq)
         assert np.allclose(np.array(cen) - 15, (-2.0, 0.0))
 
@@ -356,7 +356,7 @@ class TestSubpixelRefinement:
         cir = np.random.random((100, 100))
 
         cir[xx, yy] += 10
-        sq = get_experimental_square(cir, (47, 50), 30)
+        sq = _get_experimental_square(cir, (47, 50), 30)
         cen = _conventional_xc(sq, kernel, upsample_factor=1)
         assert np.allclose(np.array(cen), (-2.0, 0.0))
 

@@ -23,7 +23,7 @@ from skimage import draw
 from pyxem.utils.expt_utils import normalize_template_match
 
 
-def get_experimental_square(z, vector, square_size):
+def _get_experimental_square(z, vector, square_size):
     """Defines a square region around a given diffraction vector and returns.
 
     Parameters
@@ -49,7 +49,7 @@ def get_experimental_square(z, vector, square_size):
     return _z
 
 
-def get_simulated_disc(square_size, disc_radius):
+def _get_simulated_disc(square_size, disc_radius):
     """Create a uniform disc for correlating with the experimental square.
 
     Parameters
@@ -122,7 +122,7 @@ def _com_experimental_square(z, vector, square_size):
         z, but with row and column zero set to 0
     """
     # Copy to make sure we don't change the dp
-    z_adpt = np.copy(get_experimental_square(z, vector=vector, square_size=square_size))
+    z_adpt = np.copy(_get_experimental_square(z, vector=vector, square_size=square_size))
     z_adpt[:, 0] = 0
     z_adpt[0, :] = 0
     return z_adpt
@@ -154,7 +154,7 @@ def _center_of_mass_map(dp, vectors, square_size, offsets, scales):
         ]
     shifts = np.zeros_like(vectors, dtype=np.float64)
     for i, vector in enumerate(vectors):
-        square = get_experimental_square(dp, vector, square_size)
+        square = _get_experimental_square(dp, vector, square_size)
         shifts[i] = [a - square_size / 2 for a in _center_of_mass_hs(square)]
     return (vectors + shifts) * scales + offsets
 
@@ -164,6 +164,6 @@ def _conventional_xc_map(
 ):
     shifts = np.zeros_like(vectors, dtype=np.float64)
     for i, vector in enumerate(vectors):
-        expt_disc = get_experimental_square(dp, vector, square_size)
+        expt_disc = _get_experimental_square(dp, vector, square_size)
         shifts[i] = _conventional_xc(expt_disc, kernel, upsample_factor)
     return (vectors + shifts) * scales + offsets
