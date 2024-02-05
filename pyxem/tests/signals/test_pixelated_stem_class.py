@@ -628,10 +628,9 @@ class TestDiffraction2DCenterOfMass:
         assert s_lazy_0d_com.axes_manager.signal_shape == ()
 
     def test_center_of_mass_inplace(self):
-        d = Diffraction2D(np.zeros((10, 10, 20, 20)))
-        com = d.center_of_mass(inplace=True)
-        assert isinstance(d, pyxem.signals.DPCSignal1D)
-        assert com is None
+        with pytest.raises(ValueError):
+            d = Diffraction2D(np.zeros((10, 10, 20, 20)))
+            d.center_of_mass(inplace=True)
 
 
 class TestDiffraction2DAngleSector:

@@ -935,7 +935,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         self,
         threshold=None,
         mask=None,
-        inplace=False,
         **kwargs,
     ):
         """Get the centre of the STEM diffraction pattern using
@@ -977,22 +976,20 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> s_com.compute(show_progressbar=False)
 
         """
+        if "inplace" in kwargs and kwargs["inplace"]:
+            raise ValueError("Inplace is not allowed for center_of_mass")
+        else:
+            kwargs["inplace"] = False
+
         det_shape = self.axes_manager.signal_shape
         if mask is not None:
             x, y, r = mask
             mask = pst._make_circular_mask(x, y, det_shape[0], det_shape[1], r)
 
-        ans = self.map(
-            center_of_mass, threshold=threshold, mask=mask, inplace=inplace, **kwargs
-        )
-        if inplace:
-            self.T
-            self.set_signal_type("dpc")
-            self.axes_manager.navigation_axes[0].name = "Beam position"
-        else:
-            ans = ans.T
-            ans.set_signal_type("dpc")
-            ans.axes_manager.navigation_axes[0].name = "Beam position"
+        ans = self.map(center_of_mass, threshold=threshold, mask=mask, **kwargs)
+        ans = ans.T
+        ans.set_signal_type("dpc")
+        ans.axes_manager.navigation_axes[0].name = "Beam position"
         return ans
 
     @deprecated_argument(
