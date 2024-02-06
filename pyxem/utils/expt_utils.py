@@ -607,6 +607,32 @@ def find_beam_center_blur(z, sigma):
     return dispatcher.array(center)
 
 
+def center_of_mass(z, mask=None, threshold=None):
+    """Estimate direct beam position by calculating the center of mass of the
+    image.
+
+    Parameters
+    ----------
+    z : np.array
+        Two-dimensional data array containing signal.
+    mask : np.array
+        Two-dimensional data array containing mask.
+    threshold : float
+        Threshold value for center of mass calculation.
+
+    Returns
+    -------
+    center : np.array
+        np.array [x, y] containing indices of estimated direct beam positon.
+    """
+    if mask is not None:
+        z = z * mask
+    if threshold is not None:
+        z[z < (np.mean(z) * threshold)] = 0
+    center = np.array(ndi.center_of_mass(z))[::-1]
+    return center
+
+
 def find_beam_offset_cross_correlation(z, radius_start, radius_finish, **kwargs):
     """Find the offset of the direct beam from the image center by a cross-correlation algorithm.
     The shift is calculated relative to an circle perimeter. The circle can be

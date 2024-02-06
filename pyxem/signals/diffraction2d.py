@@ -60,6 +60,7 @@ from pyxem.utils.expt_utils import (
     integrate_radially,
     medfilt_1d,
     sigma_clip,
+    center_of_mass,
 )
 from pyxem.utils._azimuthal_utils import (
     _slice_radial_integrate,
@@ -934,9 +935,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         self,
         threshold=None,
         mask=None,
-        lazy_output=False,
-        show_progressbar=True,
-        chunk_calculations=None,
         **kwargs,
     ):
         """Get the centre of the STEM diffraction pattern using
@@ -950,20 +948,12 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             The thresholding will be done at mean times
             this threshold value.
         mask : tuple (x, y, r), optional
-            Round mask centered on x and y, with radius r.
-        signal_slice : tuple (low_x, high_x, low_y, high_y)
-            Slice the data. Equivilent to s.isig[low_x:high_x, low_y,
-        lazy_result : bool, optional
-            If True, will not compute the data directly, but
-            return a lazy signal. Default False
-        show_progressbar : bool, optional
-            Default True
-        chunk_calculations : tuple, optional
-            Chunking values when running the calculations.
+            Round mask centered on x and y, with radius r. These are pixel values rather
+            than physical units. Default None which means no mask is used.
 
         Returns
         -------
-        s_com : DPCSignal
+        DPCSignal
             DPCSignal with beam shifts along the navigation dimension
             and spatial dimensions as the signal dimension(s).
 
@@ -986,49 +976,21 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> s_com.compute(show_progressbar=False)
 
         """
+        if "inplace" in kwargs and kwargs["inplace"]:
+            raise ValueError("Inplace is not allowed for center_of_mass")
+        else:
+            kwargs["inplace"] = False
+
         det_shape = self.axes_manager.signal_shape
-        nav_dim = self.axes_manager.navigation_dimension
-        if chunk_calculations is None:
-            chunk_calculations = [16] * nav_dim + list(det_shape)
         if mask is not None:
             x, y, r = mask
-            mask_array = pst._make_circular_mask(x, y, det_shape[0], det_shape[1], r)
-            mask_array = np.invert(mask_array)
-        else:
-            mask_array = None
-        if self._lazy:
-            dask_array = self.data.rechunk(chunk_calculations)
-        else:
-            dask_array = da.from_array(self.data, chunks=chunk_calculations)
-        data = dt._center_of_mass_array(
-            dask_array, threshold_value=threshold, mask_array=mask_array
-        )
-        if lazy_output:
-            if nav_dim == 2:
-                s_com = LazyDPCSignal2D(data)
-            elif nav_dim == 1:
-                s_com = LazyDPCSignal1D(data)
-            elif nav_dim == 0:
-                s_com = LazyDPCBaseSignal(data).T
-        else:
-            if show_progressbar:
-                pbar = ProgressBar()
-                pbar.register()
-            data = data.compute()
-            if show_progressbar:
-                pbar.unregister()
-            if nav_dim == 2:
-                s_com = DPCSignal2D(data)
-            elif nav_dim == 1:
-                s_com = DPCSignal1D(data)
-            elif nav_dim == 0:
-                s_com = DPCBaseSignal(data).T
-        s_com.axes_manager.navigation_axes[0].name = "Beam position"
-        for nav_axes, sig_axes in zip(
-            self.axes_manager.navigation_axes, s_com.axes_manager.signal_axes
-        ):
-            pst._copy_axes_object_metadata(nav_axes, sig_axes)
-        return s_com
+            mask = pst._make_circular_mask(x, y, det_shape[0], det_shape[1], r)
+
+        ans = self.map(center_of_mass, threshold=threshold, mask=mask, **kwargs)
+        ans = ans.T
+        ans.set_signal_type("dpc")
+        ans.axes_manager.navigation_axes[0].name = "Beam position"
+        return ans
 
     @deprecated_argument(
         name="lazy_result", alternative="lazy_output", since="0.15.0", removal="1.0.0"

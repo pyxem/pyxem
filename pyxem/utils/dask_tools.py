@@ -18,6 +18,7 @@
 
 import numpy as np
 import dask.array as da
+from scipy import ndimage
 from skimage.feature import match_template, blob_dog, blob_log
 import scipy.ndimage as ndi
 from skimage import morphology
@@ -843,6 +844,7 @@ def _center_of_mass_array(dask_array, threshold_value=None, mask_array=None):
     >>> output = output_dask.compute()
 
     """
+
     det_shape = dask_array.shape[-2:]
     y_grad, x_grad = np.mgrid[0 : det_shape[0], 0 : det_shape[1]]
     y_grad, x_grad = y_grad.astype(np.float64), x_grad.astype(np.float64)
