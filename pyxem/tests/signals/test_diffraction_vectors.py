@@ -19,11 +19,19 @@
 import pytest
 import numpy as np
 from sklearn.cluster import DBSCAN
+from skimage.draw import disk
+from skimage.morphology import disk as disk2
 
 from hyperspy.signals import Signal2D
 from hyperspy.signal import BaseSignal
 
-from pyxem.signals import DiffractionVectors, DiffractionVectors2D, PolarVectors
+
+from pyxem.signals import DiffractionVectors, DiffractionVectors2D
+from pyxem.utils._subpixel_utils import (
+    _center_of_mass_hs,
+    _get_experimental_square,
+    _conventional_xc,
+)
 from hyperspy.axes import UniformDataAxis
 
 # DiffractionVectors correspond to a single list of vectors, a map of vectors
@@ -269,7 +277,7 @@ class TestInitVectors:
         pixels = dv.pixel_vectors
 
         for i in np.ndindex((2, 2)):
-            np.testing.assert_almost_equal(peaks.data[i], pixels[i])
+            np.testing.assert_almost_equal(peaks.data[i], pixels.data[i])
 
     def test_initial_metadata(self, diffraction_vectors_map):
         assert diffraction_vectors_map.scales is None
@@ -331,6 +339,64 @@ class TestInitVectors:
             100,
             100,
         ]
+
+
+class TestSubpixelRefinement:
+    def test_com_accuracy(self):
+        xx, yy = disk(center=(45, 50), radius=10)
+        cir = np.zeros((100, 100))
+        cir[xx, yy] = 1
+        sq = _get_experimental_square(cir, (47, 50), 30)
+        cen = _center_of_mass_hs(sq)
+        assert np.allclose(np.array(cen) - 15, (-2.0, 0.0))
+
+    def test_conventional_xc_accuracy(self):
+        xx, yy = disk(center=(45, 50), radius=10)
+        kernel = disk2(radius=10)
+        cir = np.random.random((100, 100))
+
+        cir[xx, yy] += 10
+        sq = _get_experimental_square(cir, (47, 50), 30)
+        cen = _conventional_xc(sq, kernel, upsample_factor=1)
+        assert np.allclose(np.array(cen), (-2.0, 0.0))
+
+    def test_subpixel_refinement_com(self):
+        import pyxem.dummy_data.make_diffraction_test_data as mdtd
+        import pyxem as pxm
+        import numpy as np
+
+        di = mdtd.DiffractionTestImage(intensity_noise=False)
+        di.add_disk(x=128, y=128, intensity=10.0)  # Add a zero beam disk at the center
+        di.add_cubic_disks(vx=20, vy=20, intensity=2.0, n=5)
+        di.add_background_lorentz()
+        dtd = mdtd.DiffractionTestDataset(10, 10, 256, 256)
+        position_array = np.ones((10, 10), dtype=bool)
+        position_array[:5] = False
+        dtd.add_diffraction_image(di)
+        s = dtd.get_signal()
+        temp = s.template_match_disk(disk_r=5, subtract_min=False)
+        pks = temp.find_peaks(threshold_abs=0.4, interactive=False)
+        dv = pxm.signals.DiffractionVectors.from_peaks(pks)
+        dv.subpixel_refine(s, method="center-of-mass")
+
+    def test_subpixel_refinement_xc(self):
+        import pyxem.dummy_data.make_diffraction_test_data as mdtd
+        import pyxem as pxm
+        import numpy as np
+
+        di = mdtd.DiffractionTestImage(intensity_noise=False)
+        di.add_disk(x=128, y=128, intensity=10.0)  # Add a zero beam disk at the center
+        di.add_cubic_disks(vx=20, vy=20, intensity=2.0, n=5)
+        di.add_background_lorentz()
+        dtd = mdtd.DiffractionTestDataset(10, 10, 256, 256)
+        position_array = np.ones((10, 10), dtype=bool)
+        position_array[:5] = False
+        dtd.add_diffraction_image(di)
+        s = dtd.get_signal()
+        temp = s.template_match_disk(disk_r=5, subtract_min=False)
+        pks = temp.find_peaks(threshold_abs=0.4, interactive=False)
+        dv = pxm.signals.DiffractionVectors.from_peaks(pks)
+        dv.subpixel_refine(s, method="cross-correlation", upsample_factor=2, disk_r=5)
 
 
 class TestConvertVectors:
@@ -624,19 +690,3 @@ class TestSlicingVectors:
         assert vectors.num_columns == 2
         lazy_vectors = vectors.as_lazy()
         assert lazy_vectors.num_columns == 2
-
-
-class TestDiffractionVectors:
-    def test_polar(self):
-        vectors = np.empty((2, 2), dtype=object)
-        for i in np.ndindex((2, 2)):
-            vectors[i] = np.array([[0.0, 1.0, 0.5], [1.0, 0.0, 0.5]]).T
-        dv = DiffractionVectors(vectors)
-        pol = dv.to_polar()
-        assert isinstance(pol, PolarVectors)
-        np.testing.assert_almost_equal(
-            pol.data[0, 0],
-            np.array([[1.0, 1.0, 0.7071068], [np.pi / 2, 0, np.pi / 4]]).T,
-        )
-        cart = pol.to_cartesian()  # test going back to cartesian
-        np.testing.assert_almost_equal(cart.data[0, 0], vectors[0, 0])

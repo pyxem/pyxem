@@ -58,29 +58,24 @@ Subpixel Peak Fitting
 =====================
 
 The template matching is done on the pixel grid.  To find the peak position more accurately the correlation
-can be upsampled using the :class:`pyxem.generators.SubpixelrefinementGenerator` class.  This class takes a
-`DiffractionSignal2D` object and a `DiffractionVector` object as input.
-"""
-"""
-from pyxem.generators.subpixelrefinement_generator import SubpixelrefinementGenerator
-subpixel_gen = SubpixelrefinementGenerator(s, pks)
-refined_peaks_com = subpixel_gen.center_of_mass_method(square_size=5)
-# square_size is the size of the square around the peak to use for the center of mass calculation
-refined_peaks_xc= subpixel_gen.conventional_xc(square_size=5,
-                                                 disc_radius=5,
-                                                 upsample_factor=3)
-markers1 = pks.as_markers(colors='red',
-                          sizes=.1,
-                          alpha=0.5)
-markers2 = refined_peaks_com.as_markers(colors='blue',
-                                        sizes=.1,
-                                        alhpa=0.5)
+can be up-sampled using the :func:`pyxem.signals.DiffractionVectors.subpixel_refine` method.  This method takes a
+`DiffractionSignal2D` object and uses that to refine the peak positions.
 
-markers3 = refined_peaks_xc.as_markers(colors='green',
-                                       sizes=.1,
-                                       alhpa=0.5)
+This only really works up to up-sampling of 2-4. There is little improvement with increased up-sampling while 
+it greatly increases the computation time. 
+"""
+refined_peaks_com = vectors.subpixel_refine(s, "center-of-mass", square_size=20)
+refined_peaks_xc = vectors.subpixel_refine(
+    s, "cross-correlation", square_size=20, upsample_factor=2, disk_r=5
+)
+
+markers2 = refined_peaks_com.to_markers(color="blue", sizes=10, alpha=0.25)
+markers3 = refined_peaks_xc.to_markers(color="green", sizes=10, alpha=0.25)
+
 
 s.plot()
-s.add_marker([markers1, markers2, markers3])
-"""
+s.add_marker(vectors.to_markers(color="red", sizes=10, alpha=0.25))
+s.add_marker(markers2)
+s.add_marker(markers3)
+
 # %%
