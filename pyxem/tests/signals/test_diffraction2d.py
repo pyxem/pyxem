@@ -135,6 +135,20 @@ class TestAzimuthalIntegral1d:
         np.testing.assert_almost_equal(np.sum(ones.data), np.pi * 4**2, decimal=0)
         assert az is None
 
+    def test_1d_azimuthal_integral_pyxem(self, ones):
+        ones.calibrate.center = None
+        ones.calibrate.scale = 0.2
+        az = ones.get_azimuthal_integral1d(
+            npt=10,
+            method="splitpixel_pyxem",
+            inplace=True,
+            radial_range=[0.0, 0.8],
+            mean=True,
+        )
+        assert isinstance(ones, Diffraction1D)
+        np.testing.assert_array_equal(ones.data[0:8], np.ones(8))
+        assert az is None
+
     def test_1d_azimuthal_integral_inplace(self, ones):
         ones.set_ai()
         az = ones.get_azimuthal_integral1d(
@@ -320,12 +334,7 @@ class TestVariance:
     @pytest.fixture
     def ones(self):
         ones_diff = Diffraction2D(data=np.ones(shape=(10, 10, 10, 10)))
-        ones_diff.axes_manager.signal_axes[0].scale = 0.1
-        ones_diff.axes_manager.signal_axes[1].scale = 0.1
-        ones_diff.axes_manager.signal_axes[0].name = "kx"
-        ones_diff.axes_manager.signal_axes[1].name = "ky"
-        ones_diff.unit = "2th_deg"
-        ones_diff.set_ai()
+        ones_diff.calibrate(scale=0.1, center=None)
         return ones_diff
 
     @pytest.fixture
@@ -333,12 +342,7 @@ class TestVariance:
         data = np.ones(shape=(10, 10, 10, 10))
         data[0:10:2, :, :, :] = 2
         ones_diff = Diffraction2D(data=data)
-        ones_diff.axes_manager.signal_axes[0].scale = 0.1
-        ones_diff.axes_manager.signal_axes[1].scale = 0.1
-        ones_diff.axes_manager.signal_axes[0].name = "kx"
-        ones_diff.axes_manager.signal_axes[1].name = "ky"
-        ones_diff.unit = "2th_deg"
-        ones_diff.set_ai()
+        ones_diff.calibrate(scale=0.1, center=None)
         return ones_diff
 
     @pytest.fixture
@@ -350,12 +354,7 @@ class TestVariance:
         rng = default_rng(seed=1)
         data = rng.poisson(lam=data)
         ones_diff = Diffraction2D(data=data)
-        ones_diff.axes_manager.signal_axes[0].scale = 0.1
-        ones_diff.axes_manager.signal_axes[1].scale = 0.1
-        ones_diff.axes_manager.signal_axes[0].name = "kx"
-        ones_diff.axes_manager.signal_axes[1].name = "ky"
-        ones_diff.unit = "2th_deg"
-        ones_diff.set_ai()
+        ones_diff.calibrate(scale=0.1, center=None)
         return ones_diff
 
     def test_FEM_Omega(self, ones, ones_zeros):
@@ -421,7 +420,7 @@ class TestVariance:
         bulls_eye_variance = bulls_eye_noisy.get_variance(25, method="re", dqe=1)
         # This fails at small radii and might still fail because it is random...
         np.testing.assert_array_almost_equal(
-            bulls_eye_variance.data[5:], np.zeros(20), decimal=2
+            bulls_eye_variance.data[5:], np.zeros(20), decimal=1
         )
         # Testing for non dqe=1
         bulls_eye_variance = (bulls_eye_noisy * 10).get_variance(

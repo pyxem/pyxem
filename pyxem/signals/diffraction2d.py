@@ -1623,24 +1623,24 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         if method == "Omega":
             one_d_integration = self.get_azimuthal_integral1d(
-                npt=npt, method="bbox", **kwargs
+                npt=npt, mean=True, **kwargs
             )
             variance = (
                 (one_d_integration**2).mean(axis=navigation_axes)
                 / one_d_integration.mean(axis=navigation_axes) ** 2
             ) - 1
             if dqe is not None:
-                sum_points = self.get_azimuthal_integral1d(
-                    method="bbox", npt=npt, sum=True, **kwargs
-                ).mean(axis=navigation_axes)
+                sum_points = self.get_azimuthal_integral1d(npt=npt, **kwargs).mean(
+                    axis=navigation_axes
+                )
                 variance = variance - ((sum_points**-1) * dqe)
 
         elif method == "r":
             one_d_integration = self.get_azimuthal_integral1d(
-                npt=npt, method="bbox", **kwargs
+                npt=npt, mean=True, **kwargs
             )
             integration_squared = (self**2).get_azimuthal_integral1d(
-                method="bbox", npt=npt, **kwargs
+                mean=True, npt=npt, **kwargs
             )
             # Full variance is the same as the unshifted phi=0 term in angular correlation
             full_variance = (integration_squared / one_d_integration**2) - 1
@@ -1655,19 +1655,17 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         elif method == "re":
             one_d_integration = self.get_azimuthal_integral1d(
-                npt=npt, method="bbox", **kwargs
+                npt=npt, mean=True, **kwargs
             ).mean(axis=navigation_axes)
             integration_squared = (
                 (self**2)
-                .get_azimuthal_integral1d(npt=npt, method="bbox", **kwargs)
+                .get_azimuthal_integral1d(npt=npt, mean=True, **kwargs)
                 .mean(axis=navigation_axes)
             )
             variance = (integration_squared / one_d_integration**2) - 1
 
             if dqe is not None:
-                sum_int = self.get_azimuthal_integral1d(
-                    npt=npt, method="bbox", **kwargs
-                ).mean()
+                sum_int = self.get_azimuthal_integral1d(npt=npt, **kwargs).mean()
                 variance = variance - (sum_int**-1) * (1 / dqe)
 
         elif method == "VImage":
@@ -1680,7 +1678,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                     self.sum(axis=navigation_axes) ** -1
                 ) * (1 / dqe)
             variance = variance_image.get_azimuthal_integral1d(
-                npt=npt, method="bbox", **kwargs
+                npt=npt, mean=True, **kwargs
             )
         return variance
 
