@@ -122,7 +122,9 @@ def _com_experimental_square(z, vector, square_size):
         z, but with row and column zero set to 0
     """
     # Copy to make sure we don't change the dp
-    z_adpt = np.copy(_get_experimental_square(z, vector=vector, square_size=square_size))
+    z_adpt = np.copy(
+        _get_experimental_square(z, vector=vector, square_size=square_size)
+    )
     z_adpt[:, 0] = 0
     z_adpt[0, :] = 0
     return z_adpt
