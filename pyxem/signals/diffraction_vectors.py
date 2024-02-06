@@ -50,7 +50,7 @@ from pyxem.utils._slicers import Slicer
 from pyxem.utils._subpixel_utils import (
     _conventional_xc_map,
     _center_of_mass_map,
-    get_simulated_disc,
+    _get_simulated_disc,
 )
 
 from pyxem.utils._deprecated import deprecated
@@ -311,7 +311,7 @@ class DiffractionVectors(BaseSignal):
             )
         if method == "cross-correlation":
             kwargs["upsample_factor"] = upsample_factor
-            kwargs["kernel"] = get_simulated_disc(square_size, disk_r)
+            kwargs["kernel"] = _get_simulated_disc(square_size, disk_r)
         kwargs["square_size"] = square_size
 
         signal_axes = signal.axes_manager.signal_axes
