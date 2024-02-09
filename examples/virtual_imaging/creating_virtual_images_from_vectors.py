@@ -1,4 +1,4 @@
-""""
+"""
 # Creating Virtual Images from Vectors
 
 In this example we will show how to create virtual images from vectors.
