@@ -63,21 +63,21 @@ def _slice_radial_integrate(
     """
     if mask is not None:
         img = img * np.logical_not(mask)
-    val = np.empty(slices.shape[0])
-
+    val = np.empty((npt_rad, npt_azim))
     for i in prange(len(factors_slice)):
-        val[i] = np.sum(
+        ii, jj = i // npt_azim, i % npt_azim
+        val[ii, jj] = np.sum(
             img[slices[i][0] : slices[i][2], slices[i][1] : slices[i][3]]
             * factors[factors_slice[i][0] : factors_slice[i][1]].reshape(
                 (slices[i][2] - slices[i][0], slices[i][3] - slices[i][1])
             )
         )
-    return val.reshape((npt_rad, npt_azim))
+    return val
 
 
 @cuda.jit
 def __slice_radial_integrate_cupy(
-    img, factors, factors_slice, slices, val
+    img, factors, factors_slice, slices, val, npt_azim
 ):  # pragma: no cover
     """Slice the image into small chunks and multiply by the factors.
     Parameters
@@ -107,7 +107,7 @@ def __slice_radial_integrate_cupy(
             for j in range(current_slice[1], current_slice[3]):
                 sum += factors[ind + factors_ind[0]] * img[i, j]
                 ind += 1
-        val[x] = sum
+        val[bx, tx] = sum
     return
 
 
@@ -122,12 +122,11 @@ def _slice_radial_integrate_cupy(
     threads_per_block = int(
         np.ceil(npt_azim / 32) * 32
     )  # round up to nearest multiple of 32
-    val = cupy.empty(slices.shape[0])
+    val = cp.empty((npt_rad, npt_azim))
     __slice_radial_integrate_cupy[blocks, threads_per_block](
-        image, factors, factor_slices, slices, val
+        image, factors, factor_slices, slices, val, npt_azim
     )
-    val_reshaped = val.reshape(npt_rad, npt_azim)
-    return val_reshaped
+    return val
 
 
 @numba.njit
