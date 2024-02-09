@@ -25,7 +25,7 @@ from pyxem.utils.correlation_utils import _correlation, _power, _pearson_correla
 from pyxem.utils._deprecated import deprecated
 
 
-class PolarDiffraction2D(Signal2D, CommonDiffraction):
+class PolarDiffraction2D(CommonDiffraction, Signal2D):
     """Signal class for two-dimensional diffraction data in polar coordinates.
 
     Parameters

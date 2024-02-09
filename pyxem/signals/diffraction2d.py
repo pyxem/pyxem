@@ -96,7 +96,7 @@ if CUPY_INSTALLED:
     import cupy as cp
 
 
-class Diffraction2D(Signal2D, CommonDiffraction):
+class Diffraction2D(CommonDiffraction, Signal2D):
     """Signal class for two-dimensional diffraction data in Cartesian coordinates.
 
     Parameters
@@ -2109,7 +2109,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                     npt_azim=npt_azim,
                     inplace=inplace,
                     mask=mask,
-                    **kwargs,)
+                    **kwargs,
+                )
 
         else:
             sig_shape = self.axes_manager.signal_shape
