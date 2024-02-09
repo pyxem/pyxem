@@ -23,6 +23,10 @@ from hyperspy.misc.utils import isiterable
 import hyperspy.api as hs
 
 from traits.trait_base import Undefined
+from pyxem import CUPY_INSTALLED
+
+if CUPY_INSTALLED:
+    import cupy as cp
 from pyxem.utils.virtual_images_utils import normalize_virtual_images
 from importlib import import_module
 
@@ -36,7 +40,7 @@ OUT_SIGNAL_AXES_DOCSTRING = """out_signal_axes : None, iterable of int or string
 class CommonDiffraction:
     """Common functions for all Diffraction Signals classes"""
 
-    def to_gpu(self):  # pragma: no cover
+    def to_device(self):  # pragma: no cover
         """Transfer the data to the GPU.
 
         Returns
@@ -44,35 +48,32 @@ class CommonDiffraction:
         Diffraction2D
             The data on the GPU.
         """
-        try:
-            cp = import_module("cupy")
-        except ImportError:
+        if not CUPY_INSTALLED:
             raise ImportError(
                 "The cupy package is required to use this method. "
                 "Please install it using `conda install cupy`."
             )
-        if self._lazy:
-            self.data = self.data.map_blocks(
-                cp.asarray
-            )  # pass chunk-wise the data to GPU
-        else:
-            self.data = cp.asarray(self.data)  # pass all the data to the GPU
+        if not self._gpu:
+            if self._lazy:
+                self.data = self.data.map_blocks(
+                    cp.asarray
+                )  # pass chunk-wise the data to GPU
+            else:
+                self.data = cp.asarray(self.data)  # pass all the data to the GPU
         self._gpu = True
 
-    def from_gpu(self):  # pragma: no cover
+    def to_host(self):  # pragma: no cover
         """Transfer the data from the GPU to the CPU."""
-
-        try:
-            cp = import_module("cupy")
-        except ImportError:
+        if not CUPY_INSTALLED:
             raise ImportError(
                 "The cupy package is required to use this method. "
                 "Please install it using `conda install cupy`."
             )
-        if self._lazy:
-            self.data = self.data.map_blocks(cp.asnumpy)
-        else:
-            self.data = cp.asnumpy(self.data)
+        if self._gpu:
+            if self._lazy:
+                self.data = self.data.map_blocks(cp.asnumpy)
+            else:
+                self.data = cp.asnumpy(self.data)
         self._gpu = False
 
     @property

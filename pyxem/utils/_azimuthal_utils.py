@@ -24,12 +24,10 @@ import shapely
 from numba import cuda, prange
 import numba
 
-try:
-    import cupy
+from pyxem import CUPY_INSTALLED
 
-    CUPY_INSTALLED = True  # pragma: no cover
-except ImportError:
-    CUPY_INSTALLED = False
+if CUPY_INSTALLED:
+    import cupy as cp
 
 
 @numba.njit(parallel=True, nogil=True)
@@ -90,10 +88,8 @@ def __slice_radial_integrate_cupy(
         The factors to multiply the slices by
     slices:
         The slices to slice the image by
-    npt_rad:
-        The number of radial points
-    npt_azim:
-        The number of azimuthal points
+    val:
+        The array to store the result in
     Note
     ----
     This function is run by every single thread once!
@@ -123,13 +119,14 @@ def _slice_radial_integrate_cupy(
     # diffraction patterns at once. This would require a change in the way the
     # map function operates upstream. (might not be worth it :))
     blocks = npt_rad
-    threads = int(np.ceil(npt_azim / 32) * 32)  # round up to nearest multiple of 32
+    threads_per_block = int(
+        np.ceil(npt_azim / 32) * 32
+    )  # round up to nearest multiple of 32
     val = cupy.empty(slices.shape[0])
-    __slice_radial_integrate_cupy[blocks, threads](
+    __slice_radial_integrate_cupy[blocks, threads_per_block](
         image, factors, factor_slices, slices, val
     )
     val_reshaped = val.reshape(npt_azim, npt_rad).T
-    del val
     return val_reshaped
 
 

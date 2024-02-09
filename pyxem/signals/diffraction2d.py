@@ -90,12 +90,10 @@ from pyxem.utils._background_subtraction import (
 )
 from pyxem.utils.calibration_utils import Calibration
 
-try:
-    import cupy as cp
+from pyxem import CUPY_INSTALLED
 
-    CUPY_INSTALLED = True
-except ImportError:
-    CUPY_INSTALLED = False
+if CUPY_INSTALLED:
+    import cupy as cp
 
 
 class Diffraction2D(Signal2D, CommonDiffraction):
