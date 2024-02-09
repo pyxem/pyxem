@@ -289,3 +289,5 @@ class DiffractionVectors2D(DiffractionVectors, Signal2D):
             label = [f"{i}" for i in range(len(self.data))]
             texts = hs.plot.markers.Texts(offsets=pos, texts=label, **kwargs)
             return rois, texts
+        else:
+            return rois
