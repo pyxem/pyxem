@@ -72,7 +72,7 @@ def _slice_radial_integrate(
                 (slices[i][2] - slices[i][0], slices[i][3] - slices[i][1])
             )
         )
-    return val.reshape((npt_azim, npt_rad)).T
+    return val.reshape((npt_rad, npt_azim))
 
 
 @cuda.jit
@@ -126,7 +126,7 @@ def _slice_radial_integrate_cupy(
     __slice_radial_integrate_cupy[blocks, threads_per_block](
         image, factors, factor_slices, slices, val
     )
-    val_reshaped = val.reshape(npt_azim, npt_rad).T
+    val_reshaped = val.reshape(npt_rad, npt_azim)
     return val_reshaped
 
 
@@ -231,17 +231,17 @@ def _get_control_points(npt, npt_azim, radial_range, affine):
     phi = np.linspace(0, 2 * np.pi, npt_azim + 1)
     control_points = np.empty(((len(r) - 1) * (len(phi) - 1), 4, 2))
     # lower left
-    control_points[:, 0, 0] = (r[:-1] * np.cos(phi[:-1])[:, np.newaxis]).ravel()
-    control_points[:, 0, 1] = (r[:-1] * np.sin(phi[:-1])[:, np.newaxis]).ravel()
+    control_points[:, 0, 0] = (np.cos(phi[:-1]) * r[:-1][:, np.newaxis]).ravel()
+    control_points[:, 0, 1] = (np.sin(phi[:-1]) * r[:-1][:, np.newaxis]).ravel()
     # lower right
-    control_points[:, 1, 0] = (r[:-1] * np.cos(phi[1:])[:, np.newaxis]).ravel()
-    control_points[:, 1, 1] = (r[:-1] * np.sin(phi[1:])[:, np.newaxis]).ravel()
+    control_points[:, 1, 0] = (np.cos(phi[1:]) * r[:-1][:, np.newaxis]).ravel()
+    control_points[:, 1, 1] = (np.sin(phi[1:]) * r[:-1][:, np.newaxis]).ravel()
     # upper left
-    control_points[:, 2, 0] = (r[1:] * np.cos(phi[1:])[:, np.newaxis]).ravel()
-    control_points[:, 2, 1] = (r[1:] * np.sin(phi[1:])[:, np.newaxis]).ravel()
+    control_points[:, 2, 0] = (np.cos(phi[1:]) * r[1:][:, np.newaxis]).ravel()
+    control_points[:, 2, 1] = (np.sin(phi[1:]) * r[1:][:, np.newaxis]).ravel()
     # upper right
-    control_points[:, 3, 0] = (r[1:] * np.cos(phi[:-1])[:, np.newaxis]).ravel()
-    control_points[:, 3, 1] = (r[1:] * np.sin(phi[:-1])[:, np.newaxis]).ravel()
+    control_points[:, 3, 0] = (np.cos(phi[:-1]) * r[1:][:, np.newaxis]).ravel()
+    control_points[:, 3, 1] = (np.sin(phi[:-1]) * r[1:][:, np.newaxis]).ravel()
 
     # apply the affine transformation to the control points
     if affine is not None:

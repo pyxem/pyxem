@@ -307,10 +307,6 @@ class Calibration:
         slices, factors, factors_slice, radial_range = self.get_slices2d(
             npt, 360, radial_range
         )
-        slices = slices.reshape((npt_azim, npt, 4)).swapaxes(0, 1).reshape((-1, 4))
-        factors_slice = (
-            factors_slice.reshape((npt_azim, npt, 2)).swapaxes(0, 1).reshape((-1, 2))
-        )
 
         # convert into 1d slices
         indexes = []
