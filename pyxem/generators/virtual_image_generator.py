@@ -23,7 +23,7 @@ import hyperspy.api as hs
 
 from pyxem.signals.common_diffraction import OUT_SIGNAL_AXES_DOCSTRING
 from pyxem.utils.virtual_images_utils import normalize_virtual_images, get_vectors_mesh
-
+from pyxem.utils._deprecated import deprecated
 
 NORMALISE_DOCSTRING = """normalize : boolean
             If True each VDF image is normalized so that the maximum intensity
@@ -48,6 +48,11 @@ class VirtualImageGenerator:
         self.signal = signal
         self.roi_list = []
 
+    @deprecated(
+        alternative="pyxem.signals.Diffraction2D.get_azithumal_integral1d",
+        since="0.17.0",
+        removal="1.0.0",
+    )
     def get_concentric_virtual_images(
         self, k_min, k_max, k_steps, normalize=False, out_signal_axes=None
     ):
@@ -282,6 +287,11 @@ class VirtualDarkFieldGenerator(VirtualImageGenerator):
 
         self.vectors = unique_vectors
 
+    @deprecated(
+        alternative="pyxem.signals.DiffractionVectors2D.to_roi",
+        since="0.17.0",
+        removal="1.0.0",
+    )
     def get_virtual_dark_field_images(
         self, radius, normalize=False, out_signal_axes=None
     ):
