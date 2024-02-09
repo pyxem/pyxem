@@ -1,5 +1,7 @@
 """
-# Creating Virtual Images from Vectors
+====================================
+Creating Virtual Images from Vectors
+====================================
 
 In this example we will show how to create virtual images from vectors.
 We will use the `find_peaks` method to find the vectors and then use the

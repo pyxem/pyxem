@@ -1,5 +1,7 @@
 """
-# Creating Interactive Virtual Images
+===================================
+Creating Interactive Virtual Images
+===================================
 
 We can create interactive virtual images by using the `interactive` method from hyperspy. Because
 this requires that we recalculate the virtual images every time we change the ROIs it works best
