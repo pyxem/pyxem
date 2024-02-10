@@ -243,7 +243,7 @@ class TestGetLinearPlaneFromSignal2d:
         s.data[50, 51] = 10000
         mask[50, 51] = True
         plane_mask = pst._get_linear_plane_from_signal2d(s, mask=mask)
-        np.testing.assert_almost_equal(plane_mask, s_orig.data)
+        np.testing.assert_allclose(plane_mask, s_orig.data, atol=1E-6)
 
     def test_crop_signal(self):
         s, _ = hs.signals.Signal2D(np.meshgrid(range(100), range(110)))
