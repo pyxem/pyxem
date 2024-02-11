@@ -77,6 +77,14 @@ class CommonDiffraction:
         self._gpu = False
 
     @property
+    def _gpu(self):
+        self.metadata.get_item("_HyperSpy.gpu")
+
+    @_gpu.setter
+    def _gpu(self, value):
+        self.metadata.set_item("_HyperSpy.gpu", value)
+
+    @property
     def unit(self):
         if self.axes_manager.signal_axes[0].units is Undefined:
             print("The unit hasn't been set yet")

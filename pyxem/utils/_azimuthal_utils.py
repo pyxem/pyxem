@@ -77,7 +77,7 @@ def _slice_radial_integrate(
 
 @cuda.jit
 def __slice_radial_integrate_cupy(
-    img, factors, factors_slice, slices, val, npt_azim
+    img, factors, factors_slice, slices, val
 ):  # pragma: no cover
     """Slice the image into small chunks and multiply by the factors.
     Parameters
@@ -124,7 +124,7 @@ def _slice_radial_integrate_cupy(
     )  # round up to nearest multiple of 32
     val = cp.empty((npt_rad, npt_azim))
     __slice_radial_integrate_cupy[blocks, threads_per_block](
-        image, factors, factor_slices, slices, val, npt_azim
+        image, factors, factor_slices, slices, val
     )
     return val
 
