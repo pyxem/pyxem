@@ -111,6 +111,45 @@ def __slice_radial_integrate_cupy(
     return
 
 
+@cuda.jit
+def __slice_radial_integrate_cupy2(
+    img, factors, factors_slice, slices, val
+):  # pragma: no cover
+    """Slice the image into small chunks and multiply by the factors.
+    Parameters
+    ----------
+    img: np.array
+        The image to be sliced
+    factors:
+        The factors to multiply the slices by
+    slices:
+        The slices to slice the image by
+    val:
+        The array to store the result in
+    Note
+    ----
+    This function is run by every single thread once!
+    """
+    tx = cuda.threadIdx.x  # current thread (per pixel)
+    bx = cuda.blockIdx.x  # Current block (radial)
+    by = cuda.blockIdx.y  # Current block (navigation flattened)
+    bw = cuda.blockDim.x  # Should be equal to blocks!
+    bwy = cuda.blockDim.y  # Should be equal to blocks!
+
+    x = tx + bx * bw + by * bwy
+    if x < val.size:  # account for slices out of range!
+        factors_ind = factors_slice[x]
+        current_slice = slices[x]
+        sum = 0
+        ind = 0
+        for i in range(current_slice[0], current_slice[2]):
+            for j in range(current_slice[1], current_slice[3]):
+                sum += factors[ind + factors_ind[0]] * img[i, j]
+                ind += 1
+        val[by, bx, tx] = sum
+    return
+
+
 def _slice_radial_integrate_cupy(
     image, factors, factor_slices, slices, npt_rad, npt_azim
 ):  # pragma: no cover
