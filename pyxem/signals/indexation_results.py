@@ -166,10 +166,6 @@ class OrientationMap(DiffractionVectors2D):
 
     _signal_type = "orientation_map"
 
-    def __init__(self):
-        super().__init__()
-        self._signal_type = "orientation_map"
-
     @property
     def simulation(self):
         return self.metadata.get_item("simulation")
