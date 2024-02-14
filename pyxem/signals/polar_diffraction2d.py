@@ -362,6 +362,10 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
             inplace=False,
         )
 
+        orientation.set_signal_type("orientation_map")
+        orientation.simulation = simulation
+        orientation.column_names = ["index", "correlation", "rotation", "factor"]
+        orientation.units = ["a.u.", "a.u.", "deg", "a.u."]
         return orientation
 
 
