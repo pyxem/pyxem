@@ -26,6 +26,7 @@ from pyxem.utils._deprecated import deprecated
 from pyxem.utils.indexation_utils import (
     _mixed_matching_lib_to_polar,
     _get_integrated_polar_templates,
+    _norm_rows,
 )
 
 from pyxem.utils._background_subtraction import (
@@ -309,7 +310,7 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
         )
 
     def get_orientation(
-        self, simulation, n_keep=1, frac_keep=0.1, n_best=1, normalize_templates=True
+        self, simulation, n_keep=None, frac_keep=0.1, n_best=1, normalize_templates=True
     ):
         """Match the orientation with some simulated diffraction patterns using
         an accelerated orientation mapping algorithm.
@@ -343,13 +344,15 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
             theta_templates,
             intensities_templates,
         ) = simulation.polar_flatten_simulations(
-            radial_axes=self.axes_manager.signal_axes[0].axis,
-            azimuthal_axes=self.axes_manager.signal_axes[1].axis,
+            radial_axes=self.axes_manager.signal_axes[1].axis,
+            azimuthal_axes=self.axes_manager.signal_axes[0].axis,
         )
-        radius = self.axes_manager.signal_axes[0].size  # number radial pixels
+        radius = self.axes_manager.signal_axes[1].size  # number radial pixels
         integrated_templates = _get_integrated_polar_templates(
             radius, r_templates, intensities_templates, normalize_templates
         )
+        if normalize_templates:
+            intensities_templates = _norm_rows(intensities_templates)
         orientation = self.map(
             _mixed_matching_lib_to_polar,
             integrated_templates=integrated_templates,
@@ -360,6 +363,7 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
             frac_keep=frac_keep,
             n_best=n_best,
             inplace=False,
+            transpose=True,
         )
 
         orientation.set_signal_type("orientation_map")
