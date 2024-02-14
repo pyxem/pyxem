@@ -324,6 +324,14 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
         ----------
         simulation : DiffractionSimulation
             The diffraction simulation object to use for indexing.
+        n_keep : int
+            The number of orientations to keep for each diffraction pattern.
+        frac_keep : float
+            The fraction of the best matching orientations to keep.
+        n_best : int
+            The number of best matching orientations to keep.
+        normalize_templates : bool
+            Normalize the templates to the same intensity.
 
         Returns
         -------
@@ -334,7 +342,10 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
             r_templates,
             theta_templates,
             intensities_templates,
-        ) = simulation.get_polar_templates()
+        ) = simulation.polar_flatten_simulations(
+            radial_axes=self.axes_manager.signal_axes[0].axis,
+            azimuthal_axes=self.axes_manager.signal_axes[1].axis,
+        )
         radius = self.axes_manager.signal_axes[0].size  # number radial pixels
         integrated_templates = _get_integrated_polar_templates(
             radius, r_templates, intensities_templates, normalize_templates
