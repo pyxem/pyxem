@@ -166,6 +166,10 @@ class OrientationMap(DiffractionVectors2D):
 
     _signal_type = "orientation_map"
 
+    def __init__(self):
+        super().__init__()
+        self._signal_type = "orientation_map"
+
     @property
     def simulation(self):
         return self.metadata.get_item("simulation")
@@ -175,43 +179,25 @@ class OrientationMap(DiffractionVectors2D):
         self.metadata.set_item("simulation", value)
 
     def to_crystal_map(self):
-        """Convert the orientation map to an `orix.CrystalMap` object"""
         pass
 
-    def to_markers(self, annotate=False, **kwargs):
-        """Convert the orientation map to a set of markers for plotting.
-
-        Parameters
-        ----------
-        annotate : bool
-            If True, the euler rotation and the correlation will be annotated on the plot using
-            the `Texts` class from hyperspy.
-        """
-
+    def to_markers(self):
         pass
 
     def to_navigator(self):
-        """Create a colored navigator and a legend (in the form of a marker) which can be passed as the
-        navigator argument to the `plot` method of some signal.
-        """
         pass
 
-    def plot_over_signal(self, signal, annotate=False, **kwargs):
-        """Convenience method to plot the orientation map and the n-best matches over the signal.
-
+    def plot_over_signal(self, annotate=False, **kwargs):
+        """
         Parameters
         ----------
-        signal : BaseSignal
-            The signal to plot the orientation map over.
-        annotate: bool
-            If True, the euler rotation and the correlation will be annotated on the plot using
-            the `Texts` class from hyperspy.
+        annotate
+        kwargs
+
+        Returns
+        -------
 
         """
-        pass
-
-    def plot_inplane_rotation(self, **kwargs):
-        """Plot the in-plane rotation of the orientation map as a 2D map."""
         pass
 
 
