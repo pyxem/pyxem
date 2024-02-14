@@ -26,6 +26,7 @@ from orix.quaternion import Rotation
 from transforms3d.euler import mat2euler
 
 from pyxem.utils.indexation_utils import get_nth_best_solution
+from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
 from pyxem.utils._signals import _transfer_navigation_axes
 
 
@@ -145,6 +146,58 @@ def _get_second_best_phase(z):
         return phase_second[4]
     else:
         return -1
+
+
+class OrientationMap(DiffractionVectors2D):
+    """Signal class for orientation maps.  Note that this is a special case where
+    for each navigation position, the signal contains the top n best matches in the form
+    of a nx4 array with columns [index,correlation, in-plane rotation, mirror(factor)]
+
+    The Simulation is saved in the metadata but can be accessed using the .simulation attribute.
+
+    Parameters
+    ----------
+    *args
+        See :class:`~hyperspy._signals.signal2d.Signal2D`.
+    **kwargs
+        See :class:`~hyperspy._signals.signal2d.Signal2D`
+    """
+
+    _signal_type = "orientation_map"
+
+    def __init__(self):
+        super().__init__()
+        self._signal_type = "orientation_map"
+
+    @property
+    def simulation(self):
+        return self.metadata.get_item("simulation")
+
+    @simulation.setter
+    def simulation(self, value):
+        self.metadata.set_item("simulation", value)
+
+    def to_crystal_map(self):
+        pass
+
+    def to_markers(self):
+        pass
+
+    def to_navigator(self):
+        pass
+
+    def plot_over_signal(self, annotate=False, **kwargs):
+        """
+        Parameters
+        ----------
+        annotate
+        kwargs
+
+        Returns
+        -------
+
+        """
+        pass
 
 
 class GenericMatchingResults:
