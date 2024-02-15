@@ -285,28 +285,30 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
     def flip_diffraction(self, axis, **kwargs):
         """Mirrors diffraction patterns about one of the coordinate axes.
-        
+
         Parameters
         ----------
-        axis : {'x', 'y'} 
+        axis : {'x', 'y'}
             The axis through which the reflection occurs
-        **kwargs : 
+        **kwargs :
             Keyword arguments to be passed to :meth:`~hyperspy.signal.BaseSignal.map`.
-        
+
         Returns
         -------
         Diffraction2D or None:
             Flipped Diffraction2D object or None (if `inplace=True`).
-        
+
         """
-        if axis == 'x':
-            return self.map(np.fliplr,**kwargs)
-        elif axis == 'y':
-            return self.map(np.flipud,**kwargs)
+        if axis == "x":
+            return self.map(np.fliplr, **kwargs)
+        elif axis == "y":
+            return self.map(np.flipud, **kwargs)
         else:
-            raise ValueError("The argument you've provided for axis is not suitable. Please use either 'x' or 'y'.")
-    
-    @deprecated(since="0.18.0", removal='1.0.0', alternative='flip_diffraction')
+            raise ValueError(
+                "The argument you've provided for axis is not suitable. Please use either 'x' or 'y'."
+            )
+
+    @deprecated(since="0.18.0", removal="1.0.0", alternative="flip_diffraction")
     def flip_diffraction_x(self):
         """Flip the dataset along the diffraction x-axis.
 
@@ -336,7 +338,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         s_out.data = np.flip(self.data, axis=-1)
         return s_out
 
-    @deprecated(since="0.18.0", removal='1.0.0', alternative='flip_diffraction')
+    @deprecated(since="0.18.0", removal="1.0.0", alternative="flip_diffraction")
     def flip_diffraction_y(self):
         """Flip the dataset along the diffraction y-axis.
 
