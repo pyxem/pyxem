@@ -16,9 +16,13 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+# TODO: Delete whole module come 1.0.0
+
 import numpy as np
+from _deprecated import deprecated
 
 
+@deprecated(since="0.18.0", removal="1.0.0")
 def normalise_pdf_signal_to_max(z, index_min, *args, **kwargs):
     """Used by hs.map in the PairDistributionFunction1D to normalise the signal
     to the maximum in the signal.
