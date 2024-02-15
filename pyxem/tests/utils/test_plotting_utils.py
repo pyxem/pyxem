@@ -1,4 +1,4 @@
-from pyxem.utils import plotting_utils as plu
+from pyxem.utils import plotting as plu
 import matplotlib.pyplot as plt
 import pytest
 import numpy as np
