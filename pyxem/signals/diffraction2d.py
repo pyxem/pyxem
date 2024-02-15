@@ -82,7 +82,7 @@ import pyxem.utils.dask_tools as dt
 import pyxem.utils.ransac_ellipse_tools as ret
 from pyxem.utils._deprecated import deprecated, deprecated_argument
 
-from pyxem.utils.background_utils import (
+from pyxem.utils._background_subtraction import (
     _subtract_median,
     _subtract_dog,
     _subtract_hdome,
