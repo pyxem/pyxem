@@ -20,8 +20,8 @@ from functools import cached_property
 from warnings import warn
 
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
-from matplotlib.cm import get_cmap
 from scipy.spatial import distance_matrix
 from sklearn.cluster import DBSCAN
 import dask.array as da
@@ -759,7 +759,7 @@ class DiffractionVectors(BaseSignal):
                     labels_to_plot[n] = labs[index]
                 # Assign a color value to each label, and shuffle these so that
                 # adjacent clusters hopefully get distinct colors.
-                cmap_lab = get_cmap("gist_rainbow")
+                cmap_lab = matplotlib.colormaps["gist_rainbow"]
                 lab_values_shuffled = np.arange(np.max(labels_to_plot) + 1)
                 np.random.shuffle(lab_values_shuffled)
                 labels_steps = np.array(
