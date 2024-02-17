@@ -24,6 +24,7 @@ import hyperspy.api as hs
 from pyxem.signals.common_diffraction import OUT_SIGNAL_AXES_DOCSTRING
 from pyxem.utils.virtual_images_utils import normalize_virtual_images, get_vectors_mesh
 from pyxem.utils._deprecated import deprecated
+from warnings import warn
 
 NORMALISE_DOCSTRING = """normalize : boolean
             If True each VDF image is normalized so that the maximum intensity
@@ -47,6 +48,11 @@ class VirtualImageGenerator:
     def __init__(self, signal, *args, **kwargs):
         self.signal = signal
         self.roi_list = []
+        warn(
+            "The VirtualImageGenerator class is deprecated and will be removed in 1.0.0. "
+            "Please use the pyxem.signals.Diffraction2D.get_virtual_image function instead.",
+            DeprecationWarning,
+        )
 
     @deprecated(
         alternative="pyxem.signals.Diffraction2D.get_azithumal_integral1d",
@@ -280,6 +286,11 @@ class VirtualDarkFieldGenerator(VirtualImageGenerator):
 
     def __init__(self, signal, vectors, *args, **kwargs):
         super().__init__(signal)
+        warn(
+            "The VirtualDarkFieldGenerator class is deprecated and will be removed in 1.0.0. "
+            "Please use the pyxem.signals.DiffractionVectors2D.to_roi function instead.",
+            DeprecationWarning,
+        )
         if len(vectors.axes_manager.signal_axes) == 0:
             unique_vectors = vectors.get_unique_vectors(*args, **kwargs)
         else:
