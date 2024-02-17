@@ -251,6 +251,29 @@ class TestDecomposition:
         assert isinstance(s, PolarDiffraction2D)
 
 
+class TestOrientationMap:
+    @pytest.fixture
+    def polar_image(self, diffraction_pattern):
+        from pyxem.signals import PolarDiffraction2D
+
+        pol_image = np.zeros((2, 2, 20, 60))
+        pol_image[:, :, 4:6, 9:11] = 1
+        pol_image[:, :, 4:6, 29:31] = 1
+        pol_image[:, :, 4:6, 49:51] = 1
+
+        pol_image[:, :, 9:11, 9:11] = 1
+        pol_image[:, :, 9:11, 29:31] = 1
+        pol_image[:, :, 9:11, 49:51] = 1
+        pol = PolarDiffraction2D(pol_image)
+        pol.axes_manager[3].scale = 0.5
+        return pol
+
+    def test_orientation_map_inplace(self, diffraction_pattern):
+        s = PolarDiffraction2D(diffraction_pattern)
+        s.orientation_map(inplace=True)
+        assert s.learning_results is not None
+
+
 class TestSubtractingDiffractionBackground:
     @pytest.fixture
     def noisy_data(self):
