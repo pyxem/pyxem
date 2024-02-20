@@ -1,6 +1,6 @@
 import numpy as np
 
-from scipy.ndimage.filters import gaussian_filter, median_filter
+from scipy.ndimage import gaussian_filter, median_filter
 from skimage.filters.rank import mean as rank_mean
 from skimage.morphology import square
 from pyxem.utils.expt_utils import regional_filter

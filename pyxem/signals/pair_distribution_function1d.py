@@ -16,10 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-
+import numpy as np
 from hyperspy.signals import Signal1D
-
-from pyxem.utils.pdf_utils import normalise_pdf_signal_to_max
 
 
 class PairDistributionFunction1D(Signal1D):
@@ -58,6 +56,10 @@ class PairDistributionFunction1D(Signal1D):
         """
         s_scale = self.axes_manager.signal_axes[0].scale
         index_min = int(s_min / s_scale)
+
+        def normalise_pdf_signal_to_max(z, index_min):
+            max_val = np.max(z[index_min:])
+            return np.divide(z, max_val)
 
         return self.map(
             normalise_pdf_signal_to_max,
