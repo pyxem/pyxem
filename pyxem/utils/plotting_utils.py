@@ -1,5 +1,10 @@
+from __future__ import annotations
+
+from typing import Iterator
+
 import matplotlib.pyplot as plt
 import numpy as np
+import hyperspy.api as hs
 from pyxem.utils.polar_transform_utils import (
     get_template_cartesian_coordinates,
     get_template_polar_coordinates,
@@ -21,7 +26,7 @@ def plot_template_over_pattern(
     marker_color="red",
     marker_type="x",
     size_factor=1.0,
-    **kwargs
+    **kwargs,
 ):
     """A quick utility function to plot a simulated pattern over an experimental image
 
@@ -113,3 +118,187 @@ def plot_template_over_pattern(
         color=marker_color,
     )
     return (ax, im, sp)
+
+
+def generate_template_markers(
+    signal,
+    library,
+    result: dict,
+    phase_key_dict: dict,
+    n_best: int = None,
+    direct_beam_position: tuple[int, int] = None,
+    marker_colors: list[str] = None,
+    scale_markers: bool = True,
+    size_factor: float = 1.0,
+) -> Iterator[hs.plot.markers.Markers]:
+    """
+    Generate markers of simulated diffraction patterns corresponding to template matching results.
+    These can be added to a signal plot for template matching result inspection.
+
+    Parameters
+    ----------
+    signal : hyperspy.signals.Signal2D
+        The 4D-STEM dataset.
+    library : diffsims.libraries.diffraction_library.DiffractionLibrary
+        The library of simulated diffraction patterns.
+    result : dict
+        Template matching results dictionary containing keys: phase_index, template_index,
+        orientation, correlation, and mirrored_template.
+        Returned from pyxem.utils.indexation_utils.index_dataset_with_template_rotation.
+    phase_key_dict: dict
+        A small dictionary to translate the integers in the phase_index array
+        to phase names in the original template library.
+        Returned from pyxem.utils.indexation_utils.index_dataset_with_template_rotation.
+    n_best : int, optional
+        Number of solutions to plot. If None, defaults to all solutions.
+    direct_beam_position: 2-tuple
+        The (x, y) position of the direct beam in pixel coordinates.
+        If None, defaults to the center of the image, i.e. (0, 0).
+    marker_colors : list of str, optional
+        Colors of the spot markers. Should be at least n_best long, otherwise colors will loop.
+        Defaults to matplotlib's default color cycle
+    scale_markers: bool, optional
+        Whether to scale the markers. Defaults to True. See notes on size.
+    size_factor : float, optional
+        Scaling factor for the spots. See notes on size.
+
+    Examples
+    --------
+    >>> # Get some data
+    >>> from pyxem.generators.indexation_generator import AcceleratedIndexationGenerator
+    >>> from pyxem.dummy_data import get_nanobeam_electron_diffraction_signal
+    >>> from diffsims.libraries.diffraction_library import load_DiffractionLibrary
+    >>> diff_lib = load_DiffractionLibrary('your/pickled/diffraction/library.pickle', safety=True)
+    >>> s = get_nanobeam_electron_diffraction_signal()
+    >>> indexer = AcceleratedIndexationGenerator(s, diff_lib)
+    >>> indexation_results, phase_dict = indexer.correlate()
+
+    >>> # Make and show the markers
+    >>> from pyxem.utils.plotting_utils import generate_template_markers
+    >>> markers = generate_template_markers(s, diff_lib, indexation_results, phase_dict, n_best = 1)
+    >>> s.plot()
+    >>> s.add_marker(markers)
+
+    Notes
+    -----
+    The spot marker sizes are scaled by the square root of their intensity
+    """
+
+    n_best_indexed = result["template_index"].shape[-1]
+
+    if n_best is None:
+        n_best = n_best_indexed
+
+    if n_best > n_best_indexed:
+        raise ValueError(
+            "`n_best` cannot be larger than the amount of indexed solutions"
+        )
+
+    if direct_beam_position is None:
+        direct_beam_position = (0, 0)
+
+    if marker_colors is None:
+        marker_colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
+
+    if len(marker_colors) < n_best:
+        print(
+            "Warning: not enough colors in `marker_colors` for `n_best` different colored marks. Colors will loop"
+        )
+
+    # Fetch an array of the results, with the correct phases
+    result_libraries_array = np.empty(
+        (signal.axes_manager[1].size, signal.axes_manager[0].size, n_best_indexed),
+        dtype=object,
+    )
+
+    for phase_ind, phase in phase_key_dict.items():
+        # Mask of where the results used the current phase
+        mask = result["phase_index"] == phase_ind
+
+        # Flat array of the simulations of the current phase
+        phase_library_simulations = library[phase]["simulations"]
+
+        # 2D array of simulations, using the indices from template matching.
+        # These might use the wrong phase
+        sim_array = phase_library_simulations[result["template_index"]]
+
+        # Use the correct phase
+        result_libraries_array[mask] = sim_array[mask]
+
+    result_libraries_signal = hs.signals.Signal1D(result_libraries_array)
+    orientation_signal = hs.signals.Signal2D(result["orientation"])
+    mirrored_template_signal = hs.signals.Signal1D(result["mirrored_template"])
+
+    # Functions to use `result_libraries_signal.map`
+    def marker_func_factory(n: int):
+        def marker_func(pattern, center, orientation, mirrored_template):
+            angle = orientation[n, 0]  # 1st ZXZ Euler angle is the in-plane rotation
+            pattern = pattern[n]
+            mirrored_template = mirrored_template[n]
+
+            x, y, _ = get_template_cartesian_coordinates(
+                pattern, center=center, in_plane_angle=angle, mirrored=mirrored_template
+            )
+
+            # See https://github.com/pyxem/pyxem/issues/925
+            y = -y
+
+            x *= signal.axes_manager[2].scale
+            y *= signal.axes_manager[3].scale
+
+            return np.array((x, y)).T
+
+        # The inputs gets squeezed, this ensures they get correctly accessed
+        if n_best_indexed == 1:
+
+            def marker_func_1D(pattern, center, orientation, mirrored_template):
+                orientation = orientation.reshape(-1, 3)
+                mirrored_template = np.array([mirrored_template])
+                return marker_func(pattern, center, orientation, mirrored_template)
+
+            return marker_func_1D
+        else:
+            return marker_func
+
+    # Due to the arrays being ragged,
+    # having a seperate function is easier than trying to extract the intensities from the
+    # `get_template_cartesian_coordinates`-call in the above function
+    def intensities_func(pattern, center, orientation, mirrored_template, n):
+        angle = orientation[n, 0]  # 1st ZXZ Euler angle is the in-plane rotation
+        pattern = pattern[n]
+        mirrored_template = mirrored_template[n]
+
+        _, _, intensities = get_template_cartesian_coordinates(
+            pattern, center=center, in_plane_angle=angle, mirrored=mirrored_template
+        )
+        return np.sqrt(intensities) * size_factor
+
+    # Generate the markers
+    for n in range(n_best):
+        markers_signal = result_libraries_signal.map(
+            marker_func_factory(n),
+            center=direct_beam_position,
+            orientation=orientation_signal,
+            mirrored_template=mirrored_template_signal,
+            inplace=False,
+            ragged=True,
+            lazy_output=True,
+        )
+        if scale_markers:
+            intensities = result_libraries_signal.map(
+                intensities_func,
+                center=direct_beam_position,
+                orientation=orientation_signal,
+                mirrored_template=mirrored_template_signal,
+                n=n,
+                inplace=False,
+                ragged=True,
+                lazy_output=True,
+            ).data.T
+        else:
+            intensities = 10
+        color = marker_colors[n % len(marker_colors)]
+        markers = hs.plot.markers.Points.from_signal(
+            markers_signal, sizes=intensities, color=color
+        )
+        yield markers
