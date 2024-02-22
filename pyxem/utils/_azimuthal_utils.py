@@ -39,6 +39,7 @@ def _slice_radial_integrate(
     npt_rad,
     npt_azim,
     mask=None,
+    mean=False,
 ):  # pragma: no cover
     """Slice the image into small chunks and multiply by the factors.
 
@@ -66,18 +67,30 @@ def _slice_radial_integrate(
     val = np.empty((npt_rad, npt_azim))
     for i in prange(len(factors_slice)):
         ii, jj = i // npt_azim, i % npt_azim
-        val[ii, jj] = np.sum(
-            img[slices[i][0] : slices[i][2], slices[i][1] : slices[i][3]]
-            * factors[factors_slice[i][0] : factors_slice[i][1]].reshape(
-                (slices[i][2] - slices[i][0], slices[i][3] - slices[i][1])
+        if mean:  # divide by the total number of pixels
+            val[ii, jj] = np.sum(
+                img[slices[i][0] : slices[i][2], slices[i][1] : slices[i][3]]
+                * factors[factors_slice[i][0] : factors_slice[i][1]].reshape(
+                    (slices[i][2] - slices[i][0], slices[i][3] - slices[i][1])
+                )
+            ) / np.sum(
+                factors[factors_slice[i][0] : factors_slice[i][1]].reshape(
+                    (slices[i][2] - slices[i][0], slices[i][3] - slices[i][1])
+                )
             )
-        )
+        else:
+            val[ii, jj] = np.sum(
+                img[slices[i][0] : slices[i][2], slices[i][1] : slices[i][3]]
+                * factors[factors_slice[i][0] : factors_slice[i][1]].reshape(
+                    (slices[i][2] - slices[i][0], slices[i][3] - slices[i][1])
+                )
+            )
     return val
 
 
 @cuda.jit
 def __slice_radial_integrate_cupy(
-    img, factors, factors_slice, slices, val
+    img, factors, factors_slice, slices, npt_azim, val
 ):  # pragma: no cover
     """Slice the image into small chunks and multiply by the factors.
     Parameters
@@ -96,11 +109,11 @@ def __slice_radial_integrate_cupy(
     """
     tx = cuda.threadIdx.x  # current thread
     bx = cuda.blockIdx.x  # Current block
-    bw = cuda.blockDim.x  # Should be equal to blocks!
-    x = tx + bx * bw
-    if x < val.shape[0]:  # account for slices out of range!
-        factors_ind = factors_slice[x]
-        current_slice = slices[x]
+    thread = cuda.grid(1)  # total thread number
+    index = tx + bx * npt_azim  # find the index of the thread
+    if thread < val.size[0]:  # account for threads out of range!
+        factors_ind = factors_slice[index]
+        current_slice = slices[index]
         sum = 0
         ind = 0
         for i in range(current_slice[0], current_slice[2]):

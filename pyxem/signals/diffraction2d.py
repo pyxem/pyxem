@@ -125,7 +125,6 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         """
         super().__init__(*args, **kwargs)
         self.calibrate = Calibration(self)
-        self._gpu = False
 
     def apply_affine_transformation(
         self, D, order=1, keep_dtype=False, inplace=True, *args, **kwargs
