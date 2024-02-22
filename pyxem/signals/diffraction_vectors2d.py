@@ -273,6 +273,20 @@ class DiffractionVectors2D(DiffractionVectors, Signal2D):
         return len(self.axes_manager.navigation_axes) > 0
 
     def to_roi(self, radius=0.1, columns=None, include_labels=False, **kwargs):
+        """
+        Convert the diffraction vectors to regions of interest (ROIs) for creating virtual images.
+
+        Parameters
+        ----------
+        radius: float
+            The radius of the ROIs in calibrated units
+        columns: list
+            The columns to use for the ROIs. If None, columns 0 and 1 are used to create the ROIs.
+        include_labels: bool
+            If True, the labels for each ROI are returned as well using hyperspy's Texts class.
+        kwargs: dict
+            Keyword arguments to pass to the hyperspy Texts class.
+        """
         if self.has_navigation_axis:
             raise NotImplementedError(
                 "This method is not implemented for 2D vectors with a navigation axis"

@@ -132,7 +132,18 @@ class CommonDiffraction:
         out.plot(**kwargs)
 
     def get_virtual_image(self, rois, new_axis_dict=None, normalize=False):
-        """Get a virtual images from a set of rois"""
+        """Get a virtual images from a set of rois
+
+        Parameters
+        ----------
+        rois : iterable of :obj:`hyperspy.roi.BaseInteractiveROI`
+            Any interactive ROI detailed in HyperSpy.
+        new_axis_dict : dict, optional
+            A dictionary with the properties of the new axis. If None, a default
+            axis is created.
+        normalize : bool, optional
+            If True, the virtual images are normalized to the maximum value.
+        """
         if not isiterable(rois):
             rois = [
                 rois,
