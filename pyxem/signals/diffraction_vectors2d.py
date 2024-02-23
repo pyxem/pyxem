@@ -24,8 +24,9 @@ from scipy.spatial import distance_matrix
 from sklearn.cluster import DBSCAN
 
 from hyperspy.signals import Signal2D
-
+from hyperspy.roi import CircleROI
 from pyxem.signals import DiffractionVectors
+import hyperspy.api as hs
 
 
 class DiffractionVectors2D(DiffractionVectors, Signal2D):
@@ -270,3 +271,37 @@ class DiffractionVectors2D(DiffractionVectors, Signal2D):
     @property
     def has_navigation_axis(self):
         return len(self.axes_manager.navigation_axes) > 0
+
+    def to_roi(self, radius=0.1, columns=None, include_labels=False, **kwargs):
+        """
+        Convert the diffraction vectors to regions of interest (ROIs) for creating virtual images.
+
+        Parameters
+        ----------
+        radius: float
+            The radius of the ROIs in calibrated units
+        columns: list
+            The columns to use for the ROIs. If None, columns 0 and 1 are used to create the ROIs.
+        include_labels: bool
+            If True, the labels for each ROI are returned as well using hyperspy's Texts class.
+        kwargs: dict
+            Keyword arguments to pass to the hyperspy Texts class.
+        """
+        if self.has_navigation_axis:
+            raise NotImplementedError(
+                "This method is not implemented for 2D vectors with a navigation axis"
+            )
+        if columns is None:
+            columns = [0, 1]
+
+        rois = [
+            CircleROI(vector[columns[1]], vector[columns[0]], r=radius)
+            for vector in self.data
+        ]
+        if include_labels:
+            pos = [(vector[columns[1]], vector[columns[0]]) for vector in self.data]
+            label = [f"{i}" for i in range(len(self.data))]
+            texts = hs.plot.markers.Texts(offsets=pos, texts=label, **kwargs)
+            return rois, texts
+        else:
+            return rois

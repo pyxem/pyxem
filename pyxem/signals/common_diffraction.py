@@ -19,8 +19,11 @@
 import numpy as np
 
 from hyperspy.api import interactive
+from hyperspy.misc.utils import isiterable
+import hyperspy.api as hs
 
 from traits.trait_base import Undefined
+from pyxem.utils.virtual_images_utils import normalize_virtual_images
 
 
 OUT_SIGNAL_AXES_DOCSTRING = """out_signal_axes : None, iterable of int or string
@@ -127,6 +130,54 @@ class CommonDiffraction:
 
         # Plot the result
         out.plot(**kwargs)
+
+    def get_virtual_image(self, rois, new_axis_dict=None, normalize=False):
+        """Get a virtual images from a set of rois
+
+        Parameters
+        ----------
+        rois : iterable of :obj:`hyperspy.roi.BaseInteractiveROI`
+            Any interactive ROI detailed in HyperSpy.
+        new_axis_dict : dict, optional
+            A dictionary with the properties of the new axis. If None, a default
+            axis is created.
+        normalize : bool, optional
+            If True, the virtual images are normalized to the maximum value.
+        """
+        if not isiterable(rois):
+            rois = [
+                rois,
+            ]
+        if new_axis_dict is None:
+            new_axis_dict = {
+                "name": "Virtual Dark Field",
+                "offset": 0,
+                "scale": 1,
+                "units": "a.u.",
+                "size": len(rois),
+            }
+
+        vdfs = [self.get_integrated_intensity(roi) for roi in rois]
+
+        vdfim = hs.stack(
+            vdfs, new_axis_name=new_axis_dict["name"], show_progressbar=False
+        )
+
+        vdfim.set_signal_type("virtual_dark_field")
+
+        if vdfim.metadata.has_item("Diffraction.integrated_range"):
+            del vdfim.metadata.Diffraction.integrated_range
+        vdfim.metadata.set_item("Diffraction.roi_list", [f"{roi}" for roi in rois])
+
+        # Set new axis properties
+        if len(rois) > 1:
+            new_axis = vdfim.axes_manager[new_axis_dict["name"]]
+            for k, v in new_axis_dict.items():
+                setattr(new_axis, k, v)
+
+        if normalize:
+            vdfim.map(normalize_virtual_images, show_progressbar=False)
+        return vdfim
 
     def get_integrated_intensity(self, roi, out_signal_axes=None):
         """Obtains the intensity integrated over the scattering range as
