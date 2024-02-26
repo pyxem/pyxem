@@ -21,10 +21,16 @@ import numpy as np
 
 from shapely import Polygon, box
 import shapely
+from numba import cuda, prange
 import numba
 
+from pyxem import CUPY_INSTALLED
 
-@numba.njit
+if CUPY_INSTALLED:
+    import cupy as cp
+
+
+@numba.njit(parallel=True, nogil=True)
 def _slice_radial_integrate(
     img,
     factors,
@@ -33,6 +39,7 @@ def _slice_radial_integrate(
     npt_rad,
     npt_azim,
     mask=None,
+    mean=False,
 ):  # pragma: no cover
     """Slice the image into small chunks and multiply by the factors.
 
@@ -57,13 +64,81 @@ def _slice_radial_integrate(
     """
     if mask is not None:
         img = img * np.logical_not(mask)
-    val = np.empty(slices.shape[0])
-    for i, (s, f) in enumerate(zip(slices, factors_slice)):
-        val[i] = np.sum(
-            img[s[0] : s[2], s[1] : s[3]]
-            * factors[f[0] : f[1]].reshape((s[2] - s[0], s[3] - s[1]))
-        )
-    return val.reshape((npt_azim, npt_rad)).T
+    val = np.empty((npt_rad, npt_azim))
+    for i in prange(len(factors_slice)):
+        ii, jj = i // npt_azim, i % npt_azim
+        if mean:  # divide by the total number of pixels
+            val[ii, jj] = np.sum(
+                img[slices[i][0] : slices[i][2], slices[i][1] : slices[i][3]]
+                * factors[factors_slice[i][0] : factors_slice[i][1]].reshape(
+                    (slices[i][2] - slices[i][0], slices[i][3] - slices[i][1])
+                )
+            ) / np.sum(
+                factors[factors_slice[i][0] : factors_slice[i][1]].reshape(
+                    (slices[i][2] - slices[i][0], slices[i][3] - slices[i][1])
+                )
+            )
+        else:
+            val[ii, jj] = np.sum(
+                img[slices[i][0] : slices[i][2], slices[i][1] : slices[i][3]]
+                * factors[factors_slice[i][0] : factors_slice[i][1]].reshape(
+                    (slices[i][2] - slices[i][0], slices[i][3] - slices[i][1])
+                )
+            )
+    return val
+
+
+def _slice_radial_integrate_cupy(
+    img, factors, factors_slice, slices, mask, npt, npt_azim
+):
+    original_nav = img.shape[:-2]
+    img = img.reshape((-1,) + img.shape[-2:])
+    val = cp.empty((img.shape[0], npt, npt_azim))
+    if mask is None:
+        mask = cp.zeros((img.shape[-2:]))
+    __slice_radial_integrate_cupy[(img.shape[0], npt), (npt_azim)](
+        img, factors, factors_slice, slices, npt_azim, mask, val
+    )
+    val = val.reshape(original_nav + (npt, npt_azim))
+    return val
+
+
+@cuda.jit
+def __slice_radial_integrate_cupy(
+    img, factors, factors_slice, slices, npt_azim, mask, val
+):  # pragma: no cover
+    """Slice the image into small chunks and multiply by the factors.
+    Parameters
+    ----------
+    img: np.array
+        The image to be sliced
+    factors:
+        The factors to multiply the slices by
+    slices:
+        The slices to slice the image by
+    val:
+        The array to store the result in
+    Note
+    ----
+    This function is run by every single thread once!
+    """
+    tx = cuda.threadIdx.x  # current thread (azimuthal)
+    bx = cuda.blockIdx.x  # Current block (navigation flattened)
+    by = cuda.blockIdx.y  # Current block (radial)
+    pos = cuda.grid(1)  # current thread
+    index = tx + npt_azim * by
+    if pos < val.size:  # account for slices out of range!
+        factors_ind = factors_slice[index]
+        current_slice = slices[index]
+        sum = 0
+        ind = 0
+        for i in range(current_slice[0], current_slice[2]):
+            for j in range(current_slice[1], current_slice[3]):
+                is_mask = not mask[i, j]
+                sum += factors[ind + factors_ind[0]] * img[bx, i, j] * is_mask
+                ind += 1
+        val[bx, by, tx] = sum
+    return
 
 
 @numba.njit
@@ -89,9 +164,9 @@ def _slice_radial_integrate1d(
 
     Note
     ----
-    This function is much faster with numba than without. There is probably a factor
-    of 2-10 speedup that could be achieved  by using cython or c++ instead of python
-
+    This function is much faster with numba than without. Additionally,  a GPU version of
+    this function is not implemented because it is a bit more complicated than the 2D
+    version and doesn't perform well using the `map` function.
     """
     if mask is not None:
         img = img * np.logical_not(mask)
@@ -167,17 +242,17 @@ def _get_control_points(npt, npt_azim, radial_range, affine):
     phi = np.linspace(0, 2 * np.pi, npt_azim + 1)
     control_points = np.empty(((len(r) - 1) * (len(phi) - 1), 4, 2))
     # lower left
-    control_points[:, 0, 0] = (r[:-1] * np.cos(phi[:-1])[:, np.newaxis]).ravel()
-    control_points[:, 0, 1] = (r[:-1] * np.sin(phi[:-1])[:, np.newaxis]).ravel()
+    control_points[:, 0, 0] = (np.cos(phi[:-1]) * r[:-1][:, np.newaxis]).ravel()
+    control_points[:, 0, 1] = (np.sin(phi[:-1]) * r[:-1][:, np.newaxis]).ravel()
     # lower right
-    control_points[:, 1, 0] = (r[:-1] * np.cos(phi[1:])[:, np.newaxis]).ravel()
-    control_points[:, 1, 1] = (r[:-1] * np.sin(phi[1:])[:, np.newaxis]).ravel()
+    control_points[:, 1, 0] = (np.cos(phi[1:]) * r[:-1][:, np.newaxis]).ravel()
+    control_points[:, 1, 1] = (np.sin(phi[1:]) * r[:-1][:, np.newaxis]).ravel()
     # upper left
-    control_points[:, 2, 0] = (r[1:] * np.cos(phi[1:])[:, np.newaxis]).ravel()
-    control_points[:, 2, 1] = (r[1:] * np.sin(phi[1:])[:, np.newaxis]).ravel()
+    control_points[:, 2, 0] = (np.cos(phi[1:]) * r[1:][:, np.newaxis]).ravel()
+    control_points[:, 2, 1] = (np.sin(phi[1:]) * r[1:][:, np.newaxis]).ravel()
     # upper right
-    control_points[:, 3, 0] = (r[1:] * np.cos(phi[:-1])[:, np.newaxis]).ravel()
-    control_points[:, 3, 1] = (r[1:] * np.sin(phi[:-1])[:, np.newaxis]).ravel()
+    control_points[:, 3, 0] = (np.cos(phi[:-1]) * r[1:][:, np.newaxis]).ravel()
+    control_points[:, 3, 1] = (np.sin(phi[:-1]) * r[1:][:, np.newaxis]).ravel()
 
     # apply the affine transformation to the control points
     if affine is not None:

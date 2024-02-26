@@ -90,8 +90,13 @@ from pyxem.utils._background_subtraction import (
 )
 from pyxem.utils.calibration_utils import Calibration
 
+from pyxem import CUPY_INSTALLED
 
-class Diffraction2D(Signal2D, CommonDiffraction):
+if CUPY_INSTALLED:
+    import cupy as cp
+
+
+class Diffraction2D(CommonDiffraction, Signal2D):
     """Signal class for two-dimensional diffraction data in Cartesian coordinates.
 
     Parameters
@@ -2073,19 +2078,39 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             slices, factors, factors_slice, radial_range = self.calibrate.get_slices2d(
                 npt, npt_azim, radial_range=radial_range
             )
-            if mask is None:
-                mask = self.calibrate.mask
-            integration = self.map(
-                _slice_radial_integrate,
-                slices=slices,
-                factors=factors,
-                factors_slice=factors_slice,
-                npt_rad=npt,
-                npt_azim=npt_azim,
-                inplace=inplace,
-                mask=mask,
-                **kwargs,
-            )
+            if self._gpu and CUPY_INSTALLED:  # pragma: no cover
+                from pyxem.utils._azimuthal_utils import _slice_radial_integrate_cupy
+
+                slices = cp.asarray(slices)
+                factors = cp.asarray(factors)
+                factors_slice = cp.asarray(factors_slice)
+                integration = self._blockwise(
+                    _slice_radial_integrate_cupy,
+                    slices=slices,
+                    factors=factors,
+                    factors_slice=factors_slice,
+                    npt=npt,
+                    npt_azim=npt_azim,
+                    inplace=inplace,
+                    signal_shape=(npt, npt_azim),
+                    mask=mask,
+                    dtype=float,
+                    **kwargs,
+                )
+            else:
+                if mask is None:
+                    mask = self.calibrate.mask
+                integration = self.map(
+                    _slice_radial_integrate,
+                    slices=slices,
+                    factors=factors,
+                    factors_slice=factors_slice,
+                    npt_rad=npt,
+                    npt_azim=npt_azim,
+                    inplace=inplace,
+                    mask=mask,
+                    **kwargs,
+                )
 
         else:
             sig_shape = self.axes_manager.signal_shape

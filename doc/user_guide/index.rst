@@ -12,6 +12,7 @@
     installing.rst
     loading_data.rst
     distributed_big_data.rst
+    gpu_computations.rst
 
 .. toctree::
     :caption: Usage

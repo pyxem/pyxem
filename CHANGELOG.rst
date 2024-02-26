@@ -23,6 +23,8 @@ Added
 - Added example for doing azimuthal integration of a 2d diffraction pattern (#1009)
 - Added `pyxem.signals.CommonDiffraction.get_virtual_image` method to calculate multiple virtual images
   from a 4D STEM dataset (#1014)
+- Added GPU support for lazy signals. (#1012)
+- Added GPU processing for `pyxem.signals.Diffraction2D.get_azimuthal_integral2d` (#1012)
 
 Deprecated
 ----------

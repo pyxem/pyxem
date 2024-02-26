@@ -20,12 +20,12 @@
 from hyperspy.signals import Signal2D
 from hyperspy._signals.lazy import LazySignal
 
-import pyxem.signals
+from pyxem.signals.common_diffraction import CommonDiffraction
 from pyxem.utils.correlation_utils import _correlation, _power, _pearson_correlation
 from pyxem.utils._deprecated import deprecated
 
 
-class PolarDiffraction2D(Signal2D):
+class PolarDiffraction2D(CommonDiffraction, Signal2D):
     """Signal class for two-dimensional diffraction data in polar coordinates.
 
     Parameters

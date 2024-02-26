@@ -19,6 +19,13 @@
 
 import logging
 
+try:
+    import cupy as cp
+
+    CUPY_INSTALLED = True
+except ImportError:
+    CUPY_INSTALLED = False
+
 _logger = logging.getLogger(__name__)
 
 
@@ -38,6 +45,7 @@ __all__ = [
     "generators",
     "signals",
     "data",
+    "CUPY_INSTALLED",
 ]
 
 __version__ = release_info.version
