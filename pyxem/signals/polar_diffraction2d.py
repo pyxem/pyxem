@@ -262,7 +262,13 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
         return correlation
 
     def get_orientation(
-        self, simulation, n_keep=None, frac_keep=0.1, n_best=1, normalize_templates=True
+        self,
+        simulation,
+        n_keep=None,
+        frac_keep=0.1,
+        n_best=1,
+        normalize_templates=True,
+        **kwargs
     ):
         """Match the orientation with some simulated diffraction patterns using
         an accelerated orientation mapping algorithm.
@@ -285,6 +291,8 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
             The number of best matching orientations to keep.
         normalize_templates : bool
             Normalize the templates to the same intensity.
+        kwargs : dict
+            Any additional options for the :meth:`~hyperspy.signal.BaseSignal.map` function.
 
         Returns
         -------
@@ -316,6 +324,8 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
             n_best=n_best,
             inplace=False,
             transpose=True,
+            output_signal_size=(n_best, 4),
+            output_dtype=float,
         )
 
         orientation.set_signal_type("orientation_map")
