@@ -2084,16 +2084,17 @@ class Diffraction2D(CommonDiffraction, Signal2D):
                 slices = cp.asarray(slices)
                 factors = cp.asarray(factors)
                 factors_slice = cp.asarray(factors_slice)
-                integration = self.map(
+                integration = self._blockwise(
                     _slice_radial_integrate_cupy,
                     slices=slices,
                     factors=factors,
-                    factor_slices=factors_slice,
-                    npt_rad=npt,
+                    factors_slice=factors_slice,
+                    npt=npt,
                     npt_azim=npt_azim,
                     inplace=inplace,
-                    output_signal_size=(npt, npt_azim),
-                    output_dtype=float,
+                    signal_shape=(npt, npt_azim),
+                    mask=mask,
+                    dtype=float,
                     **kwargs,
                 )
             else:

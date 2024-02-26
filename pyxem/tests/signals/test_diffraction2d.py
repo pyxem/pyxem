@@ -1419,3 +1419,46 @@ class TestFilter:
 
         with pytest.raises(ValueError):
             new = three_section.filter(func=small_func, inplace=False)
+
+
+class TestBlockwise:
+    def test_blockwise(self):
+        s = Diffraction2D(np.ones((2, 2, 10, 10)))
+        s._blockwise(lambda x: x + 1, inplace=True)
+        assert np.all(s.data == 2)
+        assert s.axes_manager.signal_shape == (10, 10)
+
+    def test_blockwise_change_signal(self):
+        s = Diffraction2D(np.ones((2, 2, 10, 10)))
+
+        def change_signal(x):
+            return np.zeros((2, 2, 30, 40))
+
+        new_s = s._blockwise(change_signal, inplace=False, signal_shape=(30, 40))
+        assert np.all(new_s.data == 0)
+        assert new_s.data.shape == (2, 2, 30, 40)
+        assert new_s.axes_manager.signal_shape == (40, 30)
+
+    def test_blockwise_partial_ragged(self):
+        s = Diffraction2D(np.ones((2, 2, 10, 10)))
+
+        def change_signal(x):
+            exp = np.empty(
+                (
+                    2,
+                    2,
+                ),
+                dtype=object,
+            )
+            exp[0, 0] = np.zeros((3, 4))
+            exp[0, 1] = np.zeros((4, 4))
+            exp[1, 0] = np.zeros((3, 4))
+            exp[1, 1] = np.zeros((4, 4))
+            return exp
+
+        new_s = s._blockwise(
+            change_signal, inplace=False, signal_shape=(), ragged=True, dtype=object
+        )
+        assert new_s.data.shape == (2, 2)
+        assert new_s.axes_manager.signal_shape == ()
+        assert new_s.data[0, 0].shape == (3, 4)
