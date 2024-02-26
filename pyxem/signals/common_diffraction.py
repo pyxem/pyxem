@@ -45,10 +45,9 @@ class CommonDiffraction:
     def to_device(self):  # pragma: no cover
         """Transfer the data to the GPU.
 
-        Returns
-        -------
-        Diffraction2D
-            The data on the GPU.
+        Notes
+        -----
+        This code is currently in an experimental stage. Please report and issues you have on the pyxem github
         """
         if not CUPY_INSTALLED:
             raise ImportError(
@@ -64,7 +63,12 @@ class CommonDiffraction:
                 self.data = cp.asarray(self.data)  # pass all the data to the GPU
 
     def to_host(self):  # pragma: no cover
-        """Transfer the data from the GPU to the CPU."""
+        """Transfer the data from the GPU to the CPU.
+
+        Notes
+        -----
+        This code is currently in an experimental stage. Please report and issues you have on the pyxem github
+        """
         if not CUPY_INSTALLED:
             raise ImportError(
                 "The cupy package is required to use this method. "
