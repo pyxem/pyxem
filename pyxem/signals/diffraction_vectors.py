@@ -585,7 +585,7 @@ class DiffractionVectors(BaseSignal):
         from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
 
         nav_positions = self._get_navigation_positions(
-            flatten=True, real_units=real_units
+            flatten=False, real_units=real_units
         )
         if self.axes_manager._navigation_shape_in_array == ():
             return self
@@ -594,9 +594,12 @@ class DiffractionVectors(BaseSignal):
             vectors = np.vstack(
                 [
                     np.hstack(
-                        [np.tile(nav_pos, (len(self.data[ind]), 1)), self.data[ind]]
+                        [
+                            np.tile(nav_positions[ind], (len(self.data[ind]), 1)),
+                            self.data[ind],
+                        ]
                     )
-                    for ind, nav_pos in zip(np.ndindex(self.data.shape), nav_positions)
+                    for ind in np.ndindex(self.axes_manager._navigation_shape_in_array)
                 ]
             )
         else:

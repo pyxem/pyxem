@@ -408,6 +408,47 @@ class TestConvertVectors:
         assert isinstance(vectors, DiffractionVectors2D)
         assert vectors.data.shape == (32, 4)
 
+    def test_get_navigation_positions(self):
+        test_data = np.empty((2, 3), dtype=object)
+        for i in np.ndindex(test_data.shape):
+            test_data[i] = np.random.random((np.random.randint(2, 6), 2))
+        dv = DiffractionVectors(test_data)
+        dv.axes_manager[0].name = "x"
+        dv.axes_manager[1].name = "y"
+        dv.axes_manager[0].scale = 1
+        dv.axes_manager[1].scale = 2
+        dv.axes_manager[0].offset = 1
+        flat = dv._get_navigation_positions(flatten=False, real_units=True)
+        np.testing.assert_array_equal(flat[0, 0, 0], 1)
+        np.testing.assert_array_equal(flat[0, 0, 1], 0)
+        np.testing.assert_array_equal(flat[0, 1, 1], 2)
+        np.testing.assert_array_equal(flat[0, 1, 0], 1)
+
+    def test_flatten_vectors_with_scales(self):
+        test_data = np.empty((2, 3, 4), dtype=object)
+        for i in np.ndindex(test_data.shape):
+            test_data[i] = np.random.random((np.random.randint(2, 6), 2))
+        dv = DiffractionVectors(test_data)
+        dv.axes_manager[0].name = "x"
+        dv.axes_manager[1].name = "y"
+        dv.axes_manager[2].name = "time"
+        dv.axes_manager[0].scale = 1
+        dv.axes_manager[1].scale = 2
+        dv.axes_manager[2].scale = 3
+        dv.axes_manager[0].offset = 1
+        dv.axes_manager[1].offset = 2
+        dv.axes_manager[2].offset = 3
+        flat = dv.flatten_diffraction_vectors(real_units=True)
+        assert flat.column_names[0] == "x"
+        assert flat.column_names[1] == "y"
+        assert flat.column_names[2] == "time"
+        assert np.max(flat.data[:, 0]) == dv.axes_manager[2].size
+        assert np.max(flat.data[:, 1]) == dv.axes_manager[1].size * 2
+        assert np.max(flat.data[:, 2]) == dv.axes_manager[0].size * 3
+        assert np.min(flat.data[:, 0]) == 1
+        assert np.min(flat.data[:, 1]) == 2
+        assert np.min(flat.data[:, 2]) == 3
+
     def test_flatten_vectors_with_set_metadata(self, diffraction_vectors_map):
         diffraction_vectors_map.scales = [0.1, 0.1]
         diffraction_vectors_map.offsets = [1, 1]
