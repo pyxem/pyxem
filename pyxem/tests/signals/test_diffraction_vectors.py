@@ -419,10 +419,10 @@ class TestConvertVectors:
         dv.axes_manager[1].scale = 2
         dv.axes_manager[0].offset = 1
         flat = dv._get_navigation_positions(flatten=False, real_units=True)
-        np.testing.assert_array_equal(flat[0, 0, 0], 1)
-        np.testing.assert_array_equal(flat[0, 0, 1], 0)
+        np.testing.assert_array_equal(flat[0, 0, 0], 0)
+        np.testing.assert_array_equal(flat[0, 0, 1], 1)
         np.testing.assert_array_equal(flat[0, 1, 1], 2)
-        np.testing.assert_array_equal(flat[0, 1, 0], 1)
+        np.testing.assert_array_equal(flat[0, 1, 0], 0)
 
     def test_flatten_vectors_with_scales(self):
         test_data = np.empty((2, 3, 4), dtype=object)
