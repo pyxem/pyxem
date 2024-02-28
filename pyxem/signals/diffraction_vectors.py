@@ -537,8 +537,8 @@ class DiffractionVectors(BaseSignal):
             scales = [1 for a in self.axes_manager.navigation_axes]
             offsets = [0 for a in self.axes_manager.navigation_axes]
         else:
-            scales = [a.scale for a in self.axes_manager.navigation_axes]
-            offsets = [a.offset for a in self.axes_manager.navigation_axes]
+            scales = [a.scale for a in self.axes_manager.navigation_axes[::-1]]
+            offsets = [a.offset for a in self.axes_manager.navigation_axes[::-1]]
 
         if flatten:
             real_nav = np.array(
@@ -595,7 +595,7 @@ class DiffractionVectors(BaseSignal):
                 [
                     np.hstack(
                         [
-                            np.tile(nav_positions[ind], (len(self.data[ind]), 1)),
+                            np.tile(nav_positions[ind][::-1], (len(self.data[ind]), 1)),
                             self.data[ind],
                         ]
                     )

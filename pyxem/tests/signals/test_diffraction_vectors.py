@@ -442,12 +442,21 @@ class TestConvertVectors:
         assert flat.column_names[0] == "x"
         assert flat.column_names[1] == "y"
         assert flat.column_names[2] == "time"
-        assert np.max(flat.data[:, 0]) == dv.axes_manager[2].size
-        assert np.max(flat.data[:, 1]) == dv.axes_manager[1].size * 2
-        assert np.max(flat.data[:, 2]) == dv.axes_manager[0].size * 3
-        assert np.min(flat.data[:, 0]) == 1
-        assert np.min(flat.data[:, 1]) == 2
-        assert np.min(flat.data[:, 2]) == 3
+        assert (
+            np.max(flat.data[:, 0])
+            == dv.axes_manager[0].size * dv.axes_manager[0].scale
+        )
+        assert (
+            np.max(flat.data[:, 1])
+            == dv.axes_manager[1].size * dv.axes_manager[1].scale
+        )
+        assert (
+            np.max(flat.data[:, 2])
+            == dv.axes_manager[2].size * dv.axes_manager[2].scale
+        )
+        assert np.min(flat.data[:, 0]) == dv.axes_manager[0].offset
+        assert np.min(flat.data[:, 1]) == dv.axes_manager[1].offset
+        assert np.min(flat.data[:, 2]) == dv.axes_manager[2].offset
 
     def test_flatten_vectors_with_set_metadata(self, diffraction_vectors_map):
         diffraction_vectors_map.scales = [0.1, 0.1]
