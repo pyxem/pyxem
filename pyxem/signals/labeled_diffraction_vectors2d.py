@@ -226,8 +226,8 @@ class LabeledDiffractionVectors2D(DiffractionVectors2D):
             new_signal.axes_manager.signal_axes[0].size + 1
         )
         new_signal.is_clustered = True
-        new_signal.column_names = self.column_names + ["cluster_label"]
-        new_signal.units = self.units + ["n.a."]
+        new_signal.column_names = np.append(self.column_names, ["cluster_label"])
+        new_signal.units = np.append(self.units, ["n.a."])
         return new_signal
 
     @only_signal_axes
