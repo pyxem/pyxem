@@ -55,7 +55,9 @@ class Slicer:
             ragged=self.signal._is_object_dtype,
         )
         if (
-            not self.signal._is_object_dtype and len(col_slice) == 1
+            not self.signal._is_object_dtype
+            and not isinstance(col_slice, slice)
+            and len(col_slice) == 1
         ):  # potential bug upstream
             slic.data = slic.data[..., np.newaxis]
         if self.signal.scales is not None:

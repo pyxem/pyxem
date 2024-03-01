@@ -88,6 +88,11 @@ class TestSingleDiffractionVectors2D:
         assert clustered.ivec["cluster"].data.shape[0] == 8
         assert isinstance(clustered, DiffractionVectors2D)
 
+    def test_slice(self):
+        slic = self.vector.ivec[:, self.vector.ivec[1] > 0]
+        assert slic.data.shape[0] == 5
+        assert slic.data.shape[1] == 2
+
 
 class TestVector2DSubclass:
     @pytest.fixture()
