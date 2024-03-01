@@ -72,7 +72,7 @@ class Slicer:
 
     def str2slice(self, item):
         if isinstance(item, str):
-            item = self.signal.column_names.index(item)
+            item = list(self.signal.column_names).index(item)
         elif isinstance(item, (np.ndarray, list)):
             item = np.array([self.str2slice(i) for i in item])
         elif isinstance(item, (slice, int)):
