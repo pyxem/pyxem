@@ -253,6 +253,8 @@ class DiffractionVectors(BaseSignal):
             cen=center,
             inplace=False,
             ragged=True,
+            output_signal_size=(),
+            output_dtype=object,
         )
         vectors.set_signal_type("diffraction_vectors")
         if isinstance(peaks, LazySignal):
@@ -917,6 +919,13 @@ class DiffractionVectors(BaseSignal):
         if columns is None:
             columns = list(range(self.data.shape[-1]))
 
+        if self.ragged:
+            signal_shape = ()
+            dtype = object
+        else:
+            signal_shape = self.axes_manager._signal_shape_in_array
+            signal_shape = signal_shape[:-1] + (signal_shape[-1] + 1,)
+            dtype = float
         new_signal = self.map(
             cluster,
             inplace=False,
@@ -925,6 +934,8 @@ class DiffractionVectors(BaseSignal):
             column_scale_factors=column_scale_factors,
             min_vectors=min_vectors,
             remove_nan=remove_nan,
+            output_signal_size=signal_shape,
+            output_dtype=dtype,
         )
         new_signal.column_names = self.column_names + ["cluster"]
         new_signal.units = self.units + ["n.a."]
@@ -1103,15 +1114,31 @@ class DiffractionVectors(BaseSignal):
         )
         return filtered_vectors
 
-    def to_polar(self):
+    def to_polar(self, columns=None, **kwargs):
         """Convert the diffraction vectors to polar coordinates.
+
+        Parameters
+        ----------
+        columns : list
+            The columns of the diffraction vectors to be converted to polar
+            coordinates. The default is the first two columns (kx, ky) in most
+            cases.
+        kwargs : dict
+            Any other parameters passed to the `hyperspy.signal.BaseSignal.map` function.
 
         Returns
         -------
         polar_vectors : DiffractionVectors
             Diffraction vectors in polar coordinates.
         """
-        polar_vectors = self.map(vectors_to_polar, inplace=False, ragged=True)
+        if self.ragged:
+            ragged = True
+        else:
+            ragged = False
+
+        polar_vectors = self.map(
+            vectors_to_polar, inplace=False, ragged=ragged, columns=columns, **kwargs
+        )
         polar_vectors.set_signal_type("polar_vectors")
         polar_vectors.column_names[0] = "r"
         polar_vectors.column_names[1] = "theta"
