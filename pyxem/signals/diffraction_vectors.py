@@ -937,8 +937,8 @@ class DiffractionVectors(BaseSignal):
             output_signal_size=signal_shape,
             output_dtype=dtype,
         )
-        new_signal.column_names = self.column_names + ["cluster"]
-        new_signal.units = self.units + ["n.a."]
+        new_signal.column_names = np.append(self.column_names, ["cluster"])
+        new_signal.units = np.append(self.units, ["n.a."])
 
         if not self.has_navigation_axis:
             new_signal.set_signal_type("labeled_diffraction_vectors")
