@@ -64,6 +64,7 @@ class Slicer:
             slic.column_names = np.array(self.signal.column_names)[col_slice]
         if self.signal.units is not None:
             slic.units = np.array(self.signal.units)[col_slice]
+            print(slic.units)
         return slic
 
     def str2slice(self, item):

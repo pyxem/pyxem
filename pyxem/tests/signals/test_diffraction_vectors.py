@@ -681,7 +681,10 @@ class TestSlicingVectors:
         vectors[1, 0] = np.random.randint(-100, 100, (7, 2))
         vectors[1, 1] = np.random.randint(-100, 100, (8, 2))
         v = DiffractionVectors(
-            vectors, scales=[0.1, 0.2], offsets=[10, 20], column_names=["x", "y"]
+            vectors,
+            scales=[0.1, 0.2],
+            offsets=[10, 20],
+            column_names=["x_axis", "y_axis"],
         )
 
         return v
@@ -708,6 +711,13 @@ class TestSlicingVectors:
         slic = vectors.ivec[index]
         for i in np.ndindex((2, 2)):
             np.testing.assert_almost_equal(slic.data[i][:, [0, 1]], vectors.data[i])
+
+    @pytest.mark.parametrize("item", [0, "x_axis"])
+    def test_slice(self, vectors, item):
+        sliced = vectors.ivec[item]
+        assert sliced.column_names == [
+            "x_axis",
+        ]
 
     def test_row_lt(self, vectors):
         col = vectors.ivec[0] < 0.5

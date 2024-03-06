@@ -124,6 +124,8 @@ class DiffractionVectors(BaseSignal):
         vectors = self._get_current_data()
         if vectors.dtype.kind == "O":
             vectors = vectors[0]
+        if self.num_columns == 1:
+            vectors = np.array([vectors]).T
         for i, row in enumerate(vectors):
             table += "<tr>"
             table += f"<td><center>{i}</center></td>"
@@ -417,12 +419,15 @@ class DiffractionVectors(BaseSignal):
 
     @units.setter
     def units(self, value):
+        if isinstance(value, str):
+            value = [value]
         if (
             isiterable(value)
             and len(value) == self.num_columns
             and not isinstance(value, str)
         ):
             self.metadata.VectorMetadata["units"] = value
+
         elif isiterable(value) and len(value) != self.num_columns:
             raise ValueError(
                 "The len of the units parameter must equal the number of"
@@ -464,6 +469,9 @@ class DiffractionVectors(BaseSignal):
     def column_names(self, value):
         if value is None:
             value = [f"column_{i}" for i in range(self.num_columns)]
+
+        if isinstance(value, str):
+            value = [value]
         if len(value) != self.num_columns:
             raise ValueError(
                 f"The len of the column_names parameter: {len(value)} must equal the"
@@ -480,6 +488,7 @@ class DiffractionVectors(BaseSignal):
     def offsets(self, value):
         if isiterable(value) and len(value) == self.num_columns:
             self.metadata.VectorMetadata["offsets"] = value
+
         elif isiterable(value) and len(value) != self.num_columns:
             raise ValueError(
                 "The len of the scales parameter must equal the number of"
