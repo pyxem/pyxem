@@ -47,12 +47,18 @@ class Slicer:
             col_slice = [
                 col_slice,
             ]
+        if self.signal._is_object_dtype:
+            kwargs = dict(output_signal_size=(), output_dtype=object)
+        else:
+            kwargs = dict()
+
         slic = self.signal.map(
             slice_signal,
             col_slice=col_slice,
             row_slice=row_slice,
             inplace=False,
             ragged=self.signal._is_object_dtype,
+            **kwargs
         )
         if (
             not self.signal._is_object_dtype

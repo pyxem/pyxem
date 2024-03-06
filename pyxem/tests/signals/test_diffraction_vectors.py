@@ -736,6 +736,18 @@ class TestSlicingVectors:
         with pytest.raises(ValueError):
             vectors.ivec[0, 0, 0]
 
+    def test_slicing(self, vectors):
+        sliced = vectors.ivec[:, vectors.ivec[0] > 101]
+        assert sliced.data[0, 0].shape == (0, 2)
+
+    def test_slicing_lazy(self, vectors):
+        vectors = vectors.as_lazy()
+        sliced = vectors.ivec[:, vectors.ivec[0] > 101]
+        sliced = sliced.ivec[:, sliced.ivec[0] > 101]
+        sliced.compute()
+        assert sliced.data[0, 0].shape == (0, 2)
+        sliced.flatten_diffraction_vectors()
+
     def test_num_columns(self, vectors):
         assert vectors.num_columns == 2
         lazy_vectors = vectors.as_lazy()

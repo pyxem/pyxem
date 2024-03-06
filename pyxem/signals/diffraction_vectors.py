@@ -635,14 +635,18 @@ class DiffractionVectors(BaseSignal):
         column_offsets = np.append(column_offsets, offsets)
         column_scale = np.append(column_scale, scales)
 
-        column_names = [
-            a.name for a in self.axes_manager.navigation_axes
-        ] + self.column_names
+        column_names = np.append(
+            [a.name for a in self.axes_manager.navigation_axes], self.column_names
+        )
 
         if real_units:
-            units = [a.units for a in self.axes_manager.navigation_axes] + self.units
+            units = np.append(
+                [a.units for a in self.axes_manager.navigation_axes], self.units
+            )
         else:
-            units = ["pixels"] * len(self.axes_manager.navigation_axes) + self.units
+            units = np.append(
+                ["pixels"] * len(self.axes_manager.navigation_axes), self.units
+            )
 
         return DiffractionVectors2D(
             vectors,
