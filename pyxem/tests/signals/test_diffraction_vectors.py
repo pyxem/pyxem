@@ -679,7 +679,7 @@ class TestSlicingVectors:
         vectors[0, 0] = np.random.randint(-100, 100, (20, 2))
         vectors[0, 1] = np.random.randint(-100, 100, (6, 2))
         vectors[1, 0] = np.random.randint(-100, 100, (7, 2))
-        vectors[1, 1] = np.random.randint(-100, 100, (8, 2))
+        vectors[1, 1] = np.random.randint(-100, 100, (1, 2))
         v = DiffractionVectors(
             vectors,
             scales=[0.1, 0.2],

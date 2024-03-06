@@ -20,6 +20,12 @@ import numpy as np
 
 
 def slice_signal(arr, col_slice, row_slice):
+    if (
+        hasattr(row_slice, "ndim") and row_slice.ndim == 0
+    ):  # Dealing with possible 0 d array
+        row_slice = [
+            row_slice,
+        ]
     return arr[row_slice, col_slice]
 
 
@@ -64,7 +70,6 @@ class Slicer:
             slic.column_names = np.array(self.signal.column_names)[col_slice]
         if self.signal.units is not None:
             slic.units = np.array(self.signal.units)[col_slice]
-            print(slic.units)
         return slic
 
     def str2slice(self, item):
