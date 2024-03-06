@@ -697,7 +697,7 @@ class TestSlicingVectors:
     def test_column(self, vectors, index):
         slic = vectors.ivec[index]
         for i in np.ndindex((2, 2)):
-            np.testing.assert_almost_equal(slic.data[i][:, 0], vectors.data[i][:, 0])
+            np.testing.assert_almost_equal(slic.data[i][:], vectors.data[i][:, 0])
 
     def test_column_error(self, vectors):
         with pytest.raises(ValueError):
@@ -721,8 +721,17 @@ class TestSlicingVectors:
         for i in np.ndindex((2, 2)):
             assert np.all(slic.data[i][:, 0] > 0.5)
 
+    def test_row_gt_none(self, vectors):
+        vectors = vectors.as_lazy()
+        col = vectors.ivec[0] > 101
+        assert vectors.data[0, 0].compute().shape == (20, 2)
+        slic = vectors.ivec[:, col]
+        for i in np.ndindex((2, 2)):
+            assert slic.data[i].compute().shape == (0, 2)
+
     def test_row_gte(self, vectors):
         col = vectors.ivec[0] >= 0.5
+        assert col.data[0, 0].shape == (20,)
         slic = vectors.ivec[:, col]
         for i in np.ndindex((2, 2)):
             assert np.all(slic.data[i][:, 0] >= 0.5)

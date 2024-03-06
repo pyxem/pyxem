@@ -399,6 +399,8 @@ class DiffractionVectors(BaseSignal):
                 shape = self.data[self.data.ndim * (0,)].shape
             if shape is None:
                 return 0
+            elif len(shape) == 1:
+                return 1
             else:
                 return shape[1]
         else:

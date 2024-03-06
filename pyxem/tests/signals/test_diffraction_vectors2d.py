@@ -21,10 +21,10 @@ import pytest
 import numpy as np
 from sklearn.cluster import DBSCAN
 
-from hyperspy.signals import Signal2D, BaseSignal
+from hyperspy.signals import Signal2D, BaseSignal, Signal1D
 import hyperspy.api as hs
 
-from pyxem.signals import DiffractionVectors2D
+from pyxem.signals import DiffractionVectors2D, DiffractionVectors1D
 
 
 class TestDiffractionVectors2D:
@@ -117,10 +117,10 @@ class TestVector2DSubclass:
     @pytest.mark.parametrize("item", [0, "x"])
     def test_slice(self, vectors, item):
         sliced = vectors.ivec[item]
-        assert isinstance(sliced, DiffractionVectors2D)
-        assert isinstance(sliced, Signal2D)
-        assert sliced.axes_manager.signal_shape == (1, 20)
-        assert sliced.column_names == ["x"]
+        assert isinstance(sliced, DiffractionVectors1D)
+        assert isinstance(sliced, Signal1D)
+        assert sliced.axes_manager.signal_shape == (20,)
+        assert sliced.column_names == "x"
 
     def test_flatten(self, vectors):
         flatten_diffraction_vectors = vectors.flatten_diffraction_vectors()

@@ -43,10 +43,6 @@ class Slicer:
         else:
             col_slice = self.str2slice(item)
             row_slice = slice(None)
-        if isinstance(col_slice, int):
-            col_slice = [
-                col_slice,
-            ]
         if self.signal.ragged:
             kwargs = dict(output_signal_size=(), output_dtype=object)
         else:
@@ -60,12 +56,6 @@ class Slicer:
             ragged=self.signal.ragged,
             **kwargs
         )
-        if (
-            not self.signal._is_object_dtype
-            and not isinstance(col_slice, slice)
-            and len(col_slice) == 1
-        ):  # potential bug upstream
-            slic.data = slic.data[..., np.newaxis]
         if self.signal.scales is not None:
             slic.scales = np.array(self.signal.scales)[col_slice]
         if self.signal.offsets is not None:
