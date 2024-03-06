@@ -407,6 +407,7 @@ class TestConvertVectors:
         )
         assert isinstance(vectors, DiffractionVectors2D)
         assert vectors.data.shape == (32, 4)
+        assert vectors.ragged == False
 
     def test_get_navigation_positions(self):
         test_data = np.empty((2, 3), dtype=object)
@@ -747,6 +748,15 @@ class TestSlicingVectors:
         sliced.compute()
         assert sliced.data[0, 0].shape == (0, 2)
         sliced.flatten_diffraction_vectors()
+
+    def test_ragged_vectors(self, vectors):
+        vectors = vectors.as_lazy()
+        assert vectors.ragged == True
+
+    def test_inav_slicing(self, vectors):
+        slic = vectors.inav[0, 0]
+        assert isinstance(slic, DiffractionVectors)
+        assert slic.data.shape == (1,)
 
     def test_num_columns(self, vectors):
         assert vectors.num_columns == 2

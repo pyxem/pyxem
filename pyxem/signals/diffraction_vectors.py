@@ -96,6 +96,12 @@ class DiffractionVectors(BaseSignal):
         _units = kwargs.pop("units", None)
         super().__init__(*args, **kwargs)
         self._set_up_vector(_scales, _offsets, _detector_shape, _column_names, _units)
+        if self._is_object_dtype is None:
+            pass
+        elif self._is_object_dtype:
+            self.ragged = True
+        elif self.ragged == True:
+            self.ragged = False
 
     def _repr_html_(self):
         table = '<table align="center">'
@@ -376,7 +382,13 @@ class DiffractionVectors(BaseSignal):
 
     @property
     def _is_object_dtype(self):
-        return self.data.dtype.kind == "O"
+        try:
+            if self.data[0] is None:
+                return None
+        except IndexError:
+            return None
+        else:
+            return self.data.dtype.kind == "O"
 
     @cached_property
     def num_columns(self):
@@ -477,23 +489,55 @@ class DiffractionVectors(BaseSignal):
             ] * self.num_columns
 
     def __lt__(self, other):
+        if self.ragged:
+            kwargs = dict(output_signal_size=(), output_dtype=object)
+        else:
+            kwargs = dict()
         return self.map(
-            lambda x, other: x < other, other=other, inplace=False, ragged=True
+            lambda x, other: x < other,
+            other=other,
+            inplace=False,
+            ragged=self.ragged,
+            **kwargs,
         )
 
     def __le__(self, other):
+        if self.ragged:
+            kwargs = dict(output_signal_size=(), output_dtype=object)
+        else:
+            kwargs = dict()
         return self.map(
-            lambda x, other: x <= other, other=other, inplace=False, ragged=True
+            lambda x, other: x <= other,
+            other=other,
+            inplace=False,
+            ragged=self.ragged,
+            **kwargs,
         )
 
     def __gt__(self, other):
+        if self.ragged:
+            kwargs = dict(output_signal_size=(), output_dtype=object)
+        else:
+            kwargs = dict()
         return self.map(
-            lambda x, other: x > other, other=other, inplace=False, ragged=True
+            lambda x, other: x > other,
+            other=other,
+            inplace=False,
+            ragged=self.ragged,
+            **kwargs,
         )
 
     def __ge__(self, other):
+        if self.ragged:
+            kwargs = dict(output_signal_size=(), output_dtype=object)
+        else:
+            kwargs = dict()
         return self.map(
-            lambda x, other: x >= other, other=other, inplace=False, ragged=True
+            lambda x, other: x >= other,
+            other=other,
+            inplace=False,
+            ragged=self.ragged,
+            **kwargs,
         )
 
     @property
@@ -829,11 +873,14 @@ class DiffractionVectors(BaseSignal):
         )
         signal.add_marker(marker, plot_marker=True, permanent=False)
 
-    def get_magnitudes(self, *args, **kwargs):
+    def get_magnitudes(self, columns=None, *args, **kwargs):
         """Calculate the magnitude of diffraction vectors.
 
         Parameters
         ----------
+        columns : list, optional
+            The columns of the diffraction vectors to be used to calculate
+            the magnitude. If not given, the first two columns will be used.
         *args:
             Arguments to be passed to map().
         **kwargs:
@@ -847,9 +894,13 @@ class DiffractionVectors(BaseSignal):
             navigation position.
 
         """
-        magnitudes = self.map(
-            np.linalg.norm, inplace=False, axis=-1, ragged=True, *args, **kwargs
-        )
+        if columns is None:
+            columns = [0, 1]
+
+        def get_magnitude(x):
+            return np.linalg.norm(x[:, columns], axis=-1)
+
+        magnitudes = self.map(get_magnitude, inplace=False, *args, **kwargs)
 
         return magnitudes
 
@@ -937,6 +988,7 @@ class DiffractionVectors(BaseSignal):
             columns=columns,
             column_scale_factors=column_scale_factors,
             min_vectors=min_vectors,
+            ragged=self.ragged,
             remove_nan=remove_nan,
             output_signal_size=signal_shape,
             output_dtype=dtype,
@@ -1021,13 +1073,16 @@ class DiffractionVectors(BaseSignal):
         filtered_vectors : DiffractionVectors
             Diffraction vectors within allowed magnitude tolerances.
         """
-        # If ragged the signal axes will not be defined
+
+        if self.ragged:
+            kwargs["output_signal_size"] = ()
+            kwargs["output_dtype"] = object
+
         filtered_vectors = self.map(
             filter_vectors_ragged,
             min_magnitude=min_magnitude,
             max_magnitude=max_magnitude,
             inplace=False,
-            ragged=True,
             *args,
             **kwargs,
         )

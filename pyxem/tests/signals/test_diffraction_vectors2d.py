@@ -34,16 +34,18 @@ class TestDiffractionVectors2D:
 
     def test_setup(self):
         assert isinstance(self.vector, DiffractionVectors2D)
+        assert self.vector.ragged == False
 
     def test_magnitudes(self):
         magnitudes = self.vector.get_magnitudes()
-        mags = np.linalg.norm(self.vector, axis=1)
+        assert magnitudes.ragged == False
+        mags = np.linalg.norm(self.vector.data[:, [0, 1]], axis=1)
         np.testing.assert_array_almost_equal(mags, magnitudes.data)
         assert len(magnitudes.axes_manager.signal_axes) == 1
 
     def test_filter_magnitudes(self):
         magnitudes = self.vector.filter_magnitude(min_magnitude=10, max_magnitude=40)
-        mags = np.linalg.norm(self.vector, axis=1)
+        mags = np.linalg.norm(self.vector.data[:, [0, 1]], axis=1)
         num_in_range = np.sum((mags > 10) * (mags < 40))
         assert num_in_range == magnitudes.data.shape[0]
 

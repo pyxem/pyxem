@@ -47,7 +47,7 @@ class Slicer:
             col_slice = [
                 col_slice,
             ]
-        if self.signal._is_object_dtype:
+        if self.signal.ragged:
             kwargs = dict(output_signal_size=(), output_dtype=object)
         else:
             kwargs = dict()
@@ -57,7 +57,7 @@ class Slicer:
             col_slice=col_slice,
             row_slice=row_slice,
             inplace=False,
-            ragged=self.signal._is_object_dtype,
+            ragged=self.signal.ragged,
             **kwargs
         )
         if (

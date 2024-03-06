@@ -222,6 +222,7 @@ class LabeledDiffractionVectors2D(DiffractionVectors2D):
         print(f"{np.max(labels) + 1} : Clusters Found!")
         vectors_and_labels = np.hstack([self.data, new_labels[:, np.newaxis]])
         new_signal = self._deepcopy_with_new_data(data=vectors_and_labels)
+        new_signal.ragged = False  # Need to reset this (Remove once hyperspy checks for object --> ragged)
         new_signal.axes_manager.signal_axes[0].size = (
             new_signal.axes_manager.signal_axes[0].size + 1
         )
