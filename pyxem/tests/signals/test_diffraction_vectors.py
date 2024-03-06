@@ -696,7 +696,7 @@ class TestSlicingVectors:
     def test_center(self, vectors):
         np.testing.assert_almost_equal(vectors.center, (100, 100))
 
-    @pytest.mark.parametrize("index", (0, "x", ("x",)))
+    @pytest.mark.parametrize("index", (0, "x_axis", ("x_axis",)))
     def test_column(self, vectors, index):
         slic = vectors.ivec[index]
         for i in np.ndindex((2, 2)):
@@ -706,7 +706,7 @@ class TestSlicingVectors:
         with pytest.raises(ValueError):
             vectors.ivec[5.5]
 
-    @pytest.mark.parametrize("index", ([0, 1], ["x", "y"]))
+    @pytest.mark.parametrize("index", ([0, 1], ["x_axis", "y_axis"]))
     def test_column_slicing2(self, vectors, index):
         slic = vectors.ivec[index]
         for i in np.ndindex((2, 2)):

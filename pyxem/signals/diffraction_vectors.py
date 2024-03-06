@@ -419,7 +419,7 @@ class DiffractionVectors(BaseSignal):
 
     @units.setter
     def units(self, value):
-        if isinstance(value, str):
+        if isinstance(value, str) and self.num_columns == 1:
             value = [value]
         if (
             isiterable(value)
