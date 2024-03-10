@@ -213,11 +213,13 @@ Tips for writing Jupyter notebooks that are meant to be converted to reST text f
 
 - Use ``_ = ax[0].imshow(...)`` to disable Matplotlib output if a Matplotlib
   command is the last line in a cell.
-- Refer to our API reference with this general markdown syntax.
-  ``[azimuthal_integrator2d()](reference.rst#pyxem.signals.DiffractionSignal2D.azimuthal_integrator2d)``.
-  Remember to add the parentheses ``()``.
-- Reference external APIs via standard markdown like
-  ``[Signal2D](http://hyperspy.org/hyperspy-doc/current/api/hyperspy._signals.signal2d.html)``.
+- Refer to our API reference with this general markdown syntax:
+  :code:`:meth:`~.signals.Diffraction2D.get_azimuthal_integral1d`` which will be
+  displayed as :meth:`~.signals.Diffraction2D.get_azimuthal_integral1d` or 
+  :code:`:meth:`pyxem.signals.Diffraction2D.get_azimuthal_integral1d`` to have the full
+  path: :meth:`pyxem.signals.Diffraction2D.get_azimuthal_integral1d` 
+- Reference external APIs via standard markdown like :code:`:class:`hyperspy.api.signals.Signal2D``,
+  which will be displayed as :class:`hyperspy.api.signals.Signal2D`.
 - The Sphinx gallery thumbnail used for a notebook is set by adding the
   ``nbsphinx-thumbnail`` tag to a code cell with an image output. The notebook
   must be added to the gallery in the README.rst to be included in the
@@ -239,7 +241,7 @@ create a new release. Each time a new tag is pushed to the repository, the CI se
 will:
 
 1. Build the documentation.  Each tagged release will be added as a
-   `stable <https://docs.readthedocs.io/en/stable/versions.html#versioned-documentation>`_ build
+   `stable <https://docs.readthedocs.io/en/stable/versions.html>`_ build
    to `Read the Docs <https://pyxem.readthedocs.io/en/latest/>`_.
 2. Publish a new version of pyxem to `PyPI <https://pypi.org/project/pyxem/>`_.
 3. Create a new `GitHub release <https://github.com/pyxem/pyxem/releases>`_.

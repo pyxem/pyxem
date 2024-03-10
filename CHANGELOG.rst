@@ -15,6 +15,7 @@ Fixed
 - Fixed pytest failure. Changed `setup` --> `setup_method` (#997)
 - `pyxem.signals.Diffraction2D.center_of_mass` now uses the `map` function. (#1005)
 - Replace ``matplotlib.cm.get_cmap`` (removed in matplotlib 3.9) with ``matplotlib.colormaps``. (#1023)
+- Documentation fixes and improvement. (#1028)
 
 Added
 -----
