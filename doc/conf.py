@@ -12,6 +12,7 @@ import sys
 
 from pyxem import release_info
 import pyxem
+import hyperspy.api as hs
 
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -274,3 +275,7 @@ autodoc_default_options = {
 }
 
 autosummary_generate = True
+
+
+# Enable ipywidgets GUIs to avoid error when building the documentation
+hs.preferences.GUIs.enable_ipywidgets_gui = True
