@@ -28,7 +28,9 @@ from skimage.morphology import disk
 from skimage.segmentation import watershed
 from sklearn.cluster import DBSCAN
 
+from pyxem.utils._deprecated import deprecated
 
+@deprecated(since="0.18.0", removal="1.0.0")
 def norm_cross_corr(image, template):
     """Calculates the normalised cross-correlation between an image
     and a template at zero displacement.
@@ -58,7 +60,7 @@ def norm_cross_corr(image, template):
 
     return corr
 
-
+@deprecated(since="0.18.0", removal="1.0.0")
 def separate_watershed(
     vdf_temp,
     min_distance=1,
@@ -285,7 +287,7 @@ def separate_watershed(
 
     return vdf_sep
 
-
+@deprecated(since="0.18.0", removal="1.0.0")
 def get_gaussian2d(a, xo, yo, x, y, sigma):
     """Obtain a 2D Gaussian of amplitude a and standard deviation
     sigma, centred at (xo, yo), on a grid given by x and y.

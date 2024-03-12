@@ -3,7 +3,9 @@ from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
 from pyFAI.detectors import Detector
 from pyFAI.units import register_radial_unit, eq_q
 
+from pyxem.utils._deprecated import deprecated
 
+@deprecated(since="0.18.0", removal="1.0.0")
 def get_azimuthal_integrator(
     detector,
     detector_distance,
@@ -59,7 +61,7 @@ def get_azimuthal_integrator(
     )
     return ai
 
-
+@deprecated(since="0.18.0", removal="1.0.0")
 def _get_radial_extent(ai, shape=None, unit=None):
     """Takes an Azimuthal Integrator and calculates the domain of the output.
 
@@ -77,7 +79,7 @@ def _get_radial_extent(ai, shape=None, unit=None):
     postions = ai.array_from_unit(shape=shape, unit=unit, typ="center")
     return [np.min(postions), np.max(postions)]
 
-
+@deprecated(since="0.18.0", removal="1.0.0")
 def _get_displacements(center, shape, affine):
     """Gets the displacements for a set of points based on some affine transformation
     about some center point.
@@ -113,7 +115,7 @@ def _get_displacements(center, shape, affine):
     dy = yy - corrected[:, :, 1]
     return dx, dy
 
-
+@deprecated(since="0.18.0", removal="1.0.0")
 def _get_setup(wavelength, pyxem_unit, pixel_scale, radial_range=None):
     """Returns a generic set up for a flat detector with accounting for Ewald sphere effects."""
     units_table = {
