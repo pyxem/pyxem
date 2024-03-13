@@ -30,6 +30,7 @@ from sklearn.cluster import DBSCAN
 
 from pyxem.utils._deprecated import deprecated
 
+
 @deprecated(since="0.18.0", removal="1.0.0")
 def norm_cross_corr(image, template):
     """Calculates the normalised cross-correlation between an image
@@ -59,6 +60,7 @@ def norm_cross_corr(image, template):
         corr = np.sum(f * t) / np.sqrt(np.sum(f**2) * np.sum(t**2))
 
     return corr
+
 
 @deprecated(since="0.18.0", removal="1.0.0")
 def separate_watershed(
@@ -286,6 +288,7 @@ def separate_watershed(
         ax[5].set_title("Segments")
 
     return vdf_sep
+
 
 @deprecated(since="0.18.0", removal="1.0.0")
 def get_gaussian2d(a, xo, yo, x, y, sigma):

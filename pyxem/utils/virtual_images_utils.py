@@ -19,6 +19,7 @@
 import numpy as np
 from pyxem.utils._deprecated import deprecated
 
+
 @deprecated(since="0.18.0", removal="1.0.0")
 def normalize_virtual_images(im):
     """Normalizes image intensity by dividing by maximum value.
@@ -36,6 +37,7 @@ def normalize_virtual_images(im):
     """
     imn = im / im.max()
     return imn
+
 
 @deprecated(since="0.18.0", removal="1.0.0")
 def get_vectors_mesh(g1_norm, g2_norm, g_norm_max, angle=0.0, shear=0.0):
