@@ -27,7 +27,7 @@ import dask.array as da
 from dask.graph_manipulation import clone
 
 from pyxem.utils.dask_tools import _get_dask_array, _get_chunking
-from pyxem.utils.insitu_utils import (
+from pyxem.utils._insitu import (
     _register_drift_5d,
     _register_drift_2d,
     _g2_2d,
