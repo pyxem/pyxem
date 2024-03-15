@@ -63,5 +63,5 @@ def get_vectors_mesh(g1_norm, g2_norm, g_norm_max, angle=0.0, shear=0.0):
         x and y coordinates of the vectors of the mesh
 
     """
-    from vector_utils import get_vectors_mesh
+    from pyxem.utils.vectors import get_vectors_mesh
     return get_vectors_mesh(g1_norm,g2_norm,g_norm_max,angle,shear)

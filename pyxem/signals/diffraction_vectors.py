@@ -34,7 +34,7 @@ from hyperspy.misc.utils import isiterable
 from pyxem.utils.signal import (
     transfer_navigation_axes_to_signal_axes,
 )
-from pyxem.utils.vector_utils import (
+from pyxem.utils.vectors import (
     detector_to_fourier,
     get_npeaks,
     filter_vectors_ragged,
