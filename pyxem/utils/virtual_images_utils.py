@@ -16,9 +16,10 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+# TODO: Delete this entire module
+
 import numpy as np
 from pyxem.utils._deprecated import deprecated
-
 
 @deprecated(since="0.18.0", removal="1.0.0")
 def normalize_virtual_images(im):

@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+#TODO: Delete this entire module. Consider if `seperate_watershed` can be rehomed.
+
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy.ma import masked_where
