@@ -21,8 +21,8 @@ import numpy as np
 
 from hyperspy.axes import UniformDataAxis
 
-from pyxem.utils import calibration_utils
-from pyxem.utils.calibration_utils import Calibration
+from pyxem.utils import calibration
+from pyxem.utils.calibration import Calibration
 from pyxem.signals import Diffraction2D
 
 

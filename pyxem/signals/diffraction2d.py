@@ -88,7 +88,7 @@ from pyxem.utils._background_subtraction import (
     _subtract_hdome,
     _subtract_radial_median,
 )
-from pyxem.utils.calibration_utils import Calibration
+from pyxem.utils.calibration import Calibration
 
 from pyxem import CUPY_INSTALLED
 
