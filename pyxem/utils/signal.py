@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+
 def select_method_from_method_dict(method, method_dict, print_help=True, **kwargs):
     """Streamlines the selection of utils to be mapped in class methods.
 

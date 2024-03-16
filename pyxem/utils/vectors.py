@@ -450,6 +450,7 @@ def polar_to_cartesian(vectors):
     phi = vectors[:, 1]
     return np.vstack([k * np.cos(phi), k * np.sin(phi)]).T
 
+
 def get_vectors_mesh(g1_norm, g2_norm, g_norm_max, angle=0.0, shear=0.0):
     """
     Calculate vectors coordinates of a mesh defined by a norm, a rotation and

@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-#TODO: Delete this entire module
+# TODO: Delete this entire module
 
 import numpy as np
 from pyFAI.azimuthalIntegrator import AzimuthalIntegrator

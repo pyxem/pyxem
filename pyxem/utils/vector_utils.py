@@ -18,6 +18,9 @@
 
 import warnings
 
-warnings.warn("This module has been renamed and should now be imported as `pyxem.utils.vectors`", FutureWarning)
+warnings.warn(
+    "This module has been renamed and should now be imported as `pyxem.utils.vectors`",
+    FutureWarning,
+)
 
 from pyxem.utils.vectors import *

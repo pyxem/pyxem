@@ -21,6 +21,7 @@
 import numpy as np
 from pyxem.utils._deprecated import deprecated
 
+
 @deprecated(since="0.18.0", removal="1.0.0")
 def normalize_virtual_images(im):
     """Normalizes image intensity by dividing by maximum value.
@@ -40,7 +41,9 @@ def normalize_virtual_images(im):
     return imn
 
 
-@deprecated(since="0.18.0", removal="1.0.0",alternative="utils.vectors.get_vector_mesh")
+@deprecated(
+    since="0.18.0", removal="1.0.0", alternative="utils.vectors.get_vector_mesh"
+)
 def get_vectors_mesh(g1_norm, g2_norm, g_norm_max, angle=0.0, shear=0.0):
     """
     Calculate vectors coordinates of a mesh defined by a norm, a rotation and
@@ -65,4 +68,5 @@ def get_vectors_mesh(g1_norm, g2_norm, g_norm_max, angle=0.0, shear=0.0):
 
     """
     from pyxem.utils.vectors import get_vectors_mesh
-    return get_vectors_mesh(g1_norm,g2_norm,g_norm_max,angle,shear)
+
+    return get_vectors_mesh(g1_norm, g2_norm, g_norm_max, angle, shear)
