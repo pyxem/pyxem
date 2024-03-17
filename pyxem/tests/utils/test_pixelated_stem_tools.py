@@ -23,7 +23,7 @@ import dask.array as da
 from hyperspy.signals import Signal2D
 
 from pyxem.signals import Diffraction2D
-import pyxem.utils.pixelated_stem_tools as pst
+import pyxem.utils._pixelated_stem_tools as pst
 
 
 class TestRadialIntegrationDaskArray:

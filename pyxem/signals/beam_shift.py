@@ -18,7 +18,7 @@
 
 
 import numpy as np
-import pyxem.utils.pixelated_stem_tools as pst
+import pyxem.utils._pixelated_stem_tools as pst
 from hyperspy._signals.lazy import LazySignal
 from hyperspy._signals.signal1d import Signal1D
 

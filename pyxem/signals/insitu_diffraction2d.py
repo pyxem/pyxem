@@ -34,7 +34,7 @@ from pyxem.utils.insitu_utils import (
     _interpolate_g2_2d,
     _get_resample_time,
 )
-import pyxem.utils.pixelated_stem_tools as pst
+import pyxem.utils._pixelated_stem_tools as pst
 
 
 class InSituDiffraction2D(Diffraction2D):

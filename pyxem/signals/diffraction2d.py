@@ -77,7 +77,7 @@ from pyxem.utils.signal import (
     to_hyperspy_index,
     transfer_navigation_axes,
 )
-import pyxem.utils.pixelated_stem_tools as pst
+import pyxem.utils._pixelated_stem_tools as pst
 import pyxem.utils.dask_tools as dt
 import pyxem.utils.ransac_ellipse_tools as ret
 from pyxem.utils._deprecated import deprecated, deprecated_argument

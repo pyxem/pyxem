@@ -25,7 +25,7 @@ from numpy.testing import assert_allclose
 import hyperspy.api as hs
 
 from pyxem.signals.differential_phase_contrast import make_bivariate_histogram
-import pyxem.utils.pixelated_stem_tools as pst
+import pyxem.utils._pixelated_stem_tools as pst
 
 
 class TestGetRgbPhaseMagnitudeArray:
