@@ -24,12 +24,13 @@ from hyperspy.signals import Signal2D
 from hyperspy._signals.lazy import LazySignal
 
 from pyxem.utils.correlation_utils import (
-    corr_to_power,
     _get_interpolation_matrix,
     _symmetry_stem,
 )
 from pyxem.signals.common_diffraction import CommonDiffraction
 
+def corr_to_power(z):
+    return np.power(np.fft.rfft(z, axis=1), 2).real
 
 class Correlation2D(Signal2D, CommonDiffraction):
     """Signal class for Correlation data after applying some correlation along some axis."""
