@@ -23,7 +23,7 @@ import numpy as np
 from hyperspy.signals import Signal2D
 from hyperspy._signals.lazy import LazySignal
 
-from pyxem.utils.correlation_utils import (
+from pyxem.utils._correlations import (
     _get_interpolation_matrix,
     _symmetry_stem,
 )
