@@ -47,7 +47,7 @@ from pyxem.utils.vector_utils import (
 
 from pyxem.utils._slicers import Slicer
 
-from pyxem.utils._subpixel_utils import (
+from pyxem.utils._subpixel_finding import (
     _conventional_xc_map,
     _center_of_mass_map,
     _get_simulated_disc,
