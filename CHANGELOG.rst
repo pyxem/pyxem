@@ -34,6 +34,8 @@ Deprecated
 - Deprecated `pyxem.generators.virtual_image_generator.VirtualImageGenerator` in
   favor of `pyxem.signals.CommonDiffraction.get_virtual_image` (#1014)
 - Several utility modules have been deprecated: utils.{pyfai,segement,virtual_images,background_utils,cluster_tools} (#1060 & #1030).
+- `insitu_utils` is now private.
+- `utils.vector_utils`, prefer `utils.vectors`
 
 Deleted
 -------
