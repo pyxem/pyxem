@@ -314,6 +314,7 @@ def _symmetry_stem(signal, interpolation, method="average"):
         raise ValueError("Method must be one of `average`, `max` or `first`")
     return val
 
-@deprecated(since='0.18.0',removal='0.20.0', alternative='signals.correlation2d')
+
+@deprecated(since="0.18.0", removal="0.20.0", alternative="signals.correlation2d")
 def corr_to_power(z):
     return np.power(np.fft.rfft(z, axis=1), 2).real

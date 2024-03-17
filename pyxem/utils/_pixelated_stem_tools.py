@@ -25,6 +25,7 @@ from hyperspy.misc.utils import isiterable
 from matplotlib.colors import hsv_to_rgb
 from tqdm import tqdm
 
+
 def _get_dask_chunk_slice_list(dask_array):
     """Generate a list of NumPy slice objects for a dask array
 
@@ -154,6 +155,7 @@ def _calculate_function_on_dask_array(
                 else:
                     return_data[i_x, i_y, :] = out_data
     return return_data
+
 
 def _threshold_and_mask_single_frame(im, threshold=None, mask=None):
     image = copy.deepcopy(im)
