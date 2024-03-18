@@ -27,7 +27,7 @@ from hyperspy.signal import BaseSignal
 
 
 from pyxem.signals import DiffractionVectors, DiffractionVectors2D
-from pyxem.utils._subpixel_utils import (
+from pyxem.utils._subpixel_finding import (
     _center_of_mass_hs,
     _get_experimental_square,
     _conventional_xc,

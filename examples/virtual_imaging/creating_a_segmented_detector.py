@@ -10,7 +10,7 @@ for a first look at the data.
 """
 
 import pyxem as pxm
-from pyxem.utils._azimuthal_utils import _get_control_points
+from pyxem.utils._azimuthal_integrations import _get_control_points
 import numpy as np
 import hyperspy.api as hs
 

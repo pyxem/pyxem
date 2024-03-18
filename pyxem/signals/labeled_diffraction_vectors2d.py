@@ -31,7 +31,7 @@ from pyxem.utils.labeled_vector_utils import (
     convert_to_markers,
     points_to_polygon,
 )
-from pyxem.utils.vector_utils import only_signal_axes
+from pyxem.utils.vectors import only_signal_axes
 
 
 class LabeledDiffractionVectors2D(DiffractionVectors2D):

@@ -21,13 +21,13 @@ import pytest
 
 from transforms3d.euler import euler2mat
 
-from pyxem.utils.vector_utils import calculate_norms
-from pyxem.utils.vector_utils import calculate_norms_ragged
-from pyxem.utils.vector_utils import detector_to_fourier
-from pyxem.utils.vector_utils import get_rotation_matrix_between_vectors
-from pyxem.utils.vector_utils import get_angle_cartesian
-from pyxem.utils.vector_utils import get_angle_cartesian_vec
-from pyxem.utils.vector_utils import filter_vectors_near_basis
+from pyxem.utils.vectors import calculate_norms
+from pyxem.utils.vectors import calculate_norms_ragged
+from pyxem.utils.vectors import detector_to_fourier
+from pyxem.utils.vectors import get_rotation_matrix_between_vectors
+from pyxem.utils.vectors import get_angle_cartesian
+from pyxem.utils.vectors import get_angle_cartesian_vec
+from pyxem.utils.vectors import filter_vectors_near_basis
 
 
 def test_calculate_norms():
