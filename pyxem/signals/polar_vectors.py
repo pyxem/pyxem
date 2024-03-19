@@ -20,7 +20,7 @@ from hyperspy._signals.lazy import LazySignal
 
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.utils.symmetric_vector_utils import get_three_angles
-from pyxem.utils.vector_utils import to_cart_three_angles, polar_to_cartesian
+from pyxem.utils.vectors import to_cart_three_angles, polar_to_cartesian
 
 
 class PolarVectors(DiffractionVectors):

@@ -32,7 +32,7 @@ from pyxem.utils.indexation_utils import (
     get_nth_best_solution,
     index_dataset_with_template_rotation,
 )
-from pyxem.utils.vector_utils import detector_to_fourier
+from pyxem.utils.vectors import detector_to_fourier
 from pyxem.utils.signal import (
     select_method_from_method_dict,
     transfer_navigation_axes,

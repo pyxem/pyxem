@@ -25,7 +25,7 @@ import hyperspy.api as hs
 from hyperspy.axes import UniformDataAxis
 
 from pyxem.utils.indexation_utils import index_dataset_with_template_rotation
-from pyxem.utils._azimuthal_utils import _get_control_points, _get_factors
+from pyxem.utils._azimuthal_integrations import _get_control_points, _get_factors
 from pyxem.utils._deprecated import deprecated
 
 

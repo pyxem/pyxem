@@ -63,7 +63,7 @@ from pyxem.utils.expt_utils import (
     sigma_clip,
     center_of_mass,
 )
-from pyxem.utils._azimuthal_utils import (
+from pyxem.utils._azimuthal_integrations import (
     _slice_radial_integrate,
     _slice_radial_integrate1d,
 )
@@ -2079,7 +2079,9 @@ class Diffraction2D(CommonDiffraction, Signal2D):
                 npt, npt_azim, radial_range=radial_range
             )
             if self._gpu and CUPY_INSTALLED:  # pragma: no cover
-                from pyxem.utils._azimuthal_utils import _slice_radial_integrate_cupy
+                from pyxem.utils._azimuthal_integrations import (
+                    _slice_radial_integrate_cupy,
+                )
 
                 slices = cp.asarray(slices)
                 factors = cp.asarray(factors)
