@@ -26,11 +26,9 @@ from hyperspy._signals.lazy import LazySignal
 from pyxem.utils._correlations import (
     _get_interpolation_matrix,
     _symmetry_stem,
+    _corr_to_power
 )
 from pyxem.signals.common_diffraction import CommonDiffraction
-
-def corr_to_power(z):
-    return np.power(np.fft.rfft(z, axis=1), 2).real
 
 class Correlation2D(Signal2D, CommonDiffraction):
     """Signal class for Correlation data after applying some correlation along some axis."""
@@ -42,7 +40,7 @@ class Correlation2D(Signal2D, CommonDiffraction):
         in the form of a Signal2D class.
 
         This gives the fourier decomposition of the radial correlation. Due to
-        nyquist sampling the number of fourier coefficients will be equal to the
+        Nyquist sampling the number of fourier coefficients will be equal to the
         angular range.
 
         Parameters
@@ -61,7 +59,7 @@ class Correlation2D(Signal2D, CommonDiffraction):
         power: Signal2D
             The power spectrum of the Signal2D
         """
-        power = self.map(corr_to_power, inplace=inplace, **kwargs)
+        power = self.map(_corr_to_power, inplace=inplace, **kwargs)
 
         s = self if inplace else power
 
@@ -88,7 +86,7 @@ class Correlation2D(Signal2D, CommonDiffraction):
         power: Power2D
             The power spectrum of summed angular correlation
         """
-        power = self.nansum().map(corr_to_power, inplace=inplace, **kwargs)
+        power = self.nansum().map(_corr_to_power, inplace=inplace, **kwargs)
 
         s = self if inplace else power
 
