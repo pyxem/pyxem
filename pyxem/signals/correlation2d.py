@@ -26,7 +26,7 @@ from hyperspy._signals.lazy import LazySignal
 from pyxem.utils._correlations import (
     _get_interpolation_matrix,
     _symmetry_stem,
-    _corr_to_power
+    _corr_to_power,
 )
 from pyxem.signals.common_diffraction import CommonDiffraction
 
