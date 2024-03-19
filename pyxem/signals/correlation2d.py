@@ -30,6 +30,7 @@ from pyxem.utils._correlations import (
 )
 from pyxem.signals.common_diffraction import CommonDiffraction
 
+
 class Correlation2D(Signal2D, CommonDiffraction):
     """Signal class for Correlation data after applying some correlation along some axis."""
 
