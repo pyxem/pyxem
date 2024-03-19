@@ -26,7 +26,7 @@ from scipy.ndimage import rotate, gaussian_filter
 from hyperspy.signals import BaseSignal, Signal1D, Signal2D
 from hyperspy._signals.lazy import LazySignal
 
-import pyxem.utils.pixelated_stem_tools as pst
+import pyxem.utils._pixelated_stem_tools as pst
 
 
 def make_bivariate_histogram(

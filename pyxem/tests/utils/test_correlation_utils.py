@@ -19,7 +19,7 @@
 import pytest
 import numpy as np
 
-from pyxem.utils.correlation_utils import (
+from pyxem.utils._correlations import (
     _correlation,
     _get_interpolation_matrix,
     _wrap_set_float,

@@ -22,7 +22,7 @@ from hyperspy._signals.lazy import LazySignal
 
 import numpy as np
 from fractions import Fraction as frac
-from pyxem.utils.correlation_utils import _get_interpolation_matrix, _symmetry_stem
+from pyxem.utils._correlations import _get_interpolation_matrix, _symmetry_stem
 
 
 class Correlation1D(Signal1D):

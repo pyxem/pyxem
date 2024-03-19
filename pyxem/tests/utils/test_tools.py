@@ -17,7 +17,7 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import pyxem.utils.pixelated_stem_tools as pst
+import pyxem.utils._pixelated_stem_tools as pst
 import numpy as np
 
 

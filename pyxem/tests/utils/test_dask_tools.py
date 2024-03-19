@@ -25,7 +25,7 @@ from pyxem.signals import Diffraction2D, LazyDiffraction2D
 import pyxem.utils.dask_tools as dt
 import pyxem.utils._background_subtraction as bt
 import pyxem.utils.expt_utils as et
-import pyxem.utils.pixelated_stem_tools as pst
+import pyxem.utils._pixelated_stem_tools as pst
 
 
 class TestSignalDimensionGetChunkSliceList:
