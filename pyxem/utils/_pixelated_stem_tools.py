@@ -35,6 +35,10 @@ def _threshold_and_mask_single_frame(im, threshold=None, mask=None):
         image[image > mean_value] = 1
     return image
 
+def _shift_single_frame(im, shift_x, shift_y, interpolation_order=1):
+    im_shifted = ndi.shift(im, (-shift_y, -shift_x), order=interpolation_order)
+    return im_shifted
+
 def _make_circular_mask(centerX, centerY, imageSizeX, imageSizeY, radius):
     """Make a circular mask in a bool array for masking a region in an image.
 
