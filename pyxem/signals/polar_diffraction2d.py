@@ -21,7 +21,7 @@ from hyperspy.signals import Signal2D
 from hyperspy._signals.lazy import LazySignal
 
 from pyxem.signals.common_diffraction import CommonDiffraction
-from pyxem.utils.correlation_utils import _correlation, _power, _pearson_correlation
+from pyxem.utils._correlations import _correlation, _power, _pearson_correlation
 from pyxem.utils._deprecated import deprecated
 
 
