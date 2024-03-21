@@ -54,6 +54,7 @@ def get_signal_dimension_host_chunk_slice(x, y, chunks):
                 return chunk_slice
     return False
 
+
 def _intensity_peaks_image_single_frame(frame, peaks, disk_r):
     """Intensity of the peaks is calculated by taking the mean value
     of the pixel values inside radius disk_r where the centers are the
@@ -106,3 +107,13 @@ def _intensity_peaks_image_single_frame(frame, peaks, disk_r):
             intensity_array[i, 2] = np.mean(mask * subframe)
 
     return intensity_array
+
+
+def _get_dask_array(*args, **kwargs):
+    """Stub, to allow the tests to build"""
+    pass
+
+
+def _get_chunking(*args, **kwargs):
+    """Stub, to allow the tests to build"""
+    pass
