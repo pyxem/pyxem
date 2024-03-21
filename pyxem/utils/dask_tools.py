@@ -109,11 +109,57 @@ def _intensity_peaks_image_single_frame(frame, peaks, disk_r):
     return intensity_array
 
 
-def _get_dask_array(*args, **kwargs):
-    """Stub, to allow the tests to build"""
-    pass
+def _get_chunking(signal, chunk_shape=None, chunk_bytes=None):
+    """Get chunk tuple based on the size of the dataset.
+
+    The signal dimensions will be within one chunk, and the navigation
+    dimensions will be chunked based on either chunk_shape, or
+    be optimized based on the chunk_bytes.
+
+    Parameters
+    ----------
+    signal : hyperspy or pyxem signal
+    chunk_shape : int, optional
+        Size of the navigation chunk, of None (the default), the chunk
+        size will be set automatically.
+    chunk_bytes : int or string, optional
+        Number of bytes in each chunk. For example '60MiB'. If None (the default),
+        the limit will be '30MiB'. Will not be used if chunk_shape is None.
+
+    Returns
+    -------
+    chunks : tuple
+    """
+    if chunk_bytes is None:
+        chunk_bytes = "30MiB"
+    nav_dim = signal.axes_manager.navigation_dimension
+    sig_dim = signal.axes_manager.signal_dimension
+    if chunk_shape is not None:
+        if not isiterable(chunk_shape):
+            chunk_shape = [chunk_shape] * nav_dim
+
+    chunks_dict = {}
+    for i in range(nav_dim):
+        if chunk_shape is None:
+            chunks_dict[i] = "auto"
+        else:
+            chunks_dict[i] = chunk_shape[i]
+    for i in range(nav_dim, nav_dim + sig_dim):
+        chunks_dict[i] = -1
+
+    chunks = da.core.normalize_chunks(
+        chunks=chunks_dict,
+        shape=signal.data.shape,
+        limit=chunk_bytes,
+        dtype=signal.data.dtype,
+    )
+    return chunks
 
 
-def _get_chunking(*args, **kwargs):
-    """Stub, to allow the tests to build"""
-    pass
+def _get_dask_array(signal, chunk_shape=None, chunk_bytes=None):
+    if signal._lazy:
+        dask_array = signal.data
+    else:
+        chunks = _get_chunking(signal, chunk_shape, chunk_bytes)
+        dask_array = da.from_array(signal.data, chunks=chunks)
+    return dask_array
