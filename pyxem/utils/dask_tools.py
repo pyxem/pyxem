@@ -54,26 +54,6 @@ def get_signal_dimension_host_chunk_slice(x, y, chunks):
                 return chunk_slice
     return False
 
-
-def _rechunk_signal2d_dim_one_chunk(dask_array):
-    array_dims = len(dask_array.shape)
-    if not hasattr(dask_array, "chunks"):
-        raise AttributeError(
-            "dask_array must be a dask array, not {0}".format(type(dask_array))
-        )
-    if array_dims < 2:
-        raise ValueError(
-            "dask_array must be at least two dimensions, not {0}".format(array_dims)
-        )
-    detx, dety = dask_array.shape[-2:]
-    chunks = [None] * array_dims
-    chunks[-2] = detx
-    chunks[-1] = dety
-    chunks = tuple(chunks)
-    dask_array_rechunked = dask_array.rechunk(chunks=chunks)
-    return dask_array_rechunked
-
-
 def _get_chunking(signal, chunk_shape=None, chunk_bytes=None):
     """Get chunk tuple based on the size of the dataset.
 
