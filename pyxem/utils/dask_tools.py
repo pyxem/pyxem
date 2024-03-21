@@ -18,8 +18,6 @@
 
 import numpy as np
 import dask.array as da
-from scipy import ndimage
-from skimage.feature import match_template, blob_dog, blob_log
 import scipy.ndimage as ndi
 from skimage import morphology
 from hyperspy.misc.utils import isiterable
