@@ -3,8 +3,8 @@
 .. |Actions| image:: https://github.com/pyxem/pyxem/workflows/build/badge.svg
 .. _Actions: https://github.com/pyxem/pyxem/actions
 
-.. |Coveralls| image:: https://coveralls.io/repos/github/pyxem/pyxem/badge.svg?branch=master
-.. _Coveralls: https://coveralls.io/github/pyxem/pyxem?branch=master
+.. |Coveralls| image:: https://coveralls.io/repos/github/pyxem/pyxem/badge.svg?branch=main
+.. _Coveralls: https://coveralls.io/github/pyxem/pyxem?branch=main
 
 .. |pypi_version| image:: http://img.shields.io/pypi/v/pyxem.svg?style=flat
 .. _pypi_version: https://pypi.python.org/pypi/pyxem
