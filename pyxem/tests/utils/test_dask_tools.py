@@ -493,6 +493,7 @@ class TestTemplateMatchBinaryImage:
         index = np.unravel_index(np.argmax(match), match.shape)
         assert (y, x) == index
 
+
 @pytest.mark.slow
 class TestPeakPositionRefinementCOM:
     def test_single_frame_peak(self):

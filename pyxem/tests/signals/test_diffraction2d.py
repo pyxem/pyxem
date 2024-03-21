@@ -1034,6 +1034,7 @@ class TestCenterDirectBeam:
         with pytest.raises(ValueError):
             s.center_direct_beam()
 
+
 class TestSubtractingDiffractionBackground:
     method1 = ["difference of gaussians", "median kernel", "radial median", "h-dome"]
 
