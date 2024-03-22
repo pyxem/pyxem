@@ -17,6 +17,7 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import numpy as np
+from hyperspy.signal import BaseSignal
 
 
 def slice_signal(arr, col_slice, row_slice):
@@ -39,7 +40,7 @@ class Slicer:
         if isinstance(item, tuple):  # multiple dimensions
             if len(item) == 0 or len(item) > 2:
                 raise ValueError(
-                    "Only column and row slicing 2-D arrays is currenlty supported"
+                    "Only column and row slicing 2-D arrays is currently supported"
                 )
             col_slice = self.str2slice(item[0])
             if len(item) == 2:
@@ -51,6 +52,11 @@ class Slicer:
             row_slice = slice(None)
         if self.signal.ragged:
             kwargs = dict(output_signal_size=(), output_dtype=object)
+            if not isinstance(row_slice, slice):
+                if not isinstance(row_slice, BaseSignal) or not row_slice.ragged:
+                    raise ValueError(
+                        "Only ragged boolean indexing is currently supported for ragged signals"
+                    )
         else:
             kwargs = dict()
 

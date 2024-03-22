@@ -218,7 +218,9 @@ class DiffractionVectors(BaseSignal):
             )
 
         if column_names is None and peaks.metadata.has_item("Peaks.signal_axes"):
-            column_names = [ax.name for ax in peaks.metadata.Peaks.signal_axes[::-1]]
+            column_names = [
+                str(ax.name) for ax in peaks.metadata.Peaks.signal_axes[::-1]
+            ]
         elif column_names is not None:
             pass
         else:
@@ -650,17 +652,38 @@ class DiffractionVectors(BaseSignal):
             nav_positions = self._get_navigation_positions(
                 flatten=False, real_units=real_units
             )
-            vectors = np.vstack(
-                [
-                    np.hstack(
-                        [
-                            np.tile(nav_positions[ind][::-1], (len(self.data[ind]), 1)),
-                            self.data[ind],
-                        ]
-                    )
-                    for ind in np.ndindex(self.axes_manager._navigation_shape_in_array)
-                ]
-            )
+            if self.num_columns == 1:
+                vectors = np.vstack(
+                    [
+                        np.hstack(
+                            [
+                                np.tile(
+                                    nav_positions[ind][::-1], (len(self.data[ind]), 1)
+                                ),
+                                self.data[ind][:, np.newaxis],
+                            ]
+                        )
+                        for ind in np.ndindex(
+                            self.axes_manager._navigation_shape_in_array
+                        )
+                    ]
+                )
+            else:
+                vectors = np.vstack(
+                    [
+                        np.hstack(
+                            [
+                                np.tile(
+                                    nav_positions[ind][::-1], (len(self.data[ind]), 1)
+                                ),
+                                self.data[ind],
+                            ]
+                        )
+                        for ind in np.ndindex(
+                            self.axes_manager._navigation_shape_in_array
+                        )
+                    ]
+                )
         else:
             nav_positions = self._get_navigation_positions(
                 flatten=True, real_units=real_units

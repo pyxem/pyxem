@@ -409,6 +409,10 @@ class TestConvertVectors:
         assert vectors.data.shape == (32, 4)
         assert vectors.ragged == False
 
+    def test_flatten_vectors1d(self, diffraction_vectors_map):
+        oned_vectors = diffraction_vectors_map.ivec[0]
+        vectors = oned_vectors.flatten_diffraction_vectors()
+
     def test_get_navigation_positions(self):
         test_data = np.empty((2, 3), dtype=object)
         for i in np.ndindex(test_data.shape):
@@ -759,6 +763,10 @@ class TestSlicingVectors:
     def test_slicing(self, vectors):
         sliced = vectors.ivec[:, vectors.ivec[0] > 101]
         assert sliced.data[0, 0].shape == (0, 2)
+
+    def test_slicing_first(self, vectors):
+        with pytest.raises(ValueError):
+            sliced = vectors.ivec[:, 0]
 
     def test_slicing_lazy(self, vectors):
         vectors = vectors.as_lazy()
