@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 import matplotlib.font_manager as fm
 import numpy as np
+from matplotlib.animation import FuncAnimation
 
 fontprops = fm.FontProperties(size=18, family="serif")
 family = "serif"
