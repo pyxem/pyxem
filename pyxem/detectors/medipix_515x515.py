@@ -52,7 +52,7 @@ class Medipix515x515Detector(Detector):
     aliases = ["Medipix515x515Detector"]
     MAX_SHAPE = 515, 515
 
-    @deprecated(since='0.18.0', removal='0.20.0')
+    @deprecated(since="0.18.0", removal="0.20.0")
     def __init__(self):
         pixel1 = 55e-6  # 55 micron pixel size in x
         pixel2 = 55e-6  # 55 micron pixel size in y
