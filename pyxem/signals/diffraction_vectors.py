@@ -96,7 +96,9 @@ class DiffractionVectors(BaseSignal):
         _units = kwargs.pop("units", None)
         super().__init__(*args, **kwargs)
         self._set_up_vector(_scales, _offsets, _detector_shape, _column_names, _units)
-        if self._is_object_dtype is None:
+        if (
+            self._is_object_dtype is None
+        ):  # empty signal with data=None due to `_deepcopy_with_new_data`
             pass
         elif self._is_object_dtype:
             self.ragged = True
@@ -387,10 +389,10 @@ class DiffractionVectors(BaseSignal):
         try:
             if self.data[0] is None:
                 return None
+            else:
+                return self.data.dtype.kind == "O"
         except IndexError:
             return None
-        else:
-            return self.data.dtype.kind == "O"
 
     @cached_property
     def num_columns(self):
@@ -1201,13 +1203,12 @@ class DiffractionVectors(BaseSignal):
         polar_vectors : DiffractionVectors
             Diffraction vectors in polar coordinates.
         """
-        if self.ragged:
-            ragged = True
-        else:
-            ragged = False
-
         polar_vectors = self.map(
-            vectors_to_polar, inplace=False, ragged=ragged, columns=columns, **kwargs
+            vectors_to_polar,
+            inplace=False,
+            ragged=self.ragged,
+            columns=columns,
+            **kwargs,
         )
         polar_vectors.set_signal_type("polar_vectors")
         polar_vectors.column_names[0] = "r"
