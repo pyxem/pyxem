@@ -99,7 +99,7 @@ class DisplacementGradientMap(Signal2D):
 
         e11 = np.reciprocal(U.isig[0, 0].T) - 1
         e12 = U.isig[0, 1].T
-        e21 = U.isig[1, 0].T
+        # e21 = U.isig[1, 0].T # Same as e12
         e22 = np.reciprocal(U.isig[1, 1].T) - 1
         theta = R.map(_get_rotation_angle, inplace=False)
         theta = theta.transpose(2)

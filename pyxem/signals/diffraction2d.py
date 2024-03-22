@@ -32,12 +32,6 @@ from hyperspy.axes import UniformDataAxis
 
 from pyxem.signals import (
     CommonDiffraction,
-    DPCBaseSignal,
-    DPCSignal1D,
-    DPCSignal2D,
-    LazyDPCBaseSignal,
-    LazyDPCSignal1D,
-    LazyDPCSignal2D,
 )
 from pyxem.utils.pyfai_utils import (
     get_azimuthal_integrator,
@@ -48,7 +42,6 @@ from pyxem.utils.expt_utils import (
     azimuthal_integrate1d,
     azimuthal_integrate2d,
     gain_normalise,
-    regional_filter,
     remove_bad_pixels,
     circular_mask,
     find_beam_offset_cross_correlation,
@@ -75,7 +68,6 @@ from pyxem.utils.dask_tools import (
 from pyxem.utils.signal import (
     select_method_from_method_dict,
     to_hyperspy_index,
-    transfer_navigation_axes,
 )
 import pyxem.utils._pixelated_stem_tools as pst
 import pyxem.utils.dask_tools as dt

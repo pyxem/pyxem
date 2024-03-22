@@ -21,8 +21,6 @@ from hyperspy.signals import Signal1D
 import numpy as np
 
 from pyxem.components import ReducedIntensityCorrectionComponent
-from diffsims.utils.atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
-from diffsims.utils.lobato_scattering_params import ATOMIC_SCATTERING_PARAMS_LOBATO
 from scipy import special
 
 
