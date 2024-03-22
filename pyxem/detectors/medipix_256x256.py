@@ -22,6 +22,7 @@ and other similar operations using pyFAI azimuthalIntegrator.
 """
 
 from pyFAI.detectors import Detector
+from pyxem.utils._deprecated import deprecated
 
 
 class Medipix256x256Detector(Detector):
@@ -45,6 +46,7 @@ class Medipix256x256Detector(Detector):
     aliases = ["Medipix256x256Detector"]
     MAX_SHAPE = 256, 256
 
+    @deprecated(since="0.18.0", removal="0.20.0")
     def __init__(self):
         pixel1 = 55e-6  # 55 micron pixel size in x
         pixel2 = 55e-6  # 55 micron pixel size in y
