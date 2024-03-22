@@ -15,6 +15,8 @@ import matplotlib.font_manager as fm
 import numpy as np
 from matplotlib.animation import FuncAnimation
 
+plt.rcParams["animation.html"] = "jshtml"
+
 fontprops = fm.FontProperties(size=18, family="serif")
 family = "serif"
 
@@ -144,12 +146,11 @@ def animate_4DSTEM(
         )
 
     ani = FuncAnimation(fig, animate, frames=len(indexes), interval=10, repeat=False)
-
-    ani.save(
-        "4DSTEM.gif",
-    )
+    return ani
 
 
-animate_4DSTEM(tilt)
+ani = animate_4DSTEM(tilt)
+plt.show()
 
 # %%
+# sphinx_gallery_thumbnail_number = 2
