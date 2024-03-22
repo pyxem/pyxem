@@ -216,6 +216,7 @@ sphinx_gallery_conf = {
         if "SPHINX_GALLERY_PARALLEL" in os.environ
         else (1 if os.environ.get("READTHEDOCS") == "True" else False)
     ),
+    "matplotlib_animations": True,
 }
 graphviz_output_format = "svg"
 
