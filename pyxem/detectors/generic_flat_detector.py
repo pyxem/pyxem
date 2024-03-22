@@ -23,7 +23,7 @@ operations using the pyFAI AzimuthalIntegrator for a
 """
 
 from pyFAI.detectors import Detector
-
+from pyxem.utils._deprecated import deprecated
 
 class GenericFlatDetector(Detector):
     """
@@ -57,7 +57,8 @@ class GenericFlatDetector(Detector):
     IS_CONTIGUOUS = True  # No gaps: all pixels are adjacents
     API_VERSION = "1.0"
     aliases = ["GenericFlatDetector"]
-
+    
+    @deprecated(since='0.18.0', removal='0.20.0')
     def __init__(self, size_x, size_y):
         MAX_SHAPE = size_x, size_y
         Detector.__init__(self, pixel1=1, pixel2=1, max_shape=MAX_SHAPE)
