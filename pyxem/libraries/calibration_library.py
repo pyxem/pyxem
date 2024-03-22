@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+from pyxem.utils._deprecated import deprecated
 
 class CalibrationDataLibrary(dict):
     """Maps crystal structure (phase) to diffraction vectors.
@@ -28,7 +29,7 @@ class CalibrationDataLibrary(dict):
         An image of an Au X-grating standard.
 
     """
-
+    @deprecated(since='0.18.0', removal='0.20.0')
     def __init__(
         self, au_x_grating_dp=None, au_x_grating_im=None, moo3_dp=None, moo3_im=None
     ):
