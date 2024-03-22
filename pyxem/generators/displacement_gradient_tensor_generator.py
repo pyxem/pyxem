@@ -141,7 +141,6 @@ def get_single_DisplacementGradientTensor(
         # see https://stackoverflow.com/questions/27128688
         weights = np.asarray(weights)
         # Need vectors normalized to the unstrained region otherwise the weighting breaks down
-        norm = np.linalg.norm(Vu, axis=1)
         Vs = (np.divide(Vs.T, np.linalg.norm(Vu, axis=1)) * np.sqrt(weights)).T
         Vu = (np.divide(Vu.T, np.linalg.norm(Vu, axis=1)) * np.sqrt(weights)).T
     else:

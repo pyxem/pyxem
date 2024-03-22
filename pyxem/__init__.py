@@ -26,9 +26,6 @@ try:
 except ImportError:
     CUPY_INSTALLED = False
 
-_logger = logging.getLogger(__name__)
-
-
 from pyxem import components
 from pyxem import detectors
 from pyxem import dummy_data
@@ -37,6 +34,10 @@ from pyxem import signals
 from pyxem import data
 
 from . import release_info
+
+
+_logger = logging.getLogger(__name__)
+
 
 __all__ = [
     "components",

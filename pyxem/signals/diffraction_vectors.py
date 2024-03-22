@@ -23,7 +23,6 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from scipy.spatial import distance_matrix
-from sklearn.cluster import DBSCAN
 import dask.array as da
 
 from hyperspy.signals import BaseSignal, Signal1D
