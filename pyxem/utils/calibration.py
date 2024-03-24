@@ -144,6 +144,18 @@ class Calibration:
             get_electron_wavelength(beam_energy),
         )
 
+    @property
+    def detector_gain(self):
+        return self.signal.metadata.get_item("Acquisition_instrument.TEM.detector_gain")
+
+    @detector_gain.setter
+    def detector_gain(self, gain):
+        self.signal.data = self.signal.data / gain
+        self.signal.metadata.set_item(
+            "Signal.quantity", "e$^-$"
+        )  # set the quantity to be electrons
+        self.signal.metadata.set_item("Acquisition_instrument.TEM.detector_gain", gain)
+
     def detector(
         self,
         pixel_size,

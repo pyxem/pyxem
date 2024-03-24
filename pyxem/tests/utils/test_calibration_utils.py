@@ -47,6 +47,12 @@ class TestCalibrationClass:
         assert calibration.signal.axes_manager[1].units == "k_nm^-1"
         assert calibration.units == ["k_nm^-1", "k_nm^-1"]
 
+    def test_calibrate_gain(self, calibration):
+        calibration.signal.data[0, 0] = 1
+        calibration.detector_gain = 2
+        assert calibration.detector_gain == 2
+        assert calibration.signal.data[0, 0] == 0.5
+
     def test_set_mask(self, calibration):
         calibration(mask=np.ones((10, 10)))
         assert calibration.mask is not None
