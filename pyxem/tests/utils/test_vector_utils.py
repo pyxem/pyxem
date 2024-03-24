@@ -137,9 +137,9 @@ def test_get_angle_cartesian_vec_input_validation():
 
 
 def test_filter_near_basis():
-    basis_vectors = np.random.randint(0, 100, (10, 2))
-
-    shifts = np.random.rand(10, 2)
+    rng = np.random.default_rng(10)
+    basis_vectors = rng.integers(0, 100, (10, 2))
+    shifts = rng.random((10, 2))
     dist = np.linalg.norm(shifts, axis=1)
     shifted = basis_vectors + shifts
     filt = filter_vectors_near_basis(shifted, basis_vectors, distance=0.4)
