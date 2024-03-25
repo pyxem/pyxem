@@ -215,9 +215,9 @@ Tips for writing Jupyter notebooks that are meant to be converted to reST text f
   command is the last line in a cell.
 - Refer to our API reference with this general markdown syntax:
   :code:`:meth:`~.signals.Diffraction2D.get_azimuthal_integral1d`` which will be
-  displayed as :meth:`~.signals.Diffraction2D.get_azimuthal_integral1d` or 
+  displayed as :meth:`~.signals.Diffraction2D.get_azimuthal_integral1d` or
   :code:`:meth:`pyxem.signals.Diffraction2D.get_azimuthal_integral1d`` to have the full
-  path: :meth:`pyxem.signals.Diffraction2D.get_azimuthal_integral1d` 
+  path: :meth:`pyxem.signals.Diffraction2D.get_azimuthal_integral1d`
 - Reference external APIs via standard markdown like :code:`:class:`hyperspy.api.signals.Signal2D``,
   which will be displayed as :class:`hyperspy.api.signals.Signal2D`.
 - The Sphinx gallery thumbnail used for a notebook is set by adding the

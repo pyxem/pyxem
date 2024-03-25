@@ -540,19 +540,19 @@ def ellipse_to_markers(ellipse_array, points=None, inlier=None):
         widths = np.empty(ellipse_array.shape, dtype=object)
         angles = np.empty(ellipse_array.shape, dtype=object)
         for i in np.ndindex(ellipse_array.shape):
-            offsets[i] = ellipse_array[i][:2]
-            heights[i] = ellipse_array[i][3] * 2
-            widths[i] = ellipse_array[i][2] * 2
-            angles[i] = np.rad2deg(ellipse_array[i][4])
+            offsets[i] = ellipse_array[i][:2][::-1]
+            heights[i] = ellipse_array[i][2] * 2
+            widths[i] = ellipse_array[i][3] * 2
+            angles[i] = np.rad2deg(-ellipse_array[i][4])
     else:
         offsets = np.array(
             [
-                ellipse_array[:2],
+                ellipse_array[:2][::-1],
             ]
         )
-        heights = ellipse_array[3] * 2
-        widths = ellipse_array[2] * 2
-        angles = np.rad2deg(ellipse_array[4])
+        heights = ellipse_array[2] * 2
+        widths = ellipse_array[3] * 2
+        angles = np.rad2deg(-ellipse_array[4])
 
     el = hs.plot.markers.Ellipses(
         offsets=offsets,
@@ -566,14 +566,18 @@ def ellipse_to_markers(ellipse_array, points=None, inlier=None):
 
     if points is not None and inlier is not None:
         in_points = hs.plot.markers.Points(
-            offsets=mask_peak_array(points, inlier), color="green"
+            offsets=mask_peak_array(points[:, ::-1], inlier), color="green"
         )
         out_points = hs.plot.markers.Points(
-            offsets=mask_peak_array(points, inlier, invert=True), color="red", alpha=0.5
+            offsets=mask_peak_array(points[:, ::-1], inlier, invert=True),
+            color="red",
+            alpha=0.5,
         )
         return el, in_points, out_points
     elif points is not None:
-        points = hs.plot.markers.Points(offsets=points, color="green", alpha=0.5)
+        points = hs.plot.markers.Points(
+            offsets=points[:, ::-1], color="green", alpha=0.5
+        )
         return el, points
     else:
         return el

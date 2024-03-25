@@ -169,18 +169,6 @@ class DiffractionVectors2D(DiffractionVectors, Signal2D):
         else:
             return unique_peaks
 
-    def get_magnitudes(self, out=None, rechunk=False):
-        """
-        Calculate the magnitude of diffraction vectors.
-
-        TODO: Add in ability to get the magnitude of only certain columns.
-        """
-
-        axis = self.axes_manager[-2]
-        return self._apply_function_on_data_and_remove_axis(
-            np.linalg.norm, axes=axis, out=out, rechunk=rechunk
-        )
-
     def __lt__(self, other):
         return self._deepcopy_with_new_data(self.data < other)
 
@@ -195,34 +183,6 @@ class DiffractionVectors2D(DiffractionVectors, Signal2D):
 
     def from_peaks(cls, **kwargs):
         raise NotImplementedError("This method is not implemented for 2D vectors")
-
-    def filter_magnitude(self, min_magnitude, max_magnitude, *args, **kwargs):
-        """Filter the diffraction vectors to accept only those with a magnitude
-        within a user specified range.
-        TODO: Add in ability to filter by the magnitude of only certain columns.
-
-        Parameters
-        ----------
-        min_magnitude : float
-            Minimum allowed vector magnitude.
-        max_magnitude : float
-            Maximum allowed vector magnitude.
-        *args:
-            Arguments to be passed to map().
-        **kwargs:
-            Keyword arguments to map().
-
-        Returns
-        -------
-        filtered_vectors : DiffractionVectors
-            Diffraction vectors within allowed magnitude tolerances.
-        """
-        magnitudes = self.get_magnitudes()
-        in_range = (min_magnitude < magnitudes) * (magnitudes < max_magnitude)
-
-        # self.data[in_range]
-        new_data = self.data[in_range]
-        return DiffractionVectors2D(new_data)
 
     def filter_detector_edge(self, exclude_width, columns=[-2, -1]):
         """Filter the diffraction vectors to accept only those not within a

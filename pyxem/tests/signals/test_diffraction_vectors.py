@@ -407,6 +407,61 @@ class TestConvertVectors:
         )
         assert isinstance(vectors, DiffractionVectors2D)
         assert vectors.data.shape == (32, 4)
+        assert vectors.ragged == False
+
+    def test_flatten_vectors1d(self, diffraction_vectors_map):
+        oned_vectors = diffraction_vectors_map.ivec[0]
+        vectors = oned_vectors.flatten_diffraction_vectors()
+
+    def test_get_navigation_positions(self):
+        test_data = np.empty((2, 3), dtype=object)
+        for i in np.ndindex(test_data.shape):
+            test_data[i] = np.random.random((np.random.randint(2, 6), 2))
+        dv = DiffractionVectors(test_data)
+        dv.axes_manager[0].name = "x"
+        dv.axes_manager[1].name = "y"
+        dv.axes_manager[0].scale = 1
+        dv.axes_manager[1].scale = 2
+        dv.axes_manager[0].offset = 1
+        flat = dv._get_navigation_positions(flatten=False, real_units=True)
+        np.testing.assert_array_equal(flat[0, 0, 0], 0)
+        np.testing.assert_array_equal(flat[0, 0, 1], 1)
+        np.testing.assert_array_equal(flat[0, 1, 1], 2)
+        np.testing.assert_array_equal(flat[0, 1, 0], 0)
+
+    def test_flatten_vectors_with_scales(self):
+        test_data = np.empty((2, 3, 4), dtype=object)
+        for i in np.ndindex(test_data.shape):
+            test_data[i] = np.random.random((np.random.randint(2, 6), 2))
+        dv = DiffractionVectors(test_data)
+        dv.axes_manager[0].name = "x"
+        dv.axes_manager[1].name = "y"
+        dv.axes_manager[2].name = "time"
+        dv.axes_manager[0].scale = 1
+        dv.axes_manager[1].scale = 2
+        dv.axes_manager[2].scale = 3
+        dv.axes_manager[0].offset = 1
+        dv.axes_manager[1].offset = 2
+        dv.axes_manager[2].offset = 3
+        flat = dv.flatten_diffraction_vectors(real_units=True)
+        assert flat.column_names[0] == "x"
+        assert flat.column_names[1] == "y"
+        assert flat.column_names[2] == "time"
+        assert (
+            np.max(flat.data[:, 0])
+            == dv.axes_manager[0].size * dv.axes_manager[0].scale
+        )
+        assert (
+            np.max(flat.data[:, 1])
+            == dv.axes_manager[1].size * dv.axes_manager[1].scale
+        )
+        assert (
+            np.max(flat.data[:, 2])
+            == dv.axes_manager[2].size * dv.axes_manager[2].scale
+        )
+        assert np.min(flat.data[:, 0]) == dv.axes_manager[0].offset
+        assert np.min(flat.data[:, 1]) == dv.axes_manager[1].offset
+        assert np.min(flat.data[:, 2]) == dv.axes_manager[2].offset
 
     def test_flatten_vectors_with_set_metadata(self, diffraction_vectors_map):
         diffraction_vectors_map.scales = [0.1, 0.1]
@@ -628,9 +683,12 @@ class TestSlicingVectors:
         vectors[0, 0] = np.random.randint(-100, 100, (20, 2))
         vectors[0, 1] = np.random.randint(-100, 100, (6, 2))
         vectors[1, 0] = np.random.randint(-100, 100, (7, 2))
-        vectors[1, 1] = np.random.randint(-100, 100, (8, 2))
+        vectors[1, 1] = np.random.randint(-100, 100, (1, 2))
         v = DiffractionVectors(
-            vectors, scales=[0.1, 0.2], offsets=[10, 20], column_names=["x", "y"]
+            vectors,
+            scales=[0.1, 0.2],
+            offsets=[10, 20],
+            column_names=["x_axis", "y_axis"],
         )
 
         return v
@@ -642,21 +700,28 @@ class TestSlicingVectors:
     def test_center(self, vectors):
         np.testing.assert_almost_equal(vectors.center, (100, 100))
 
-    @pytest.mark.parametrize("index", (0, "x", ("x",)))
+    @pytest.mark.parametrize("index", (0, "x_axis", ("x_axis",)))
     def test_column(self, vectors, index):
         slic = vectors.ivec[index]
         for i in np.ndindex((2, 2)):
-            np.testing.assert_almost_equal(slic.data[i][:, 0], vectors.data[i][:, 0])
+            np.testing.assert_almost_equal(slic.data[i][:], vectors.data[i][:, 0])
 
     def test_column_error(self, vectors):
         with pytest.raises(ValueError):
             vectors.ivec[5.5]
 
-    @pytest.mark.parametrize("index", ([0, 1], ["x", "y"]))
+    @pytest.mark.parametrize("index", ([0, 1], ["x_axis", "y_axis"]))
     def test_column_slicing2(self, vectors, index):
         slic = vectors.ivec[index]
         for i in np.ndindex((2, 2)):
             np.testing.assert_almost_equal(slic.data[i][:, [0, 1]], vectors.data[i])
+
+    @pytest.mark.parametrize("item", [0, "x_axis"])
+    def test_slice(self, vectors, item):
+        sliced = vectors.ivec[item]
+        assert sliced.column_names == [
+            "x_axis",
+        ]
 
     def test_row_lt(self, vectors):
         col = vectors.ivec[0] < 0.5
@@ -670,8 +735,17 @@ class TestSlicingVectors:
         for i in np.ndindex((2, 2)):
             assert np.all(slic.data[i][:, 0] > 0.5)
 
+    def test_row_gt_none(self, vectors):
+        vectors = vectors.as_lazy()
+        col = vectors.ivec[0] > 101
+        assert vectors.data[0, 0].compute().shape == (20, 2)
+        slic = vectors.ivec[:, col]
+        for i in np.ndindex((2, 2)):
+            assert slic.data[i].compute().shape == (0, 2)
+
     def test_row_gte(self, vectors):
         col = vectors.ivec[0] >= 0.5
+        assert col.data[0, 0].shape == (20,)
         slic = vectors.ivec[:, col]
         for i in np.ndindex((2, 2)):
             assert np.all(slic.data[i][:, 0] >= 0.5)
@@ -685,6 +759,31 @@ class TestSlicingVectors:
     def test_vector_slicing_error(self, vectors):
         with pytest.raises(ValueError):
             vectors.ivec[0, 0, 0]
+
+    def test_slicing(self, vectors):
+        sliced = vectors.ivec[:, vectors.ivec[0] > 101]
+        assert sliced.data[0, 0].shape == (0, 2)
+
+    def test_slicing_first(self, vectors):
+        with pytest.raises(ValueError):
+            sliced = vectors.ivec[:, 0]
+
+    def test_slicing_lazy(self, vectors):
+        vectors = vectors.as_lazy()
+        sliced = vectors.ivec[:, vectors.ivec[0] > 101]
+        sliced = sliced.ivec[:, sliced.ivec[0] > 101]
+        sliced.compute()
+        assert sliced.data[0, 0].shape == (0, 2)
+        sliced.flatten_diffraction_vectors()
+
+    def test_ragged_vectors(self, vectors):
+        vectors = vectors.as_lazy()
+        assert vectors.ragged == True
+
+    def test_inav_slicing(self, vectors):
+        slic = vectors.inav[0, 0]
+        assert isinstance(slic, DiffractionVectors)
+        assert slic.data.shape == (1,)
 
     def test_num_columns(self, vectors):
         assert vectors.num_columns == 2

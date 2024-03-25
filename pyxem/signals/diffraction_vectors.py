@@ -96,6 +96,14 @@ class DiffractionVectors(BaseSignal):
         _units = kwargs.pop("units", None)
         super().__init__(*args, **kwargs)
         self._set_up_vector(_scales, _offsets, _detector_shape, _column_names, _units)
+        if (
+            self._is_object_dtype is None
+        ):  # empty signal with data=None due to `_deepcopy_with_new_data`
+            pass
+        elif self._is_object_dtype:
+            self.ragged = True
+        elif self.ragged == True:
+            self.ragged = False
 
     def _repr_html_(self):
         table = '<table align="center">'
@@ -118,6 +126,8 @@ class DiffractionVectors(BaseSignal):
         vectors = self._get_current_data()
         if vectors.dtype.kind == "O":
             vectors = vectors[0]
+        if self.num_columns == 1:
+            vectors = np.array([vectors]).T
         for i, row in enumerate(vectors):
             table += "<tr>"
             table += f"<td><center>{i}</center></td>"
@@ -208,7 +218,9 @@ class DiffractionVectors(BaseSignal):
             )
 
         if column_names is None and peaks.metadata.has_item("Peaks.signal_axes"):
-            column_names = [ax.name for ax in peaks.metadata.Peaks.signal_axes[::-1]]
+            column_names = [
+                str(ax.name) for ax in peaks.metadata.Peaks.signal_axes[::-1]
+            ]
         elif column_names is not None:
             pass
         else:
@@ -253,6 +265,8 @@ class DiffractionVectors(BaseSignal):
             cen=center,
             inplace=False,
             ragged=True,
+            output_signal_size=(),
+            output_dtype=object,
         )
         vectors.set_signal_type("diffraction_vectors")
         if isinstance(peaks, LazySignal):
@@ -374,7 +388,13 @@ class DiffractionVectors(BaseSignal):
 
     @property
     def _is_object_dtype(self):
-        return self.data.dtype.kind == "O"
+        try:
+            if self.data[0] is None:
+                return None
+            else:
+                return self.data.dtype.kind == "O"
+        except IndexError:
+            return None
 
     @cached_property
     def num_columns(self):
@@ -385,6 +405,8 @@ class DiffractionVectors(BaseSignal):
                 shape = self.data[self.data.ndim * (0,)].shape
             if shape is None:
                 return 0
+            elif len(shape) == 1:
+                return 1
             else:
                 return shape[1]
         else:
@@ -401,12 +423,15 @@ class DiffractionVectors(BaseSignal):
 
     @units.setter
     def units(self, value):
+        if isinstance(value, str) and self.num_columns == 1:
+            value = [value]
         if (
             isiterable(value)
             and len(value) == self.num_columns
             and not isinstance(value, str)
         ):
             self.metadata.VectorMetadata["units"] = value
+
         elif isiterable(value) and len(value) != self.num_columns:
             raise ValueError(
                 "The len of the units parameter must equal the number of"
@@ -448,6 +473,9 @@ class DiffractionVectors(BaseSignal):
     def column_names(self, value):
         if value is None:
             value = [f"column_{i}" for i in range(self.num_columns)]
+
+        if isinstance(value, str):
+            value = [value]
         if len(value) != self.num_columns:
             raise ValueError(
                 f"The len of the column_names parameter: {len(value)} must equal the"
@@ -464,6 +492,7 @@ class DiffractionVectors(BaseSignal):
     def offsets(self, value):
         if isiterable(value) and len(value) == self.num_columns:
             self.metadata.VectorMetadata["offsets"] = value
+
         elif isiterable(value) and len(value) != self.num_columns:
             raise ValueError(
                 "The len of the scales parameter must equal the number of"
@@ -475,23 +504,55 @@ class DiffractionVectors(BaseSignal):
             ] * self.num_columns
 
     def __lt__(self, other):
+        if self.ragged:
+            kwargs = dict(output_signal_size=(), output_dtype=object)
+        else:
+            kwargs = dict()
         return self.map(
-            lambda x, other: x < other, other=other, inplace=False, ragged=True
+            lambda x, other: x < other,
+            other=other,
+            inplace=False,
+            ragged=self.ragged,
+            **kwargs,
         )
 
     def __le__(self, other):
+        if self.ragged:
+            kwargs = dict(output_signal_size=(), output_dtype=object)
+        else:
+            kwargs = dict()
         return self.map(
-            lambda x, other: x <= other, other=other, inplace=False, ragged=True
+            lambda x, other: x <= other,
+            other=other,
+            inplace=False,
+            ragged=self.ragged,
+            **kwargs,
         )
 
     def __gt__(self, other):
+        if self.ragged:
+            kwargs = dict(output_signal_size=(), output_dtype=object)
+        else:
+            kwargs = dict()
         return self.map(
-            lambda x, other: x > other, other=other, inplace=False, ragged=True
+            lambda x, other: x > other,
+            other=other,
+            inplace=False,
+            ragged=self.ragged,
+            **kwargs,
         )
 
     def __ge__(self, other):
+        if self.ragged:
+            kwargs = dict(output_signal_size=(), output_dtype=object)
+        else:
+            kwargs = dict()
         return self.map(
-            lambda x, other: x >= other, other=other, inplace=False, ragged=True
+            lambda x, other: x >= other,
+            other=other,
+            inplace=False,
+            ragged=self.ragged,
+            **kwargs,
         )
 
     @property
@@ -537,8 +598,8 @@ class DiffractionVectors(BaseSignal):
             scales = [1 for a in self.axes_manager.navigation_axes]
             offsets = [0 for a in self.axes_manager.navigation_axes]
         else:
-            scales = [a.scale for a in self.axes_manager.navigation_axes]
-            offsets = [a.offset for a in self.axes_manager.navigation_axes]
+            scales = [a.scale for a in self.axes_manager.navigation_axes[::-1]]
+            offsets = [a.offset for a in self.axes_manager.navigation_axes[::-1]]
 
         if flatten:
             real_nav = np.array(
@@ -584,22 +645,49 @@ class DiffractionVectors(BaseSignal):
         """
         from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
 
-        nav_positions = self._get_navigation_positions(
-            flatten=True, real_units=real_units
-        )
         if self.axes_manager._navigation_shape_in_array == ():
             return self
 
         if self._is_object_dtype:
-            vectors = np.vstack(
-                [
-                    np.hstack(
-                        [np.tile(nav_pos, (len(self.data[ind]), 1)), self.data[ind]]
-                    )
-                    for ind, nav_pos in zip(np.ndindex(self.data.shape), nav_positions)
-                ]
+            nav_positions = self._get_navigation_positions(
+                flatten=False, real_units=real_units
             )
+            if self.num_columns == 1:
+                vectors = np.vstack(
+                    [
+                        np.hstack(
+                            [
+                                np.tile(
+                                    nav_positions[ind][::-1], (len(self.data[ind]), 1)
+                                ),
+                                self.data[ind][:, np.newaxis],
+                            ]
+                        )
+                        for ind in np.ndindex(
+                            self.axes_manager._navigation_shape_in_array
+                        )
+                    ]
+                )
+            else:
+                vectors = np.vstack(
+                    [
+                        np.hstack(
+                            [
+                                np.tile(
+                                    nav_positions[ind][::-1], (len(self.data[ind]), 1)
+                                ),
+                                self.data[ind],
+                            ]
+                        )
+                        for ind in np.ndindex(
+                            self.axes_manager._navigation_shape_in_array
+                        )
+                    ]
+                )
         else:
+            nav_positions = self._get_navigation_positions(
+                flatten=True, real_units=real_units
+            )
             navs = np.repeat(nav_positions, self.num_rows, axis=0)
             data = self.data.reshape((-1, self.num_columns))
             vectors = np.vstack((navs, data))
@@ -627,14 +715,18 @@ class DiffractionVectors(BaseSignal):
         column_offsets = np.append(column_offsets, offsets)
         column_scale = np.append(column_scale, scales)
 
-        column_names = [
-            a.name for a in self.axes_manager.navigation_axes
-        ] + self.column_names
+        column_names = np.append(
+            [a.name for a in self.axes_manager.navigation_axes], self.column_names
+        )
 
         if real_units:
-            units = [a.units for a in self.axes_manager.navigation_axes] + self.units
+            units = np.append(
+                [a.units for a in self.axes_manager.navigation_axes], self.units
+            )
         else:
-            units = ["pixels"] * len(self.axes_manager.navigation_axes) + self.units
+            units = np.append(
+                ["pixels"] * len(self.axes_manager.navigation_axes), self.units
+            )
 
         return DiffractionVectors2D(
             vectors,
@@ -817,11 +909,14 @@ class DiffractionVectors(BaseSignal):
         )
         signal.add_marker(marker, plot_marker=True, permanent=False)
 
-    def get_magnitudes(self, *args, **kwargs):
+    def get_magnitudes(self, columns=None, *args, **kwargs):
         """Calculate the magnitude of diffraction vectors.
 
         Parameters
         ----------
+        columns : list, optional
+            The columns of the diffraction vectors to be used to calculate
+            the magnitude. If not given, the first two columns will be used.
         *args:
             Arguments to be passed to map().
         **kwargs:
@@ -835,9 +930,13 @@ class DiffractionVectors(BaseSignal):
             navigation position.
 
         """
-        magnitudes = self.map(
-            np.linalg.norm, inplace=False, axis=-1, ragged=True, *args, **kwargs
-        )
+        if columns is None:
+            columns = [0, 1]
+
+        def get_magnitude(x):
+            return np.linalg.norm(x[:, columns], axis=-1)
+
+        magnitudes = self.map(get_magnitude, inplace=False, *args, **kwargs)
 
         return magnitudes
 
@@ -911,6 +1010,13 @@ class DiffractionVectors(BaseSignal):
         if columns is None:
             columns = list(range(self.data.shape[-1]))
 
+        if self.ragged:
+            signal_shape = ()
+            dtype = object
+        else:
+            signal_shape = self.axes_manager._signal_shape_in_array
+            signal_shape = signal_shape[:-1] + (signal_shape[-1] + 1,)
+            dtype = float
         new_signal = self.map(
             cluster,
             inplace=False,
@@ -918,10 +1024,13 @@ class DiffractionVectors(BaseSignal):
             columns=columns,
             column_scale_factors=column_scale_factors,
             min_vectors=min_vectors,
+            ragged=self.ragged,
             remove_nan=remove_nan,
+            output_signal_size=signal_shape,
+            output_dtype=dtype,
         )
-        new_signal.column_names = self.column_names + ["cluster"]
-        new_signal.units = self.units + ["n.a."]
+        new_signal.column_names = np.append(self.column_names, ["cluster"])
+        new_signal.units = np.append(self.units, ["n.a."])
 
         if not self.has_navigation_axis:
             new_signal.set_signal_type("labeled_diffraction_vectors")
@@ -1000,13 +1109,16 @@ class DiffractionVectors(BaseSignal):
         filtered_vectors : DiffractionVectors
             Diffraction vectors within allowed magnitude tolerances.
         """
-        # If ragged the signal axes will not be defined
+
+        if self.ragged:
+            kwargs["output_signal_size"] = ()
+            kwargs["output_dtype"] = object
+
         filtered_vectors = self.map(
             filter_vectors_ragged,
             min_magnitude=min_magnitude,
             max_magnitude=max_magnitude,
             inplace=False,
-            ragged=True,
             *args,
             **kwargs,
         )
@@ -1097,15 +1209,30 @@ class DiffractionVectors(BaseSignal):
         )
         return filtered_vectors
 
-    def to_polar(self):
+    def to_polar(self, columns=None, **kwargs):
         """Convert the diffraction vectors to polar coordinates.
+
+        Parameters
+        ----------
+        columns : list
+            The columns of the diffraction vectors to be converted to polar
+            coordinates. The default is the first two columns (kx, ky) in most
+            cases.
+        kwargs : dict
+            Any other parameters passed to the `hyperspy.signal.BaseSignal.map` function.
 
         Returns
         -------
         polar_vectors : DiffractionVectors
             Diffraction vectors in polar coordinates.
         """
-        polar_vectors = self.map(vectors_to_polar, inplace=False, ragged=True)
+        polar_vectors = self.map(
+            vectors_to_polar,
+            inplace=False,
+            ragged=self.ragged,
+            columns=columns,
+            **kwargs,
+        )
         polar_vectors.set_signal_type("polar_vectors")
         polar_vectors.column_names[0] = "r"
         polar_vectors.column_names[1] = "theta"

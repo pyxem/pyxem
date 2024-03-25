@@ -21,10 +21,10 @@ import pytest
 import numpy as np
 from sklearn.cluster import DBSCAN
 
-from hyperspy.signals import Signal2D, BaseSignal
+from hyperspy.signals import Signal2D, BaseSignal, Signal1D
 import hyperspy.api as hs
 
-from pyxem.signals import DiffractionVectors2D
+from pyxem.signals import DiffractionVectors2D, DiffractionVectors1D
 
 
 class TestDiffractionVectors2D:
@@ -34,16 +34,18 @@ class TestDiffractionVectors2D:
 
     def test_setup(self):
         assert isinstance(self.vector, DiffractionVectors2D)
+        assert self.vector.ragged == False
 
     def test_magnitudes(self):
         magnitudes = self.vector.get_magnitudes()
-        mags = np.linalg.norm(self.vector, axis=1)
+        assert magnitudes.ragged == False
+        mags = np.linalg.norm(self.vector.data[:, [0, 1]], axis=1)
         np.testing.assert_array_almost_equal(mags, magnitudes.data)
         assert len(magnitudes.axes_manager.signal_axes) == 1
 
     def test_filter_magnitudes(self):
         magnitudes = self.vector.filter_magnitude(min_magnitude=10, max_magnitude=40)
-        mags = np.linalg.norm(self.vector, axis=1)
+        mags = np.linalg.norm(self.vector.data[:, [0, 1]], axis=1)
         num_in_range = np.sum((mags > 10) * (mags < 40))
         assert num_in_range == magnitudes.data.shape[0]
 
@@ -88,6 +90,11 @@ class TestSingleDiffractionVectors2D:
         assert clustered.ivec["cluster"].data.shape[0] == 8
         assert isinstance(clustered, DiffractionVectors2D)
 
+    def test_slice(self):
+        slic = self.vector.ivec[:, self.vector.ivec[1] > 0]
+        assert slic.data.shape[0] == 5
+        assert slic.data.shape[1] == 2
+
 
 class TestVector2DSubclass:
     @pytest.fixture()
@@ -110,10 +117,10 @@ class TestVector2DSubclass:
     @pytest.mark.parametrize("item", [0, "x"])
     def test_slice(self, vectors, item):
         sliced = vectors.ivec[item]
-        assert isinstance(sliced, DiffractionVectors2D)
-        assert isinstance(sliced, Signal2D)
-        assert sliced.axes_manager.signal_shape == (1, 20)
-        assert sliced.column_names == ["x"]
+        assert isinstance(sliced, DiffractionVectors1D)
+        assert isinstance(sliced, Signal1D)
+        assert sliced.axes_manager.signal_shape == (20,)
+        assert sliced.column_names == "x"
 
     def test_flatten(self, vectors):
         flatten_diffraction_vectors = vectors.flatten_diffraction_vectors()
