@@ -21,10 +21,12 @@
 from pyxem.utils._deprecated import deprecated
 import scipy.ndimage as ndi
 
+
 @deprecated(since="0.18.0", removal="0.20.0")
 def align_single_frame(image, shifts, **kwargs):
     temp_image = ndi.shift(image, shifts[::-1], **kwargs)
     return temp_image
+
 
 @deprecated(since="0.18.0", removal="0.20.0")
 def get_signal_dimension_chunk_slice_list(chunks):
@@ -40,6 +42,7 @@ def get_signal_dimension_chunk_slice_list(chunks):
     for chunk_slice_raw in chunk_slice_raw_list:
         chunk_slice_list.append((chunk_slice_raw[1], chunk_slice_raw[0]))
     return chunk_slice_list
+
 
 @deprecated(since="0.18.0", removal="0.20.0")
 def get_signal_dimension_host_chunk_slice(x, y, chunks):
