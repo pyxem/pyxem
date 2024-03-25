@@ -23,12 +23,12 @@ from skimage import morphology
 from hyperspy.misc.utils import isiterable
 
 
-def align_single_frame(image, shifts, **kwargs):
+def _align_single_frame(image, shifts, **kwargs):
     temp_image = ndi.shift(image, shifts[::-1], **kwargs)
     return temp_image
 
 
-def get_signal_dimension_chunk_slice_list(chunks):
+def _get_signal_dimension_chunk_slice_list(chunks):
     """Convenience function for getting the signal chunks as slices
 
     The slices are assumed to be used on a HyperSpy signal object.
@@ -43,8 +43,8 @@ def get_signal_dimension_chunk_slice_list(chunks):
     return chunk_slice_list
 
 
-def get_signal_dimension_host_chunk_slice(x, y, chunks):
-    chunk_slice_list = get_signal_dimension_chunk_slice_list(chunks)
+def _get_signal_dimension_host_chunk_slice(x, y, chunks):
+    chunk_slice_list = _get_signal_dimension_chunk_slice_list(chunks)
     for chunk_slice in chunk_slice_list:
         x_slice, y_slice = chunk_slice
         if y_slice.start <= y < y_slice.stop:
