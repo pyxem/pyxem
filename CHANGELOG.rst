@@ -27,6 +27,7 @@ Added
   from a 4D STEM dataset (#1014)
 - Added GPU support for lazy signals. (#1012)
 - Added GPU processing for `pyxem.signals.Diffraction2D.get_azimuthal_integral2d` (#1012)
+- Added method for calibrating the detector gain (#1046)
 
 Deprecated
 ----------
