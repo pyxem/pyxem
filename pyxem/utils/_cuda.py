@@ -28,7 +28,7 @@ def _is_cupy_installed():
     except ImportError:
         return False
 
-def dask_array_to_gpu(dask_array):
+def _dask_array_to_gpu(dask_array):
     """
     Copy a dask array to the GPU chunk by chunk
     """
@@ -38,7 +38,7 @@ def dask_array_to_gpu(dask_array):
         raise BaseException("cupy is required")
 
 
-def dask_array_from_gpu(dask_array):
+def _dask_array_from_gpu(dask_array):
     """
     Copy a dask array from the GPU chunk by chunk
     """
@@ -48,7 +48,7 @@ def dask_array_from_gpu(dask_array):
         raise BaseException("cupy is required")
 
 
-def to_numpy(array):
+def _to_numpy(array):
     """
     Returns the array as an numpy array
     Parameters
@@ -66,7 +66,7 @@ def to_numpy(array):
     return array
 
 
-def get_array_module(array):
+def _get_array_module(array):
     """
     Returns the array module for the given array
     Parameters
@@ -88,7 +88,7 @@ def get_array_module(array):
     return module
 
 
-def is_cupy_array(array):
+def _is_cupy_array(array):
     """
     Convenience function to determine if an array is a cupy array
 

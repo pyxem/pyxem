@@ -35,8 +35,8 @@ from pyxem.utils.expt_utils import _cart2polar
 from pyxem.utils.vectors import get_rotation_matrix_between_vectors
 from pyxem.utils.vectors import get_angle_cartesian
 from pyxem.utils._cuda import (
-    is_cupy_array,
-    get_array_module,
+    _is_cupy_array,
+    _get_array_module,
     _correlate_polar_image_to_library_gpu,
     TPB,
 )
@@ -412,7 +412,7 @@ def _match_polar_to_polar_template(
     correlation : 1D ndarray
         correlation index at each in-plane angle position
     """
-    dispatcher = get_array_module(polar_image)
+    dispatcher = _get_array_module(polar_image)
     sli = polar_image[:, r_template]
     rows, column_indices = dispatcher.ogrid[: sli.shape[0], : sli.shape[1]]
     rows = dispatcher.mod(rows + theta_template[None, :], polar_image.shape[0])
@@ -601,12 +601,12 @@ def _get_integrated_polar_templates(
     integrated_templates : 2D numpy or cupy ndarray
         Templates integrated over the azimuthal axis of shape (N, r_max)
     """
-    dispatcher = get_array_module(intensities_templates)
+    dispatcher = _get_array_module(intensities_templates)
     data = intensities_templates.ravel()
     columns = r_templates.ravel()
     rows = dispatcher.arange(r_templates.shape[0]).repeat(r_templates.shape[1])
     out_shape = (r_templates.shape[0], r_max)
-    if is_cupy_array(intensities_templates):
+    if _is_cupy_array(intensities_templates):
         integrated_templates = spgpu.sparse.coo_matrix(
             (data, (rows, columns)), shape=out_shape
         ).toarray()
@@ -707,7 +707,7 @@ def _prepare_image_and_templates(
         find_direct_beam=find_direct_beam,
         direct_beam_position=direct_beam_position,
     )
-    dispatcher = get_array_module(polar_image)
+    dispatcher = _get_array_module(polar_image)
     max_radius = polar_image.shape[1] * delta_r
     positions, intensities = _simulations_to_arrays(simulations, max_radius=max_radius)
     r, theta = _cartesian_positions_to_polar(
@@ -718,7 +718,7 @@ def _prepare_image_and_templates(
     r[condition] = polar_image.shape[1] - 1
     theta[condition] = 0
     intensities[condition] = 0.0
-    if is_cupy_array(polar_image):
+    if _is_cupy_array(polar_image):
         # send data to GPU
         r = cp.asarray(r)
         theta = cp.asarray(theta)
@@ -776,7 +776,7 @@ def _mixed_matching_lib_to_polar(
         of the best fitting template, where factor is 1 if the direct template is
         matched and -1 if the mirror template is matched
     """
-    dispatcher = get_array_module(polar_image)
+    dispatcher = _get_array_module(polar_image)
     # remove templates we don't care about with a fast match
     (
         template_indexes,
@@ -858,7 +858,7 @@ def _index_chunk(
     norm_images,
     order=1,
 ):
-    dispatcher = get_array_module(images)
+    dispatcher = _get_array_module(images)
     # prepare an empty results chunk
     indexation_result_chunk = dispatcher.empty(
         (images.shape[0], images.shape[1], n_best, 4),
@@ -958,7 +958,7 @@ def get_in_plane_rotation_correlation(
         delta_theta=delta_theta,
         max_r=polar_image.shape[1],
     )
-    if is_cupy_array(polar_image):
+    if _is_cupy_array(polar_image):
         dispatcher = cp
         r = cp.asarray(r)
         theta = cp.asarray(theta)
@@ -989,7 +989,7 @@ def _get_fast_correlation_index(
     normalize_image,
     normalize_templates,
 ):
-    dispatcher = get_array_module(polar_image)
+    dispatcher = _get_array_module(polar_image)
     integrated_polar = polar_image.sum(axis=0)
     rrr = dispatcher.arange(integrated_polar.shape[0]) / integrated_polar.shape[0]
     integrated_polar = integrated_polar * rrr
@@ -1099,7 +1099,7 @@ def _prefilter_templates(
     frac_keep,
     n_keep,
 ):
-    dispatcher = get_array_module(polar_image)
+    dispatcher = _get_array_module(polar_image)
     max_keep = _get_max_n(r.shape[0], n_keep, frac_keep)
     template_indexes = dispatcher.arange(r.shape[0], dtype=np.int32)
     if max_keep != r.shape[0]:
@@ -1125,7 +1125,7 @@ def _get_full_correlations(
     intensities,
 ):
     # get a full match on the filtered data - we must branch for CPU/GPU
-    if is_cupy_array(polar_image):
+    if _is_cupy_array(polar_image):
         f = _match_polar_to_polar_library_gpu
     else:
         f = _match_polar_to_polar_library_cpu
