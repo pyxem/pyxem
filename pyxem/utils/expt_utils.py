@@ -30,7 +30,7 @@ from tqdm import tqdm
 from packaging.version import Version
 
 from pyxem.utils.pyfai_utils import get_azimuthal_integrator
-from pyxem.utils.cuda_utils import is_cupy_array
+from pyxem.utils._cuda import _is_cupy_array
 from pyxem.utils._deprecated import deprecated
 
 try:
@@ -596,7 +596,7 @@ def find_beam_center_blur(z, sigma):
     center : np.array
         np.array [x, y] containing indices of estimated direct beam positon.
     """
-    if is_cupy_array(z):
+    if _is_cupy_array(z):
         gaus = ndigpu.gaussian_filter
         dispatcher = cp
     else:

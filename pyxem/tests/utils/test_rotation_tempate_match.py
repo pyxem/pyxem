@@ -24,7 +24,7 @@ import pytest
 from unittest.mock import Mock
 import dask.array as da
 import sys
-from pyxem.utils.cuda_utils import is_cupy_array
+from pyxem.utils._cuda import _is_cupy_array
 
 
 try:
@@ -368,7 +368,7 @@ def test_correlate_library_to_pattern_fast_gpu(simulations, norim, nortemp):
         normalize_templates=nortemp,
     )
     assert cor.shape[0] == 3
-    assert is_cupy_array(cor)
+    assert _is_cupy_array(cor)
 
 
 # @pytest.mark.skipif(sys.platform=='darwin',reason="Fails on Mac OSX")
