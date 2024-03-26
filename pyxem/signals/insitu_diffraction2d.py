@@ -26,7 +26,7 @@ from hyperspy.roi import RectangularROI
 import dask.array as da
 from dask.graph_manipulation import clone
 
-from pyxem.utils.dask_tools import _get_dask_array, _get_chunking
+from pyxem.utils._dask import _get_dask_array, _get_chunking
 from pyxem.utils._insitu import (
     _register_drift_5d,
     _register_drift_2d,

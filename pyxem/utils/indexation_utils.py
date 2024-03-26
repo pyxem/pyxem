@@ -40,7 +40,7 @@ from pyxem.utils.cuda_utils import (
     _correlate_polar_image_to_library_gpu,
     TPB,
 )
-from pyxem.utils.dask_tools import _get_dask_array
+from pyxem.utils._dask import _get_dask_array
 from pyxem.utils.polar_transform_utils import (
     _cartesian_positions_to_polar,
     get_polar_pattern_shape,

@@ -22,7 +22,7 @@ import dask.array as da
 import skimage.morphology as sm
 
 from pyxem.signals import Diffraction2D, LazyDiffraction2D
-import pyxem.utils.dask_tools as dt
+import pyxem.utils._dask as dt
 import pyxem.utils._background_subtraction as bt
 import pyxem.utils.expt_utils as et
 import pyxem.utils._pixelated_stem_tools as pst
@@ -36,7 +36,7 @@ class TestSignalDimensionGetChunkSliceList:
     def test_chunksizes(self, sig_chunks):
         xchunk, ychunk = sig_chunks
         data = da.zeros((20, 20, 20, 20), chunks=(10, 10, ychunk, xchunk))
-        chunk_slice_list = dt.get_signal_dimension_chunk_slice_list(data.chunks)
+        chunk_slice_list = dt._get_signal_dimension_chunk_slice_list(data.chunks)
         assert len(data.chunks[-1]) * len(data.chunks[-2]) == len(chunk_slice_list)
         for chunk_slice in chunk_slice_list:
             xsize = chunk_slice[0].stop - chunk_slice[0].start
@@ -46,7 +46,7 @@ class TestSignalDimensionGetChunkSliceList:
 
     def test_non_square_chunks(self):
         data = da.zeros((2, 2, 20, 20), chunks=(2, 2, 15, 15))
-        chunk_slice_list = dt.get_signal_dimension_chunk_slice_list(data.chunks)
+        chunk_slice_list = dt._get_signal_dimension_chunk_slice_list(data.chunks)
         assert chunk_slice_list[0] == (slice(0, 15, None), slice(0, 15, None))
         assert chunk_slice_list[1] == (slice(15, 20, None), slice(0, 15, None))
         assert chunk_slice_list[2] == (slice(0, 15, None), slice(15, 20, None))
@@ -54,20 +54,20 @@ class TestSignalDimensionGetChunkSliceList:
 
     def test_one_signal_chunk(self):
         data = da.zeros((2, 2, 20, 20), chunks=(1, 1, 20, 20))
-        chunk_slice_list = dt.get_signal_dimension_chunk_slice_list(data.chunks)
+        chunk_slice_list = dt._get_signal_dimension_chunk_slice_list(data.chunks)
         assert len(chunk_slice_list) == 1
         assert chunk_slice_list[0] == np.s_[0:20, 0:20]
 
     def test_rechunk(self):
         data = da.zeros((2, 2, 20, 20), chunks=(1, 1, 20, 20))
         data1 = data.rechunk((2, 2, 10, 10))
-        chunk_slice_list = dt.get_signal_dimension_chunk_slice_list(data1.chunks)
+        chunk_slice_list = dt._get_signal_dimension_chunk_slice_list(data1.chunks)
         assert len(chunk_slice_list) == 4
 
     def test_slice_navigation(self):
         data = da.zeros((2, 2, 20, 20), chunks=(1, 1, 20, 20))
         data1 = data[0, 1]
-        chunk_slice_list = dt.get_signal_dimension_chunk_slice_list(data1.chunks)
+        chunk_slice_list = dt._get_signal_dimension_chunk_slice_list(data1.chunks)
         assert len(chunk_slice_list) == 1
         assert chunk_slice_list[0] == np.s_[0:20, 0:20]
 
@@ -95,7 +95,7 @@ class TestGetSignalDimensionHostChunkSlice:
     def test_simple(self, xy, sig_slice, xchunk, ychunk):
         x, y = xy
         data = da.zeros((2, 2, 20, 20), chunks=(1, 1, ychunk, xchunk))
-        chunk_slice = dt.get_signal_dimension_host_chunk_slice(x, y, data.chunks)
+        chunk_slice = dt._get_signal_dimension_host_chunk_slice(x, y, data.chunks)
         assert chunk_slice == sig_slice
 
     @pytest.mark.parametrize(
@@ -111,7 +111,7 @@ class TestGetSignalDimensionHostChunkSlice:
     def test_non_square(self, xy, sig_slice):
         x, y = xy
         data = da.zeros((2, 2, 30, 20), chunks=(1, 1, 10, 10))
-        chunk_slice = dt.get_signal_dimension_host_chunk_slice(x, y, data.chunks)
+        chunk_slice = dt._get_signal_dimension_host_chunk_slice(x, y, data.chunks)
         assert chunk_slice == sig_slice
 
 
@@ -124,7 +124,7 @@ class TestAlignSingleFrame:
         image = np.zeros((y_size, x_size), dtype=np.uint16)
         x, y = 3, 7
         image[y, x] = 7
-        image_shifted = dt.align_single_frame(image, shifts)
+        image_shifted = dt._align_single_frame(image, shifts)
         pos = np.s_[y + shifts[1], x + shifts[0]]
         assert image_shifted[pos] == 7
         image_shifted[pos] = 0
@@ -144,7 +144,7 @@ class TestAlignSingleFrame:
         image = np.zeros((y_size, x_size), dtype=np.uint16)
         x, y = 3, 7
         image[y, x] = 8
-        image_shifted = dt.align_single_frame(image, shifts, order=1)
+        image_shifted = dt._align_single_frame(image, shifts, order=1)
         assert (image_shifted[pos] >= 2).all()
         image_shifted[pos] = 0
         assert not image_shifted.any()
@@ -163,7 +163,7 @@ class TestAlignSingleFrame:
         image = np.zeros((y_size, x_size), dtype=np.float32)
         x, y = 3, 7
         image[y, x] = 9
-        image_shifted = dt.align_single_frame(image, shifts, order=1)
+        image_shifted = dt._align_single_frame(image, shifts, order=1)
         assert image_shifted[pos].sum() == 9
         image_shifted[pos] = 0
         assert not image_shifted.any()
@@ -174,7 +174,7 @@ class TestAlignSingleFrame:
         image = np.zeros((y_size, x_size), dtype=np.float32)
         x, y = 3, 7
         image[y, x] = 9
-        image_shifted = dt.align_single_frame(image, shifts, order=0)
+        image_shifted = dt._align_single_frame(image, shifts, order=0)
         pos = np.s_[y + round(shifts[1]), x + round(shifts[0])]
         assert image_shifted[pos] == 9.0
         image_shifted[pos] = 0

@@ -60,17 +60,17 @@ from pyxem.utils._azimuthal_integrations import (
     _slice_radial_integrate,
     _slice_radial_integrate1d,
 )
-from pyxem.utils.dask_tools import (
+from pyxem.utils._dask import (
     _get_dask_array,
-    get_signal_dimension_host_chunk_slice,
-    align_single_frame,
+    _get_signal_dimension_host_chunk_slice,
+    _align_single_frame,
 )
 from pyxem.utils.signal import (
     select_method_from_method_dict,
     to_hyperspy_index,
 )
 import pyxem.utils._pixelated_stem_tools as pst
-import pyxem.utils.dask_tools as dt
+import pyxem.utils._dask as dt
 import pyxem.utils.ransac_ellipse_tools as ret
 from pyxem.utils._deprecated import deprecated, deprecated_argument
 
@@ -860,7 +860,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             else:
                 align_kwargs["order"] = 0
         aligned = self.map(
-            align_single_frame,
+            _align_single_frame,
             shifts=shifts,
             inplace=inplace,
             lazy_output=lazy_output,
@@ -1332,7 +1332,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             x = round(self.axes_manager.signal_shape[0] / 2)
             y = round(self.axes_manager.signal_shape[1] / 2)
             if self._lazy:
-                isig_slice = get_signal_dimension_host_chunk_slice(
+                isig_slice = _get_signal_dimension_host_chunk_slice(
                     x, y, self.data.chunks
                 )
             else:

@@ -32,11 +32,12 @@ Added
 Deprecated
 ----------
 - The module & all functions within `utils.reduced_intensity1d` are deprecated in favour of using the methods of `ReducedIntensity1D` (#994).
-- Deprecated `CalibrationGenerator` in favour of `pyxem.utils.calibration_utils.Calibration` class (#1000)
+- Deprecated `CalibrationGenerator` and `CalibrationLibrary` in favour of `pyxem.utils.calibration.Calibration` class (#1000)
+- Detector module as we move away from pyfai
 - Deprecated `pyxem.generators.virtual_image_generator.VirtualImageGenerator` in
   favor of `pyxem.signals.CommonDiffraction.get_virtual_image` (#1014)
 - Several utility modules have been deprecated: utils.{pyfai,segement,virtual_images,background_utils,cluster_tools} (#1060 & #1030).
-- The following utils: `insitu_utils`, `correlations_utils` and `pixelated_stem_tools` are now private.
+- The following utils: `insitu_utils`, `correlations_utils` and `pixelated_stem_tools`, `dask_tools` are now private.
 - `utils.vector_utils`, prefer `utils.vectors`
 
 Deleted
