@@ -19,6 +19,7 @@
 from warnings import warn
 
 import hyperspy.api as hs
+from hyperspy._signals.lazy import LazySignal
 from hyperspy.signal import BaseSignal
 import numpy as np
 from orix.crystal_map import CrystalMap
@@ -27,6 +28,7 @@ from transforms3d.euler import mat2euler
 
 from pyxem.utils.indexation_utils import get_nth_best_solution
 from pyxem.utils.signal import transfer_navigation_axes
+from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
 
 
 def crystal_from_vector_matching(z_matches):
@@ -147,6 +149,72 @@ def _get_second_best_phase(z):
         return -1
 
 
+class OrientationMap(DiffractionVectors2D):
+    """Signal class for orientation maps.  Note that this is a special case where
+    for each navigation position, the signal contains the top n best matches in the form
+    of a nx4 array with columns [index,correlation, in-plane rotation, mirror(factor)]
+
+    The Simulation is saved in the metadata but can be accessed using the .simulation attribute.
+
+    Parameters
+    ----------
+    *args
+        See :class:`~hyperspy._signals.signal2d.Signal2D`.
+    **kwargs
+        See :class:`~hyperspy._signals.signal2d.Signal2D`
+    """
+
+    _signal_type = "orientation_map"
+
+    @property
+    def simulation(self):
+        return self.metadata.get_item("simulation")
+
+    @simulation.setter
+    def simulation(self, value):
+        self.metadata.set_item("simulation", value)
+
+    def to_crystal_map(self):
+        """Convert the orientation map to an `orix.CrystalMap` object"""
+        pass
+
+    def to_markers(self, annotate=False, **kwargs):
+        """Convert the orientation map to a set of markers for plotting.
+
+        Parameters
+        ----------
+        annotate : bool
+            If True, the euler rotation and the correlation will be annotated on the plot using
+            the `Texts` class from hyperspy.
+        """
+
+        pass
+
+    def to_navigator(self):
+        """Create a colored navigator and a legend (in the form of a marker) which can be passed as the
+        navigator argument to the `plot` method of some signal.
+        """
+        pass
+
+    def plot_over_signal(self, signal, annotate=False, **kwargs):
+        """Convenience method to plot the orientation map and the n-best matches over the signal.
+
+        Parameters
+        ----------
+        signal : BaseSignal
+            The signal to plot the orientation map over.
+        annotate: bool
+            If True, the euler rotation and the correlation will be annotated on the plot using
+            the `Texts` class from hyperspy.
+
+        """
+        pass
+
+    def plot_inplane_rotation(self, **kwargs):
+        """Plot the in-plane rotation of the orientation map as a 2D map."""
+        pass
+
+
 class GenericMatchingResults:
     def __init__(self, data):
         self.data = hs.signals.Signal2D(data)
@@ -197,6 +265,10 @@ class GenericMatchingResults:
         return CrystalMap(
             rotations=rotations, phase_id=phase_id, x=x, y=y, prop=properties
         )
+
+
+class LazyOrientationMap(LazySignal, OrientationMap):
+    pass
 
 
 class VectorMatchingResults(BaseSignal):

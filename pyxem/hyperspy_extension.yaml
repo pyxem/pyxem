@@ -125,6 +125,18 @@ signals:
     dtype: real
     lazy: False
     module: pyxem.signals.indexation_results
+  OrientationMap:
+    signal_type: orientation_map
+    signal_dimension: 2
+    dtype: real
+    lazy: False
+    module: pyxem.signals.indexation_results
+  LazyOrientationMap:
+    signal_type: orientation_map
+    signal_dimension: 2
+    dtype: real
+    lazy: True
+    module: pyxem.signals.indexation_results
   DisplacementGradientMap:
     signal_type: tensor_field
     signal_dimension: 2

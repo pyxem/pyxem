@@ -742,6 +742,7 @@ def _mixed_matching_lib_to_polar(
     n_keep,
     frac_keep,
     n_best,
+    transpose=False,
 ):
     """
     Match a polar image to a filtered subset of polar templates
@@ -776,6 +777,8 @@ def _mixed_matching_lib_to_polar(
         of the best fitting template, where factor is 1 if the direct template is
         matched and -1 if the mirror template is matched
     """
+    if transpose:
+        polar_image = polar_image.T
     dispatcher = get_array_module(polar_image)
     # remove templates we don't care about with a fast match
     (
@@ -1099,6 +1102,24 @@ def _prefilter_templates(
     frac_keep,
     n_keep,
 ):
+    """
+    Pre-filter the templates to reduce the number of templates to do a full match on
+
+    Parameters
+    ----------
+    polar_image: 2D numpy.ndarray
+        The image converted to polar coordinates in the form (theta, r)
+    r:
+    theta
+    intensities
+    integrated_templates
+    frac_keep
+    n_keep
+
+    Returns
+    -------
+
+    """
     dispatcher = get_array_module(polar_image)
     max_keep = _get_max_n(r.shape[0], n_keep, frac_keep)
     template_indexes = dispatcher.arange(r.shape[0], dtype=np.int32)
