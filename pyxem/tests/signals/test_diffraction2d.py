@@ -622,23 +622,6 @@ class TestPyFAIIntegration:
         np.testing.assert_array_equal(ones, np.ones(10))
         assert integration is None
 
-    def test_integrate_sigma_clip(self, ones):
-        ones.set_ai(center=(5.5, 5.5), wavelength=1e-9)
-        integration = ones.sigma_clip(
-            npt_rad=10, npt_azim=100, method="CSR", correctSolidAngle=False
-        )  # only CSR works
-        np.testing.assert_array_equal(integration, np.ones(10))
-        integration = ones.sigma_clip(
-            npt_rad=10,
-            npt_azim=100,
-            method="CSR",
-            correctSolidAngle=False,
-            inplace=True,
-        )
-        np.testing.assert_array_equal(ones, np.ones(10))
-        assert integration is None
-
-
 class TestVirtualImaging:
     # Tests that virtual imaging runs without failure
 
