@@ -144,6 +144,28 @@ class Calibration:
             get_electron_wavelength(beam_energy),
         )
 
+    @property
+    def detector_gain(self):
+        return self.signal.metadata.get_item("Acquisition_instrument.TEM.detector_gain")
+
+    @detector_gain.setter
+    def detector_gain(self, gain):
+        """
+        Calibrate the signal with a known detector gain. This works by dividing the signal the average
+        number of counts per electron.  It also sets the appropriate metadata for setting the color
+        bar when plotting the signal.
+        Parameters
+        ----------
+        gain: float
+            The gain of the detector
+        """
+        if gain != 1:  # ignore for counted detectors
+            self.signal.data = self.signal.data / gain
+        self.signal.metadata.set_item(
+            "Signal.quantity", "e$^-$"
+        )  # set the quantity to be electrons
+        self.signal.metadata.set_item("Acquisition_instrument.TEM.detector_gain", gain)
+
     def detector(
         self,
         pixel_size,
