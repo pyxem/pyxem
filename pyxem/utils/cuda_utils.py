@@ -20,30 +20,32 @@
 from numba import cuda, int32, float32
 import numpy as np
 
-try:
-    import cupy as cp
-
-    CUPY_INSTALLED = True
-except ImportError:
-    CUPY_INSTALLED = False
-
+def _is_cupy_installed():
+    """ Check if cupy is installed, if installed import as `cp'"""
+    try:
+        import cupy as cp
+        return True
+    except ImportError:
+        return False
 
 def dask_array_to_gpu(dask_array):
     """
     Copy a dask array to the GPU chunk by chunk
     """
-    if not CUPY_INSTALLED:
+    if _is_cupy_installed():
+        return dask_array.map_blocks(cp.asarray)
+    else:
         raise BaseException("cupy is required")
-    return dask_array.map_blocks(cp.asarray)
 
 
 def dask_array_from_gpu(dask_array):
     """
     Copy a dask array from the GPU chunk by chunk
     """
-    if not CUPY_INSTALLED:
+    if _is_cupy_installed():
+        return dask_array.map_blocks(cp.asnumpy)
+    else:
         raise BaseException("cupy is required")
-    return dask_array.map_blocks(cp.asnumpy)
 
 
 def to_numpy(array):
