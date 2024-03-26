@@ -19,7 +19,7 @@
 import numpy as np
 from pyxem.utils.expt_utils import find_beam_center_blur
 from scipy import ndimage
-from pyxem.utils.cuda_utils import get_array_module
+from pyxem.utils._cuda import get_array_module
 
 
 try:

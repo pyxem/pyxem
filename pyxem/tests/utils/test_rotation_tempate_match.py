@@ -24,7 +24,7 @@ import pytest
 from unittest.mock import Mock
 import dask.array as da
 import sys
-from pyxem.utils.cuda_utils import is_cupy_array
+from pyxem.utils._cuda import is_cupy_array
 
 
 try:

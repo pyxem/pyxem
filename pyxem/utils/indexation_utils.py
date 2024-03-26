@@ -34,7 +34,7 @@ import scipy
 from pyxem.utils.expt_utils import _cart2polar
 from pyxem.utils.vectors import get_rotation_matrix_between_vectors
 from pyxem.utils.vectors import get_angle_cartesian
-from pyxem.utils.cuda_utils import (
+from pyxem.utils._cuda import (
     is_cupy_array,
     get_array_module,
     _correlate_polar_image_to_library_gpu,
