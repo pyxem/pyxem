@@ -20,13 +20,16 @@
 from numba import cuda, int32, float32
 import numpy as np
 
+
 def _is_cupy_installed():
-    """ Check if cupy is installed, if installed import as `cp'"""
+    """Check if cupy is installed, if installed import as `cp'"""
     try:
         import cupy as cp
+
         return True
     except ImportError:
         return False
+
 
 def _dask_array_to_gpu(dask_array):
     """

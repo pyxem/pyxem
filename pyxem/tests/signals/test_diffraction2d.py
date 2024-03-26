@@ -622,6 +622,7 @@ class TestPyFAIIntegration:
         np.testing.assert_array_equal(ones, np.ones(10))
         assert integration is None
 
+
 class TestVirtualImaging:
     # Tests that virtual imaging runs without failure
 

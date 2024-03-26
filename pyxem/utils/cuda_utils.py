@@ -23,6 +23,7 @@ import numpy as np
 from pyxem.utils._deprecated import deprecated
 from pyxem.utils._cuda import _is_cupy_installed
 
+
 @deprecated(since="0.18.0", removal="0.20.0")
 def dask_array_to_gpu(dask_array):
     """
@@ -33,6 +34,7 @@ def dask_array_to_gpu(dask_array):
     else:
         raise BaseException("cupy is required")
 
+
 @deprecated(since="0.18.0", removal="0.20.0")
 def dask_array_from_gpu(dask_array):
     """
@@ -42,6 +44,7 @@ def dask_array_from_gpu(dask_array):
         return dask_array.map_blocks(cp.asnumpy)
     else:
         raise BaseException("cupy is required")
+
 
 @deprecated(since="0.18.0", removal="0.20.0")
 def to_numpy(array):
@@ -60,6 +63,7 @@ def to_numpy(array):
 
         array = cp.asnumpy(array)
     return array
+
 
 @deprecated(since="0.18.0", removal="0.20.0")
 def get_array_module(array):
@@ -82,6 +86,7 @@ def get_array_module(array):
     except ImportError:
         pass
     return module
+
 
 @deprecated(since="0.18.0", removal="0.20.0")
 def is_cupy_array(array):
