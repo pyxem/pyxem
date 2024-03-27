@@ -1,9 +1,3 @@
-import itertools
-from copy import deepcopy
-
-import numpy as np
-from scipy.spatial import ConvexHull
-
 warnings.warn(
     "This module has been renamed and should now be imported as `pyxem.utils.vectors`",
     FutureWarning,

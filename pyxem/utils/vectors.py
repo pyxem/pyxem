@@ -15,10 +15,13 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+import itertools
+from copy import deepcopy
+import math
 
 import numpy as np
-import math
 from scipy.spatial.distance import cdist
+from scipy.spatial import ConvexHull
 from transforms3d.axangles import axangle2mat
 
 
