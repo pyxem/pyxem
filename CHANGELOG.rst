@@ -37,6 +37,8 @@ Deprecated
 - Several utility modules have been deprecated: utils.{pyfai,segement,virtual_images,background_utils,cluster_tools} (#1060 & #1030).
 - The following utils: `insitu_utils`, `correlations_utils` and `pixelated_stem_tools` are now private.
 - `utils.vector_utils`, prefer `utils.vectors`
+- `utils.symmetric_vector_utils`, prefer `utils.vectors`
+- `utils.labeled_vector_utils`, prefer `utils.vectors`
 
 Deleted
 -------
