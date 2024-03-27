@@ -47,7 +47,7 @@ s.add_marker(p, plot_on_signal=False)
 # %%
 
 vect = clustered.map_vectors(
-    pxm.utils.labeled_vector_utils.column_mean,
+    pxm.utils.vectors.column_mean,
     columns=[0, 1],
     label_index=-1,
     dtype=float,
