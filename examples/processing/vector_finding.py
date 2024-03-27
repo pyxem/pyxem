@@ -14,7 +14,7 @@ import hyperspy.api as hs
 s = pxm.data.tilt_boundary_data()
 # %%
 
-s.find_peaks(iteractive=True)  # find the peaks using the interactive peak finder
+s.find_peaks(interactive=True)  # find the peaks using the interactive peak finder
 
 # %%
 
