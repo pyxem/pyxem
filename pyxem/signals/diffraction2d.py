@@ -1245,10 +1245,10 @@ class Diffraction2D(CommonDiffraction, Signal2D):
                 vectors,
                 center=center,
                 calibration=calibration,
-                column_names=None,
-                units=None,
+                column_names=column_names,
+                units=units,
             )
-
+            return vectors
         else:
             return super().find_peaks(interactive=interactive, **kwargs)
 
