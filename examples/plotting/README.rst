@@ -1,3 +1,4 @@
-Plotting
-===============
-Below is a gallery of examples on how to make nice plots with Matplotlib from hyperspy/ pyxem signals.
+Plotting Data using Matplotlib
+==============================
+Below is a gallery of examples on how to make nice publication quality plots and
+figures using Matplotlib.
