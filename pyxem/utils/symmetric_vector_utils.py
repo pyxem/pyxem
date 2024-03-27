@@ -15,6 +15,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+import warnings
 
 warnings.warn(
     "This module has been renamed and should now be imported as `pyxem.utils.vectors`",
