@@ -1218,6 +1218,57 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             **kwargs,
         )
 
+    def find_peaks(
+        self,
+        return_vectors=False,
+        interactive=False,
+        center=None,
+        calibration=None,
+        column_names=None,
+        units=None,
+        **kwargs,
+    ):
+        """Find vectors from the diffraction pattern. Wraps `hyperspy.api.signals.Signal2D.find_peaks`
+
+        Parameters
+        ----------
+        return_vectors : bool
+            If True, will return a DiffractionVectors object. If False,
+            returns a BaseSignal object.
+        interactive : bool
+            If True, will use the interactive peak finding tool to help find
+            the peaks.
+        center: None or tuple
+            The center of the diffraction pattern, if None, will use the
+            center determined by the offsets in the signal axes
+        calibration: None or tuple
+            The calibration of the diffraction pattern, if None, will use the
+            scales in the signal axes
+        column_names: None or tuple
+            The column names of the vectors, if None, will use the names
+            of the signal axes
+        units: None or tuple
+            The units of the vectors, if None, will use the units of the
+            signal axes
+        kwargs:
+            Passed to the peak finding function.
+        """
+        if return_vectors:
+            from pyxem.signals import DiffractionVectors
+
+            interactive = False
+            vectors = super().find_peaks(interactive=interactive, **kwargs)
+            vectors = DiffractionVectors.from_peaks(
+                vectors,
+                center=center,
+                calibration=calibration,
+                column_names=None,
+                units=None,
+            )
+
+        else:
+            return super().find_peaks(interactive=interactive, **kwargs)
+
     def peak_position_refinement_com(
         self, peak_array, square_size=10, lazy_result=True, show_progressbar=True
     ):
