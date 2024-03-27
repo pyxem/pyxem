@@ -134,27 +134,23 @@ class TestSimpleHyperspy:
         assert isinstance(diffraction_pattern, ElectronDiffraction2D)
 
     @pytest.mark.parametrize(
-        "calibration, center",
+        "calibration, center, center_pixels",
         [
-            (
-                1,
-                (4, 4),
-            ),
-            (0.017, (3, 3)),
-            (
-                0.5,
-                None,
-            ),
+            (1, (4, 4), None),
+            (0.017, (3, 3), None),
+            (0.5, None, None),
+            (0.5, None, (3, 3)),
+            (0.5, (3, 3), (4, 4)),
         ],
     )
     def test_set_diffraction_calibration(
-        self, diffraction_pattern, calibration, center
+        self, diffraction_pattern, calibration, center, center_pixels
     ):
         calibrated_center = (
             calibration * np.array(center) if center is not None else center
         )
         diffraction_pattern.set_diffraction_calibration(
-            calibration, center=calibrated_center
+            calibration, center=calibrated_center, center_pixels=center_pixels
         )
         dx, dy = diffraction_pattern.axes_manager.signal_axes
         assert dx.scale == calibration and dy.scale == calibration
@@ -162,6 +158,19 @@ class TestSimpleHyperspy:
             assert np.all(
                 diffraction_pattern.isig[0.0, 0.0].data
                 == diffraction_pattern.isig[center[0], center[1]].data
+            )
+        elif center_pixels is not None:
+            assert np.all(
+                diffraction_pattern.isig[0.0, 0.0].data
+                == diffraction_pattern.isig[center_pixels[0], center_pixels[1]].data
+            )
+        else:
+            pattern_center = (
+                np.array(diffraction_pattern.axes_manager.signal_shape) // 2
+            )
+            assert np.all(
+                diffraction_pattern.isig[0.0, 0.0].data
+                == diffraction_pattern.isig[pattern_center[0], pattern_center[1]].data
             )
 
 
