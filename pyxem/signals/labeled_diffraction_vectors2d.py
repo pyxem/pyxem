@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt
 
 import hyperspy.api as hs
 
-from pyxem.utils.labeled_vector_utils import (
+from pyxem.utils.vectors import (
     column_mean,
     vectors2image,
     convert_to_markers,

@@ -15,10 +15,13 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+import itertools
+from copy import deepcopy
+import math
 
 import numpy as np
-import math
 from scipy.spatial.distance import cdist
+from scipy.spatial import ConvexHull
 from transforms3d.axangles import axangle2mat
 
 
@@ -502,3 +505,379 @@ def get_vectors_mesh(g1_norm, g2_norm, g_norm_max, angle=0.0, shear=0.0):
     norm = np.linalg.norm(vectors, axis=0)
 
     return vectors[:, norm <= g_norm_max].T
+
+
+##################################################
+# Symmetry Methods for Analyzing Glassy Materials
+##################################################
+
+
+def get_angles(angles):
+    """This function takes a list of angles and returns the angles between each pair of angles.
+    This is useful for finding the angles between three vectors.
+
+    Parameters
+    ----------
+    angles: np.ndarray
+        An array of angles in radians.  This is a 2D array with shape (n, 3) where n is the number
+        of combinations and 3 is specific combination of angles to determine the difference between.
+
+    """
+    all_angles = np.abs(np.triu(np.subtract.outer(angles, angles)))
+    all_angles = all_angles[all_angles != 0]
+    all_angles[all_angles > np.pi] = np.pi - np.abs(
+        all_angles[all_angles > np.pi] - np.pi
+    )
+    return all_angles
+
+
+def get_filtered_combinations(
+    pks,
+    num,
+    radial_index=0,
+    angle_index=1,
+    intensity_index=None,
+    intensity_threshold=None,
+    min_angle=None,
+    min_k=None,
+):
+    """
+    Creates combinations of `num` peaks but forces at least one of the combinations to have
+    an intensity higher than the `intensity_threshold`.
+    This filter is useful for finding high intensity features but not losing lower intensity
+    paired features which contribute to symmetry etc.
+
+    Parameters
+    ----------
+    pks : np.ndarray
+        The diffraction vectors to be analyzed
+    num : int
+        The number of peaks to be combined
+    radial_index : int, optional
+        The index of the radial component of the diffraction vectors, by default 0
+    angle_index : int, optional
+        The index of the angular component of the diffraction vectors, by default 1
+    intensity_index : int, optional
+        The index of the intensity component of the diffraction vectors, by default None
+    intensity_threshold : float, optional
+        The minimum intensity of the diffraction vectors to be considered, by default None
+    min_angle: float, optional
+        The minimum angle between two diffraction vectors. This ignores small angles which are
+        likely to be from the same feature or unphysical.
+    min_k : float, optional
+        The minimum difference between the radial component of the diffraction vectors to be
+        considered from the same feature, by default 0.05
+    """
+    if intensity_threshold is not None and intensity_index is not None:
+        intensity = pks[:, intensity_index]
+        intensity_bool = intensity > intensity_threshold
+        pks = pks[intensity_bool]
+        intensity = intensity[intensity_bool]
+    else:
+        intensity = np.ones(len(pks))
+    angles = pks[:, angle_index]
+    k = pks[:, radial_index]
+
+    angle_combos = np.array(list(itertools.combinations(angles, num)))
+    k_combos = np.array(list(itertools.combinations(k, num)))
+    intensity_combos = np.array(list(itertools.combinations(intensity, num)))
+
+    if len(angle_combos) == 0:
+        angle_combos = np.zeros(shape=(0, 3))
+    # Filtering out combinations where there are two peaks close to each other
+    if min_angle is not None:
+        in_range = (
+            np.abs(angle_combos[:, :, np.newaxis] - angle_combos[:, np.newaxis, :])
+            < min_angle
+        )
+
+        above_angle = np.any(
+            np.sum(
+                in_range,
+                axis=1,
+            )
+            < 2,
+            axis=1,
+        )  # See if there are two angles that are too close to each other
+
+    else:
+        above_angle = True
+    # Filtering out combinations of diffraction vectors at different values for k.
+    # This could be faster if we sort the values by k first and then only get the combinations
+    # of the values within a certain range.
+    if min_k is not None and len(k_combos) > 0:
+        mean_k = np.mean(k_combos, axis=1)
+        abs_k = np.abs(np.subtract(k_combos, mean_k[:, np.newaxis]))
+        in_k_range = np.mean(abs_k, axis=1) < min_k
+    else:
+        in_k_range = True
+    in_combos = above_angle * in_k_range
+    if len(angle_combos) == 0:
+        combos = angle_combos
+        combos_k = []
+        combo_inten = []
+    elif np.all(in_combos):
+        combos = angle_combos
+        combos_k = np.mean(k_combos, axis=1)
+        combo_inten = np.mean(intensity_combos, axis=1)
+    else:
+        combos = angle_combos[in_combos]
+        combos_k = np.mean(k_combos[in_combos], axis=1)
+        combo_inten = np.mean(intensity_combos[in_combos], axis=1)
+    return combos, combos_k, combo_inten
+
+
+def get_three_angles(
+    pks,
+    k_index=0,
+    angle_index=1,
+    intensity_index=2,
+    intensity_threshold=None,
+    accept_threshold=0.05,
+    min_k=0.05,
+    min_angle=None,
+):
+    """
+    This function takes the angle between three points and determines the angle between them,
+    returning the angle if it is repeated using the `accept_threshold` to measure the acceptable
+    difference between angle a and angle b
+           o
+           |
+           |_   angle a
+           | |
+           x--------o
+           |_|
+           |    angle b
+           |
+           o
+
+    Parameters
+    ----------
+    pks : np.ndarray
+        The diffraction vectors to be analyzed
+    k_index : int, optional
+        The index of the radial component of the diffraction vectors, by default 0
+    angle_index : int, optional
+        The index of the angular component of the diffraction vectors, by default 1
+    intensity_index : int, optional
+        The index of the intensity component of the diffraction vectors, by default 2
+    intensity_threshold : float, optional
+        The minimum intensity of the diffraction vectors to be considered, by default None
+    accept_threshold : float, optional
+        The maximum difference between angle a and angle b to be considered the same angle,
+        by default 0.05
+    min_k : float, optional
+        The minimum difference between the radial component of the diffraction vectors to be
+        considered from the same feature, by default 0.05
+    min_angle: float, optional
+        The minimum angle between two diffraction vectors. This ignores small angles which are
+        likely to be from the same feature or unphysical.
+
+    Returns
+    -------
+    three_angles : np.ndarray
+        An array of angles between three diffraction vectors.  The columns are:
+        [k, delta phi, min-angle, intensity, reduced-angle]
+    """
+    three_angles = []
+    combos, combo_k, combo_inten = get_filtered_combinations(
+        pks,
+        3,
+        radial_index=k_index,
+        angle_index=angle_index,
+        intensity_index=intensity_index,
+        intensity_threshold=intensity_threshold,
+        min_angle=min_angle,
+        min_k=min_k,
+    )
+    for c, k, inten in zip(combos, combo_k, combo_inten):
+        angular_seperations = get_angles(c)
+        min_ind = np.argmin(angular_seperations)
+        min_sep = angular_seperations[min_ind]
+        angular_seperations = np.delete(angular_seperations, min_ind)
+        in_range = np.abs((angular_seperations - min_sep)) < accept_threshold
+        is_symetric = np.any(in_range)
+        if is_symetric:
+            # take the average of the two smaller angles
+            avg_sep = np.mean((np.array(angular_seperations)[in_range][0], min_sep))
+            min_angle = np.min(c)
+            num_times = np.round(min_angle / min_sep)
+            three_angles.append(
+                [
+                    k,
+                    avg_sep,
+                    min_angle,
+                    inten,
+                    np.abs(min_angle - (num_times * min_sep)),
+                ]
+            )
+    if len(three_angles) == 0:
+        three_angles = np.empty((0, 5))
+    return np.array(three_angles)
+
+
+# =============================================
+# Functions for use with the map_vectors method
+# =============================================
+
+
+def column_mean(vectors, columns):
+    return np.mean(vectors[:, columns], axis=0)
+
+
+##############################
+# Plotting Diffraction Vectors
+##############################
+
+
+def vectors2image(
+    vectors,
+    image_size,
+    scales,
+    offsets,
+    indexes=None,
+):
+    """
+    Convert a set of vectors to an image by binning the vectors into a 2D histogram.
+
+    Parameters
+    ----------
+    vectors: np.ndarray
+        The vectors to be binned
+    image_size  : tuple
+        The size of the image to be produced
+    scales: tuple
+        The scales of the image to be produced
+    offsets: tuple
+        The offsets of the image to be produced
+    indexes: tuple
+        The indexes of the vectors to be used to create the image.
+        If None, the first two columns are used.
+
+    Returns
+    -------
+
+    """
+    if indexes is None:
+        indexes = [0, 1]
+    red_points = vectors[:, indexes]
+    image_range = (
+        (offsets[0], offsets[0] + image_size[0] * scales[0]),
+        (offsets[1], offsets[1] + image_size[1] * scales[1]),
+    )
+    im, _, _ = np.histogram2d(
+        red_points[:, 0], red_points[:, 1], bins=image_size, range=image_range
+    )
+    return im
+
+
+def points_to_poly_collection(points, hull_index=(0, 1)):
+    try:
+        hull = ConvexHull(points[:, hull_index][:, ::-1])
+    except:
+        return np.array([[0, 0], [0, 0], [0, 0]])
+    return hull.points[hull.vertices]
+
+
+def points_to_polygon(points, num_points=50):
+    """
+    Convert a set of points to a polygon by creating a polygon. The method takes the points
+    given and finds the outermost points to create the polygon. The number of points in the
+    polygon defines the resolution of the polygon.
+
+    Parameters
+    ----------
+    points: np.ndarray
+        The points to be used to create the polygon (N x 2)
+    num_points
+        The number of points on each side (top, bottom, left, right) of the polygon
+        used to create the edges of the polygon.
+
+    Returns
+    -------
+    np.ndarray
+        The vertices of the polygon
+
+    """
+    if len(points) == 0:
+        return np.array([[0, 0], [0, 0], [0, 0]])
+    sorted_points = points[np.argsort(points[:, 0])]
+    min_x = sorted_points[0, 0]
+    max_x = sorted_points[-1, 0]
+    sorted_index = np.linspace(min_x, max_x, num_points)
+
+    lo = np.searchsorted(sorted_points[:, 0], sorted_index[:-1], side="left")
+    hi = np.searchsorted(sorted_points[:, 0], sorted_index[1:], side="right")
+
+    min_points = []
+    for l, h, x in zip(lo, hi, sorted_index):
+        if l == h:
+            pass
+        else:
+            min_points.append(
+                [
+                    np.min(sorted_points[l:h][:, 1]),
+                    x,
+                ]
+            )
+
+    max_points = []
+    for l, h, x in zip(lo, hi, sorted_index):
+        if l == h:
+            pass
+        else:
+            max_points.append([np.max(sorted_points[l:h][:, 1]), x])
+    all_points = min_points + max_points[::-1]
+    all_points = np.array(all_points)
+    return all_points
+
+
+def convert_to_markers(
+    peaks,
+    signal,
+):
+    """
+    Convert a set of (flattened) peaks to a set of markers for plotting. Note that the
+    function below only works for 4D signals.
+
+
+    Parameters
+    ----------
+    peaks: DiffractionVectors2D
+        The peaks to be converted to markers
+    signal: pyxem.signals.Signal2D
+        The 4-D signal to plot the peaks on
+
+    Returns
+    -------
+
+    """
+    new_peaks = deepcopy(peaks.data)
+    x_axis, y_axis = signal.axes_manager.navigation_axes
+    new_peaks[:, 0] = np.round((new_peaks[:, 0] - x_axis.offset) / x_axis.scale)
+    new_peaks[:, 1] = np.round((new_peaks[:, 1] - y_axis.offset) / y_axis.scale)
+    ind = np.lexsort((new_peaks[:, 1], new_peaks[:, 0]))
+    sorted_peaks = new_peaks[ind]
+    shape = signal.axes_manager.navigation_shape
+    by_ind_peaks = np.empty(shape, dtype=object)
+    by_ind_colors = np.empty(shape, dtype=object)
+    num_labels = np.max(new_peaks[:, -1])
+    colors_by_index = (
+        np.random.random((int(num_labels + 1), 3)) * 0.9
+    )  # (Stay away from white)
+    colors_by_index = np.vstack((colors_by_index, [1, 1, 1]))
+    low_x_ind = np.searchsorted(sorted_peaks[:, 0], range(0, shape[0]), side="left")
+    high_x_ind = np.searchsorted(
+        sorted_peaks[:, 0], range(1, shape[0] + 1), side="left"
+    )
+    for i, (lo_x, hi_x) in enumerate(zip(low_x_ind, high_x_ind)):
+        x_inds = sorted_peaks[lo_x:hi_x]
+        low_y_ind = np.searchsorted(x_inds[:, 1], range(0, shape[1]), side="left")
+        high_y_ind = np.searchsorted(x_inds[:, 1], range(1, shape[1] + 1), side="left")
+        for j, (lo_y, hi_y) in enumerate(zip(low_y_ind, high_y_ind)):
+            x_values = x_inds[lo_y:hi_y, 2]
+            y_values = x_inds[lo_y:hi_y, 3]
+            labels = np.array(x_inds[lo_y:hi_y, -1], dtype=int)
+            by_ind_peaks[i, j] = np.stack((y_values, x_values), axis=1)
+            by_ind_colors[i, j] = colors_by_index[labels]
+    return by_ind_peaks, by_ind_colors, colors_by_index
