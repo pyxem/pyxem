@@ -227,7 +227,7 @@ class DiffractionVectors(BaseSignal):
             column_names = ["x", "y"]
 
         if units is None and peaks.metadata.has_item("Peaks.signal_axes"):
-            units = [ax.units for ax in peaks.metadata.Peaks.signal_axes[::-1]]
+            units = [str(ax.units) for ax in peaks.metadata.Peaks.signal_axes[::-1]]
         elif units is not None:
             pass
         else:

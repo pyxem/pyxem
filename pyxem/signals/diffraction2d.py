@@ -1218,14 +1218,13 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             **kwargs,
         )
 
-    def find_peaks(
+    def get_diffraction_vectors(
         self,
-        return_vectors=False,
-        interactive=False,
         center=None,
         calibration=None,
         column_names=None,
         units=None,
+        get_intensity=True,
         **kwargs,
     ):
         """Find vectors from the diffraction pattern. Wraps `hyperspy.api.signals.Signal2D.find_peaks`
@@ -1253,21 +1252,19 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         kwargs:
             Passed to the peak finding function.
         """
-        if return_vectors:
-            from pyxem.signals import DiffractionVectors
+        from pyxem.signals import DiffractionVectors
 
-            interactive = False
-            vectors = super().find_peaks(interactive=interactive, **kwargs)
-            vectors = DiffractionVectors.from_peaks(
-                vectors,
-                center=center,
-                calibration=calibration,
-                column_names=column_names,
-                units=units,
-            )
-            return vectors
-        else:
-            return super().find_peaks(interactive=interactive, **kwargs)
+        vectors = super().find_peaks(
+            interactive=False, get_intensity=get_intensity, **kwargs
+        )
+        vectors = DiffractionVectors.from_peaks(
+            vectors,
+            center=center,
+            calibration=calibration,
+            column_names=column_names,
+            units=units,
+        )
+        return vectors
 
     def peak_position_refinement_com(
         self, peak_array, square_size=10, lazy_result=True, show_progressbar=True

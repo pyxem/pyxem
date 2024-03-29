@@ -30,6 +30,7 @@ from pyxem.signals import (
     Diffraction2D,
     LazyDiffraction2D,
     PolarDiffraction2D,
+    DiffractionVectors,
 )
 
 
@@ -1070,6 +1071,34 @@ class TestCenterDirectBeam:
         s = self.s
         with pytest.raises(ValueError):
             s.center_direct_beam()
+
+
+class TestFindVectors:
+    def setup_method(self):
+        data = np.zeros((8, 6, 20, 16), dtype=np.int16)
+        x_pos_list = np.random.randint(8 - 2, 8 + 2, 6, dtype=np.int16)
+        x_pos_list[x_pos_list == 8] = 9
+        y_pos_list = np.random.randint(10 - 2, 10 + 2, 8, dtype=np.int16)
+        for ix in range(len(x_pos_list)):
+            for iy in range(len(y_pos_list)):
+                data[iy, ix, y_pos_list[iy], x_pos_list[ix]] = 9
+        s = Diffraction2D(data)
+        s.axes_manager[0].scale = 0.5
+        s.axes_manager[1].scale = 0.6
+        s.axes_manager[2].scale = 3
+        s.axes_manager[3].scale = 4
+        s_lazy = s.as_lazy()
+        self.s = s
+        self.s_lazy = s_lazy
+        self.x_pos_list = x_pos_list
+        self.y_pos_list = y_pos_list
+
+    def test_find_vectors(self):
+        s = self.s
+        vectors = s.get_diffraction_vectors()
+        assert isinstance(vectors, DiffractionVectors)
+        assert vectors.column_names == ["<undefined>", "<undefined>", "intensity"]
+        assert vectors.units == ["<undefined>", "<undefined>", "a.u."]
 
 
 class TestSubtractingDiffractionBackground:
