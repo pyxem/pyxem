@@ -12,40 +12,40 @@ Unreleased
 ==========
 Fixed
 -----
-- Fixed pytest failure. Changed `setup` --> `setup_method` (#997)
-- `pyxem.signals.Diffraction2D.center_of_mass` now uses the `map` function. (#1005)
+- Fixed pytest failure. Changed ``setup`` --> ``setup_method`` (#997)
+- :meth:`pyxem.signals.Diffraction2D.center_of_mass` now uses the :meth:`hyperspy.api.BaseSignal.map` function. (#1005)
 - Replace ``matplotlib.cm.get_cmap`` (removed in matplotlib 3.9) with ``matplotlib.colormaps``. (#1023)
 - Documentation fixes and improvement. (#1028)
 - Fixed bug with flattening diffraction Vectors when there are different scales (#1024)
 
 Added
 -----
-- Added `pyxem.utils.calibration_utils.Calibration` class  for calibrating the signal axes of a 4-D STEM dataset(#993)
-- Added `pyxem.signals.Diffraction2D.get_azimuthal_integral1D` method to calculate the azimuthal integral of a 2D diffraction pattern (#1008)
+- Added :class:`pyxem.utils.calibration_utils.Calibration` class  for calibrating the signal axes of a 4-D STEM dataset(#993)
+- Added :meth:`pyxem.signals.Diffraction2D.get_azimuthal_integral1D` method to calculate the azimuthal integral of a 2D diffraction pattern (#1008)
 - Added example for doing azimuthal integration of a 2d diffraction pattern (#1009)
-- Added `pyxem.signals.CommonDiffraction.get_virtual_image` method to calculate multiple virtual images
+- Added :meth:`pyxem.signals.CommonDiffraction.get_virtual_image` method to calculate multiple virtual images
   from a 4D STEM dataset (#1014)
 - Added GPU support for lazy signals. (#1012)
-- Added GPU processing for `pyxem.signals.Diffraction2D.get_azimuthal_integral2d` (#1012)
+- Added GPU processing for :meth:`pyxem.signals.Diffraction2D.get_azimuthal_integral2d` (#1012)
 - Added method for calibrating the detector gain (#1046)
 
 Deprecated
 ----------
-- The module & all functions within `utils.reduced_intensity1d` are deprecated in favour of using the methods of `ReducedIntensity1D` (#994).
-- Deprecated `CalibrationGenerator` and `CalibrationLibrary` in favour of `pyxem.utils.calibration.Calibration` class (#1000)
+- The module & all functions within ``utils.reduced_intensity1d`` are deprecated in favour of using the methods of `ReducedIntensity1D` (#994).
+- Deprecated ``CalibrationGenerator`` and ``CalibrationLibrary`` in favour of :class:`pyxem.utils.calibration.Calibration` class (#1000)
 - Detector module as we move away from pyfai
-- Deprecated `pyxem.generators.virtual_image_generator.VirtualImageGenerator` in
-  favor of `pyxem.signals.CommonDiffraction.get_virtual_image` (#1014)
+- Deprecated ``pyxem.generators.virtual_image_generator.VirtualImageGenerator`` in
+  favor of  :meth:`pyxem.signals.CommonDiffraction.get_virtual_image` (#1014)
 - Several utility modules have been deprecated: utils.{pyfai,segement,virtual_images,background_utils,cluster_tools} (#1060 & #1030).
-- The following utils: `insitu_utils`, `correlations_utils` and `pixelated_stem_tools`, `dask_tools` are now private.
-- `utils.vector_utils`, prefer `utils.vectors`
-- `utils.symmetric_vector_utils`, prefer `utils.vectors`
-- `utils.labeled_vector_utils`, prefer `utils.vectors`
+- The following utils: ``insitu_utils``, ``correlations_utils`` and ``pixelated_stem_tools``, ``dask_tools`` are now private.
+- ``utils.vector_utils``, prefer ``utils.vectors``
+- ``utils.symmetric_vector_utils``, prefer ``utils.vectors``
+- ``utils.labeled_vector_utils``, prefer ``utils.vectors``
 
 Deleted
 -------
-- Several expired methods of `Diffraction2D` associated with radial integration (#998)
-- The `peak_find_lazy` method of `Diffraction2D` (#1040)
+- Several expired methods of :class:`pyxem.signals.Diffraction2D` associated with radial integration (#998)
+- The ``peak_find_lazy`` method of :class:`pyxem.signals.Diffraction2D`  (#1040)
 
 Changed
 -------
