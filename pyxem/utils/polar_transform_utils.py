@@ -19,7 +19,7 @@
 import numpy as np
 from pyxem.utils.expt_utils import find_beam_center_blur
 from scipy import ndimage
-from pyxem.utils.cuda_utils import get_array_module
+from pyxem.utils._cuda import _get_array_module
 
 
 try:
@@ -260,7 +260,7 @@ def _warp_polar_custom(
     was achieved: from 180 ms to 400 microseconds. However, this does not
     count the time to transfer data from the CPU to the GPU and back.
     """
-    dispatcher = get_array_module(image)
+    dispatcher = _get_array_module(image)
     cy, cx = center
     H = output_shape[0]
     W = output_shape[1]
@@ -365,7 +365,7 @@ def _chunk_to_polar(
         diffraction patterns in polar coordinates. Returns a cuda or numpy array depending
         on the device
     """
-    dispatcher = get_array_module(images)
+    dispatcher = _get_array_module(images)
     polar_chunk = dispatcher.empty(
         (images.shape[0], images.shape[1], output_shape[0], output_shape[1]),
         dtype=precision,

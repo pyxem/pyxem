@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-from pyxem.utils import cuda_utils as cutls
+from pyxem.utils import _cuda as cutls
 import dask.array as da
 import numpy as np
 import pytest
@@ -36,9 +36,9 @@ skip_cupy = pytest.mark.skipif(not CUPY_INSTALLED, reason="cupy is required")
 
 @skip_cupy
 def test_dask_array_to_gpu():
-    cutls.dask_array_to_gpu(da.array([1, 2, 3, 4]))
+    cutls._dask_array_to_gpu(da.array([1, 2, 3, 4]))
 
 
 @skip_cupy
 def test_dask_array_from_gpu():
-    cutls.dask_array_from_gpu(da.array(cp.array([1, 2, 3, 4])))
+    cutls._dask_array_from_gpu(da.array(cp.array([1, 2, 3, 4])))
