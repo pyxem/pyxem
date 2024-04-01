@@ -27,6 +27,32 @@ from scipy.spatial.distance import cdist
 from scipy.spatial import ConvexHull
 from transforms3d.axangles import axangle2mat
 
+__all__ = [
+    "detector_to_fourier",
+    "calculate_norms",
+    "calculate_norms_ragged",
+    "filter_vectors_ragged",
+    "filter_vectors_edge_ragged",
+    "normalize_or_zero",
+    "get_rotation_matrix_between_vectors",
+    "get_npeaks",
+    "get_angle_cartesian_vec",
+    "get_angle_cartesian",
+    "filter_vectors_near_basis",
+    "vectors_to_polar",
+    "to_cart_three_angles",
+    "polar_to_cartesian",
+    "get_vectors_mesh",
+    "get_angles",
+    "get_filtered_combinations",
+    "convert_to_markers",
+    "points_to_polygon",
+    "points_to_poly_collection",
+    "column_mean",
+    "vectors2image",
+    "get_three_angles",
+]
+
 
 def detector_to_fourier(k_xy, wavelength, camera_length):
     """Maps two-dimensional Cartesian coordinates in the detector plane to
@@ -37,7 +63,7 @@ def detector_to_fourier(k_xy, wavelength, camera_length):
 
     Parameters
     ----------
-    k_xy : np.array()
+    k_xy : numpy.ndarray()
         Cartesian coordinates in detector plane, in reciprocal Ångström.
     wavelength : float
         Electron wavelength in Ångström.
@@ -46,7 +72,7 @@ def detector_to_fourier(k_xy, wavelength, camera_length):
 
     Returns
     -------
-    k : np.array()
+    k : numpy.ndarray()
         Array of Cartesian coordinates in reciprocal space relative to [000].
 
     """
@@ -72,12 +98,12 @@ def calculate_norms(z):
 
     Parameters
     ----------
-    z : np.array()
+    z : numpy.ndarray()
         Array of cartesian vectors.
 
     Returns
     -------
-    norms : np.array()
+    norms : numpy.ndarray()
         Array of vector norms.
     """
     return np.linalg.norm(z, axis=1)
@@ -89,12 +115,12 @@ def calculate_norms_ragged(z):
 
     Parameters
     ----------
-    z : np.array()
+    z : numpy.ndarray()
         Array of cartesian vectors.
 
     Returns
     -------
-    norms : np.array()
+    norms : numpy.ndarray()
         Array of vector norms.
     """
     norms = []
@@ -116,7 +142,7 @@ def filter_vectors_ragged(z, min_magnitude, max_magnitude, columns=[0, 1]):
 
     Returns
     -------
-    filtered_vectors : np.array()
+    filtered_vectors : numpy.ndarray()
         Diffraction vectors within allowed magnitude tolerances.
     """
     # Calculate norms
@@ -142,7 +168,7 @@ def filter_vectors_edge_ragged(z, x_threshold, y_threshold):
 
     Returns
     -------
-    filtered_vectors : np.array()
+    filtered_vectors : numpy.ndarray()
         Diffraction vectors within allowed tolerances.
     """
     # Filter x / y coordinates
@@ -158,7 +184,7 @@ def normalize_or_zero(v):
 
     Parameters
     ----------
-    v : np.array()
+    v : numpy.ndarray()
         Single vector or array of vectors to be normalized.
     """
     norms = np.linalg.norm(v, axis=-1)
@@ -175,14 +201,14 @@ def get_rotation_matrix_between_vectors(from_v1, from_v2, to_v1, to_v2):
 
     Parameters
     ----------
-    from_v1, from_v2 : np.array()
+    from_v1, from_v2 : numpy.ndarray()
         Vector to rotate _from_.
-    to_v1, to_v2 : np.array()
+    to_v1, to_v2 : numpy.ndarray()
         Nx3 array of vectors to rotate _to_.
 
     Returns
     -------
-    R : np.array()
+    R : numpy.ndarray()
         Nx3x3 list of rotation matrices between the vector pairs.
     """
     # Find normals to rotate around
@@ -256,7 +282,7 @@ def get_npeaks(found_peaks):
 
     Parameters
     ----------
-    found_peaks : np.array()
+    found_peaks : numpy.ndarray()
         Array of found peaks.
 
     Returns
@@ -273,13 +299,13 @@ def get_angle_cartesian_vec(a, b):
 
     Parameters
     ----------
-    a, b : np.array()
+    a, b : numpy.ndarray()
         The two lists of directions to compute the angle between in Nx3 float
         arrays.
 
     Returns
     -------
-    angles : np.array()
+    angles : numpy.ndarray()
         List of angles between `a` and `b` in radians.
     """
     if a.shape != b.shape:
@@ -369,7 +395,7 @@ def _reverse_pos(peaks, ind=2):
 
     Parameters
     ----------
-    peaks : np.array
+    peaks : numpy.ndarray
         Array of peaks to be reversed.
     ind : int
         The index of the position to be reversed.
@@ -418,7 +444,7 @@ def vectors_to_polar(vectors, columns=None):
 
     Parameters
     ----------
-    vectors : np.array()
+    vectors : numpy.ndarray
         Array of vectors.
     columns:
         The x and y columns to be used to calculate the
@@ -427,7 +453,7 @@ def vectors_to_polar(vectors, columns=None):
 
     Returns
     -------
-    polar_vectors : np.array()
+    polar_vectors : numpy.ndarray
         Array of vectors in polar coordinates.
     """
     if columns is None:
@@ -476,7 +502,7 @@ def get_vectors_mesh(g1_norm, g2_norm, g_norm_max, angle=0.0, shear=0.0):
 
     Returns
     -------
-    np.ndarray
+    numpy.ndarray
         x and y coordinates of the vectors of the mesh
 
     """
@@ -521,7 +547,7 @@ def get_angles(angles):
 
     Parameters
     ----------
-    angles: np.ndarray
+    angles: numpy.ndarray
         An array of angles in radians.  This is a 2D array with shape (n, 3) where n is the number
         of combinations and 3 is specific combination of angles to determine the difference between.
 
@@ -552,7 +578,7 @@ def get_filtered_combinations(
 
     Parameters
     ----------
-    pks : np.ndarray
+    pks : numpy.ndarray
         The diffraction vectors to be analyzed
     num : int
         The number of peaks to be combined
@@ -643,20 +669,11 @@ def get_three_angles(
     """
     This function takes the angle between three points and determines the angle between them,
     returning the angle if it is repeated using the `accept_threshold` to measure the acceptable
-    difference between angle a and angle b
-           o
-           |
-           |_   angle a
-           | |
-           x--------o
-           |_|
-           |    angle b
-           |
-           o
+    difference between angle a and angle b.
 
     Parameters
     ----------
-    pks : np.ndarray
+    pks : numpy.ndarray
         The diffraction vectors to be analyzed
     k_index : int, optional
         The index of the radial component of the diffraction vectors, by default 0
@@ -678,7 +695,7 @@ def get_three_angles(
 
     Returns
     -------
-    three_angles : np.ndarray
+    three_angles : numpy.ndarray
         An array of angles between three diffraction vectors.  The columns are:
         [k, delta phi, min-angle, intensity, reduced-angle]
     """
@@ -725,6 +742,16 @@ def get_three_angles(
 
 
 def column_mean(vectors, columns):
+    """Calculate the mean of the columns of a set of vectors. Useful for calculating the mean
+    using the map_vectors method.
+
+    Parameters
+    ----------
+    vectors: numpy.ndarray
+        The vectors to be used to calculate the mean
+    columns:
+        The columns to be used to calculate the mean.
+    """
     return np.mean(vectors[:, columns], axis=0)
 
 
@@ -740,12 +767,11 @@ def vectors2image(
     offsets,
     indexes=None,
 ):
-    """
-    Convert a set of vectors to an image by binning the vectors into a 2D histogram.
+    """Convert a set of vectors to an image by binning the vectors into a 2D histogram.
 
     Parameters
     ----------
-    vectors: np.ndarray
+    vectors: numpy.ndarray
         The vectors to be binned
     image_size  : tuple
         The size of the image to be produced
@@ -775,6 +801,17 @@ def vectors2image(
 
 
 def points_to_poly_collection(points, hull_index=(0, 1)):
+    """Convert a set of points to a polygon collection by creating a polygon. The method takes the
+    points given and finds the outermost points to create the polygon.
+
+    Parameters
+    ----------
+    points: numpy.ndarray
+        The points to be used to create the polygon (N x 2)
+    hull_index:
+        The index of the points to be used to create the polygon. The default is (0, 1) which
+        means that the first two columns of the points are used to create the polygon.
+    """
     try:
         hull = ConvexHull(points[:, hull_index][:, ::-1])
     except:
@@ -783,14 +820,13 @@ def points_to_poly_collection(points, hull_index=(0, 1)):
 
 
 def points_to_polygon(points, num_points=50):
-    """
-    Convert a set of points to a polygon by creating a polygon. The method takes the points
+    """Convert a set of points to a polygon by creating a polygon. The method takes the points
     given and finds the outermost points to create the polygon. The number of points in the
     polygon defines the resolution of the polygon.
 
     Parameters
     ----------
-    points: np.ndarray
+    points: numpy.ndarray
         The points to be used to create the polygon (N x 2)
     num_points
         The number of points on each side (top, bottom, left, right) of the polygon
@@ -798,7 +834,7 @@ def points_to_polygon(points, num_points=50):
 
     Returns
     -------
-    np.ndarray
+    numpy.ndarray
         The vertices of the polygon
 
     """
@@ -839,8 +875,7 @@ def convert_to_markers(
     peaks,
     signal,
 ):
-    """
-    Convert a set of (flattened) peaks to a set of markers for plotting. Note that the
+    """Convert a set of (flattened) peaks to a set of markers for plotting. Note that the
     function below only works for 4D signals.
 
 

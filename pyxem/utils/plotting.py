@@ -27,6 +27,10 @@ from pyxem.utils.polar_transform_utils import (
 )
 from pyxem.utils.diffraction import find_beam_center_blur
 
+__all__ = [
+    "plot_template_over_pattern",
+]
+
 
 def plot_template_over_pattern(
     pattern,
@@ -49,7 +53,7 @@ def plot_template_over_pattern(
     ----------
     pattern : 2D np.ndarray
         The diffraction pattern
-    simulation : :class:`~diffsims.sims.diffraction_simulation.DiffractionSimulation`
+    simulation : :class:`diffsims.sims.diffraction_simulation.DiffractionSimulation`
         The simulated diffraction pattern. It must be calibrated.
     axis : matplotlib.AxesSubplot, optional
         An axis object on which to plot. If None is provided, one will be created.
@@ -75,7 +79,7 @@ def plot_template_over_pattern(
     size_factor : float, optional
         Scaling factor for the spots. See notes on size.
     **kwargs :
-        See :meth:`~matplotlib.pyplot.imshow`
+        See :func:`matplotlib.pyplot.imshow`
 
     Returns
     -------
