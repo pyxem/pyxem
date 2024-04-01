@@ -63,7 +63,7 @@ def detector_to_fourier(k_xy, wavelength, camera_length):
 
     Parameters
     ----------
-    k_xy : numpy.ndarray()
+    k_xy : numpy.ndarray
         Cartesian coordinates in detector plane, in reciprocal Ångström.
     wavelength : float
         Electron wavelength in Ångström.
@@ -72,7 +72,7 @@ def detector_to_fourier(k_xy, wavelength, camera_length):
 
     Returns
     -------
-    k : numpy.ndarray()
+    k : numpy.ndarray
         Array of Cartesian coordinates in reciprocal space relative to [000].
 
     """
@@ -98,12 +98,12 @@ def calculate_norms(z):
 
     Parameters
     ----------
-    z : numpy.ndarray()
+    z : numpy.ndarray
         Array of cartesian vectors.
 
     Returns
     -------
-    norms : numpy.ndarray()
+    norms : numpy.ndarray
         Array of vector norms.
     """
     return np.linalg.norm(z, axis=1)
@@ -115,12 +115,12 @@ def calculate_norms_ragged(z):
 
     Parameters
     ----------
-    z : numpy.ndarray()
+    z : numpy.ndarray
         Array of cartesian vectors.
 
     Returns
     -------
-    norms : numpy.ndarray()
+    norms : numpy.ndarray
         Array of vector norms.
     """
     norms = []
@@ -142,7 +142,7 @@ def filter_vectors_ragged(z, min_magnitude, max_magnitude, columns=[0, 1]):
 
     Returns
     -------
-    filtered_vectors : numpy.ndarray()
+    filtered_vectors : numpy.ndarray
         Diffraction vectors within allowed magnitude tolerances.
     """
     # Calculate norms
@@ -168,7 +168,7 @@ def filter_vectors_edge_ragged(z, x_threshold, y_threshold):
 
     Returns
     -------
-    filtered_vectors : numpy.ndarray()
+    filtered_vectors : numpy.ndarray
         Diffraction vectors within allowed tolerances.
     """
     # Filter x / y coordinates
@@ -184,7 +184,7 @@ def normalize_or_zero(v):
 
     Parameters
     ----------
-    v : numpy.ndarray()
+    v : numpy.ndarray
         Single vector or array of vectors to be normalized.
     """
     norms = np.linalg.norm(v, axis=-1)
@@ -201,14 +201,14 @@ def get_rotation_matrix_between_vectors(from_v1, from_v2, to_v1, to_v2):
 
     Parameters
     ----------
-    from_v1, from_v2 : numpy.ndarray()
+    from_v1, from_v2 : numpy.ndarray
         Vector to rotate _from_.
-    to_v1, to_v2 : numpy.ndarray()
+    to_v1, to_v2 : numpy.ndarray
         Nx3 array of vectors to rotate _to_.
 
     Returns
     -------
-    R : numpy.ndarray()
+    R : numpy.ndarray
         Nx3x3 list of rotation matrices between the vector pairs.
     """
     # Find normals to rotate around
@@ -282,7 +282,7 @@ def get_npeaks(found_peaks):
 
     Parameters
     ----------
-    found_peaks : numpy.ndarray()
+    found_peaks : numpy.ndarray
         Array of found peaks.
 
     Returns
@@ -299,13 +299,13 @@ def get_angle_cartesian_vec(a, b):
 
     Parameters
     ----------
-    a, b : numpy.ndarray()
+    a, b : numpy.ndarray
         The two lists of directions to compute the angle between in Nx3 float
         arrays.
 
     Returns
     -------
-    angles : numpy.ndarray()
+    angles : numpy.ndarray
         List of angles between `a` and `b` in radians.
     """
     if a.shape != b.shape:
