@@ -21,7 +21,7 @@
 import numpy as np
 
 from pyxem.signals import PairDistributionFunction1D
-from pyxem.utils._signals import transfer_navigation_axes
+from pyxem.utils._signals import _transfer_navigation_axes
 from pyxem.utils._deprecated import deprecated
 
 
@@ -101,7 +101,7 @@ class PDFGenerator1D:
         signal_axis.scale = r_increment
         signal_axis.name = "Radius r"
         signal_axis.units = "$Å$"
-        rpdf = transfer_navigation_axes(rpdf, self.signal)
+        rpdf = _transfer_navigation_axes(rpdf, self.signal)
 
         title = self.signal.metadata.General.title
         rpdf.metadata.General.title = f"Pair distribution function of {title}"

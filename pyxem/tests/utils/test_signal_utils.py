@@ -18,19 +18,19 @@
 
 import pytest
 
-from pyxem.utils._signals import select_method_from_method_dict
+from pyxem.utils._signals import _select_method_from_method_dict
 
 
 @pytest.fixture()
 def method_dict():
-    return {"dummy_choice": select_method_from_method_dict}
+    return {"dummy_choice": _select_method_from_method_dict}
 
 
 def test_select_fake_method_from_method_dict(method_dict):
     with pytest.raises(NotImplementedError):
-        _ = select_method_from_method_dict("fake_choice", method_dict, print_help=True)
+        _ = _select_method_from_method_dict("fake_choice", method_dict, print_help=True)
 
 
-def test_select_method_from_method_dict_print_help(method_dict):
-    method_dict = {"dummy_choice": select_method_from_method_dict}
-    _ = select_method_from_method_dict("dummy_choice", method_dict, print_help=True)
+def test__select_method_from_method_dict_print_help(method_dict):
+    method_dict = {"dummy_choice": _select_method_from_method_dict}
+    _ = _select_method_from_method_dict("dummy_choice", method_dict, print_help=True)

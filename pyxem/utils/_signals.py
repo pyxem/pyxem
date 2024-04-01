@@ -17,7 +17,7 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
-def select_method_from_method_dict(method, method_dict, print_help=True, **kwargs):
+def _select_method_from_method_dict(method, method_dict, print_help=True, **kwargs):
     """Streamlines the selection of utils to be mapped in class methods.
 
     Parameters
@@ -51,7 +51,7 @@ def select_method_from_method_dict(method, method_dict, print_help=True, **kwarg
     return method_dict[method]
 
 
-def transfer_signal_axes(new_signal, old_signal):
+def _transfer_signal_axes(new_signal, old_signal):
     """Transfers signal axis calibrations from an old signal to a new
     signal produced from it by a method or a generator.
 
@@ -78,7 +78,7 @@ def transfer_signal_axes(new_signal, old_signal):
     return new_signal
 
 
-def transfer_navigation_axes(new_signal, old_signal):
+def _transfer_navigation_axes(new_signal, old_signal):
     """Transfers navigation axis calibrations from an old signal to a new
     signal produced from it by a method or a generator.
 
@@ -113,14 +113,14 @@ def transfer_navigation_axes(new_signal, old_signal):
     return new_signal
 
 
-def to_hyperspy_index(index, signal_axis):
+def _to_hyperspy_index(index, signal_axis):
     if isinstance(index, int):
         return index
     else:
         return signal_axis.value2index(index)
 
 
-def transfer_navigation_axes_to_signal_axes(new_signal, old_signal):
+def _transfer_navigation_axes_to_signal_axes(new_signal, old_signal):
     """Transfers navigation axis calibrations from an old signal to the signal
     axes of a new signal produced from it by a method or a generator.
 

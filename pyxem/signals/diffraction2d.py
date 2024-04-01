@@ -66,8 +66,8 @@ from pyxem.utils._dask import (
     _align_single_frame,
 )
 from pyxem.utils._signals import (
-    select_method_from_method_dict,
-    to_hyperspy_index,
+    _select_method_from_method_dict,
+    _to_hyperspy_index,
 )
 import pyxem.utils._pixelated_stem_tools as pst
 import pyxem.utils._dask as dt
@@ -686,7 +686,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             sig_axes = self.axes_manager.signal_axes
             sig_axes = np.repeat(sig_axes, 2)
             low_x, high_x, low_y, high_y = [
-                to_hyperspy_index(ind, ax)
+                _to_hyperspy_index(ind, ax)
                 for ind, ax in zip(
                     signal_slice,
                     sig_axes,
@@ -716,7 +716,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             "center_of_mass": None,
         }
 
-        method_function = select_method_from_method_dict(
+        method_function = _select_method_from_method_dict(
             method, method_dict, print_help=False, **kwargs
         )
 
