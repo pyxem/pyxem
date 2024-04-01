@@ -17,7 +17,7 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import pytest
-import pyxem.dummy_data as dd
+import pyxem.utils.dummy_data as dd
 
 
 @pytest.mark.slow

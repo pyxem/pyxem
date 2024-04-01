@@ -402,7 +402,7 @@ def get_angle_image_comparison(s0, s1, angleN=12, mask_radius=None):
 
     Examples
     --------
-    >>> from pyxem.dummy_data import MakeTestData
+    >>> from pyxem.utils.dummy_data import MakeTestData
     >>> test_data0 = MakeTestData(300, 300)
     >>> test_data0.add_ring(150, 150, 40)
     >>> test_data1 = MakeTestData(300, 300)
@@ -653,7 +653,7 @@ def fit_single_ellipse_to_signal(
 
     Examples
     --------
-    >>> from pyxem.dummy_data import make_diffraction_test_data as mdtd
+    >>> from pyxem.utils.dummy_data import make_diffraction_test_data as mdtd
     >>> s = pxm.signals.Diffraction2D(np.zeros((200, 220)))
     >>> s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -110
     >>> xx, yy = np.meshgrid(s.axes_manager[0].axis, s.axes_manager[1].axis)
@@ -714,7 +714,7 @@ def fit_ellipses_to_signal(
 
     Examples
     --------
-    >>> from pyxem.dummy_data import make_diffraction_test_data as mdtd
+    >>> from pyxem.utils.dummy_data import make_diffraction_test_data as mdtd
     >>> s = pxm.signals.Diffraction2D(np.zeros((200, 220)))
     >>> s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -110
     >>> xx, yy = np.meshgrid(s.axes_manager[0].axis, s.axes_manager[1].axis)

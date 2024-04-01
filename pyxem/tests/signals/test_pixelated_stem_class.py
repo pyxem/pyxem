@@ -27,8 +27,8 @@ from hyperspy.signals import Signal2D, BaseSignal
 import pyxem.signals
 from pyxem.signals import Diffraction2D, LazyDiffraction2D
 import pyxem.utils.ransac_ellipse_tools as ret
-from pyxem.dummy_data import make_diffraction_test_data as mdtd
-import pyxem.dummy_data as dd
+from pyxem.utils.dummy_data import make_diffraction_test_data as mdtd
+import pyxem.utils.dummy_data as dd
 
 
 @pytest.mark.slow

@@ -22,7 +22,7 @@ import numpy as np
 
 from pyxem.signals import Diffraction2D
 import pyxem.utils.radial_utils as ra
-from pyxem.dummy_data import make_diffraction_test_data as mdtd
+from pyxem.utils.dummy_data import make_diffraction_test_data as mdtd
 
 
 class TestRadialModule:

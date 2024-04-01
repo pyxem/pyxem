@@ -25,7 +25,7 @@ from skimage.draw import polygon
 
 from hyperspy.components1d import Gaussian
 
-from pyxem.dummy_data import make_diffraction_test_data as mdtd
+from pyxem.utils.dummy_data import make_diffraction_test_data as mdtd
 from pyxem.signals import DPCSignal2D, Diffraction2D, LazyDiffraction2D
 
 
