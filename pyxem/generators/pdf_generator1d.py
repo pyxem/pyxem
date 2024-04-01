@@ -21,7 +21,7 @@
 import numpy as np
 
 from pyxem.signals import PairDistributionFunction1D
-from pyxem.utils.signal import transfer_navigation_axes
+from pyxem.utils._signals import transfer_navigation_axes
 from pyxem.utils._deprecated import deprecated
 
 

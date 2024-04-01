@@ -23,7 +23,7 @@ from hyperspy.signals import Signal2D
 from hyperspy.api import stack
 
 from pyxem.signals import DiffractionVariance2D, ImageVariance
-from pyxem.utils.signal import (
+from pyxem.utils._signals import (
     transfer_navigation_axes_to_signal_axes,
     transfer_signal_axes,
 )

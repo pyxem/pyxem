@@ -30,7 +30,7 @@ from hyperspy._signals.lazy import LazySignal
 from hyperspy.drawing._markers.points import Points
 from hyperspy.misc.utils import isiterable
 
-from pyxem.utils.signal import (
+from pyxem.utils._signals import (
     transfer_navigation_axes_to_signal_axes,
 )
 from pyxem.utils.vectors import (

@@ -18,7 +18,7 @@
 
 import pytest
 
-from pyxem.utils.signal import select_method_from_method_dict
+from pyxem.utils._signals import select_method_from_method_dict
 
 
 @pytest.fixture()

@@ -23,7 +23,7 @@ from hyperspy.signals import Signal2D
 from hyperspy._signals.lazy import LazySignal
 
 from pyxem.signals import DiffractionVectors, VDFSegment
-from pyxem.utils.signal import transfer_signal_axes
+from pyxem.utils._signals import transfer_signal_axes
 from pyxem.utils.segment_utils import separate_watershed
 
 

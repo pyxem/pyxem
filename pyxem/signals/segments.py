@@ -23,7 +23,7 @@ from tqdm import tqdm
 from hyperspy.signals import Signal2D
 
 from pyxem.signals import DiffractionVectors, ElectronDiffraction2D
-from pyxem.utils.signal import transfer_signal_axes
+from pyxem.utils._signals import transfer_signal_axes
 from pyxem.utils.segment_utils import (
     norm_cross_corr,
     separate_watershed,

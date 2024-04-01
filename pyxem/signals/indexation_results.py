@@ -26,7 +26,7 @@ from orix.quaternion import Rotation
 from transforms3d.euler import mat2euler
 
 from pyxem.utils.indexation_utils import get_nth_best_solution
-from pyxem.utils.signal import transfer_navigation_axes
+from pyxem.utils._signals import transfer_navigation_axes
 
 
 def crystal_from_vector_matching(z_matches):

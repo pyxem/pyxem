@@ -20,7 +20,7 @@ import numpy as np
 
 from hyperspy.signals import Signal2D
 
-from pyxem.utils.signal import transfer_signal_axes
+from pyxem.utils._signals import transfer_signal_axes
 
 
 def _get_rotation_matrix(x_new):

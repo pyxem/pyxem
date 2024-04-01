@@ -65,7 +65,7 @@ from pyxem.utils._dask import (
     _get_signal_dimension_host_chunk_slice,
     _align_single_frame,
 )
-from pyxem.utils.signal import (
+from pyxem.utils._signals import (
     select_method_from_method_dict,
     to_hyperspy_index,
 )
