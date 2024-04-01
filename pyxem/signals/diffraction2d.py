@@ -137,9 +137,9 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             If True (default), this signal is overwritten. Otherwise, returns a
             new signal.
         *args:
-            Arguments to be passed to :meth:`~hyperspy.signal.BaseSignal.map`.
+            Arguments to be passed to :meth:`hyperspy.api.signals.BaseSignal.map`.
         **kwargs:
-            Keyword arguments to be passed to :meth:`~hyperspy.signal.BaseSignal.map`.
+            Keyword arguments to be passed to :meth:`hyperspy.api.signals.BaseSignal.map`.
 
         Returns
         -------
@@ -377,9 +377,9 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             If True (default), this signal is overwritten. Otherwise, returns a
             new signal.
         *args:
-            Arguments to be passed to :meth:`~hyperspy.signal.BaseSignal.map`.
+            Arguments to be passed to :meth:`hyperspy.api.signals.BaseSignal.map`.
         **kwargs:
-            Keyword arguments to be passed to :meth:`~hyperspy.signal.BaseSignal.map`.
+            Keyword arguments to be passed to :meth:`hyperspy.api.signal.BaseSignal.map`.
 
         """
         return self.map(
@@ -588,13 +588,13 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             When working in memory, determines if operation is performed inplace, default is True. When
             working lazily the result will NOT be inplace.
         *args :
-            passed to :meth:`~hyperspy.signal.BaseSignal.map` if working in memory
+            passed to :meth:`hyperspy.api.signals.BaseSignal.map` if working in memory
         **kwargs :
-            passed to :meth:`~hyperspy.signal.BaseSignal.map` if working in memory
+            passed to :meth:`hyperspy.api.signals.BaseSignal.map` if working in memory
 
         Returns
         -------
-        signal_corrected: Diffraction2D or LazyDiffraction2D
+        signal_corrected: :class:`pyxem.signals.Diffraction2D` or :class:`pyxem.signals.LazyDiffraction2D`
 
         Examples
         --------
@@ -633,14 +633,14 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             Must be one of "cross_correlate", "blur", "interpolate" or "center_of_mass".
 
            "cross_correlate": Center finding using cross-correlation of circles of
-                `radius_start` to `radius_finish`.
+                ``radius_start`` to ``radius_finish``.
            "blur": Center finding by blurring each frame with a Gaussian kernel with
-                standard deviation `sigma` and finding the maximum.
+                standard deviation ``sigma`` and finding the maximum.
            "interpolate": Finding the center by summing along X/Y and finding the peak
                 for each axis independently. Data is blurred first using a Gaussian kernel
-                with standard deviation "sigma".
+                with standard deviation ``sigma``.
            "center_of_mass": The center is found using a calculation of the center of mass.
-                Optionally a `mask` can be applied to focus on just the center of some
+                Optionally a ``mask`` can be applied to focus on just the center of some
                 dataset. A threshold value can also be given to suppress contrast from
                 weaker diffraction features.
         lazy_output : optional
@@ -658,13 +658,13 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             pattern. Only one of `half_square_width` or signal_slice can be defined.
         **kwargs:
             Additional arguments accepted by :func:`~pyxem.utils.expt_utils.find_beam_center_blur`,
-            :func:`~pyxem.utils.expt_utils.find_beam_center_interpolate`,
-            :func:`~pyxem.utils.expt_utils.find_beam_offset_cross_correlation`,
-            and :func:`~pyxem.signals.diffraction2d.Diffraction2D.center_of_mass`,
+            :func:`pyxem.utils.expt_utils.find_beam_center_interpolate`,
+            :func:`pyxem.utils.expt_utils.find_beam_offset_cross_correlation`,
+            and :func:`pyxem.signals.diffraction2d.Diffraction2D.center_of_mass`,
 
         Returns
         -------
-        s_shifts : HyperSpy Signal1D
+        s_shifts : :class:`pyxem.signals.BeamShift`
             Array containing the shifts for each SED pattern, with the first
             signal index being the x-shift and the second the y-shift.
 
@@ -1282,7 +1282,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         disk_r : int
             Radius of the disc chosen to take the mean value of
         lazy_result : bool, default True
-            If True, will return a :class:`~pyxem.signals.diffraction2d.LazyDiffraction2D` object. If False,
+            If True, will return a :class:`pyxem.signals.diffraction2d.LazyDiffraction2D` object. If False,
             will compute the result and return a Diffraction2D object.
         show_progressbar : bool, default True
 
@@ -1387,7 +1387,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             Default False, if True the markers will be added to the
             signal permanently.
         **kwargs :
-            Passed to :py:class:`~hs.api.plot.markers.Points`
+            Passed to :py:class:`hyperspy.api.plot.markers.Points`
 
         Examples
         --------
@@ -1511,7 +1511,8 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         navigation_axes : list or none, optional
             The axes to calculate the variance over.  The default is to use the navigation axes.
         **kwargs: dict
-            Any keywords accepted for the get_azimuthal_integral1d() or get_azimuthal_integral2d() function
+            Any keywords accepted for the :func:`pyxem.signals.Diffraction2D.get_azimuthal_integral1d` or
+            :func:`pyxem.signals.Diffraction2D.get_azimuthal_integral2d` function
 
         Returns
         -------
@@ -1523,6 +1524,11 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         [1] Daulton, T. L et al, Ultramicroscopy, 110(10), 1279–1289, https://doi.org/10.1016/j.ultramic.2010.05.010
             Nanobeam diffraction fluctuation electron microscopy technique for structural characterization of disordered
             materials-Application to Al88-xY7Fe5Tix metallic glasses.
+
+        See Also
+        --------
+        func:`pyxem.signals.Diffraction2D.get_azimuthal_integral1d`
+        func:`pyxem.signals.Diffraction2D.get_azimuthal_integral2d`
         """
 
         if method not in ["Omega", "r", "re", "VImage"]:
@@ -1840,6 +1846,9 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         >>> ds.set_ai(wavelength=2.5e-12) # creating an AzimuthalIntegrator Object
         >>> ds.get_azimuthal_integral1d(npt=100)
 
+        See Also
+        --------
+        :meth:`pyxem.signals.Diffraction2D.get_azimuthal_integral2d`
         """
         usepyfai = method not in ["splitpixel_pyxem"]
         if not usepyfai:
@@ -1980,6 +1989,10 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         >>> ds.unit = "k_nm^-1" # setting units
         >>> ds.set_ai(wavelength=2.5e-12)
         >>> ds.get_azimuthal_integral2d(npt_rad=100)
+
+        See Also
+        --------
+        :meth:`pyxem.signals.Diffraction2D.get_azimuthal_integral1d`
 
         """
         usepyfai = method not in ["splitpixel_pyxem"]

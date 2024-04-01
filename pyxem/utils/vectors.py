@@ -15,6 +15,9 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+
+"""Utils for operating on 2D Diffraction Patterns."""
+
 import itertools
 from copy import deepcopy
 import math

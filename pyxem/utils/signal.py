@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+"""Utils for signal processing."""
+
 # This code is not used internally and so can safely be deleted at the end of the deprecation period
 
 from pyxem.utils._deprecated import deprecated

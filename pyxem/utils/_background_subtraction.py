@@ -1,3 +1,5 @@
+"""Utils for Background Subtraction."""
+
 import numpy as np
 
 from scipy.ndimage import gaussian_filter, median_filter

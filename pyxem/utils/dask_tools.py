@@ -18,6 +18,9 @@
 
 # For 0.20.0 we should update the code to call these functions from utils._dask, where they should be made private
 
+"""Utils for Dask."""
+
+
 from pyxem.utils._deprecated import deprecated
 import scipy.ndimage as ndi
 

@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+"""Tools for ellipse fitting using RANSAC."""
+
 from tqdm import tqdm
 import math
 from functools import partial
@@ -617,7 +619,7 @@ def determine_ellipse(
     return_params : bool
         If the ellipse parameters should be returned as well.
     **kwargs:
-        Any other keywords for `get_ellipse_model_ransac_single_frame`.
+        Any other keywords for ``get_ellipse_model_ransac_single_frame``.
 
     Returns
     -------

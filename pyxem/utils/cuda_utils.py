@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+"""Utils for Cuda."""
 
 from numba import cuda, int32, float32
 import numpy as np

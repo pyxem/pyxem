@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+"""Utils for Clustering."""
+
 import numpy as np
 from sklearn import cluster
 from hyperspy.misc.utils import isiterable
