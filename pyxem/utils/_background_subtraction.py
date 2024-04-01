@@ -3,7 +3,7 @@ import numpy as np
 from scipy.ndimage import gaussian_filter, median_filter
 from skimage.filters.rank import mean as rank_mean
 from skimage.morphology import square
-from pyxem.utils.expt_utils import regional_filter
+from pyxem.utils.diffraction import regional_filter
 
 
 def _subtract_radial_median(frame, center_x=128, center_y=128):

@@ -38,7 +38,7 @@ from pyxem.utils.pyfai_utils import (
     _get_radial_extent,
     _get_setup,
 )
-from pyxem.utils.expt_utils import (
+from pyxem.utils.diffraction import (
     azimuthal_integrate1d,
     azimuthal_integrate2d,
     gain_normalise,
