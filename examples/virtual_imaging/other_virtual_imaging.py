@@ -13,7 +13,7 @@ vectors = pxm.utils.virtual_images_utils.get_vectors_mesh(
 rois, labels = pxm.signals.DiffractionVectors2D(vectors).to_roi(
     radius=4, include_labels=True
 )
-c = pxm.dummy_data.get_cbed_signal()
+c = pyxem.data.dummy_data.get_cbed_signal()
 c.calibrate(center=None)
 c.plot()
 for r in rois:

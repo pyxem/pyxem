@@ -13,13 +13,13 @@ You can drag the ROI to update the virtual image if you use the ipympl or qt5 ba
 import pyxem as pxm
 import hyperspy.api as hs
 
-s = pxm.dummy_data.get_cbed_signal()
+s = pyxem.data.dummy_data.get_cbed_signal()
 circle = hs.roi.CircleROI(cx=26, cy=74, r=5.5, r_inner=0)
 s.plot_integrated_intensity(circle)
 # %%
 
 # Also we can do the same with a 1D signal
-s = pxm.dummy_data.get_cbed_signal()
+s = pyxem.data.dummy_data.get_cbed_signal()
 s.calibrate(center=None)
 s1d = s.get_azimuthal_integral1d(npt=100, mean=True)
 span = hs.roi.SpanROI(left=15.5, right=20)
