@@ -23,7 +23,7 @@ def _subtract_radial_median(frame, center_x=128, center_y=128):
     Examples
     --------
     >>> import pyxem.utils.dask_tools as dt
-    >>> s = pxm.dummy_data.get_cbed_signal()
+    >>> s = pxm.data.dummy_data.get_cbed_signal()
     >>> s_rem = dt._background_removal_single_frame_radial_median(s.data[0, 0])
     """
 
@@ -58,7 +58,7 @@ def _subtract_dog(frame, min_sigma=1, max_sigma=55):
     Examples
     --------
     >>> import pyxem.utils.dask_tools as dt
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.data.dummy_data.dummy_data.get_cbed_signal()
     >>> s_rem = dt._background_removal_single_frame_dog(s.data[0, 0])
 
     """
@@ -82,7 +82,7 @@ def _subtract_median(frame, footprint=19):
     Examples
     --------
     >>> import pyxem.utils.dask_tools as dt
-    >>> s = pxm.dummy_data.get_cbed_signal()
+    >>> s = pxm.data.dummy_data.get_cbed_signal()
     >>> s_rem = dt._background_removal_single_frame_median(s.data[0, 0])
 
     """

@@ -47,7 +47,7 @@ Deleted
 -------
 - Several expired methods of :class:`pyxem.signals.Diffraction2D` associated with radial integration (#998)
 - The ``peak_find_lazy`` method of :class:`pyxem.signals.Diffraction2D`  (#1040)
-- ``dummy_data`` that content is now avaliable under ``utils.dummy_data``
+- ``dummy_data`` that content is now available under ``data.dummy_data``
 
 Changed
 -------

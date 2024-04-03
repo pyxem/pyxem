@@ -25,7 +25,7 @@ from scipy.signal import convolve2d
 from skimage import morphology
 from hyperspy.signals import Signal2D
 
-from pyxem.utils.dummy_data import make_diffraction_test_data as mdtd
+from pyxem.data.dummy_data import make_diffraction_test_data as mdtd
 from pyxem.signals import Diffraction2D
 import pyxem.utils.ransac_ellipse_tools as ret
 

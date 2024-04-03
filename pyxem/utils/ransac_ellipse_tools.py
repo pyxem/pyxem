@@ -629,7 +629,7 @@ def determine_ellipse(
     Examples
     --------
     >>> import pyxem.utils.ransac_ellipse_tools as ret
-    >>> import pyxem.utils.dummy_data.make_diffraction_test_data as mdtd
+    >>> import pyxem.data.dummy_data.make_diffraction_test_data as mdtd
     >>> test_data = mdtd.MakeTestData(200, 200, default=False)
     >>> test_data.add_disk(x0=100, y0=100, r=5, intensity=30)
     >>> test_data.add_ring_ellipse(x0=100, y0=100, semi_len0=63, semi_len1=70, rotation=45)

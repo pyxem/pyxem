@@ -25,7 +25,7 @@ from skimage.draw import polygon
 
 from hyperspy.components1d import Gaussian
 
-from pyxem.utils.dummy_data import make_diffraction_test_data as mdtd
+from pyxem.data.dummy_data import make_diffraction_test_data as mdtd
 from pyxem.signals import DPCSignal2D, Diffraction2D, LazyDiffraction2D
 
 
@@ -45,12 +45,12 @@ def get_disk_shift_simple_test_signal(lazy=False):
 
     Examples
     --------
-    >>> s = pxm.dummy_data.get_disk_shift_simple_test_signal()
+    >>> s = pxm.data.dummy_data.get_disk_shift_simple_test_signal()
     >>> s.plot()
 
     Load as lazy
 
-    >>> s = pxm.dummy_data.get_disk_shift_simple_test_signal(lazy=True)
+    >>> s = pxm.data.dummy_data.get_disk_shift_simple_test_signal(lazy=True)
 
     """
     disk_x, disk_y = np.mgrid[22:28:20j, 22:28:20j]
@@ -86,12 +86,12 @@ def get_holz_simple_test_signal(lazy=False):
 
     Examples
     --------
-    >>> s = pxm.dummy_data.get_holz_simple_test_signal()
+    >>> s = pxm.data.dummy_data.get_holz_simple_test_signal()
     >>> s.plot()
 
     Load as lazy
 
-    >>> s = pxm.dummy_data.get_holz_simple_test_signal(lazy=True)
+    >>> s = pxm.data.dummy_data.get_holz_simple_test_signal(lazy=True)
 
     """
     ring_x, ring_y = np.mgrid[24:26:20j, 24:26:20j]
@@ -130,12 +130,12 @@ def get_holz_heterostructure_test_signal(lazy=False):
 
     Example
     -------
-    >>> s = pxm.dummy_data.get_holz_heterostructure_test_signal()
+    >>> s = pxm.data.dummy_data.get_holz_heterostructure_test_signal()
     >>> s.plot()
 
     Load as lazy
 
-    >>> s = pxm.dummy_data.get_holz_heterostructure_test_signal(lazy=True)
+    >>> s = pxm.data.dummy_data.get_holz_heterostructure_test_signal(lazy=True)
 
     """
     probe_size_x, probe_size_y = 40, 40
@@ -186,11 +186,11 @@ def get_dead_pixel_signal(lazy=False):
 
     Example
     -------
-    >>> s = pxm.dummy_data.get_dead_pixel_signal()
+    >>> s = pxm.data.dummy_data.get_dead_pixel_signal()
 
     Lazy signal
 
-    >>> s_lazy = pxm.dummy_data.get_dead_pixel_signal(lazy=True)
+    >>> s_lazy = pxm.data.dummy_data.get_dead_pixel_signal(lazy=True)
 
     """
     data = mdtd.MakeTestData(size_x=128, size_y=128, default=False, blur=True)
@@ -217,11 +217,11 @@ def get_hot_pixel_signal(lazy=False):
 
     Example
     -------
-    >>> s = pxm.dummy_data.get_hot_pixel_signal()
+    >>> s = pxm.data.dummy_data.get_hot_pixel_signal()
 
     Lazy signal
 
-    >>> s_lazy = pxm.dummy_data.get_hot_pixel_signal(lazy=True)
+    >>> s_lazy = pxm.data.dummy_data.get_hot_pixel_signal(lazy=True)
 
     """
     data = mdtd.MakeTestData(size_x=128, size_y=128, default=False, blur=True)
@@ -246,7 +246,7 @@ def get_simple_dpc_signal():
 
     Example
     -------
-    >>> s = pxm.dummy_data.get_simple_dpc_signal()
+    >>> s = pxm.data.dummy_data.get_simple_dpc_signal()
 
     """
     data = np.mgrid[-5:5:100j, -5:5:100j]
@@ -267,7 +267,7 @@ def get_stripe_pattern_dpc_signal():
 
     Example
     -------
-    >>> s = pxm.dummy_data.get_stripe_pattern_dpc_signal()
+    >>> s = pxm.data.dummy_data.get_stripe_pattern_dpc_signal()
 
     """
     data = np.zeros((2, 100, 50))
@@ -293,12 +293,12 @@ def get_square_dpc_signal(add_ramp=False):
 
     Examples
     --------
-    >>> s = pxm.dummy_data.get_square_dpc_signal()
+    >>> s = pxm.data.dummy_data.get_square_dpc_signal()
     >>> s.plot()
 
     Adding a ramp
 
-    >>> s = pxm.dummy_data.get_square_dpc_signal(add_ramp=True)
+    >>> s = pxm.data.dummy_data.get_square_dpc_signal(add_ramp=True)
     >>> s.plot()
 
     """
@@ -341,7 +341,7 @@ def get_fem_signal(lazy=False):
 
     Examples
     --------
-    >>> s = pxm.dummy_data.get_fem_signal()
+    >>> s = pxm.data.dummy_data.get_fem_signal()
     >>> s.plot()
 
     """
@@ -433,7 +433,7 @@ def get_simple_fem_signal(lazy=False):
 
     Examples
     --------
-    >>> s = pxm.dummy_data.get_simple_fem_signal()
+    >>> s = pxm.data.dummy_data.get_simple_fem_signal()
     >>> s.plot()
 
     """
@@ -535,7 +535,7 @@ def get_generic_fem_signal(probe_x=2, probe_y=2, image_x=50, image_y=50, lazy=Fa
 
     Examples
     --------
-    >>> s = pxm.dummy_data.get_generic_fem_signal(probe_x=5, probe_y=10,
+    >>> s = pxm.data.dummy_data.get_generic_fem_signal(probe_x=5, probe_y=10,
     ...     image_x=25, image_y=30, lazy=False)
     >>> s.plot()
 
@@ -625,7 +625,7 @@ def get_cbed_signal():
 
     Example
     -------
-    >>> s = pxm.dummy_data.get_cbed_signal()
+    >>> s = pxm.data.dummy_data.get_cbed_signal()
     >>> s.plot()
 
     """
@@ -672,7 +672,7 @@ def get_simple_ellipse_signal_peak_array(seed=None):
 
     Examples
     --------
-    >>> s, peak_array = pxm.dummy_data.get_simple_ellipse_signal_peak_array()
+    >>> s, peak_array = pxm.data.dummy_data.get_simple_ellipse_signal_peak_array()
     >>> s.add_peak_array_as_markers(peak_array, color='blue', size=30)
 
     """
@@ -696,7 +696,7 @@ def get_nanobeam_electron_diffraction_signal():
 
     Example
     -------
-    >>> s = pxm.dummy_data.get_nanobeam_electron_diffraction_signal()
+    >>> s = pxm.data.dummy_data.get_nanobeam_electron_diffraction_signal()
     >>> s.plot()
 
     """

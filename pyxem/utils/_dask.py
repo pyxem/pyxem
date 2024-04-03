@@ -76,7 +76,7 @@ def _intensity_peaks_image_single_frame(frame, peaks, disk_r):
     Examples
     --------
     >>> import pyxem.utils.dask_tools as dt
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.data.dummy_data.dummy_data.get_cbed_signal()
     >>> peaks = np.array(([50,50],[25,50]))
     >>> intensity = dt._intensity_peaks_image_single_frame(
     ...     s.data[0,0,:,:], peaks, 5)

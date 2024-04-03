@@ -361,7 +361,7 @@ class TestSubpixelRefinement:
         assert np.allclose(np.array(cen), (-2.0, 0.0))
 
     def test_subpixel_refinement_com(self):
-        import pyxem.utils.dummy_data.make_diffraction_test_data as mdtd
+        import pyxem.data.dummy_data.make_diffraction_test_data as mdtd
         import pyxem as pxm
         import numpy as np
 
@@ -380,7 +380,7 @@ class TestSubpixelRefinement:
         dv.subpixel_refine(s, method="center-of-mass")
 
     def test_subpixel_refinement_xc(self):
-        import pyxem.utils.dummy_data.make_diffraction_test_data as mdtd
+        import pyxem.data.dummy_data.make_diffraction_test_data as mdtd
         import pyxem as pxm
         import numpy as np
 

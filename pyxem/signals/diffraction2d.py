@@ -212,7 +212,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Examples
         --------
-        >>> s = pxm.dummy_data.get_disk_shift_simple_test_signal()
+        >>> s = pxm.data.dummy_data.get_disk_shift_simple_test_signal()
         >>> s_c = s.center_of_mass(threshold=3., show_progressbar=False)
         >>> s_c -= 25 # To shift the center disk to the middle (25, 25)
         >>> s_shift = s.shift_diffraction(
@@ -264,7 +264,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Examples
         --------
-        >>> s = pxm.dummy_data.get_holz_simple_test_signal()
+        >>> s = pxm.data.dummy_data.get_holz_simple_test_signal()
         >>> s_rot = s.rotate_diffraction(30, show_progressbar=False)
 
         """
@@ -296,7 +296,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Example
         -------
-        >>> s = pxm.dummy_data.get_holz_simple_test_signal()
+        >>> s = pxm.data.dummy_data.get_holz_simple_test_signal()
         >>> s_flip = s.flip_diffraction_x()
 
         To avoid changing the original object afterwards
@@ -326,7 +326,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Example
         -------
-        >>> s = pxm.dummy_data.get_holz_simple_test_signal()
+        >>> s = pxm.data.dummy_data.get_holz_simple_test_signal()
         >>> s_flip = s.flip_diffraction_y()
 
         To avoid changing the original object afterwards
@@ -426,7 +426,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Examples
         --------
-        >>> s = pxm.dummy_data.get_cbed_signal()
+        >>> s = pxm.data.dummy_data.get_cbed_signal()
         >>> s_r = s.subtract_diffraction_background(method='median kernel',
         ...     footprint=20, lazy_output=False, show_progressbar=False)
         >>> s_r.plot()
@@ -475,7 +475,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Examples
         --------
-        >>> s = pxm.dummy_data.get_dead_pixel_signal()
+        >>> s = pxm.data.dummy_data.get_dead_pixel_signal()
         >>> s_dead_pixels = s.find_dead_pixels(show_progressbar=False)
 
         Using a mask array
@@ -483,7 +483,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         >>> import numpy as np
         >>> mask_array = np.zeros((128, 128), dtype=bool)
         >>> mask_array[:, 100:] = True
-        >>> s = pxm.dummy_data.get_dead_pixel_signal()
+        >>> s = pxm.data.dummy_data.get_dead_pixel_signal()
         >>> s_dead_pixels = s.find_dead_pixels(
         ...     mask_array=mask_array, show_progressbar=False)
 
@@ -536,7 +536,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Examples
         --------
-        >>> s = pxm.dummy_data.get_hot_pixel_signal()
+        >>> s = pxm.data.dummy_data.get_hot_pixel_signal()
         >>> s_hot_pixels = s.find_hot_pixels(show_progressbar=False)
 
         Using a mask array
@@ -544,7 +544,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         >>> import numpy as np
         >>> mask_array = np.zeros((128, 128), dtype=bool)
         >>> mask_array[:, 100:] = True
-        >>> s = pxm.dummy_data.get_hot_pixel_signal()
+        >>> s = pxm.data.dummy_data.get_hot_pixel_signal()
         >>> s_hot_pixels = s.find_hot_pixels(
         ...     mask_array=mask_array, show_progressbar=False)
 
@@ -598,7 +598,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Examples
         --------
-        >>> s = pxm.dummy_data.get_hot_pixel_signal()
+        >>> s = pxm.data.dummy_data.get_hot_pixel_signal()
         >>> s_hot_pixels = s.find_hot_pixels()
         >>> s_corr = s.correct_bad_pixels(s_hot_pixels)
 
@@ -898,7 +898,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Examples
         --------
-        >>> s = pxm.dummy_data.get_disk_shift_simple_test_signal()
+        >>> s = pxm.data.dummy_data.get_disk_shift_simple_test_signal()
         >>> mask = (25, 25, 10)
         >>> s_out = s.threshold_and_mask(
         ...     mask=mask, threshold=2, show_progressbar=False)
@@ -959,7 +959,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         --------
         With mask centered at x=105, y=120 and 30 pixel radius
 
-        >>> s = pxm.dummy_data.get_disk_shift_simple_test_signal()
+        >>> s = pxm.data.dummy_data.get_disk_shift_simple_test_signal()
         >>> mask = (25, 25, 10)
         >>> s_com = s.center_of_mass(mask=mask, show_progressbar=False)
         >>> s_color = s_com.get_color_signal()
@@ -1014,7 +1014,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Examples
         --------
-        >>> s = pxm.dummy_data.get_cbed_signal()
+        >>> s = pxm.data.dummy_data.get_cbed_signal()
         >>> s_template = s.template_match_disk(
         ...     disk_r=5, show_progressbar=False)
         >>> s.plot()
@@ -1054,7 +1054,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Examples
         --------
-        >>> s = pxm.dummy_data.get_cbed_signal()
+        >>> s = pxm.data.dummy_data.get_cbed_signal()
         >>> s_template = s.template_match_ring(show_progressbar=False)
         >>> s.plot()
 
@@ -1103,7 +1103,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         --------
         >>> import pyxem as pxm
         >>> from scipy.ndimage import gaussian_filter
-        >>> s = pxm.dummy_data.get_cbed_signal()
+        >>> s = pxm.data.dummy_data.get_cbed_signal()
         >>> s_filtered = s.filter(gaussian_filter, sigma=1)
 
         """
@@ -1139,7 +1139,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         Examples
         --------
         >>> import pyxem as pxm
-        >>> s = pxm.dummy_data.get_cbed_signal()
+        >>> s = pxm.data.dummy_data.get_cbed_signal()
         >>> binary_image = np.random.randint(0, 2, (6, 6))
         >>> s_template = s.template_match_with_binary_image(
         ...     binary_image, show_progressbar=False)
@@ -1182,7 +1182,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Examples
         --------
-        >>> s = pxm.dummy_data.get_cbed_signal()
+        >>> s = pxm.data.dummy_data.get_cbed_signal()
         >>> binary_image = np.random.randint(0, 2, (6, 6))
         >>> s_template = s.template_match_with_binary_image(
         ...     binary_image, show_progressbar=False)
@@ -1232,7 +1232,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Examples
         --------
-        >>> s = pxm.dummy_data.get_cbed_signal()
+        >>> s = pxm.data.dummy_data.get_cbed_signal()
         >>> peak_array = s.find_peaks_lazy()
         >>> refined_peak_array = s.peak_position_refinement_com(peak_array, 20)
         >>> refined_peak_array_com = refined_peak_array.compute(
@@ -1294,7 +1294,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Examples
         --------
-        >>> s = pxm.dummy_data.get_cbed_signal()
+        >>> s = pxm.data.dummy_data.get_cbed_signal()
         >>> peak_array = s.find_peaks_lazy()
         >>> intensity_array = s.intensity_peaks(peak_array, disk_r=6)
         >>> intensity_array_computed = intensity_array.compute()
@@ -1391,7 +1391,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Examples
         --------
-        >>> s, parray = pxm.dummy_data.get_simple_ellipse_signal_peak_array()
+        >>> s, parray = pxm.data.dummy_data.get_simple_ellipse_signal_peak_array()
         >>> s.add_peak_array_as_markers(parray)
         >>> s.plot()
 
@@ -1430,7 +1430,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Examples
         --------
-        >>> s, _ = pxm.dummy_data.get_simple_ellipse_signal_peak_array()
+        >>> s, _ = pxm.data.dummy_data.get_simple_ellipse_signal_peak_array()
         >>> ellipse_array = [128, 128, 20, 20, 0] # (xc, yc, semi0, semi1, rot)
         >>> ellipse_array = [[128, ]]
         >>> s.plot()
@@ -1468,7 +1468,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Examples
         --------
-        >>> s = pxm.dummy_data.get_holz_simple_test_signal()
+        >>> s = pxm.data.dummy_data.get_holz_simple_test_signal()
         >>> s.axes_manager.signal_axes[0].offset = -25
         >>> s.axes_manager.signal_axes[1].offset = -25
         >>> mask_array = s.angular_mask(0.5*np.pi, np.pi)
@@ -1651,7 +1651,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Examples
         --------
-        >>> s = pxm.dummy_data.get_holz_simple_test_signal()
+        >>> s = pxm.data.dummy_data.get_holz_simple_test_signal()
         >>> s_com = s.center_of_mass(show_progressbar=False)
         >>> s_ar = s.angular_slice_radial_average(
         ...     angleN=10, centre_x=s_com.inav[0].data,
