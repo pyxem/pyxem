@@ -15,7 +15,7 @@ Note that this workflow might change (simplify and improve!) in the future as py
 
 ########################################################################################
 # First, we import the necessary packages and make a single test diffraction pattern.
-import pxm.data.dummy_data.make_diffraction_test_data as mdtd
+import pyxem.data.dummy_data.make_diffraction_test_data as mdtd
 import pyxem as pxm
 import pyxem.utils.ransac_ellipse_tools as ret
 import hyperspy.api as hs
