@@ -18,7 +18,7 @@ for each ROI for use plotting on the signal.
 
 import pyxem as pxm
 
-c = pyxem.data.dummy_data.get_cbed_signal()
+c = pxm.data.dummy_data.get_cbed_signal()
 pks = c.template_match_disk(5, subtract_min=False).find_peaks(
     interactive=False, threshold_abs=0.8, min_distance=6
 )
