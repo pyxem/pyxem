@@ -1231,12 +1231,6 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Parameters
         ----------
-        return_vectors : bool
-            If True, will return a DiffractionVectors object. If False,
-            returns a BaseSignal object.
-        interactive : bool
-            If True, will use the interactive peak finding tool to help find
-            the peaks.
         center: None or tuple
             The center of the diffraction pattern, if None, will use the
             center determined by the offsets in the signal axes
@@ -1249,6 +1243,9 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         units: None or tuple
             The units of the vectors, if None, will use the units of the
             signal axes
+        get_intensity: bool
+            If True, will return the intensity of the peaks as well as the
+            intensity of the peaks. Default True.
         kwargs:
             Passed to the peak finding function.
         """
