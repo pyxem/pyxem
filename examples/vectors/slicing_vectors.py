@@ -17,12 +17,8 @@ hs.set_log_level("ERROR")
 
 s = pxm.data.tilt_boundary_data()
 temp = s.template_match_disk(disk_r=5, subtract_min=False)
-pks = temp.find_peaks(
-    interactive=False, threshold_abs=0.4, min_distance=5, get_intensity=True
-)
-vectors = pxm.signals.DiffractionVectors.from_peaks(
-    pks
-)  # calibration is automatically set
+
+vectors = s.get_diffraction_vectors(threshold_abs=0.4, min_distance=5)
 
 # Plotting all the vectors
 
