@@ -20,6 +20,7 @@
 
 from pyxem.utils._deprecated import deprecated
 
+
 @deprecated(since="0.18.0", removal="0.19.0")
 def select_method_from_method_dict(method, method_dict, print_help=True, **kwargs):
     """Streamlines the selection of utils to be mapped in class methods.
@@ -54,6 +55,7 @@ def select_method_from_method_dict(method, method_dict, print_help=True, **kwarg
 
     return method_dict[method]
 
+
 @deprecated(since="0.18.0", removal="0.19.0")
 def transfer_signal_axes(new_signal, old_signal):
     """Transfers signal axis calibrations from an old signal to a new
@@ -80,6 +82,7 @@ def transfer_signal_axes(new_signal, old_signal):
         ax_new.units = ax_old.units
 
     return new_signal
+
 
 @deprecated(since="0.18.0", removal="0.19.0")
 def transfer_navigation_axes(new_signal, old_signal):
@@ -116,12 +119,14 @@ def transfer_navigation_axes(new_signal, old_signal):
 
     return new_signal
 
+
 @deprecated(since="0.18.0", removal="0.19.0")
 def to_hyperspy_index(index, signal_axis):
     if isinstance(index, int):
         return index
     else:
         return signal_axis.value2index(index)
+
 
 @deprecated(since="0.18.0", removal="0.19.0")
 def transfer_navigation_axes_to_signal_axes(new_signal, old_signal):
