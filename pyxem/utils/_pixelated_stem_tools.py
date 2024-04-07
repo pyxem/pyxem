@@ -83,11 +83,11 @@ def _get_corner_slices(s, corner_size=0.05):
         Tuple with the corner slices.
 
     """
-    if len(s.axes_manager.navigation_axes) != 0:
-        raise ValueError("s need to have 0 navigation dimensions")
-    if len(s.axes_manager.signal_axes) != 2:
-        raise ValueError("s need to have 2 signal dimensions")
-    am = s.axes_manager.signal_axes
+    if s.axes_manager.signal_dimension != 0:
+        raise ValueError("s need to have 0 signal dimensions")
+    if s.axes_manager.navigation_dimension != 2:
+        raise ValueError("s need to have 2 navigation dimensions")
+    am = s.axes_manager.navigation_axes
     a0_range = (am[0].high_index - am[0].low_index) * corner_size
     a1_range = (am[1].high_index - am[1].low_index) * corner_size
     a0_range, a1_range = int(a0_range), int(a1_range)

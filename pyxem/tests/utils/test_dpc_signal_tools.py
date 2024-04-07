@@ -24,7 +24,7 @@ from numpy.testing import assert_allclose
 
 import hyperspy.api as hs
 
-from pyxem.signals.differential_phase_contrast import make_bivariate_histogram
+from pyxem.signals.beam_shift import make_bivariate_histogram
 import pyxem.utils._pixelated_stem_tools as pst
 
 
@@ -121,11 +121,11 @@ class TestGetCornerSlices:
     @pytest.mark.parametrize("corner_size", [0.02, 0.05, 0.20, 0.23])
     def test_corner_size(self, corner_size):
         size = 100
-        s = hs.signals.Signal2D(np.zeros((size, size)))
+        s = hs.signals.Signal2D(np.zeros((size, size))).T
         corner_slice_list = pst._get_corner_slices(s, corner_size=corner_size)
         corner_shape = (round(size * corner_size), round(size * corner_size))
         for corner_slice in corner_slice_list:
-            s_corner = s.isig[corner_slice]
+            s_corner = s.inav[corner_slice]
             assert s_corner.axes_manager.shape == corner_shape
 
     def test_signal_slice_values(self):
@@ -134,21 +134,21 @@ class TestGetCornerSlices:
         data[:20, -20:] = 5
         data[-20:, :20] = 10
         data[-20:, -20:] = 8
-        s = hs.signals.Signal2D(data)
+        s = hs.signals.Signal2D(data).T
         corner_slice_list = pst._get_corner_slices(s, corner_size=0.05)
-        assert (s.isig[corner_slice_list[0]].data == 2).all()
-        assert (s.isig[corner_slice_list[1]].data == 10).all()
-        assert (s.isig[corner_slice_list[2]].data == 5).all()
-        assert (s.isig[corner_slice_list[3]].data == 8).all()
+        assert (s.inav[corner_slice_list[0]].data == 2).all()
+        assert (s.inav[corner_slice_list[1]].data == 10).all()
+        assert (s.inav[corner_slice_list[2]].data == 5).all()
+        assert (s.inav[corner_slice_list[3]].data == 8).all()
 
     def test_non_square_signal(self):
         corner_size = 0.05
         size_x, size_y = 100, 200
-        s = hs.signals.Signal2D(np.zeros((size_y, size_x)))
+        s = hs.signals.Signal2D(np.zeros((size_y, size_x))).T
         corner_slice_list = pst._get_corner_slices(s, corner_size=0.05)
         corner_shape = (round(size_x * corner_size), round(size_y * corner_size))
         for corner_slice in corner_slice_list:
-            s_corner = s.isig[corner_slice]
+            s_corner = s.inav[corner_slice]
             assert s_corner.axes_manager.shape == corner_shape
 
     def test_wrong_input_dimensions(self):

@@ -26,7 +26,7 @@ from skimage.draw import polygon
 from hyperspy.components1d import Gaussian
 
 from pyxem.dummy_data import make_diffraction_test_data as mdtd
-from pyxem.signals import DPCSignal2D, Diffraction2D, LazyDiffraction2D
+from pyxem.signals import DPCSignal2D, Diffraction2D, LazyDiffraction2D, BeamShift
 
 
 def get_disk_shift_simple_test_signal(lazy=False):
@@ -249,8 +249,9 @@ def get_simple_dpc_signal():
     >>> s = pxm.dummy_data.get_simple_dpc_signal()
 
     """
-    data = np.mgrid[-5:5:100j, -5:5:100j]
-    s = DPCSignal2D(data)
+    temp_data = np.mgrid[-5:5:100j, -5:5:100j]
+    data = np.stack((temp_data[0], temp_data[1]), -1)
+    s = BeamShift(data)
     return s
 
 
