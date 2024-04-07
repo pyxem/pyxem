@@ -23,7 +23,7 @@ from tqdm import tqdm
 from hyperspy.signals import Signal2D
 
 from pyxem.signals import DiffractionVectors, ElectronDiffraction2D
-from pyxem.utils.signal import transfer_signal_axes
+from pyxem.utils._signals import _transfer_signal_axes
 from pyxem.utils.segment_utils import (
     norm_cross_corr,
     separate_watershed,
@@ -477,7 +477,7 @@ class VDFSegment:
         )
 
         # Transfer axes properties of segments
-        vdfseg.segments = transfer_signal_axes(vdfseg.segments, self.segments)
+        vdfseg.segments = _transfer_signal_axes(vdfseg.segments, self.segments)
         n = vdfseg.segments.axes_manager.navigation_axes[0]
         n.name = "n"
         n.units = "number"

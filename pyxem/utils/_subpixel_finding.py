@@ -20,7 +20,7 @@ import numpy as np
 from skimage.transform import rescale
 from skimage import draw
 
-from pyxem.utils.expt_utils import normalize_template_match
+from pyxem.utils.diffraction import normalize_template_match
 
 
 def _get_experimental_square(z, vector, square_size):

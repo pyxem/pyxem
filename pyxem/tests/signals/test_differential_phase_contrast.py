@@ -37,7 +37,7 @@ from pyxem.signals import (
     LazyDPCSignal2D,
 )
 from pyxem.signals.differential_phase_contrast import make_bivariate_histogram
-import pyxem.dummy_data as dd
+import pyxem.data.dummy_data as dd
 import pyxem as pxm
 
 

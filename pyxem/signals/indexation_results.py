@@ -26,7 +26,7 @@ from orix.quaternion import Rotation
 from transforms3d.euler import mat2euler
 
 from pyxem.utils.indexation_utils import get_nth_best_solution
-from pyxem.utils.signal import transfer_navigation_axes
+from pyxem.utils._signals import _transfer_navigation_axes
 
 
 def crystal_from_vector_matching(z_matches):
@@ -243,7 +243,7 @@ class VectorMatchingResults(BaseSignal):
             crystal_from_vector_matching, inplace=False, *args, **kwargs
         )
 
-        crystal_map = transfer_navigation_axes(crystal_map, self)
+        crystal_map = _transfer_navigation_axes(crystal_map, self)
         return crystal_map
 
     def get_indexed_diffraction_vectors(

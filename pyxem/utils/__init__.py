@@ -22,11 +22,11 @@
 from pyxem.utils.ransac_ellipse_tools import determine_ellipse
 from pyxem.utils.calibration import find_diffraction_calibration
 from pyxem.utils.plotting import plot_template_over_pattern
-from pyxem.utils import expt_utils
+from pyxem.utils import diffraction
 
 __all__ = [
     "determine_ellipse",
     "find_diffraction_calibration",
     "plot_template_over_pattern",
-    "expt_utils",
+    "diffraction",
 ]

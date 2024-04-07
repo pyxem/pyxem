@@ -30,8 +30,8 @@ from hyperspy._signals.lazy import LazySignal
 from hyperspy.drawing._markers.points import Points
 from hyperspy.misc.utils import isiterable
 
-from pyxem.utils.signal import (
-    transfer_navigation_axes_to_signal_axes,
+from pyxem.utils._signals import (
+    _transfer_navigation_axes_to_signal_axes,
 )
 from pyxem.utils.vectors import (
     detector_to_fourier,
@@ -1268,7 +1268,7 @@ class DiffractionVectors(BaseSignal):
         if binary is True:
             xim = xim >= 1.0
         # Set properties
-        xim = transfer_navigation_axes_to_signal_axes(xim, self)
+        xim = _transfer_navigation_axes_to_signal_axes(xim, self)
         xim.change_dtype("float")
         xim.set_signal_type("signal2d")
         xim.metadata.General.title = "Diffracting Pixels Map"

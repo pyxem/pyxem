@@ -25,8 +25,10 @@ from hyperspy.signals import Signal2D
 from hyperspy.misc.utils import isiterable
 import hyperspy.api as hs
 import pyxem.utils._pixelated_stem_tools as pst
+from pyxem.utils._deprecated import deprecated
 
 
+@deprecated(since="0.18.0", removal="0.19.0")
 def _centre_comparison(s, steps, step_size, crop_radial_signal=None, angleN=8):
     """
     Compare how the centre position affects the radial average.
@@ -68,6 +70,7 @@ def _centre_comparison(s, steps, step_size, crop_radial_signal=None, angleN=8):
     return s_list
 
 
+@deprecated(since="0.18.0", removal="0.19.0")
 def get_coordinate_of_min(s):
     """Returns the x and y values of the minimum in a signal."""
     z = s.data
@@ -77,6 +80,7 @@ def get_coordinate_of_min(s):
     return (x, y)
 
 
+@deprecated(since="0.18.0", removal="0.19.0")
 def get_centre_position_list(s, steps, step_size):
     """
     Returns a zip of x and y coordinates based on the offset of the center-
@@ -103,6 +107,7 @@ def get_centre_position_list(s, steps, step_size):
     return centre_list
 
 
+@deprecated(since="0.18.0", removal="0.19.0")
 def get_optimal_centre_position(
     s, radial_signal_span, steps=3, step_size=1, angleN=8, show_progressbar=True
 ):
@@ -145,7 +150,7 @@ def get_optimal_centre_position(
 
     Examples
     --------
-    >>> s = pxm.dummy_data.get_single_ring_diffraction_signal()
+    >>> s = pxm.data.dummy_data.get_single_ring_diffraction_signal()
     >>> s.axes_manager.signal_axes[0].offset = -105
     >>> s.axes_manager.signal_axes[1].offset = -67
     >>> import pyxem.utils.radial_utils as ra
@@ -176,6 +181,7 @@ def get_optimal_centre_position(
     return s_centre_std_array
 
 
+@deprecated(since="0.18.0", removal="0.19.0")
 def refine_signal_centre_position(
     s, radial_signal_span, refine_step_size=None, **kwargs
 ):
@@ -204,7 +210,7 @@ def refine_signal_centre_position(
     Example
     -------
     >>> import pyxem.utils.radial_utils as ra
-    >>> s = pxm.dummy_data.get_single_ring_diffraction_signal()
+    >>> s = pxm.data.dummy_data.get_single_ring_diffraction_signal()
     >>> s.axes_manager[0].offset, s.axes_manager[1].offset = -103, -69
     >>> ra.refine_signal_centre_position(s, (32., 48.), angleN=4)
     >>> x, y = s.axes_manager[0].offset, s.axes_manager[1].offset
@@ -220,6 +226,7 @@ def refine_signal_centre_position(
         s.axes_manager[0].offset, s.axes_manager[1].offset = -x, -y
 
 
+@deprecated(since="0.18.0", removal="0.19.0")
 def _get_offset_image(model_list, s, steps, step_size):
     """
     Make offset image signal based on difference in Gaussian centre position.
@@ -259,6 +266,7 @@ def _get_offset_image(model_list, s, steps, step_size):
     return s_offset
 
 
+@deprecated(since="0.18.0", removal="0.19.0")
 def _make_radius_vs_angle_model(
     signal,
     radial_signal_span,
@@ -304,6 +312,7 @@ def _make_radius_vs_angle_model(
     return m_ra
 
 
+@deprecated(since="0.18.0", removal="0.19.0")
 def get_radius_vs_angle(
     signal,
     radial_signal_span,
@@ -343,7 +352,7 @@ def get_radius_vs_angle(
 
     Examples
     --------
-    >>> s = pxm.dummy_data.get_single_ring_diffraction_signal()
+    >>> s = pxm.data.dummy_data.get_single_ring_diffraction_signal()
     >>> s.axes_manager.signal_axes[0].offset = -105
     >>> s.axes_manager.signal_axes[1].offset = -67
     >>> import pyxem.utils.radial_utils as ra
@@ -365,6 +374,7 @@ def get_radius_vs_angle(
     return s_centre
 
 
+@deprecated(since="0.18.0", removal="0.19.0")
 def get_angle_image_comparison(s0, s1, angleN=12, mask_radius=None):
     """Compare two images by overlaying one on the other in slices.
 
@@ -392,7 +402,7 @@ def get_angle_image_comparison(s0, s1, angleN=12, mask_radius=None):
 
     Examples
     --------
-    >>> from pyxem.dummy_data import MakeTestData
+    >>> from pyxem.data.dummy_data import MakeTestData
     >>> test_data0 = MakeTestData(300, 300)
     >>> test_data0.add_ring(150, 150, 40)
     >>> test_data1 = MakeTestData(300, 300)
@@ -434,6 +444,7 @@ def get_angle_image_comparison(s0, s1, angleN=12, mask_radius=None):
     return s
 
 
+@deprecated(since="0.18.0", removal="0.19.0")
 def _get_holz_angle(electron_wavelength, lattice_parameter):
     """
     Parameters
@@ -464,6 +475,7 @@ def _get_holz_angle(electron_wavelength, lattice_parameter):
     return angle
 
 
+@deprecated(since="0.18.0", removal="0.19.0")
 def _scattering_angle_to_lattice_parameter(electron_wavelength, angle):
     """Convert scattering angle data to lattice parameter sizes.
 
@@ -495,6 +507,7 @@ def _scattering_angle_to_lattice_parameter(electron_wavelength, angle):
     return 1 / kz
 
 
+@deprecated(since="0.18.0", removal="0.19.0")
 def _get_xy_points_from_radius_angle_plot(s_ra):
     x_list = []
     y_list = []
@@ -508,6 +521,7 @@ def _get_xy_points_from_radius_angle_plot(s_ra):
     return (x_list, y_list)
 
 
+@deprecated(since="0.18.0", removal="0.19.0")
 def _fit_ellipse_to_xy_points(x, y):
     """Fit an ellipse to a list of x and y points.
 
@@ -535,6 +549,7 @@ def _fit_ellipse_to_xy_points(x, y):
     return g
 
 
+@deprecated(since="0.18.0", removal="0.19.0")
 def _get_ellipse_parameters(g):
     """
     Parameters
@@ -585,6 +600,7 @@ def _get_ellipse_parameters(g):
     return (xC, yC, semi_len0, semi_len1, rot, eccen)
 
 
+@deprecated(since="0.18.0", removal="0.19.0")
 def _get_marker_list(ellipse_parameters, x_list=None, y_list=None):
     xC, yC, semi_len0, semi_len1, rot, ecce = _get_ellipse_parameters(
         ellipse_parameters
@@ -601,6 +617,7 @@ def _get_marker_list(ellipse_parameters, x_list=None, y_list=None):
     return marker_list
 
 
+@deprecated(since="0.18.0", removal="0.19.0")
 def fit_single_ellipse_to_signal(
     s, radial_signal_span, prepeak_range=None, angleN=20, show_progressbar=True
 ):
@@ -636,7 +653,7 @@ def fit_single_ellipse_to_signal(
 
     Examples
     --------
-    >>> from pyxem.dummy_data import make_diffraction_test_data as mdtd
+    >>> from pyxem.data.dummy_data import make_diffraction_test_data as mdtd
     >>> s = pxm.signals.Diffraction2D(np.zeros((200, 220)))
     >>> s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -110
     >>> xx, yy = np.meshgrid(s.axes_manager[0].axis, s.axes_manager[1].axis)
@@ -663,6 +680,7 @@ def fit_single_ellipse_to_signal(
     return s_m, xC, yC, semi0, semi1, rot, ecc
 
 
+@deprecated(since="0.18.0", removal="0.19.0")
 def fit_ellipses_to_signal(
     s, radial_signal_span_list, prepeak_range=None, angleN=20, show_progressbar=True
 ):
@@ -696,7 +714,7 @@ def fit_ellipses_to_signal(
 
     Examples
     --------
-    >>> from pyxem.dummy_data import make_diffraction_test_data as mdtd
+    >>> from pyxem.data.dummy_data import make_diffraction_test_data as mdtd
     >>> s = pxm.signals.Diffraction2D(np.zeros((200, 220)))
     >>> s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -110
     >>> xx, yy = np.meshgrid(s.axes_manager[0].axis, s.axes_manager[1].axis)

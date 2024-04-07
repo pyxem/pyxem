@@ -23,7 +23,7 @@ from pyxem.utils.polar_transform_utils import (
     get_template_polar_coordinates,
     image_to_polar,
 )
-from pyxem.utils.expt_utils import find_beam_center_blur
+from pyxem.utils.diffraction import find_beam_center_blur
 
 
 def plot_template_over_pattern(

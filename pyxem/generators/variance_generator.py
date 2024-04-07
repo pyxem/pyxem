@@ -23,9 +23,9 @@ from hyperspy.signals import Signal2D
 from hyperspy.api import stack
 
 from pyxem.signals import DiffractionVariance2D, ImageVariance
-from pyxem.utils.signal import (
-    transfer_navigation_axes_to_signal_axes,
-    transfer_signal_axes,
+from pyxem.utils._signals import (
+    _transfer_navigation_axes_to_signal_axes,
+    _transfer_signal_axes,
 )
 from pyxem.utils._deprecated import deprecated
 
@@ -100,7 +100,7 @@ class VarianceGenerator:
 
         dv = DiffractionVariance2D(vardps.data.reshape((2, 2, sig_x, sig_y)))
 
-        dv = transfer_signal_axes(dv, self.signal)
+        dv = _transfer_signal_axes(dv, self.signal)
 
         return dv
 
@@ -145,6 +145,6 @@ class VarianceGenerator:
         sig_x = varims.data.shape[1]
         sig_y = varims.data.shape[2]
         iv = ImageVariance(varims.data.reshape((2, 2, sig_x, sig_y)))
-        iv = transfer_navigation_axes_to_signal_axes(iv, self.signal)
+        iv = _transfer_navigation_axes_to_signal_axes(iv, self.signal)
 
         return iv

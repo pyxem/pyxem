@@ -36,16 +36,18 @@ Deprecated
 - Detector module as we move away from pyfai
 - Deprecated ``pyxem.generators.virtual_image_generator.VirtualImageGenerator`` in
   favor of  :meth:`pyxem.signals.CommonDiffraction.get_virtual_image` (#1014)
-- Several utility modules have been deprecated: utils.{pyfai,segement,virtual_images,background_utils,cluster_tools} (#1060 & #1030).
+- Several utility modules have been deprecated: utils.{pyfai,segement,virtual_images,background_utils,cluster_tools,signals, radial_utils} (#1030 & #1060, #1055).
 - The following utils: ``insitu_utils``, ``correlations_utils`` and ``pixelated_stem_tools``, ``dask_tools`` are now private.
 - ``utils.vector_utils``, prefer ``utils.vectors``
 - ``utils.symmetric_vector_utils``, prefer ``utils.vectors``
 - ``utils.labeled_vector_utils``, prefer ``utils.vectors``
+- ``utils.expt_utils``, prefer ``utils.diffraction``
 
 Deleted
 -------
 - Several expired methods of :class:`pyxem.signals.Diffraction2D` associated with radial integration (#998)
 - The ``peak_find_lazy`` method of :class:`pyxem.signals.Diffraction2D`  (#1040)
+- ``dummy_data`` that content is now available under ``data.dummy_data``
 
 Changed
 -------

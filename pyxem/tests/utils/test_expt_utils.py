@@ -23,7 +23,7 @@ from matplotlib import pyplot as plt
 
 from pyFAI.detectors import Detector
 
-from pyxem.utils.expt_utils import (
+from pyxem.utils.diffraction import (
     _index_coords,
     _cart2polar,
     _polar2cart,

@@ -31,7 +31,7 @@ from orix.quaternion import Rotation
 import psutil
 import scipy
 
-from pyxem.utils.expt_utils import _cart2polar
+from pyxem.utils.diffraction import _cart2polar
 from pyxem.utils.vectors import get_rotation_matrix_between_vectors
 from pyxem.utils.vectors import get_angle_cartesian
 from pyxem.utils.cuda_utils import (
