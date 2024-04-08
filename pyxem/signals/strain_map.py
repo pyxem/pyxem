@@ -33,7 +33,7 @@ def _get_rotation_matrix(x_new):
 
     Returns
     -------
-    R : 2 x 2 numpy.array()
+    R : 2 x 2 numpy.ndarray
         The rotation matrix.
     """
     try:

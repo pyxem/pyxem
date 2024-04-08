@@ -31,14 +31,14 @@ def _polar_decomposition(image, side):
 
     Parameters
     ----------
-    image : np.array()
+    image : numpy.ndarray
         Matrix on which to form polar decomposition.
     side : str
         'left' or 'right' the side on which to perform polar decomposition.
 
     Returns
     -------
-    R, U : np.array()
+    R, U :  numpy.ndarray
         Stretch and rotation matrices obtained by polar decomposition.
 
     """
@@ -50,12 +50,12 @@ def _get_rotation_angle(matrix):
 
     Parameters
     ----------
-    matrix : np.array()
+    matrix : numpy.ndarray
         A rotation matrix.
 
     Returns
     -------
-    angle :  np.array()
+    angle :  numpy.ndarray
         Rotation angle associated with matrix.
 
     """

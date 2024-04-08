@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+"""Utils for operating on insitu signals."""
+
 import numpy as np
 import scipy.ndimage as ndi
 import scipy.signal as ss

@@ -17,15 +17,15 @@ We are also looking to add support for faster loading of data from detectors tha
 support.  This means adding support for distributed file loading, which allows for operating
 on data using multiple computers connected over a network.
 
-To load data from a file, we use the :func:`~hyperspy.api.load` function.  The
-:func:`~hyperspy.api.load` function will return different type of object depending what
+To load data from a file, we use the :func:`hyperspy.api.load` function.  The
+:func:`hyperspy.api.load` function will return different type of object depending what
 file is being loaded. For example, it can return HyperSpy generic signal object
 (e. g. :class:`hyperspy.api.signals.Signal2D`) or domain specific signal object
-(e. g. :class:`~.signals.ElecttronDiffraction2D`).
+(e. g. :class:`pyxem.signals.ElectronDiffraction2D`).
 
 With some file formats, it is possible to assign the data to a suitable signal type when loading the file
 and when possible it is done automatically. For example, loading:external+rsciio:`.blo<blockfile-format>` will
-return :class:`~.signals.ElecttronDiffraction2D` object but in situations, where a generic signal is returned,
+return :class:`pyxem.signals.ElectronDiffraction2D` object but in situations, where a generic signal is returned,
 a domain-specific signal can be specified as follow:
 
 .. code-block::

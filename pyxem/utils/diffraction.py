@@ -16,6 +16,11 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+"""
+This module contains utility functions for processing electron diffraction
+patterns.
+"""
+
 import numpy as np
 import scipy.ndimage as ndi
 import pyxem as pxm  # for ElectronDiffraction2D
@@ -44,18 +49,12 @@ except ImportError:
     ndigpu = None
 
 
-"""
-This module contains utility functions for processing electron diffraction
-patterns.
-"""
-
-
 def _index_coords(z, origin=None):
     """Creates x & y coords for the indices in a numpy array.
 
     Parameters
     ----------
-    z : np.array()
+    z : numpy.ndarray
         Two-dimensional data array containing signal.
     origin : tuple
         (x,y) defaults to the center of the image. Specify origin=(0,0) to set
@@ -128,7 +127,7 @@ def azimuthal_integrate1d(
 
     Parameters
     ----------
-    z : np.array()
+    z : numpy.ndarray
         Two-dimensional data array containing the signal.
     azimuthal_integrator : pyFAI.azimuthal_integrator.AzimuthalIntegrator object
         An AzimuthalIntegrator that is already initialised and used to calculate
@@ -144,9 +143,9 @@ def azimuthal_integrate1d(
 
     Returns
     -------
-    tth : np.array()
+    tth : numpy.ndarray
         One-dimensional scattering vector axis of z.
-    I : np.array()
+    I : numpy.ndarray
         One-dimensional azimuthal integral of z.
     """
     output = azimuthal_integrator.integrate1d(z, npt=npt_rad, mask=mask, **kwargs)
@@ -167,7 +166,7 @@ def azimuthal_integrate2d(
 
     Parameters
     ----------
-    z : np.array()
+    z : numpy.ndarray
         Two-dimensional data array containing the signal.
     azimuthal_integrator : pyFAI.azimuthal_integrator.AzimuthalIntegrator object
         An AzimuthalIntegrator that is already initialised and used to calculate
@@ -185,7 +184,7 @@ def azimuthal_integrate2d(
 
     Returns
     -------
-    I : np.array()
+    I : numpy.ndarray
         Two-dimensional azimuthal integral of z.
     """
     output = azimuthal_integrator.integrate2d(
@@ -204,7 +203,7 @@ def integrate_radially(
 
     Parameters
     ----------
-    z : np.array()
+    z : numpy.ndarray
         Two-dimensional data array containing the signal.
     azimuthal_integrator : pyFAI.azimuthal_integrator.AzimuthalIntegrator object
         An AzimuthalIntegrator that is already initialised and used to calculate
@@ -222,9 +221,9 @@ def integrate_radially(
 
     Returns
     -------
-    tth : np.array()
+    tth : numpy.ndarray
         One-dimensional scattering vector axis of z.
-    I : np.array()
+    I : numpy.ndarray
         One-dimensional azimuthal integral of z.
     """
     output = azimuthal_integrator.integrate_radial(
@@ -241,7 +240,7 @@ def medfilt_1d(z, azimuthal_integrator, npt_rad, npt_azim, mask=None, **kwargs):
 
     Parameters
     ----------
-    z : np.array()
+    z : numpy.ndarray
         Two-dimensional data array containing the signal.
     azimuthal_integrator : pyFAI.azimuthal_integrator.AzimuthalIntegrator object
         An AzimuthalIntegrator that is already initialised and used to calculate
@@ -259,9 +258,9 @@ def medfilt_1d(z, azimuthal_integrator, npt_rad, npt_azim, mask=None, **kwargs):
 
     Returns
     -------
-    tth : np.array()
+    tth : numpy.ndarray
         One-dimensional scattering vector axis of z.
-    I : np.array()
+    I : numpy.ndarray
         One-dimensional azimuthal integral of z.
     """
     output = azimuthal_integrator.medfilt1d(
@@ -277,7 +276,7 @@ def sigma_clip(z, azimuthal_integrator, npt_rad, npt_azim, mask=None, **kwargs):
 
     Parameters
     ----------
-    z : np.array()
+    z :  numpy.ndarray
         Two-dimensional data array containing the signal.
     azimuthal_integrator : pyFAI.azimuthal_integrator.AzimuthalIntegrator object
         An AzimuthalIntegrator that is already initialised and used to calculate
@@ -295,9 +294,9 @@ def sigma_clip(z, azimuthal_integrator, npt_rad, npt_azim, mask=None, **kwargs):
 
     Returns
     -------
-    tth : np.array()
+    tth :  numpy.ndarray
         One-dimensional scattering vector axis of z.
-    I : np.array()
+    I : numpy.ndarray
         One-dimensional azimuthal integral of z.
     """
     from pyFAI._version import version
@@ -317,7 +316,7 @@ def gain_normalise(z, dref, bref):
 
     Parameters
     ----------
-    z : np.array()
+    z : numpy.ndarray
         Two-dimensional data array containing signal.
     dref : ElectronDiffraction2D
         Two-dimensional data array containing dark reference.
@@ -357,18 +356,18 @@ def remove_dead(z, deadpixels):
 
 def convert_affine_to_transform(D, shape):
     """Converts an affine transform on a diffraction pattern to a suitable
-    form for skimage.transform.warp()
+    form for :func:`skimage.transform.warp`
 
     Parameters
     ----------
-    D : np.array
+    D : numpy.ndarray
         Affine transform to be applied
     shape : tuple
         Shape tuple in form (y,x) for the diffraction pattern
 
     Returns
     -------
-    transformation : np.array
+    transformation : numpy.ndarray
         3x3 numpy array of the transformation to be applied.
 
     """
@@ -394,18 +393,18 @@ def apply_transformation(z, transformation, keep_dtype, order=1, *args, **kwargs
 
     Parameters
     ----------
-    z : np.array
+    z : numpy.ndarray
         Array to be transformed
-    transformation : np.array
+    transformation : numpy.ndarray
         3x3 numpy array specifying the transformation to be applied.
     order : int
         Interpolation order.
     keep_dtype : bool
         If True dtype of returned object is that of z
     *args :
-        To be passed to skimage.warp
+        To be passed to :func:`skimage.transform.warp`
     **kwargs :
-        To be passed to skimage.warp
+        To be passed to :func:`skimage.transform.warp`
 
     Returns
     -------
@@ -414,7 +413,11 @@ def apply_transformation(z, transformation, keep_dtype, order=1, *args, **kwargs
 
     Notes
     -----
-    Generally used in combination with pyxem.expt_utils.convert_affine_to_transform
+    Generally used in combination with :func:`pyxem.expt_utils.convert_affine_to_transform`
+
+    See Also
+    --------
+    pyxem.expt_utils.convert_affine_to_transform
     """
 
     if keep_dtype is False:
@@ -438,7 +441,7 @@ def regional_filter(z, h):
 
     Returns
     -------
-        h-dome subtracted image as np.array
+        h-dome subtracted image as numpy.ndarray
     """
     seed = np.copy(z)
     seed = z - h
@@ -462,7 +465,7 @@ def circular_mask(shape, radius, center=None):
 
     Returns
     -------
-    mask : np.array()
+    mask : numpy.ndarray
         The circular mask.
 
     """
@@ -479,7 +482,7 @@ def reference_circle(coords, dimX, dimY, radius):
 
     Parameters
     ----------
-    coords : np.array size n,2
+    coords : numpy.ndarray size n,2
         size n,2 array of coordinates to draw the circle.
     dimX : int
         first dimension of the diffraction pattern (size)
@@ -490,7 +493,7 @@ def reference_circle(coords, dimX, dimY, radius):
 
     Returns
     -------
-    img: np.array
+    img: numpy.ndarray
         Array containing the circle at the position given in the coordinates.
     """
     img = np.zeros((dimX, dimY))
@@ -569,8 +572,8 @@ def find_beam_center_interpolate(z, sigma, upsample_factor, kind):
 
     Returns
     -------
-    center : np.array
-        np.array, [y, x] containing indices of estimated direct beam positon
+    center : numpy.ndarray
+        numpy.ndarray, [y, x] containing indices of estimated direct beam positon
     """
     xx = np.sum(z, axis=1)
     yy = np.sum(z, axis=0)
@@ -593,8 +596,8 @@ def find_beam_center_blur(z, sigma):
 
     Returns
     -------
-    center : np.array
-        np.array [x, y] containing indices of estimated direct beam positon.
+    center : numpy.ndarray
+        numpy.ndarray [x, y] containing indices of estimated direct beam positon.
     """
     if is_cupy_array(z):
         gaus = ndigpu.gaussian_filter
@@ -613,17 +616,17 @@ def center_of_mass(z, mask=None, threshold=None):
 
     Parameters
     ----------
-    z : np.array
+    z : numpy.ndarray
         Two-dimensional data array containing signal.
-    mask : np.array
+    mask : numpy.ndarray
         Two-dimensional data array containing mask.
     threshold : float
         Threshold value for center of mass calculation.
 
     Returns
     -------
-    center : np.array
-        np.array [x, y] containing indices of estimated direct beam positon.
+    center : numpy.ndarray
+        numpy.ndarray [x, y] containing indices of estimated direct beam positon.
     """
     if mask is not None:
         z = z * mask
@@ -642,7 +645,7 @@ def find_beam_offset_cross_correlation(z, radius_start, radius_finish, **kwargs)
 
     Parameters
     ----------
-    z: array-like
+    z: numpy.ndarray
         The two dimensional array/image that is operated on
     radius_start : int
         The lower bound for the radius of the central disc to be used in the
@@ -655,8 +658,8 @@ def find_beam_offset_cross_correlation(z, radius_start, radius_finish, **kwargs)
 
     Returns
     -------
-    shift: np.array
-        np.array [y, x] containing offset (from center) of the direct beam positon.
+    shift: numpy.ndarray
+        numpy.ndarray [y, x] containing offset (from center) of the direct beam positon.
     """
     radiusList = np.arange(radius_start, radius_finish)
     errRecord = np.zeros_like(radiusList, dtype="single")
@@ -700,16 +703,16 @@ def peaks_as_gvectors(z, center, calibration):
 
     Parameters
     ----------
-    z : numpy array
+    z : numpy.ndarray
         peak positions as array indices.
-    center : numpy array
+    center : numpy.ndarray
         diffraction pattern center in array indices.
     calibration : float
         calibration in reciprocal Angstroms per pixels.
 
     Returns
     -------
-    g : numpy array
+    g : numpy.ndarray
         peak positions in calibrated units.
 
     """
@@ -741,7 +744,7 @@ def investigate_dog_background_removal_interactive(
     See Also
     --------
     subtract_background_dog : The background subtraction method used.
-    np.arange : Produces suitable objects for std_dev_maxs
+    numpy.arange : Produces suitable objects for std_dev_maxs
 
     """
     gauss_processed = np.empty(
@@ -783,11 +786,11 @@ def find_hot_pixels(z, threshold_multiplier=500, mask=None):
 
     Parameters
     ----------
-    z : array-like
+    z : numpy.ndarray
         Frame to operate on
     threshold_multiplier : scaler
         Used to threshold the dif.
-    mask : NumPy array, optional
+    mask : numpy.ndarray, optional
         Array with bool values. The True values will be masked
         (i.e. ignored). Must have the same shape as the two
         last dimensions in dask_array.
@@ -807,9 +810,9 @@ def remove_bad_pixels(z, bad_pixels):
 
     Parameters
     ----------
-    z : array-like
+    z : numpy.ndarray
         A single frame
-    bad_pixels : array-like
+    bad_pixels : numpy.ndarray
         Must either have the same shape as dask_array,
         or the same shape as the two last dimensions of dask_array.
 
@@ -836,7 +839,21 @@ def remove_bad_pixels(z, bad_pixels):
 def normalize_template_match(z, template, subtract_min=True, pad_input=True, **kwargs):
     """Matches a template with an image z. Preformed a normalized cross-correlation
     using the given templates. If subtract_min is True then the minimum value will
-     be subtracted from the correlation.
+    be subtracted from the correlation.
+
+    Parameters
+    ----------
+    z : numpy.ndarray
+        Two-dimensional data array containing signal.
+    template : numpy.ndarray
+        Two-dimensional data array containing template.
+    subtract_min : bool
+        If True the minimum value will be subtracted from the correlation.
+    pad_input : bool
+        If True the input array will be padded. (This should be True otherwise
+        the result will be shifted by half the template size)
+    **kwargs :
+        Keyword arguments to be passed to :func:`skimage.feature.match_template`
     """
     template_match = match_template(z, template, pad_input=pad_input, **kwargs)
     if subtract_min:

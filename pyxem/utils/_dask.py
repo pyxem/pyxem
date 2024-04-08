@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+"""Utils for using dask."""
+
 import numpy as np
 import dask.array as da
 import scipy.ndimage as ndi

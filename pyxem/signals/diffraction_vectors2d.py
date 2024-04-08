@@ -243,9 +243,10 @@ class DiffractionVectors2D(DiffractionVectors, Signal2D):
         columns: list
             The columns to use for the ROIs. If None, columns 0 and 1 are used to create the ROIs.
         include_labels: bool
-            If True, the labels for each ROI are returned as well using hyperspy's Texts class.
+            If True, the labels for each ROI are returned as well using hyperspy's
+             :class:`hyperspy.api.plot.markers.Texts` class.
         kwargs: dict
-            Keyword arguments to pass to the hyperspy Texts class.
+            Keyword arguments to pass to the :class:`hyperspy.api.plot.markers.Texts` class.
         """
         if self.has_navigation_axis:
             raise NotImplementedError(

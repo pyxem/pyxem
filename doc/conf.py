@@ -126,6 +126,7 @@ pygments_style = "friendly"
 napoleon_google_docstring = False
 napoleon_use_param = False
 napoleon_use_ivar = True
+nitpicky = True
 
 # Figure references
 numfig = True
