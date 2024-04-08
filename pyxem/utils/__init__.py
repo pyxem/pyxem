@@ -29,7 +29,9 @@
     plotting
     ransac_ellipse_tools
     vectors
-    expt_utils
+    diffraction
+    calibration
+
 """
 
 
@@ -40,7 +42,6 @@ from pyxem.utils.plotting import plot_template_over_pattern
 from pyxem.utils import vectors
 from pyxem.utils import plotting
 from pyxem.utils import ransac_ellipse_tools
-from pyxem.utils import expt_utils
 from pyxem.utils import calibration
 from pyxem.utils import diffraction
 
