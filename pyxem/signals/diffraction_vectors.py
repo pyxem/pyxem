@@ -286,6 +286,7 @@ class DiffractionVectors(BaseSignal):
         disk_r=None,
         upsample_factor=2,
         square_size=10,
+        columns=None,
         **kwargs,
     ):
         """
@@ -306,6 +307,8 @@ class DiffractionVectors(BaseSignal):
             The upsample factor used for the cross-correlation method.
         square_size : int
             The size of the square used for both the center-of-mass and cross-correlation methods.
+        columns : list
+            The columns for the pixels of interest. If None, the first two columns are used.
         kwargs : dict
             Additional keyword arguments to be passed to the map method.
 
@@ -314,6 +317,8 @@ class DiffractionVectors(BaseSignal):
         refined_vectors : DiffractionVectors
             The refined vectors.
         """
+        if columns is None:
+            columns = [0, 1]
         method_dict = {
             "cross-correlation": _conventional_xc_map,
             "center-of-mass": _center_of_mass_map,
@@ -337,6 +342,7 @@ class DiffractionVectors(BaseSignal):
             scales=scales,
             shape=signal.axes_manager._signal_shape_in_array,
             square_size=square_size,
+            columns=columns,
         )
         refined_vectors = signal.map(
             funct,
@@ -358,7 +364,7 @@ class DiffractionVectors(BaseSignal):
         return self.get_pixel_vectors()
 
     def get_pixel_vectors(
-        self, offsets=None, scales=None, square_size=None, shape=None
+        self, offsets=None, scales=None, square_size=None, shape=None, columns=None
     ):
         """Returns the diffraction vectors in pixel coordinates."""
         if offsets is None:
@@ -366,8 +372,10 @@ class DiffractionVectors(BaseSignal):
         if scales is None:
             scales = self.scales
 
-        def get_pixels(x, off, scale, square_size=None, shape=None):
-            pixels = np.round((x - off) / scale).astype(int)
+        def get_pixels(x, off, scale, square_size=None, shape=None, columns=None):
+            pixels = np.round((x[:, columns] - off[columns]) / scale[columns]).astype(
+                int
+            )
             if square_size is not None and shape is not None:
                 pixels = pixels[np.all(pixels > (square_size / 2) + 1, axis=1)]
                 pixels = pixels[
@@ -383,6 +391,7 @@ class DiffractionVectors(BaseSignal):
             shape=shape,
             inplace=False,
             ragged=True,
+            columns=columns,
         )
         return pixels
 

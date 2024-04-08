@@ -164,9 +164,16 @@ def _center_of_mass_map(dp, vectors, square_size, offsets, scales):
 
 
 def _conventional_xc_map(
-    dp, vectors, kernel, square_size, upsample_factor, offsets, scales
+    dp,
+    vectors,
+    kernel,
+    square_size,
+    upsample_factor,
+    offsets,
+    scales,
+    columns,
 ):
-    shifts = np.zeros_like(vectors, dtype=np.float64)
+    shifts = np.zeros_like(vectors[columns], dtype=np.float64)
     for i, vector in enumerate(vectors):
         expt_disc = _get_experimental_square(dp, vector, square_size)
         shifts[i] = _conventional_xc(expt_disc, kernel, upsample_factor)
