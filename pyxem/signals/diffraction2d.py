@@ -1006,7 +1006,8 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         lazy_output : bool, default True
             If True, will return a LazyDiffraction2D object. If False,
             will compute the result and return a Diffraction2D object.
-        show_progressbar : bool, default True
+        kwargs :
+            Passed to :func:`pyxem.utils.diffraction.normalize_template_match`
 
         Returns
         -------
@@ -1021,8 +1022,9 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         See Also
         --------
-        template_match_ring
-        template_match
+        :meth:`pyxem.signals.DiffractionSignal2D.template_match_ring`
+        :meth:`pyxem.signals.DiffractionSignal2D.template_match`
+        :func:`pyxem.utils.diffraction.normalize_template_match`
 
         """
         disk = morphology.disk(disk_r, self.data.dtype)
@@ -1043,10 +1045,11 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         ----------
         r_inner, r_outer : scalar, optional
             Inner and outer radius of the rings.
-        lazy_output : bool, default True
-            If True, will return a LazyDiffraction2D object. If False,
-            will compute the result and return a Diffraction2D object.
-        show_progressbar : bool, default True
+        inplace : bool, optional
+            If True, the data is replaced by the filtered data. If False, a
+            new signal is returned. Default False.
+        kwargs :
+            Passed to :func:`pyxem.utils.diffraction.normalize_template_match`
 
         Returns
         -------
@@ -1060,9 +1063,9 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         See Also
         --------
-        template_match_disk
-        template_match
-
+        :meth:`pyxem.signals.DiffractionSignal2D.template_match_disk`
+        :meth:`pyxem.signals.DiffractionSignal2D.template_match`
+        :func:`pyxem.utils.diffraction.normalize_template_match`
         """
         if r_outer <= r_inner:
             raise ValueError(
@@ -1130,7 +1133,14 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Parameters
         ----------
-        template : 2-D NumPy array
+        template : numpy.ndarray
+            The 2D template to match with the signal.
+        inplace : bool, optional
+            If True, the data is replaced by the filtered data. If False, a
+            new signal is returned. Default False.
+        **kwargs :
+            Any additional keyword arguments to be passed to
+            :func:`pyxem.utils.diffraction.normalize_template_match`
 
         Returns
         -------
@@ -1147,8 +1157,9 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         See Also
         --------
-        template_match_disk
-        template_match_ring
+        :meth:`pyxem.signals.DiffractionSignal2D.template_match_disk`
+        :meth:`pyxem.signals.DiffractionSignal2D.template_match_ring`
+        :func:`pyxem.utils.diffraction.normalize_template_match`
 
         """
 
@@ -1387,7 +1398,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             Default False, if True the markers will be added to the
             signal permanently.
         **kwargs :
-            Passed to :py:class:`hyperspy.api.plot.markers.Points`
+            Passed to :class:`hyperspy.api.plot.markers.Points`
 
         Examples
         --------
@@ -1462,7 +1473,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Returns
         -------
-        mask_array : NumPy array
+        mask_array : numpy.ndarray
             The True values will be the region between angle0 and angle1.
             The array will have the same dimensions as the signal.
 

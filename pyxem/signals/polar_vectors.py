@@ -63,7 +63,7 @@ class PolarVectors(DiffractionVectors):
             Which means that two vectors even with a small angle between them will be
             considered.
         **kwargs:
-            Keyword arguments to map().
+            Keyword arguments to :meth:`hyperspy.api.signals.BaseSignal.map`.
 
         Returns
         -------

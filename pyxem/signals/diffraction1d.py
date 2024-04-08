@@ -29,9 +29,9 @@ class Diffraction1D(CommonDiffraction, Signal1D):
     Parameters
     ----------
     *args
-        See :class:`~hyperspy._signals.signal1d.Signal1D`.
+        See :class:`hyperspy.api.signals.Signal1D`.
     **kwargs
-        See :class:`~hyperspy._signals.signal1d.Signal1D`
+        See :class:`hyperspy.api.signals.Signal1D`
     """
 
     _signal_type = "diffraction"

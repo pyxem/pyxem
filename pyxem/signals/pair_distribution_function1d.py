@@ -27,9 +27,9 @@ class PairDistributionFunction1D(Signal1D):
     Parameters
     ----------
     *args
-        See :class:`~hyperspy._signals.signal1d.Signal1D`.
+        See :class:`hyperspy.api.signals.Signal1D`.
     **kwargs
-        See :class:`~hyperspy._signals.signal1d.Signal1D`
+        See :class:`hyperspy.api.signals.Signal1D`
     """
 
     _signal_type = "pair_distribution_function"
@@ -49,9 +49,9 @@ class PairDistributionFunction1D(Signal1D):
             If True (default), this signal is overwritten. Otherwise, returns a
             new signal.
         *args:
-            Arguments to be passed to map().
+            Arguments to be passed to :meth:`hyperspy.api.signals.BaseSignal.map`.
         **kwargs:
-            Keyword arguments to be passed to map().
+            Keyword arguments to be passed to :meth:`hyperspy.api.signals.BaseSignal.map`.
 
         """
         s_scale = self.axes_manager.signal_axes[0].scale

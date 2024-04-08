@@ -36,14 +36,14 @@ def crystal_from_vector_matching(z_matches):
 
     Parameters
     ----------
-    z_matches : numpy.array
+    z_matches : numpy.ndarray
         Template matching results in an array of shape (m,5) sorted by
         total_error (ascending) within each phase, with entries
         [phase, R, match_rate, ehkls, total_error]
 
     Returns
     -------
-    results_array : numpy.array
+    results_array : numpy.ndarray
         Crystallographic mapping results in an array of shape (3) with entries
         [phase, np.array((z, x, z)), dict(metrics)]
 
@@ -79,12 +79,12 @@ def _get_best_match(z):
 
     Parameters
     ----------
-    z : np.array
+    z : numpy.ndarray
         array with shape (5,n_matches), the 5 elements are phase, alpha, beta, gamma, score
 
     Returns
     -------
-    z_best : np.array
+    z_best : numpy.ndarray
         array with shape (5,)
 
     """
@@ -96,7 +96,7 @@ def _get_phase_reliability(z):
 
     Parameters
     ----------
-    z : np.array
+    z : numpy.ndarray
         array with shape (5,n_matches), the 5 elements are phase, alpha, beta, gamma, score
 
     Returns
@@ -125,7 +125,7 @@ def _get_second_best_phase(z):
 
     Parameters
     ----------
-    z : np.array
+    z : numpy.ndarray
         array with shape (5,n_matches), the 5 elements are phase, alpha, beta, gamma, score
 
     Returns
@@ -205,7 +205,7 @@ class VectorMatchingResults(BaseSignal):
 
     Attributes
     ----------
-    vectors : DiffractionVectors
+    vectors : pyxem.signals.DiffractionVectors
         Diffraction vectors indexed.
     hkls : BaseSignal
         Miller indices associated with each diffraction vector.
@@ -253,12 +253,12 @@ class VectorMatchingResults(BaseSignal):
 
         Parameters
         ----------
-        vectors : DiffractionVectors
+        vectors : pyxem.signals.DiffractionVectors
             A diffraction vectors object to be indexed.
 
         Returns
         -------
-        indexed_vectors : DiffractionVectors
+        indexed_vectors : pyxem.signals.DiffractionVectors
             An indexed diffraction vectors object.
 
         """

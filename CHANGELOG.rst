@@ -17,6 +17,7 @@ Fixed
 - Replace ``matplotlib.cm.get_cmap`` (removed in matplotlib 3.9) with ``matplotlib.colormaps``. (#1023)
 - Documentation fixes and improvement. (#1028)
 - Fixed bug with flattening diffraction Vectors when there are different scales (#1024)
+- Fixed intersphinx links and improved api documentation (#1056)
 
 Added
 -----
