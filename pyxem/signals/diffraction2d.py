@@ -351,7 +351,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Return
         ------
-        signal-mask : ndarray
+        numpy.ndarray
             The mask of the direct beam
         """
         shape = self.axes_manager.signal_shape
@@ -369,9 +369,9 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Parameters
         ----------
-        dark_reference : ElectronDiffraction2D
+        dark_reference : pyxem.signals.ElectronDiffraction2D
             Dark reference image.
-        bright_reference : DiffractionSignal
+        bright_reference : pyxem.signals.Diffraction2D
             Bright reference image.
         inplace : bool
             If True (default), this signal is overwritten. Otherwise, returns a
@@ -422,7 +422,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Returns
         -------
-        s : Diffraction2D or LazyDiffraction2D signal
+        s : pyxem.signals.Diffraction2D
 
         Examples
         --------
@@ -657,9 +657,9 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             pattern to `half_square_width` pixels around th center of the diffraction
             pattern. Only one of `half_square_width` or signal_slice can be defined.
         **kwargs:
-            Additional arguments accepted by :func:`~pyxem.utils.expt_utils.find_beam_center_blur`,
-            :func:`pyxem.utils.expt_utils.find_beam_center_interpolate`,
-            :func:`pyxem.utils.expt_utils.find_beam_offset_cross_correlation`,
+            Additional arguments accepted by :func:`pyxem.utils.diffraction.find_beam_center_blur`,
+            :func:`pyxem.utils.diffraction.find_beam_center_interpolate`,
+            :func:`pyxem.utils.diffraction.find_beam_offset_cross_correlation`,
             and :func:`pyxem.signals.diffraction2d.Diffraction2D.center_of_mass`,
 
         Returns
@@ -816,11 +816,11 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             Parameters passed to the alignment function. See scipy.ndimage.shift
             for more information about the parameters.
         *args, **kwargs :
-            Additional arguments accepted by :func:`~pyxem.utils.expt_utils.find_beam_center_blur`,
-            :func:`~pyxem.utils.expt_utils.find_beam_center_interpolate`,
-            :func:`~pyxem.utils.expt_utils.find_beam_offset_cross_correlation`,
-            :func:`~pyxem.signals.diffraction2d.Diffraction2D.get_direct_beam_position`,
-            and :func:`~pyxem.signals.diffraction2d.Diffraction2D.center_of_mass`,
+            Additional arguments accepted by :func:`pyxem.utils.diffraction.find_beam_center_blur`,
+            :func:`pyxem.utils.diffraction.find_beam_center_interpolate`,
+            :func:`pyxem.utils.diffraction.find_beam_offset_cross_correlation`,
+            :func:`pyxem.signals.diffraction2d.Diffraction2D.get_direct_beam_position`,
+            and :func:`pyxem.signals.diffraction2d.Diffraction2D.center_of_mass`,
 
         Example
         -------
@@ -836,8 +836,8 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         -----
         If the signal has an integer dtype, and subpixel=True is used (the default)
         the total intensity in the diffraction images will most likely not be preserved.
-        This is due to subpixel=True utilizing interpolation. To keep the total intensity
-        use a float dtype, which can be done by s.change_dtype('float32', rechunk=False).
+        This is due to ``subpixel=True`` utilizing interpolation. To keep the total intensity
+        use a float dtype, which can be done by ``s.change_dtype('float32', rechunk=False)``.
 
         """
         if (shifts is None) and (method is None):
@@ -879,8 +879,8 @@ class Diffraction2D(CommonDiffraction, Signal2D):
     def threshold_and_mask(self, threshold=None, mask=None, show_progressbar=True):
         """Get a thresholded and masked of the signal.
 
-        Useful for figuring out optimal settings for the center_of_mass
-        method.
+        Useful for figuring out optimal settings for the
+        :meth:`pyxem.signals.Diffraction2D.center_of_mass` method.
 
         Parameters
         ----------
@@ -894,7 +894,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Returns
         -------
-        s_out : Diffraction2D signal
+        s_out : pyxem.signals.Diffraction2D
 
         Examples
         --------
@@ -903,6 +903,10 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         >>> s_out = s.threshold_and_mask(
         ...     mask=mask, threshold=2, show_progressbar=False)
         >>> s_out.plot()
+
+        See Also
+        --------
+        center_of_mass
 
         """
         if self._lazy:
@@ -1011,7 +1015,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Returns
         -------
-        template_match : Diffraction2D object
+        template_match : pyxem.signals.Diffraction2D
 
         Examples
         --------
@@ -1022,8 +1026,8 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         See Also
         --------
-        pyxem.signals.DiffractionSignal2D.template_match_ring
-        pyxem.signals.DiffractionSignal2D.template_match
+        pyxem.signals.Diffraction2D.template_match_ring
+        pyxem.signals.Diffraction2D.template_match
         pyxem.utils.diffraction.normalize_template_match
 
         """
@@ -1053,7 +1057,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Returns
         -------
-        template_match : Diffraction2D object
+        pyxem.signals.Diffraction2D
 
         Examples
         --------
@@ -1063,8 +1067,8 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         See Also
         --------
-        pyxem.signals.DiffractionSignal2D.template_match_disk
-        pyxem.signals.DiffractionSignal2D.template_match
+        pyxem.signals.Diffraction2D.template_match_disk
+        pyxem.signals.Diffraction2D.template_match
         pyxem.utils.diffraction.normalize_template_match
         """
         if r_outer <= r_inner:
@@ -1144,7 +1148,8 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Returns
         -------
-        template_match : Diffraction2D object
+        pyxem.signals.Diffraction2D
+
 
         Examples
         --------
@@ -1157,8 +1162,8 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         See Also
         --------
-        pyxem.signals.DiffractionSignal2D.template_match_disk
-        pyxem.signals.DiffractionSignal2D.template_match_ring
+        pyxem.signals.Diffraction2D.template_match_disk
+        pyxem.signals.Diffraction2D.template_match_ring
         pyxem.utils.diffraction.normalize_template_match
 
         """
@@ -1181,7 +1186,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Parameters
         ----------
-        binary_image : 2-D NumPy array
+        binary_image : numpy.ndarray (2-D NumPy array)
         lazy_result : bool, default True
             If True, will return a LazyDiffraction2D object. If False,
             will compute the result and return a Diffraction2D object.
@@ -1189,7 +1194,8 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Returns
         -------
-        template_match : Diffraction2D object
+        pyxem.signals.Diffraction2D
+
 
         Examples
         --------
@@ -1201,8 +1207,8 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         See Also
         --------
-        pyxem.signals.DiffractionSignal2D.template_match_disk
-        pyxem.signals.DiffractionSignal2D.template_match_ring
+        pyxem.signals.Diffraction2D.template_match_disk
+        pyxem.signals.Diffraction2D.template_match_ring
 
         """
         return self.template_match(
