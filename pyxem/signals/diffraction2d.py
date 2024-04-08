@@ -1022,9 +1022,9 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         See Also
         --------
-        :meth:`pyxem.signals.DiffractionSignal2D.template_match_ring`
-        :meth:`pyxem.signals.DiffractionSignal2D.template_match`
-        :func:`pyxem.utils.diffraction.normalize_template_match`
+        pyxem.signals.DiffractionSignal2D.template_match_ring
+        pyxem.signals.DiffractionSignal2D.template_match
+        pyxem.utils.diffraction.normalize_template_match
 
         """
         disk = morphology.disk(disk_r, self.data.dtype)
@@ -1063,9 +1063,9 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         See Also
         --------
-        :meth:`pyxem.signals.DiffractionSignal2D.template_match_disk`
-        :meth:`pyxem.signals.DiffractionSignal2D.template_match`
-        :func:`pyxem.utils.diffraction.normalize_template_match`
+        pyxem.signals.DiffractionSignal2D.template_match_disk
+        pyxem.signals.DiffractionSignal2D.template_match
+        pyxem.utils.diffraction.normalize_template_match
         """
         if r_outer <= r_inner:
             raise ValueError(
@@ -1157,9 +1157,9 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         See Also
         --------
-        :meth:`pyxem.signals.DiffractionSignal2D.template_match_disk`
-        :meth:`pyxem.signals.DiffractionSignal2D.template_match_ring`
-        :func:`pyxem.utils.diffraction.normalize_template_match`
+        pyxem.signals.DiffractionSignal2D.template_match_disk
+        pyxem.signals.DiffractionSignal2D.template_match_ring
+        pyxem.utils.diffraction.normalize_template_match
 
         """
 
@@ -1201,8 +1201,8 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         See Also
         --------
-        :meth:`~pyxem.signals.DiffractionSignal2D.template_match_disk`
-        :meth:`~pyxem.signals.DiffractionSignal2D.template_match_ring`
+        pyxem.signals.DiffractionSignal2D.template_match_disk
+        pyxem.signals.DiffractionSignal2D.template_match_ring
 
         """
         return self.template_match(
@@ -1538,8 +1538,8 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         See Also
         --------
-        func:`pyxem.signals.Diffraction2D.get_azimuthal_integral1d`
-        func:`pyxem.signals.Diffraction2D.get_azimuthal_integral2d`
+        pyxem.signals.Diffraction2D.get_azimuthal_integral1d
+        pyxem.signals.Diffraction2D.get_azimuthal_integral2d
         """
 
         if method not in ["Omega", "r", "re", "VImage"]:
@@ -1859,7 +1859,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         See Also
         --------
-        :meth:`pyxem.signals.Diffraction2D.get_azimuthal_integral2d`
+        pyxem.signals.Diffraction2D.get_azimuthal_integral2d
         """
         usepyfai = method not in ["splitpixel_pyxem"]
         if not usepyfai:
@@ -2003,7 +2003,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         See Also
         --------
-        :meth:`pyxem.signals.Diffraction2D.get_azimuthal_integral1d`
+        pyxem.signals.Diffraction2D.get_azimuthal_integral1d
 
         """
         usepyfai = method not in ["splitpixel_pyxem"]

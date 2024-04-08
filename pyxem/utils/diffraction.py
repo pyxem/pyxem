@@ -417,7 +417,7 @@ def apply_transformation(z, transformation, keep_dtype, order=1, *args, **kwargs
 
     See Also
     --------
-    :func:`pyxem.expt_utils.convert_affine_to_transform`
+    pyxem.expt_utils.convert_affine_to_transform
     """
 
     if keep_dtype is False:
