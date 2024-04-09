@@ -293,7 +293,13 @@ class Calibration:
         if radial_range is None:
             from itertools import combinations
 
-            edges = np.reshape([[ax.min() ** 2, (ax.max() + scale) ** 2] for ax, scale in zip(self.axes, self.scale)], -1)
+            edges = np.reshape(
+                [
+                    [ax.min() ** 2, (ax.max() + scale) ** 2]
+                    for ax, scale in zip(self.axes, self.scale)
+                ],
+                -1,
+            )
             max_range = np.max(
                 np.power(np.sum(list(combinations(edges, 2)), axis=1), 0.5)
             )
