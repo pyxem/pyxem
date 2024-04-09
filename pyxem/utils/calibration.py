@@ -411,7 +411,7 @@ class Calibration:
         # get the points which bound each azimuthal pixel
         control_points = _get_control_points(npt, npt_azim, radial_range, self.affine)
 
-        # get the min and max indices for each control point using the 
+        # get the min and max indices for each control point using the
         pixel_ext_x, pixel_ext_y = self.pixel_extent
         min_x = (
             np.min(
@@ -433,15 +433,11 @@ class Calibration:
         )
 
         max_x = np.max(
-            np.searchsorted(
-                pixel_ext_x[0, :], control_points[:, :, 0], side="right"
-            ),
+            np.searchsorted(pixel_ext_x[0, :], control_points[:, :, 0], side="right"),
             axis=1,
         ).astype(int)
         max_y = np.max(
-            np.searchsorted(
-                pixel_ext_y[0, :], control_points[:, :, 1], side="right"
-            ),
+            np.searchsorted(pixel_ext_y[0, :], control_points[:, :, 1], side="right"),
             axis=1,
         ).astype(int)
         # Note that if a point is outside the range of the axes it will be set to the
