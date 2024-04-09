@@ -305,10 +305,9 @@ class Calibration:
         """
         if self.flat_ewald:
             extents = []
-            for ax in self.axes:
-                pixel_size = ax[1] - ax[0]
-                left = ax - pixel_size / 2
-                right = ax + pixel_size / 2
+            for ax, scale in zip(self.axes,  self.scale):
+                left = ax - scale / 2
+                right = ax + scale / 2
                 extent = np.stack((left, right))
                 extents.append(extent)
             return extents
