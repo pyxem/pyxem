@@ -250,9 +250,9 @@ class Calibration:
         y_ext_r = translate_pixel_coords(y_pixels + 0.5)
 
         self._pixel_extent = [
-                np.stack((x_ext_l, x_ext_r)),
-                np.stack((y_ext_l, y_ext_r)),
-            ]
+            np.stack((x_ext_l, x_ext_r)),
+            np.stack((y_ext_l, y_ext_r)),
+        ]
 
         for ax, axis in zip(self.signal.axes_manager.signal_axes, [x_axes, y_axes]):
             if isinstance(ax, UniformDataAxis):
