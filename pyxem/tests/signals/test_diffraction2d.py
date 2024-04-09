@@ -582,9 +582,10 @@ class TestAzimuthalIntegral2d:
     @pytest.mark.parametrize(
         "shape",
         [
-            (10, 10),  # Square
-            (4, 6),  # Even numbers
-            (5, 9),  # Odd numbers
+            (10, 10),  # Even square
+            (9, 9),  # Odd square
+            (4, 6),  # Even
+            (5, 9),  # Odd
             (5, 10),  # Odd and even
             (10, 5),  # Even and odd
         ],
