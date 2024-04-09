@@ -228,19 +228,33 @@ class Calibration:
             raise ValueError(
                 f"Unit {units} not recognized. Must be one of {unit_factors.keys()}"
             )
+
         if center is None:
-            center = np.array(self.signal.axes_manager.signal_shape) / 2
-        x_pixels = np.arange(-center[0], self.shape[0] - center[0])
-        y_pixels = np.arange(-center[1], self.shape[1] - center[1])
+            center = [(ax.max() - ax.min()) / 2 for ax in self.axes]
 
-        x_pixels *= pixel_size
-        y_pixels *= pixel_size
+        def translate_pixel_coords(px: np.ndarray) -> np.ndarray:
+            coord = pixel_size * px
+            angle = np.arctan(coord / detector_distance)
+            return np.sin(angle) * (1 / wavelength) * unit_factors[units]
 
-        x_angles = np.arctan(x_pixels / detector_distance)
-        y_angles = np.arctan(y_pixels / detector_distance)
+        x_pixels = np.arange(self.shape[0]) - center[0]
+        y_pixels = np.arange(self.shape[1]) - center[1]
 
-        x_axes = np.sin(x_angles) * (1 / wavelength) * unit_factors[units]
-        y_axes = np.sin(y_angles) * (1 / wavelength) * unit_factors[units]
+        x_axes = translate_pixel_coords(x_pixels)
+        y_axes = translate_pixel_coords(y_pixels)
+
+        # Re-do calculations to get pixel extents
+        x_ext_l = translate_pixel_coords(x_pixels - 0.5)
+        x_ext_r = translate_pixel_coords(x_pixels + 0.5)
+        y_ext_l = translate_pixel_coords(y_pixels - 0.5)
+        y_ext_r = translate_pixel_coords(y_pixels + 0.5)
+
+        self._pixel_extent = np.array(
+            [
+                np.stack((x_ext_l, x_ext_r)),
+                np.stack((y_ext_l, y_ext_r)),
+            ]
+        )
 
         for ax, axis in zip(self.signal.axes_manager.signal_axes, [x_axes, y_axes]):
             if isinstance(ax, UniformDataAxis):
@@ -271,6 +285,38 @@ class Calibration:
     def axes(self):
         return [ax.axis for ax in self.signal.axes_manager.signal_axes][::-1]
 
+    @property
+    def pixel_extent(self) -> list[np.ndarray, np.ndarray]:
+        """Return an array with axes [x/y, left/right, pixel_extent], as follows:
+        [
+            # x axis
+            [
+                # left
+                [boundary 1, boundary 2 ...],
+                # right
+                [boundary 1, boundary 2 ...],
+            ],
+            # y axis
+            [
+                # left
+                [boundary 1, boundary 2 ...],
+                # right
+                [boundary 1, boundary 2 ...],
+            ],
+        ]
+        """
+        if self.flat_ewald:
+            extents = []
+            for ax in self.axes:
+                pixel_size = ax[1] - ax[0]
+                left = ax - pixel_size / 2
+                right = ax + pixel_size / 2
+                extent = np.stack((left, right))
+                extents.append(extent)
+            return extents
+        else:
+            return self._pixel_extent
+
     def get_slices2d(self, npt, npt_azim, radial_range=None):
         """Get the slices and factors for some image that can be used to
         slice the image for 2d integration.
@@ -295,8 +341,8 @@ class Calibration:
 
             edges = np.reshape(
                 [
-                    [ax.min() ** 2, (ax.max() + scale) ** 2]
-                    for ax, scale in zip(self.axes, self.scale)
+                    [ax_ext[0][0] ** 2, ax_ext[1][-1] ** 2]
+                    for ax_ext in self.pixel_extent
                 ],
                 -1,
             )
@@ -365,27 +411,38 @@ class Calibration:
         # get the points which bound each azimuthal pixel
         control_points = _get_control_points(npt, npt_azim, radial_range, self.affine)
 
-        # get the min and max indices for each control point using the axes
+        # get the min and max indices for each control point using the 
+        pixel_ext_x, pixel_ext_y = self.pixel_extent
         min_x = (
             np.min(
-                np.searchsorted(self.axes[0], control_points[:, :, 0], side="left"),
+                np.searchsorted(
+                    pixel_ext_x[1, :], control_points[:, :, 0], side="left"
+                ),
                 axis=1,
             ).astype(int)
             - 1
         )
         min_y = (
             np.min(
-                np.searchsorted(self.axes[1], control_points[:, :, 1], side="left"),
+                np.searchsorted(
+                    pixel_ext_y[1, :], control_points[:, :, 1], side="left"
+                ),
                 axis=1,
             ).astype(int)
             - 1
         )
 
         max_x = np.max(
-            np.searchsorted(self.axes[0], control_points[:, :, 0], side="right"), axis=1
+            np.searchsorted(
+                pixel_ext_x[0, :], control_points[:, :, 0], side="right"
+            ),
+            axis=1,
         ).astype(int)
         max_y = np.max(
-            np.searchsorted(self.axes[1], control_points[:, :, 1], side="right"), axis=1
+            np.searchsorted(
+                pixel_ext_y[0, :], control_points[:, :, 1], side="right"
+            ),
+            axis=1,
         ).astype(int)
         # Note that if a point is outside the range of the axes it will be set to the
         # maximum value of the axis+1 and 0 if it is below the minimum value of the axis.
@@ -407,7 +464,7 @@ class Calibration:
         slices[slices[:, 2] < 0, 2] = 0
         slices[slices[:, 3] < 0, 3] = 0
 
-        factors, factors_slice = _get_factors(control_points, slices, self.axes)
+        factors, factors_slice = _get_factors(control_points, slices, self.pixel_extent)
         return slices, factors, factors_slice
 
     @property

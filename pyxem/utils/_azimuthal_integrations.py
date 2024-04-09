@@ -190,7 +190,7 @@ def _slice_radial_integrate1d(
     return ans
 
 
-def _get_factors(control_points, slices, axes):
+def _get_factors(control_points, slices, pixel_extents):
     """This function takes a set of control points (vertices of bounding polygons) and
     slices (min and max indices for each control point) and returns the factors for
     each slice. The factors are the area of the intersection of the polygon and the
@@ -199,8 +199,10 @@ def _get_factors(control_points, slices, axes):
     factors = []
     factors_slice = []
     start = 0
-    x_scale = axes[0][1] - axes[0][0]
-    y_scale = axes[1][1] - axes[1][0]
+    # unpack extents
+    x_extent, y_extent = pixel_extents
+    x_ext_left, x_ext_right = x_extent
+    y_ext_left, y_ext_right = y_extent
     for cp, sl in zip(control_points, slices):
         p = Polygon(cp)
         x_edges = list(range(sl[0], sl[2]))
@@ -209,7 +211,10 @@ def _get_factors(control_points, slices, axes):
         for i, x in enumerate(x_edges):
             for j, y in enumerate(y_edges):
                 b = box(
-                    axes[0][x], axes[1][y], axes[0][x] + x_scale, axes[1][y] + y_scale
+                    x_ext_left[x],
+                    y_ext_left[y],
+                    x_ext_right[x],
+                    y_ext_right[y],
                 )
                 boxes.append(b)
         factors += list(
