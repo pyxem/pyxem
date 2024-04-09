@@ -570,6 +570,42 @@ class TestAzimuthalIntegral2d:
         ring_sum = np.sum(az.data, axis=1)
         assert ring_sum.shape == (40,)
 
+    @pytest.mark.parametrize(
+        "corner",
+        [
+            (0, 0),
+            (0, -1),
+            (-1, 0),
+            (-1, -1),
+        ],
+    )
+    @pytest.mark.parametrize(
+        "shape",
+        [
+            (10, 10),  # Square
+            (4, 6),  # Even numbers
+            (5, 9),  # Odd numbers
+            (5, 10),  # Odd and even
+            (10, 5),  # Even and odd
+        ],
+    )
+    def test_internal_azimuthal_integration_data_range(self, corner, shape):
+        # Test that the edges of the cartesian data are included in the polar transform
+
+        max_val = 10
+        data = np.zeros(shape)
+        data[corner] = max_val
+
+        signal = Diffraction2D(data)
+
+        # Reality check
+        assert np.allclose(np.nanmax(signal.data), max_val)
+
+        # Use mean=True to conserve values
+        pol = signal.get_azimuthal_integral2d(npt=20, mean=True)
+
+        assert np.allclose(np.nanmax(pol.data), max_val)
+
 
 class TestPyFAIIntegration:
     @pytest.fixture
