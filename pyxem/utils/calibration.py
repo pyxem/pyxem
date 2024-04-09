@@ -293,7 +293,7 @@ class Calibration:
         if radial_range is None:
             from itertools import combinations
 
-            edges = np.reshape([[ax[0] ** 2, ax[-1] ** 2] for ax in self.axes], -1)
+            edges = np.reshape([[ax.min() ** 2, (ax.max() + scale) ** 2] for ax, scale in zip(self.axes, self.scale)], -1)
             max_range = np.max(
                 np.power(np.sum(list(combinations(edges, 2)), axis=1), 0.5)
             )
@@ -386,8 +386,8 @@ class Calibration:
         slices = np.array(
             [[mx, my, mxx, myy] for mx, my, mxx, myy in zip(min_x, min_y, max_x, max_y)]
         )
-        max_y_ind = len(self.axes[1]) - 1
-        max_x_ind = len(self.axes[0]) - 1
+        max_y_ind = len(self.axes[1])
+        max_x_ind = len(self.axes[0])
 
         # set the slices to be within the range of the axes.  If the entire slice is outside
         # the range of the axes then set the slice to be the maximum value of the axis

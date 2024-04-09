@@ -199,6 +199,8 @@ def _get_factors(control_points, slices, axes):
     factors = []
     factors_slice = []
     start = 0
+    x_scale = axes[0][1] - axes[0][0]
+    y_scale = axes[1][1] - axes[1][0]
     for cp, sl in zip(control_points, slices):
         p = Polygon(cp)
         x_edges = list(range(sl[0], sl[2]))
@@ -206,7 +208,9 @@ def _get_factors(control_points, slices, axes):
         boxes = []
         for i, x in enumerate(x_edges):
             for j, y in enumerate(y_edges):
-                b = box(axes[0][x], axes[1][y], axes[0][x + 1], axes[1][y + 1])
+                b = box(
+                    axes[0][x], axes[1][y], axes[0][x] + x_scale, axes[1][y] + y_scale
+                )
                 boxes.append(b)
         factors += list(
             shapely.area(shapely.intersection(boxes, p)) / shapely.area(boxes)
