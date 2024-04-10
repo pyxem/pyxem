@@ -42,8 +42,8 @@ class TestDummyDataModule:
         s = dd.get_single_ring_diffraction_signal()
         assert hasattr(s, "plot")
 
-    def test_get_simple_dpc_signal(self):
-        s = dd.get_simple_dpc_signal()
+    def test_get_simple_beam_shift_signal(self):
+        s = dd.get_simple_beam_shift_signal()
         assert hasattr(s, "plot")
 
     def test_get_holz_heterostructure_test_signal(self):
@@ -54,14 +54,14 @@ class TestDummyDataModule:
         s = dd.get_holz_heterostructure_test_signal(lazy=True)
         assert s._lazy
 
-    def test_get_stripe_pattern_dpc_signal(self):
-        s = dd.get_stripe_pattern_dpc_signal()
+    def test_get_stripe_pattern_beam_shift_signal(self):
+        s = dd.get_stripe_pattern_beam_shift_signal()
         assert hasattr(s, "plot")
 
-    def test_get_square_dpc_signal(self):
-        s = dd.get_square_dpc_signal()
+    def test_get_magnetic_square_beam_shift_signal(self):
+        s = dd.get_magnetic_square_beam_shift_signal()
         assert hasattr(s, "plot")
-        _ = dd.get_square_dpc_signal(add_ramp=True)
+        _ = dd.get_magnetic_square_beam_shift_signal(add_ramp=True)
         assert hasattr(s, "plot")
 
     def test_get_dead_pixel_signal(self):
