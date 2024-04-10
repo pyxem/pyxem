@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+"""Utils for using dask."""
+
 import numpy as np
 import dask.array as da
 import scipy.ndimage as ndi
@@ -76,7 +78,7 @@ def _intensity_peaks_image_single_frame(frame, peaks, disk_r):
     Examples
     --------
     >>> import pyxem.utils.dask_tools as dt
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.data.dummy_data.dummy_data.get_cbed_signal()
     >>> peaks = np.array(([50,50],[25,50]))
     >>> intensity = dt._intensity_peaks_image_single_frame(
     ...     s.data[0,0,:,:], peaks, 5)

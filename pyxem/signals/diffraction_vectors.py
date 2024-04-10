@@ -30,8 +30,8 @@ from hyperspy._signals.lazy import LazySignal
 from hyperspy.drawing._markers.points import Points
 from hyperspy.misc.utils import isiterable
 
-from pyxem.utils.signal import (
-    transfer_navigation_axes_to_signal_axes,
+from pyxem.utils._signals import (
+    _transfer_navigation_axes_to_signal_axes,
 )
 from pyxem.utils.vectors import (
     detector_to_fourier,
@@ -77,10 +77,10 @@ class DiffractionVectors(BaseSignal):
 
     Attributes
     ----------
-    cartesian : np.array()
+    cartesian : numpy.array
         Array of 3-vectors describing Cartesian coordinates associated with
         each diffraction vector.
-    hkls : np.array()
+    hkls : numpy.array
         Array of Miller indices associated with each diffraction vector
         following indexation.
     """
@@ -183,7 +183,7 @@ class DiffractionVectors(BaseSignal):
 
         Parameters
         ----------
-        peaks : Signal
+        peaks : hyperspy.api.signals.BaseSignal
             Signal containing lists (np.array) of pixel coordinates specifying
             the reflection positions
         center : np.array or None
@@ -193,7 +193,7 @@ class DiffractionVectors(BaseSignal):
 
         Returns
         -------
-        vectors : :obj:`pyxem.signals.diffraction_vectors.DiffractionVectors`
+        vectors : :class:`pyxem.signals.diffraction_vectors.DiffractionVectors`
             List of diffraction vectors
         """
         if center is None and peaks.metadata.has_item("Peaks.signal_axes"):
@@ -294,7 +294,7 @@ class DiffractionVectors(BaseSignal):
 
         Parameters
         ----------
-        signal : Signal
+        signal : hyperspy.api.signals.BaseSignal
             The signal which will be used to refine the diffraction vectors.
         method : str
             The method used to refine the diffraction vectors. Currently
@@ -1268,7 +1268,7 @@ class DiffractionVectors(BaseSignal):
         if binary is True:
             xim = xim >= 1.0
         # Set properties
-        xim = transfer_navigation_axes_to_signal_axes(xim, self)
+        xim = _transfer_navigation_axes_to_signal_axes(xim, self)
         xim.change_dtype("float")
         xim.set_signal_type("signal2d")
         xim.metadata.General.title = "Diffracting Pixels Map"

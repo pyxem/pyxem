@@ -28,7 +28,6 @@ except ImportError:
 
 from pyxem import components
 from pyxem import detectors
-from pyxem import dummy_data
 from pyxem import generators
 from pyxem import signals
 from pyxem import data
@@ -42,7 +41,6 @@ _logger = logging.getLogger(__name__)
 __all__ = [
     "components",
     "detectors",
-    "dummy_data",
     "generators",
     "signals",
     "data",

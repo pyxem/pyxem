@@ -31,9 +31,9 @@ class ElectronDiffraction2D(Diffraction2D):
     Parameters
     ----------
     *args
-        See :class:`~hyperspy._signals.signal2d.Signal2D`.
+        See :class:`hyperspy.api.signals.Signal2D`.
     **kwargs
-        See :class:`~hyperspy._signals.signal2d.Signal2D`
+        See :class:`hyperspy.api.signals.Signal2D`
     """
 
     _signal_type = "electron_diffraction"

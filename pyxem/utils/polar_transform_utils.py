@@ -16,8 +16,10 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+"""Utils for polar 2D Diffraction Pattern transformations."""
+
 import numpy as np
-from pyxem.utils.expt_utils import find_beam_center_blur
+from pyxem.utils.diffraction import find_beam_center_blur
 from scipy import ndimage
 from pyxem.utils.cuda_utils import get_array_module
 

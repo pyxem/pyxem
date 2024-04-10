@@ -16,17 +16,42 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Additional utility functions for processing signals."""
+"""Additional utility functions for processing signals.
+
+.. currentmodule:: pyxem.utils
+
+.. rubric:: Modules
+
+.. autosummary::
+    :toctree: ../generated/
+    :template: custom-module-template.rst
+
+    plotting
+    ransac_ellipse_tools
+    vectors
+    diffraction
+    calibration
+
+"""
 
 
 from pyxem.utils.ransac_ellipse_tools import determine_ellipse
 from pyxem.utils.calibration import find_diffraction_calibration
 from pyxem.utils.plotting import plot_template_over_pattern
-from pyxem.utils import expt_utils
+
+from pyxem.utils import vectors
+from pyxem.utils import plotting
+from pyxem.utils import ransac_ellipse_tools
+from pyxem.utils import calibration
+from pyxem.utils import diffraction
 
 __all__ = [
-    "determine_ellipse",
     "find_diffraction_calibration",
     "plot_template_over_pattern",
-    "expt_utils",
+    "determine_ellipse",
+    "ransac_ellipse_tools",
+    "vectors",
+    "calibration",
+    "plotting",
+    "diffraction",
 ]

@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+"""Utils for calibrating Diffraction Patterns."""
+
 
 import numpy as np
 import json
@@ -675,7 +677,7 @@ def _create_check_diflib(
     max_excitation_error : float
         Maximum exacitation error.  Default is 0.01.
     kwargs
-        Keyword arguments passed to :meth:`index_dataset_with_template_rotation`.
+        Keyword arguments passed to :meth:`pyxem.utisl.indexation_utils.index_dataset_with_template_rotation`.
 
     Returns
     -------

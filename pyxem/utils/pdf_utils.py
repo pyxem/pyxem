@@ -18,6 +18,8 @@
 
 # TODO: Delete whole module come 1.0.0
 
+""" Utils for Pair Distribution Function (PDF) analysis. """
+
 import numpy as np
 from _deprecated import deprecated
 

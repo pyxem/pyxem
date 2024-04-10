@@ -18,6 +18,9 @@
 
 # TODO: Delete the whole module come 1.0.0
 
+"""Tools for radial integration"""
+
+
 from pyxem.utils._deprecated import deprecated
 from pyxem.signals.reduced_intensity1d import (
     _damp_ri_exponential,

@@ -16,15 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Utils for signal processing."""
 
-# This code is not used internally and so can safely be deleted at the end of the deprecation period
-
-from pyxem.utils._deprecated import deprecated
-
-
-@deprecated(since="0.18.0", removal="0.19.0")
-def select_method_from_method_dict(method, method_dict, print_help=True, **kwargs):
+def _select_method_from_method_dict(method, method_dict, print_help=True, **kwargs):
     """Streamlines the selection of utils to be mapped in class methods.
 
     Parameters
@@ -58,8 +51,7 @@ def select_method_from_method_dict(method, method_dict, print_help=True, **kwarg
     return method_dict[method]
 
 
-@deprecated(since="0.18.0", removal="0.19.0")
-def transfer_signal_axes(new_signal, old_signal):
+def _transfer_signal_axes(new_signal, old_signal):
     """Transfers signal axis calibrations from an old signal to a new
     signal produced from it by a method or a generator.
 
@@ -86,8 +78,7 @@ def transfer_signal_axes(new_signal, old_signal):
     return new_signal
 
 
-@deprecated(since="0.18.0", removal="0.19.0")
-def transfer_navigation_axes(new_signal, old_signal):
+def _transfer_navigation_axes(new_signal, old_signal):
     """Transfers navigation axis calibrations from an old signal to a new
     signal produced from it by a method or a generator.
 
@@ -122,16 +113,14 @@ def transfer_navigation_axes(new_signal, old_signal):
     return new_signal
 
 
-@deprecated(since="0.18.0", removal="0.19.0")
-def to_hyperspy_index(index, signal_axis):
+def _to_hyperspy_index(index, signal_axis):
     if isinstance(index, int):
         return index
     else:
         return signal_axis.value2index(index)
 
 
-@deprecated(since="0.18.0", removal="0.19.0")
-def transfer_navigation_axes_to_signal_axes(new_signal, old_signal):
+def _transfer_navigation_axes_to_signal_axes(new_signal, old_signal):
     """Transfers navigation axis calibrations from an old signal to the signal
     axes of a new signal produced from it by a method or a generator.
 

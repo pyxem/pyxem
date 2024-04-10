@@ -1,9 +1,11 @@
+"""Utils for Background Subtraction."""
+
 import numpy as np
 
 from scipy.ndimage import gaussian_filter, median_filter
 from skimage.filters.rank import mean as rank_mean
 from skimage.morphology import square
-from pyxem.utils.expt_utils import regional_filter
+from pyxem.utils.diffraction import regional_filter
 
 
 def _subtract_radial_median(frame, center_x=128, center_y=128):
@@ -23,7 +25,7 @@ def _subtract_radial_median(frame, center_x=128, center_y=128):
     Examples
     --------
     >>> import pyxem.utils.dask_tools as dt
-    >>> s = pxm.dummy_data.get_cbed_signal()
+    >>> s = pxm.data.dummy_data.get_cbed_signal()
     >>> s_rem = dt._background_removal_single_frame_radial_median(s.data[0, 0])
     """
 
@@ -58,7 +60,7 @@ def _subtract_dog(frame, min_sigma=1, max_sigma=55):
     Examples
     --------
     >>> import pyxem.utils.dask_tools as dt
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.data.dummy_data.dummy_data.get_cbed_signal()
     >>> s_rem = dt._background_removal_single_frame_dog(s.data[0, 0])
 
     """
@@ -82,7 +84,7 @@ def _subtract_median(frame, footprint=19):
     Examples
     --------
     >>> import pyxem.utils.dask_tools as dt
-    >>> s = pxm.dummy_data.get_cbed_signal()
+    >>> s = pxm.data.dummy_data.get_cbed_signal()
     >>> s_rem = dt._background_removal_single_frame_median(s.data[0, 0])
 
     """

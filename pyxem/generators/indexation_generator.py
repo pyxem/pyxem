@@ -33,9 +33,9 @@ from pyxem.utils.indexation_utils import (
     index_dataset_with_template_rotation,
 )
 from pyxem.utils.vectors import detector_to_fourier
-from pyxem.utils.signal import (
-    select_method_from_method_dict,
-    transfer_navigation_axes,
+from pyxem.utils._signals import (
+    _select_method_from_method_dict,
+    _transfer_navigation_axes,
 )
 
 
@@ -557,7 +557,7 @@ class VectorIndexationGenerator:
         indexation_results = VectorMatchingResults(indexation)
         indexation_results.vectors = vectors
         indexation_results.hkls = rhkls
-        indexation_results = transfer_navigation_axes(
+        indexation_results = _transfer_navigation_axes(
             indexation_results, vectors.cartesian
         )
 
@@ -693,7 +693,7 @@ class VectorIndexationGenerator:
         indexation_results = VectorMatchingResults(indexation)
         indexation_results.vectors = vectors
         indexation_results.hkls = rhkls
-        indexation_results = transfer_navigation_axes(
+        indexation_results = _transfer_navigation_axes(
             indexation_results, vectors.cartesian
         )
 

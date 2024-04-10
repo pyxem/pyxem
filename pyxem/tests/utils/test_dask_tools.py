@@ -24,7 +24,7 @@ import skimage.morphology as sm
 from pyxem.signals import Diffraction2D, LazyDiffraction2D
 import pyxem.utils._dask as dt
 import pyxem.utils._background_subtraction as bt
-import pyxem.utils.expt_utils as et
+import pyxem.utils.diffraction as et
 import pyxem.utils._pixelated_stem_tools as pst
 
 

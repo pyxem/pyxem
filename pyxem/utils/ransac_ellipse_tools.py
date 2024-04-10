@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+"""Tools for ellipse fitting using RANSAC."""
+
 from tqdm import tqdm
 import math
 from functools import partial
@@ -25,6 +27,15 @@ import warnings
 from hyperspy.signals import BaseSignal
 from hyperspy.misc.utils import isiterable
 import hyperspy.api as hs
+
+__all__ = [
+    "is_ellipse_good",
+    "make_ellipse_data_points",
+    "ellipse_to_markers",
+    "get_ellipse_model_ransac",
+    "get_ellipse_model_ransac_single_frame",
+    "determine_ellipse",
+]
 
 
 def is_ellipse_good(
@@ -176,7 +187,7 @@ def make_ellipse_data_points(x, y, a, b, r, nt=20, use_focus=True):
 
     Returns
     -------
-    data : NumPy array
+    data : numpy.ndarray
         [[x0, y0], [x1, y1], ...]
 
     Examples
@@ -273,7 +284,7 @@ def get_ellipse_model_ransac_single_frame(
 
     Parameters
     ----------
-    data : NumPy array
+    data : numpy.ndarray
         In the form [[x0, y0], [x1, y1], ...]
     xf, yf : scalar, optional
         Default 128
@@ -366,7 +377,7 @@ def get_ellipse_model_ransac(
 
     Parameters
     ----------
-    data : NumPy array
+    data : numpy.ndarray
         In the form [[[[x0, y0], [x1, y1], ...]]]
     xf, yf : scalar, optional
         Default 128 center of the diffraction pattern
@@ -391,7 +402,7 @@ def get_ellipse_model_ransac(
 
     Returns
     -------
-    ellipse_array, inlier_array : NumPy array
+    ellipse_array, inlier_array : numpy.ndarray
         Model data is accessed in ellipse_array, where each probe position
         (for two axes) contain a list with the ellipse parameters:
         [y, x, semi_len0, semi_len1, rotation]. If no ellipse is found
@@ -514,7 +525,7 @@ def mask_peak_array(array, mask, invert=False):
 
 
 def ellipse_to_markers(ellipse_array, points=None, inlier=None):
-    """Convert an ellipse array to a :class:`hs.plot.markers.Ellipses` object. If points and
+    """Convert an ellipse array to a :class:`hyperspy.api.plot.markers.Ellipses` object. If points and
     inlier are provided, then the points are also plotted. The inlier points are plotted in green
     and the outlier points are plotted in red.
 
@@ -617,7 +628,7 @@ def determine_ellipse(
     return_params : bool
         If the ellipse parameters should be returned as well.
     **kwargs:
-        Any other keywords for `get_ellipse_model_ransac_single_frame`.
+        Any other keywords for ``get_ellipse_model_ransac_single_frame``.
 
     Returns
     -------
@@ -629,7 +640,7 @@ def determine_ellipse(
     Examples
     --------
     >>> import pyxem.utils.ransac_ellipse_tools as ret
-    >>> import pyxem.dummy_data.make_diffraction_test_data as mdtd
+    >>> import pyxem.data.dummy_data.make_diffraction_test_data as mdtd
     >>> test_data = mdtd.MakeTestData(200, 200, default=False)
     >>> test_data.add_disk(x0=100, y0=100, r=5, intensity=30)
     >>> test_data.add_ring_ellipse(x0=100, y0=100, semi_len0=63, semi_len1=70, rotation=45)

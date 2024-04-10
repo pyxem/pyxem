@@ -55,9 +55,9 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
         normalize: bool
             Normalize the radial correlation by the average value at some radius.
         kwargs: dict
-            Any additional options for the hyperspy.BaseSignal.map() function
+            Any additional options for the :meth:`hyperspy.api.signals.BaseSignal.map` function
         inplace: bool
-            From hyperspy.signal.map(). inplace=True means the signal is
+            From :meth:`hyperspy.api.signals.BaseSignal.map`. inplace=True means the signal is
             overwritten.
 
         Returns
@@ -100,10 +100,10 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
          normalize: bool
              Normalize the radial correlation by the average value at some radius.
         inplace: bool
-            From :meth:`~hyperspy.signal.BaseSignal.map` inplace=True means the signal is
+            From :meth:`hyperspy.api.signals.BaseSignal.map` inplace=True means the signal is
             overwritten.
         kwargs: dict
-            Any additional options for the :meth:`~hyperspy.signal.BaseSignal.map` function
+            Any additional options for the :meth:`hyperspy.api.signals.BaseSignal.map` function
 
         Returns
         -------
@@ -133,7 +133,7 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
 
         Parameters
         ----------
-        mask: Numpy array
+        mask: numpy.ndarray
             A bool mask of values to ignore of shape equal to the signal shape.
             True for elements masked, False for elements unmasked
         krange: tuple of int or float

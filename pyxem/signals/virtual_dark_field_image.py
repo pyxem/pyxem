@@ -23,7 +23,7 @@ from hyperspy.signals import Signal2D
 from hyperspy._signals.lazy import LazySignal
 
 from pyxem.signals import DiffractionVectors, VDFSegment
-from pyxem.utils.signal import transfer_signal_axes
+from pyxem.utils._signals import _transfer_signal_axes
 from pyxem.utils.segment_utils import separate_watershed
 
 
@@ -160,7 +160,7 @@ class VirtualDarkFieldImage(Signal2D):
         vdfsegs = VDFSegment(
             segments, DiffractionVectors(vectors_of_segments), segment_intensities
         )
-        vdfsegs.segments = transfer_signal_axes(vdfsegs.segments, vdfs)
+        vdfsegs.segments = _transfer_signal_axes(vdfsegs.segments, vdfs)
         n = vdfsegs.segments.axes_manager.navigation_axes[0]
         n.name = "n"
         n.units = "number"

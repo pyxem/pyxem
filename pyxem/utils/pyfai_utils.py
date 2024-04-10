@@ -18,6 +18,8 @@
 
 # TODO: Delete this entire module
 
+"""Utils for pyfai transformations."""
+
 import numpy as np
 from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
 from pyFAI.detectors import Detector

@@ -1,5 +1,5 @@
 import numpy as np
-from pyxem.dummy_data import make_diffraction_test_data as mdtd
+from pyxem.data.dummy_data import make_diffraction_test_data as mdtd
 import hyperspy.api as hs
 
 

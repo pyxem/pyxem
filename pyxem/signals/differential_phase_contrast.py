@@ -84,7 +84,6 @@ class DPCSignal2D(Signal2D):
     _signal_type = "dpc"
 
 
-
 class LazyDPCBaseSignal(LazySignal, DPCBaseSignal):
     _lazy = True
 
