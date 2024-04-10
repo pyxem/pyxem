@@ -22,7 +22,7 @@ import numpy as np
 import dask.array as da
 from matplotlib.pyplot import subplots
 from hyperspy.signals import Signal2D
-import pyxem.dummy_data as dd
+import pyxem.data.dummy_data.dummy_data as dd
 from pyxem.signals import BeamShift, LazyBeamShift, Diffraction2D
 from pyxem.signals.beam_shift import make_bivariate_histogram
 
@@ -134,7 +134,7 @@ class TestBeamShiftFitCorners:
         assert s1.inav[:5, -5:].data == approx(np.zeros((5, 5, 2)), abs=1e-7)
         assert s1.inav[-5:, -5:].data == approx(np.zeros((5, 5, 2)), abs=1e-7)
 
-    def test_cropped_dpcsignal(self):
+    def test_cropped_beam_shift_signal(self):
         s = BeamShift(np.random.random((200, 200, 2)))
         s_crop = s.inav[50:150, 50:150]
         s_crop_corr = s_crop - s_crop.get_linear_plane(fit_corners=0.05)
@@ -445,7 +445,7 @@ class TestRotateBeamShifts:
 
 class TestRotateScanDimensions:
     def test_clockwise(self):
-        s = dd.get_simple_dpc_signal()
+        s = dd.get_simple_beam_shift_signal()
         s_rot = s.rotate_scan_dimensions(1)
         assert not (s_rot.data[0, 0:10, 0] == 0).all()
         assert (s_rot.data[0, -10:, 0] == 0).all()
@@ -453,7 +453,7 @@ class TestRotateScanDimensions:
         assert (s_rot.data[0:10, 0, 0] == 0).all()
 
     def test_counterclockwise(self):
-        s = dd.get_simple_dpc_signal()
+        s = dd.get_simple_beam_shift_signal()
         s_rot = s.rotate_scan_dimensions(-1)
         assert (s_rot.data[0, 0:10, 0] == 0).all()
         assert not (s_rot.data[0, -10:, 0] == 0).all()

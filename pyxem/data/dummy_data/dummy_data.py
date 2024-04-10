@@ -25,8 +25,8 @@ from skimage.draw import polygon
 
 from hyperspy.components1d import Gaussian
 
-from pyxem.dummy_data import make_diffraction_test_data as mdtd
-from pyxem.signals import DPCSignal2D, Diffraction2D, LazyDiffraction2D, BeamShift
+import pyxem.data.dummy_data.make_diffraction_test_data as mdtd
+from pyxem.signals import Diffraction2D, LazyDiffraction2D, BeamShift
 
 
 def get_disk_shift_simple_test_signal(lazy=False):
@@ -241,7 +241,7 @@ def get_hot_pixel_signal(lazy=False):
     return s
 
 
-def get_simple_dpc_signal():
+def get_simple_beam_shift_signal():
     """Get a simple DPCSignal2D with a zero point in the centre.
 
     Example
@@ -255,7 +255,7 @@ def get_simple_dpc_signal():
     return s
 
 
-def get_stripe_pattern_dpc_signal():
+def get_stripe_pattern_beam_shift_signal():
     """Get a 2D DPC signal with a stripe pattern.
 
     The stripe pattern only has an x-component, with alternating left/right
@@ -271,15 +271,15 @@ def get_stripe_pattern_dpc_signal():
     >>> s = pxm.data.dummy_data.get_stripe_pattern_dpc_signal()
 
     """
-    data = np.zeros((2, 100, 50))
+    data = np.zeros((100, 50, 2))
     for i in range(10, 90, 20):
-        data[0, i : i + 10, 10:40] = 1.1
-        data[0, i + 10 : i + 20, 10:40] = -1
-    s = DPCSignal2D(data)
+        data[i : i + 10, 10:40, 0] = 1.1
+        data[i + 10 : i + 20, 10:40, 0] = -1
+    s = BeamShift(data)
     return s
 
 
-def get_square_dpc_signal(add_ramp=False):
+def get_magnetic_square_beam_shift_signal(add_ramp=False):
     """Get a 2D DPC signal resembling a Landau domain.
 
     Parameters
@@ -320,11 +320,12 @@ def get_square_dpc_signal(add_ramp=False):
         ramp_y, ramp_x = np.mgrid[18 : 28 : imY * 1j, -5.3 : 1.2 : imX * 1j]
         data_x += ramp_x
         data_y += ramp_y
-    s = DPCSignal2D((data_y, data_x))
-    s.axes_manager.signal_axes[0].name = "Probe position x"
-    s.axes_manager.signal_axes[1].name = "Probe position y"
-    s.axes_manager.signal_axes[0].units = "nm"
-    s.axes_manager.signal_axes[1].units = "nm"
+    data = np.stack((data_y, data_x), axis=-1)
+    s = BeamShift(data)
+    s.axes_manager.navigation_axes[0].name = "Probe position x"
+    s.axes_manager.navigation_axes[1].name = "Probe position y"
+    s.axes_manager.navigation_axes[0].units = "nm"
+    s.axes_manager.navigation_axes[1].units = "nm"
     return s
 
 

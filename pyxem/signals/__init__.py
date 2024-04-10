@@ -23,14 +23,6 @@
 from .common_diffraction import CommonDiffraction
 from .correlation2d import Correlation2D, LazyCorrelation2D
 from .beam_shift import BeamShift, LazyBeamShift
-from .differential_phase_contrast import (
-    DPCBaseSignal,
-    DPCSignal1D,
-    DPCSignal2D,
-    LazyDPCBaseSignal,
-    LazyDPCSignal1D,
-    LazyDPCSignal2D,
-)
 from .diffraction_variance1d import DiffractionVariance1D
 from .diffraction_variance2d import DiffractionVariance2D, ImageVariance
 from .diffraction_vectors import DiffractionVectors
