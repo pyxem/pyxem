@@ -230,7 +230,7 @@ class Calibration:
             )
 
         if center is None:
-            center = [(ax.max() - ax.min()) / 2 for ax in self.axes]
+            center = [(ax.size - 1) / 2 for ax in self.axes]
 
         def translate_pixel_coords(px: np.ndarray) -> np.ndarray:
             coord = pixel_size * px
@@ -305,7 +305,7 @@ class Calibration:
         """
         if self.flat_ewald:
             extents = []
-            for ax, scale in zip(self.axes,  self.scale):
+            for ax, scale in zip(self.axes, self.scale):
                 left = ax - scale / 2
                 right = ax + scale / 2
                 extent = np.stack((left, right))

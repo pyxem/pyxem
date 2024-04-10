@@ -90,16 +90,20 @@ class TestCalibrationClass:
             calibration.detector(pixel_size=0.1, detector_distance=1)
         calibration.beam_energy = 200
         calibration.detector(pixel_size=0.1, detector_distance=1)
+        # The center, in pixel coordinates, is (4.5, 4.5)
+        # When using a detector, this gets rounded down to 4
+        assert calibration.center == [4, 4]
         calibration.detector(
             pixel_size=0.1, detector_distance=1, beam_energy=200, units="k_nm^-1"
         )
         assert calibration.flat_ewald is False
+        assert calibration.center == [4, 4]
         with pytest.raises(ValueError):
             calibration(scale=0.01)
         assert calibration.scale is None
         with pytest.raises(ValueError):
             calibration(center=(5, 5))
-        assert calibration.center == [5, 5]
+        assert calibration.center == [4, 4]
 
         with pytest.raises(ValueError):
             calibration.detector(pixel_size=0.1, detector_distance=1, units="nm^-1")
