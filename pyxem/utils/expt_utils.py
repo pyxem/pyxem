@@ -82,7 +82,7 @@ def match_template_dilate(
     )[1:-1, 1:-1]
 
     template_mean = template.mean()
-    template_volume = math.prod(template.shape)
+    template_volume = np.sum(dilated_template)
     template_ssd = np.sum((template - template_mean) ** 2)
 
     xcorr = fftconvolve(image, template[::-1, ::-1], mode="valid")[1:-1, 1:-1]
