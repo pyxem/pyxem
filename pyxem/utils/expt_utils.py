@@ -89,8 +89,8 @@ def match_template_dilate(
     numerator = xcorr - image_window_sum * template_mean
 
     denominator = image_window_sum2
-    np.multiply(image_window_sum, image_window_sum, out=image_window_sum)
     np.divide(image_window_sum, template_volume, out=image_window_sum)
+    np.multiply(image_window_sum, image_window_sum, out=image_window_sum)
     denominator -= image_window_sum
     denominator *= template_ssd
     np.maximum(denominator, 0, out=denominator)  # sqrt of negative number not allowed
