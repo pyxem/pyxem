@@ -18,7 +18,6 @@
 
 """Utils for calibrating Diffraction Patterns."""
 
-
 import numpy as np
 import json
 
@@ -296,10 +295,18 @@ class Calibration:
             left_scales = self.scale
             right_scales = self.scale
         else:
-            scales = np.array([ax[1:] - ax[:-1] for ax in self.axes])
-            scales = np.pad(scales, 1, mode="edge")
-            left_scales = scales[:, :-1]
-            right_scales = scales[:, 1:]
+            x_scales = self.axes[0][1:] - self.axes[0][:-1]
+            x_scales = np.pad(x_scales, 1, mode="edge")
+            y_scales = self.axes[1][1:] - self.axes[1][:-1]
+            y_scales = np.pad(y_scales, 1, mode="edge")
+            left_scales = [
+                x_scales[:-1],
+                y_scales[:-1],
+            ]
+            right_scales = [
+                x_scales[1:],
+                y_scales[1:],
+            ]
 
         extents = []
         for ax, left_scale, right_scale in zip(self.axes, left_scales, right_scales):
