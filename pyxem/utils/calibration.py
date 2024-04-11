@@ -482,7 +482,7 @@ class Calibration:
             )
         if center is None:
             for ax in self.signal.axes_manager.signal_axes:
-                ax.offset = -ax.scale * (ax.size / 2)
+                ax.offset = -ax.scale * ((ax.size - 1) / 2)
         else:
             for ax, off in zip(self.signal.axes_manager.signal_axes, center):
                 ax.offset = -off * ax.scale
