@@ -243,17 +243,6 @@ class Calibration:
         x_axes = translate_pixel_coords(x_pixels)
         y_axes = translate_pixel_coords(y_pixels)
 
-        # Re-do calculations to get pixel extents
-        x_ext_l = translate_pixel_coords(x_pixels - 0.5)
-        x_ext_r = translate_pixel_coords(x_pixels + 0.5)
-        y_ext_l = translate_pixel_coords(y_pixels - 0.5)
-        y_ext_r = translate_pixel_coords(y_pixels + 0.5)
-
-        self._pixel_extent = [
-            np.stack((x_ext_l, x_ext_r)),
-            np.stack((y_ext_l, y_ext_r)),
-        ]
-
         for ax, axis in zip(self.signal.axes_manager.signal_axes, [x_axes, y_axes]):
             if isinstance(ax, UniformDataAxis):
                 ax.convert_to_non_uniform_axis()
@@ -304,15 +293,21 @@ class Calibration:
         ]
         """
         if self.flat_ewald:
-            extents = []
-            for ax, scale in zip(self.axes, self.scale):
-                left = ax - scale / 2
-                right = ax + scale / 2
-                extent = np.stack((left, right))
-                extents.append(extent)
-            return extents
+            left_scales = self.scale
+            right_scales = self.scale
         else:
-            return self._pixel_extent
+            scales = np.array([ax[1:] - ax[:-1] for ax in self.axes])
+            scales = np.pad(scales, 1, mode="edge")
+            left_scales = scales[:, :-1]
+            right_scales = scales[:, 1:]
+
+        extents = []
+        for ax, left_scale, right_scale in zip(self.axes, left_scales, right_scales):
+            left = ax - left_scale / 2
+            right = ax + right_scale / 2
+            extent = np.stack((left, right))
+            extents.append(extent)
+        return extents
 
     def get_slices2d(self, npt, npt_azim, radial_range=None):
         """Get the slices and factors for some image that can be used to
