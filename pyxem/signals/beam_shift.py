@@ -18,78 +18,10 @@
 
 
 import numpy as np
-import matplotlib.pyplot as plt
-from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
-from scipy.ndimage import rotate, gaussian_filter
-import pyxem.utils._pixelated_stem_tools as pst
+from scipy.ndimage import rotate
+import pyxem.utils._beam_shift_tools as bst
 from hyperspy._signals.lazy import LazySignal
-from hyperspy.signals import BaseSignal, Signal1D, Signal2D
-
-
-def make_bivariate_histogram(
-    x_position, y_position, histogram_range=None, masked=None, bins=200, spatial_std=3
-):
-    s0_flat = x_position.flatten()
-    s1_flat = y_position.flatten()
-
-    if masked is not None:
-        temp_s0_flat = []
-        temp_s1_flat = []
-        for data0, data1, masked_value in zip(s0_flat, s1_flat, masked.flatten()):
-            if not masked_value:
-                temp_s0_flat.append(data0)
-                temp_s1_flat.append(data1)
-        s0_flat = np.array(temp_s0_flat)
-        s1_flat = np.array(temp_s1_flat)
-
-    if histogram_range is None:
-        if s0_flat.std() > s1_flat.std():
-            s0_range = (
-                s0_flat.mean() - s0_flat.std() * spatial_std,
-                s0_flat.mean() + s0_flat.std() * spatial_std,
-            )
-            s1_range = (
-                s1_flat.mean() - s0_flat.std() * spatial_std,
-                s1_flat.mean() + s0_flat.std() * spatial_std,
-            )
-        else:
-            s0_range = (
-                s0_flat.mean() - s1_flat.std() * spatial_std,
-                s0_flat.mean() + s1_flat.std() * spatial_std,
-            )
-            s1_range = (
-                s1_flat.mean() - s1_flat.std() * spatial_std,
-                s1_flat.mean() + s1_flat.std() * spatial_std,
-            )
-    else:
-        s0_range = histogram_range
-        s1_range = histogram_range
-
-    hist2d, xedges, yedges = np.histogram2d(
-        s0_flat,
-        s1_flat,
-        bins=bins,
-        range=[[s0_range[0], s0_range[1]], [s1_range[0], s1_range[1]]],
-    )
-
-    s_hist = Signal2D(hist2d).swap_axes(0, 1)
-    s_hist.axes_manager[0].offset = xedges[0]
-    s_hist.axes_manager[0].scale = xedges[1] - xedges[0]
-    s_hist.axes_manager[1].offset = yedges[0]
-    s_hist.axes_manager[1].scale = yedges[1] - yedges[0]
-    return s_hist
-
-
-def _get_corner_mask(s, corner_size=0.05):
-    corner_slice_list = pst._get_corner_slices(
-        s, corner_size=corner_size,
-    )
-    mask = np.ones_like(s.data, dtype=bool)
-    for corner_slice in corner_slice_list:
-        mask[corner_slice] = False
-
-    s_mask = s._deepcopy_with_new_data(mask).T
-    return s_mask
+from hyperspy.signals import Signal1D, Signal2D
 
 
 class BeamShift(Signal1D):
@@ -151,14 +83,14 @@ class BeamShift(Signal1D):
         if (mask is not None) and (fit_corners is not None):
             raise ValueError("Only mask or fit_to_corners can be set.")
         if fit_corners is not None:
-            mask = _get_corner_mask(self.isig[0], corner_size=fit_corners)
+            mask = bst._get_corner_mask(self.isig[0], corner_size=fit_corners)
 
         s_shift_x = self.isig[0].T
         s_shift_y = self.isig[1].T
         if mask is not None:
             mask = mask.__array__()
-        plane_image_x = pst._get_linear_plane_from_signal2d(s_shift_x, mask=mask)
-        plane_image_y = pst._get_linear_plane_from_signal2d(s_shift_y, mask=mask)
+        plane_image_x = bst._get_linear_plane_from_signal2d(s_shift_x, mask=mask)
+        plane_image_y = bst._get_linear_plane_from_signal2d(s_shift_y, mask=mask)
         plane_image = np.stack((plane_image_x, plane_image_y), -1)
         s_bs = self._deepcopy_with_new_data(plane_image)
         return s_bs
@@ -194,14 +126,14 @@ class BeamShift(Signal1D):
 
         Examples
         --------
-        >>> s = pxm.dummy_data.get_stripe_pattern_dpc_signal()
+        >>> s = pxm.data.dummy_data.get_stripe_pattern_beam_shift_signal()
         >>> s_hist = s.get_bivariate_histogram()
         >>> s_hist.plot()
 
         """
         x_position = self.isig[0].data
         y_position = self.isig[1].data
-        s_hist = make_bivariate_histogram(
+        s_hist = bst._make_bivariate_histogram(
             x_position,
             y_position,
             histogram_range=histogram_range,
@@ -217,7 +149,7 @@ class BeamShift(Signal1D):
     def get_magnitude_signal(
         self, autolim=True, autolim_sigma=4, magnitude_limits=None
     ):
-        """Get DPC magnitude image visualized as greyscale.
+        """Get beam shift magnitude image visualized as greyscale.
 
         Converts the x and y beam shifts into a magnitude map, showing the
         magnitude of the beam shifts.
@@ -238,7 +170,7 @@ class BeamShift(Signal1D):
 
         Examples
         --------
-        >>> s = pxm.dummy_data.get_simple_dpc_signal()
+        >>> s = pxm.data.dummy_data.get_simple_beam_shift_signal()
         >>> s_magnitude = s.get_magnitude_signal()
         >>> s_magnitude.plot()
 
@@ -263,7 +195,7 @@ class BeamShift(Signal1D):
                     "If autolim==True then `magnitude_limits` must be set to None"
                 )
 
-            magnitude_limits = pst._get_limits_from_array(
+            magnitude_limits = bst._get_limits_from_array(
                 s_magnitude.data, sigma=autolim_sigma
             )
         if magnitude_limits is not None:
@@ -324,7 +256,7 @@ class BeamShift(Signal1D):
 
         Examples
         --------
-        >>> s = pxm.dummy_data.get_square_dpc_signal()
+        >>> s = pxm.data.dummy_data.get_magnetic_square_beam_shift_signal()
         >>> s_phase = s.phase_retrieval()
         >>> s_phase.plot()
 
@@ -416,7 +348,7 @@ class BeamShift(Signal1D):
         return signal
 
     def get_phase_signal(self, rotation=None):
-        """Get DPC phase image visualized using continuous color scale.
+        """Get beam shift phase image visualized using continuous color scale.
 
         Converts the x and y beam shifts into an RGB array, showing the
         direction of the beam shifts.
@@ -437,7 +369,7 @@ class BeamShift(Signal1D):
 
         Examples
         --------
-        >>> s = pxm.dummy_data.get_simple_dpc_signal()
+        >>> s = pxm.data.dummy_data.get_simple_beam_shift_signal()
         >>> s_color = s.get_phase_signal(rotation=20)
         >>> s_color.plot()
 
@@ -461,7 +393,7 @@ class BeamShift(Signal1D):
             rotation = rotation - 30
 
         phase = np.arctan2(self.isig[0].data, self.isig[1].data) % (2 * np.pi)
-        rgb_array = pst._get_rgb_phase_array(phase=phase, rotation=rotation)
+        rgb_array = bst._get_rgb_phase_array(phase=phase, rotation=rotation)
         rgb_array_16bit = rgb_array * (2**16 - 1)
         s_rgb = self._deepcopy_with_new_data(rgb_array_16bit)
         s_rgb.change_dtype("uint16")
@@ -471,7 +403,7 @@ class BeamShift(Signal1D):
     def get_color_signal(
         self, rotation=None, autolim=True, autolim_sigma=4, magnitude_limits=None
     ):
-        """Get DPC image visualized using continuous color scale.
+        """Get beam shift image visualized using continuous color scale.
 
         Converts the x and y beam shifts into an RGB array, showing the
         magnitude and direction of the beam shifts.
@@ -495,7 +427,7 @@ class BeamShift(Signal1D):
 
         Examples
         --------
-        >>> s = pxm.dummy_data.get_simple_dpc_signal()
+        >>> s = pxm.data.dummy_data.get_simple_beam_shift_signal()
         >>> s_color = s.get_color_signal()
         >>> s_color.plot()
 
@@ -524,10 +456,10 @@ class BeamShift(Signal1D):
                     "If autolim==True then `magnitude_limits` must be set to None"
                 )
 
-            magnitude_limits = pst._get_limits_from_array(
+            magnitude_limits = bst._get_limits_from_array(
                 magnitude, sigma=autolim_sigma
             )
-        rgb_array = pst._get_rgb_phase_magnitude_array(
+        rgb_array = bst._get_rgb_phase_magnitude_array(
             phase=phase,
             magnitude=magnitude,
             rotation=rotation,
@@ -539,97 +471,6 @@ class BeamShift(Signal1D):
         s_rgb.change_dtype("rgb16")
         return s_rgb
 
-    def get_color_image_with_indicator(
-        self,
-        phase_rotation=0,
-        indicator_rotation=0,
-        only_phase=False,
-        autolim=True,
-        autolim_sigma=4,
-        magnitude_limits=None,
-        scalebar_size=None,
-        ax=None,
-        ax_indicator=None,
-    ):
-        """Make a matplotlib figure showing DPC contrast.
-
-        Parameters
-        ----------
-        phase_rotation : float, default 0
-            Changes the phase of the plotted data.
-            Useful for correcting scan rotation.
-        indicator_rotation : float, default 0
-            Changes the color wheel rotation.
-        only_phase : bool, default False
-            If False, will plot both the magnitude and phase.
-            If True, will only plot the phase.
-        autolim : bool, default True
-        autolim_sigma : float, default 4
-        magnitude_limits : tuple of floats, default None
-            Manually sets the value limits for the color signal.
-            For this, autolim needs to be False.
-        scalebar_size : int, optional
-        ax : Matplotlib subplot, optional
-        ax_indicator : Matplotlib subplot, optional
-            If None, generate a new subplot for the indicator.
-            If False, do not include an indicator
-
-        Examples
-        --------
-        >>> s = pxm.dummy_data.get_simple_dpc_signal()
-        >>> fig = s.get_color_image_with_indicator()
-        >>> fig.savefig("simple_dpc_test_signal.png")
-
-        Only plotting the phase
-
-        >>> fig = s.get_color_image_with_indicator(only_phase=True)
-        >>> fig.savefig("simple_dpc_test_signal.png")
-
-        Matplotlib subplot as input
-
-        >>> import matplotlib.pyplot as plt
-        >>> fig, ax = plt.subplots()
-        >>> ax_indicator = fig.add_subplot(331)
-        >>> fig_return = s.get_color_image_with_indicator(
-        ...     scalebar_size=10, ax=ax, ax_indicator=ax_indicator)
-
-        """
-        indicator_rotation = indicator_rotation + 60
-        if ax is None:
-            set_fig = True
-            fig, ax = plt.subplots(1, 1, figsize=(7, 7))
-        else:
-            fig = ax.figure
-            set_fig = False
-        if only_phase:
-            s = self.get_phase_signal(rotation=phase_rotation)
-        else:
-            s = self.get_color_signal(
-                rotation=phase_rotation,
-                autolim=autolim,
-                autolim_sigma=autolim_sigma,
-                magnitude_limits=magnitude_limits,
-            )
-        s.change_dtype("uint16")
-        s.change_dtype("float64")
-        extent = s.axes_manager.navigation_extent
-        extent = [extent[0], extent[1], extent[3], extent[2]]
-        ax.imshow(s.data / 65536.0, extent=extent)
-        if ax_indicator is not False:
-            if ax_indicator is None:
-                ax_indicator = fig.add_subplot(331)
-            pst._make_color_wheel(
-                ax_indicator, rotation=indicator_rotation + phase_rotation
-            )
-        ax.set_axis_off()
-        if scalebar_size is not None:
-            scalebar_label = "{0} {1}".format(scalebar_size, s.axes_manager[0].units)
-            sb = AnchoredSizeBar(ax.transData, scalebar_size, scalebar_label, loc=4)
-            ax.add_artist(sb)
-        if set_fig:
-            fig.subplots_adjust(0, 0, 1, 1)
-        return fig
-
     def rotate_beam_shifts(self, angle):
         """Rotate the beam shift vector.
 
@@ -640,14 +481,14 @@ class BeamShift(Signal1D):
 
         Returns
         -------
-        shift_rotated_signal : DPCSignal2D
+        shift_rotated_signal : BeamShift
 
         Example
         -------
 
         Rotate beam shifts by 10 degrees clockwise
 
-        >>> s = pxm.dummy_data.get_simple_dpc_signal()
+        >>> s = pxm.data.dummy_data.get_simple_beam_shift_signal()
         >>> s_new = s.rotate_beam_shifts(10)
         >>> s_new.plot()
 
@@ -669,14 +510,14 @@ class BeamShift(Signal1D):
 
         Returns
         -------
-        rotated_signal : DPCSignal2D
+        rotated_signal : BeamShift
 
         Example
         -------
 
         Rotate data by 10 degrees clockwise
 
-        >>> s = pxm.dummy_data.get_simple_dpc_signal()
+        >>> s = pxm.data.dummy_data.get_simple_beam_shift_signal()
         >>> s_rot = s.rotate_data(10)
         >>> s_rot.plot()
 

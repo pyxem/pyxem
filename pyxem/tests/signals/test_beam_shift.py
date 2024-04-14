@@ -20,11 +20,10 @@ import pytest
 from pytest import approx
 import numpy as np
 import dask.array as da
-from matplotlib.pyplot import subplots
 from hyperspy.signals import Signal2D
 import pyxem.data.dummy_data.dummy_data as dd
 from pyxem.signals import BeamShift, LazyBeamShift, Diffraction2D
-from pyxem.signals.beam_shift import make_bivariate_histogram
+import pyxem.utils._beam_shift_tools as bst
 
 
 class TestMakeLinearPlane:
@@ -312,23 +311,7 @@ class TestGetColorSignal:
         assert (s_color.data["B"] == 0).all()
 
 
-def test_get_color_image_with_indicator():
-    s = BeamShift(np.random.random(size=(100, 100, 2)))
-    s.get_color_image_with_indicator()
-    s.get_color_image_with_indicator(
-        phase_rotation=45,
-        indicator_rotation=10,
-        autolim=True,
-        autolim_sigma=1,
-        scalebar_size=10,
-    )
-    s.get_color_image_with_indicator(only_phase=True)
-    s.get_color_image_with_indicator(autolim=False, magnitude_limits=(0, 0.5))
-    fig, ax = subplots()
-    s.get_color_image_with_indicator(ax=ax)
-
-
-class TestBivariateHistogram:
+class TestGetBivariateHistogram:
     def test_get_bivariate_histogram_1d(self):
         s = BeamShift(np.random.random((10, 2)))
         s.get_bivariate_histogram()
@@ -356,47 +339,6 @@ class TestBivariateHistogram:
         )
         assert s_hist.isig[3.0, 0.0].data[0] == 0.0
         assert s_hist.isig[0.0, 0.0].data[0] == (5 * 5) - 1
-
-    def test_make_bivariate_histogram(self):
-        x, y = np.ones((100, 100)), np.ones((100, 100))
-        make_bivariate_histogram(
-            x_position=x,
-            y_position=y,
-            histogram_range=None,
-            masked=None,
-            bins=200,
-            spatial_std=3,
-        )
-
-    def test_single_x(self):
-        size = 100
-        x, y = np.ones(size), np.zeros(size)
-        s = make_bivariate_histogram(x, y)
-        hist_iX = s.axes_manager[0].value2index(1.0)
-        hist_iY = s.axes_manager[1].value2index(0.0)
-        assert s.data[hist_iY, hist_iX] == size
-        s.data[hist_iY, hist_iX] = 0
-        assert not s.data.any()
-
-    def test_single_negative_x(self):
-        size = 100
-        x, y = -np.ones(size), np.zeros(size)
-        s = make_bivariate_histogram(x, y)
-        hist_iX = s.axes_manager[0].value2index(-1)
-        hist_iY = s.axes_manager[1].value2index(0)
-        assert s.data[hist_iY, hist_iX] == size
-        s.data[hist_iY, hist_iX] = 0
-        assert not s.data.any()
-
-    def test_single_negative_x_y(self):
-        size = 100
-        x, y = -np.ones(size), np.ones(size)
-        s = make_bivariate_histogram(x, y)
-        hist_iX = s.axes_manager[0].value2index(-1)
-        hist_iY = s.axes_manager[1].value2index(1)
-        assert s.data[hist_iY, hist_iX] == size
-        s.data[hist_iY, hist_iX] = 0
-        assert not s.data.any()
 
 
 class TestRotateBeamShifts:
