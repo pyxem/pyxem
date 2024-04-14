@@ -21,7 +21,7 @@ import numpy as np
 from scipy.ndimage import rotate
 import pyxem.utils._beam_shift_tools as bst
 from hyperspy._signals.lazy import LazySignal
-from hyperspy.signals import Signal1D, Signal2D
+from hyperspy.signals import Signal1D
 
 
 class BeamShift(Signal1D):
@@ -180,6 +180,7 @@ class BeamShift(Signal1D):
         get_phase_signal : Signal showing the phase
 
         """
+
         def magnitude_calc_with_map(image):
             x, y = image
             mag = np.hypot(x, y)
@@ -187,7 +188,6 @@ class BeamShift(Signal1D):
 
         s_magnitude = self.map(magnitude_calc_with_map, inplace=False)
         s_magnitude = s_magnitude.T
-
 
         if autolim:
             if magnitude_limits is not None:
@@ -381,9 +381,7 @@ class BeamShift(Signal1D):
         """
 
         if self.axes_manager.navigation_dimension != 2:
-            raise ValueError(
-                "get_phase_signal only works with 2 navigation dimensions"
-            )
+            raise ValueError("get_phase_signal only works with 2 navigation dimensions")
         # Rotate the phase by -30 degrees in the color "wheel", to get better
         # visualization in the vertical and horizontal direction.
         rotation = None

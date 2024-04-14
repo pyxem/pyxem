@@ -83,38 +83,6 @@ class TestFindPhase:
         assert (phase0 == np.pi / 2).all()
 
 
-class TestMakeBivariateHistogram:
-    def test_single_x(self):
-        size = 100
-        x, y = np.ones(size), np.zeros(size)
-        s = bst._make_bivariate_histogram(x, y)
-        hist_iX = s.axes_manager[0].value2index(1.0)
-        hist_iY = s.axes_manager[1].value2index(0.0)
-        assert s.data[hist_iY, hist_iX] == size
-        s.data[hist_iY, hist_iX] = 0
-        assert not s.data.any()
-
-    def test_single_negative_x(self):
-        size = 100
-        x, y = -np.ones(size), np.zeros(size)
-        s = bst._make_bivariate_histogram(x, y)
-        hist_iX = s.axes_manager[0].value2index(-1)
-        hist_iY = s.axes_manager[1].value2index(0)
-        assert s.data[hist_iY, hist_iX] == size
-        s.data[hist_iY, hist_iX] = 0
-        assert not s.data.any()
-
-    def test_single_negative_x_y(self):
-        size = 100
-        x, y = -np.ones(size), np.ones(size)
-        s = bst._make_bivariate_histogram(x, y)
-        hist_iX = s.axes_manager[0].value2index(-1)
-        hist_iY = s.axes_manager[1].value2index(1)
-        assert s.data[hist_iY, hist_iX] == size
-        s.data[hist_iY, hist_iX] = 0
-        assert not s.data.any()
-
-
 class TestGetCornerSlices:
     @pytest.mark.parametrize("corner_size", [0.02, 0.05, 0.20, 0.23])
     def test_corner_size(self, corner_size):

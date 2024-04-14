@@ -61,9 +61,7 @@ def _make_bivariate_histogram(
 
 
 def _get_corner_mask(s, corner_size=0.05):
-    corner_slice_list = _get_corner_slices(
-        s, corner_size=corner_size,
-    )
+    corner_slice_list = _get_corner_slices(s, corner_size=corner_size)
     mask = np.ones_like(s.data, dtype=bool)
     for corner_slice in corner_slice_list:
         mask[corner_slice] = False
@@ -215,5 +213,3 @@ def _get_rgb_phase_magnitude_array(
     HSV = np.dstack((phase, S, magnitude))
     RGB = hsv_to_rgb(HSV)
     return RGB
-
-

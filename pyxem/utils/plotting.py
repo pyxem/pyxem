@@ -221,9 +221,7 @@ def plot_beam_shift_color(
     if ax_indicator is not False:
         if ax_indicator is None:
             ax_indicator = fig.add_subplot(331)
-        _make_color_wheel(
-            ax_indicator, rotation=indicator_rotation + phase_rotation
-        )
+        _make_color_wheel(ax_indicator, rotation=indicator_rotation + phase_rotation)
     ax.set_axis_off()
     if scalebar_size is not None:
         scalebar_label = "{0} {1}".format(scalebar_size, s.axes_manager[0].units)

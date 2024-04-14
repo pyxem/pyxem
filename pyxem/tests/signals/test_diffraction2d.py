@@ -858,7 +858,7 @@ class TestDiffraction2DGetDirectBeamPositionCenterOfMass:
         assert (s_bs.isig[0].data == x_new).all()
         assert (s_bs.isig[1].data == y_new).all()
         assert s_bs.axes_manager.navigation_shape == ()
-        assert s_bs.axes_manager.signal_shape == (2, )
+        assert s_bs.axes_manager.signal_shape == (2,)
 
     def test_center_of_mass_1d(self):
         x_im, y_im, x, y = 7, 9, 2, 3
@@ -869,8 +869,8 @@ class TestDiffraction2DGetDirectBeamPositionCenterOfMass:
         x_new, y_new = (x_im / 2) - x, (y_im / 2) - y
         assert (s_bs.isig[0].data == x_new).all()
         assert (s_bs.isig[1].data == y_new).all()
-        assert s_bs.axes_manager.navigation_shape == (5, )
-        assert s_bs.axes_manager.signal_shape == (2, )
+        assert s_bs.axes_manager.navigation_shape == (5,)
+        assert s_bs.axes_manager.signal_shape == (2,)
 
     def test_center_of_mass(self):
         x_im, y_im, x, y = 10, 10, 5, 7
@@ -882,7 +882,7 @@ class TestDiffraction2DGetDirectBeamPositionCenterOfMass:
         assert (s_bs.isig[0].data == x_new).all()
         assert (s_bs.isig[1].data == y_new).all()
         assert s_bs.axes_manager.navigation_shape == (10, 10)
-        assert s_bs.axes_manager.signal_shape == (2, )
+        assert s_bs.axes_manager.signal_shape == (2,)
 
     def test_center_of_mass_random_position(self):
         x_im, y_im = 10, 10
@@ -912,7 +912,7 @@ class TestDiffraction2DGetDirectBeamPositionCenterOfMass:
         assert (s_bs.isig[0].data == x_new).all()
         assert (s_bs.isig[1].data == y_new).all()
         assert s_bs.axes_manager.navigation_shape == (x_nav, y_nav)
-        assert s_bs.axes_manager.signal_shape == (2, )
+        assert s_bs.axes_manager.signal_shape == (2,)
 
     def test_center_of_mass_different_shapes2(self):
         psX, psY = 11, 9
@@ -1107,7 +1107,9 @@ class TestDiffraction2DGetDirectBeamPositionCenterOfMass:
         s.data[:, :, 1, -2] = 60
 
         # The extra values are ignored due to thresholding and mask
-        s_bs0 = s.get_direct_beam_position(method="center_of_mass", threshold=3, mask=(60, 50, 50))
+        s_bs0 = s.get_direct_beam_position(
+            method="center_of_mass", threshold=3, mask=(60, 50, 50)
+        )
         assert (s_bs0.isig[0].data == x_new).all()
         assert (s_bs0.isig[1].data == y_new).all()
 
@@ -1221,7 +1223,6 @@ class TestDiffraction2DGetDirectBeamPositionCenterOfMass:
             blur_sigma=1,
             downscale=False,
         )
-        x_new, y_new = (x_im / 2) - x, (y_im / 2) - y
         s_lazy = LazyDiffraction2D(da.from_array(s.data, chunks=(1, 1, 140, 160)))
         s_bs = s.get_direct_beam_position(method="center_of_mass")
         s_lazy_bs = s_lazy.get_direct_beam_position(method="center_of_mass")
@@ -1238,17 +1239,23 @@ class TestDiffraction2DGetDirectBeamPositionCenterOfMass:
     def test_lazy_result(self):
         data = da.ones((10, 10, 20, 20), chunks=(10, 10, 10, 10))
         s_lazy = LazyDiffraction2D(data)
-        s_lazy_bs = s_lazy.get_direct_beam_position(method="center_of_mass", lazy_output=True)
+        s_lazy_bs = s_lazy.get_direct_beam_position(
+            method="center_of_mass", lazy_output=True
+        )
         assert s_lazy_bs._lazy
         assert s_lazy_bs.axes_manager.navigation_shape == (10, 10)
 
         s_lazy_1d = s_lazy.inav[0]
-        s_lazy_1d_bs = s_lazy_1d.get_direct_beam_position(method="center_of_mass", lazy_output=True)
+        s_lazy_1d_bs = s_lazy_1d.get_direct_beam_position(
+            method="center_of_mass", lazy_output=True
+        )
         assert s_lazy_1d_bs._lazy
         assert s_lazy_1d_bs.axes_manager.navigation_shape == (10,)
 
         s_lazy_0d = s_lazy.inav[0, 0]
-        s_lazy_0d_bs = s_lazy_0d.get_direct_beam_position(method="center_of_mass", lazy_output=True)
+        s_lazy_0d_bs = s_lazy_0d.get_direct_beam_position(
+            method="center_of_mass", lazy_output=True
+        )
         assert s_lazy_0d_bs._lazy
         assert s_lazy_0d_bs.axes_manager.navigation_shape == ()
 

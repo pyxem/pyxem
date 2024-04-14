@@ -23,7 +23,6 @@ import dask.array as da
 from hyperspy.signals import Signal2D
 import pyxem.data.dummy_data.dummy_data as dd
 from pyxem.signals import BeamShift, LazyBeamShift, Diffraction2D
-import pyxem.utils._beam_shift_tools as bst
 
 
 class TestMakeLinearPlane:
@@ -69,7 +68,7 @@ class TestBeamShiftFitCorners:
         s0_linear_plane = s0.get_linear_plane(fit_corners=0.05)
         s0_corr = s0 - s0_linear_plane
         assert (s0.data == data0).all()
-        assert s0_corr.data == approx(0., abs=1e-7)
+        assert s0_corr.data == approx(0.0, abs=1e-7)
 
     def test_fit_corners_x_y(self):
         array_x, array_y = np.meshgrid(range(64), range(64))
@@ -295,7 +294,7 @@ class TestGetColorSignal:
         s_random = BeamShift(data_random)
         s_random.get_color_signal()
         s_random.get_color_signal(rotation=45)
-        s_random.get_color_signal(autolim=False, magnitude_limits=(0, 30))    
+        s_random.get_color_signal(autolim=False, magnitude_limits=(0, 30))
 
     def test_get_color_signal_errors(self):
         data_random = np.random.random(size=(64, 64, 2))
@@ -329,7 +328,7 @@ class TestGetBivariateHistogram:
         value = 3
         s.data[0, 0, 0] = value
         s_hist = s.get_bivariate_histogram(bins=10, histogram_range=(-5, 5))
-        assert s_hist.isig[3.0, 0.0].data[0] == 1.
+        assert s_hist.isig[3.0, 0.0].data[0] == 1.0
         assert s_hist.isig[0.0, 0.0].data[0] == (5 * 5) - 1
 
         masked = np.zeros((11, 11), dtype=bool)
