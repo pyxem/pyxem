@@ -30,7 +30,9 @@ from pyxem.signals import Diffraction2D, LazyDiffraction2D, BeamShift
 
 
 def get_disk_shift_simple_test_signal(lazy=False):
-    """Get HyperSpy 2D signal with 2D navigation dimensions for DPC testing.
+    """Get HyperSpy 2D signal with 2D navigation dimensions.
+
+    Useful for exploring the effects of dscan.
 
     Probe size x/y (20, 20), and image size x/y (50, 50).
     Disk moves from 22-28 x/y.
@@ -242,11 +244,11 @@ def get_hot_pixel_signal(lazy=False):
 
 
 def get_simple_beam_shift_signal():
-    """Get a simple DPCSignal2D with a zero point in the centre.
+    """Get a simple BeamShift signal with a zero point in the centre.
 
     Example
     -------
-    >>> s = pxm.data.dummy_data.get_simple_dpc_signal()
+    >>> s = pxm.data.dummy_data.get_simple_beam_shift_signal()
 
     """
     temp_data = np.mgrid[-5:5:100j, -5:5:100j]
@@ -256,7 +258,7 @@ def get_simple_beam_shift_signal():
 
 
 def get_stripe_pattern_beam_shift_signal():
-    """Get a 2D DPC signal with a stripe pattern.
+    """Get a BeamShift signal with a stripe pattern.
 
     The stripe pattern only has an x-component, with alternating left/right
     directions. There is a small a net moment in the positive x-direction
@@ -264,11 +266,11 @@ def get_stripe_pattern_beam_shift_signal():
 
     Returns
     -------
-    stripe_dpc_signal : DPCSignal2D
+    stripe_beam_shift_signal : BeamShift
 
     Example
     -------
-    >>> s = pxm.data.dummy_data.get_stripe_pattern_dpc_signal()
+    >>> s = pxm.data.dummy_data.get_stripe_pattern_beam_shift_signal()
 
     """
     data = np.zeros((100, 50, 2))
@@ -280,7 +282,7 @@ def get_stripe_pattern_beam_shift_signal():
 
 
 def get_magnetic_square_beam_shift_signal(add_ramp=False):
-    """Get a 2D DPC signal resembling a Landau domain.
+    """Get a BeamShift signal resembling a Landau domain.
 
     Parameters
     ----------
@@ -290,16 +292,16 @@ def get_magnetic_square_beam_shift_signal(add_ramp=False):
 
     Returns
     -------
-    square_dpc_signal : DPCSignal2D
+    square_beam_shift_signal : BeamShift
 
     Examples
     --------
-    >>> s = pxm.data.dummy_data.get_square_dpc_signal()
+    >>> s = pxm.data.dummy_data.get_magnetic_square_beam_shift_signal()
     >>> s.plot()
 
     Adding a ramp
 
-    >>> s = pxm.data.dummy_data.get_square_dpc_signal(add_ramp=True)
+    >>> s = pxm.data.dummy_data.get_magnetic_square_beam_shift_signal(add_ramp=True)
     >>> s.plot()
 
     """
