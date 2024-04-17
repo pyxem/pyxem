@@ -18,6 +18,7 @@ Fixed
 - Documentation fixes and improvement. (#1028)
 - Fixed bug with flattening diffraction Vectors when there are different scales (#1024)
 - Fixed intersphinx links and improved api documentation (#1056)
+- Fix an off-by-one error in the :meth:`pyxem.signals.Diffraction2D.get_azimuthal_integral2d` (#1058)
 
 Added
 -----
