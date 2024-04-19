@@ -333,8 +333,8 @@ class DiffractionVectors(BaseSignal):
         kwargs["square_size"] = square_size
 
         signal_axes = signal.axes_manager.signal_axes
-        offsets = [ax.offset for ax in signal_axes]
-        scales = [ax.scale for ax in signal_axes]
+        offsets = np.array([ax.offset for ax in signal_axes])
+        scales = np.array([ax.scale for ax in signal_axes])
 
         funct = method_dict[method]
         pixels = self.get_pixel_vectors(
@@ -351,6 +351,7 @@ class DiffractionVectors(BaseSignal):
             ragged=True,
             offsets=offsets,
             scales=scales,
+            columns=columns,
             **kwargs,
         )
         refined_vectors.set_signal_type("diffraction_vectors")
@@ -373,14 +374,28 @@ class DiffractionVectors(BaseSignal):
             scales = self.scales
 
         def get_pixels(x, off, scale, square_size=None, shape=None, columns=None):
-            pixels = np.round((x[:, columns] - off[columns]) / scale[columns]).astype(
-                int
-            )
-            if square_size is not None and shape is not None:
-                pixels = pixels[np.all(pixels > (square_size / 2) + 1, axis=1)]
-                pixels = pixels[
-                    np.all(np.array(shape) - pixels > (square_size / 2) + 1, axis=1)
+            if columns is not None:
+                pixels = np.round(
+                    (x[:, columns] - off[columns]) / scale[columns]
+                ).astype(int)
+            else:
+                pixels = np.round((x - off) / scale).astype(int)
+
+            if columns is not None:
+                num_cols = x.shape[1]
+                other_indexes = np.arange(num_cols)[
+                    np.logical_not(np.isin(np.arange(num_cols), columns))
                 ]
+                other_columns = x[:, other_indexes]
+            if square_size is not None and shape is not None:
+                is_in = np.all(pixels > (square_size / 2) + 1, axis=1) * np.all(
+                    np.array(shape) - pixels > (square_size / 2) + 1, axis=1
+                )
+                pixels = pixels[is_in]
+                if columns is not None:
+                    other_columns = other_columns[is_in]
+            if columns is not None:
+                pixels = np.hstack([pixels, other_columns])
             return pixels
 
         pixels = self.map(
@@ -500,7 +515,7 @@ class DiffractionVectors(BaseSignal):
     @offsets.setter
     def offsets(self, value):
         if isiterable(value) and len(value) == self.num_columns:
-            self.metadata.VectorMetadata["offsets"] = value
+            self.metadata.VectorMetadata["offsets"] = np.array(value)
 
         elif isiterable(value) and len(value) != self.num_columns:
             raise ValueError(

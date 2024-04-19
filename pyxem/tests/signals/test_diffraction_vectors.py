@@ -279,6 +279,21 @@ class TestInitVectors:
         for i in np.ndindex((2, 2)):
             np.testing.assert_almost_equal(peaks.data[i], pixels.data[i])
 
+    def test_peaks_with_intensity(self, peaks_w_intensity):
+        peaks_w_intensity.metadata.add_node("Peaks.signal_axes")
+        peaks_w_intensity.metadata.Peaks.signal_axes = (
+            UniformDataAxis(scale=0.1, offset=-5.0, units="nm"),
+            UniformDataAxis(scale=0.1, offset=-5.0, units="nm"),
+        )
+        dv = DiffractionVectors.from_peaks(
+            peaks_w_intensity,
+            center=None,
+            calibration=None,
+        )
+        pixels = dv.pixel_vectors
+        for i in np.ndindex((2, 2)):
+            np.testing.assert_almost_equal(peaks_w_intensity.data[i], pixels.data[i])
+
     def test_initial_metadata(self, diffraction_vectors_map):
         assert diffraction_vectors_map.scales is None
         assert diffraction_vectors_map.metadata.VectorMetadata["scales"] == None

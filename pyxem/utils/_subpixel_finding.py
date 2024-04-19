@@ -151,16 +151,29 @@ def _conventional_xc(slic, kernel, upsample_factor):
 #####################################################
 
 
-def _center_of_mass_map(dp, vectors, square_size, offsets, scales):
+def _center_of_mass_map(dp, vectors, square_size, offsets, scales, columns):
     if vectors.shape == (2,):
-        vectors = [
-            vectors,
+        vectors = np.array(
+            [
+                vectors,
+            ]
+        )
+    if columns is not None:
+        num_cols = vectors.shape[1]
+        other_indexes = np.arange(num_cols)[
+            np.logical_not(np.isin(np.arange(num_cols), columns))
         ]
+        extra_columns = vectors[:, other_indexes]
+        vectors = vectors[:, columns]
     shifts = np.zeros_like(vectors, dtype=np.float64)
     for i, vector in enumerate(vectors):
         square = _get_experimental_square(dp, vector, square_size)
         shifts[i] = [a - square_size / 2 for a in _center_of_mass_hs(square)]
-    return (vectors + shifts) * scales + offsets
+
+    new_vectors = (vectors + shifts) * scales + offsets
+    if columns is not None:
+        new_vectors = np.hstack(new_vectors, extra_columns)
+    return new_vectors
 
 
 def _conventional_xc_map(
@@ -173,6 +186,7 @@ def _conventional_xc_map(
     scales,
     columns,
 ):
+    vectors = np.array(vectors).astype(int)
     shifts = np.zeros_like(vectors[columns], dtype=np.float64)
     for i, vector in enumerate(vectors):
         expt_disc = _get_experimental_square(dp, vector, square_size)

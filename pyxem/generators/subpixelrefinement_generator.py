@@ -236,16 +236,29 @@ def _com_experimental_square(z, vector, square_size):
     return z_adpt
 
 
-def _center_of_mass_map(dp, vectors, square_size, center, calibration):
+def _center_of_mass_map(dp, vectors, square_size, center, calibration, columns=None):
     if vectors.shape == (2,):
-        vectors = [
-            vectors,
-        ]
+        vectors = np.array(
+            [
+                vectors,
+            ]
+        )
     shifts = np.zeros_like(vectors, dtype=np.float64)
+    if columns is not None:
+        num_cols = vectors.shape[1]
+        other_indexes = np.arange(num_cols)[
+            np.logical_not(np.isin(np.arange(num_cols), columns))
+        ]
+        vectors = vectors[:, columns]
+        extra_columns = vectors[:, other_indexes]
+
     for i, vector in enumerate(vectors):
         expt_disc = _com_experimental_square(dp, vector, square_size)
         shifts[i] = [a - square_size / 2 for a in _center_of_mass_hs(expt_disc)]
-    return ((vectors + shifts) - center) * calibration
+    new_vectors = ((vectors + shifts) - center) * calibration
+    if columns is not None:
+        new_vectors = np.hstack(new_vectors, extra_columns)
+    return new_vectors
 
 
 class SubpixelrefinementGenerator:
