@@ -2012,12 +2012,18 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         pyxem.signals.Diffraction2D.get_azimuthal_integral1d
 
         """
+        if azimuth_range is None:
+            azimuth_range = (-np.pi, np.pi)
+
         usepyfai = method not in ["splitpixel_pyxem"]
         if not usepyfai:
             # get_slices2d should be sped up in the future by
             # getting rid of shapely and using numba on the for loop
             slices, factors, factors_slice, radial_range = self.calibrate.get_slices2d(
-                npt, npt_azim, radial_range=radial_range
+                npt,
+                npt_azim,
+                radial_range=radial_range,
+                azimuthal_range=azimuth_range,
             )
             if self._gpu and CUPY_INSTALLED:  # pragma: no cover
                 from pyxem.utils._azimuthal_integrations import (
@@ -2088,15 +2094,11 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             k_axis.convert_to_uniform_axis()
         if not isinstance(t_axis, UniformDataAxis):
             t_axis.convert_to_uniform_axis()
+
         t_axis.name = "Radians"
         t_axis.units = "Rad"
-
-        if azimuth_range is None:
-            t_axis.scale = np.pi * 2 / npt_azim
-            t_axis.offset = -np.pi
-        else:
-            t_axis.scale = (azimuth_range[1] - azimuth_range[0]) / npt
-            t_axis.offset = azimuth_range[0]
+        t_axis.scale = (azimuth_range[1] - azimuth_range[0]) / npt_azim
+        t_axis.offset = azimuth_range[0]
 
         k_axis.name = "Radius"
         k_axis.scale = (radial_range[1] - radial_range[0]) / npt
