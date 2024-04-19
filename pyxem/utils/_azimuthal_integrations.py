@@ -241,6 +241,8 @@ def _get_control_points(npt, npt_azim, radial_range, azimuthal_range, affine):
         The center of the diffraction pattern
     radial_range: (float, float)
         The radial range of the data
+    azimuthal_range: (float, float)
+        The azumuthal range of the data, in radians
 
     Returns
     -------
