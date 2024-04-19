@@ -81,7 +81,9 @@ def match_template_dilate(
         image**2, dilated_template[::-1, ::-1], mode="valid"
     )[1:-1, 1:-1]
 
-    template_mean = template.mean()
+    template_mean = template[
+        dilated_template.astype(bool)
+    ].mean()  # only consider the pixels in the dilated template
     template_volume = np.sum(dilated_template)
     template_ssd = np.sum((template - template_mean) ** 2)
 
@@ -89,8 +91,8 @@ def match_template_dilate(
     numerator = xcorr - image_window_sum * template_mean
 
     denominator = image_window_sum2
-    np.divide(image_window_sum, template_volume, out=image_window_sum)
     np.multiply(image_window_sum, image_window_sum, out=image_window_sum)
+    np.divide(image_window_sum, template_volume, out=image_window_sum)
     denominator -= image_window_sum
     denominator *= template_ssd
     np.maximum(denominator, 0, out=denominator)  # sqrt of negative number not allowed
