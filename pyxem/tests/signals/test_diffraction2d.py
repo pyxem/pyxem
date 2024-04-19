@@ -448,6 +448,19 @@ class TestAzimuthalIntegral2d:
         return ones_diff
 
     @pytest.fixture
+    def arange(self):
+        # signal looks as follows:
+        # 0 1
+        # 2 3
+        arange_diff = Diffraction2D(data=np.arange(4).reshape(2, 2))
+        arange_diff.axes_manager.signal_axes[0].scale = 1
+        arange_diff.axes_manager.signal_axes[1].scale = 1
+        arange_diff.axes_manager.signal_axes[0].name = "kx"
+        arange_diff.axes_manager.signal_axes[1].name = "ky"
+        arange_diff.unit = "2th_deg"
+        return arange_diff
+
+    @pytest.fixture
     def ring(self):
         ring_pattern = Diffraction2D(data=np.ones(shape=(100, 100)))
         rr, cc, val = circle_perimeter_aa(r=50, c=50, radius=30, shape=(100, 100))
@@ -606,6 +619,44 @@ class TestAzimuthalIntegral2d:
         pol = signal.get_azimuthal_integral2d(npt=20, mean=True)
 
         assert np.allclose(np.nanmax(pol.data), max_val)
+
+    # polar unwrapping `arange` should look like [3 1 0 2]
+    # since data looks like:
+    # 0 1
+    # 2 3
+    # and the data gets unwrapped from the center and downwards, using the right hand rule
+    @pytest.mark.parametrize(
+        [
+            "azimuthal_range",
+            "expected_output",
+        ],
+        [
+            [
+                (0 * np.pi / 2, 1 * np.pi / 2),
+                3,
+            ],
+            [
+                (1 * np.pi / 2, 2 * np.pi / 2),
+                1,
+            ],
+            [
+                (2 * np.pi / 2, 3 * np.pi / 2),
+                0,
+            ],
+            [
+                (3 * np.pi / 2, 4 * np.pi / 2),
+                2,
+            ],
+        ],
+    )
+    def test_azimuthal_integration_range(
+        self, arange, azimuthal_range, expected_output
+    ):
+        arange.calibrate.center = None  # set center
+        quadrant = arange.get_azimuthal_integral2d(
+            npt=10, npt_azim=10, azimuth_range=azimuthal_range, mean=True
+        )
+        assert np.allclose(quadrant.data[~np.isnan(quadrant.data)], expected_output)
 
 
 class TestPyFAIIntegration:
