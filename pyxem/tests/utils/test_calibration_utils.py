@@ -134,7 +134,7 @@ class TestCalibrationClass:
         s = Diffraction2D(np.zeros((100, 100)))
         s.calibrate(scale=0.1, center=None)
         slices, factors, factor_slices = s.calibrate._get_slices_and_factors(
-            npt=100, npt_azim=360, radial_range=(0, 4)
+            npt=100, npt_azim=360, radial_range=(0, 4), azimuthal_range=(0, 2 * np.pi)
         )
         # check that the number of pixels for each radial slice is the same
         sum_factors = [np.sum(factors[f[0] : f[1]]) for f in factor_slices]
@@ -148,7 +148,7 @@ class TestCalibrationClass:
         all_sum = np.sum(sum_factors)
         assert np.allclose(all_sum, 3.1415 * 40**2, atol=1)
         slices, factors, factor_slices = s.calibrate._get_slices_and_factors(
-            npt=100, npt_azim=360, radial_range=(0, 15)
+            npt=100, npt_azim=360, radial_range=(0, 15), azimuthal_range=(0, 2 * np.pi)
         )
         # check that the number of pixels for each radial slice is the same
         sum_factors = [np.sum(factors[f[0] : f[1]]) for f in factor_slices]
@@ -157,9 +157,7 @@ class TestCalibrationClass:
         # Up to rounding due to the fact that we are actually finding the area of an n-gon where
         # n = npt_azim
         all_sum = np.sum(sum_factors)
-        # For some reason we are missing 1 row/ column of pixels on the edge
-        # of the image so this is 9801 instead of 10000!
-        # assert np.allclose(all_sum, 10000, atol=1)
+        assert np.allclose(all_sum, 10000, atol=1)
 
     def test_get_slices_and_factors1d(self):
         s = Diffraction2D(np.zeros((100, 100)))
