@@ -101,7 +101,7 @@
     {
       "name": "Tiarnan Doherty"
     },
-
+    
     {
       "name":"Tomas Ostasevicius"
     },
@@ -118,6 +118,10 @@
     {
       "name": "Petr Vacek",
       "orcid": "0000-0002-1625-9258"
+    },
+    {
+      "name":"Viljar Johan Femoen",
+      "affiliation": "Norwegian University of Science and Technology"
     }
   ]
 }
