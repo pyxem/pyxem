@@ -23,11 +23,10 @@ import hyperspy.api as hs
 from hyperspy._signals.lazy import LazySignal
 from hyperspy.signal import BaseSignal
 import numpy as np
-from orix.crystal_map import CrystalMap
-from orix.quaternion import Rotation
+from orix.crystal_map import CrystalMap, Phase
+from orix.quaternion import Rotation, Orientation
 from orix.vector import Vector3d
 from orix.plot import IPFColorKeyTSL
-from diffsims.simulations import Simulation2D
 from transforms3d.euler import mat2euler
 
 from pyxem.utils.indexation_utils import get_nth_best_solution
@@ -182,7 +181,36 @@ class OrientationMap(DiffractionVectors2D):
     def simulation(self, value):
         self.metadata.set_item("simulation", value)
 
-    def to_crystal_map(self):
+    def to_single_phase_orientations(self) -> Orientation:
+        """Convert the orientation map to an `Orientation`-object,
+        given a single-phase simulation.
+        """
+        if not isinstance(self.simulation.phases, Phase):
+            raise ValueError("Multiple phases found in simulation")
+
+        # Use the quaternion data from rotations to support 2D rotations,
+        # i.e. unique rotations for each navigation position
+        rotations = hs.signals.Signal2D(self.simulation.rotations.data)
+
+        def rotation_from_orientation_map(result, rotations):
+            index, _, rotation, mirror = result.T
+            index = index.astype(int)
+            ori = rotations[index]
+            euler = Orientation(ori).to_euler(degrees=True) * mirror[..., np.newaxis]
+            euler[:, 0] = rotation
+            ori = Orientation.from_euler(euler, degrees=True).data
+            return ori
+
+        return Orientation(
+            self.map(
+                rotation_from_orientation_map,
+                rotations=rotations,
+                inplace=False,
+            ),
+            symmetry=self.simulation.phases.point_group,
+        )
+
+    def to_crystal_map(self) -> CrystalMap:
         """Convert the orientation map to an `orix.CrystalMap` object"""
         pass
 
@@ -278,11 +306,20 @@ class OrientationMap(DiffractionVectors2D):
             markers = hs.plot.markers.Points.from_signal(markers_signal)
             yield markers
 
-    def to_navigator(self):
+    def to_navigator(self, direction: Vector3d = Vector3d.zvector()):
         """Create a colored navigator and a legend (in the form of a marker) which can be passed as the
         navigator argument to the `plot` method of some signal.
         """
-        pass
+        oris = self.to_single_phase_orientations()[:, :, 0]
+        ipfcolorkey = IPFColorKeyTSL(oris.symmetry, direction)
+
+        float_rgb = ipfcolorkey.orientation2color(oris)
+        int_rgb = (float_rgb * 255).astype(np.uint8)
+
+        s = hs.signals.Signal1D(int_rgb)
+        s.change_dtype("rgb8")
+
+        return s
 
     def plot_over_signal(self, signal, annotate=False, **kwargs):
         """Convenience method to plot the orientation map and the n-best matches over the signal.
