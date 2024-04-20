@@ -179,25 +179,123 @@ class OrientationMap(DiffractionVectors2D):
         self.metadata.set_item("simulation", value)
 
     def to_crystal_map(self):
+        """Convert the orientation map to an `orix.CrystalMap` object"""
         pass
 
-    def to_markers(self):
-        pass
+    def to_markers(self, n_best: int = 1, annotate=False, **kwargs):
+        """Convert the orientation map to a set of markers for plotting.
 
-    def to_navigator(self):
-        pass
-
-    def plot_over_signal(self, annotate=False, **kwargs):
-        """
         Parameters
         ----------
-        annotate
-        kwargs
+        annotate : bool
+            If True, the euler rotation and the correlation will be annotated on the plot using
+            the `Texts` class from hyperspy.
+        """
+        def marker_generator_factory(n_best_entry: int):
+            def marker_generator(entry):
+                # Get data
+                index, correlation, rotation, factor = entry[n_best_entry]
+                # Get coordinates of reflections
+                _, _, coords = self.simulation.get_simulation(int(index))
+                # Mirror data if necessary
+                coords.data[:, 1] *= factor
+                # Rotation matrix for the in-plane rotation
+                T = Rotation.from_euler((rotation, 0, 0), degrees=True).to_matrix().squeeze()
+                coords = coords.data @ T
+                # x and y needs to swap, and we don't want z. Therefore, use slice(1, 0, -1)
+                return coords[:, 1::-1]
+            return marker_generator
 
-        Returns
-        -------
+        def reciprocal_lattice_vector_to_text(vec):
+            def add_bar(i: int) -> str:
+                if i < 0:
+                    return f"$\\bar{{{abs(i)}}}$"
+                else:
+                    return f"{i}"
+            out = []
+            for hkl in vec.hkl:
+                hkl = np.round(hkl).astype(np.int16)
+                out.append(f"({add_bar(hkl[0])} {add_bar(hkl[1])} {add_bar(hkl[2])})")
+            return out
+
+        def text_generator_factory(n_best_entry: int):
+            def text_generator(entry):
+                # Get data
+                index, correlation, rotation, factor = entry[n_best_entry]
+                _, _, vecs = self.simulation.get_simulation(int(index))
+                return reciprocal_lattice_vector_to_text(vecs)
+            return text_generator
+
+        for n in range(n_best):
+            markers_signal = self.map(
+                marker_generator_factory(n),
+                inplace=False,
+                ragged=True,
+                lazy_output=True,
+            )
+            markers = hs.plot.markers.Points.from_signal(markers_signal, color="red")
+            yield markers
+            if annotate:
+                text_signal = self.map(
+                    text_generator_factory(n),
+                    inplace=False,
+                    ragged=True,
+                    lazy_output=False,
+                )
+                texts = np.empty(self.axes_manager.navigation_shape, dtype=object)
+                for i in range(texts.shape[0]):
+                    for j in range(texts.shape[1]):
+                        texts[i, j] = ["a", str(i) + str(j), "a b c"]
+                text_markers = hs.plot.markers.Texts.from_signal(markers_signal, texts=np.swapaxes(text_signal.data, 0, 1), color="black")
+                yield text_markers
+
+
+    def to_polar_markers(self, n_best: int = 1):
+        r_templates, theta_templates, intensities_templates = self.simulation.polar_flatten_simulations()
+
+        def marker_generator_factory(n_best_entry: int):
+            def marker_generator(entry):
+                index, correlation, rotation, factor = entry[n_best_entry]
+                r = r_templates[int(index)]
+                theta = theta_templates[int(index)]
+                theta +=  2*np.pi + np.deg2rad(rotation)
+                theta %= 2*np.pi
+                theta -= np.pi
+                return np.array((theta, r)).T
+            return marker_generator
+
+        for n in range(n_best):
+            markers_signal = self.map(
+                marker_generator_factory(n),
+                inplace=False,
+                ragged=True,
+                lazy_output=True,
+            )
+            markers = hs.plot.markers.Points.from_signal(markers_signal)
+            yield markers
+
+    def to_navigator(self):
+        """Create a colored navigator and a legend (in the form of a marker) which can be passed as the
+        navigator argument to the `plot` method of some signal.
+        """
+        pass
+
+    def plot_over_signal(self, signal, annotate=False, **kwargs):
+        """Convenience method to plot the orientation map and the n-best matches over the signal.
+
+        Parameters
+        ----------
+        signal : BaseSignal
+            The signal to plot the orientation map over.
+        annotate: bool
+            If True, the euler rotation and the correlation will be annotated on the plot using
+            the `Texts` class from hyperspy.
 
         """
+        pass
+
+    def plot_inplane_rotation(self, **kwargs):
+        """Plot the in-plane rotation of the orientation map as a 2D map."""
         pass
 
 
