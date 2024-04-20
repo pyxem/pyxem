@@ -49,6 +49,7 @@ def match_template_dilate(
         Value to pad the image with if mode is 'constant'
     """
 
+    image = image.astype(float, copy=False)
     if image.ndim < template.ndim:
         raise ValueError(
             "Dimensionality of template must be less than or "
