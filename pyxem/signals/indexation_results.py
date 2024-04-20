@@ -17,6 +17,7 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 from warnings import warn
+from typing import Iterator, Union, Literal
 
 import hyperspy.api as hs
 from hyperspy._signals.lazy import LazySignal
@@ -24,6 +25,9 @@ from hyperspy.signal import BaseSignal
 import numpy as np
 from orix.crystal_map import CrystalMap
 from orix.quaternion import Rotation
+from orix.vector import Vector3d
+from orix.plot import IPFColorKeyTSL
+from diffsims.simulations import Simulation2D
 from transforms3d.euler import mat2euler
 
 from pyxem.utils.indexation_utils import get_nth_best_solution
@@ -171,7 +175,7 @@ class OrientationMap(DiffractionVectors2D):
         self._signal_type = "orientation_map"
 
     @property
-    def simulation(self):
+    def simulation(self) -> Simulation2D:
         return self.metadata.get_item("simulation")
 
     @simulation.setter
@@ -182,7 +186,7 @@ class OrientationMap(DiffractionVectors2D):
         """Convert the orientation map to an `orix.CrystalMap` object"""
         pass
 
-    def to_markers(self, n_best: int = 1, annotate=False, **kwargs):
+    def to_markers(self, n_best: int = 1, annotate=False, marker_color: str = "red", text_color: str = "black"):
         """Convert the orientation map to a set of markers for plotting.
 
         Parameters
@@ -190,6 +194,10 @@ class OrientationMap(DiffractionVectors2D):
         annotate : bool
             If True, the euler rotation and the correlation will be annotated on the plot using
             the `Texts` class from hyperspy.
+        marker_color: str, optional
+            The color of the point markers used for simulated reflections
+        text_color: str, optional
+            The color used for the text annotations for reflections. Does nothing if `annotate` is `False`.
         """
         def marker_generator_factory(n_best_entry: int):
             def marker_generator(entry):
@@ -233,7 +241,7 @@ class OrientationMap(DiffractionVectors2D):
                 ragged=True,
                 lazy_output=True,
             )
-            markers = hs.plot.markers.Points.from_signal(markers_signal, color="red")
+            markers = hs.plot.markers.Points.from_signal(markers_signal, color=marker_color)
             yield markers
             if annotate:
                 text_signal = self.map(
@@ -242,15 +250,11 @@ class OrientationMap(DiffractionVectors2D):
                     ragged=True,
                     lazy_output=False,
                 )
-                texts = np.empty(self.axes_manager.navigation_shape, dtype=object)
-                for i in range(texts.shape[0]):
-                    for j in range(texts.shape[1]):
-                        texts[i, j] = ["a", str(i) + str(j), "a b c"]
-                text_markers = hs.plot.markers.Texts.from_signal(markers_signal, texts=np.swapaxes(text_signal.data, 0, 1), color="black")
+                text_markers = hs.plot.markers.Texts.from_signal(markers_signal, texts=text_signal.data.T, color=text_color)
                 yield text_markers
 
 
-    def to_polar_markers(self, n_best: int = 1):
+    def to_polar_markers(self, n_best: int = 1) -> Iterator[hs.plot.markers.Markers]:
         r_templates, theta_templates, intensities_templates = self.simulation.polar_flatten_simulations()
 
         def marker_generator_factory(n_best_entry: int):
@@ -290,9 +294,13 @@ class OrientationMap(DiffractionVectors2D):
         annotate: bool
             If True, the euler rotation and the correlation will be annotated on the plot using
             the `Texts` class from hyperspy.
-
+        
+        Notes
+        -----
+        The kwargs are passed to the `signal.plot` function call
         """
-        pass
+        signal.plot(**kwargs)
+        signal.add_marker(self.to_markers(1, annotate=annotate))
 
     def plot_inplane_rotation(self, **kwargs):
         """Plot the in-plane rotation of the orientation map as a 2D map."""
