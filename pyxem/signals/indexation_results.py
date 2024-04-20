@@ -28,6 +28,7 @@ from orix.quaternion import Rotation, Orientation
 from orix.vector import Vector3d
 from orix.plot import IPFColorKeyTSL
 from transforms3d.euler import mat2euler
+from diffsims.crystallography import ReciprocalLatticeVector
 
 from pyxem.utils.indexation_utils import get_nth_best_solution
 from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
@@ -174,7 +175,7 @@ class OrientationMap(DiffractionVectors2D):
         self._signal_type = "orientation_map"
 
     @property
-    def simulation(self) -> Simulation2D:
+    def simulation(self):
         return self.metadata.get_item("simulation")
 
     @simulation.setter
@@ -185,7 +186,7 @@ class OrientationMap(DiffractionVectors2D):
         """Convert the orientation map to an `Orientation`-object,
         given a single-phase simulation.
         """
-        if not isinstance(self.simulation.phases, Phase):
+        if self.simulation.has_multiple_phases:
             raise ValueError("Multiple phases found in simulation")
 
         # Use the quaternion data from rotations to support 2D rotations,
@@ -210,15 +211,65 @@ class OrientationMap(DiffractionVectors2D):
             symmetry=self.simulation.phases.point_group,
         )
 
+    def to_single_phase_vectors(self, n_best_index: int = 0) -> hs.signals.Signal1D:
+        """
+        Get the reciprocal lattice vectors for a single-phase simulation.
+
+        Parameters
+        ----------
+        n_best_index: int
+            The index into the `n_best` matchese
+        """
+
+        if self.simulation.has_multiple_phases:
+            raise ValueError("Multiple phases found in simulation")
+
+        # Use vector data as signal in case of different vectors per navigation position
+        vectors_signal = hs.signals.Signal1D(self.simulation.coordinates)
+
+        def extract_vectors_from_orientation_map(result, all_vectors):
+            index, _, rotation, mirror = result[n_best_index, :].T
+            index = index.astype(int)
+            vectors = all_vectors[index]
+            # Copy manually, as deepcopy adds a lot of overhead with the phase
+            vectors = ReciprocalLatticeVector(vectors.phase, xyz=vectors.data.copy())
+            # Flip y, as discussed in https://github.com/pyxem/pyxem/issues/925
+            vectors.y = -vectors.y
+            # Mirror if necessary
+            vectors.y = mirror * vectors.y
+            rotation_matrix = (
+                Rotation.from_euler(
+                    (rotation, 0, 0), degrees=True, direction="crystal2lab"
+                )
+            ).to_matrix()
+            vectors = vectors.rotate_from_matrix(rotation_matrix.squeeze())
+
+            return vectors
+
+        return self.map(
+            extract_vectors_from_orientation_map,
+            all_vectors=vectors_signal,
+            inplace=False,
+        )
+
     def to_crystal_map(self) -> CrystalMap:
         """Convert the orientation map to an `orix.CrystalMap` object"""
         pass
 
-    def to_markers(self, n_best: int = 1, annotate=False, marker_color: str = "red", text_color: str = "black"):
+    def to_single_phase_markers(
+        self,
+        n_best: int = 1,
+        annotate: bool = False,
+        marker_color: str = "red",
+        text_color: str = "black",
+        lazy: bool = True,
+    ):
         """Convert the orientation map to a set of markers for plotting.
 
         Parameters
         ----------
+        n_best: int
+            The amount of solutions to plot
         annotate : bool
             If True, the euler rotation and the correlation will be annotated on the plot using
             the `Texts` class from hyperspy.
@@ -227,73 +278,57 @@ class OrientationMap(DiffractionVectors2D):
         text_color: str, optional
             The color used for the text annotations for reflections. Does nothing if `annotate` is `False`.
         """
-        def marker_generator_factory(n_best_entry: int):
-            def marker_generator(entry):
-                # Get data
-                index, correlation, rotation, factor = entry[n_best_entry]
-                # Get coordinates of reflections
-                _, _, coords = self.simulation.get_simulation(int(index))
-                # Mirror data if necessary
-                coords.data[:, 1] *= factor
-                # Rotation matrix for the in-plane rotation
-                T = Rotation.from_euler((rotation, 0, 0), degrees=True).to_matrix().squeeze()
-                coords = coords.data @ T
-                # x and y needs to swap, and we don't want z. Therefore, use slice(1, 0, -1)
-                return coords[:, 1::-1]
-            return marker_generator
 
-        def reciprocal_lattice_vector_to_text(vec):
+        def vectors_to_coordinates(vectors):
+            return np.vstack((vectors.x, vectors.y)).T
+
+        def vectors_to_text(vectors):
             def add_bar(i: int) -> str:
                 if i < 0:
                     return f"$\\bar{{{abs(i)}}}$"
                 else:
                     return f"{i}"
+
             out = []
-            for hkl in vec.hkl:
-                hkl = np.round(hkl).astype(np.int16)
-                out.append(f"({add_bar(hkl[0])} {add_bar(hkl[1])} {add_bar(hkl[2])})")
+            for hkl in vectors.hkl:
+                h, k, l = np.round(hkl).astype(np.int16)
+                out.append(f"({add_bar(h)} {add_bar(k)} {add_bar(l)})")
             return out
 
-        def text_generator_factory(n_best_entry: int):
-            def text_generator(entry):
-                # Get data
-                index, correlation, rotation, factor = entry[n_best_entry]
-                _, _, vecs = self.simulation.get_simulation(int(index))
-                return reciprocal_lattice_vector_to_text(vecs)
-            return text_generator
-
         for n in range(n_best):
-            markers_signal = self.map(
-                marker_generator_factory(n),
-                inplace=False,
-                ragged=True,
-                lazy_output=True,
+            vectors = self.to_single_phase_vectors(n)
+            coords = vectors.map(
+                vectors_to_coordinates, inplace=False, lazy_output=lazy, ragged=True
             )
-            markers = hs.plot.markers.Points.from_signal(markers_signal, color=marker_color)
+            markers = hs.plot.markers.Points.from_signal(coords, color=marker_color)
             yield markers
+
             if annotate:
-                text_signal = self.map(
-                    text_generator_factory(n),
-                    inplace=False,
-                    ragged=True,
-                    lazy_output=False,
+                texts = vectors.map(
+                    vectors_to_text, inplace=False, lazy_output=lazy, ragged=True
                 )
-                text_markers = hs.plot.markers.Texts.from_signal(markers_signal, texts=text_signal.data.T, color=text_color)
+                text_markers = hs.plot.markers.Texts.from_signal(
+                    coords, texts=texts.data.T, color=text_color
+                )
                 yield text_markers
 
-
     def to_polar_markers(self, n_best: int = 1) -> Iterator[hs.plot.markers.Markers]:
-        r_templates, theta_templates, intensities_templates = self.simulation.polar_flatten_simulations()
+        (
+            r_templates,
+            theta_templates,
+            intensities_templates,
+        ) = self.simulation.polar_flatten_simulations()
 
         def marker_generator_factory(n_best_entry: int):
             def marker_generator(entry):
                 index, correlation, rotation, factor = entry[n_best_entry]
                 r = r_templates[int(index)]
                 theta = theta_templates[int(index)]
-                theta +=  2*np.pi + np.deg2rad(rotation)
-                theta %= 2*np.pi
+                theta += 2 * np.pi + np.deg2rad(rotation)
+                theta %= 2 * np.pi
                 theta -= np.pi
                 return np.array((theta, r)).T
+
             return marker_generator
 
         for n in range(n_best):
@@ -321,7 +356,7 @@ class OrientationMap(DiffractionVectors2D):
 
         return s
 
-    def plot_over_signal(self, signal, annotate=False, **kwargs):
+    def plot_over_signal(self, signal, annotate=False, **plot_kwargs):
         """Convenience method to plot the orientation map and the n-best matches over the signal.
 
         Parameters
@@ -331,13 +366,14 @@ class OrientationMap(DiffractionVectors2D):
         annotate: bool
             If True, the euler rotation and the correlation will be annotated on the plot using
             the `Texts` class from hyperspy.
-        
+
         Notes
         -----
         The kwargs are passed to the `signal.plot` function call
         """
-        signal.plot(**kwargs)
-        signal.add_marker(self.to_markers(1, annotate=annotate))
+        nav = self.to_navigator()
+        signal.plot(navigator=nav, **plot_kwargs)
+        signal.add_marker(self.to_single_phase_markers(1, annotate=annotate))
 
     def plot_inplane_rotation(self, **kwargs):
         """Plot the in-plane rotation of the orientation map as a 2D map."""
