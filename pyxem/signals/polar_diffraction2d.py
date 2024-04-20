@@ -19,6 +19,7 @@
 
 from hyperspy.signals import Signal2D
 from hyperspy._signals.lazy import LazySignal
+from numpy import rad2deg
 
 from pyxem.signals.common_diffraction import CommonDiffraction
 from pyxem.utils._correlations import _correlation, _power, _pearson_correlation
@@ -371,6 +372,20 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
             output_signal_size=(n_best, 4),
             output_dtype=float,
         )
+
+        # Translate in-plane rotation from index to degrees
+        # by using the calibration of the axis
+        def rotation_index_to_degrees(data):
+            data = data.copy()
+            axis = self.axes_manager.signal_axes[0].axis
+            ind = data[:, 2].astype(int)
+            data[:, 2] = rad2deg(axis[ind])
+            # Account for the 90 degree discrepancy between the X_L axis
+            # and the origin of the azimuthal axis of the polar signal
+            data[:, 2] -= 90
+            return data
+
+        orientation.map(rotation_index_to_degrees)
 
         orientation.set_signal_type("orientation_map")
         orientation.simulation = simulation
