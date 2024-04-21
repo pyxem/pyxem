@@ -24,7 +24,7 @@ s_filtered_h = s.subtract_diffraction_background("h-dome", inplace=False, h=0.7)
 
 
 hs.plot.plot_images(
-    [s.inav[2, 2], s_filtered.inav[2, 2], s_filtered_median.inav[2, 2]],
+    [s.inav[2, 2], s_filtered.inav[2, 2], s_filtered_h.inav[2, 2]],
     label=["Original", "Difference of Gaussians", "H-Dome"],
     tight_layout=True,
     norm="symlog",
