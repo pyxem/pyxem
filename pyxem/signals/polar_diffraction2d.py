@@ -274,7 +274,7 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
 
             For 'radial median' no extra parameters are necessary.
 
-            For 'radial percentile' the 'percentile' argument decides 
+            For 'radial percentile' the 'percentile' argument decides
             which percentile to substract.
         **kwargs :
                 To be passed to the chosen method.
@@ -296,7 +296,13 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
             )
         subtraction_function = method_dict[method]
 
-        return self.map(subtraction_function, inplace=inplace, **kwargs)
+        return self.map(
+            subtraction_function,
+            inplace=inplace,
+            output_dtype=self.data.dtype,
+            output_signal_size=self.axes_manager._signal_shape_in_array,
+            **kwargs,
+        )
 
 
 class LazyPolarDiffraction2D(LazySignal, PolarDiffraction2D):
