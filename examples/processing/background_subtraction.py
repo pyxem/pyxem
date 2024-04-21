@@ -11,35 +11,42 @@ example is shown in the 'Filtering Data'-example.
 import pyxem as pxm
 import hyperspy.api as hs
 
-s = pxm.data.twinned_nanowire(allow_download=True)
+s = pxm.data.tilt_boundary_data()
 
 s_filtered = s.subtract_diffraction_background(
     "difference of gaussians",
     inplace=False,
-    min_sigma=2,
-    max_sigma=8,
+    min_sigma=3,
+    max_sigma=20,
 )
 
+s_filtered_h = s.subtract_diffraction_background("h-dome", inplace=False, h=0.7)
+
+
 hs.plot.plot_images(
-    [s.inav[9, 42], s_filtered.inav[9, 42]],
-    label=["Original", "Difference of Gaussians"],
+    [s.inav[2, 2], s_filtered.inav[2, 2], s_filtered_median.inav[2, 2]],
+    label=["Original", "Difference of Gaussians", "H-Dome"],
     tight_layout=True,
     norm="symlog",
     cmap="viridis",
     colorbar=None,
 )
+
 # %%
-
-"""
-The available methods differ for `Diffraction2D` datasets and `PolarDiffraction2D`
-datasets.
-"""
-
+# ======================
+# Filtering Polar Images
+# ======================
+# The available methods differ for `Diffraction2D` datasets and `PolarDiffraction2D`
+# datasets.
+#
 # Set the center of the diffraction pattern to its default,
 # i.e. the middle of the image
+
 s.calibrate.center = None
 
+# %%
 # Transform to polar coordinates
+
 s_polar = s.get_azimuthal_integral2d(npt=100, mean=True)
 
 s_polar_filtered = s_polar.subtract_diffraction_background(
@@ -47,11 +54,19 @@ s_polar_filtered = s_polar.subtract_diffraction_background(
     inplace=False,
 )
 
+s_polar_filtered2 = s_polar.subtract_diffraction_background(
+    "radial percentile",
+    percentile=70,
+    inplace=False,
+)
+
 hs.plot.plot_images(
-    [s_polar.inav[9, 42], s_polar_filtered.inav[9, 42]],
-    label=["Original (polar)", "Radial Median"],
+    [s_polar.inav[2, 2], s_polar_filtered.inav[2, 2], s_polar_filtered2.inav[2, 2]],
+    label=["Original (polar)", "Radial Median", "Radial Percentile"],
     tight_layout=True,
     norm="symlog",
     cmap="viridis",
     colorbar=None,
 )
+
+# %%
