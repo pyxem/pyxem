@@ -14,11 +14,11 @@ import hyperspy.api as hs
 s = pxm.data.twinned_nanowire(allow_download=True)
 
 s_filtered = s.subtract_diffraction_background(
-    "difference of gaussians", 
-    inplace=False, 
-    min_sigma=2, 
+    "difference of gaussians",
+    inplace=False,
+    min_sigma=2,
     max_sigma=8,
-    )
+)
 
 hs.plot.plot_images(
     [s.inav[9, 42], s_filtered.inav[9, 42]],
@@ -29,6 +29,7 @@ hs.plot.plot_images(
     colorbar=None,
 )
 # %%
+
 """
 The available methods differ for `Diffraction2D` datasets and `PolarDiffraction2D`
 datasets.
@@ -42,9 +43,9 @@ s.calibrate.center = None
 s_polar = s.get_azimuthal_integral2d(npt=100, mean=True)
 
 s_polar_filtered = s_polar.subtract_diffraction_background(
-    "radial median", 
-    inplace=False, 
-    )
+    "radial median",
+    inplace=False,
+)
 
 hs.plot.plot_images(
     [s_polar.inav[9, 42], s_polar_filtered.inav[9, 42]],
