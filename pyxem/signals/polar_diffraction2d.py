@@ -24,6 +24,11 @@ from pyxem.signals.common_diffraction import CommonDiffraction
 from pyxem.utils._correlations import _correlation, _power, _pearson_correlation
 from pyxem.utils._deprecated import deprecated
 
+from pyxem.utils._background_subtraction import (
+    _polar_subtract_radial_median,
+    _polar_subtract_radial_percentile,
+)
+
 
 class PolarDiffraction2D(CommonDiffraction, Signal2D):
     """Signal class for two-dimensional diffraction data in polar coordinates.
@@ -73,7 +78,7 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
             mask=mask,
             normalize=normalize,
             inplace=inplace,
-            **kwargs
+            **kwargs,
         )
         s = self if inplace else correlation
         theta_axis = s.axes_manager.signal_axes[0]
@@ -255,6 +260,49 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
         k_axis.scale = self.axes_manager[-1].scale
 
         return correlation
+
+    def subtract_diffraction_background(
+        self, method="radial median", inplace=False, **kwargs
+    ):
+        """Background subtraction of the diffraction data.
+
+        Parameters
+        ----------
+        method : str, optional
+            'radial median', 'radial percentile'
+            Default 'radial median'.
+
+            For 'radial median' no extra parameters are necessary.
+
+            For 'radial percentile' the 'percentile' argument decides
+            which percentile to substract.
+        **kwargs :
+                To be passed to the chosen method.
+
+        Returns
+        -------
+        s : PolarDiffraction2D or LazyPolarDiffraction2D signal
+
+        """
+        method_dict = {
+            "radial median": _polar_subtract_radial_median,
+            "radial percentile": _polar_subtract_radial_percentile,
+        }
+        if method not in method_dict:
+            raise NotImplementedError(
+                f"The method specified, '{method}',"
+                f" is not implemented.  The different methods are:  "
+                f"{', '.join(method_dict.keys())}."
+            )
+        subtraction_function = method_dict[method]
+
+        return self.map(
+            subtraction_function,
+            inplace=inplace,
+            output_dtype=self.data.dtype,
+            output_signal_size=self.axes_manager._signal_shape_in_array,
+            **kwargs,
+        )
 
 
 class LazyPolarDiffraction2D(LazySignal, PolarDiffraction2D):

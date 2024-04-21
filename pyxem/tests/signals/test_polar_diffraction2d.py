@@ -249,3 +249,31 @@ class TestDecomposition:
         s = PolarDiffraction2D(diffraction_pattern)
         s.decomposition()
         assert isinstance(s, PolarDiffraction2D)
+
+
+class TestSubtractingDiffractionBackground:
+    @pytest.fixture
+    def noisy_data(self):
+        data = np.random.rand(3, 2, 20, 15)
+        data[:, :, 10:12, 7:9] = 100
+        dp = PolarDiffraction2D(data)
+        return dp
+
+    @pytest.mark.parametrize(
+        ["method", "kwargs"],
+        [
+            ("radial median", {}),
+            ("radial percentile", {"percentile": 40}),
+            pytest.param(
+                "this method does not exist",
+                {},
+                marks=pytest.mark.xfail(raises=NotImplementedError),
+            ),
+        ],
+    )
+    def test_subtract_backgrounds(self, method, kwargs, noisy_data):
+        kwargs["inplace"] = False
+
+        subtracted = noisy_data.subtract_diffraction_background(method=method, **kwargs)
+        assert isinstance(subtracted, PolarDiffraction2D)
+        assert subtracted.data.shape == noisy_data.data.shape

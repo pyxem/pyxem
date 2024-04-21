@@ -100,3 +100,29 @@ def _subtract_hdome(frame, **kwargs):
     )
     bg_subtracted = bg_subtracted / np.max(bg_subtracted)
     return bg_subtracted
+
+
+def _polar_subtract_radial_median(frame):
+    """Background removal using the radial median"""
+    median = np.nanmedian(frame, axis=1)
+    image = frame - median[:, np.newaxis]
+    image[image < 0] = 0
+    return image
+
+
+def _polar_subtract_radial_percentile(frame, percentile: int):
+    """Background removal using the specified radial percentile.
+
+    Parameters
+    ----------
+    frame : NumPy 2D array
+    percentile : percentile, between 0 and 100
+
+    Note
+    -------
+    if `percentile` is 50, then this is equivalent to `_polar_subtract_radial_median`.
+    """
+    percentile = np.nanpercentile(frame, percentile, axis=1)
+    image = frame - percentile[:, np.newaxis]
+    image[image < 0] = 0
+    return image

@@ -30,6 +30,7 @@ Added
 - Added GPU support for lazy signals. (#1012)
 - Added GPU processing for :meth:`pyxem.signals.Diffraction2D.get_azimuthal_integral2d` (#1012)
 - Added method for calibrating the detector gain (#1046)
+- Added :meth:`pyxem.signals.PolarDiffraction2D.subtract_diffraction_background` for polar-specific background subtraction (#1062)
 
 Deprecated
 ----------
