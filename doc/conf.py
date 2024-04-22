@@ -88,6 +88,9 @@ linkcheck_ignore = [
 templates_path = [
     "_templates",
 ]
+_version = pyxem.__version__
+version_match = "dev" if "dev" in _version else ".".join(_version.split(".")[:2])
+
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files. This image also affects
@@ -106,6 +109,10 @@ html_theme_options = {
     "announcement": "Check out the Free "
     " <a href='https://www.ntnu.edu/web/temgemini/nordtemhub'>(Big) Data analysis of 4D-STEM</a> "
     " workshop in Trondheim, Norway, 11-13 June 2024",
+    "switcher": {
+        "json_url": "https://pyxem.readthedocs.io/en/latest/_static/switcher.json",
+        "version_match": version_match,
+    },
 }
 
 html_context = {

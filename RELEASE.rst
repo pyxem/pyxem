@@ -58,3 +58,6 @@ Post-release action
   Merge after checks pass.
   Monitor the Azure pipeline CI to ensure the release is successfully published to
   conda-forge.
+
+- Update the version switcher in ``doc/_static/switcher.json`` to include the new
+  build for the documentation.
