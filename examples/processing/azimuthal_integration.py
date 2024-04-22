@@ -93,8 +93,6 @@ nano_crystals.get_azimuthal_integral2d(
 # The `azimuth_range`-argument lets you choose what angular range to calculate the azimuthal integral for.
 # The range can be increasing, decreasing, and does not need to be a multiple of pi.
 
-nano_crystals.calibrate(center=None)
-
 pol1 = nano_crystals.get_azimuthal_integral2d(npt=100, azimuth_range=(-np.pi, np.pi))
 
 pol2 = nano_crystals.get_azimuthal_integral2d(npt=100, azimuth_range=(0, 1))
