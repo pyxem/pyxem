@@ -113,6 +113,7 @@ html_theme_options = {
         "json_url": "https://pyxem.readthedocs.io/en/latest/_static/switcher.json",
         "version_match": version_match,
     },
+    "navbar_start": ["navbar-logo", "version-switcher"],
 }
 
 html_context = {
