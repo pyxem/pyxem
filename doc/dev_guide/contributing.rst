@@ -225,6 +225,19 @@ Tips for writing Jupyter notebooks that are meant to be converted to reST text f
   must be added to the gallery in the README.rst to be included in the
   documentation pages.
 
+Switching between Documentation Versions
+----------------------------------------
+
+To make switching between documentation versions easier, we have a version switcher
+in the documentation. This switcher is located in the ``doc/_static/switcher.json`` file
+or at https://pyxem.readthedocs.io/en/latest/_static/switcher.json.  Because the switcher
+points to the latest version of the documentation, any update to the documentation will
+be retroactively applied to all previous versions which have the switcher enabled.
+
+To update the switcher, you will need to update the ``doc/_static/switcher.json`` file
+with the new version number. This will ensure that the version switcher in the
+documentation is up to date.
+
 Continuous integration (CI)
 ===========================
 
