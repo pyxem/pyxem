@@ -261,6 +261,10 @@ To make a new release, follow these steps:
 Then you can increase the version number in ``release_info.py`` to the next minor version
 and add a dev suffix (e.g. "0.17.dev0").
 
+After the new version documentation is public. You should update the doc/_static/switcher.json
+file with the new version of the documentation. This will ensure that the version switcher in the
+documentation is up to date.
+
 .. note::
    If any of the steps fail, you can restart the CI server by clicking on the "Re-run
    jobs" button on the GitHub Actions page. Sometimes the CI server fails because of

@@ -110,7 +110,6 @@ html_theme_options = {
     " <a href='https://www.ntnu.edu/web/temgemini/nordtemhub'>(Big) Data analysis of 4D-STEM</a> "
     " workshop in Trondheim, Norway, 11-13 June 2024",
     "switcher": {
-        # Update when merged and released
         "json_url": "https://pyxem.readthedocs.io/en/latest/_static/switcher.json",
         "version_match": version_match,
     },
