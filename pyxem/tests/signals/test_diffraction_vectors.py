@@ -375,7 +375,8 @@ class TestSubpixelRefinement:
         cen = _conventional_xc(sq, kernel, upsample_factor=1)
         assert np.allclose(np.array(cen), (-2.0, 0.0))
 
-    def test_subpixel_refinement_com(self):
+    @pytest.mark.parametrize("intensity", (True, False))
+    def test_subpixel_refinement_com(self, intensity):
         import pyxem.data.dummy_data.make_diffraction_test_data as mdtd
         import pyxem as pxm
         import numpy as np
@@ -390,11 +391,17 @@ class TestSubpixelRefinement:
         dtd.add_diffraction_image(di)
         s = dtd.get_signal()
         temp = s.template_match_disk(disk_r=5, subtract_min=False)
-        pks = temp.find_peaks(threshold_abs=0.4, interactive=False)
-        dv = pxm.signals.DiffractionVectors.from_peaks(pks)
+        dv = temp.get_diffraction_vectors(
+            threshold_abs=0.4, min_distance=5, get_intensity=intensity
+        )
         dv.subpixel_refine(s, method="center-of-mass")
+        if intensity:
+            assert dv.data[0, 0].shape[1] == 3
+        else:
+            assert dv.data[0, 0].shape[1] == 2
 
-    def test_subpixel_refinement_xc(self):
+    @pytest.mark.parametrize("intensity", (True, False))
+    def test_subpixel_refinement_xc(self, intensity):
         import pyxem.data.dummy_data.make_diffraction_test_data as mdtd
         import pyxem as pxm
         import numpy as np
@@ -409,9 +416,14 @@ class TestSubpixelRefinement:
         dtd.add_diffraction_image(di)
         s = dtd.get_signal()
         temp = s.template_match_disk(disk_r=5, subtract_min=False)
-        pks = temp.find_peaks(threshold_abs=0.4, interactive=False)
-        dv = pxm.signals.DiffractionVectors.from_peaks(pks)
+        dv = temp.get_diffraction_vectors(
+            threshold_abs=0.4, min_distance=5, get_intensity=intensity
+        )
         dv.subpixel_refine(s, method="cross-correlation", upsample_factor=2, disk_r=5)
+        if intensity:
+            assert dv.data[0, 0].shape[1] == 3
+        else:
+            assert dv.data[0, 0].shape[1] == 2
 
 
 class TestConvertVectors:

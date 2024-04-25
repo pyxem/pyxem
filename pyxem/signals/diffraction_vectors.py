@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-from functools import cached_property
+from functools import cached_property, partial
 from warnings import warn
 
 import numpy as np
@@ -50,6 +50,7 @@ from pyxem.utils._subpixel_finding import (
     _conventional_xc_map,
     _center_of_mass_map,
     _get_simulated_disc,
+    _wrap_columns,
 )
 
 from pyxem.utils._deprecated import deprecated
@@ -344,8 +345,11 @@ class DiffractionVectors(BaseSignal):
             square_size=square_size,
             columns=columns,
         )
+        method_func = partial(_wrap_columns, f=funct, columns=columns)
+
+        _wrap_columns
         refined_vectors = signal.map(
-            funct,
+            method_func,
             vectors=pixels,
             inplace=False,
             ragged=True,

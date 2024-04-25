@@ -46,7 +46,7 @@ def _get_experimental_square(z, vector, square_size):
     if square_size % 2 != 0:
         raise ValueError("'square_size' must be an even number")
     # reverse the order of the vector
-    cx, cy, half_ss = vector[1], vector[0], int(square_size / 2)
+    cx, cy, half_ss = int(vector[1]), int(vector[0]), int(square_size / 2)
     _z = z[cy - half_ss : cy + half_ss + 1, cx - half_ss : cx + half_ss + 1]
     return _z
 
@@ -151,7 +151,55 @@ def _conventional_xc(slic, kernel, upsample_factor):
 #####################################################
 
 
-def _center_of_mass_map(dp, vectors, square_size, offsets, scales, columns):
+def _center_of_mass_map(dp, vectors, square_size, offsets, scales):
+    shifts = np.zeros_like(vectors, dtype=np.float64)
+    for i, vector in enumerate(vectors):
+        square = _get_experimental_square(dp, vector, square_size)
+        shifts[i] = [a - square_size / 2 for a in _center_of_mass_hs(square)]
+
+    new_vectors = (vectors + shifts) * scales + offsets
+    return new_vectors
+
+
+def _conventional_xc_map(
+    dp,
+    vectors,
+    kernel,
+    square_size,
+    upsample_factor,
+    offsets,
+    scales,
+):
+    vectors = np.array(vectors).astype(int)
+    shifts = np.zeros_like(vectors, dtype=np.float64)
+    for i, vector in enumerate(vectors):
+        expt_disc = _get_experimental_square(dp, vector, square_size)
+        shifts[i] = _conventional_xc(expt_disc, kernel, upsample_factor)
+
+    return (vectors + shifts) * scales + offsets
+
+
+def _wrap_columns(dp, vectors, f, columns=None, **kwargs):
+    """
+    Take some function, f, and apply it to the 2d array X returning a list
+    of peak positions.  The intensity at each peak position is then appended
+    to the returned list of peaks
+
+    Parameters
+    ----------
+    X: 2-D array-like
+        The input image used to find peaks
+    f: func
+        The passed function to find peaks
+    kwargs:
+        Any additional keyword arguments passed to f
+
+    Returns
+    -------
+        peaks:array-like
+            A 2d array with columns [x, y, intensity]
+
+    """
     if vectors.shape == (2,):
         vectors = np.array(
             [
@@ -165,30 +213,7 @@ def _center_of_mass_map(dp, vectors, square_size, offsets, scales, columns):
         ]
         extra_columns = vectors[:, other_indexes]
         vectors = vectors[:, columns]
-    shifts = np.zeros_like(vectors, dtype=np.float64)
-    for i, vector in enumerate(vectors):
-        square = _get_experimental_square(dp, vector, square_size)
-        shifts[i] = [a - square_size / 2 for a in _center_of_mass_hs(square)]
-
-    new_vectors = (vectors + shifts) * scales + offsets
+    new_vectors = f(dp, vectors[:, columns], **kwargs)
     if columns is not None:
-        new_vectors = np.hstack(new_vectors, extra_columns)
+        new_vectors = np.hstack((new_vectors, extra_columns))
     return new_vectors
-
-
-def _conventional_xc_map(
-    dp,
-    vectors,
-    kernel,
-    square_size,
-    upsample_factor,
-    offsets,
-    scales,
-    columns,
-):
-    vectors = np.array(vectors).astype(int)
-    shifts = np.zeros_like(vectors[columns], dtype=np.float64)
-    for i, vector in enumerate(vectors):
-        expt_disc = _get_experimental_square(dp, vector, square_size)
-        shifts[i] = _conventional_xc(expt_disc, kernel, upsample_factor)
-    return (vectors + shifts) * scales + offsets
