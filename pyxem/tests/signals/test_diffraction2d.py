@@ -620,11 +620,11 @@ class TestAzimuthalIntegral2d:
 
         assert np.allclose(np.nanmax(pol.data), max_val)
 
-    # polar unwrapping `arange` should look like [3 1 0 2]
+    # polar unwrapping `arange` should look like [1 0 2 3]
     # since data looks like:
     # 0 1
     # 2 3
-    # and the data gets unwrapped from the center and downwards, using the right hand rule
+    # and the data gets unwrapped from the center to the right
     @pytest.mark.parametrize(
         [
             "azimuthal_range",
@@ -633,19 +633,19 @@ class TestAzimuthalIntegral2d:
         [
             [
                 (0 * np.pi / 2, 1 * np.pi / 2),
-                3,
-            ],
-            [
-                (1 * np.pi / 2, 2 * np.pi / 2),
                 1,
             ],
             [
-                (2 * np.pi / 2, 3 * np.pi / 2),
+                (1 * np.pi / 2, 2 * np.pi / 2),
                 0,
             ],
             [
-                (3 * np.pi / 2, 4 * np.pi / 2),
+                (2 * np.pi / 2, 3 * np.pi / 2),
                 2,
+            ],
+            [
+                (3 * np.pi / 2, 4 * np.pi / 2),
+                3,
             ],
         ],
     )
