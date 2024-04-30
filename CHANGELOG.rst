@@ -29,6 +29,7 @@ Added
   from a 4D STEM dataset (#1014)
 - Added GPU support for lazy signals. (#1012)
 - Added GPU processing for :meth:`pyxem.signals.Diffraction2D.get_azimuthal_integral2d` (#1012)
+- Added :meth:`pyxem.signals.Diffraction2D.get_diffraction_vectors` to directly return the diffraction vectors (#1053)
 - Added method for calibrating the detector gain (#1046)
 - Added :meth:`pyxem.signals.PolarDiffraction2D.subtract_diffraction_background` for polar-specific background subtraction (#1062)
 

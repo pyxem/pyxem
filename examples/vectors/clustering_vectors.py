@@ -17,12 +17,7 @@ s = pxm.data.mgo_nanocrystals()
 s.data[s.data < 120] = 1
 s.filter(gaussian_filter, sigma=(0.5, 0.5, 0, 0), inplace=True)  # only in real space
 s.template_match_disk(disk_r=3, subtract_min=False, inplace=True)
-pks = s.find_peaks(
-    interactive=False, threshold_abs=0.5, min_distance=3, get_intensity=True
-)
-vectors = pxm.signals.DiffractionVectors.from_peaks(
-    pks
-)  # calibration is automatically set
+vectors = s.get_diffraction_vectors(threshold_abs=0.5, min_distance=3)
 
 # Now we can convert the vectors into a 2D array of rows/columns
 flat_vectors = (

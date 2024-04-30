@@ -22,12 +22,8 @@ s.axes_manager.signal_axes[1].offset = -19.3
 
 s.filter(gaussian_filter, sigma=(1, 1, 0, 0), inplace=True)  # only in real space
 s.template_match_disk(disk_r=5, subtract_min=False, inplace=True)
-pks = s.find_peaks(
-    interactive=False, threshold_abs=0.5, min_distance=3, get_intensity=True
-)
-vectors = pxm.signals.DiffractionVectors.from_peaks(
-    pks
-)  # calibration is automatically set
+
+vectors = s.get_diffraction_vectors(threshold_abs=0.5, min_distance=3)
 
 # Now we can convert to polar vectors
 pol = vectors.to_polar()
