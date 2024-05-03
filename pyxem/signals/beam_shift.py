@@ -22,6 +22,7 @@ from scipy.ndimage import rotate
 import pyxem.utils._beam_shift_tools as bst
 from hyperspy._signals.lazy import LazySignal
 from hyperspy.signals import Signal1D
+from hyperspy.utils.plot import plot_images
 
 
 class BeamShift(Signal1D):
@@ -95,8 +96,22 @@ class BeamShift(Signal1D):
         s_bs = self._deepcopy_with_new_data(plane_image)
         return s_bs
 
-    def plot(self):
-        self.T.plot()
+    def plot(self, tight_layout=True, **kwargs):
+        """
+        Plot the beam shifts, utilizing HyperSpy's utils.plot.plot_images
+        function.
+
+        """
+        x_shift = self.isig[0]
+        y_shift = self.isig[1]
+        if not "suptitle" in kwargs:
+            label = ["x-shift", "y-shift"]
+            kwargs['label'] = label
+        axes_list = plot_images(
+            (self.isig[0], self.isig[1]),
+            tight_layout=tight_layout,
+            **kwargs,
+        )
 
     def get_bivariate_histogram(
         self, histogram_range=None, masked=None, bins=200, spatial_std=3
