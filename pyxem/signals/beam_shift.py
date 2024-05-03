@@ -102,6 +102,11 @@ class BeamShift(Signal1D):
         function.
 
         """
+        if self._lazy:
+            raise ValueError(
+                "plot is not implemented for lazy signals, "
+                "run compute() first"
+            )
         x_shift = self.isig[0]
         y_shift = self.isig[1]
         if not "suptitle" in kwargs:
