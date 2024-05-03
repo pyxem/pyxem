@@ -89,3 +89,25 @@ nano_crystals.get_azimuthal_integral2d(
     npt=100, npt_azim=360, inplace=False
 ).sum().plot()
 # %%
+
+# The `azimuth_range`-argument lets you choose what angular range to calculate the azimuthal integral for.
+# The range can be increasing, decreasing, and does not need to be a multiple of pi.
+
+pol1 = nano_crystals.get_azimuthal_integral2d(npt=100, azimuth_range=(-np.pi, np.pi))
+
+pol2 = nano_crystals.get_azimuthal_integral2d(npt=100, azimuth_range=(0, 1))
+
+pol3 = nano_crystals.get_azimuthal_integral2d(
+    npt=100, npt_azim=720, azimuth_range=(0, 4 * np.pi)
+)
+
+pol4 = nano_crystals.get_azimuthal_integral2d(npt=100, azimuth_range=(np.pi, 0))
+
+hs.plot.plot_images(
+    [pol1.sum(), pol2.sum(), pol3.sum(), pol4.sum()],
+    label=["(-pi, pi) default", "(0, 1)", "(0, 4pi)", "(pi, 0)"],
+    cmap="viridis",
+    tight_layout=True,
+    colorbar=None,
+)
+# %%

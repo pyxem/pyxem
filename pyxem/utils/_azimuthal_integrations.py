@@ -225,7 +225,7 @@ def _get_factors(control_points, slices, pixel_extents):
     return np.array(factors), np.array(factors_slice)
 
 
-def _get_control_points(npt, npt_azim, radial_range, affine):
+def _get_control_points(npt, npt_azim, radial_range, azimuthal_range, affine):
     """Get the control points in the form of an array (npt_azim*npt, 4, 2) representing
     the cartesian coordinates of the control points for each azimuthal pixel.
 
@@ -241,6 +241,8 @@ def _get_control_points(npt, npt_azim, radial_range, affine):
         The center of the diffraction pattern
     radial_range: (float, float)
         The radial range of the data
+    azimuthal_range: (float, float)
+        The azumuthal range of the data, in radians
 
     Returns
     -------
@@ -249,7 +251,7 @@ def _get_control_points(npt, npt_azim, radial_range, affine):
 
     """
     r = np.linspace(radial_range[0], radial_range[1], npt + 1)
-    phi = np.linspace(0, 2 * np.pi, npt_azim + 1)
+    phi = np.linspace(azimuthal_range[0], azimuthal_range[1], npt_azim + 1)
     control_points = np.empty(((len(r) - 1) * (len(phi) - 1), 4, 2))
     # lower left
     control_points[:, 0, 0] = (np.cos(phi[:-1]) * r[:-1][:, np.newaxis]).ravel()

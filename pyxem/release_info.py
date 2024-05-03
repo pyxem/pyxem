@@ -40,6 +40,7 @@ credits = [
     "Matt von Lany",
     "Rob Tovey",
     "Petr Vacek",
+    "Viljar Johan Femoen",
 ]
 license = "GPLv3+"
 maintainer = "Duncan Johnstone, Phillip Crout, Magnus Nord, Carter Francis"

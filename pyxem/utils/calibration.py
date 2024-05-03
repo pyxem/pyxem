@@ -316,7 +316,7 @@ class Calibration:
             extents.append(extent)
         return extents
 
-    def get_slices2d(self, npt, npt_azim, radial_range=None):
+    def get_slices2d(self, npt, npt_azim, radial_range=None, azimuthal_range=None):
         """Get the slices and factors for some image that can be used to
         slice the image for 2d integration.
 
@@ -328,9 +328,11 @@ class Calibration:
             The number of azimuthal points
         """
         radial_range = self._get_radial_range(radial_range)
+        if azimuthal_range is None:
+            azimuthal_range = (-np.pi, np.pi)
         # Get the slices and factors for the integration
         slices, factors, factors_slice = self._get_slices_and_factors(
-            npt, npt_azim, radial_range
+            npt, npt_azim, radial_range, azimuthal_range
         )
         return slices, factors, factors_slice, radial_range
 
@@ -380,7 +382,7 @@ class Calibration:
         npt_azim = 360  # approximate a circle with a 360-gon... Using a circle is harder/ not much better
 
         slices, factors, factors_slice, radial_range = self.get_slices2d(
-            npt, 360, radial_range
+            npt, npt_azim, radial_range
         )
 
         # convert into 1d slices
@@ -406,9 +408,22 @@ class Calibration:
         indexes, facts = np.vstack(indexes), np.hstack(facts)
         return indexes, facts, factor_slices, radial_range
 
-    def _get_slices_and_factors(self, npt, npt_azim, radial_range):
+    def _get_slices_and_factors(self, npt, npt_azim, radial_range, azimuthal_range):
+        # In `_get_control_points`, positive x-direction is downwards, and positive y is to the right.
+        # This is 90 degrees off from the pyxem definition:
+        # https://pyxem.readthedocs.io/en/stable/tutorials/pyxem-demos/13%20Conventions.html
+        # As the azimuthal integration performed with a `Calibration`-object should align with
+        # the $X_L$ / $Y_L$-definitions in pyxem, we add pi/2 to the azimuthal range.
+        # This aligns the azimuthal angle 0 to $X_L$.
+        azimuthal_range = (
+            azimuthal_range[0] + np.pi / 2,
+            azimuthal_range[1] + np.pi / 2,
+        )
+
         # get the points which bound each azimuthal pixel
-        control_points = _get_control_points(npt, npt_azim, radial_range, self.affine)
+        control_points = _get_control_points(
+            npt, npt_azim, radial_range, azimuthal_range, self.affine
+        )
 
         # get the min and max indices for each control point using the
         pixel_ext_x, pixel_ext_y = self.pixel_extent
