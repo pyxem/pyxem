@@ -316,17 +316,14 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
         frac_keep=0.1,
         n_best=1,
         normalize_templates=True,
-        **kwargs
+        **kwargs,
     ):
         """Match the orientation with some simulated diffraction patterns using
         an accelerated orientation mapping algorithm.
-
         The details of the algorithm are described in the paper:
         "Free, flexible and fast: Orientation mapping using the multi-core and
          GPU-accelerated template matching capabilities in the python-based open
          source 4D-STEM analysis toolbox Pyxem"
-
-
         Parameters
         ----------
         simulation : DiffractionSimulation
@@ -341,7 +338,6 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
             Normalize the templates to the same intensity.
         kwargs : dict
             Any additional options for the :meth:`~hyperspy.signal.BaseSignal.map` function.
-
         Returns
         -------
         orientation : BaseSignal
