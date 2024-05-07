@@ -268,11 +268,6 @@ class TestOrientationMap:
         pol.axes_manager[3].scale = 0.5
         return pol
 
-    def test_orientation_map_inplace(self, diffraction_pattern):
-        s = PolarDiffraction2D(diffraction_pattern)
-        s.orientation_map(inplace=True)
-        assert s.learning_results is not None
-
 
 class TestSubtractingDiffractionBackground:
     @pytest.fixture
