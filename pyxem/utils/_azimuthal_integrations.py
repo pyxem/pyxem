@@ -200,29 +200,82 @@ def _get_factors(control_points, slices, pixel_extents):
     factors_slice = []
     start = 0
     # unpack extents
-    x_extent, y_extent = pixel_extents
+    all_boxes = get_boxes(slices, pixel_extent=pixel_extents)
+    max_num = np.max([len(x) for x in all_boxes])
+    num_box = len(all_boxes)
+    boxes = shapely.empty((num_box, max_num))
+
+    p = shapely.polygons(control_points)
+    for i, bx in enumerate(all_boxes):
+        try:
+            b = shapely.box(bx[:, 0], bx[:, 1], bx[:, 2], bx[:, 3])
+            boxes[i, : len(b)] = b
+        except IndexError:
+            pass
+
+    factors = shapely.area(
+        shapely.intersection(boxes, p[:, np.newaxis])
+    ) / shapely.area(boxes)
+
+    is_nan = np.isnan(factors[:, 0])
+    not_nan = np.logical_not(np.isnan(factors))
+
+    factors = factors.flatten()
+    factors = factors[np.logical_not(np.isnan(factors))]
+
+    num = np.sum(not_nan, axis=1)
+    factors_slice = np.cumsum(num)
+    factors_slice = np.hstack(([0], factors_slice))
+    factors_slice = np.stack((factors_slice[:-1], factors_slice[1:])).T
+    return factors, factors_slice
+
+
+def get_boxes(slices, pixel_extent):
+    all_boxes = []
+    x_extent, y_extent = pixel_extent
     x_ext_left, x_ext_right = x_extent
     y_ext_left, y_ext_right = y_extent
-    for cp, sl in zip(control_points, slices):
-        p = Polygon(cp)
+    for sl in slices:
         x_edges = list(range(sl[0], sl[2]))
         y_edges = list(range(sl[1], sl[3]))
         boxes = []
         for i, x in enumerate(x_edges):
             for j, y in enumerate(y_edges):
-                b = box(
+                b = [
                     x_ext_left[x],
                     y_ext_left[y],
                     x_ext_right[x],
                     y_ext_right[y],
-                )
+                ]
                 boxes.append(b)
-        factors += list(
-            shapely.area(shapely.intersection(boxes, p)) / shapely.area(boxes)
-        )
-        factors_slice.append([start, start + len(boxes)])
-        start += len(boxes)
-    return np.array(factors), np.array(factors_slice)
+        all_boxes.append(np.array(boxes))
+    return all_boxes
+
+
+def get_area(polygon, box_corners):
+    """
+
+    Parameters
+    ----------
+    polygon:
+        4x2 array of the polygon vertices
+    box_corners:
+        4x1 array of the box corners (x0, y0, x1, y1)
+
+    Returns
+    -------
+
+    """
+    for i in range(4):
+        start = polygon[i]
+        stop = polygon[(i + 1) % 4]
+        x_values = [start[0], stop[0]]
+        if x_values[0] < box_corners[0]:
+            x_values[0] = box_corners[0]
+        y_values = [start[1], stop[1]]
+
+    x_values = polygon[:, 0]
+    y_values = polygon[:, 1]
 
 
 def _get_control_points(npt, npt_azim, radial_range, azimuthal_range, affine):
