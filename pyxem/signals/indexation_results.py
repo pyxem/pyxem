@@ -170,10 +170,6 @@ class OrientationMap(DiffractionVectors2D):
 
     _signal_type = "orientation_map"
 
-    def __init__(self):
-        super().__init__()
-        self._signal_type = "orientation_map"
-
     @property
     def simulation(self):
         return self.metadata.get_item("simulation")
@@ -181,6 +177,12 @@ class OrientationMap(DiffractionVectors2D):
     @simulation.setter
     def simulation(self, value):
         self.metadata.set_item("simulation", value)
+
+    def deepcopy(self):
+        """Deepcopy the signal"""
+        self.simulation._phase_slider = None
+        self.simulation._rotation_slider = None
+        return super().deepcopy()
 
     def to_single_phase_orientations(self) -> Orientation:
         """Convert the orientation map to an `Orientation`-object,
@@ -237,12 +239,10 @@ class OrientationMap(DiffractionVectors2D):
             vectors.y = -vectors.y
             # Mirror if necessary
             vectors.y = mirror * vectors.y
-            rotation_matrix = (
-                Rotation.from_euler(
-                    (rotation, 0, 0), degrees=True, direction="crystal2lab"
-                )
-            ).to_matrix()
-            vectors = vectors.rotate_from_matrix(rotation_matrix.squeeze())
+            rotation = Rotation.from_euler(
+                (rotation, 0, 0), degrees=True, direction="crystal2lab"
+            )
+            vectors = ~rotation * vectors
 
             return vectors
 
@@ -300,7 +300,9 @@ class OrientationMap(DiffractionVectors2D):
             coords = vectors.map(
                 vectors_to_coordinates, inplace=False, lazy_output=lazy, ragged=True
             )
-            markers = hs.plot.markers.Points.from_signal(coords, color=marker_color)
+            markers = hs.plot.markers.Points.from_signal(
+                coords, facecolor="none", edgecolor=marker_color, sizes=(20,)
+            )
             yield markers
 
             if annotate:
