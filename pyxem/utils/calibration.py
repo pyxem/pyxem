@@ -182,7 +182,7 @@ class Calibration:
 
         This sets the signal axes to be a `~hyperspy.axes.DataAxis` instead of a UniformAxis to
         account for the Ewald sphere curvature. This is the most accurate method of calibration
-        but requires a known beam energy/wavelength and detector distance or to calibrate the
+        but requires a known beam energy/wavelength and detector distance or to calibration the
         experimental configuration with a known standard.
 
         Parameters
@@ -493,7 +493,7 @@ class Calibration:
         if not self.flat_ewald:
             raise ValueError(
                 "To set the center of a curved ewald sphere "
-                "use the s.calibrate.detector method"
+                "use the s.calibration.detector method"
             )
         if center is None:
             for ax in self.signal.axes_manager.signal_axes:
@@ -533,7 +533,7 @@ class Calibration:
             )
             if pixel_size is None or dist is None:
                 raise ValueError(
-                    "The dector must be first initialized with the s.calibrate.detector method"
+                    "The dector must be first initialized with the s.calibration.detector method"
                 )
             detector = Detector(
                 pixel1=pixel_size,
@@ -552,7 +552,9 @@ class Calibration:
 
 
 @deprecated(
-    since="0.18.0", removal="1.0.0", alternative="pyxem.signals.Diffraction2D.calibrate"
+    since="0.18.0",
+    removal="1.0.0",
+    alternative="pyxem.signals.Diffraction2D.calibration",
 )
 def find_diffraction_calibration(
     patterns,

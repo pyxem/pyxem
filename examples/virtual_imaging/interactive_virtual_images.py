@@ -20,7 +20,7 @@ s.plot_integrated_intensity(circle)
 
 # Also we can do the same with a 1D signal
 s = pxm.data.dummy_data.get_cbed_signal()
-s.calibrate(center=None)
+s.calibration(center=None)
 s1d = s.get_azimuthal_integral1d(npt=100, mean=True)
 span = hs.roi.SpanROI(left=15.5, right=20)
 s1d.plot_integrated_intensity(span)

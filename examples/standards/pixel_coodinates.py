@@ -17,8 +17,8 @@ from skimage.morphology import disk
 
 
 s = pxm.signals.Diffraction2D(disk((10)))
-s.calibrate.center = None
-print(s.calibrate.center)
+s.calibration.center = None
+print(s.calibration.center)
 
 # %%
 
@@ -27,13 +27,13 @@ s.plot(axes_ticks=True)
 
 # From the plot above you can see that hyperspy automatically sets the axes ticks to be centered
 # on each pixel. This means that for a 21x21 pixel image, the center is at (-10, -10) in pixel coordinates.
-# if we change the scale using the calibrate function it will automatically adjust the center.  Here it is
+# if we change the scale using the calibration function it will automatically adjust the center.  Here it is
 # now (-1, -1)
 
-s.calibrate.scale = 0.1
-s.calibrate.units = "nm$^{-1}$"
+s.calibration.scale = 0.1
+s.calibration.units = "nm$^{-1}$"
 s.plot(axes_ticks=True)
-print(s.calibrate.center)
+print(s.calibration.center)
 
 
 # %%
@@ -54,9 +54,9 @@ az.plot()
 # Now consider the case where we have non-linear axes. In this case the center is still (10,10)
 # but things are streatched based on the effects of the Ewald Sphere.
 
-s.calibrate.beam_energy = 200
-s.calibrate.detector(pixel_size=0.1, detector_distance=3)
-print(s.calibrate.center)
+s.calibration.beam_energy = 200
+s.calibration.detector(pixel_size=0.1, detector_distance=3)
+print(s.calibration.center)
 s.plot()
 
 az = s.get_azimuthal_integral2d(npt=30)

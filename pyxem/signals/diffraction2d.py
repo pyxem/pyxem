@@ -116,7 +116,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             Passed to the __init__ of Signal2D
         """
         super().__init__(*args, **kwargs)
-        self.calibrate = Calibration(self)
+        self.calibration = Calibration(self)
 
     def apply_affine_transformation(
         self, D, order=1, keep_dtype=False, inplace=True, *args, **kwargs
@@ -1781,7 +1781,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
     @deprecated(
         since="0.18",
         removal="1.0.0",
-        alternative="pyxem.signals.diffraction2d.calibrate",
+        alternative="pyxem.signals.diffraction2d.calibration",
     )
     def set_ai(
         self, center=None, wavelength=None, affine=None, radial_range=None, **kwargs
@@ -1916,11 +1916,11 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         if not usepyfai:
             # get_slices1d should be sped up in the future by
             # getting rid of shapely and using numba on the for loop
-            indexes, facts, factor_slices, radial_range = self.calibrate.get_slices1d(
+            indexes, facts, factor_slices, radial_range = self.calibration.get_slices1d(
                 npt, radial_range=radial_range
             )
             if mask is None:
-                mask = self.calibrate.mask
+                mask = self.calibration.mask
             integration = self.map(
                 _slice_radial_integrate1d,
                 indexes=indexes,
@@ -2064,11 +2064,13 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         if not usepyfai:
             # get_slices2d should be sped up in the future by
             # getting rid of shapely and using numba on the for loop
-            slices, factors, factors_slice, radial_range = self.calibrate.get_slices2d(
-                npt,
-                npt_azim,
-                radial_range=radial_range,
-                azimuthal_range=azimuth_range,
+            slices, factors, factors_slice, radial_range = (
+                self.calibration.get_slices2d(
+                    npt,
+                    npt_azim,
+                    radial_range=radial_range,
+                    azimuthal_range=azimuth_range,
+                )
             )
             if self._gpu and CUPY_INSTALLED:  # pragma: no cover
                 from pyxem.utils._azimuthal_integrations import (
@@ -2093,7 +2095,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
                 )
             else:
                 if mask is None:
-                    mask = self.calibrate.mask
+                    mask = self.calibration.mask
                 integration = self.map(
                     _slice_radial_integrate,
                     slices=slices,

@@ -132,8 +132,8 @@ class TestCalibrationClass:
 
     def test_get_slices_and_factors(self):
         s = Diffraction2D(np.zeros((100, 100)))
-        s.calibrate(scale=0.1, center=None)
-        slices, factors, factor_slices = s.calibrate._get_slices_and_factors(
+        s.calibration(scale=0.1, center=None)
+        slices, factors, factor_slices = s.calibration._get_slices_and_factors(
             npt=100, npt_azim=360, radial_range=(0, 4), azimuthal_range=(0, 2 * np.pi)
         )
         # check that the number of pixels for each radial slice is the same
@@ -147,7 +147,7 @@ class TestCalibrationClass:
         # n = npt_azim
         all_sum = np.sum(sum_factors)
         assert np.allclose(all_sum, 3.1415 * 40**2, atol=1)
-        slices, factors, factor_slices = s.calibrate._get_slices_and_factors(
+        slices, factors, factor_slices = s.calibration._get_slices_and_factors(
             npt=100, npt_azim=360, radial_range=(0, 15), azimuthal_range=(0, 2 * np.pi)
         )
         # check that the number of pixels for each radial slice is the same
@@ -161,8 +161,8 @@ class TestCalibrationClass:
 
     def test_get_slices_and_factors1d(self):
         s = Diffraction2D(np.zeros((100, 100)))
-        s.calibrate(scale=0.1, center=None)
-        slices, factors, factor_slices, _ = s.calibrate.get_slices1d(
+        s.calibration(scale=0.1, center=None)
+        slices, factors, factor_slices, _ = s.calibration.get_slices1d(
             100, radial_range=(0, 4)
         )
         # check that the number of pixels for each radial slice is the same

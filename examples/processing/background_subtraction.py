@@ -42,7 +42,7 @@ hs.plot.plot_images(
 # Set the center of the diffraction pattern to its default,
 # i.e. the middle of the image
 
-s.calibrate.center = None
+s.calibration.center = None
 
 # %%
 # Transform to polar coordinates
