@@ -17,7 +17,7 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 from warnings import warn
-from typing import Iterator, Union, Literal
+from typing import Union, Literal, Sequence, Iterator
 
 import hyperspy.api as hs
 from hyperspy._signals.lazy import LazySignal
@@ -263,6 +263,7 @@ class OrientationMap(DiffractionVectors2D):
         marker_color: str = "red",
         text_color: str = "black",
         lazy: bool = True,
+        annotation_shift: Sequence[float] = None,
     ):
         """Convert the orientation map to a set of markers for plotting.
 
@@ -277,7 +278,11 @@ class OrientationMap(DiffractionVectors2D):
             The color of the point markers used for simulated reflections
         text_color: str, optional
             The color used for the text annotations for reflections. Does nothing if `annotate` is `False`.
+        annotation_shift: List[float,float], optional
+            The shift to apply to the annotation text. Default is [0,-0.1]
         """
+        if annotation_shift is None:
+            annotation_shift = [0, -0.15]
 
         def vectors_to_coordinates(vectors):
             return np.vstack((vectors.x, vectors.y)).T
@@ -309,8 +314,11 @@ class OrientationMap(DiffractionVectors2D):
                 texts = vectors.map(
                     vectors_to_text, inplace=False, lazy_output=lazy, ragged=True
                 )
+                coords.map(lambda x: x + annotation_shift, inplace=True)
                 text_markers = hs.plot.markers.Texts.from_signal(
-                    coords, texts=texts.data.T, color=text_color
+                    coords,
+                    texts=texts.data.T,
+                    color=text_color,
                 )
                 yield text_markers
 

@@ -37,7 +37,10 @@ sim = generator.calculate_diffraction2d(
         degrees=True,
     ),
     max_excitation_error=0.1,
-    reciprocal_radius=1,
+    reciprocal_radius=1.5,
 )
 orientation_map = polar_si_tilt.get_orientation(sim)
-orientation_map.plot_over_signal(simulated_si_tilt, annotate=True)
+simulated_si_tilt.plot(vmax="99th")
+simulated_si_tilt.add_marker(
+    orientation_map.to_single_phase_markers(annotate=True, text_color="w")
+)

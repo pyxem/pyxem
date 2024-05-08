@@ -779,6 +779,7 @@ def _mixed_matching_lib_to_polar(
     """
     if transpose:
         polar_image = polar_image.T
+    polar_image = np.nan_to_num(polar_image)
     dispatcher = get_array_module(polar_image)
     # remove templates we don't care about with a fast match
     (
