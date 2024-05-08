@@ -232,7 +232,10 @@ class OrientationMap(DiffractionVectors2D):
         def extract_vectors_from_orientation_map(result, all_vectors):
             index, _, rotation, mirror = result[n_best_index, :].T
             index = index.astype(int)
-            vectors = all_vectors[index]
+            if all_vectors.ndim == 0:
+                vectors = all_vectors
+            else:
+                vectors = all_vectors[index]
             # Copy manually, as deepcopy adds a lot of overhead with the phase
             vectors = ReciprocalLatticeVector(vectors.phase, xyz=vectors.data.copy())
             # Flip y, as discussed in https://github.com/pyxem/pyxem/issues/925

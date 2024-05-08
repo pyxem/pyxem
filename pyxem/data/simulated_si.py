@@ -5,9 +5,14 @@ from diffpy.structure import Atom, Lattice, Structure
 from diffsims.generators.simulation_generator import SimulationGenerator
 from scipy.ndimage import gaussian_filter1d
 from pyxem.signals import Diffraction1D, Diffraction2D
+import skimage
 
 
 def si_phase():
+    """Create a silicon phase with space group 227. This is a diamond cubic structure with
+    a lattice parameter of 5.431 Å.
+
+    """
     a = 5.431
     latt = Lattice(a, a, a, 90, 90, 90)
     atom_list = []
@@ -25,7 +30,9 @@ def si_phase():
 def si_tilt():
     p = si_phase()
     gen = SimulationGenerator()
-    rotations = Rotation.from_euler([[0, 0, 0], [10, 0, 0]], degrees=True)
+    rotations = Rotation.from_euler(
+        [[0, 0, 0], [10, 0, 0]], degrees=True, direction="crystal2lab"
+    )
     sim = gen.calculate_diffraction2d(
         phase=p, rotation=rotations, reciprocal_radius=1.5, max_excitation_error=0.1
     )
@@ -51,6 +58,37 @@ def si_tilt():
     tilt.axes_manager.signal_axes[0].scale = 0.01
     tilt.axes_manager.signal_axes[1].scale = 0.01
     return tilt
+
+
+def si_grains(num_grains=4, seed=2, size=20, recip_pixels=128):
+    p = si_phase()
+    gen = SimulationGenerator()
+    rotations = Rotation.random(num_grains)
+    sim = gen.calculate_diffraction2d(
+        phase=p, rotation=rotations, reciprocal_radius=1.5, max_excitation_error=0.1
+    )
+    dps = [
+        sim.irot[i].get_diffraction_pattern(sigma=5, shape=(recip_pixels, recip_pixels))
+        for i in range(num_grains)
+    ]
+    rng = np.random.default_rng(seed)
+    x = rng.integers(0, size, size=num_grains)
+    y = rng.integers(0, size, size=num_grains)
+    navigator = np.zeros((size, size))
+    for i in range(num_grains):
+        navigator[x[i], y[i]] = i + 1
+    navigator = skimage.segmentation.expand_labels(navigator, distance=size)
+    grain_data = np.empty((size, size, recip_pixels, recip_pixels))
+    for i in range(num_grains):
+        grain_data[navigator == i + 1] = dps[i][np.newaxis]
+    grains = Diffraction2D(grain_data)
+    grains.axes_manager.signal_axes[0].name = "kx"
+    grains.axes_manager.signal_axes[1].name = "kx"
+    grains.axes_manager.signal_axes[0].units = r"$\AA^{-1}$"
+    grains.axes_manager.signal_axes[1].units = r"$\AA^{-1}$"
+    grains.axes_manager.signal_axes[0].scale = 0.01
+    grains.axes_manager.signal_axes[1].scale = 0.01
+    return grains
 
 
 def simulated1dsi(
