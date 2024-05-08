@@ -196,10 +196,6 @@ def _get_factors(control_points, slices, pixel_extents):
     each slice. The factors are the area of the intersection of the polygon and the
     sliced pixels.
     """
-    factors = []
-    factors_slice = []
-    start = 0
-    # unpack extents
     all_boxes = get_boxes(slices, pixel_extent=pixel_extents)
     max_num = np.max([len(x) for x in all_boxes])
     num_box = len(all_boxes)
@@ -210,18 +206,16 @@ def _get_factors(control_points, slices, pixel_extents):
         try:
             b = shapely.box(bx[:, 0], bx[:, 1], bx[:, 2], bx[:, 3])
             boxes[i, : len(b)] = b
-        except IndexError:
+        except IndexError:  # the box is empty.
             pass
 
     factors = shapely.area(
         shapely.intersection(boxes, p[:, np.newaxis])
     ) / shapely.area(boxes)
-
-    is_nan = np.isnan(factors[:, 0])
     not_nan = np.logical_not(np.isnan(factors))
 
     factors = factors.flatten()
-    factors = factors[np.logical_not(np.isnan(factors))]
+    factors = factors[not_nan.flatten()]
 
     num = np.sum(not_nan, axis=1)
     factors_slice = np.cumsum(num)
@@ -250,32 +244,6 @@ def get_boxes(slices, pixel_extent):
                 boxes.append(b)
         all_boxes.append(np.array(boxes))
     return all_boxes
-
-
-def get_area(polygon, box_corners):
-    """
-
-    Parameters
-    ----------
-    polygon:
-        4x2 array of the polygon vertices
-    box_corners:
-        4x1 array of the box corners (x0, y0, x1, y1)
-
-    Returns
-    -------
-
-    """
-    for i in range(4):
-        start = polygon[i]
-        stop = polygon[(i + 1) % 4]
-        x_values = [start[0], stop[0]]
-        if x_values[0] < box_corners[0]:
-            x_values[0] = box_corners[0]
-        y_values = [start[1], stop[1]]
-
-    x_values = polygon[:, 0]
-    y_values = polygon[:, 1]
 
 
 def _get_control_points(npt, npt_azim, radial_range, azimuthal_range, affine):
