@@ -21,7 +21,7 @@ mulit_phase = fe_multi_phase_grains()
 # The mean=True argument will return the mean pixel value in each bin rather than the sum
 # this makes the high k values more visible
 
-mulit_phase.calibrate.center = None
+mulit_phase.calibration.center = None
 polar_multi = mulit_phase.get_azimuthal_integral2d(
     npt=100, npt_azim=360, inplace=False, mean=True
 )

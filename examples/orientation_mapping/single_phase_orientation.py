@@ -19,7 +19,7 @@ simulated_si = si_grains()
 # The mean=True argument will return the mean pixel value in each bin rather than the sum
 # this makes the high k values more visible
 
-simulated_si.calibrate.center = None
+simulated_si.calibration.center = None
 polar_si = simulated_si.get_azimuthal_integral2d(
     npt=100, npt_azim=360, inplace=False, mean=True
 )

@@ -19,7 +19,7 @@ simulated_si_tilt = si_tilt()
 # The mean=True argument will return the mean pixel value in each bin rather than the sum
 # this makes the high k values more visible
 
-simulated_si_tilt.calibrate.center = None
+simulated_si_tilt.calibration.center = None
 polar_si_tilt = simulated_si_tilt.get_azimuthal_integral2d(
     npt=100, npt_azim=360, inplace=False, mean=True
 )
