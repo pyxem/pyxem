@@ -195,11 +195,18 @@ class OrientationMap(DiffractionVectors2D):
         # i.e. unique rotations for each navigation position
         rotations = hs.signals.Signal2D(self.simulation.rotations.data)
 
-        def rotation_from_orientation_map(result, rotations):
+        def rotation_from_orientation_map(result, rots):
+            if rots.ndim == 1:
+                rots = rots[np.newaxis, :]
             index, _, rotation, mirror = result.T
             index = index.astype(int)
-            ori = rotations[index]
-            euler = Orientation(ori).to_euler(degrees=True) * mirror[..., np.newaxis]
+            ori = rots[index]
+            euler = (
+                Orientation(ori).to_euler(
+                    degrees=True,
+                )
+                * mirror[..., np.newaxis]
+            )
             euler[:, 0] = rotation
             ori = Orientation.from_euler(euler, degrees=True).data
             return ori
@@ -207,7 +214,7 @@ class OrientationMap(DiffractionVectors2D):
         return Orientation(
             self.map(
                 rotation_from_orientation_map,
-                rotations=rotations,
+                rots=rotations,
                 inplace=False,
             ),
             symmetry=self.simulation.phases.point_group,
@@ -245,7 +252,7 @@ class OrientationMap(DiffractionVectors2D):
             rotation = Rotation.from_euler(
                 (rotation, 0, 0), degrees=True, direction="crystal2lab"
             )
-            vectors = ~rotation * vectors
+            vectors = ~rotation * vectors.to_miller()
 
             return vectors
 

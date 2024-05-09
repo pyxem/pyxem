@@ -1,6 +1,6 @@
 import numpy as np
 from orix.crystal_map import Phase
-from orix.quaternion import Rotation
+from orix.quaternion import Rotation, Orientation
 from diffpy.structure import Atom, Lattice, Structure
 from diffsims.generators.simulation_generator import SimulationGenerator
 from scipy.ndimage import gaussian_filter1d
@@ -31,15 +31,16 @@ def si_tilt():
     p = si_phase()
     gen = SimulationGenerator()
     rotations = Rotation.from_euler(
-        [[0, 0, 0], [10, 0, 0]], degrees=True, direction="crystal2lab"
+        [[0, 0, 0], [10, 0, 0]],
+        degrees=True,
     )
     sim = gen.calculate_diffraction2d(
         phase=p, rotation=rotations, reciprocal_radius=1.5, max_excitation_error=0.1
     )
-    dp1 = sim.get_diffraction_pattern(
-        sigma=5,
-    )
-    dp2 = sim.irot[1].get_diffraction_pattern(sigma=5)
+    dp1 = np.flipud(
+        sim.get_diffraction_pattern(sigma=5, shape=(128, 128))
+    )  # flip up/down to go from scatter to diffraction
+    dp2 = np.flipud(sim.irot[1].get_diffraction_pattern(sigma=5, shape=(128, 128)))
 
     top = np.tile(
         dp1,
@@ -60,15 +61,19 @@ def si_tilt():
     return tilt
 
 
-def si_grains(num_grains=4, seed=2, size=20, recip_pixels=128):
+def si_grains(num_grains=4, seed=2, size=20, recip_pixels=128, return_rotations=False):
     p = si_phase()
     gen = SimulationGenerator()
-    rotations = Rotation.random(num_grains)
+    rotations = Orientation.random(num_grains, symmetry=p.point_group)
     sim = gen.calculate_diffraction2d(
         phase=p, rotation=rotations, reciprocal_radius=1.5, max_excitation_error=0.1
     )
     dps = [
-        sim.irot[i].get_diffraction_pattern(sigma=5, shape=(recip_pixels, recip_pixels))
+        np.flipud(
+            sim.irot[i].get_diffraction_pattern(
+                sigma=5, shape=(recip_pixels, recip_pixels)
+            )
+        )
         for i in range(num_grains)
     ]
     rng = np.random.default_rng(seed)
@@ -88,7 +93,10 @@ def si_grains(num_grains=4, seed=2, size=20, recip_pixels=128):
     grains.axes_manager.signal_axes[1].units = r"$\AA^{-1}$"
     grains.axes_manager.signal_axes[0].scale = 0.01
     grains.axes_manager.signal_axes[1].scale = 0.01
-    return grains
+    if return_rotations:
+        return grains, rotations
+    else:
+        return grains
 
 
 def simulated1dsi(

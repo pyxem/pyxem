@@ -25,12 +25,14 @@ from diffsims.libraries.structure_library import StructureLibrary
 from diffsims.generators.diffraction_generator import DiffractionGenerator
 from diffsims.generators.library_generator import DiffractionLibraryGenerator
 
+from diffsims.generators.simulation_generator import SimulationGenerator
+from orix.sampling import get_sample_reduced_fundamental
+from orix.quaternion import Rotation, Orientation
+
 from pyxem.generators import TemplateIndexationGenerator
-from pyxem.signals import (
-    VectorMatchingResults,
-    DiffractionVectors,
-)
+from pyxem.signals import VectorMatchingResults, DiffractionVectors, OrientationMap
 from pyxem.utils.indexation_utils import OrientationResult
+from pyxem.data import si_grains, si_phase, si_tilt
 
 
 @pytest.fixture
@@ -143,3 +145,79 @@ def test_vector_get_indexed_diffraction_vectors_warn():
     with pytest.warns(Warning):
         match_results.get_indexed_diffraction_vectors(vectors)
     np.testing.assert_allclose(vectors.hkls, [0, 0, 0])
+
+
+class TestOrientationResult:
+    """Testing the OrientationMap class for valid outputs. These tests are based on the
+    examples provided in the documentation.
+    """
+
+    @pytest.fixture
+    def single_rot_orientation_result(self):
+        s = si_tilt()
+        s.calibration.center = None
+        polar_si_tilt = s.get_azimuthal_integral2d(
+            npt=100, npt_azim=360, inplace=False, mean=True
+        )
+        phase = si_phase()
+        generator = SimulationGenerator(200)
+        sim = generator.calculate_diffraction2d(
+            phase,
+            rotation=Rotation.from_euler(
+                [0, 0, 0],
+                degrees=True,
+            ),
+            max_excitation_error=0.1,
+            reciprocal_radius=1.5,
+        )
+        orientation_map = polar_si_tilt.get_orientation(sim)
+        return orientation_map
+
+    @pytest.fixture
+    def multi_rot_orientation_result(self):
+        s, r = si_grains(return_rotations=True)
+        s.calibration.center = None
+        polar = s.get_azimuthal_integral2d(
+            npt=100, npt_azim=180, inplace=False, mean=True
+        )
+        phase = si_phase()
+        generator = SimulationGenerator(200, minimum_intensity=0.05)
+        rotations = get_sample_reduced_fundamental(
+            resolution=1, point_group=phase.point_group
+        )
+        sims = generator.calculate_diffraction2d(
+            phase, rotation=rotations, max_excitation_error=0.1, reciprocal_radius=2
+        )
+        orientations = polar.get_orientation(sims)
+        return orientations, r
+
+    def test_tilt_orientation_result(self, single_rot_orientation_result):
+        assert isinstance(single_rot_orientation_result, OrientationMap)
+        orients = single_rot_orientation_result.to_single_phase_orientations()
+        # Check that the orientations are within 1 degree of the expected value
+        degrees_between = orients.angle_with(
+            Orientation.from_euler([0, 0, 0]), degrees=True
+        )
+        assert np.all(
+            degrees_between[:, :5] <= 1
+        )  # off by 1 degree (due to pixelation?)
+        degrees_between = orients.angle_with(
+            Orientation.from_euler([10, 0, 0], degrees=True), degrees=True
+        )
+        assert np.all(degrees_between[:, 5:] <= 1)
+
+    def test_grain_orientation_result(self, multi_rot_orientation_result):
+        orientations, rotations = multi_rot_orientation_result
+        assert isinstance(rotations, Orientation)
+        assert isinstance(orientations, OrientationMap)
+        orients = orientations.to_single_phase_orientations()
+        # Check that the orientations are within 1 degree of the expected value
+
+        degrees_between = orients.angle_with(rotations, degrees=True)
+        assert np.all(np.min(degrees_between, axis=2) <= 1)
+
+    def test_orientation_result(self, orientation_result):
+        assert isinstance(orientation_result[0], OrientationMap)
+
+    def test_to_orientation(self, orientation_result):
+        orientation_result[0].to_single_phase_orientations()

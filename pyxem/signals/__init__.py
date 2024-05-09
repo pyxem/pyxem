@@ -41,7 +41,7 @@ from .diffraction2d import Diffraction2D, LazyDiffraction2D
 from .polar_vectors import PolarVectors, LazyPolarVectors
 from .electron_diffraction1d import ElectronDiffraction1D, LazyElectronDiffraction1D
 from .electron_diffraction2d import ElectronDiffraction2D, LazyElectronDiffraction2D
-from .indexation_results import VectorMatchingResults
+from .indexation_results import VectorMatchingResults, OrientationMap
 from .pair_distribution_function1d import PairDistributionFunction1D
 from .polar_diffraction2d import PolarDiffraction2D, LazyPolarDiffraction2D
 from .power2d import Power2D, LazyPower2D
@@ -99,4 +99,5 @@ __all__ = [
     "VirtualDarkFieldImage",
     "InSituDiffraction2D",
     "LabeledDiffractionVectors2D",
+    "OrientationMap",
 ]
