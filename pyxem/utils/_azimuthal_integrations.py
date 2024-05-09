@@ -196,33 +196,54 @@ def _get_factors(control_points, slices, pixel_extents):
     each slice. The factors are the area of the intersection of the polygon and the
     sliced pixels.
     """
-    factors = []
-    factors_slice = []
-    start = 0
-    # unpack extents
-    x_extent, y_extent = pixel_extents
+    all_boxes = get_boxes(slices, pixel_extent=pixel_extents)
+    max_num = np.max([len(x) for x in all_boxes])
+    num_box = len(all_boxes)
+    boxes = shapely.empty((num_box, max_num))
+
+    p = shapely.polygons(control_points)
+    for i, bx in enumerate(all_boxes):
+        try:
+            b = shapely.box(bx[:, 0], bx[:, 1], bx[:, 2], bx[:, 3])
+            boxes[i, : len(b)] = b
+        except IndexError:  # the box is empty.
+            pass
+
+    factors = shapely.area(
+        shapely.intersection(boxes, p[:, np.newaxis])
+    ) / shapely.area(boxes)
+    not_nan = np.logical_not(np.isnan(factors))
+
+    factors = factors.flatten()
+    factors = factors[not_nan.flatten()]
+
+    num = np.sum(not_nan, axis=1)
+    factors_slice = np.cumsum(num)
+    factors_slice = np.hstack(([0], factors_slice))
+    factors_slice = np.stack((factors_slice[:-1], factors_slice[1:])).T
+    return factors, factors_slice
+
+
+def get_boxes(slices, pixel_extent):
+    all_boxes = []
+    x_extent, y_extent = pixel_extent
     x_ext_left, x_ext_right = x_extent
     y_ext_left, y_ext_right = y_extent
-    for cp, sl in zip(control_points, slices):
-        p = Polygon(cp)
+    for sl in slices:
         x_edges = list(range(sl[0], sl[2]))
         y_edges = list(range(sl[1], sl[3]))
         boxes = []
         for i, x in enumerate(x_edges):
             for j, y in enumerate(y_edges):
-                b = box(
+                b = [
                     x_ext_left[x],
                     y_ext_left[y],
                     x_ext_right[x],
                     y_ext_right[y],
-                )
+                ]
                 boxes.append(b)
-        factors += list(
-            shapely.area(shapely.intersection(boxes, p)) / shapely.area(boxes)
-        )
-        factors_slice.append([start, start + len(boxes)])
-        start += len(boxes)
-    return np.array(factors), np.array(factors_slice)
+        all_boxes.append(np.array(boxes))
+    return all_boxes
 
 
 def _get_control_points(npt, npt_azim, radial_range, azimuthal_range, affine):
