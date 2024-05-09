@@ -124,8 +124,8 @@ class TestAzimuthalIntegral1d:
         np.testing.assert_array_equal(az.data[0:8], np.ones(8))
 
     def test_1d_azimuthal_integral_pyxem(self, ones):
-        ones.calibrate.center = None
-        ones.calibrate.scale = 0.2
+        ones.calibration.center = None
+        ones.calibration.scale = 0.2
         az = ones.get_azimuthal_integral1d(
             npt=10,
             method="splitpixel_pyxem",
@@ -137,8 +137,8 @@ class TestAzimuthalIntegral1d:
         assert az is None
 
     def test_1d_azimuthal_integral_pyxem(self, ones):
-        ones.calibrate.center = None
-        ones.calibrate.scale = 0.2
+        ones.calibration.center = None
+        ones.calibration.scale = 0.2
         az = ones.get_azimuthal_integral1d(
             npt=10,
             method="splitpixel_pyxem",
@@ -335,7 +335,7 @@ class TestVariance:
     @pytest.fixture
     def ones(self):
         ones_diff = Diffraction2D(data=np.ones(shape=(10, 10, 10, 10)))
-        ones_diff.calibrate(scale=0.1, center=None)
+        ones_diff.calibration(scale=0.1, center=None)
         return ones_diff
 
     @pytest.fixture
@@ -343,7 +343,7 @@ class TestVariance:
         data = np.ones(shape=(10, 10, 10, 10))
         data[0:10:2, :, :, :] = 2
         ones_diff = Diffraction2D(data=data)
-        ones_diff.calibrate(scale=0.1, center=None)
+        ones_diff.calibration(scale=0.1, center=None)
         return ones_diff
 
     @pytest.fixture
@@ -355,7 +355,7 @@ class TestVariance:
         rng = default_rng(seed=1)
         data = rng.poisson(lam=data)
         ones_diff = Diffraction2D(data=data)
-        ones_diff.calibrate(scale=0.1, center=None)
+        ones_diff.calibration(scale=0.1, center=None)
         return ones_diff
 
     def test_FEM_Omega(self, ones, ones_zeros):
@@ -579,7 +579,7 @@ class TestAzimuthalIntegral2d:
         )
 
     def test_internal_azimuthal_integration(self, ring):
-        ring.calibrate(scale=1)
+        ring.calibration(scale=1)
         az = ring.get_azimuthal_integral2d(npt=40, npt_azim=100, radial_range=(0, 40))
         ring_sum = np.sum(az.data, axis=1)
         assert ring_sum.shape == (40,)
@@ -653,7 +653,7 @@ class TestAzimuthalIntegral2d:
     def test_azimuthal_integration_range(
         self, arange, azimuthal_range, expected_output
     ):
-        arange.calibrate.center = None  # set center
+        arange.calibration.center = None  # set center
         quadrant = arange.get_azimuthal_integral2d(
             npt=10, npt_azim=10, azimuth_range=azimuthal_range, mean=True
         )
