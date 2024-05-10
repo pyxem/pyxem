@@ -60,7 +60,10 @@ def si_tilt():
     tilt.axes_manager.signal_axes[1].scale = 0.01
     return tilt
 
-def si_grains_from_orientations(oris: Orientation, seed: int = 2, size: int = 20, recip_pixels: int = 128):
+
+def si_grains_from_orientations(
+    oris: Orientation, seed: int = 2, size: int = 20, recip_pixels: int = 128
+):
     p = si_phase()
     gen = SimulationGenerator()
     num_grains = oris.size
@@ -95,36 +98,43 @@ def si_grains_from_orientations(oris: Orientation, seed: int = 2, size: int = 20
     grains.axes_manager.signal_axes[1].scale = 0.01
     return grains
 
-def si_grains_random(num_grains=4, seed=2, size=20, recip_pixels=128, return_rotations=False):
+
+def si_grains(num_grains=4, seed=2, size=20, recip_pixels=128, return_rotations=False):
     """Generate a simulated dataset with grains in random orientations"""
     p = si_phase()
     rotations = Orientation.random(num_grains, symmetry=p.point_group)
-    grains = si_grains_from_orientations(rotations, seed=seed, size=size, recip_pixels=recip_pixels)
-    
+    grains = si_grains_from_orientations(
+        rotations, seed=seed, size=size, recip_pixels=recip_pixels
+    )
+
     if return_rotations:
         return grains, rotations
     else:
         return grains
+
 
 def si_grains_simple(seed=2, size=20, recip_pixels=128, return_rotations=False):
     """Generate a simulated dataset with low-index zone axes"""
     p = si_phase()
     rotations = Orientation.from_euler(
         [
-            [0, 0, 0],      # [0 0 1]
-            [0, 45, 0],     # [0 1 1]
+            [0, 0, 0],  # [0 0 1]
+            [0, 45, 0],  # [0 1 1]
             [0, 54.7, 45],  # [1 1 1]
-            [0, 35, 45],    # [1 1 2]
+            [0, 35, 45],  # [1 1 2]
         ],
         degrees=True,
-        symmetry=p.point_group
+        symmetry=p.point_group,
     )
-    grains = si_grains_from_orientations(rotations, seed=seed, size=size, recip_pixels=recip_pixels)
+    grains = si_grains_from_orientations(
+        rotations, seed=seed, size=size, recip_pixels=recip_pixels
+    )
 
     if return_rotations:
         return grains, rotations
     else:
         return grains
+
 
 def simulated1dsi(
     num_points=200,
