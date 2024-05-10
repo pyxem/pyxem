@@ -373,6 +373,18 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
             output_dtype=float,
         )
 
+        # Translate in-plane rotation from index to degrees
+        # by using the calibration of the axis
+        def rotation_index_to_degrees(data, axis):
+            data = data.copy()
+            ind = data[:, 2].astype(int)
+            data[:, 2] = rad2deg(axis[ind])
+            return data
+
+        orientation.map(
+            rotation_index_to_degrees, axis=self.axes_manager.signal_axes[0].axis
+        )
+
         orientation.set_signal_type("orientation_map")
         orientation.simulation = simulation
         orientation.column_names = ["index", "correlation", "rotation", "factor"]
