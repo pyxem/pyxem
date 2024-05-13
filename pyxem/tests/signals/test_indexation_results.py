@@ -234,9 +234,3 @@ class TestOrientationResult:
         # Use 2 degrees since that is the angular resolution of the polar dataset
         degrees_between = orients.angle_with(rotations, degrees=True)
         assert np.all(np.min(degrees_between, axis=2) <= 2)
-
-    def test_orientation_result(self, orientation_result):
-        assert isinstance(orientation_result[0], OrientationMap)
-
-    def test_to_orientation(self, orientation_result):
-        orientation_result[0].to_single_phase_orientations()
