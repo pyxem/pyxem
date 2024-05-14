@@ -136,6 +136,29 @@ def si_grains_simple(seed=2, size=20, recip_pixels=128, return_rotations=False):
         return grains
 
 
+def si_rotations_line():
+    from orix.sampling import get_sample_reduced_fundamental
+
+    p = si_phase()
+    gen = SimulationGenerator()
+    rotations = get_sample_reduced_fundamental(resolution=3, point_group=p.point_group)
+    sim = gen.calculate_diffraction2d(
+        phase=p, rotation=rotations, max_excitation_error=0.1, reciprocal_radius=2
+    )
+    dps = []
+    for i in range(rotations.size):
+        dp = np.flipud(sim.irot[i].get_diffraction_pattern(sigma=5, shape=(256, 256)))
+        dps.append(dp)
+    line = Diffraction2D(np.array(dps))
+    line.axes_manager.signal_axes[0].name = "kx"
+    line.axes_manager.signal_axes[1].name = "kx"
+    line.axes_manager.signal_axes[0].units = r"$\AA^{-1}$"
+    line.axes_manager.signal_axes[1].units = r"$\AA^{-1}$"
+    line.axes_manager.signal_axes[0].scale = 0.01
+    line.axes_manager.signal_axes[1].scale = 0.01
+    return line
+
+
 def simulated1dsi(
     num_points=200,
     accelerating_voltage=200,

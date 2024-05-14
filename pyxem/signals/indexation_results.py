@@ -29,6 +29,12 @@ from orix.vector import Vector3d
 from orix.plot import IPFColorKeyTSL
 from transforms3d.euler import mat2euler
 from diffsims.crystallography._diffracting_vector import DiffractingVector
+from orix.vector import Vector3d
+from orix.projections import StereographicProjection
+from orix.plot.inverse_pole_figure_plot import _get_ipf_axes_labels
+from orix.vector.fundamental_sector import _closed_edges_in_hemisphere
+import numpy as np
+import hyperspy.api as hs
 
 from pyxem.utils.indexation_utils import get_nth_best_solution
 from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
@@ -274,9 +280,84 @@ class OrientationMap(DiffractionVectors2D):
     def to_ipf_markers(self):
         """Convert the orientation map to a set of inverse pole figure
         markers which visualizes the best matching orientations in the
-        reduced S2 space."""
+        reduced S2 space.
+        """
+        if self._lazy:
+            raise ValueError(
+                "Cannot create markers from lazy signal. Please compute the signal first."
+            )
+        if self.simulation.has_multiple_phases:
+            raise ValueError("Multiple phases found in simulation")
 
-        pass
+        orients = self.to_single_phase_orientations()
+        sector = self.simulation.phases.point_group.fundamental_sector
+        labels = _get_ipf_axes_labels(
+            sector.vertices, symmetry=self.simulation.phases.point_group
+        )
+        s = StereographicProjection()
+        vectors = orients * Vector3d.zvector()
+        edges = _closed_edges_in_hemisphere(sector.edges, sector)
+        vectors = vectors.in_fundamental_sector(self.simulation.phases.point_group)
+        x, y = s.vector2xy(vectors)
+        ex, ey = s.vector2xy(edges)
+        tx, ty = s.vector2xy(sector.vertices)
+
+        x = x.reshape(vectors.shape)
+        y = y.reshape(vectors.shape)
+        cor = self.data[..., 1]
+
+        offsets = np.empty(shape=vectors.shape[:-1], dtype=object)
+        correlation = np.empty(shape=vectors.shape[:-1], dtype=object)
+        original_offset = np.vstack((ex, ey)).T
+        texts_offset = np.vstack((tx, ty)).T
+
+        mins, maxes = original_offset.min(axis=0), original_offset.max(axis=0)
+
+        original_offset = (
+            (original_offset - ((maxes + mins) / 2)) / (maxes - mins) * 0.2
+        )
+        original_offset = original_offset + 0.85
+
+        texts_offset = (texts_offset - ((maxes + mins) / 2)) / (maxes - mins) * 0.2
+        texts_offset = texts_offset + 0.85
+        for i in np.ndindex(offsets.shape):
+            off = np.vstack((x[i], y[i])).T
+            norm_points = (off - ((maxes + mins) / 2)) / (maxes - mins) * 0.2
+            norm_points = norm_points + 0.85
+            offsets[i] = norm_points
+            correlation[i] = cor[i] / np.max(cor[i]) * 0.5
+
+        square = hs.plot.markers.Squares(
+            offsets=[[0.85, 0.85]],
+            widths=(0.3,),
+            units="width",
+            offset_transform="axes",
+            facecolor="white",
+            edgecolor="black",
+        )
+        polygon_sector = hs.plot.markers.Polygons(
+            verts=original_offset[np.newaxis],
+            transform="axes",
+            alpha=1,
+            facecolor="none",
+        )
+
+        best_points = hs.plot.markers.Points(
+            offsets=offsets.T,
+            sizes=(4,),
+            offset_transform="axes",
+            alpha=correlation.T,
+            facecolor="green",
+        )
+
+        texts = hs.plot.markers.Texts(
+            texts=labels,
+            offsets=texts_offset,
+            sizes=(1,),
+            offset_transform="axes",
+            facecolor="k",
+        )
+        return square, polygon_sector, best_points, texts
 
     def to_single_phase_markers(
         self,
@@ -325,7 +406,7 @@ class OrientationMap(DiffractionVectors2D):
                     inplace=False,
                     lazy_output=lazy_output,
                     ragged=True,
-                ).data
+                ).data.T
                 kwargs["sizes"] = intensity
 
             coords = vectors.map(
@@ -520,33 +601,34 @@ class VectorMatchingResults(BaseSignal):
         crystal_map = _transfer_navigation_axes(crystal_map, self)
         return crystal_map
 
+    def get_indexed_diffraction_vectors(
+        self, vectors, overwrite=False, *args, **kwargs
+    ):
+        """Obtain an indexed diffraction vectors object.
 
-def get_indexed_diffraction_vectors(self, vectors, overwrite=False, *args, **kwargs):
-    """Obtain an indexed diffraction vectors object.
+        Parameters
+        ----------
+        vectors : pyxem.signals.DiffractionVectors
+            A diffraction vectors object to be indexed.
 
-    Parameters
-    ----------
-    vectors : pyxem.signals.DiffractionVectors
-        A diffraction vectors object to be indexed.
+        Returns
+        -------
+        indexed_vectors : pyxem.signals.DiffractionVectors
+            An indexed diffraction vectors object.
 
-    Returns
-    -------
-    indexed_vectors : pyxem.signals.DiffractionVectors
-        An indexed diffraction vectors object.
+        """
+        if overwrite is False:
+            if vectors.hkls is not None:
+                warn(
+                    "The vectors supplied are already associated with hkls set "
+                    "overwrite=True to replace these hkls."
+                )
+            else:
+                vectors.hkls = self.hkls
 
-    """
-    if overwrite is False:
-        if vectors.hkls is not None:
-            warn(
-                "The vectors supplied are already associated with hkls set "
-                "overwrite=True to replace these hkls."
-            )
-        else:
+        elif overwrite is True:
             vectors.hkls = self.hkls
-
-    elif overwrite is True:
-        vectors.hkls = self.hkls
-    return vectors
+        return vectors
 
 
 def vectors_to_coordinates(vectors):
