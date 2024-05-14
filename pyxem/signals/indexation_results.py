@@ -28,7 +28,7 @@ from orix.quaternion import Rotation, Orientation
 from orix.vector import Vector3d
 from orix.plot import IPFColorKeyTSL
 from transforms3d.euler import mat2euler
-from diffsims.crystallography import ReciprocalLatticeVector
+from diffsims.crystallography._diffracting_vector import DiffractingVector
 
 from pyxem.utils.indexation_utils import get_nth_best_solution
 from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
@@ -184,7 +184,7 @@ class OrientationMap(DiffractionVectors2D):
         self.simulation._rotation_slider = None
         return super().deepcopy()
 
-    def to_single_phase_orientations(self) -> Orientation:
+    def to_single_phase_orientations(self, **kwargs) -> Orientation:
         """Convert the orientation map to an `Orientation`-object,
         given a single-phase simulation.
         """
@@ -216,6 +216,7 @@ class OrientationMap(DiffractionVectors2D):
                 rotation_from_orientation_map,
                 rots=rotations,
                 inplace=False,
+                **kwargs,
             ),
             symmetry=self.simulation.phases.point_group,
         )
@@ -244,7 +245,8 @@ class OrientationMap(DiffractionVectors2D):
             else:
                 vectors = all_vectors[index]
             # Copy manually, as deepcopy adds a lot of overhead with the phase
-            vectors = ReciprocalLatticeVector(vectors.phase, xyz=vectors.data.copy())
+            intensity = vectors.intensity
+            vectors = DiffractingVector(vectors.phase, xyz=vectors.data.copy())
             # Flip y, as discussed in https://github.com/pyxem/pyxem/issues/925
             vectors.y = -vectors.y
             # Mirror if necessary
@@ -253,6 +255,9 @@ class OrientationMap(DiffractionVectors2D):
                 (rotation, 0, 0), degrees=True, direction="crystal2lab"
             )
             vectors = ~rotation * vectors.to_miller()
+            vectors = DiffractingVector(
+                vectors.phase, xyz=vectors.data.copy(), intensity=intensity
+            )
 
             return vectors
 
@@ -266,14 +271,25 @@ class OrientationMap(DiffractionVectors2D):
         """Convert the orientation map to an `orix.CrystalMap` object"""
         pass
 
+    def to_ipf_markers(self):
+        """Convert the orientation map to a set of inverse pole figure
+        markers which visualizes the best matching orientations in the
+        reduced S2 space."""
+
+        pass
+
     def to_single_phase_markers(
         self,
         n_best: int = 1,
         annotate: bool = False,
-        marker_color: str = "red",
+        marker_colors: str = ("red", "blue", "green", "orange", "purple"),
         text_color: str = "black",
-        lazy: bool = True,
+        lazy_output: bool = None,
         annotation_shift: Sequence[float] = None,
+        text_kwargs: dict = None,
+        include_intensity: bool = False,
+        intesity_scale: float = 1,
+        **kwargs,
     ):
         """Convert the orientation map to a set of markers for plotting.
 
@@ -290,45 +306,46 @@ class OrientationMap(DiffractionVectors2D):
             The color used for the text annotations for reflections. Does nothing if `annotate` is `False`.
         annotation_shift: List[float,float], optional
             The shift to apply to the annotation text. Default is [0,-0.1]
+        include_intensity: bool
+            If True, the intensity of the diffraction spot will be displayed with more intense peaks
+            having a larger marker size.
         """
+        if text_kwargs is None:
+            text_kwargs = dict()
         if annotation_shift is None:
             annotation_shift = [0, -0.15]
 
-        def vectors_to_coordinates(vectors):
-            return np.vstack((vectors.x, vectors.y)).T
-
-        def vectors_to_text(vectors):
-            def add_bar(i: int) -> str:
-                if i < 0:
-                    return f"$\\bar{{{abs(i)}}}$"
-                else:
-                    return f"{i}"
-
-            out = []
-            for hkl in vectors.hkl:
-                h, k, l = np.round(hkl).astype(np.int16)
-                out.append(f"({add_bar(h)} {add_bar(k)} {add_bar(l)})")
-            return out
-
         for n in range(n_best):
             vectors = self.to_single_phase_vectors(n)
+            color = marker_colors[n % len(marker_colors)]
+            if include_intensity:
+                intensity = vectors.map(
+                    vectors_to_intensity,
+                    scale=intesity_scale,
+                    inplace=False,
+                    lazy_output=lazy_output,
+                    ragged=True,
+                ).data
+                kwargs["sizes"] = intensity
+
             coords = vectors.map(
-                vectors_to_coordinates, inplace=False, lazy_output=lazy, ragged=True
+                vectors_to_coordinates,
+                inplace=False,
+                lazy_output=lazy_output,
+                ragged=True,
             )
             markers = hs.plot.markers.Points.from_signal(
-                coords, facecolor="none", edgecolor=marker_color, sizes=(20,)
+                coords, facecolor="none", edgecolor=color, **kwargs
             )
             yield markers
 
             if annotate:
                 texts = vectors.map(
-                    vectors_to_text, inplace=False, lazy_output=lazy, ragged=True
+                    vectors_to_text, inplace=False, lazy_output=lazy_output, ragged=True
                 )
                 coords.map(lambda x: x + annotation_shift, inplace=True)
                 text_markers = hs.plot.markers.Texts.from_signal(
-                    coords,
-                    texts=texts.data.T,
-                    color=text_color,
+                    coords, texts=texts.data.T, color=text_color, **text_kwargs
                 )
                 yield text_markers
 
@@ -503,32 +520,66 @@ class VectorMatchingResults(BaseSignal):
         crystal_map = _transfer_navigation_axes(crystal_map, self)
         return crystal_map
 
-    def get_indexed_diffraction_vectors(
-        self, vectors, overwrite=False, *args, **kwargs
-    ):
-        """Obtain an indexed diffraction vectors object.
 
-        Parameters
-        ----------
-        vectors : pyxem.signals.DiffractionVectors
-            A diffraction vectors object to be indexed.
+def get_indexed_diffraction_vectors(self, vectors, overwrite=False, *args, **kwargs):
+    """Obtain an indexed diffraction vectors object.
 
-        Returns
-        -------
-        indexed_vectors : pyxem.signals.DiffractionVectors
-            An indexed diffraction vectors object.
+    Parameters
+    ----------
+    vectors : pyxem.signals.DiffractionVectors
+        A diffraction vectors object to be indexed.
 
-        """
-        if overwrite is False:
-            if vectors.hkls is not None:
-                warn(
-                    "The vectors supplied are already associated with hkls set "
-                    "overwrite=True to replace these hkls."
-                )
-            else:
-                vectors.hkls = self.hkls
+    Returns
+    -------
+    indexed_vectors : pyxem.signals.DiffractionVectors
+        An indexed diffraction vectors object.
 
-        elif overwrite is True:
+    """
+    if overwrite is False:
+        if vectors.hkls is not None:
+            warn(
+                "The vectors supplied are already associated with hkls set "
+                "overwrite=True to replace these hkls."
+            )
+        else:
             vectors.hkls = self.hkls
 
-        return vectors
+    elif overwrite is True:
+        vectors.hkls = self.hkls
+    return vectors
+
+
+def vectors_to_coordinates(vectors):
+    """
+    Convert a set of diffraction vectors to coordinates. For use with the map
+    function and making markers.
+    """
+    return np.vstack((vectors.x, vectors.y)).T
+
+
+def vectors_to_intensity(vectors, scale=1):
+    """
+    Convert a set of diffraction vectors to coordinates. For use with the map
+    function and making markers.
+    """
+
+    return (vectors.intensity / np.max(vectors.intensity)) * scale
+
+
+def vectors_to_text(vectors):
+    """
+    Convert a set of diffraction vectors to text. For use with the map function
+    and making text markers.
+    """
+
+    def add_bar(i: int) -> str:
+        if i < 0:
+            return f"$\\bar{{{abs(i)}}}$"
+        else:
+            return f"{i}"
+
+    out = []
+    for hkl in vectors.hkl:
+        h, k, l = np.round(hkl).astype(np.int16)
+        out.append(f"({add_bar(h)} {add_bar(k)} {add_bar(l)})")
+    return out
