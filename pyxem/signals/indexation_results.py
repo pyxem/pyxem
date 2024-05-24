@@ -227,7 +227,9 @@ class OrientationMap(DiffractionVectors2D):
             symmetry=self.simulation.phases.point_group,
         )
 
-    def to_single_phase_vectors(self, n_best_index: int = 0) -> hs.signals.Signal1D:
+    def to_single_phase_vectors(
+        self, n_best_index: int = 0, **kwargs
+    ) -> hs.signals.Signal1D:
         """
         Get the reciprocal lattice vectors for a single-phase simulation.
 
@@ -271,6 +273,9 @@ class OrientationMap(DiffractionVectors2D):
             extract_vectors_from_orientation_map,
             all_vectors=vectors_signal,
             inplace=False,
+            output_signal_size=(),
+            output_dtype=object,
+            **kwargs,
         )
 
     def to_crystal_map(self) -> CrystalMap:
@@ -395,25 +400,35 @@ class OrientationMap(DiffractionVectors2D):
             text_kwargs = dict()
         if annotation_shift is None:
             annotation_shift = [0, -0.15]
+        if not self._lazy:
+            navigation_chunks = (5,) * self.axes_manager.navigation_dimension
+        else:
+            navigation_chunks = None
 
         for n in range(n_best):
-            vectors = self.to_single_phase_vectors(n)
+            vectors = self.to_single_phase_vectors(
+                lazy_output=lazy_output, navigation_chunks=navigation_chunks
+            )
             color = marker_colors[n % len(marker_colors)]
             if include_intensity:
                 intensity = vectors.map(
                     vectors_to_intensity,
                     scale=intesity_scale,
                     inplace=False,
-                    lazy_output=lazy_output,
                     ragged=True,
+                    output_dtype=object,
+                    output_signal_size=(),
+                    navigation_chunks=navigation_chunks,
                 ).data.T
                 kwargs["sizes"] = intensity
 
             coords = vectors.map(
                 vectors_to_coordinates,
                 inplace=False,
-                lazy_output=lazy_output,
                 ragged=True,
+                output_dtype=object,
+                output_signal_size=(),
+                navigation_chunks=navigation_chunks,
             )
             markers = hs.plot.markers.Points.from_signal(
                 coords, facecolor="none", edgecolor=color, **kwargs
@@ -422,7 +437,12 @@ class OrientationMap(DiffractionVectors2D):
 
             if annotate:
                 texts = vectors.map(
-                    vectors_to_text, inplace=False, lazy_output=lazy_output, ragged=True
+                    vectors_to_text,
+                    inplace=False,
+                    lazy_output=lazy_output,
+                    ragged=True,
+                    output_dtype=object,
+                    output_signal_size=(),
                 )
                 coords.map(lambda x: x + annotation_shift, inplace=True)
                 text_markers = hs.plot.markers.Texts.from_signal(
