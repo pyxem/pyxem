@@ -6,8 +6,12 @@
     },
     {
         "name": "stable",
-        "version": "0.17.0",
+        "version": "0.18.0",
         "url": "https://pyxem.readthedocs.io/en/stable/"
+    },
+    {
+        "version": "0.17.0",
+        "url": "https://pyxem.readthedocs.io/en/v0.17.0/"
     },
     {
         "version": "0.16.0",
