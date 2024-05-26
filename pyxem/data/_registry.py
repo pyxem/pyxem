@@ -35,6 +35,8 @@ _file_names_hash = {
     "sample_with_g.zspy": "md5:65c0a17387a10ca21ebf1812bab67568",
     "twinned_nanowire.hdf5": "md5:2765fa855db8bc011252dbb425facc81",
     "ZrNbPercipitate.zspy": "md5:7012a2bdf564f4fb25299af05412723f",
+    "cuzipProcessed.zspy": "md5:829ecb8f765acb6e9a22092339c6a268",
+    "colorwheel.txt": "md5:1555136e42cae858be0716f007bda4e4",
 }
 # add to _urls and to _file_names_hash
 # if you want to download the data from a different location

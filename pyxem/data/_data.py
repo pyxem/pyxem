@@ -137,7 +137,7 @@ def twinned_nanowire(allow_download=False, **kwargs):  # pragma: no cover
 
 
 def sample_with_g(allow_download=False, **kwargs):  # pragma: no cover
-    """A small 4-D STEM dataset of a twinned nanowire for orientation mapping.
+    """A small 4-D STEM dataset for orientation mapping with mulitple overlapping grains.
 
     Data can be acessed from https://zenodo.org/records/8429302
 
@@ -160,6 +160,61 @@ def sample_with_g(allow_download=False, **kwargs):  # pragma: no cover
     file_path = sample.fetch_file_path(allow_download=allow_download)
     store = zarr.ZipStore(file_path)  # for loading from zip
     return hs.load(store, **kwargs)
+
+
+def cuag_orientations(allow_download=False, **kwargs):  # pragma: no cover
+    """A small 4-D STEM dataset of CuAg with multiple orientations of the Cu FCC phase
+     for orientation mapping.
+
+    Data can be acessed from https://zenodo.org/records/8429302
+    Parameters
+    ----------
+    allow_download: bool
+        If True, the file will be downloaded from the repository to the local cache.
+    **kwargs
+        Keyword arguments passed to :func:`~hyperspy.api.load`.
+    Examples
+    --------
+    >>> import pyxem as pxm
+    >>> s = pxm.data.cuag_orientations(allow_download=True)
+    >>> print(s)
+    """
+    import zarr
+
+    sample = Dataset("cuag_orientations.zspy")
+    file_path = sample.fetch_file_path(allow_download=allow_download)
+    store = zarr.ZipStore(file_path)  # for loading from zip
+    return hs.load(store, **kwargs)
+
+
+def organic_semiconductor(allow_download=False, **kwargs):  # pragma: no cover
+    """A small 4-D STEM dataset of an organic semiconductor for orientation mapping.
+
+    Data can be acessed from https://zenodo.org/records/8429302
+    Parameters
+    ----------
+    allow_download: bool
+        If True, the file will be downloaded from the repository to the local cache.
+    **kwargs
+        Keyword arguments passed to :func:`~hyperspy.api.load`.
+    Examples
+    --------
+    >>> import pyxem as pxm
+    >>> s = pxm.data.organic_semiconductor(allow_download=True)
+    >>> print(s)
+    """
+    import zarr
+
+    sample = Dataset("data_processed.zspy")
+    file_path = sample.fetch_file_path(allow_download=allow_download)
+    store = zarr.ZipStore(file_path)  # for loading from zip
+    return hs.load(store, **kwargs)
+
+
+def pdcusi_insitu(allow_download=False, **kwargs):  # pragma: no cover
+    """A decently sized 5D STEM dataset of a PdCuSi alloy held at 390C. This
+    dataset is sliced from a a larger d
+    """
 
 
 def mgo_nanocrystals(allow_download=False, **kwargs):  # pragma: no cover

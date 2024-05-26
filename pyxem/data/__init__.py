@@ -37,6 +37,8 @@ from pyxem.data._data import (
     twinned_nanowire,
     sample_with_g,
     mgo_nanocrystals,
+    organic_semiconductor,
+    cuag_orientations,
 )
 
 __all__ = [
@@ -47,4 +49,6 @@ __all__ = [
     "sample_with_g",
     "mgo_nanocrystals",
     "tilt_boundary_data",
+    "cuag_orientations",
+    "organic_semiconductor",
 ]
