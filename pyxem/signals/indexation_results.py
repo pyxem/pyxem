@@ -386,6 +386,9 @@ class OrientationMap(DiffractionVectors2D):
 
         if self.simulation.has_multiple_phases:
             phases = PhaseList(list(self.simulation.phases))
+            if phase_index.ndim == 3:
+                phase_index = phase_index[..., 0]
+            phase_index = phase_index.flatten()
         else:
             phases = PhaseList(self.simulation.phases)
 

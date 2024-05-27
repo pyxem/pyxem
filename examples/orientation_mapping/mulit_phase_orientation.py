@@ -51,7 +51,8 @@ sim = generator.calculate_diffraction2d(
 )
 orientation_map = polar_multi.get_orientation(sim)
 
-# mulit_phase.add_marker(orientation_map.to_single_phase_markers(annotate=True, text_color="w"))
 
+cmap = orientation_map.to_crystal_map()
+cmap.plot()
 # %%
 # sphinx_gallery_thumbnail_number = 3
