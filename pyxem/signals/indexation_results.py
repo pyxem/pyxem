@@ -23,7 +23,7 @@ import hyperspy.api as hs
 from hyperspy._signals.lazy import LazySignal
 from hyperspy.signal import BaseSignal
 import numpy as np
-from orix.crystal_map import CrystalMap, Phase
+from orix.crystal_map import CrystalMap, Phase, PhaseList
 from orix.quaternion import Rotation, Orientation
 from orix.vector import Vector3d
 from orix.plot import IPFColorKeyTSL
@@ -159,6 +159,64 @@ def _get_second_best_phase(z):
         return -1
 
 
+def vectors_to_coordinates(vectors):
+    """
+    Convert a set of diffraction vectors to coordinates. For use with the map
+    function and making markers.
+    """
+    return np.vstack((vectors.x, vectors.y)).T
+
+
+def vectors_to_intensity(vectors, scale=1):
+    """
+    Convert a set of diffraction vectors to coordinates. For use with the map
+    function and making markers.
+    """
+
+    return (vectors.intensity / np.max(vectors.intensity)) * scale
+
+
+def vectors_to_text(vectors):
+    """
+    Convert a set of diffraction vectors to text. For use with the map function
+    and making text markers.
+    """
+
+    def add_bar(i: int) -> str:
+        if i < 0:
+            return f"$\\bar{{{abs(i)}}}$"
+        else:
+            return f"{i}"
+
+    out = []
+    for hkl in vectors.hkl:
+        h, k, l = np.round(hkl).astype(np.int16)
+        out.append(f"({add_bar(h)} {add_bar(k)} {add_bar(l)})")
+    return out
+
+
+def rotation_from_orientation_map(result, rots):
+    # if rots.ndim == 1:
+    #    rots = rots[np.newaxis, :]
+    index, _, rotation, mirror = result.T
+    index = index.astype(int)
+    ori = rots[index]
+    euler = (
+        Orientation(ori).to_euler(
+            degrees=True,
+        )
+        * mirror[..., np.newaxis]
+    )
+    euler[:, 0] = rotation
+    ori = Orientation.from_euler(euler, degrees=True).data
+    return ori
+
+
+def orientation2phase(orientations, sizes):
+    o = orientations[:, 0]
+    return np.searchsorted(sizes, o)
+
+
 class OrientationMap(DiffractionVectors2D):
     """Signal class for orientation maps.  Note that this is a special case where
     for each navigation position, the signal contains the top n best matches in the form
@@ -189,6 +247,38 @@ class OrientationMap(DiffractionVectors2D):
         self.simulation._phase_slider = None
         self.simulation._rotation_slider = None
         return super().deepcopy()
+
+    def to_rotation(self, flatten=False):
+        """
+        Convert the orientation map to a set of `orix.Quaternion.Rotation` objects.
+        Returns
+        -------
+        """
+        if self._lazy:
+            warn("Computing the s ")
+        all_rotations = Rotation.stack(self.simulation.rotations).flatten()
+        rotations = self.map(
+            rotation_from_orientation_map,
+            rots=all_rotations,
+            inplace=False,
+            lazy_output=False,
+        )
+
+        rots = Rotation(rotations)
+        if flatten:
+            shape1 = np.prod(rots.shape[:-1])
+            rots = rots.reshape((shape1, rots.shape[-1]))
+        return rots
+
+    def to_phase_index(self):
+        """
+        Convert the orientation map to a set of phase ids
+        """
+        if self.simulation.has_multiple_phases:
+            sizes = np.cumsum([i.size for i in self.simulation.rotations])
+            return self.map(orientation2phase, sizes=sizes, inplace=False).data
+        else:
+            return None
 
     def to_single_phase_orientations(self, **kwargs) -> Orientation:
         """Convert the orientation map to an `Orientation`-object,
@@ -280,6 +370,41 @@ class OrientationMap(DiffractionVectors2D):
 
     def to_crystal_map(self) -> CrystalMap:
         """Convert the orientation map to an `orix.CrystalMap` object"""
+        if self.axes_manager.navigation_dimension != 2:
+            raise ValueError(
+                "Only 2D navigation supported. Please raise an issue if you are interested in "
+                "support for 3+ navigation dimensions."
+            )
+
+        x, y = [ax.axis for ax in self.axes_manager.navigation_axes]
+        xx, yy = np.meshgrid(x, y)
+        xx = xx - np.min(xx)
+        yy = yy - np.min(yy)
+        scan_unit = self.axes_manager.navigation_axes[0].units
+        rotations = self.to_rotation(flatten=True)
+        phase_index = self.to_phase_index()
+
+        if self.simulation.has_multiple_phases:
+            phases = PhaseList(list(self.simulation.phases))
+        else:
+            phases = PhaseList(self.simulation.phases)
+
+        return CrystalMap(
+            rotations=rotations,
+            x=xx.flatten(),
+            phase_id=phase_index,
+            y=yy.flatten(),
+            scan_unit=scan_unit,
+            phase_list=phases,
+        )
+
+    def to_polar_mask(self, reciporical_radius: float = 0.1, **kwargs):
+        """Convert the orientation map to a mask in polar coordinate for
+        finding multiple overlapping phases. This is useful for indexing
+        multiple phases by finding the best matching orientation and then
+        masking the data to find the next best matching orientation for
+        the second phase.
+        """
         pass
 
     def to_ipf_markers(self):
@@ -649,39 +774,3 @@ class VectorMatchingResults(BaseSignal):
         elif overwrite is True:
             vectors.hkls = self.hkls
         return vectors
-
-
-def vectors_to_coordinates(vectors):
-    """
-    Convert a set of diffraction vectors to coordinates. For use with the map
-    function and making markers.
-    """
-    return np.vstack((vectors.x, vectors.y)).T
-
-
-def vectors_to_intensity(vectors, scale=1):
-    """
-    Convert a set of diffraction vectors to coordinates. For use with the map
-    function and making markers.
-    """
-
-    return (vectors.intensity / np.max(vectors.intensity)) * scale
-
-
-def vectors_to_text(vectors):
-    """
-    Convert a set of diffraction vectors to text. For use with the map function
-    and making text markers.
-    """
-
-    def add_bar(i: int) -> str:
-        if i < 0:
-            return f"$\\bar{{{abs(i)}}}$"
-        else:
-            return f"{i}"
-
-    out = []
-    for hkl in vectors.hkl:
-        h, k, l = np.round(hkl).astype(np.int16)
-        out.append(f"({add_bar(h)} {add_bar(k)} {add_bar(l)})")
-    return out
