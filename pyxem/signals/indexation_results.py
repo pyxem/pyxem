@@ -212,6 +212,31 @@ def rotation_from_orientation_map(result, rots):
     return ori
 
 
+def extract_vectors_from_orientation_map(result, all_vectors):
+    index, _, rotation, mirror = result[n_best_index, :].T
+    index = index.astype(int)
+    if all_vectors.ndim == 0:
+        vectors = all_vectors
+    else:
+        vectors = all_vectors[index]
+    # Copy manually, as deepcopy adds a lot of overhead with the phase
+    intensity = vectors.intensity
+    vectors = DiffractingVector(vectors.phase, xyz=vectors.data.copy())
+    # Flip y, as discussed in https://github.com/pyxem/pyxem/issues/925
+    vectors.y = -vectors.y
+    # Mirror if necessary
+    vectors.y = mirror * vectors.y
+    rotation = Rotation.from_euler(
+        (rotation, 0, 0), degrees=True, direction="crystal2lab"
+    )
+    vectors = ~rotation * vectors.to_miller()
+    vectors = DiffractingVector(
+        vectors.phase, xyz=vectors.data.copy(), intensity=intensity
+    )
+
+    return vectors
+
+
 def orientation2phase(orientations, sizes):
     o = orientations[:, 0]
     return np.searchsorted(sizes, o)
@@ -273,6 +298,12 @@ class OrientationMap(DiffractionVectors2D):
     def to_phase_index(self):
         """
         Convert the orientation map to a set of phase ids
+
+        Returns
+        -------
+        np.ndarray or None
+            The phase ids for each pixel in the orientation map or None if the simulation
+            does not have multiple phases.
         """
         if self.simulation.has_multiple_phases:
             sizes = np.cumsum([i.size for i in self.simulation.rotations])
@@ -285,27 +316,13 @@ class OrientationMap(DiffractionVectors2D):
         given a single-phase simulation.
         """
         if self.simulation.has_multiple_phases:
-            raise ValueError("Multiple phases found in simulation")
+            raise ValueError(
+                "Multiple phases found in simulation (use to_crystal_map instead)"
+            )
 
         # Use the quaternion data from rotations to support 2D rotations,
         # i.e. unique rotations for each navigation position
         rotations = hs.signals.Signal2D(self.simulation.rotations.data)
-
-        def rotation_from_orientation_map(result, rots):
-            if rots.ndim == 1:
-                rots = rots[np.newaxis, :]
-            index, _, rotation, mirror = result.T
-            index = index.astype(int)
-            ori = rots[index]
-            euler = (
-                Orientation(ori).to_euler(
-                    degrees=True,
-                )
-                * mirror[..., np.newaxis]
-            )
-            euler[:, 0] = rotation
-            ori = Orientation.from_euler(euler, degrees=True).data
-            return ori
 
         return Orientation(
             self.map(
@@ -335,36 +352,13 @@ class OrientationMap(DiffractionVectors2D):
         # Use vector data as signal in case of different vectors per navigation position
         vectors_signal = hs.signals.Signal1D(self.simulation.coordinates)
 
-        def extract_vectors_from_orientation_map(result, all_vectors):
-            index, _, rotation, mirror = result[n_best_index, :].T
-            index = index.astype(int)
-            if all_vectors.ndim == 0:
-                vectors = all_vectors
-            else:
-                vectors = all_vectors[index]
-            # Copy manually, as deepcopy adds a lot of overhead with the phase
-            intensity = vectors.intensity
-            vectors = DiffractingVector(vectors.phase, xyz=vectors.data.copy())
-            # Flip y, as discussed in https://github.com/pyxem/pyxem/issues/925
-            vectors.y = -vectors.y
-            # Mirror if necessary
-            vectors.y = mirror * vectors.y
-            rotation = Rotation.from_euler(
-                (rotation, 0, 0), degrees=True, direction="crystal2lab"
-            )
-            vectors = ~rotation * vectors.to_miller()
-            vectors = DiffractingVector(
-                vectors.phase, xyz=vectors.data.copy(), intensity=intensity
-            )
-
-            return vectors
-
         return self.map(
             extract_vectors_from_orientation_map,
             all_vectors=vectors_signal,
             inplace=False,
             output_signal_size=(),
             output_dtype=object,
+            show_progressbar=False,
             **kwargs,
         )
 
@@ -400,15 +394,6 @@ class OrientationMap(DiffractionVectors2D):
             scan_unit=scan_unit,
             phase_list=phases,
         )
-
-    def to_polar_mask(self, reciporical_radius: float = 0.1, **kwargs):
-        """Convert the orientation map to a mask in polar coordinate for
-        finding multiple overlapping phases. This is useful for indexing
-        multiple phases by finding the best matching orientation and then
-        masking the data to find the next best matching orientation for
-        the second phase.
-        """
-        pass
 
     def to_ipf_markers(self):
         """Convert the orientation map to a set of inverse pole figure
