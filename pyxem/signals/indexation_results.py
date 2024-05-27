@@ -22,6 +22,7 @@ from typing import Union, Literal, Sequence, Iterator
 import hyperspy.api as hs
 from hyperspy._signals.lazy import LazySignal
 from hyperspy.signal import BaseSignal
+from hyperspy.axes import AxesManager
 import numpy as np
 from orix.crystal_map import CrystalMap, Phase, PhaseList
 from orix.quaternion import Rotation, Orientation
@@ -196,8 +197,8 @@ def vectors_to_text(vectors):
 
 
 def rotation_from_orientation_map(result, rots):
-    if rots.ndim == 1:
-        rots = rots[np.newaxis, :]
+    # if rots.ndim == 1:
+    #    rots = rots[np.newaxis, :]
     index, _, rotation, mirror = result.T
     index = index.astype(int)
     ori = rots[index]
@@ -360,6 +361,34 @@ class OrientationMap(DiffractionVectors2D):
 
         # Use vector data as signal in case of different vectors per navigation position
         vectors_signal = hs.signals.Signal1D(self.simulation.coordinates)
+
+        def extract_vectors_from_orientation_map(result, all_vectors):
+            index, _, rotation, mirror = result[n_best_index, :].T
+            index = index.astype(int)
+            if all_vectors.ndim == 0:
+                vectors = all_vectors
+            else:
+                vectors = all_vectors[index]
+            # Copy manually, as deepcopy adds a lot of overhead with the phase
+            intensity = vectors.intensity
+            vectors = DiffractingVector(vectors.phase, xyz=vectors.data.copy())
+            # Flip y, as discussed in https://github.com/pyxem/pyxem/issues/925
+            vectors.y = -vectors.y
+
+            rotation = Rotation.from_euler(
+                (mirror * rotation, 0, 0), degrees=True, direction="crystal2lab"
+            )
+            vectors = ~rotation * vectors.to_miller()
+            vectors = DiffractingVector(
+                vectors.phase, xyz=vectors.data.copy(), intensity=intensity
+            )
+
+            # Mirror if necessary.
+            # Mirroring, in this case, means casting (r, theta) to (r, -theta).
+            # This is equivalent to (x, y) -> (x, -y)
+            vectors.y = mirror * vectors.y
+
+            return vectors
 
         return self.map(
             extract_vectors_from_orientation_map,
@@ -566,39 +595,61 @@ class OrientationMap(DiffractionVectors2D):
                     output_dtype=object,
                     output_signal_size=(),
                 )
-                coords.map(lambda x: x + annotation_shift, inplace=True)
+                # New signal for offset coordinates, as using inplace=True shifts the point markers too
+                text_coords = coords.map(lambda x: x + annotation_shift, inplace=False)
                 text_markers = hs.plot.markers.Texts.from_signal(
-                    coords, texts=texts.data.T, color=text_color, **text_kwargs
+                    text_coords, texts=texts.data.T, color=text_color, **text_kwargs
                 )
                 yield text_markers
 
-    def to_polar_markers(self, n_best: int = 1) -> Iterator[hs.plot.markers.Markers]:
+    def to_single_phase_polar_markers(
+        self, signal_axes: AxesManager, n_best: int = 1, marker_color: str = "red"
+    ) -> Iterator[hs.plot.markers.Markers]:
         (
             r_templates,
             theta_templates,
             intensities_templates,
-        ) = self.simulation.polar_flatten_simulations()
+        ) = self.simulation.polar_flatten_simulations(
+            signal_axes[1].axis, signal_axes[0].axis
+        )
 
-        def marker_generator_factory(n_best_entry: int):
+        def marker_generator_factory(n_best_entry: int, r_axis, theta_axis):
+            theta_min, theta_max = theta_axis.min(), theta_axis.max()
+
             def marker_generator(entry):
-                index, correlation, rotation, factor = entry[n_best_entry]
-                r = r_templates[int(index)]
-                theta = theta_templates[int(index)]
-                theta += 2 * np.pi + np.deg2rad(rotation)
-                theta %= 2 * np.pi
-                theta -= np.pi
-                return np.array((theta, r)).T
+                index, _, rotation, mirror = entry[n_best_entry]
+                index = index.astype(int)
+                mirror = mirror.astype(int)
+
+                r_ind = r_templates[index]
+                r = r_axis[r_ind]
+
+                theta_ind = theta_templates[index]
+                theta = theta_axis[::mirror][theta_ind] + np.deg2rad(rotation)
+
+                # Rotate as per https://github.com/pyxem/pyxem/issues/925
+                theta += np.pi
+
+                # handle wrap-around theta
+                theta -= theta_min
+                theta %= theta_max - theta_min
+                theta += theta_min
+
+                mask = r != 0
+                return np.vstack((theta[mask], r[mask])).T
 
             return marker_generator
 
         for n in range(n_best):
             markers_signal = self.map(
-                marker_generator_factory(n),
+                marker_generator_factory(n, signal_axes[1].axis, signal_axes[0].axis),
                 inplace=False,
                 ragged=True,
                 lazy_output=True,
             )
-            markers = hs.plot.markers.Points.from_signal(markers_signal)
+            markers = hs.plot.markers.Points.from_signal(
+                markers_signal, facecolor="none", edgecolor=marker_color, sizes=(10,)
+            )
             yield markers
 
     def to_navigator(self, direction: Vector3d = Vector3d.zvector()):
