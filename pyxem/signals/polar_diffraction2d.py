@@ -381,6 +381,9 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
             data[:, 2] = rad2deg(axis[ind])
             return data
 
+        orientation.axes_manager.signal_axes[0].name = "n-best"
+        orientation.axes_manager.signal_axes[1].name = "columns"
+
         orientation.map(
             rotation_index_to_degrees, axis=self.axes_manager.signal_axes[0].axis
         )

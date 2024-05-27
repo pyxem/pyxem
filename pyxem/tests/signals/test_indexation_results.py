@@ -33,7 +33,15 @@ from orix.crystal_map import CrystalMap
 from pyxem.generators import TemplateIndexationGenerator
 from pyxem.signals import VectorMatchingResults, DiffractionVectors, OrientationMap
 from pyxem.utils.indexation_utils import OrientationResult
-from pyxem.data import si_grains, si_phase, si_tilt, si_grains_simple
+from pyxem.data import (
+    si_grains,
+    si_phase,
+    si_tilt,
+    si_grains_simple,
+    fe_multi_phase_grains,
+    fe_bcc_phase,
+    fe_fcc_phase,
+)
 import hyperspy.api as hs
 
 
@@ -211,6 +219,32 @@ class TestOrientationResult:
         orientations = polar.get_orientation(sims)
         return orientations, r
 
+    @pytest.fixture
+    def multi_phase_orientation_result(self):
+        s = fe_multi_phase_grains()
+        s.calibration.center = None
+        polar = s.get_azimuthal_integral2d(
+            npt=100, npt_azim=180, inplace=False, mean=True
+        )
+        phase = fe_fcc_phase()
+        phase2 = fe_bcc_phase()
+
+        generator = SimulationGenerator(200, minimum_intensity=0.05)
+        rotations = get_sample_reduced_fundamental(
+            resolution=1, point_group=phase.point_group
+        )
+        rotations2 = get_sample_reduced_fundamental(
+            resolution=1, point_group=phase2.point_group
+        )
+        sims = generator.calculate_diffraction2d(
+            [phase, phase2],
+            rotation=[rotations, rotations2],
+            max_excitation_error=0.1,
+            reciprocal_radius=2,
+        )
+        orientations = polar.get_orientation(sims)
+        return orientations
+
     def test_tilt_orientation_result(self, single_rot_orientation_result):
         assert isinstance(single_rot_orientation_result, OrientationMap)
         orients = single_rot_orientation_result.to_single_phase_orientations()
@@ -242,3 +276,8 @@ class TestOrientationResult:
         crystal_map = orientations.to_crystal_map()
         assert isinstance(crystal_map, CrystalMap)
         assert np.all(crystal_map.phase_id == 0)
+
+    def test_to_crystal_map_multi_phase(self, multi_phase_orientation_result):
+        crystal_map = multi_phase_orientation_result.to_crystal_map()
+        assert isinstance(crystal_map, CrystalMap)
+        assert np.all(crystal_map.phase_id < 2)
