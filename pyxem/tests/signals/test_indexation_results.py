@@ -28,11 +28,13 @@ from diffsims.generators.library_generator import DiffractionLibraryGenerator
 from diffsims.generators.simulation_generator import SimulationGenerator
 from orix.sampling import get_sample_reduced_fundamental
 from orix.quaternion import Rotation, Orientation
+from orix.crystal_map import CrystalMap
 
 from pyxem.generators import TemplateIndexationGenerator
 from pyxem.signals import VectorMatchingResults, DiffractionVectors, OrientationMap
 from pyxem.utils.indexation_utils import OrientationResult
 from pyxem.data import si_grains, si_phase, si_tilt, si_grains_simple
+import hyperspy.api as hs
 
 
 @pytest.fixture
@@ -234,3 +236,9 @@ class TestOrientationResult:
         # Use 2 degrees since that is the angular resolution of the polar dataset
         degrees_between = orients.angle_with(rotations, degrees=True)
         assert np.all(np.min(degrees_between, axis=2) <= 2)
+
+    def test_to_crystal_map(self, simple_multi_rot_orientation_result):
+        orientations, rotations = simple_multi_rot_orientation_result
+        crystal_map = orientations.to_crystal_map()
+        assert isinstance(crystal_map, CrystalMap)
+        assert np.all(crystal_map.phase_id == 0)

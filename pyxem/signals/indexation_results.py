@@ -196,8 +196,8 @@ def vectors_to_text(vectors):
 
 
 def rotation_from_orientation_map(result, rots):
-    # if rots.ndim == 1:
-    #    rots = rots[np.newaxis, :]
+    if rots.ndim == 1:
+        rots = rots[np.newaxis, :]
     index, _, rotation, mirror = result.T
     index = index.astype(int)
     ori = rots[index]
@@ -273,6 +273,10 @@ class OrientationMap(DiffractionVectors2D):
         self.simulation._rotation_slider = None
         return super().deepcopy()
 
+    @property
+    def num_rows(self):
+        return self.axes_manager.signal_axes[1].size
+
     def to_rotation(self, flatten=False):
         """
         Convert the orientation map to a set of `orix.Quaternion.Rotation` objects.
@@ -280,13 +284,16 @@ class OrientationMap(DiffractionVectors2D):
         -------
         """
         if self._lazy:
-            warn("Computing the s ")
+            warn("Computing the signal")
+            self.compute()
         all_rotations = Rotation.stack(self.simulation.rotations).flatten()
         rotations = self.map(
             rotation_from_orientation_map,
-            rots=all_rotations,
+            rots=all_rotations.data,
             inplace=False,
             lazy_output=False,
+            output_signal_size=(self.num_rows, 4),
+            output_dtype=float,
         )
 
         rots = Rotation(rotations)
@@ -329,6 +336,8 @@ class OrientationMap(DiffractionVectors2D):
                 rotation_from_orientation_map,
                 rots=rotations,
                 inplace=False,
+                output_signal_size=(self.num_rows, 4),
+                output_dtype=float,
                 **kwargs,
             ),
             symmetry=self.simulation.phases.point_group,
