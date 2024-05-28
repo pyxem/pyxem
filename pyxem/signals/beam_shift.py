@@ -23,9 +23,10 @@ import pyxem.utils._beam_shift_tools as bst
 from hyperspy._signals.lazy import LazySignal
 from hyperspy.signals import Signal1D
 from hyperspy.utils.plot import plot_images
+from pyxem.signals import DiffractionVectors1D
 
 
-class BeamShift(Signal1D):
+class BeamShift(DiffractionVectors1D):
     """Signal class for working with shift of the direct beam."""
 
     _signal_type = "beam_shift"
