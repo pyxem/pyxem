@@ -46,7 +46,30 @@ class DiffractionVectors1D(Signal1D):
     _signal_dimension = 1
     _signal_type = "diffraction_vectors"
 
-    def __init__(self, *args, **kwargs):
-        self.column_scale = kwargs.get("column_scale", None)
-        self.column_offsets = kwargs.get("column_offsets", None)
-        super().__init__(*args, **kwargs)
+    def plot(self, tight_layout=True, **kwargs):
+        """
+        Plot the beam shifts, utilizing HyperSpy's :func:`hyperspy.api.plot.plot_images`
+        function.
+
+        Parameters
+        ----------
+        tight_layout : bool, optional
+            Whether to use tight layout in the plot. The default is True.
+        **kwargs : dict
+            Keyword arguments to pass to :func:`hyperspy.api.plot.plot_images`.
+
+        """
+        if self._lazy:
+            raise ValueError(
+                "plot is not implemented for lazy signals, " "run compute() first"
+            )
+
+        vectors = self.T
+
+        if not "suptitle" in kwargs:
+            kwargs["label"] = self.column_names
+        axes_list = plot_images(
+            (self.isig[0], self.isig[1]),
+            tight_layout=tight_layout,
+            **kwargs,
+        )

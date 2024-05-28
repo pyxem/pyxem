@@ -29,7 +29,10 @@ def slice_signal(arr, col_slice, row_slice):
         row_slice = [
             row_slice,
         ]
-    return arr[row_slice, col_slice]
+    if arr.ndim == 1:
+        return arr[col_slice]
+    else:
+        return arr[row_slice, col_slice]
 
 
 # Note this functionality should be upstreamed to hyperspy and replaced by equivalent functionality

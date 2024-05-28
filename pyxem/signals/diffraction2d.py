@@ -788,7 +788,11 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         shifts.set_signal_type("beam_shift")
         shifts.axes_manager.signal_axes[0].name = "Beam position"
-
+        shifts.column_names = ["x-shift", "y-shift"]
+        shifts.units = [
+            self.axes_manager.signal_axes[0].units,
+            self.axes_manager.signal_axes[1].units,
+        ]
         return shifts
 
     @deprecated_argument(

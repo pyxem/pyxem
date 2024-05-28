@@ -73,7 +73,7 @@ class BeamShift(Signal1D):
         >>> s = pxm.signals.BeamShift(np.random.randint(0, 99, (100, 120, 2)))
         >>> s_mask = hs.signals.Signal2D(np.zeros((100, 120), dtype=bool))
         >>> s_mask.data[20:-20, 20:-20] = True
-        >>> s.make_linear_plane(mask=s_mask)
+        >>> s.get_linear_plane(mask=s_mask)
 
         """
         if self._lazy:
@@ -95,28 +95,6 @@ class BeamShift(Signal1D):
         plane_image = np.stack((plane_image_x, plane_image_y), -1)
         s_bs = self._deepcopy_with_new_data(plane_image)
         return s_bs
-
-    def plot(self, tight_layout=True, **kwargs):
-        """
-        Plot the beam shifts, utilizing HyperSpy's utils.plot.plot_images
-        function.
-
-        """
-        if self._lazy:
-            raise ValueError(
-                "plot is not implemented for lazy signals, "
-                "run compute() first"
-            )
-        x_shift = self.isig[0]
-        y_shift = self.isig[1]
-        if not "suptitle" in kwargs:
-            label = ["x-shift", "y-shift"]
-            kwargs['label'] = label
-        axes_list = plot_images(
-            (self.isig[0], self.isig[1]),
-            tight_layout=tight_layout,
-            **kwargs,
-        )
 
     def get_bivariate_histogram(
         self, histogram_range=None, masked=None, bins=200, spatial_std=3

@@ -19,7 +19,6 @@
 """Generating DisplacementGradientMaps from diffraction vectors."""
 
 import numpy as np
-from pyxem.signals.tensor_field import DisplacementGradientMap
 
 
 def get_DisplacementGradientMap(
@@ -66,6 +65,8 @@ def get_DisplacementGradientMap(
     get_single_DisplacementGradientTensor()
 
     """
+    from pyxem.signals.tensor_field import DisplacementGradientMap
+
     # Calculate displacement gradient tensor across map.
     D = strained_vectors.map(
         get_single_DisplacementGradientTensor,
