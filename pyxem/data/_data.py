@@ -39,6 +39,9 @@ kipper = pooch.create(
 def au_grating(allow_download=False, **kwargs):
     """An au_grating 4-D STEM dataset used to show calibration.
 
+    Data can be acessed from https://zenodo.org/records/11284654
+
+
     Parameters
     ----------
     **kwargs
@@ -60,7 +63,7 @@ def au_grating(allow_download=False, **kwargs):
 def pdnip_glass(allow_download=False, **kwargs):  # pragma: no cover
     """A small PdNiP glass 4-D STEM dataset.
 
-    Data can be acessed from https://zenodo.org/records/8429302
+    Data can be acessed from https://zenodo.org/records/11284654
 
     Data liscenced under CC BY 4.0
 
@@ -90,7 +93,7 @@ def zrnb_precipitate(allow_download=False, **kwargs):  # pragma: no cover
 
     Data liscenced under CC BY 4.0
 
-    Data can be acessed from https://zenodo.org/records/8429302
+    Data can be acessed from https://zenodo.org/records/11284654
 
     Parameters
     ----------
@@ -116,7 +119,7 @@ def zrnb_precipitate(allow_download=False, **kwargs):  # pragma: no cover
 def twinned_nanowire(allow_download=False, **kwargs):  # pragma: no cover
     """A small 4-D STEM dataset of a twinned nanowire for orientation mapping.
 
-    Data can be acessed from https://zenodo.org/records/8429302
+    Data can be acessed from https://zenodo.org/records/11284654
 
     Parameters
     ----------
@@ -139,7 +142,9 @@ def twinned_nanowire(allow_download=False, **kwargs):  # pragma: no cover
 def sample_with_g(allow_download=False, **kwargs):  # pragma: no cover
     """A small 4-D STEM dataset for orientation mapping with mulitple overlapping grains.
 
-    Data can be acessed from https://zenodo.org/records/8429302
+    Data liscenced under CC BY 4.0
+
+    Data can be acessed from https://zenodo.org/records/11284654
 
     Parameters
     ----------
@@ -166,7 +171,10 @@ def cuag_orientations(allow_download=False, **kwargs):  # pragma: no cover
     """A small 4-D STEM dataset of CuAg with multiple orientations of the Cu FCC phase
      for orientation mapping.
 
-    Data can be acessed from https://zenodo.org/records/8429302
+    Data liscenced under CC BY 4.0
+
+    Data can be acessed from https://zenodo.org/records/11284654
+
     Parameters
     ----------
     allow_download: bool
@@ -181,7 +189,7 @@ def cuag_orientations(allow_download=False, **kwargs):  # pragma: no cover
     """
     import zarr
 
-    sample = Dataset("cuag_orientations.zspy")
+    sample = Dataset("cuzipProcessed.zspy")
     file_path = sample.fetch_file_path(allow_download=allow_download)
     store = zarr.ZipStore(file_path)  # for loading from zip
     return hs.load(store, **kwargs)
@@ -190,7 +198,10 @@ def cuag_orientations(allow_download=False, **kwargs):  # pragma: no cover
 def organic_semiconductor(allow_download=False, **kwargs):  # pragma: no cover
     """A small 4-D STEM dataset of an organic semiconductor for orientation mapping.
 
-    Data can be acessed from https://zenodo.org/records/8429302
+    Data liscenced under CC BY 4.0
+
+    Data can be acessed from https://zenodo.org/records/11284654
+
     Parameters
     ----------
     allow_download: bool
@@ -213,14 +224,94 @@ def organic_semiconductor(allow_download=False, **kwargs):  # pragma: no cover
 
 def pdcusi_insitu(allow_download=False, **kwargs):  # pragma: no cover
     """A decently sized 5D STEM dataset of a PdCuSi alloy held at 390C. This
-    dataset is sliced from a a larger d
+    dataset is sliced from a larger dataset and is used to demonstrate how to operate
+    on a in situ 4D STEM dataset. Note that this dataset is ~6GB compressed and about
+    30GB uncompressed so it might take a while to download.
+
+    Data liscenced under CC BY 4.0
+
+    Data can be acessed from https://zenodo.org/records/11284654
+
+    Parameters
+    ----------
+    allow_download: bool
+        If True, the file will be downloaded from the repository to the local cache.
+    **kwargs
+        Keyword arguments passed to :func:`~hyperspy.api.load`.
+
+    Examples
+    --------
+    >>> import pyxem as pxm
+    >>> s = pxm.data.pdcusi_insitu(allow_download=True)
+    >>> print(s)
+
     """
+    import zarr
+
+    sample = Dataset("PdCuSiCrystalization-zip.zspy")
+    file_path = sample.fetch_file_path(allow_download=allow_download)
+    store = zarr.ZipStore(file_path)  # for loading from zip
+    return hs.load(store, **kwargs)
+
+
+def feal_stripes(allow_download=False, **kwargs):  # pragma: no cover
+    """A small 4-D STEM dataset for doing DPC on a set of magnetic FeAl stripes
+
+    Data can be acessed from https://zenodo.org/records/11284654
+
+    Parameters
+    ----------
+    allow_download: bool
+        If True, the file will be downloaded from the repository to the local cache.
+    **kwargs
+        Keyword arguments passed to :func:`~hyperspy.api.load`.
+
+    Examples
+    --------
+    >>> import pyxem as pxm
+    >>> s = pxm.data.feal_stripes()
+    >>> print(s)
+    """
+    import zarr
+
+    sample = Dataset("FeAl_stripes.zspy")
+    file_path = sample.fetch_file_path(allow_download=allow_download)
+    store = zarr.ZipStore(file_path)  # for loading from zip
+    return hs.load(store, **kwargs)
+
+
+def sped_ag(allow_download=False, **kwargs):  # pragma: no cover
+    """A small 4-D STEM dataset of a Ag sample which is good for demonstrating the
+    ML capabilities of pyxem.
+
+    Data can be acessed from https://zenodo.org/records/11284654
+
+    Parameters
+    ----------
+    allow_download: bool
+        If True, the file will be downloaded from the repository to the local cache.
+    **kwargs
+        Keyword arguments passed to :func:`~hyperspy.api.load`.
+
+    Examples
+    --------
+    >>> import pyxem as pxm
+    >>> s = pxm.data.sped_ag()
+    >>> print(s)
+
+    """
+    import zarr
+
+    sample = Dataset("SPED-Ag.zspy")
+    file_path = sample.fetch_file_path(allow_download=allow_download)
+    store = zarr.ZipStore(file_path)  # for loading from zip
+    return hs.load(store, **kwargs)
 
 
 def mgo_nanocrystals(allow_download=False, **kwargs):  # pragma: no cover
     """A small 4-D STEM dataset of overlapping MgO nanocrystals
 
-    Data can be acessed from https://zenodo.org/records/8429302
+    Data can be acessed from https://zenodo.org/records/11284654
 
     Parameters
     ----------

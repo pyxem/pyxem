@@ -39,6 +39,9 @@ from pyxem.data._data import (
     mgo_nanocrystals,
     organic_semiconductor,
     cuag_orientations,
+    feal_stripes,
+    sped_ag,
+    pdcusi_insitu,
 )
 
 __all__ = [
@@ -51,4 +54,7 @@ __all__ = [
     "tilt_boundary_data",
     "cuag_orientations",
     "organic_semiconductor",
+    "feal_stripes",
+    "sped_ag",
+    "pdcusi_insitu",
 ]
