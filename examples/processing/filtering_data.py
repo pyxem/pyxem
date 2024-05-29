@@ -25,7 +25,7 @@ import pyxem as pxm
 import hyperspy.api as hs
 import numpy as np
 
-s = pxm.data.mgo_nanocrystals(allow_download=True)  # MgO nanocrystals dataset
+s = pxm.data.tilt_boundary_data()
 
 s_filtered = s.filter(
     gaussian_filter, sigma=1.0, inplace=False
@@ -36,7 +36,7 @@ s_filtered2 = s.filter(
 )  # Only filter in real space
 
 hs.plot.plot_images(
-    [s.inav[10, 10], s_filtered.inav[10, 10], s_filtered2.inav[10, 10]],
+    [s.inav[3, 3], s_filtered.inav[3, 3], s_filtered2.inav[3, 3]],
     label=["Original", "GaussFilt(all)", "GaussFilt(real space)"],
     tight_layout=True,
     vmax="99th",
@@ -55,7 +55,7 @@ def custom_filter(array):
 s_filtered3 = s.filter(custom_filter, inplace=False)  # Custom filter
 
 hs.plot.plot_images(
-    [s.inav[10, 10], s_filtered3.inav[10, 10]],
+    [s.inav[3, 3], s_filtered3.inav[3, 3]],
     label=["Original", "GaussFilt(Custom)"],
     tight_layout=True,
     vmax="99th",
@@ -71,9 +71,10 @@ s_filtered4 = s.filter(
 )  # Gaussian filter with sigma=1.0
 
 hs.plot.plot_images(
-    [s_filtered.inav[10, 10], s_filtered4.inav[10, 10]],
+    [s_filtered.inav[3, 3], s_filtered4.inav[3, 3]],
     label=["GaussFilt", "GaussFilt(Lazy)"],
     tight_layout=True,
     vmax="99th",
 )
+
 # %%
