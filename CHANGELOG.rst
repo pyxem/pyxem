@@ -9,21 +9,20 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 
 Unreleased
 ==========
-Added
------
-- Added new datasets of in situ crystalization, Ag SPED,
-  Organic Semiconductor Orientation mapping, Orientation Mapping, and DPC (#1081)
-
-Unreleased
-==========
 Fixed
 -----
 - Fixed indexing error in :meth:`~pyxem.signals.Diffraction2D.get_direct_beam_position` (#1080)
 
 Added
 -----
+- Added Examples for doing a Circular Hough Transform and Increased Documentation for Filtering Data (#1082)
+Added
+-----
 - Added `circular_background` to :meth:`~pyxem.signals.Diffraction2D.template_match_disk` to account for
   an amorphous circular background when template matching (#1084)
+
+- Added new datasets of in situ crystalization, Ag SPED,
+  Organic Semiconductor Orientation mapping, Orientation Mapping, and DPC (#1081)
 
 
 2024-05-08 - version 0.18.0
