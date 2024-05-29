@@ -1,10 +1,22 @@
 """
-Filtering Data
-==============
+Filtering Data (Averaging Neighboring Patterns etc.)
+====================================================
 
 If you have a low number of counts in your data, you may want to filter the data
 to remove noise. This can be done using the `filter` function which applies some
 function to the entire dataset and returns a filtered dataset of the same shape.
+
+In this example, we will use the `filter` function to apply a Gaussian filter in
+only the real space dimensions of the dataset. This is useful for removing noise
+as it acts like a spatial bandpass filter for high frequencies (noise) in the dataset.
+
+Because the STEM probe is Gaussian-like, and the convolution of two Gaussian functions
+is another Gaussian function, the Gaussian filter is a good choice for filtering and is
+equivalent to aquiring the data with a larger probe size equal to
+:math:`\sigma_{Filtererd} = \sqrt{\sigma_{Beam}^2 + \sigma_{Filter}^2}`.  The benefit is
+that the total aquisition time is much shorter than if the probe size was increased to
+reach the same number of counts.  For detectors with low saturation counts, this can be
+a significant advantage.
 """
 
 from scipy.ndimage import gaussian_filter
