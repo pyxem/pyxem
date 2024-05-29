@@ -9,10 +9,13 @@ grains on each side of the boundary. This can be done using the
 from pyxem.data import si_tilt, si_phase
 from diffsims.generators.simulation_generator import SimulationGenerator
 from orix.quaternion import Rotation
+from orix.vector import Vector3d
 
 simulated_si_tilt = si_tilt()
 
 # %%
+# Pre-Processing
+# --------------
 # First we center the diffraction patterns and get a polar signal
 # Increasing the number of npt_azim with give better polar sampling
 # but will take longer to compute the orientation map
@@ -27,7 +30,14 @@ polar_si_tilt.plot()
 
 # %%
 
-# Now we can get make the orientation map
+# Building a Simulation
+# ---------------------
+# Now we can get make the orientation map.  In this case we have aligned the tilt axis with the z-axis
+# so we can use the :func:`orix.vector.Vector3d.from_euler` method to get the rotation axis.
+# As always ``with_direct_beam=False`` is important to make sure that the center
+# beam does not affect the orientation mapping.
+
+
 phase = si_phase()
 generator = SimulationGenerator(200)
 sim = generator.calculate_diffraction2d(
@@ -38,9 +48,20 @@ sim = generator.calculate_diffraction2d(
     ),
     max_excitation_error=0.1,
     reciprocal_radius=1.5,
+    with_direct_beam=False,
 )
+# Getting the Orientation
+# -----------------------
+# This should be fairly good at finding the orientation of the grains on each side of the tilt boundary.
+# The rotation is stored in the rotation column of the orientation map or .isg[2,0] if you want to use the
+# rotation as a navigator or plot it directly.
+
 orientation_map = polar_si_tilt.get_orientation(sim)
-simulated_si_tilt.plot(vmax="99th")
+simulated_si_tilt.plot(vmax="99th", navigator=orientation_map.isig[2, 0])
 simulated_si_tilt.add_marker(
-    orientation_map.to_single_phase_markers(annotate=True, text_color="w")
+    orientation_map.to_single_phase_markers(
+        annotate=True, text_color="w", lw=4, include_intensity=True, intesity_scale=40
+    )
 )
+# %%
+# sphinx_gallery_thumbnail_number = 4

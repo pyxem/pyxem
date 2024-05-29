@@ -13,6 +13,8 @@ from orix.sampling import get_sample_reduced_fundamental
 simulated_si = si_grains()
 
 # %%
+# Pre-Processing
+# --------------
 # First we center the diffraction patterns and get a polar signal
 # Increasing the number of npt_azim with give better polar sampling
 # but will take longer to compute the orientation map
@@ -26,22 +28,41 @@ polar_si = simulated_si.get_azimuthal_integral2d(
 polar_si.plot()
 
 # %%
-
+# Building a Simulation
+# ---------------------
 # Now we can get make a simulation. In this case we want to set a minimum_intensity which removes the low intensity reflections.
-# we also sample the S2 space using the :func`orix.sampling.get_sample_reduced_fundamental`
+# we also sample the S2 space using the :func`orix.sampling.get_sample_reduced_fundamental`.  Make sure that you set
+# ``with_direct_beam=False`` or the orientation mapping will be unduely affected by the center beam.
 phase = si_phase()
 generator = SimulationGenerator(200, minimum_intensity=0.05)
 rotations = get_sample_reduced_fundamental(resolution=1, point_group=phase.point_group)
 sim = generator.calculate_diffraction2d(
-    phase, rotation=rotations, max_excitation_error=0.1, reciprocal_radius=2
-)
-orientation_map = polar_si.get_orientation(sim)
-navigator = orientation_map.to_navigator()
-
-simulated_si.plot(navigator=navigator, vmax="99th")
-simulated_si.add_marker(
-    orientation_map.to_single_phase_markers(annotate=True, text_color="w")
-)
+    phase,
+    rotation=rotations,
+    max_excitation_error=0.1,
+    reciprocal_radius=2,
+    with_direct_beam=False,
+)  # Make sure that with_direct_beam ==False
 
 # %%
-# sphinx_gallery_thumbnail_number = 3
+# Getting the Orientation
+# -----------------------
+# By default the `get_orientation` function uses a gamma correction equilivent to polar_si**0.5.  For noisy datasets
+# it might be a good idea to reduce the noise (Maybe by averaging neighboring patterns?) or simple background subtraction,
+# otherwise the gamma correction will increase the effects of noise on the data. This tries to focus on  "Is the Bragg vector
+# there?" rather than "Is the Bragg vector the right intensity?" patially because the intensity of the Bragg vector might have
+# many different effects.
+
+orientation_map = polar_si.get_orientation(sim)
+ipf_markers = orientation_map.to_ipf_markers()
+navigator = orientation_map.to_navigator()
+simulated_si.plot(navigator=navigator, vmax="95th")
+simulated_si.add_marker(
+    orientation_map.to_single_phase_markers(
+        annotate=True, text_color="w", include_intensity=True, intesity_scale=40, lw=4
+    )
+)
+simulated_si.add_marker(ipf_markers)
+
+# %%
+# sphinx_gallery_thumbnail_number = 4

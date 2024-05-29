@@ -28,12 +28,16 @@ polar_multi = mulit_phase.get_azimuthal_integral2d(
 polar_multi.plot()
 
 # %%
-
 # Now we can get make a simulation. In this case we want to set a minimum_intensity which removes the low intensity reflections.
 # we also sample the S2 space using the :func`orix.sampling.get_sample_reduced_fundamental`
 # We have two phases here so we can make a simulation object with both of the phases.
+
 bcc = fe_bcc_phase()
 fcc = fe_fcc_phase()
+bcc.name = "BCC Phase"
+fcc.name = "FCC Phase"
+fcc.color = "red"
+bcc.color = "blue"
 
 generator = SimulationGenerator(200, minimum_intensity=0.05)
 rotations_bcc = get_sample_reduced_fundamental(
@@ -48,6 +52,7 @@ sim = generator.calculate_diffraction2d(
     rotation=[rotations_bcc, rotations_fcc],
     max_excitation_error=0.1,
     reciprocal_radius=2,
+    with_direct_beam=False,
 )
 orientation_map = polar_multi.get_orientation(sim)
 

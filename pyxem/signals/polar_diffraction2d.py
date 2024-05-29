@@ -316,6 +316,7 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
         n_keep=None,
         frac_keep=0.1,
         n_best=1,
+        gamma=0.5,
         normalize_templates=True,
         **kwargs,
     ):
@@ -337,6 +338,11 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
             The number of best matching orientations to keep.
         normalize_templates : bool
             Normalize the templates to the same intensity.
+        gamma : float
+            The gamma correction applied to the diffraction patterns. The default
+            value is 0.5 which takes the square root of the diffraction patterns to
+            increase the intensity of the low intensity reflections and decrease the
+            intensity of the high intensity reflections.
         kwargs : dict
             Any additional options for the :meth:`~hyperspy.signal.BaseSignal.map` function.
         Returns
@@ -344,6 +350,8 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
         orientation : BaseSignal
             A signal with the orientation at each navigation position.
         """
+        if gamma != 1:
+            self.data = self.data**gamma
         (
             r_templates,
             theta_templates,

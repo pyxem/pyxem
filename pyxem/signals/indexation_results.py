@@ -18,6 +18,7 @@
 
 from warnings import warn
 from typing import Union, Literal, Sequence, Iterator
+from traits.api import Undefined
 
 import hyperspy.api as hs
 from hyperspy._signals.lazy import LazySignal
@@ -213,7 +214,7 @@ def rotation_from_orientation_map(result, rots):
     return ori
 
 
-def extract_vectors_from_orientation_map(result, all_vectors):
+def extract_vectors_from_orientation_map(result, all_vectors, n_best_index=0):
     index, _, rotation, mirror = result[n_best_index, :].T
     index = index.astype(int)
     if all_vectors.ndim == 0:
@@ -373,6 +374,7 @@ class OrientationMap(DiffractionVectors2D):
             output_signal_size=(),
             output_dtype=object,
             show_progressbar=False,
+            n_best_index=n_best_index,
             **kwargs,
         )
 
@@ -399,6 +401,8 @@ class OrientationMap(DiffractionVectors2D):
             phase_index = phase_index.flatten()
         else:
             phases = PhaseList(self.simulation.phases)
+        if scan_unit is Undefined:
+            scan_unit = "px"
 
         return CrystalMap(
             rotations=rotations,
