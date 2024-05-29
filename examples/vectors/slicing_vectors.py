@@ -59,3 +59,4 @@ s.plot()
 s.add_marker([all_vectors, slic_vectors])
 s.add_marker([all_vectors, slic_vectors])
 # %%
+# sphinx_gallery_thumbnail_number = 8

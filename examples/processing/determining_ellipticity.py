@@ -34,14 +34,13 @@ s.plot()
 
 # %%
 
-"""
-Using RANSAC Ellipse Determination
-----------------------------------
-The RANSAC algorithm is a robust method for fitting an ellipse to points with outliers. Here we
-use it to determine the elliptic distortion of the diffraction pattern and exclude the zero
-beam as "outliers".  We can also manually exclude other points from the fit by using the
-mask parameter.
-"""
+# Using RANSAC Ellipse Determination
+# ----------------------------------
+# The RANSAC algorithm is a robust method for fitting an ellipse to points with outliers. Here we
+# use it to determine the elliptic distortion of the diffraction pattern and exclude the zero
+# beam as "outliers".  We can also manually exclude other points from the fit by using the
+# mask parameter.
+
 
 center, affine, params, pos, inlier = pxm.utils.ransac_ellipse_tools.determine_ellipse(
     s, use_ransac=True, return_params=True
@@ -57,12 +56,11 @@ s.add_marker(el, plot_marker=True)
 s.add_marker(out_points, plot_marker=True)
 # %%
 
-"""
-Using Manual Ellipse Determination
-----------------------------------
-Sometimes it is useful to force the ellipse to fit certain points.  For example, here we
-can force the ellipse to fit the first ring by masking the zero beam.
-"""
+# Using Manual Ellipse Determination
+# ----------------------------------
+# Sometimes it is useful to force the ellipse to fit certain points.  For example, here we
+# can force the ellipse to fit the first ring by masking the zero beam.
+
 
 mask = s.get_direct_beam_mask(radius=20)
 
@@ -99,14 +97,12 @@ hs.plot.plot_images(
 # %%
 
 
-"""
-Ellipse from Points
--------------------
-This workflow will likely change slightly in the future to add better parllelism,
-but here is how to determine the ellipticity from a set of points.
-"""
-
+# Ellipse from Points
+# -------------------
+# This workflow will likely change slightly in the future to add better parllelism,
+# but here is how to determine the ellipticity from a set of points.
 # making a test elliptical diffraction pattern
+
 xf, yf, a, b, r, nt = 100, 115, 45, 35, 0, 15
 data_points = ret.make_ellipse_data_points(xf, yf, a, b, r, nt)
 image = np.zeros(shape=(200, 210), dtype=np.float32)

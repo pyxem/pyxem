@@ -63,3 +63,4 @@ az = s.get_azimuthal_integral2d(npt=30)
 az.plot()
 
 # %%
+# sphinx_gallery_thumbnail_number = 4

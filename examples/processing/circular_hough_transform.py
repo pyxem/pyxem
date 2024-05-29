@@ -70,3 +70,6 @@ dv = circular_hough.get_diffraction_vectors(threshold_abs=0.4, min_distance=4)
 m = dv.to_markers(facecolor="none", edgecolor="w")
 circular_hough.plot()
 circular_hough.add_marker(m)
+
+# %%
+# sphinx_gallery_thumbnail_number = 6
