@@ -197,8 +197,8 @@ def vectors_to_text(vectors):
 
 
 def rotation_from_orientation_map(result, rots):
-    # if rots.ndim == 1:
-    #    rots = rots[np.newaxis, :]
+    if rots.ndim == 1:
+        rots = rots[np.newaxis, :]
     index, _, rotation, mirror = result.T
     index = index.astype(int)
     ori = rots[index]
