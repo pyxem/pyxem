@@ -19,8 +19,9 @@ dp = pxm.data.tilt_boundary_data()
 dp.calibration.center = None  # Center the diffraction patterns
 dp.calibration.scale = 0.1  # Scale the diffraction patterns in reciprocal space
 
-
+# %%
 # Visualizing the virtual detector
+
 cp = _get_control_points(
     1,
     npt_azim=8,

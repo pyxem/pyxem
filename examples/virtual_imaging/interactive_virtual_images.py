@@ -16,9 +16,10 @@ import hyperspy.api as hs
 s = pxm.data.dummy_data.get_cbed_signal()
 circle = hs.roi.CircleROI(cx=26, cy=74, r=5.5, r_inner=0)
 s.plot_integrated_intensity(circle)
-# %%
 
+# %%
 # Also we can do the same with a 1D signal
+
 s = pxm.data.dummy_data.get_cbed_signal()
 s.calibration(center=None)
 s1d = s.get_azimuthal_integral1d(npt=100, mean=True)

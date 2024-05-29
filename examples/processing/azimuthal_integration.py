@@ -22,27 +22,26 @@ s.calibration.scale = 0.03  # To angstroms
 s1d = s.get_azimuthal_integral1d(npt=100, inplace=False)
 
 s1d.sum().plot()
-# %%
 
+# %%
 # Similarly, the `get_azimuthal_integral2d` method will return a `Polar2D` signal.
 
 s_polar = s.get_azimuthal_integral2d(npt=100, npt_azim=360, inplace=False)
 s_polar.sum().plot()
 
 # %%
-
 # There are also other things you can account for with azimuthal integration, such as the
 # effects of the Ewald sphere.  This can be done by calibrating with a known detector distance,
 # and beam energy.
-
+#
 # Here we just show the effect of just calibrating with the first peak vs. calibrating
 # with the known beam energy and detector distance. For things like accurate template matching good
 # calibration can be important when matching to high diffraction vectors. The calibration example gives
 # more information on how to get the correct values for your microscope/setup.
-
+#
 # If you are doing x-ray diffraction please raise an issue on the pyxem github to let us know! The same
 # assumptions should apply for each case, but it would be good to test!
-
+#
 # We only show the 1D case here, but the same applies for the 2D case as well!
 
 s.calibration.detector(
@@ -67,12 +66,10 @@ hs.plot.plot_spectra(
     legend=["Flat Ewald Sphere Assumption", "200keV Corrected", "80keV Corrected"],
 )
 # %%
-
-
 # At times you may want to use a mask to exclude certain pixels from the azimuthal integration or apply an affine
 # transformation to the diffraction patterns before azimuthal integration.  This can be done using the `mask` and
 # `affine` parameters of the `Calibration` object.
-
+#
 # Here we just show a random affine transformation for illustration.
 
 
@@ -82,8 +79,8 @@ affine = np.array(
 )  # Just a random affine transformation for illustration
 s.calibration(mask=mask, affine=affine)
 s.get_azimuthal_integral2d(npt=100, npt_azim=360, inplace=False).sum().plot()
-# %%
 
+# %%
 # The `azimuth_range`-argument lets you choose what angular range to calculate the azimuthal integral for.
 # The range can be increasing, decreasing, and does not need to be a multiple of pi.
 

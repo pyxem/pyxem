@@ -24,7 +24,6 @@ s = pxm.data.tilt_boundary_data(correct_pivot_point=True)
 
 
 # %%
-
 # Canny Filter
 # ---------------------
 # First we have to apply a Canny filter to the dataset to get a binary image of the
@@ -42,8 +41,6 @@ canny_img = s.map(
 
 canny_img.plot()  # Plotting canny filtered image with outlines
 # %%
-
-
 # Computing the Hough Transform
 # -----------------------------
 # We can then compute the hough Transform using the radius of the disk. It is possible to
@@ -60,7 +57,6 @@ circular_hough = canny_img.map(hough_circle_single_rad, radius=6, inplace=False)
 circular_hough.plot()
 
 # %%
-
 # Finding Peaks
 # -------------
 # Finding peaks is fairly easy from this point and uses the ``get_diffraction_vectors`` function.

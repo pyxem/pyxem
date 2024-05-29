@@ -13,7 +13,7 @@ Note that this workflow might change (simplify and improve!) in the future as py
 1.0.0 is developed/released.
 """
 
-########################################################################################
+# %%
 # First, we import the necessary packages and make a single test diffraction pattern.
 import pyxem.data.dummy_data.make_diffraction_test_data as mdtd
 import pyxem as pxm
@@ -33,7 +33,6 @@ s.set_signal_type("electron_diffraction")
 s.plot()
 
 # %%
-
 # Using RANSAC Ellipse Determination
 # ----------------------------------
 # The RANSAC algorithm is a robust method for fitting an ellipse to points with outliers. Here we
@@ -54,8 +53,8 @@ s.plot()
 s.add_marker(in_points, plot_marker=True)
 s.add_marker(el, plot_marker=True)
 s.add_marker(out_points, plot_marker=True)
-# %%
 
+# %%
 # Using Manual Ellipse Determination
 # ----------------------------------
 # Sometimes it is useful to force the ellipse to fit certain points.  For example, here we
@@ -95,8 +94,6 @@ hs.plot.plot_images(
     colorbar=None,
 )
 # %%
-
-
 # Ellipse from Points
 # -------------------
 # This workflow will likely change slightly in the future to add better parllelism,
@@ -114,7 +111,9 @@ data = np.zeros((2, 3, 210, 200), dtype=np.float32)
 data[:, :] = image.T
 s = Diffraction2D(data)
 
+# %%
 # Finding the peaks
+
 s_t = s.template_match_disk(disk_r=5)
 peak_array = s_t.find_peaks(
     method="difference_of_gaussian",

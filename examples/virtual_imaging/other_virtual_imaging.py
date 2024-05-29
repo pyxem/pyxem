@@ -24,8 +24,8 @@ c.add_marker(labels)
 vdfs = c.get_virtual_image(rois)
 
 vdfs.plot()
-# %%
 
+# %%
 # We can also use multiple different ROIs and combine them into a virtual image.
 
 r1 = hs.roi.RectangularROI(-35, -35, 35, 35)
