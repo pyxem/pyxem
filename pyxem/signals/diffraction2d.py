@@ -654,7 +654,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             Half the side length of square that captures the direct beam in all
             scans. Means that the centering algorithm is stable against
             diffracted spots brighter than the direct beam. Crops the diffraction
-            pattern to `half_square_width` pixels around th center of the diffraction
+            pattern to `half_square_width` pixels around the center of the diffraction
             pattern. Only one of `half_square_width` or signal_slice can be defined.
         **kwargs:
             Additional arguments accepted by :func:`pyxem.utils.diffraction.find_beam_center_blur`,
@@ -751,9 +751,10 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             shifts = -centers + origin_coordinates
         elif method == "center_of_mass":
             if "mask" in kwargs and signal_slice is not None:
+                # Shifts mask into coordinate space of sliced signal
                 x, y, r = kwargs["mask"]
                 x = x - signal_slice[0]
-                y = y - signal_slice[1]
+                y = y - signal_slice[2]
                 kwargs["mask"] = (x, y, r)
             centers = signal.center_of_mass(
                 lazy_result=lazy_output,
