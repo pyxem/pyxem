@@ -81,6 +81,7 @@ linkcheck_ignore = [
     "http://dx.doi.org/10.1088/0965-0393/23/8/083501",  # 403 Client Error: Forbidden for url
     "https://doi.org/10.1111/jmi.12065",  # 403 Client Error: Forbidden for url
     "https://doi.org/10.1111/j.0022-2720.2004.01293.x",  # 403 Client Error: Forbidden for url
+    "https://doi.org/10.1016/j.ultramic.2016.12.021",
 ]
 
 
