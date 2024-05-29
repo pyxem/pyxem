@@ -87,7 +87,7 @@ setup(
     extras_require=extra_feature_requirements,
     install_requires=[
         "dask",
-        "diffsims @ git+https://github.com/pyxem/diffsims.git@main",
+        "diffsims       == 0.6.rc1",
         "hyperspy       >= 2.0",
         "h5py",
         "lmfit          >= 0.9.12",
