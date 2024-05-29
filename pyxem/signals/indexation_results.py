@@ -225,15 +225,19 @@ def extract_vectors_from_orientation_map(result, all_vectors):
     vectors = DiffractingVector(vectors.phase, xyz=vectors.data.copy())
     # Flip y, as discussed in https://github.com/pyxem/pyxem/issues/925
     vectors.y = -vectors.y
-    # Mirror if necessary
-    vectors.y = mirror * vectors.y
+
     rotation = Rotation.from_euler(
-        (rotation, 0, 0), degrees=True, direction="crystal2lab"
+        (mirror * rotation, 0, 0), degrees=True, direction="crystal2lab"
     )
     vectors = ~rotation * vectors.to_miller()
     vectors = DiffractingVector(
         vectors.phase, xyz=vectors.data.copy(), intensity=intensity
     )
+
+    # Mirror if necessary.
+    # Mirroring, in this case, means casting (r, theta) to (r, -theta).
+    # This is equivalent to (x, y) -> (x, -y)
+    vectors.y = mirror * vectors.y
 
     return vectors
 
@@ -361,34 +365,6 @@ class OrientationMap(DiffractionVectors2D):
 
         # Use vector data as signal in case of different vectors per navigation position
         vectors_signal = hs.signals.Signal1D(self.simulation.coordinates)
-
-        def extract_vectors_from_orientation_map(result, all_vectors):
-            index, _, rotation, mirror = result[n_best_index, :].T
-            index = index.astype(int)
-            if all_vectors.ndim == 0:
-                vectors = all_vectors
-            else:
-                vectors = all_vectors[index]
-            # Copy manually, as deepcopy adds a lot of overhead with the phase
-            intensity = vectors.intensity
-            vectors = DiffractingVector(vectors.phase, xyz=vectors.data.copy())
-            # Flip y, as discussed in https://github.com/pyxem/pyxem/issues/925
-            vectors.y = -vectors.y
-
-            rotation = Rotation.from_euler(
-                (mirror * rotation, 0, 0), degrees=True, direction="crystal2lab"
-            )
-            vectors = ~rotation * vectors.to_miller()
-            vectors = DiffractingVector(
-                vectors.phase, xyz=vectors.data.copy(), intensity=intensity
-            )
-
-            # Mirror if necessary.
-            # Mirroring, in this case, means casting (r, theta) to (r, -theta).
-            # This is equivalent to (x, y) -> (x, -y)
-            vectors.y = mirror * vectors.y
-
-            return vectors
 
         return self.map(
             extract_vectors_from_orientation_map,
