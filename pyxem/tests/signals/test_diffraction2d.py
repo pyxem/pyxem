@@ -857,7 +857,7 @@ class TestGetDirectBeamPosition:
                     "kind": "nearest",
                 },
             ),
-            ("center_of_mass", {}),
+            ("center_of_mass", {"mask": (10, 13, 10)}),
         ],
     )
     def test_get_direct_beam(self, method, sig_slice, kwargs):
