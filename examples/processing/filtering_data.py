@@ -43,10 +43,8 @@ hs.plot.plot_images(
 )
 
 # %%
-"""
-The `filter` function can also be used with a custom function as long as the function
-takes a numpy array as input and returns a numpy array of the same shape.
-"""
+# The `filter` function can also be used with a custom function as long as the function
+# takes a numpy array as input and returns a numpy array of the same shape.
 
 
 def custom_filter(array):
@@ -63,12 +61,9 @@ hs.plot.plot_images(
     vmax="99th",
 )
 # %%
-
-"""
-For lazy datasets, functions which operate on dask arrays can be used. For example,
-the `gaussian_filter` function from `scipy.ndimage` is replaced with the `dask_image`
-version which operates on dask arrays.
-"""
+# For lazy datasets, functions which operate on dask arrays can be used. For example,
+# the `gaussian_filter` function from `scipy.ndimage` is replaced with the `dask_image`
+# version which operates on dask arrays.
 
 s = s.as_lazy()  # Convert to lazy dataset
 s_filtered4 = s.filter(
