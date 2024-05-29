@@ -10,7 +10,7 @@ import numpy as np
 import hyperspy.api as hs
 
 import pyxem as pxm
-import pyxem.dummy_data.make_diffraction_test_data as mdtd
+import pyxem.data.dummy_data.make_diffraction_test_data as mdtd
 
 s = pxm.data.tilt_boundary_data()
 
@@ -55,7 +55,8 @@ hs.plot.plot_images(
 
 # Sometimes the template matching can be thrown off by an amorphous halo around the diffraction spots.  This
 # can be seen in the following example.  In this case we can use a dilated (circular) window to reduce the
-# effect of the imposed square window.
+# effect of the imposed square window. This can be seen in the intensity of the diffraction vectors at
+# +y,+x and -y,-x.
 data = mdtd.generate_4d_data(
     image_size_x=256,
     image_size_y=256,
@@ -65,20 +66,35 @@ data = mdtd.generate_4d_data(
     ring_x=128,
     ring_y=128,
     disk_I=10,
-    ring_lw=6,
+    ring_lw=8,
     ring_I=2,
 )
 amorphous_data = data + s
 
+template_normal = amorphous_data.template_match_disk(disk_r=6, subtract_min=False)
+template_circular = amorphous_data.template_match_disk(
+    disk_r=6, circular_background=True, template_dilation=5, subtract_min=False
+)
+mask = template_normal.get_direct_beam_mask(35)
 
-template_normal = amorphous_data.template_match_disk(disk_r=6)
-template_circular = s.template_match_disk(disk_r=6, dilated_template_window=True)
+mask2 = ~template_normal.get_direct_beam_mask(55)
 
+template_normal.data[:, :, mask] = 0
+template_circular.data[:, :, mask] = 0
 
+template_normal.data[:, :, mask2] = 0
+template_circular.data[:, :, mask2] = 0
+import matplotlib.pyplot as plt
+
+f = plt.figure(figsize=(15, 5))
 ind = (5, 5)
 hs.plot.plot_images(
     [amorphous_data.inav[ind], template_normal.inav[ind], template_circular.inav[ind]],
-    label=["Signal", "Square Window", "Large Window"],
+    label=["Signal", "Square Window", "Circular Window"],
     tight_layout=True,
     per_row=3,
+    vmin=[0, 0.7, 0.7],
+    fig=f,
 )
+
+# %%

@@ -26,10 +26,12 @@ import scipy.ndimage as ndi
 import pyxem as pxm  # for ElectronDiffraction2D
 
 from scipy.interpolate import interp1d
+from scipy.signal import fftconvolve
 from skimage import transform as tf
 from skimage.feature import match_template
 from skimage import morphology, filters
 from skimage.draw import ellipse_perimeter
+from skimage._shared.utils import _supported_float_type
 from skimage.registration import phase_cross_correlation
 from tqdm import tqdm
 from packaging.version import Version
@@ -855,7 +857,10 @@ def normalize_template_match(z, template, subtract_min=True, pad_input=True, **k
     **kwargs :
         Keyword arguments to be passed to :func:`skimage.feature.match_template`
     """
-    template_match = match_template(z, template, pad_input=pad_input, **kwargs)
+    if kwargs.pop("circular_background", False):
+        template_match = match_template_dilate(z, template, **kwargs)
+    else:
+        template_match = match_template(z, template, pad_input=pad_input, **kwargs)
     if subtract_min:
         template_match = template_match - np.min(template_match)
     return template_match
