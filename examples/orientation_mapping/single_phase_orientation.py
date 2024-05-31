@@ -53,16 +53,9 @@ sim = generator.calculate_diffraction2d(
 # there?" rather than "Is the Bragg vector the right intensity?" patially because the intensity of the Bragg vector might have
 # many different effects.
 
+
 orientation_map = polar_si.get_orientation(sim)
-ipf_markers = orientation_map.to_ipf_markers()
-navigator = orientation_map.to_navigator()
-simulated_si.plot(navigator=navigator, vmax="95th")
-simulated_si.add_marker(
-    orientation_map.to_single_phase_markers(
-        annotate=True, text_color="w", include_intensity=True, intesity_scale=40, lw=4
-    )
-)
-simulated_si.add_marker(ipf_markers)
+orientation_map.plot_over_signal(simulated_si, vmax="96th")
 
 # %%
 # sphinx_gallery_thumbnail_number = 4

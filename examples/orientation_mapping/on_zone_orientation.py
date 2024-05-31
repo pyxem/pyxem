@@ -57,11 +57,4 @@ sim = generator.calculate_diffraction2d(
 # rotation as a navigator or plot it directly.
 
 orientation_map = polar_si_tilt.get_orientation(sim)
-simulated_si_tilt.plot(vmax="99th", navigator=orientation_map.isig[2, 0])
-simulated_si_tilt.add_marker(
-    orientation_map.to_single_phase_markers(
-        annotate=True, text_color="w", lw=4, include_intensity=True, intesity_scale=40
-    )
-)
-# %%
-# sphinx_gallery_thumbnail_number = 4
+orientation_map.plot_over_signal(simulated_si_tilt)

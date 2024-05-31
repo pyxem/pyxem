@@ -1,5 +1,5 @@
 """
-Mulit Phase Orientation Mapping
+Multi Phase Orientation Mapping
 ===============================
 You can also calculate the orientation of the grains for multiple phases using the
 :meth:`pyxem.signals.PolarSignal2D.get_orientation` method. This requires that you

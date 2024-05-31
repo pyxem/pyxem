@@ -23,7 +23,7 @@ from traits.api import Undefined
 import hyperspy.api as hs
 from hyperspy._signals.lazy import LazySignal
 from hyperspy.signal import BaseSignal
-from hyperspy.axes import AxesManager
+from hyperspy.axes import AxesManager, BaseDataAxis
 import numpy as np
 from orix.crystal_map import CrystalMap, Phase, PhaseList
 from orix.quaternion import Rotation, Orientation
@@ -277,6 +277,9 @@ class OrientationMap(DiffractionVectors2D):
 
     @property
     def simulation(self):
+        """Simulation object used to generate the orientation map.  This is stored in the metadata
+        but can be accessed using the ``.simulation`` attribute. The simulation object is a
+        :class:`diffsims.simulation.Simulation2D` object."""
         return self.metadata.get_item("simulation")
 
     @simulation.setter
@@ -284,14 +287,19 @@ class OrientationMap(DiffractionVectors2D):
         self.metadata.set_item("simulation", value)
 
     def deepcopy(self, deepcopy_simulation=False):
-        """Deepcopy the signal"""
-        simulation = self.simulation
-        simulation._phase_slider = None
-        simulation._rotation_slider = None
-        self.simulation = None
+        """Deepcopy the signal. Deepcopying the simulation is optional and is computationally
+        expensive. If the simulation is not deepcopied, the simulation attribute of the
+        copied signal is passed along"""
+
+        if not deepcopy_simulation:
+            simulation = self.simulation
+            simulation._phase_slider = None
+            simulation._rotation_slider = None
+            self.simulation = None
         new = super().deepcopy()
-        new.simulation = simulation
-        self.simulation = simulation
+        if not deepcopy_simulation:
+            new.simulation = simulation
+            self.simulation = simulation
         return new
 
     @property
@@ -301,12 +309,20 @@ class OrientationMap(DiffractionVectors2D):
     def to_rotation(self, flatten=False):
         """
         Convert the orientation map to a set of `orix.Quaternion.Rotation` objects.
+
+        Parameters
+        ----------
+        flatten : bool
+            If True, the rotations will be flattened to a 2D array. This is useful for passing
+            to a `CrystalMap` object.
         Returns
         -------
+        orix.Quaternion.Rotation
         """
         if self._lazy:
-            warn("Computing the signal")
-            self.compute()
+            raise ValueError(
+                "Cannot create rotation from lazy signal. Please compute the signal first."
+            )
         all_rotations = Rotation.stack(self.simulation.rotations).flatten()
         rotations = self.map(
             rotation_from_orientation_map,
@@ -342,6 +358,11 @@ class OrientationMap(DiffractionVectors2D):
     def to_single_phase_orientations(self, **kwargs) -> Orientation:
         """Convert the orientation map to an `Orientation`-object,
         given a single-phase simulation.
+
+        Parameters
+        ----------
+        **kwargs
+            Additional keyword arguments to pass to the :meth:`hyperspy.api.signals.BaseSignal.map` function.
         """
         if self.simulation.has_multiple_phases:
             raise ValueError(
@@ -367,13 +388,14 @@ class OrientationMap(DiffractionVectors2D):
     def to_single_phase_vectors(
         self, n_best_index: int = 0, **kwargs
     ) -> hs.signals.Signal1D:
-        """
-        Get the reciprocal lattice vectors for a single-phase simulation.
+        """Get the reciprocal lattice vectors for a single-phase simulation.
 
         Parameters
         ----------
         n_best_index: int
             The index into the `n_best` matchese
+        **kwargs
+            Additional keyword arguments to pass to the :meth:`hyperspy.api.signals.BaseSignal.map` function.
         """
 
         if self.simulation.has_multiple_phases:
@@ -395,7 +417,13 @@ class OrientationMap(DiffractionVectors2D):
         return v
 
     def to_crystal_map(self) -> CrystalMap:
-        """Convert the orientation map to an `orix.CrystalMap` object"""
+        """Convert the orientation map to an :class:`orix.crystal_map.CrystalMap` object
+
+        Returns
+        -------
+        orix.crystal_map.CrystalMap
+            A crystal map object with the phase id as the highest matching phase.
+        """
         if self.axes_manager.navigation_dimension != 2:
             raise ValueError(
                 "Only 2D navigation supported. Please raise an issue if you are interested in "
@@ -429,10 +457,17 @@ class OrientationMap(DiffractionVectors2D):
             phase_list=phases,
         )
 
-    def to_ipf_markers(self, offset=0.85, scale=0.2):
+    def to_ipf_markers(self, offset: float = 0.85, scale: float = 0.2):
         """Convert the orientation map to a set of inverse pole figure
         markers which visualizes the best matching orientations in the
         reduced S2 space.
+
+        Parameters
+        ----------
+        offset : float
+            The offset of the markers from the center of the plot
+        scale : float
+            The scale (as a fraction of the axis) for the markers.
         """
         if self._lazy:
             raise ValueError(
@@ -481,7 +516,7 @@ class OrientationMap(DiffractionVectors2D):
 
         return square, polygon_sector, best_points, texts
 
-    def to_single_phase_markers(
+    def to_markers(
         self,
         n_best: int = 1,
         annotate: bool = False,
@@ -493,7 +528,7 @@ class OrientationMap(DiffractionVectors2D):
         include_intensity: bool = False,
         intesity_scale: float = 1,
         **kwargs,
-    ):
+    ) -> Sequence[hs.plot.markers.Markers]:
         """Convert the orientation map to a set of markers for plotting.
 
         Parameters
@@ -514,6 +549,12 @@ class OrientationMap(DiffractionVectors2D):
             having a larger marker size.
         lazy_output: bool
             If True, the output will be a lazy signal. If None, the output will be lazy if the input is lazy.
+
+        Returns
+        -------
+        all_markers : Sequence[hs.plot.markers.Markers]
+            A list of markers for each of the n_best solutions
+
         """
         if lazy_output is None:
             lazy_output = self._lazy
@@ -587,8 +628,36 @@ class OrientationMap(DiffractionVectors2D):
         return all_markers
 
     def to_single_phase_polar_markers(
-        self, signal_axes: AxesManager, n_best: int = 1, marker_color: str = "red"
+        self,
+        signal_axes: Sequence[BaseDataAxis],
+        n_best: int = 1,
+        marker_colors: str = ("red", "blue", "green", "orange", "purple"),
+        lazy_output: bool = None,
+        **kwargs,
     ) -> Iterator[hs.plot.markers.Markers]:
+        """
+        Convert the orientation map to a set of markers for plotting in polar coordinates.
+
+        Parameters
+        ----------
+        signal_axes: Sequence[BaseDataAxis]
+            The signal axes for the orientation map. The first axis should be the azimuthal axis
+            and the second axis should be the radial axis.
+        n_best: int
+            The number of best fit solutions to return as markers
+        marker_colors:
+            The colors to use for the markers. If there are more than 5 solutions, the colors will repeat.
+        lazy_output:
+            If True, the output will be a set of lazy markers. If False the output will be a set of computed markers.
+            If None, the output will be lazy if the input is lazy or not lazy if the input is not lazy.
+        kwargs:
+            Additional keyword arguments to pass to the hyperspy.plot.markers.Points.from_signal function.
+        Returns
+        -------
+        all_markers : Sequence[hs.plot.markers.Markers]
+            An list of markers for each of the n_best solutions
+
+        """
         (
             r_templates,
             theta_templates,
@@ -596,6 +665,9 @@ class OrientationMap(DiffractionVectors2D):
         ) = self.simulation.polar_flatten_simulations(
             signal_axes[1].axis, signal_axes[0].axis
         )
+
+        if lazy_output is None:
+            lazy_output = self._lazy
 
         def marker_generator_factory(n_best_entry: int, r_axis, theta_axis):
             theta_min, theta_max = theta_axis.min(), theta_axis.max()
@@ -624,21 +696,52 @@ class OrientationMap(DiffractionVectors2D):
 
             return marker_generator
 
+        all_markers = []
         for n in range(n_best):
+            color = marker_colors[n % len(marker_colors)]
             markers_signal = self.map(
                 marker_generator_factory(n, signal_axes[1].axis, signal_axes[0].axis),
                 inplace=False,
                 ragged=True,
                 lazy_output=True,
             )
+            if "sizes" not in kwargs:
+                kwargs["sizes"] = 15
             markers = hs.plot.markers.Points.from_signal(
-                markers_signal, facecolor="none", edgecolor=marker_color, sizes=(10,)
+                markers_signal, facecolor="none", edgecolor=color, **kwargs
             )
-            yield markers
 
-    def _get_ipf_outline(self, include_labels=True, offset=0.85, scale=0.2):
+            all_markers.append(markers)
+        if lazy_output is False:  # Compute all at once (as it is faster)
+            all_markers = compute_markers(all_markers)
+        return all_markers
+
+    def _get_ipf_outline(
+        self, include_labels: bool = True, offset: float = 0.85, scale: float = 0.2
+    ):
         """Get the outline of the IPF for the orientation map as a marker in the
-        upper right hand corner including labels if desired."""
+        upper right hand corner including labels if desired.
+
+        Parameters
+        ----------
+        include_labels : bool
+            If True, the labels for the axes will be included.
+        offset : float
+            The offset of the markers from the lower left of the plot (as a fraction of the axis).
+        scale : float
+            The scale (as a fraction of the axis) for the markers.
+
+        Returns
+        -------
+        polygon_sector : hs.plot.markers.Polygons
+            The outline of the IPF as a marker
+        texts : hs.plot.markers.Texts
+            The text labels for the IPF axes
+        maxes : np.ndarray
+            The maximum values for the axes
+        mins : np.ndarray
+            The minimum values for the axes
+        """
         # Creating Lines around QuadMesh
         sector = self.simulation.phases.point_group.fundamental_sector
         s = StereographicProjection()
@@ -676,10 +779,27 @@ class OrientationMap(DiffractionVectors2D):
             )
             return polygon_sector, texts, maxes, mins
 
-    def get_ipf_annotation_markers(self, offset=0.85, scale=0.2):
+    def get_ipf_annotation_markers(self, offset: float = 0.85, scale: float = 0.2):
         """Get the outline of the IPF for the orientation map as a marker in the
         upper right hand corner including labels if desired. As well as the color
-        mesh for the IPF."""
+        mesh for the IPF.
+
+        Parameters
+        ----------
+        offset : float
+            The offset of the markers from the lower left of the plot (as a fraction of the axis).
+        scale : float
+            The scale (as a fraction of the axis) for the markers.
+
+        Returns
+        -------
+        polygon_sector : hs.plot.markers.Polygons
+            The outline of the IPF as a marker
+        texts : hs.plot.markers.Texts
+            The text labels for the IPF axes
+        mesh : hs.plot.markers.Markers
+            The color mesh for the IPF (using :class:`matplotlib.collections.QuadMesh`)
+        """
 
         polygon_sector, texts, _, _ = self._get_ipf_outline(offset=offset, scale=scale)
 
@@ -720,6 +840,17 @@ class OrientationMap(DiffractionVectors2D):
     ):
         """Create a colored navigator and a legend (in the form of a marker) which can be passed as the
         navigator argument to the `plot` method of some signal.
+
+        Parameters
+        ----------
+        direction : Vector3d
+            The direction to plot the IPF in
+        add_markers : bool
+            If True, the markers for the IPF will be added to the navigator as permanent markers.
+
+        Returns
+        -------
+        hs.signals.BaseSignal
         """
         oris = self.to_single_phase_orientations()[:, :, 0]
         ipfcolorkey = IPFColorKeyTSL(oris.symmetry, direction)
@@ -742,28 +873,44 @@ class OrientationMap(DiffractionVectors2D):
             )
         return s
 
-    def plot_over_signal(self, signal, annotate=False, **plot_kwargs):
+    def plot_over_signal(
+        self,
+        signal,
+        add_vector_markers=True,
+        add_ipf_markers=True,
+        add_ipf_colorkey=True,
+        vector_kwargs=None,
+        **kwargs,
+    ):
         """Convenience method to plot the orientation map and the n-best matches over the signal.
 
         Parameters
         ----------
         signal : BaseSignal
             The signal to plot the orientation map over.
-        annotate: bool
-            If True, the euler rotation and the correlation will be annotated on the plot using
-            the `Texts` class from hyperspy.
-
-        Notes
-        -----
-        The kwargs are passed to the `signal.plot` function call
+        add_vector_markers : bool
+            If True, the vector markers will be added to the signal.
+        add_ipf_markers : bool
+            If True, the IPF best fit will be added to the signal in an overlay
+        add_ipf_colorkey : bool
+            If True, the IPF colorkey will be added to the signal
+        vector_kwargs : dict
+            Additional keyword arguments to pass to the `to_single_phase_markers` method
+        kwargs
+            Additional keyword arguments to pass to the
+            :meth:`hyperspy.api.signals.Signal2D.plot` method
         """
-        nav = self.to_navigator()
-        signal.plot(navigator=nav, **plot_kwargs)
-        signal.add_marker(self.to_single_phase_markers(1, annotate=annotate))
-
-    def plot_inplane_rotation(self, **kwargs):
-        """Plot the in-plane rotation of the orientation map as a 2D map."""
-        pass
+        nav = self.to_ipf_colormap(add_markers=False)
+        if vector_kwargs is None:
+            vector_kwargs = dict()
+        signal.plot(navigator=nav, **kwargs)
+        if add_vector_markers:
+            signal.add_marker(self.to_markers(1, **vector_kwargs))
+        if add_ipf_markers:
+            ipf_markers = self.to_ipf_markers()
+            signal.add_marker(ipf_markers)
+        if add_ipf_colorkey:
+            signal.add_marker(self.get_ipf_annotation_markers(), plot_on_signal=False)
 
 
 class GenericMatchingResults:

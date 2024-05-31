@@ -20,6 +20,7 @@ import numpy as np
 import pytest
 from matplotlib import pyplot as plt
 from transforms3d.euler import euler2mat
+import dask.array as da
 
 from diffsims.libraries.structure_library import StructureLibrary
 from diffsims.generators.diffraction_generator import DiffractionGenerator
@@ -162,7 +163,7 @@ class TestOrientationResult:
     examples provided in the documentation.
     """
 
-    @pytest.fixture
+    @pytest.fixture(scope="class")
     def single_rot_orientation_result(self):
         s = si_tilt()
         s.calibration.center = None
@@ -179,11 +180,12 @@ class TestOrientationResult:
             ),
             max_excitation_error=0.1,
             reciprocal_radius=1.5,
+            with_direct_beam=False,
         )
         orientation_map = polar_si_tilt.get_orientation(sim)
         return orientation_map
 
-    @pytest.fixture
+    @pytest.fixture(scope="class")
     def multi_rot_orientation_result(self):
         s, r = si_grains(return_rotations=True)
         s.calibration.center = None
@@ -196,12 +198,17 @@ class TestOrientationResult:
             resolution=1, point_group=phase.point_group
         )
         sims = generator.calculate_diffraction2d(
-            phase, rotation=rotations, max_excitation_error=0.1, reciprocal_radius=2
+            phase,
+            rotation=rotations,
+            max_excitation_error=0.1,
+            reciprocal_radius=2,
+            with_direct_beam=False,
         )
         orientations = polar.get_orientation(sims)
+
         return orientations, r
 
-    @pytest.fixture
+    @pytest.fixture(scope="class")
     def simple_multi_rot_orientation_result(self):
         s, r = si_grains_simple(return_rotations=True)
         s.calibration.center = None
@@ -214,12 +221,16 @@ class TestOrientationResult:
             resolution=1, point_group=phase.point_group
         )
         sims = generator.calculate_diffraction2d(
-            phase, rotation=rotations, max_excitation_error=0.1, reciprocal_radius=2
+            phase,
+            rotation=rotations,
+            max_excitation_error=0.1,
+            reciprocal_radius=2,
+            with_direct_beam=True,
         )
-        orientations = polar.get_orientation(sims)
-        return orientations, r
+        orientations = polar.get_orientation(sims, alpha=1)  # in this case we
+        return orientations, r, s
 
-    @pytest.fixture
+    @pytest.fixture(scope="class")
     def multi_phase_orientation_result(self):
         s = fe_multi_phase_grains()
         s.calibration.center = None
@@ -242,7 +253,7 @@ class TestOrientationResult:
             max_excitation_error=0.1,
             reciprocal_radius=2,
         )
-        orientations = polar.get_orientation(sims)
+        orientations = polar.get_orientation(sims, n_best=3)
         return orientations
 
     def test_tilt_orientation_result(self, single_rot_orientation_result):
@@ -261,7 +272,7 @@ class TestOrientationResult:
         assert np.all(degrees_between[:, 5:] <= 1)
 
     def test_grain_orientation_result(self, simple_multi_rot_orientation_result):
-        orientations, rotations = simple_multi_rot_orientation_result
+        orientations, rotations, s = simple_multi_rot_orientation_result
         assert isinstance(rotations, Orientation)
         assert isinstance(orientations, OrientationMap)
         orients = orientations.to_single_phase_orientations()
@@ -272,7 +283,7 @@ class TestOrientationResult:
         assert np.all(np.min(degrees_between, axis=2) <= 2)
 
     def test_to_crystal_map(self, simple_multi_rot_orientation_result):
-        orientations, rotations = simple_multi_rot_orientation_result
+        orientations, rotations, s = simple_multi_rot_orientation_result
         crystal_map = orientations.to_crystal_map()
         assert isinstance(crystal_map, CrystalMap)
         assert np.all(crystal_map.phase_id == 0)
@@ -282,26 +293,77 @@ class TestOrientationResult:
         assert isinstance(crystal_map, CrystalMap)
         assert np.all(crystal_map.phase_id < 2)
 
-    def test_to_markers(self, simple_multi_rot_orientation_result):
-        orientations, rotations = simple_multi_rot_orientation_result
-        markers = orientations.to_single_phase_markers(lazy_output=True)
+    @pytest.mark.parametrize("annotate", [True, False])
+    @pytest.mark.parametrize("lazy_output", [True, False])
+    @pytest.mark.parametrize("add_intensity", [True, False])
+    def test_to_markers(
+        self, simple_multi_rot_orientation_result, annotate, lazy_output, add_intensity
+    ):
+        orientations, rotations, s = simple_multi_rot_orientation_result
+        markers = orientations.to_markers(
+            lazy_output=lazy_output, annotate=annotate, include_intensity=add_intensity
+        )
+        assert isinstance(markers[0], hs.plot.markers.Markers)
+
+    def test_to_markers_lazy(self, simple_multi_rot_orientation_result):
+        orientations, rotations, s = simple_multi_rot_orientation_result
+        orientations = orientations.as_lazy()
+        markers = orientations.to_markers()
+        assert isinstance(markers[0].kwargs["offsets"], da.Array)
+
+    def test_to_markers_polar(self, simple_multi_rot_orientation_result):
+        orientations, rotations, s = simple_multi_rot_orientation_result
+        polar = s.get_azimuthal_integral2d(
+            npt=100, npt_azim=180, inplace=False, mean=True
+        )
+        markers = orientations.to_single_phase_polar_markers(
+            polar.axes_manager.signal_axes
+        )
         assert isinstance(markers[0], hs.plot.markers.Markers)
 
     def test_to_ipf_markers(self, simple_multi_rot_orientation_result):
-        orientations, rotations = simple_multi_rot_orientation_result
+        orientations, rotations, s = simple_multi_rot_orientation_result
         markers = orientations.to_ipf_markers()
         assert isinstance(markers[0], hs.plot.markers.Markers)
 
     def test_to_ipf_annotation(self, simple_multi_rot_orientation_result):
-        orientations, rotations = simple_multi_rot_orientation_result
+        orientations, rotations, s = simple_multi_rot_orientation_result
         annotations = orientations.get_ipf_annotation_markers()
         for a in annotations:
             assert isinstance(a, hs.plot.markers.Markers)
 
     @pytest.mark.parametrize("add_markers", [True, False])
     def test_to_ipf_map(self, simple_multi_rot_orientation_result, add_markers):
-        orientations, rotations = simple_multi_rot_orientation_result
+        orientations, rotations, s = simple_multi_rot_orientation_result
         navigator = orientations.to_ipf_colormap(add_markers=add_markers)
         assert isinstance(navigator, hs.signals.BaseSignal)
         if add_markers:
             assert len(navigator.metadata.Markers) == 3
+
+    def test_multi_phase_errors(self, multi_phase_orientation_result):
+        with pytest.raises(ValueError):
+            multi_phase_orientation_result.to_ipf_colormap()
+        with pytest.raises(ValueError):
+            multi_phase_orientation_result.to_single_phase_vectors()
+        with pytest.raises(ValueError):
+            multi_phase_orientation_result.to_single_phase_orientations()
+        with pytest.raises(ValueError):
+            multi_phase_orientation_result.to_ipf_markers()
+
+    def test_lazy_error(self, simple_multi_rot_orientation_result):
+        orientations, rotations, s = simple_multi_rot_orientation_result
+        orientations = orientations.as_lazy()
+        with pytest.raises(ValueError):
+            rotations = orientations.to_rotation()
+        with pytest.raises(ValueError):
+            rotations = orientations.to_ipf_markers()
+
+    def test_to_crystal_map_error(self, simple_multi_rot_orientation_result):
+        orientations, rotations, s = simple_multi_rot_orientation_result
+        orientations = hs.stack((orientations, orientations))
+        with pytest.raises(ValueError):
+            rotations = orientations.to_crystal_map()
+
+    def test_plot_over_signal(self, simple_multi_rot_orientation_result):
+        orientations, rotations, s = simple_multi_rot_orientation_result
+        orientations.plot_over_signal(s)
