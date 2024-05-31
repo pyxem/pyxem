@@ -890,12 +890,12 @@ def match_template_dilate(
     """
 
     image = image.astype(float, copy=False)
-    if image.ndim < template.ndim:
+    if image.ndim < template.ndim:  # pragma: no cover
         raise ValueError(
             "Dimensionality of template must be less than or "
             "equal to the dimensionality of image."
         )
-    if np.any(np.less(image.shape, template.shape)):
+    if np.any(np.less(image.shape, template.shape)):  # pragma: no cover
         raise ValueError("Image must be larger than template.")
 
     image_shape = image.shape
