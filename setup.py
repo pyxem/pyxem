@@ -91,7 +91,7 @@ setup(
         "hyperspy       >= 2.0",
         "h5py",
         "lmfit          >= 0.9.12",
-        "matplotlib     >= 3.6",
+        "matplotlib     >= 3.7.5",
         "numba",
         "numpy",
         "numexpr        != 2.8.6",  # bug in 2.8.6 for greek letters need for pyfai
