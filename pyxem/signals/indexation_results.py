@@ -35,12 +35,22 @@ from orix.vector import Vector3d
 from orix.projections import StereographicProjection
 from orix.plot.inverse_pole_figure_plot import _get_ipf_axes_labels
 from orix.vector.fundamental_sector import _closed_edges_in_hemisphere
+from orix.vector import Vector3d
+from orix.projections import StereographicProjection
+from orix.plot.inverse_pole_figure_plot import _get_ipf_axes_labels
+from orix.vector.fundamental_sector import _closed_edges_in_hemisphere
+from orix.plot import IPFColorKeyTSL, DirectionColorKeyTSL
+import hyperspy.api as hs
+import numpy as np
+from matplotlib.collections import QuadMesh
+
 import numpy as np
 import hyperspy.api as hs
 
 from pyxem.utils.indexation_utils import get_nth_best_solution
 from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
 from pyxem.utils._signals import _transfer_navigation_axes
+from pyxem.utils.signal import compute_markers
 
 
 def crystal_from_vector_matching(z_matches):
@@ -273,11 +283,16 @@ class OrientationMap(DiffractionVectors2D):
     def simulation(self, value):
         self.metadata.set_item("simulation", value)
 
-    def deepcopy(self):
+    def deepcopy(self, deepcopy_simulation=False):
         """Deepcopy the signal"""
-        self.simulation._phase_slider = None
-        self.simulation._rotation_slider = None
-        return super().deepcopy()
+        simulation = self.simulation
+        simulation._phase_slider = None
+        simulation._rotation_slider = None
+        self.simulation = None
+        new = super().deepcopy()
+        new.simulation = simulation
+        self.simulation = simulation
+        return new
 
     @property
     def num_rows(self):
@@ -366,8 +381,7 @@ class OrientationMap(DiffractionVectors2D):
 
         # Use vector data as signal in case of different vectors per navigation position
         vectors_signal = hs.signals.Signal1D(self.simulation.coordinates)
-
-        return self.map(
+        v = self.map(
             extract_vectors_from_orientation_map,
             all_vectors=vectors_signal,
             inplace=False,
@@ -377,6 +391,8 @@ class OrientationMap(DiffractionVectors2D):
             n_best_index=n_best_index,
             **kwargs,
         )
+        v.metadata.simulation = None
+        return v
 
     def to_crystal_map(self) -> CrystalMap:
         """Convert the orientation map to an `orix.CrystalMap` object"""
@@ -413,7 +429,7 @@ class OrientationMap(DiffractionVectors2D):
             phase_list=phases,
         )
 
-    def to_ipf_markers(self):
+    def to_ipf_markers(self, offset=0.85, scale=0.2):
         """Convert the orientation map to a set of inverse pole figure
         markers which visualizes the best matching orientations in the
         reduced S2 space.
@@ -424,58 +440,35 @@ class OrientationMap(DiffractionVectors2D):
             )
         if self.simulation.has_multiple_phases:
             raise ValueError("Multiple phases found in simulation")
+        polygon_sector, texts, maxes, mins = self._get_ipf_outline(
+            offset=offset, scale=scale
+        )
 
         orients = self.to_single_phase_orientations()
-        sector = self.simulation.phases.point_group.fundamental_sector
-        labels = _get_ipf_axes_labels(
-            sector.vertices, symmetry=self.simulation.phases.point_group
-        )
-        s = StereographicProjection()
         vectors = orients * Vector3d.zvector()
-        edges = _closed_edges_in_hemisphere(sector.edges, sector)
         vectors = vectors.in_fundamental_sector(self.simulation.phases.point_group)
+        s = StereographicProjection()
         x, y = s.vector2xy(vectors)
-        ex, ey = s.vector2xy(edges)
-        tx, ty = s.vector2xy(sector.vertices)
-
         x = x.reshape(vectors.shape)
         y = y.reshape(vectors.shape)
         cor = self.data[..., 1]
-
         offsets = np.empty(shape=vectors.shape[:-1], dtype=object)
         correlation = np.empty(shape=vectors.shape[:-1], dtype=object)
-        original_offset = np.vstack((ex, ey)).T
-        texts_offset = np.vstack((tx, ty)).T
 
-        mins, maxes = original_offset.min(axis=0), original_offset.max(axis=0)
-
-        original_offset = (
-            (original_offset - ((maxes + mins) / 2)) / (maxes - mins) * 0.2
-        )
-        original_offset = original_offset + 0.85
-
-        texts_offset = (texts_offset - ((maxes + mins) / 2)) / (maxes - mins) * 0.2
-        texts_offset = texts_offset + 0.85
         for i in np.ndindex(offsets.shape):
             off = np.vstack((x[i], y[i])).T
-            norm_points = (off - ((maxes + mins) / 2)) / (maxes - mins) * 0.2
-            norm_points = norm_points + 0.85
+            norm_points = (off - ((maxes + mins) / 2)) / (maxes - mins) * scale
+            norm_points = norm_points + offset
             offsets[i] = norm_points
             correlation[i] = cor[i] / np.max(cor[i]) * 0.5
 
         square = hs.plot.markers.Squares(
-            offsets=[[0.85, 0.85]],
-            widths=(0.3,),
+            offsets=[[offset, offset]],
+            widths=(scale + scale / 2,),
             units="width",
             offset_transform="axes",
             facecolor="white",
             edgecolor="black",
-        )
-        polygon_sector = hs.plot.markers.Polygons(
-            verts=original_offset[np.newaxis],
-            transform="axes",
-            alpha=1,
-            facecolor="none",
         )
 
         best_points = hs.plot.markers.Points(
@@ -486,13 +479,6 @@ class OrientationMap(DiffractionVectors2D):
             facecolor="green",
         )
 
-        texts = hs.plot.markers.Texts(
-            texts=labels,
-            offsets=texts_offset,
-            sizes=(1,),
-            offset_transform="axes",
-            facecolor="k",
-        )
         return square, polygon_sector, best_points, texts
 
     def to_single_phase_markers(
@@ -526,7 +512,11 @@ class OrientationMap(DiffractionVectors2D):
         include_intensity: bool
             If True, the intensity of the diffraction spot will be displayed with more intense peaks
             having a larger marker size.
+        lazy_output: bool
+            If True, the output will be a lazy signal. If None, the output will be lazy if the input is lazy.
         """
+        if lazy_output is None:
+            lazy_output = self._lazy
         if text_kwargs is None:
             text_kwargs = dict()
         if annotation_shift is None:
@@ -535,10 +525,10 @@ class OrientationMap(DiffractionVectors2D):
             navigation_chunks = (5,) * self.axes_manager.navigation_dimension
         else:
             navigation_chunks = None
-
+        all_markers = []
         for n in range(n_best):
             vectors = self.to_single_phase_vectors(
-                lazy_output=lazy_output, navigation_chunks=navigation_chunks
+                lazy_output=True, navigation_chunks=navigation_chunks
             )
             color = marker_colors[n % len(marker_colors)]
             if include_intensity:
@@ -550,6 +540,7 @@ class OrientationMap(DiffractionVectors2D):
                     output_dtype=object,
                     output_signal_size=(),
                     navigation_chunks=navigation_chunks,
+                    lazy_output=True,
                 ).data.T
                 kwargs["sizes"] = intensity
 
@@ -560,27 +551,40 @@ class OrientationMap(DiffractionVectors2D):
                 output_dtype=object,
                 output_signal_size=(),
                 navigation_chunks=navigation_chunks,
+                lazy_output=True,
             )
             markers = hs.plot.markers.Points.from_signal(
                 coords, facecolor="none", edgecolor=color, **kwargs
             )
-            yield markers
+            all_markers.append(markers)
 
             if annotate:
                 texts = vectors.map(
                     vectors_to_text,
                     inplace=False,
-                    lazy_output=lazy_output,
+                    lazy_output=True,
                     ragged=True,
                     output_dtype=object,
                     output_signal_size=(),
                 )
                 # New signal for offset coordinates, as using inplace=True shifts the point markers too
-                text_coords = coords.map(lambda x: x + annotation_shift, inplace=False)
+                text_coords = coords.map(
+                    lambda x: x + annotation_shift,
+                    inplace=False,
+                    lazy_output=True,
+                )
+                text_coords = coords.map(
+                    lambda x: x + annotation_shift,
+                    inplace=False,
+                    lazy_output=True,
+                )
                 text_markers = hs.plot.markers.Texts.from_signal(
                     text_coords, texts=texts.data.T, color=text_color, **text_kwargs
                 )
-                yield text_markers
+                all_markers.append(text_markers)
+        if lazy_output is False:  # Compute all at once (as it is faster)
+            all_markers = compute_markers(all_markers)
+        return all_markers
 
     def to_single_phase_polar_markers(
         self, signal_axes: AxesManager, n_best: int = 1, marker_color: str = "red"
@@ -632,7 +636,88 @@ class OrientationMap(DiffractionVectors2D):
             )
             yield markers
 
-    def to_navigator(self, direction: Vector3d = Vector3d.zvector()):
+    def _get_ipf_outline(self, include_labels=True, offset=0.85, scale=0.2):
+        """Get the outline of the IPF for the orientation map as a marker in the
+        upper right hand corner including labels if desired."""
+        # Creating Lines around QuadMesh
+        sector = self.simulation.phases.point_group.fundamental_sector
+        s = StereographicProjection()
+
+        edges = _closed_edges_in_hemisphere(sector.edges, sector)
+        ex, ey = s.vector2xy(edges)
+        original_offset = np.vstack((ex, ey)).T
+        mins, maxes = original_offset.min(axis=0), original_offset.max(axis=0)
+        original_offset = (
+            (original_offset - ((maxes + mins) / 2)) / (maxes - mins) * scale
+        )
+        original_offset = original_offset + offset
+        polygon_sector = hs.plot.markers.Polygons(
+            verts=original_offset[np.newaxis],
+            transform="axes",
+            alpha=1,
+            facecolor="none",
+        )
+        if include_labels:
+            labels = _get_ipf_axes_labels(
+                sector.vertices, symmetry=self.simulation.phases.point_group
+            )
+            tx, ty = s.vector2xy(sector.vertices)
+            texts_offset = np.vstack((tx, ty)).T
+            texts_offset = (
+                (texts_offset - ((maxes + mins) / 2)) / (maxes - mins) * scale
+            )
+            texts_offset = texts_offset + offset
+            texts = hs.plot.markers.Texts(
+                texts=labels,
+                offsets=texts_offset,
+                sizes=(1,),
+                offset_transform="axes",
+                facecolor="k",
+            )
+            return polygon_sector, texts, maxes, mins
+
+    def get_ipf_annotation_markers(self, offset=0.85, scale=0.2):
+        """Get the outline of the IPF for the orientation map as a marker in the
+        upper right hand corner including labels if desired. As well as the color
+        mesh for the IPF."""
+
+        polygon_sector, texts, _, _ = self._get_ipf_outline(offset=offset, scale=scale)
+
+        # Create Color Mesh
+        color_key = DirectionColorKeyTSL(symmetry=self.simulation.phases.point_group)
+        g, ext = color_key._create_rgba_grid(return_extent=True)
+
+        max_x = np.max(ext[1])
+        min_x = np.min(ext[1])
+
+        max_y = np.max(ext[0])
+        min_y = np.min(ext[0])
+
+        # center extent:
+        y = np.linspace(ext[0][0], ext[0][1], g.shape[1] + 1) - ((max_y + min_y) / 2)
+
+        y = y / (max_y - min_y) * scale + offset
+
+        x = np.linspace(ext[1][1], ext[1][0], g.shape[0] + 1) - ((max_x + min_x) / 2)
+
+        x = x / (max_x - min_x) * scale + offset
+        xx, yy = np.meshgrid(y, x)
+
+        mesh = hs.plot.markers.Markers(
+            collection=QuadMesh,
+            coordinates=np.stack((xx, yy), axis=-1),
+            array=g,
+            transform="axes",
+            offset_transform="display",
+            offsets=[[0, 0]],
+        )
+        return polygon_sector, texts, mesh
+
+    def to_ipf_colormap(
+        self,
+        direction: Vector3d = Vector3d.zvector(),
+        add_markers: bool = True,
+    ):
         """Create a colored navigator and a legend (in the form of a marker) which can be passed as the
         navigator argument to the `plot` method of some signal.
         """
@@ -644,7 +729,17 @@ class OrientationMap(DiffractionVectors2D):
 
         s = hs.signals.Signal1D(int_rgb)
         s.change_dtype("rgb8")
+        s = s.T
 
+        if add_markers:
+            annotations = self.get_ipf_annotation_markers()
+            s.add_marker(
+                annotations,
+                permanent=True,
+                plot_signal=False,
+                plot_marker=False,
+                plot_on_signal=False,
+            )
         return s
 
     def plot_over_signal(self, signal, annotate=False, **plot_kwargs):
@@ -723,7 +818,7 @@ class GenericMatchingResults:
         )
 
 
-class LazyOrientationMap(LazySignal, OrientationMap):
+class LazyOrientationMap(OrientationMap, LazySignal):
     pass
 
 

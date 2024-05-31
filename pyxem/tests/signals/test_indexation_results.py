@@ -281,3 +281,27 @@ class TestOrientationResult:
         crystal_map = multi_phase_orientation_result.to_crystal_map()
         assert isinstance(crystal_map, CrystalMap)
         assert np.all(crystal_map.phase_id < 2)
+
+    def test_to_markers(self, simple_multi_rot_orientation_result):
+        orientations, rotations = simple_multi_rot_orientation_result
+        markers = orientations.to_single_phase_markers(lazy_output=True)
+        assert isinstance(markers[0], hs.plot.markers.Markers)
+
+    def test_to_ipf_markers(self, simple_multi_rot_orientation_result):
+        orientations, rotations = simple_multi_rot_orientation_result
+        markers = orientations.to_ipf_markers()
+        assert isinstance(markers[0], hs.plot.markers.Markers)
+
+    def test_to_ipf_annotation(self, simple_multi_rot_orientation_result):
+        orientations, rotations = simple_multi_rot_orientation_result
+        annotations = orientations.get_ipf_annotation_markers()
+        for a in annotations:
+            assert isinstance(a, hs.plot.markers.Markers)
+
+    @pytest.mark.parametrize("add_markers", [True, False])
+    def test_to_ipf_map(self, simple_multi_rot_orientation_result, add_markers):
+        orientations, rotations = simple_multi_rot_orientation_result
+        navigator = orientations.to_ipf_colormap(add_markers=add_markers)
+        assert isinstance(navigator, hs.signals.BaseSignal)
+        if add_markers:
+            assert len(navigator.metadata.Markers) == 3
