@@ -116,7 +116,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             Passed to the __init__ of Signal2D
         """
         super().__init__(*args, **kwargs)
-        self.calibrate = Calibration(self)
+        self.calibration = Calibration(self)
 
     def apply_affine_transformation(
         self, D, order=1, keep_dtype=False, inplace=True, *args, **kwargs
@@ -654,7 +654,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             Half the side length of square that captures the direct beam in all
             scans. Means that the centering algorithm is stable against
             diffracted spots brighter than the direct beam. Crops the diffraction
-            pattern to `half_square_width` pixels around th center of the diffraction
+            pattern to `half_square_width` pixels around the center of the diffraction
             pattern. Only one of `half_square_width` or signal_slice can be defined.
         **kwargs:
             Additional arguments accepted by :func:`pyxem.utils.diffraction.find_beam_center_blur`,
@@ -768,9 +768,10 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             shifts = -centers + origin_coordinates
         elif method == "center_of_mass":
             if "mask" in kwargs and signal_slice is not None:
+                # Shifts mask into coordinate space of sliced signal
                 x, y, r = kwargs["mask"]
                 x = x - signal_slice[0]
-                y = y - signal_slice[1]
+                y = y - signal_slice[2]
                 kwargs["mask"] = (x, y, r)
             centers = find_center_of_mass(
                 self,
@@ -1176,6 +1177,51 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             show_progressbar=show_progressbar,
             **kwargs,
         )
+
+    def get_diffraction_vectors(
+        self,
+        center=None,
+        calibration=None,
+        column_names=None,
+        units=None,
+        get_intensity=True,
+        **kwargs,
+    ):
+        """Find vectors from the diffraction pattern. Wraps `hyperspy.api.signals.Signal2D.find_peaks`
+
+        Parameters
+        ----------
+        center: None or tuple
+            The center of the diffraction pattern, if None, will use the
+            center determined by the offsets in the signal axes
+        calibration: None or tuple
+            The calibration of the diffraction pattern, if None, will use the
+            scales in the signal axes
+        column_names: None or tuple
+            The column names of the vectors, if None, will use the names
+            of the signal axes
+        units: None or tuple
+            The units of the vectors, if None, will use the units of the
+            signal axes
+        get_intensity: bool
+            If True, will return the intensity of the peaks as well as the
+            intensity of the peaks. Default True.
+        kwargs:
+            Passed to the peak finding function.
+        """
+        from pyxem.signals import DiffractionVectors
+
+        vectors = super().find_peaks(
+            interactive=False, get_intensity=get_intensity, **kwargs
+        )
+        vectors = DiffractionVectors.from_peaks(
+            vectors,
+            center=center,
+            calibration=calibration,
+            column_names=column_names,
+            units=units,
+        )
+        return vectors
 
     def peak_position_refinement_com(
         self, peak_array, square_size=10, lazy_result=True, show_progressbar=True
@@ -1695,7 +1741,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
     @deprecated(
         since="0.18",
         removal="1.0.0",
-        alternative="pyxem.signals.diffraction2d.calibrate",
+        alternative="pyxem.signals.diffraction2d.calibration",
     )
     def set_ai(
         self, center=None, wavelength=None, affine=None, radial_range=None, **kwargs
@@ -1830,11 +1876,11 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         if not usepyfai:
             # get_slices1d should be sped up in the future by
             # getting rid of shapely and using numba on the for loop
-            indexes, facts, factor_slices, radial_range = self.calibrate.get_slices1d(
+            indexes, facts, factor_slices, radial_range = self.calibration.get_slices1d(
                 npt, radial_range=radial_range
             )
             if mask is None:
-                mask = self.calibrate.mask
+                mask = self.calibration.mask
             integration = self.map(
                 _slice_radial_integrate1d,
                 indexes=indexes,
@@ -1971,12 +2017,20 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         pyxem.signals.Diffraction2D.get_azimuthal_integral1d
 
         """
+        if azimuth_range is None:
+            azimuth_range = (-np.pi, np.pi)
+
         usepyfai = method not in ["splitpixel_pyxem"]
         if not usepyfai:
             # get_slices2d should be sped up in the future by
             # getting rid of shapely and using numba on the for loop
-            slices, factors, factors_slice, radial_range = self.calibrate.get_slices2d(
-                npt, npt_azim, radial_range=radial_range
+            slices, factors, factors_slice, radial_range = (
+                self.calibration.get_slices2d(
+                    npt,
+                    npt_azim,
+                    radial_range=radial_range,
+                    azimuthal_range=azimuth_range,
+                )
             )
             if self._gpu and CUPY_INSTALLED:  # pragma: no cover
                 from pyxem.utils._azimuthal_integrations import (
@@ -2001,7 +2055,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
                 )
             else:
                 if mask is None:
-                    mask = self.calibrate.mask
+                    mask = self.calibration.mask
                 integration = self.map(
                     _slice_radial_integrate,
                     slices=slices,
@@ -2047,15 +2101,11 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             k_axis.convert_to_uniform_axis()
         if not isinstance(t_axis, UniformDataAxis):
             t_axis.convert_to_uniform_axis()
+
         t_axis.name = "Radians"
         t_axis.units = "Rad"
-
-        if azimuth_range is None:
-            t_axis.scale = np.pi * 2 / npt_azim
-            t_axis.offset = -np.pi
-        else:
-            t_axis.scale = (azimuth_range[1] - azimuth_range[0]) / npt
-            t_axis.offset = azimuth_range[0]
+        t_axis.scale = (azimuth_range[1] - azimuth_range[0]) / npt_azim
+        t_axis.offset = azimuth_range[0]
 
         k_axis.name = "Radius"
         k_axis.scale = (radial_range[1] - radial_range[0]) / npt

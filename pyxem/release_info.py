@@ -1,6 +1,6 @@
 name = "pyxem"
-version = "0.18.dev0"
-author = "Duncan Johnstone, Phillip Crout, Magnus Nord, Carter Francis"
+version = "0.19.dev0"
+author = "Duncan Johnstone, Phillip Crout, Carter Francis, Magnus Nord"
 copyright = "Copyright 2016-2024, The pyxem developers"
 # Contributors listed by original committer, maintainers, then other
 # within groups organised by  number of commits.
@@ -8,8 +8,8 @@ copyright = "Copyright 2016-2024, The pyxem developers"
 credits = [
     "Duncan Johnstone",
     "Phillip Crout",
-    "Magnus Nord",
     "Carter Francis",
+    "Magnus Nord",
     "Joonatan Laulainen",
     "Simon Høgås",
     "Eirik Opheim",
@@ -21,6 +21,7 @@ credits = [
     "Stef Smeets",
     "Andrew Ross",
     "Joseph Broussard",
+    "Viljar Johan Femoen",
     "Shuoyuan Huang",
     "Sean Collins",
     "Tom Furnival",

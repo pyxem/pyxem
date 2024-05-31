@@ -16,13 +16,17 @@ import hyperspy.api as hs
 
 
 dp = pxm.data.tilt_boundary_data()
-dp.calibrate.center = None  # Center the diffraction patterns
-dp.calibrate.scale = 0.1  # Scale the diffraction patterns in reciprocal space
+dp.calibration.center = None  # Center the diffraction patterns
+dp.calibration.scale = 0.1  # Scale the diffraction patterns in reciprocal space
 
 
 # Visualizing the virtual detector
 cp = _get_control_points(
-    1, npt_azim=8, radial_range=(1, 5), affine=dp.calibrate.affine
+    1,
+    npt_azim=8,
+    radial_range=(1, 5),
+    azimuthal_range=(-np.pi, np.pi),
+    affine=dp.calibration.affine,
 )[:, :, ::-1]
 poly = hs.plot.markers.Polygons(verts=cp, edgecolor="w", facecolor="none")
 dp.plot()

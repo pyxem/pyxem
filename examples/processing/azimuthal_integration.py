@@ -14,7 +14,7 @@ import hyperspy.api as hs
 import numpy as np
 
 nano_crystals = pxm.data.mgo_nanocrystals(lazy=True)
-nano_crystals.calibrate(
+nano_crystals.calibration(
     center=None
 )  # set the center to None to use center of the diffraction patterns
 nano_crystals1d = nano_crystals.get_azimuthal_integral1d(npt=100, inplace=False)
@@ -49,7 +49,7 @@ assumptions should apply for each case, but it would be good to test!
 We only show the 1D case here, but the same applies for the 2D case as well!
 """
 
-nano_crystals.calibrate.detector(
+nano_crystals.calibration.detector(
     pixel_size=0.001,
     detector_distance=0.125,
     beam_energy=200,
@@ -57,7 +57,7 @@ nano_crystals.calibrate.detector(
     units="k_A^-1",
 )  # set the center= None to use the center of the diffraction patterns
 nano_crystals1d_200 = nano_crystals.get_azimuthal_integral1d(npt=100, inplace=False)
-nano_crystals.calibrate.detector(
+nano_crystals.calibration.detector(
     pixel_size=0.001,
     detector_distance=0.075,
     beam_energy=80,
@@ -84,8 +84,30 @@ mask = nano_crystals.get_direct_beam_mask(radius=20)  # Mask the direct beam
 affine = np.array(
     [[0.9, 0.1, 0], [0.1, 0.9, 0], [0, 0, 1]]
 )  # Just a random affine transformation for illustration
-nano_crystals.calibrate(mask=mask, affine=affine)
+nano_crystals.calibration(mask=mask, affine=affine)
 nano_crystals.get_azimuthal_integral2d(
     npt=100, npt_azim=360, inplace=False
 ).sum().plot()
+# %%
+
+# The `azimuth_range`-argument lets you choose what angular range to calculate the azimuthal integral for.
+# The range can be increasing, decreasing, and does not need to be a multiple of pi.
+
+pol1 = nano_crystals.get_azimuthal_integral2d(npt=100, azimuth_range=(-np.pi, np.pi))
+
+pol2 = nano_crystals.get_azimuthal_integral2d(npt=100, azimuth_range=(0, 1))
+
+pol3 = nano_crystals.get_azimuthal_integral2d(
+    npt=100, npt_azim=720, azimuth_range=(0, 4 * np.pi)
+)
+
+pol4 = nano_crystals.get_azimuthal_integral2d(npt=100, azimuth_range=(np.pi, 0))
+
+hs.plot.plot_images(
+    [pol1.sum(), pol2.sum(), pol3.sum(), pol4.sum()],
+    label=["(-pi, pi) default", "(0, 1)", "(0, 4pi)", "(pi, 0)"],
+    cmap="viridis",
+    tight_layout=True,
+    colorbar=None,
+)
 # %%

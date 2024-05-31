@@ -931,7 +931,7 @@ class TestDetermineEllipse:
         center, affine = ret.determine_ellipse(
             s, mask=mask, use_ransac=False, num_points=2000
         )
-        s.calibrate(
+        s.calibration(
             center=center, affine=affine, scale=0.1, units="k_nm^-1", beam_energy=200
         )
         s_az = s.get_azimuthal_integral2d(npt=100)
@@ -949,7 +949,7 @@ class TestDetermineEllipse:
         mask = np.zeros_like(s.data, dtype=bool)
         mask[100 - 20 : 100 + 20, 100 - 20 : 100 + 20] = True
         center, affine = ret.determine_ellipse(s, mask=mask, use_ransac=False)
-        s.calibrate(
+        s.calibration(
             center=center, affine=affine, scale=0.1, units="k_nm^-1", beam_energy=200
         )
         s_az = s.get_azimuthal_integral2d(npt=100)

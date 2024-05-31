@@ -14,7 +14,7 @@ rois, labels = pxm.signals.DiffractionVectors2D(vectors).to_roi(
     radius=4, include_labels=True
 )
 c = pxm.data.dummy_data.get_cbed_signal()
-c.calibrate(center=None)
+c.calibration(center=None)
 c.plot()
 for r in rois:
     r.add_widget(c, axes=(2, 3))

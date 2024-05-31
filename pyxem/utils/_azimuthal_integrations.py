@@ -190,33 +190,63 @@ def _slice_radial_integrate1d(
     return ans
 
 
-def _get_factors(control_points, slices, axes):
+def _get_factors(control_points, slices, pixel_extents):
     """This function takes a set of control points (vertices of bounding polygons) and
     slices (min and max indices for each control point) and returns the factors for
     each slice. The factors are the area of the intersection of the polygon and the
     sliced pixels.
     """
-    factors = []
-    factors_slice = []
-    start = 0
-    for cp, sl in zip(control_points, slices):
-        p = Polygon(cp)
+    all_boxes = get_boxes(slices, pixel_extent=pixel_extents)
+    max_num = np.max([len(x) for x in all_boxes])
+    num_box = len(all_boxes)
+    boxes = shapely.empty((num_box, max_num))
+
+    p = shapely.polygons(control_points)
+    for i, bx in enumerate(all_boxes):
+        try:
+            b = shapely.box(bx[:, 0], bx[:, 1], bx[:, 2], bx[:, 3])
+            boxes[i, : len(b)] = b
+        except IndexError:  # the box is empty.
+            pass
+
+    factors = shapely.area(
+        shapely.intersection(boxes, p[:, np.newaxis])
+    ) / shapely.area(boxes)
+    not_nan = np.logical_not(np.isnan(factors))
+
+    factors = factors.flatten()
+    factors = factors[not_nan.flatten()]
+
+    num = np.sum(not_nan, axis=1)
+    factors_slice = np.cumsum(num)
+    factors_slice = np.hstack(([0], factors_slice))
+    factors_slice = np.stack((factors_slice[:-1], factors_slice[1:])).T
+    return factors, factors_slice
+
+
+def get_boxes(slices, pixel_extent):
+    all_boxes = []
+    x_extent, y_extent = pixel_extent
+    x_ext_left, x_ext_right = x_extent
+    y_ext_left, y_ext_right = y_extent
+    for sl in slices:
         x_edges = list(range(sl[0], sl[2]))
         y_edges = list(range(sl[1], sl[3]))
         boxes = []
         for i, x in enumerate(x_edges):
             for j, y in enumerate(y_edges):
-                b = box(axes[0][x], axes[1][y], axes[0][x + 1], axes[1][y + 1])
+                b = [
+                    x_ext_left[x],
+                    y_ext_left[y],
+                    x_ext_right[x],
+                    y_ext_right[y],
+                ]
                 boxes.append(b)
-        factors += list(
-            shapely.area(shapely.intersection(boxes, p)) / shapely.area(boxes)
-        )
-        factors_slice.append([start, start + len(boxes)])
-        start += len(boxes)
-    return np.array(factors), np.array(factors_slice)
+        all_boxes.append(np.array(boxes))
+    return all_boxes
 
 
-def _get_control_points(npt, npt_azim, radial_range, affine):
+def _get_control_points(npt, npt_azim, radial_range, azimuthal_range, affine):
     """Get the control points in the form of an array (npt_azim*npt, 4, 2) representing
     the cartesian coordinates of the control points for each azimuthal pixel.
 
@@ -232,6 +262,8 @@ def _get_control_points(npt, npt_azim, radial_range, affine):
         The center of the diffraction pattern
     radial_range: (float, float)
         The radial range of the data
+    azimuthal_range: (float, float)
+        The azumuthal range of the data, in radians
 
     Returns
     -------
@@ -240,7 +272,7 @@ def _get_control_points(npt, npt_azim, radial_range, affine):
 
     """
     r = np.linspace(radial_range[0], radial_range[1], npt + 1)
-    phi = np.linspace(0, 2 * np.pi, npt_azim + 1)
+    phi = np.linspace(azimuthal_range[0], azimuthal_range[1], npt_azim + 1)
     control_points = np.empty(((len(r) - 1) * (len(phi) - 1), 4, 2))
     # lower left
     control_points[:, 0, 0] = (np.cos(phi[:-1]) * r[:-1][:, np.newaxis]).ravel()

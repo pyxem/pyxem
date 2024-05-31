@@ -23,12 +23,22 @@ Unreleased
 ==========
 Fixed
 -----
+- Fixed indexing error in :meth:`~pyxem.signals.Diffraction2D.get_direct_beam_position` (#1080)
+
+
+
+2024-05-08 - version 0.18.0
+==========
+Fixed
+-----
 - Fixed pytest failure. Changed ``setup`` --> ``setup_method`` (#997)
 - :meth:`pyxem.signals.Diffraction2D.center_of_mass` now uses the :meth:`hyperspy.api.BaseSignal.map` function. (#1005)
 - Replace ``matplotlib.cm.get_cmap`` (removed in matplotlib 3.9) with ``matplotlib.colormaps``. (#1023)
 - Documentation fixes and improvement. (#1028)
 - Fixed bug with flattening diffraction Vectors when there are different scales (#1024)
 - Fixed intersphinx links and improved api documentation (#1056)
+- Fix an off-by-one error in the :meth:`pyxem.signals.Diffraction2D.get_azimuthal_integral2d` (#1058)
+- Fix handling of azimuthal range in :meth:`pyxem.signals.Diffraction2D.get_azimuthal_integral2d` (#1060)
 
 Added
 -----
@@ -39,7 +49,9 @@ Added
   from a 4D STEM dataset (#1014)
 - Added GPU support for lazy signals. (#1012)
 - Added GPU processing for :meth:`pyxem.signals.Diffraction2D.get_azimuthal_integral2d` (#1012)
+- Added :meth:`pyxem.signals.Diffraction2D.get_diffraction_vectors` to directly return the diffraction vectors (#1053)
 - Added method for calibrating the detector gain (#1046)
+- Added :meth:`pyxem.signals.PolarDiffraction2D.subtract_diffraction_background` for polar-specific background subtraction (#1062)
 
 Deprecated
 ----------

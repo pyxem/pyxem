@@ -14,7 +14,7 @@ import hyperspy.api as hs
 s = pxm.data.tilt_boundary_data()
 # %%
 
-s.find_peaks(iteractive=True)  # find the peaks using the interactive peak finder
+s.find_peaks(interactive=True)  # find the peaks using the interactive peak finder
 
 # %%
 
@@ -40,30 +40,29 @@ hs.plot.plot_images(
     label=["Too Small", "Just Right", "Too Large"],
 )
 
-pks = temp.find_peaks(interactive=False, threshold_abs=0.4, min_distance=5)
+vectors = temp.get_diffraction_vectors(threshold_abs=0.4, min_distance=5)
+
 # %%
-"""
-Plotting Peaks
-==============
-We can plot the peaks using hyperSpy's markers and DiffractionVectors.
-"""
-vectors = pxm.signals.DiffractionVectors.from_peaks(
-    pks
-)  # calibration is automatically set
+
+# Plotting Peaks
+# ==============
+# We can plot the peaks using hyperSpy's markers and DiffractionVectors.
+
 s.plot()
-
 s.add_marker(vectors.to_markers(color="red", sizes=10, alpha=0.5))
-"""
-Subpixel Peak Fitting
-=====================
 
-The template matching is done on the pixel grid.  To find the peak position more accurately the correlation
-can be up-sampled using the :func:`pyxem.signals.DiffractionVectors.subpixel_refine` method.  This method takes a
-`DiffractionSignal2D` object and uses that to refine the peak positions.
+# %%
 
-This only really works up to up-sampling of 2-4. There is little improvement with increased up-sampling while 
-it greatly increases the computation time. 
-"""
+# Subpixel Peak Fitting
+# =====================
+
+# The template matching is done on the pixel grid.  To find the peak position more accurately the correlation
+# can be up-sampled using the :func:`pyxem.signals.DiffractionVectors.subpixel_refine` method.  This method takes a
+# `DiffractionSignal2D` object and uses that to refine the peak positions.
+#
+# This only really works up to up-sampling of 2-4. There is little improvement with increased up-sampling while
+# it greatly increases the computation time.
+
 refined_peaks_com = vectors.subpixel_refine(s, "center-of-mass", square_size=20)
 refined_peaks_xc = vectors.subpixel_refine(
     s, "cross-correlation", square_size=20, upsample_factor=2, disk_r=5
@@ -79,3 +78,5 @@ s.add_marker(markers2)
 s.add_marker(markers3)
 
 # %%
+
+# sphinx_gallery_thumbnail_number = 3

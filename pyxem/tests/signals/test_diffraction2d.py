@@ -30,6 +30,7 @@ from pyxem.signals import (
     Diffraction2D,
     LazyDiffraction2D,
     PolarDiffraction2D,
+    DiffractionVectors,
 )
 from pyxem.data.dummy_data import make_diffraction_test_data as mdtd
 
@@ -124,8 +125,8 @@ class TestAzimuthalIntegral1d:
         np.testing.assert_array_equal(az.data[0:8], np.ones(8))
 
     def test_1d_azimuthal_integral_pyxem(self, ones):
-        ones.calibrate.center = None
-        ones.calibrate.scale = 0.2
+        ones.calibration.center = None
+        ones.calibration.scale = 0.2
         az = ones.get_azimuthal_integral1d(
             npt=10,
             method="splitpixel_pyxem",
@@ -137,8 +138,8 @@ class TestAzimuthalIntegral1d:
         assert az is None
 
     def test_1d_azimuthal_integral_pyxem(self, ones):
-        ones.calibrate.center = None
-        ones.calibrate.scale = 0.2
+        ones.calibration.center = None
+        ones.calibration.scale = 0.2
         az = ones.get_azimuthal_integral1d(
             npt=10,
             method="splitpixel_pyxem",
@@ -335,7 +336,7 @@ class TestVariance:
     @pytest.fixture
     def ones(self):
         ones_diff = Diffraction2D(data=np.ones(shape=(10, 10, 10, 10)))
-        ones_diff.calibrate(scale=0.1, center=None)
+        ones_diff.calibration(scale=0.1, center=None)
         return ones_diff
 
     @pytest.fixture
@@ -343,7 +344,7 @@ class TestVariance:
         data = np.ones(shape=(10, 10, 10, 10))
         data[0:10:2, :, :, :] = 2
         ones_diff = Diffraction2D(data=data)
-        ones_diff.calibrate(scale=0.1, center=None)
+        ones_diff.calibration(scale=0.1, center=None)
         return ones_diff
 
     @pytest.fixture
@@ -355,7 +356,7 @@ class TestVariance:
         rng = default_rng(seed=1)
         data = rng.poisson(lam=data)
         ones_diff = Diffraction2D(data=data)
-        ones_diff.calibrate(scale=0.1, center=None)
+        ones_diff.calibration(scale=0.1, center=None)
         return ones_diff
 
     def test_FEM_Omega(self, ones, ones_zeros):
@@ -447,6 +448,19 @@ class TestAzimuthalIntegral2d:
         ones_diff.axes_manager.signal_axes[1].name = "ky"
         ones_diff.unit = "2th_deg"
         return ones_diff
+
+    @pytest.fixture
+    def arange(self):
+        # signal looks as follows:
+        # 0 1
+        # 2 3
+        arange_diff = Diffraction2D(data=np.arange(4).reshape(2, 2))
+        arange_diff.axes_manager.signal_axes[0].scale = 1
+        arange_diff.axes_manager.signal_axes[1].scale = 1
+        arange_diff.axes_manager.signal_axes[0].name = "kx"
+        arange_diff.axes_manager.signal_axes[1].name = "ky"
+        arange_diff.unit = "2th_deg"
+        return arange_diff
 
     @pytest.fixture
     def ring(self):
@@ -566,10 +580,85 @@ class TestAzimuthalIntegral2d:
         )
 
     def test_internal_azimuthal_integration(self, ring):
-        ring.calibrate(scale=1)
+        ring.calibration(scale=1)
         az = ring.get_azimuthal_integral2d(npt=40, npt_azim=100, radial_range=(0, 40))
         ring_sum = np.sum(az.data, axis=1)
         assert ring_sum.shape == (40,)
+
+    @pytest.mark.parametrize(
+        "corner",
+        [
+            (0, 0),
+            (0, -1),
+            (-1, 0),
+            (-1, -1),
+        ],
+    )
+    @pytest.mark.parametrize(
+        "shape",
+        [
+            (10, 10),  # Even square
+            (9, 9),  # Odd square
+            (4, 6),  # Even
+            (5, 9),  # Odd
+            (5, 10),  # Odd and even
+            (10, 5),  # Even and odd
+        ],
+    )
+    def test_internal_azimuthal_integration_data_range(self, corner, shape):
+        # Test that the edges of the cartesian data are included in the polar transform
+
+        max_val = 10
+        data = np.zeros(shape)
+        data[corner] = max_val
+
+        signal = Diffraction2D(data)
+
+        # Reality check
+        assert np.allclose(np.nanmax(signal.data), max_val)
+
+        # Use mean=True to conserve values
+        pol = signal.get_azimuthal_integral2d(npt=20, mean=True)
+
+        assert np.allclose(np.nanmax(pol.data), max_val)
+
+    # polar unwrapping `arange` should look like [1 0 2 3]
+    # since data looks like:
+    # 0 1
+    # 2 3
+    # and the data gets unwrapped from the center to the right
+    @pytest.mark.parametrize(
+        [
+            "azimuthal_range",
+            "expected_output",
+        ],
+        [
+            [
+                (0 * np.pi / 2, 1 * np.pi / 2),
+                1,
+            ],
+            [
+                (1 * np.pi / 2, 2 * np.pi / 2),
+                0,
+            ],
+            [
+                (2 * np.pi / 2, 3 * np.pi / 2),
+                2,
+            ],
+            [
+                (3 * np.pi / 2, 4 * np.pi / 2),
+                3,
+            ],
+        ],
+    )
+    def test_azimuthal_integration_range(
+        self, arange, azimuthal_range, expected_output
+    ):
+        arange.calibration.center = None  # set center
+        quadrant = arange.get_azimuthal_integral2d(
+            npt=10, npt_azim=10, azimuth_range=azimuthal_range, mean=True
+        )
+        assert np.allclose(quadrant.data[~np.isnan(quadrant.data)], expected_output)
 
 
 class TestPyFAIIntegration:
@@ -769,7 +858,7 @@ class TestGetDirectBeamPosition:
                     "kind": "nearest",
                 },
             ),
-            ("center_of_mass", {}),
+            ("center_of_mass", {"mask": (10, 13, 10)}),
         ],
     )
     def test_get_direct_beam(self, method, sig_slice, kwargs):
@@ -1452,6 +1541,34 @@ class TestCenterDirectBeam:
         s = self.s
         with pytest.raises(ValueError):
             s.center_direct_beam()
+
+
+class TestFindVectors:
+    def setup_method(self):
+        data = np.zeros((8, 6, 20, 16), dtype=np.int16)
+        x_pos_list = np.random.randint(8 - 2, 8 + 2, 6, dtype=np.int16)
+        x_pos_list[x_pos_list == 8] = 9
+        y_pos_list = np.random.randint(10 - 2, 10 + 2, 8, dtype=np.int16)
+        for ix in range(len(x_pos_list)):
+            for iy in range(len(y_pos_list)):
+                data[iy, ix, y_pos_list[iy], x_pos_list[ix]] = 9
+        s = Diffraction2D(data)
+        s.axes_manager[0].scale = 0.5
+        s.axes_manager[1].scale = 0.6
+        s.axes_manager[2].scale = 3
+        s.axes_manager[3].scale = 4
+        s_lazy = s.as_lazy()
+        self.s = s
+        self.s_lazy = s_lazy
+        self.x_pos_list = x_pos_list
+        self.y_pos_list = y_pos_list
+
+    def test_find_vectors(self):
+        s = self.s
+        vectors = s.get_diffraction_vectors()
+        assert isinstance(vectors, DiffractionVectors)
+        assert vectors.column_names == ["<undefined>", "<undefined>", "intensity"]
+        assert vectors.units == ["<undefined>", "<undefined>", "a.u."]
 
 
 class TestSubtractingDiffractionBackground:
