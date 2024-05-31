@@ -5,18 +5,21 @@ Template Matching
 This example shows how the template matching is done in pyxem to find peaks in a diffraction pattern.
 """
 
-from skimage.morphology import disk
 import numpy as np
 import hyperspy.api as hs
+import matplotlib.pyplot as plt
+from skimage.morphology import disk
+
 
 import pyxem as pxm
 import pyxem.data.dummy_data.make_diffraction_test_data as mdtd
 
 s = pxm.data.tilt_boundary_data()
 
+# %%
 # How Template Matching Works
 # ===========================
-
+#
 # Pyxem uses a window-normalized cross-correlation to find the peaks.  This is much better for finding
 # both strongly and weakly scattering peaks but sometimes if the window is too small, too large, or the
 # wrong shape, the behavior can be unexpected.
@@ -45,26 +48,26 @@ hs.plot.plot_images(
 )
 
 # %%
-
 # In the very large window case you can see that in the middle the strong zero beam is __included__ in the window
 # and the intensity for those pixels is suppressed in the template matching. We also see this occurs in a
 # square pattern because even though our template is a disk, the window is a square!
-
+#
 # Template Matching with an Amorphous Halo
 # =========================================
-
+#
 # Sometimes the template matching can be thrown off by an amorphous halo around the diffraction spots.  This
 # can be seen in the following example.  In this case we can use a dilated (circular) window to reduce the
 # effect of the imposed square window. This can be seen in the intensity of the diffraction vectors at
 # +y,+x and -y,-x.
+
 data = mdtd.generate_4d_data(
-    image_size_x=256,
-    image_size_y=256,
-    disk_x=128,
-    disk_y=128,
-    ring_r=45,
-    ring_x=128,
-    ring_y=128,
+    image_size_x=s.axes_manager.signal_axes[0].size,
+    image_size_y=s.axes_manager.signal_axes[1].size,
+    disk_x=s.axes_manager.signal_axes[0].size // 2,
+    disk_y=s.axes_manager.signal_axes[0].size // 2,
+    ring_r=45 / 128 * s.axes_manager.signal_axes[0].size // 2,
+    ring_x=s.axes_manager.signal_axes[0].size // 2,
+    ring_y=s.axes_manager.signal_axes[0].size // 2,
     disk_I=10,
     ring_lw=8,
     ring_I=2,
@@ -84,7 +87,6 @@ template_circular.data[:, :, mask] = 0
 
 template_normal.data[:, :, mask2] = 0
 template_circular.data[:, :, mask2] = 0
-import matplotlib.pyplot as plt
 
 f = plt.figure(figsize=(15, 5))
 ind = (5, 5)

@@ -31,7 +31,6 @@ from skimage import transform as tf
 from skimage.feature import match_template
 from skimage import morphology, filters
 from skimage.draw import ellipse_perimeter
-from skimage._shared.utils import _supported_float_type
 from skimage.registration import phase_cross_correlation
 from tqdm import tqdm
 from packaging.version import Version
@@ -49,6 +48,18 @@ except ImportError:
     CUPY_INSTALLED = False
     cp = None
     ndigpu = None
+
+new_float_type = {
+    # preserved types
+    np.float32().dtype.char: np.float32,
+    np.float64().dtype.char: np.float64,
+    np.complex64().dtype.char: np.complex64,
+    np.complex128().dtype.char: np.complex128,
+    # altered types
+    np.float16().dtype.char: np.float32,
+    "g": np.float64,  # np.float128 ; doesn't exist on windows
+    "G": np.complex128,  # np.complex256 ; doesn't exist on windows
+}
 
 
 def _index_coords(z, origin=None):
@@ -866,14 +877,46 @@ def normalize_template_match(z, template, subtract_min=True, pad_input=True, **k
     return template_match
 
 
+def _supported_float_type(input_dtype, allow_complex=False):
+    """Return an appropriate floating-point dtype for a given dtype.
+
+    float32, float64, complex64, complex128 are preserved.
+    float16 is promoted to float32.
+    complex256 is demoted to complex128.
+    Other types are cast to float64.
+
+    Parameters
+    ----------
+    input_dtype : np.dtype or tuple of np.dtype
+        The input dtype. If a tuple of multiple dtypes is provided, each
+        dtype is first converted to a supported floating point type and the
+        final dtype is then determined by applying `np.result_type` on the
+        sequence of supported floating point types.
+    allow_complex : bool, optional
+        If False, raise a ValueError on complex-valued inputs.
+
+    Returns
+    -------
+    float_type : dtype
+        Floating-point dtype for the image.
+    """
+    if isinstance(input_dtype, tuple):
+        return np.result_type(*(_supported_float_type(d) for d in input_dtype))
+    input_dtype = np.dtype(input_dtype)
+    if not allow_complex and input_dtype.kind == "c":
+        raise ValueError("complex valued input is not supported")
+    return new_float_type.get(input_dtype.char, np.float64)
+
+
 def match_template_dilate(
     image, template, template_dilation=2, mode="constant", constant_values=0
 ):
-    """
-    Matches a template with an image using a window normalized cross-correlation. This preforms very well
-    for image with different background intensities.  This is a slower version of the skimage `match_template`
-    but performs better for images with circular variations in background intensity, specifically accounting
-    for an amorphous halo around the diffraction pattern.
+    """Matches a template with an image using a window normalized cross-correlation.
+
+    This performs very well for image with different background intensities.  This is a slower version
+    of the skimage :func:`skimage.feature.match_template` but performs better for images with circular
+    variations in background intensity, specifically accounting for an amorphous halo around the
+    diffraction pattern.
 
     Parameters
     ----------
@@ -887,6 +930,11 @@ def match_template_dilate(
         Padding mode for the image. Options are 'constant', 'edge', 'wrap', 'reflect'
     constant_values : int
         Value to pad the image with if mode is 'constant'
+
+    Returns
+    -------
+    response : np.array
+        The windowed cross-correlation of the image and template
     """
 
     image = image.astype(float, copy=False)
