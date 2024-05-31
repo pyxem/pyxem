@@ -4,6 +4,8 @@ Single Phase Orientation Mapping
 You can also calculate the orientation of the grains in a single phase sample using the
 :meth:`pyxem.signals.PolarSignal2D.get_orientation` method. This requires that you
 simulate the entire S2 space for the phase and then compare to the simulated diffraction.
+
+For more information on the orientation mapping process see :cite:`pyxemorientationmapping2022`
 """
 
 from pyxem.data import si_phase, si_grains

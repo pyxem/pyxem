@@ -342,13 +342,18 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
             The gamma correction applied to the diffraction patterns. The default
             value is 0.5 which takes the square root of the diffraction patterns to
             increase the intensity of the low intensity reflections and decrease the
-            intensity of the high intensity reflections.
+            intensity of the high intensity reflections. In most cases gamma<1 is a
+            good starting point.  See :cite:`pyxemorientationmapping2022` for more information.
         kwargs : dict
             Any additional options for the :meth:`~hyperspy.signal.BaseSignal.map` function.
         Returns
         -------
         orientation : BaseSignal
             A signal with the orientation at each navigation position.
+
+        References
+        ----------
+            .. bibliography::
         """
         if gamma != 1:
             self.data = self.data**gamma
