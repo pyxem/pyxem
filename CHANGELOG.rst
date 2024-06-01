@@ -14,6 +14,10 @@ Fixed
 -----
 - Fixed indexing error in :meth:`~pyxem.signals.Diffraction2D.get_direct_beam_position` (#1080)
 
+Added
+-----
+- Added `circular_background` to :meth:`~pyxem.signals.Diffraction2D.template_match_disk` to account for
+  an amorphous circular background when template matching (#1084)
 
 
 2024-05-08 - version 0.18.0
