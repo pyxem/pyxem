@@ -15,10 +15,16 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+import hyperspy.models.model1d
+import hyperspy.api as hs
+import pytest
 
 import numpy as np
 import dask.array as da
-import pytest
+from scipy.signal.windows import gaussian
+from diffsims.simulations import Simulation1D
+from orix.crystal_map import Phase
+from diffpy.structure import Atom, Lattice, Structure
 
 from pyxem.signals import ElectronDiffraction1D, LazyElectronDiffraction1D
 
@@ -106,3 +112,60 @@ class TestDecomposition:
     def test_decomposition_class_assignment(self, electron_diffraction1d):
         electron_diffraction1d.decomposition()
         assert isinstance(electron_diffraction1d, ElectronDiffraction1D)
+
+
+class TestModelFitting:
+    @pytest.fixture()
+    def simple_1d_plus_model(self):
+        peaks = [20, 40, 60, 80]
+        x = np.zeros(100)
+        for i, p in enumerate(peaks):
+            g = gaussian(100, 3)
+            g = np.roll(g, p, axis=0)
+            if i == 0:
+                g = g * 2
+            x += g
+        s = ElectronDiffraction1D(x)
+        p = Phase(
+            name="al",
+            space_group=225,
+            structure=Structure(
+                atoms=[Atom("al", [0, 0, 0])],
+                lattice=Lattice(0.405, 0.405, 0.405, 90, 90, 90),
+            ),
+        )
+        shifted_peaks = (np.array([20, 40, 60, 80]) + 50) % 101
+        shifted_peaks = np.sort(shifted_peaks)
+        sim = Simulation1D(
+            phase=p,
+            reciprocal_spacing=shifted_peaks,
+            intensities=(1, 1, 2, 1),
+            hkl=[[1, 1, 1], [2, 0, 0], [3, 1, 1], [4, 0, 0]],
+            reciprocal_radius=100,
+            wavelength=1e-9,
+        )
+        model = s.model_simulation1d(sim)
+        return s, model, shifted_peaks, sim
+
+    def test_create_model(self, simple_1d_plus_model):
+        s, model, peaks, _ = simple_1d_plus_model
+        assert isinstance(model, hyperspy.models.model1d.Model1D)
+        assert len(model) == 5
+        centers = np.sort(
+            [
+                m.centre.value
+                for m in model
+                if isinstance(m, hs.model.components1D.Gaussian)
+            ]
+        )
+        np.testing.assert_array_almost_equal(centers, peaks, decimal=1)
+
+    def test_model2theta_scale(self, simple_1d_plus_model):
+        s, model, peaks, sim = simple_1d_plus_model
+        scale = s.model2theta_scale(sim, model, 300)
+        np.testing.assert_almost_equal(scale, 0.012768541396519572, decimal=6)
+
+    def test_camera_length(self, simple_1d_plus_model):
+        s, model, peaks, sim = simple_1d_plus_model
+        scale = s.model2camera_length(sim, model, 300, 0.051077)
+        np.testing.assert_almost_equal(scale, 4, decimal=4)
