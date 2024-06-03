@@ -15,12 +15,15 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+from copy import deepcopy
+
 import numpy as np
 from scipy.ndimage import rotate
 from skimage import morphology
 import dask.array as da
 from dask.diagnostics import ProgressBar
 from tqdm import tqdm
+from traits.api import Undefined
 import warnings
 
 import hyperspy.api as hs
@@ -117,6 +120,20 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         """
         super().__init__(*args, **kwargs)
         self.calibration = Calibration(self)
+        # setting some sensible defaults for the axes
+        if self.axes_manager.navigation_dimension == 2:
+            ax1 = self.axes_manager.navigation_axes[0]
+            ax2 = self.axes_manager.navigation_axes[1]
+            ax1.name = "x" if ax1.name is Undefined else ax1.name
+            ax2.name = "y" if ax2.name is Undefined else ax2.name
+            ax1.units = "px" if ax1.units is Undefined else ax1.units
+            ax2.units = "px" if ax2.units is Undefined else ax2.units
+        s_ax1 = self.axes_manager.signal_axes[0]
+        s_ax2 = self.axes_manager.signal_axes[1]
+        s_ax1.name = "kx" if s_ax1.name is Undefined else s_ax1.name
+        s_ax2.name = "ky" if s_ax2.name is Undefined else s_ax2.name
+        s_ax1.units = "px" if s_ax1.units is Undefined else s_ax1.units
+        s_ax2.units = "px" if s_ax2.units is Undefined else s_ax2.units
 
     def apply_affine_transformation(
         self, D, order=1, keep_dtype=False, inplace=True, *args, **kwargs
@@ -791,6 +808,8 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         shifts.axes_manager.signal_axes[0].name = "Beam position"
         shifts.column_names = ["x-shift", "y-shift"]
         shifts.units = ["px", "px"]  # shifts are in pixels
+        shifts.metadata.add_node("Shifts")  # add information about the signal Axes
+        shifts.metadata.Shifts.signal_axes = deepcopy(self.axes_manager.signal_axes)
         return shifts
 
     @deprecated_argument(

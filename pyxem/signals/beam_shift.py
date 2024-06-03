@@ -19,17 +19,27 @@
 
 import numpy as np
 from scipy.ndimage import rotate
-import pyxem.utils._beam_shift_tools as bst
 from hyperspy._signals.lazy import LazySignal
-from hyperspy.signals import Signal1D
-from hyperspy.utils.plot import plot_images
+from hyperspy.axes import UniformDataAxis
+
+import pyxem.utils._beam_shift_tools as bst
 from pyxem.signals import DiffractionVectors1D
+from pyxem.utils._deprecated import deprecated
 
 
 class BeamShift(DiffractionVectors1D):
     """Signal class for working with shift of the direct beam."""
 
     _signal_type = "beam_shift"
+
+    @deprecated(
+        since="0.19.0",
+        alternative="get_linear_plane",
+        alternative_is_function=True,
+        removal="1.0.0",
+    )
+    def make_linear_plane(self, **kwargs):
+        return self.get_linear_plane(**kwargs)
 
     def get_linear_plane(self, mask=None, fit_corners=None):
         """Fit linear planes to the beam shifts, which replaces the original data.
@@ -144,6 +154,44 @@ class BeamShift(DiffractionVectors1D):
             self.metadata.General.title
         )
         return s_hist
+
+    def pixels_to_calibrated_units(self, signal_axes=None, inplace=False, **kwargs):
+        """Convert the beam shifts from pixels to calibrated units using the
+        signal axes passed or saved in the metadata.
+
+        Parameters
+        ----------
+        signal_axes : list of UniformDataAxis, optional
+            The signal axes to use for the conversion. If not provided, the
+            signal axes saved in the metadata will be used.
+        inplace : bool, optional
+            If True, the data will be replaced with the converted data.
+            Default is False.
+        **kwargs : dict
+            Additional keyword arguments to pass to the map method.
+
+        """
+        if signal_axes is None:
+            try:
+                signal_axes = self.metadata.Shifts.signal_axes
+            except AttributeError:
+                raise ValueError(
+                    "No signal axes found in metadata. Please provide signal_axes."
+                )
+        signal_axes = [
+            s.convert_to_uniform_axis() if not isinstance(s, UniformDataAxis) else s
+            for s in signal_axes
+        ]
+        scales = [s.scale for s in signal_axes]
+
+        return self.map(
+            lambda x: x * scales,
+            output_signal_dtype=float,
+            output_signal_size=(2,),
+            scales=np.array(scales),
+            inplace=inplace,
+            **kwargs
+        )
 
     def get_magnitude_signal(
         self, autolim=True, autolim_sigma=4, magnitude_limits=None

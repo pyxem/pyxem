@@ -8,7 +8,7 @@ The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`
 and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
 Unreleased: Restructuring of DPC processing
-===============================
+===========================================
 - Total restructure of data processing of DPC data. This has now all been moved to the :class:`pyxem.signals.BeamShift` class.
 - `DPCBaseSignal`, `DPCSignal1D`, `DPCSignal2D`, `LazyDPCBaseSignal`, `LazyDPCSignal1D`, `LazyDPCSignal2D` has been deprecated.
 - `Diffraction2D.center_of_mass` has been deprecated. The functionality now resides in :meth:`pyxem.signals.Diffraction2D.get_center_beam_position`. Use `get_center_beam_position(method="center_of_mass")`

@@ -23,7 +23,7 @@ hs.plot.plot_images(shifts.T)  # Plotting the shifts
 # In many instances the zero beam position will vary systematically with the scan position.
 # This can be corrected by fitting a linear plane to the zero beam position using the
 # :meth:`make_linear_plane` method.
-shifts.make_linear_plane()  # Making a linear plane to remove the systematic shift
+shifts.get_linear_plane()  # Making a linear plane to remove the systematic shift
 hs.plot.plot_images(shifts.T)  # Plotting the shifts after making a linear plane
 
 # Centering the Zero Beam
