@@ -194,7 +194,7 @@ class Calibration:
         beam_energy: float
             The beam energy in keV.
         wavelength: float
-            The beam wavelength in nm^-1.
+            The beam wavelength in A^-1.
         center: list
             The center of the signal in pixels.
         unit: str

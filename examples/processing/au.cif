@@ -1,0 +1,259 @@
+#------------------------------------------------------------------------------
+#$Date: 2024-05-06 10:39:41 +0300 (Mon, 06 May 2024) $
+#$Revision: 291735 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/9/00/84/9008463.cif $
+#------------------------------------------------------------------------------
+#
+# This file is available in the Crystallography Open Database (COD),
+# http://www.crystallography.net/. The original data for this entry
+# were provided the American Mineralogist Crystal Structure Database,
+# http://rruff.geo.arizona.edu/AMS/amcsd.php
+#
+# The file may be used within the scientific community so long as
+# proper attribution is given to the journal article from which the
+# data were obtained.
+#
+data_9008463
+loop_
+_publ_author_name
+'Wyckoff, R. W. G.'
+_publ_section_title
+;
+ Second edition. Interscience Publishers, New York, New York
+ Cubic closest packed, ccp, structure
+;
+_journal_name_full               'Crystal Structures'
+_journal_page_first              7
+_journal_page_last               83
+_journal_volume                  1
+_journal_year                    1963
+_chemical_formula_sum            Au
+_chemical_name_mineral           Gold
+_space_group_IT_number           225
+_symmetry_space_group_name_Hall  '-F 4 2 3'
+_symmetry_space_group_name_H-M   'F m -3 m'
+_cell_angle_alpha                90
+_cell_angle_beta                 90
+_cell_angle_gamma                90
+_cell_length_a                   4.07825
+_cell_length_b                   4.07825
+_cell_length_c                   4.07825
+_cell_formula_units_Z            4
+_cell_volume                     67.830
+_database_code_amcsd             0011140
+_exptl_crystal_density_diffrn    19.288
+_cod_depositor_comments
+;
+ Added the _cell_formula_units_Z data item.
+
+ Antanas Vaitkus,
+ 2021-04-23
+;
+_cod_original_sg_symbol_H-M      'F m 3 m'
+_cod_database_code               9008463
+loop_
+_space_group_symop_operation_xyz
+x,y,z
+x,1/2+y,1/2+z
+1/2+x,y,1/2+z
+1/2+x,1/2+y,z
+z,-x,y
+z,1/2-x,1/2+y
+1/2+z,-x,1/2+y
+1/2+z,1/2-x,y
+-y,z,-x
+-y,1/2+z,1/2-x
+1/2-y,z,1/2-x
+1/2-y,1/2+z,-x
+x,-y,z
+x,1/2-y,1/2+z
+1/2+x,-y,1/2+z
+1/2+x,1/2-y,z
+-z,x,-y
+-z,1/2+x,1/2-y
+1/2-z,x,1/2-y
+1/2-z,1/2+x,-y
+y,-z,x
+y,1/2-z,1/2+x
+1/2+y,-z,1/2+x
+1/2+y,1/2-z,x
+-x,y,-z
+-x,1/2+y,1/2-z
+1/2-x,y,1/2-z
+1/2-x,1/2+y,-z
+x,-z,-y
+x,1/2-z,1/2-y
+1/2+x,-z,1/2-y
+1/2+x,1/2-z,-y
+-z,y,x
+-z,1/2+y,1/2+x
+1/2-z,y,1/2+x
+1/2-z,1/2+y,x
+y,-x,-z
+y,1/2-x,1/2-z
+1/2+y,-x,1/2-z
+1/2+y,1/2-x,-z
+-x,z,y
+-x,1/2+z,1/2+y
+1/2-x,z,1/2+y
+1/2-x,1/2+z,y
+z,-y,-x
+z,1/2-y,1/2-x
+1/2+z,-y,1/2-x
+1/2+z,1/2-y,-x
+-y,x,z
+-y,1/2+x,1/2+z
+1/2-y,x,1/2+z
+1/2-y,1/2+x,z
+x,z,y
+x,1/2+z,1/2+y
+1/2+x,z,1/2+y
+1/2+x,1/2+z,y
+-z,-y,-x
+-z,1/2-y,1/2-x
+1/2-z,-y,1/2-x
+1/2-z,1/2-y,-x
+y,x,z
+y,1/2+x,1/2+z
+1/2+y,x,1/2+z
+1/2+y,1/2+x,z
+-x,-z,-y
+-x,1/2-z,1/2-y
+1/2-x,-z,1/2-y
+1/2-x,1/2-z,-y
+z,y,x
+z,1/2+y,1/2+x
+1/2+z,y,1/2+x
+1/2+z,1/2+y,x
+-y,-x,-z
+-y,1/2-x,1/2-z
+1/2-y,-x,1/2-z
+1/2-y,1/2-x,-z
+z,x,-y
+z,1/2+x,1/2-y
+1/2+z,x,1/2-y
+1/2+z,1/2+x,-y
+-y,-z,x
+-y,1/2-z,1/2+x
+1/2-y,-z,1/2+x
+1/2-y,1/2-z,x
+x,y,-z
+x,1/2+y,1/2-z
+1/2+x,y,1/2-z
+1/2+x,1/2+y,-z
+-z,-x,y
+-z,1/2-x,1/2+y
+1/2-z,-x,1/2+y
+1/2-z,1/2-x,y
+y,z,-x
+y,1/2+z,1/2-x
+1/2+y,z,1/2-x
+1/2+y,1/2+z,-x
+-x,-y,z
+-x,1/2-y,1/2+z
+1/2-x,-y,1/2+z
+1/2-x,1/2-y,z
+-z,x,y
+-z,1/2+x,1/2+y
+1/2-z,x,1/2+y
+1/2-z,1/2+x,y
+y,-z,-x
+y,1/2-z,1/2-x
+1/2+y,-z,1/2-x
+1/2+y,1/2-z,-x
+-x,y,z
+-x,1/2+y,1/2+z
+1/2-x,y,1/2+z
+1/2-x,1/2+y,z
+z,-x,-y
+z,1/2-x,1/2-y
+1/2+z,-x,1/2-y
+1/2+z,1/2-x,-y
+-y,z,x
+-y,1/2+z,1/2+x
+1/2-y,z,1/2+x
+1/2-y,1/2+z,x
+x,-y,-z
+x,1/2-y,1/2-z
+1/2+x,-y,1/2-z
+1/2+x,1/2-y,-z
+-x,z,-y
+-x,1/2+z,1/2-y
+1/2-x,z,1/2-y
+1/2-x,1/2+z,-y
+z,-y,x
+z,1/2-y,1/2+x
+1/2+z,-y,1/2+x
+1/2+z,1/2-y,x
+-y,x,-z
+-y,1/2+x,1/2-z
+1/2-y,x,1/2-z
+1/2-y,1/2+x,-z
+x,-z,y
+x,1/2-z,1/2+y
+1/2+x,-z,1/2+y
+1/2+x,1/2-z,y
+-z,y,-x
+-z,1/2+y,1/2-x
+1/2-z,y,1/2-x
+1/2-z,1/2+y,-x
+y,-x,z
+y,1/2-x,1/2+z
+1/2+y,-x,1/2+z
+1/2+y,1/2-x,z
+-x,-z,y
+-x,1/2-z,1/2+y
+1/2-x,-z,1/2+y
+1/2-x,1/2-z,y
+z,y,-x
+z,1/2+y,1/2-x
+1/2+z,y,1/2-x
+1/2+z,1/2+y,-x
+-y,-x,z
+-y,1/2-x,1/2+z
+1/2-y,-x,1/2+z
+1/2-y,1/2-x,z
+x,z,-y
+x,1/2+z,1/2-y
+1/2+x,z,1/2-y
+1/2+x,1/2+z,-y
+-z,-y,x
+-z,1/2-y,1/2+x
+1/2-z,-y,1/2+x
+1/2-z,1/2-y,x
+y,x,-z
+y,1/2+x,1/2-z
+1/2+y,x,1/2-z
+1/2+y,1/2+x,-z
+-z,-x,-y
+-z,1/2-x,1/2-y
+1/2-z,-x,1/2-y
+1/2-z,1/2-x,-y
+y,z,x
+y,1/2+z,1/2+x
+1/2+y,z,1/2+x
+1/2+y,1/2+z,x
+-x,-y,-z
+-x,1/2-y,1/2-z
+1/2-x,-y,1/2-z
+1/2-x,1/2-y,-z
+z,x,y
+z,1/2+x,1/2+y
+1/2+z,x,1/2+y
+1/2+z,1/2+x,y
+-y,-z,-x
+-y,1/2-z,1/2-x
+1/2-y,-z,1/2-x
+1/2-y,1/2-z,-x
+loop_
+_atom_site_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+Au 0.00000 0.00000 0.00000
+loop_
+_cod_related_entry_id
+_cod_related_entry_database
+_cod_related_entry_code
+1 ChemSpider 22421
+2 AMCSD 0011140
