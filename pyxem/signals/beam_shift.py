@@ -431,7 +431,6 @@ class BeamShift(DiffractionVectors1D):
             raise ValueError("get_phase_signal only works with 2 navigation dimensions")
         # Rotate the phase by -30 degrees in the color "wheel", to get better
         # visualization in the vertical and horizontal direction.
-        rotation = None
         if rotation is None:
             rotation = -30
         else:

@@ -67,13 +67,14 @@ class DiffractionVectors1D(DiffractionVectors, Signal1D):
             )
         vectors = self.T
 
-        if not "suptitle" in kwargs:
-            kwargs["label"] = self.column_names
+        if "suptitle" not in kwargs:
+            kwargs["label"] = [c if c is not None else "" for c in self.column_names]
         axes_list = plot_images(
             vectors,
             tight_layout=tight_layout,
             **kwargs,
         )
+        return axes_list
 
     def flatten_diffraction_vectors(self, **kwargs):
         raise NotImplementedError(
