@@ -774,7 +774,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
                 y = y - signal_slice[2]
                 kwargs["mask"] = (x, y, r)
             centers = find_center_of_mass(
-                self,
+                signal,
                 lazy_output=lazy_output,
                 show_progressbar=False,
                 **kwargs,
@@ -790,10 +790,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         shifts.set_signal_type("beam_shift")
         shifts.axes_manager.signal_axes[0].name = "Beam position"
         shifts.column_names = ["x-shift", "y-shift"]
-        shifts.units = [
-            self.axes_manager.signal_axes[0].units,
-            self.axes_manager.signal_axes[1].units,
-        ]
+        shifts.units = ["px", "px"]  # shifts are in pixels
         return shifts
 
     @deprecated_argument(
