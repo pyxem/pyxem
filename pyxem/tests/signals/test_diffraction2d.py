@@ -106,9 +106,9 @@ class TestAzimuthalIntegral1d:
 
     def test_unit(self, ones):
         dif = Diffraction2D(data=[[1, 1], [1, 1]])
-        assert dif.unit is None
+        assert dif.unit is "px"
         dif.unit = "!23"
-        assert dif.unit is None
+        assert dif.unit is "px"
 
     def test_unit_set(self, ones):
         assert ones.unit == "2th_deg"
@@ -1567,8 +1567,8 @@ class TestFindVectors:
         s = self.s
         vectors = s.get_diffraction_vectors()
         assert isinstance(vectors, DiffractionVectors)
-        assert vectors.column_names == ["<undefined>", "<undefined>", "intensity"]
-        assert vectors.units == ["<undefined>", "<undefined>", "a.u."]
+        assert vectors.column_names == ["ky", "kx", "intensity"]
+        assert vectors.units == ["px", "px", "a.u."]
 
 
 class TestSubtractingDiffractionBackground:
