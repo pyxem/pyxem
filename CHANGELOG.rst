@@ -7,6 +7,12 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_,
 and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
+Unreleased
+==========
+Added
+-----
+- Added new datasets of in situ crystalization, Ag SPED,
+  Organic Semiconductor Orientation mapping, Orientation Mapping, and DPC (#1081)
 
 Unreleased
 ==========
