@@ -87,15 +87,15 @@ setup(
     extras_require=extra_feature_requirements,
     install_requires=[
         "dask",
-        "diffsims       >= 0.5",
+        "diffsims       == 0.6.rc1",
         "hyperspy       >= 2.0",
         "h5py",
         "lmfit          >= 0.9.12",
-        "matplotlib     >= 3.6",
+        "matplotlib     >= 3.7.5",
         "numba",
         "numpy",
         "numexpr        != 2.8.6",  # bug in 2.8.6 for greek letters need for pyfai
-        "orix           >= 0.9",
+        "orix           >= 0.12.1",
         "pooch",
         "psutil",
         "pyfai           <= 2023.9.0",  # breaking changes

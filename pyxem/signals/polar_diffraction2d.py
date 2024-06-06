@@ -19,10 +19,16 @@
 
 from hyperspy.signals import Signal2D
 from hyperspy._signals.lazy import LazySignal
+from numpy import rad2deg
 
 from pyxem.signals.common_diffraction import CommonDiffraction
 from pyxem.utils._correlations import _correlation, _power, _pearson_correlation
 from pyxem.utils._deprecated import deprecated
+from pyxem.utils.indexation_utils import (
+    _mixed_matching_lib_to_polar,
+    _get_integrated_polar_templates,
+    _norm_rows,
+)
 
 from pyxem.utils._background_subtraction import (
     _polar_subtract_radial_median,
@@ -303,6 +309,103 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
             output_signal_size=self.axes_manager._signal_shape_in_array,
             **kwargs,
         )
+
+    def get_orientation(
+        self,
+        simulation,
+        n_keep=None,
+        frac_keep=0.1,
+        n_best=1,
+        gamma=0.5,
+        normalize_templates=True,
+        **kwargs,
+    ):
+        """Match the orientation with some simulated diffraction patterns using
+        an accelerated orientation mapping algorithm.
+        The details of the algorithm are described in the paper:
+        "Free, flexible and fast: Orientation mapping using the multi-core and
+         GPU-accelerated template matching capabilities in the python-based open
+         source 4D-STEM analysis toolbox Pyxem"
+        Parameters
+        ----------
+        simulation : DiffractionSimulation
+            The diffraction simulation object to use for indexing.
+        n_keep : int
+            The number of orientations to keep for each diffraction pattern.
+        frac_keep : float
+            The fraction of the best matching orientations to keep.
+        n_best : int
+            The number of best matching orientations to keep.
+        normalize_templates : bool
+            Normalize the templates to the same intensity.
+        gamma : float
+            The gamma correction applied to the diffraction patterns. The default
+            value is 0.5 which takes the square root of the diffraction patterns to
+            increase the intensity of the low intensity reflections and decrease the
+            intensity of the high intensity reflections. In most cases gamma<1 is a
+            good starting point.  See :cite:`pyxemorientationmapping2022` for more information.
+        kwargs : dict
+            Any additional options for the :meth:`~hyperspy.signal.BaseSignal.map` function.
+        Returns
+        -------
+        orientation : BaseSignal
+            A signal with the orientation at each navigation position.
+
+        References
+        ----------
+            .. bibliography::
+        """
+        if gamma != 1:
+            self.data = self.data**gamma
+        (
+            r_templates,
+            theta_templates,
+            intensities_templates,
+        ) = simulation.polar_flatten_simulations(
+            radial_axes=self.axes_manager.signal_axes[1].axis,
+            azimuthal_axes=self.axes_manager.signal_axes[0].axis,
+        )
+        radius = self.axes_manager.signal_axes[1].size  # number radial pixels
+        integrated_templates = _get_integrated_polar_templates(
+            radius, r_templates, intensities_templates, normalize_templates
+        )
+        if normalize_templates:
+            intensities_templates = _norm_rows(intensities_templates)
+        orientation = self.map(
+            _mixed_matching_lib_to_polar,
+            integrated_templates=integrated_templates,
+            r_templates=r_templates,
+            theta_templates=theta_templates,
+            intensities_templates=intensities_templates,
+            n_keep=n_keep,
+            frac_keep=frac_keep,
+            n_best=n_best,
+            inplace=False,
+            transpose=True,
+            output_signal_size=(n_best, 4),
+            output_dtype=float,
+        )
+
+        # Translate in-plane rotation from index to degrees
+        # by using the calibration of the axis
+        def rotation_index_to_degrees(data, axis):
+            data = data.copy()
+            ind = data[:, 2].astype(int)
+            data[:, 2] = rad2deg(axis[ind])
+            return data
+
+        orientation.axes_manager.signal_axes[0].name = "n-best"
+        orientation.axes_manager.signal_axes[1].name = "columns"
+
+        orientation.map(
+            rotation_index_to_degrees, axis=self.axes_manager.signal_axes[0].axis
+        )
+
+        orientation.set_signal_type("orientation_map")
+        orientation.simulation = simulation
+        orientation.column_names = ["index", "correlation", "rotation", "factor"]
+        orientation.units = ["a.u.", "a.u.", "deg", "a.u."]
+        return orientation
 
 
 class LazyPolarDiffraction2D(LazySignal, PolarDiffraction2D):
