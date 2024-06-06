@@ -896,7 +896,7 @@ def convert_to_markers(
     new_peaks[:, 1] = np.round((new_peaks[:, 1] - y_axis.offset) / y_axis.scale)
     ind = np.lexsort((new_peaks[:, 1], new_peaks[:, 0]))
     sorted_peaks = new_peaks[ind]
-    shape = signal.axes_manager.navigation_shape
+    shape = signal.axes_manager._navigation_shape_in_array
     by_ind_peaks = np.empty(shape, dtype=object)
     by_ind_colors = np.empty(shape, dtype=object)
     num_labels = np.max(new_peaks[:, -1])
@@ -904,14 +904,14 @@ def convert_to_markers(
         np.random.random((int(num_labels + 1), 3)) * 0.9
     )  # (Stay away from white)
     colors_by_index = np.vstack((colors_by_index, [1, 1, 1]))
-    low_x_ind = np.searchsorted(sorted_peaks[:, 0], range(0, shape[0]), side="left")
+    low_x_ind = np.searchsorted(sorted_peaks[:, 0], range(0, shape[1]), side="left")
     high_x_ind = np.searchsorted(
-        sorted_peaks[:, 0], range(1, shape[0] + 1), side="left"
+        sorted_peaks[:, 0], range(1, shape[1] + 1), side="left"
     )
     for i, (lo_x, hi_x) in enumerate(zip(low_x_ind, high_x_ind)):
         x_inds = sorted_peaks[lo_x:hi_x]
-        low_y_ind = np.searchsorted(x_inds[:, 1], range(0, shape[1]), side="left")
-        high_y_ind = np.searchsorted(x_inds[:, 1], range(1, shape[1] + 1), side="left")
+        low_y_ind = np.searchsorted(x_inds[:, 1], range(0, shape[0]), side="left")
+        high_y_ind = np.searchsorted(x_inds[:, 1], range(1, shape[0] + 1), side="left")
         for j, (lo_y, hi_y) in enumerate(zip(low_y_ind, high_y_ind)):
             x_values = x_inds[lo_y:hi_y, 2]
             y_values = x_inds[lo_y:hi_y, 3]

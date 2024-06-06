@@ -1305,6 +1305,57 @@ class DiffractionVectors(BaseSignal):
 
         return xim
 
+    def vectors_to_mask(self, disk_r, columns=[0, 1], signal_axes=None):
+        """Convert the diffraction vectors to a N-D mask.
+
+        This can be useful for Orientation Mapping including the fitting of mulitple
+        phases.
+
+        Parameters
+        ----------
+        disk_r : float
+            The radius of the disk to be used for the mask.
+        signal_axes : list
+            The signal axes to be used for the mask. If None, the axes saved
+            in the metadata will be used. (if available)
+
+        """
+        if signal_axes is None and not self.metadata.has_item("Peaks.signal_axes"):
+            raise ValueError("No signal axes provided and no axes saved in metadata.")
+        elif signal_axes is None:
+            signal_axes = self.metadata.Peaks.signal_axes
+            axes = [ax.axis for ax in signal_axes]
+        shape = [ax.size for ax in axes]
+
+        def mask_from_vectors(x, disk_r, axes):
+            from skimage.draw import disk
+
+            shape = [ax.size for ax in axes]
+            mask = np.zeros(shape, dtype=bool)
+            vectors = []
+            for i, ax in enumerate(axes):
+                idx = np.searchsorted(ax, x[:, i], side="left")
+                idx[idx > len(ax) - 1] = len(ax) - 1
+                idx = idx - (np.abs(x[:, i] - ax[idx - 1]) < np.abs(x[:, i] - ax[idx]))
+                vectors.append(idx)
+            for v in np.array(
+                vectors
+            ).T:  # this could maybe be faster if vectorized a bit better
+                rr, cc = disk((v[0], v[1]), disk_r, shape=shape)
+                mask[rr, cc] = 1
+            return mask
+
+        mask = self.map(
+            mask_from_vectors,
+            inplace=False,
+            disk_r=disk_r,
+            axes=axes,
+            output_signal_size=tuple(shape),
+            output_dtype=bool,
+            ragged=False,
+        )
+        return mask
+
     def calculate_cartesian_coordinates(
         self, accelerating_voltage, camera_length, *args, **kwargs
     ):
