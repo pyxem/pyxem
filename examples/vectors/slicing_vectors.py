@@ -20,6 +20,7 @@ temp = s.template_match_disk(disk_r=5, subtract_min=False)
 
 vectors = s.get_diffraction_vectors(threshold_abs=0.4, min_distance=5)
 
+# %%
 # Plotting all the vectors
 
 s.plot()
@@ -58,4 +59,6 @@ slic_vectors = (vectors.ivec[:, vectors.ivec["intensity"] < 0.5]).to_markers(
 s.plot()
 s.add_marker([all_vectors, slic_vectors])
 s.add_marker([all_vectors, slic_vectors])
+
 # %%
+# sphinx_gallery_thumbnail_number = 8

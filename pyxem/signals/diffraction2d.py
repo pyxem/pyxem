@@ -1101,6 +1101,10 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         numpy or dask array as output which has the same shape, and axes as
         the input.
 
+        This can be useful for adjusting the data inplace or for filtering the
+        data using something like a Gaussian Kernel to average neighboring
+        diffraction patterns.
+
         Parameters
         ----------
         func : function

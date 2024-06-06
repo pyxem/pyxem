@@ -24,7 +24,6 @@ print(s.calibration.center)
 
 s.plot(axes_ticks=True)
 # %%
-
 # From the plot above you can see that hyperspy automatically sets the axes ticks to be centered
 # on each pixel. This means that for a 21x21 pixel image, the center is at (-10, -10) in pixel coordinates.
 # if we change the scale using the calibration function it will automatically adjust the center.  Here it is
@@ -37,7 +36,6 @@ print(s.calibration.center)
 
 
 # %%
-
 # Azimuthal Integration
 # ---------------------
 #
@@ -47,7 +45,6 @@ az = s.get_azimuthal_integral2d(npt=30)
 az.plot()
 
 # %%
-
 # Non-Linear Axes
 # ---------------
 #
@@ -63,3 +60,4 @@ az = s.get_azimuthal_integral2d(npt=30)
 az.plot()
 
 # %%
+# sphinx_gallery_thumbnail_number = 4

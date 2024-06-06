@@ -43,7 +43,6 @@ hs.plot.plot_images(
 vectors = temp.get_diffraction_vectors(threshold_abs=0.4, min_distance=5)
 
 # %%
-
 # Plotting Peaks
 # ==============
 # We can plot the peaks using hyperSpy's markers and DiffractionVectors.
@@ -52,10 +51,9 @@ s.plot()
 s.add_marker(vectors.to_markers(color="red", sizes=10, alpha=0.5))
 
 # %%
-
 # Subpixel Peak Fitting
 # =====================
-
+#
 # The template matching is done on the pixel grid.  To find the peak position more accurately the correlation
 # can be up-sampled using the :func:`pyxem.signals.DiffractionVectors.subpixel_refine` method.  This method takes a
 # `DiffractionSignal2D` object and uses that to refine the peak positions.
