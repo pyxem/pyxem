@@ -24,6 +24,11 @@ from pyxem.utils._deprecated import deprecated
 
 class DPCSignal1D(Signal1D):
     """
+    Note: this signal will be removed in pyxem version 1.0.0.
+    All the functionality has been moved to the BeamShift class.
+    Convert this signal to the BeamShift class using the
+    DPCSignal.to_beamshift() function.
+
     Signal for processing differential phase contrast (DPC) acquired using
     scanning transmission electron microscopy (STEM).
 
@@ -63,6 +68,11 @@ class DPCSignal1D(Signal1D):
 
 class DPCSignal2D(Signal2D):
     """
+    Note: this signal will be removed in pyxem version 1.0.0.
+    All the functionality has been moved to the BeamShift class.
+    Convert this signal to the BeamShift class using the
+    DPCSignal.to_beamshift() function.
+
     Signal for processing differential phase contrast (DPC) acquired using
     scanning transmission electron microscopy (STEM).
 
