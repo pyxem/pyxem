@@ -28,6 +28,12 @@ from .diffraction_vectors import DiffractionVectors
 from .diffraction_vectors2d import DiffractionVectors2D
 from .diffraction_vectors1d import DiffractionVectors1D
 from .beam_shift import BeamShift, LazyBeamShift
+from .differential_phase_contrast import (
+    DPCSignal1D,
+    DPCSignal2D,
+    LazyDPCSignal1D,
+    LazyDPCSignal2D,
+)
 from .diffraction1d import Diffraction1D, LazyDiffraction1D
 from .diffraction2d import Diffraction2D, LazyDiffraction2D
 from .polar_vectors import PolarVectors, LazyPolarVectors
