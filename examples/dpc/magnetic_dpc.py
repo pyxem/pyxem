@@ -31,18 +31,18 @@ s_beam_pos.plot()
 # --------------------------------------
 # To plot the shifts in one signal, with the color showing the magnitude and direction.
 
-s_color = s.get_color_signal()
-s_color.plot()
+s_magnitude_phase = s_beam_pos.get_magnitude_phase_signal()
+s_magnitude_phase.plot()
 
 # %%
 # Plotting Magnitude and Direction
 # --------------------------------
 # Since each probe position is a vector, we can plot the magnitude and phase (direction).
 
-s_magnitude = s.get_magnitude_signal()
+s_magnitude = s_beam_pos.get_magnitude_signal()
 s_magnitude.plot()
 
-s_phase = s.get_phase_signal()
+s_phase = s_beam_pos.get_phase_signal()
 s_phase.plot()
 
 # %%

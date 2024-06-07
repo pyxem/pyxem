@@ -33,5 +33,5 @@ s_centered = s.center_direct_beam(shifts=s_linear_plane, inplace=False)
 s_pacbed_centered = s_centered.sum()  # Plotting the sum of the dataset to check that the zero beam is centered
 s_pacbed = s.sum()  # Plotting the sum of the non-centered dataset to check that the zero beam is centered
 
-hs.plot.plot_images([pacbed, pacbed_centered], label=["Original", "Centered"])
+hs.plot.plot_images([s_pacbed, s_pacbed_centered], label=["Original", "Centered"])
 # %%

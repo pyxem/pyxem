@@ -207,7 +207,7 @@ def plot_beam_shift_color(
     if only_phase:
         s = signal.get_phase_signal(rotation=phase_rotation)
     else:
-        s = signal.get_color_signal(
+        s = signal.get_magnitude_phase_signal(
             rotation=phase_rotation,
             autolim=autolim,
             autolim_sigma=autolim_sigma,
