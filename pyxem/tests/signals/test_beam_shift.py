@@ -279,7 +279,7 @@ class TestGetMagnitudeSignal:
         s = BeamShift(np.zeros((2, 100, 100)))
 
         with pytest.raises(ValueError):
-            s.get_color_signal(autolim=True, magnitude_limits=(0, 30))
+            s.get_magnitude_signal(autolim=True, magnitude_limits=(0, 30))
 
 
 class TestGetPhaseSignal:
@@ -300,23 +300,23 @@ class TestGetPhaseSignal:
         s.get_phase_signal()
 
 
-class TestGetColorSignal:
-    def test_get_color_signal(self):
+class TestGetMagnitudePhaseSignal:
+    def test_get_magnitude_phase_signal(self):
         data_random = np.random.random(size=(64, 64, 2))
         s_random = BeamShift(data_random)
-        s_random.get_color_signal()
-        s_random.get_color_signal(rotation=45)
-        s_random.get_color_signal(autolim=False, magnitude_limits=(0, 30))
+        s_random.get_magnitude_phase_signal()
+        s_random.get_magnitude_phase_signal(rotation=45)
+        s_random.get_magnitude_phase_signal(autolim=False, magnitude_limits=(0, 30))
 
-    def test_get_color_signal_errors(self):
+    def test_get_magnitude_phase_signal_errors(self):
         data_random = np.random.random(size=(64, 64, 2))
         s_random = BeamShift(data_random)
         with pytest.raises(ValueError):
-            s_random.get_color_signal(autolim=True, magnitude_limits=(0, 30))
+            s_random.get_magnitude_phase_signal(autolim=True, magnitude_limits=(0, 30))
 
-    def test_get_color_signal_zeros(self):
+    def test_get_magnitude_phase_signal_zeros(self):
         s = BeamShift(np.zeros((100, 100, 2)))
-        s_color = s.get_color_signal()
+        s_color = s.get_magnitude_phase_signal()
         assert (s_color.data["R"] == 0).all()
         assert (s_color.data["G"] == 0).all()
         assert (s_color.data["B"] == 0).all()

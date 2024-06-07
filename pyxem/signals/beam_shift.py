@@ -231,7 +231,7 @@ class BeamShift(DiffractionVectors1D):
 
         See Also
         --------
-        get_color_signal : Signal showing both phase and magnitude
+        get_magnitude_phase_signal : Signal showing both phase and magnitude
         get_phase_signal : Signal showing the phase
 
         """
@@ -430,7 +430,7 @@ class BeamShift(DiffractionVectors1D):
 
         See Also
         --------
-        get_color_signal : Signal showing both phase and magnitude
+        get_magnitude_phase_signal : Signal showing both phase and magnitude
         get_magnitude_signal : Signal showing the magnitude
 
         """
@@ -452,13 +452,22 @@ class BeamShift(DiffractionVectors1D):
         s_rgb.change_dtype("rgb16")
         return s_rgb
 
-    def get_color_signal(
+    @deprecated(
+        since="0.19.0",
+        alternative="get_magnitude_phase_signal",
+        alternative_is_function=True,
+        removal="1.0.0",
+    )
+    def get_color_signal(self, **kwargs):
+        return self.get_magnitude_phase_signal(**kwargs)
+
+    def get_magnitude_phase_signal(
         self, rotation=None, autolim=True, autolim_sigma=4, magnitude_limits=None
     ):
         """Get beam shift image visualized using continuous color scale.
 
         Converts the x and y beam shifts into an RGB array, showing the
-        magnitude and direction of the beam shifts.
+        magnitude and phase (direction) of the beam shifts.
 
         Useful for visualizing magnetic domain structures.
 
@@ -480,16 +489,16 @@ class BeamShift(DiffractionVectors1D):
         Examples
         --------
         >>> s = pxm.data.dummy_data.get_simple_beam_shift_signal()
-        >>> s_color = s.get_color_signal()
-        >>> s_color.plot()
+        >>> s_magnitude_phase = s.get_magnitude_phase_signal()
+        >>> s_magnitude_phase.plot()
 
         Rotate the beam shift by 30 degrees
 
-        >>> s_color = s.get_color_signal(rotation=30)
+        >>> s_magnitude_phase = s.get_magnitude_phase_signal(rotation=30)
 
         See Also
         --------
-        get_color_signal : Signal showing both phase and magnitude
+        get_magnitude_signal : Signal showing the magnitude
         get_phase_signal : Signal showing the phase
 
         """
