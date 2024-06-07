@@ -89,9 +89,17 @@ class BeamShift(DiffractionVectors1D):
         """
         if self._lazy:
             raise ValueError(
-                "make_linear_plane is not implemented for lazy signals, "
+                "get_linear_plane is not implemented for lazy signals, "
                 "run compute() first"
             )
+        if self.axes_manager.navigation_dimension != 2:
+            raise NotImplementedError(
+                "get_linear_plane is only implemented for signals with "
+                "2 navigation dimensions, not {0}".format(
+                    self.axes_manager.navigation_dimension
+                )
+            )
+
         if (mask is not None) and (fit_corners is not None):
             raise ValueError("Only mask or fit_to_corners can be set.")
         if fit_corners is not None:

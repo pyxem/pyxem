@@ -25,7 +25,7 @@ import pyxem.data.dummy_data.dummy_data as dd
 from pyxem.signals import BeamShift, LazyBeamShift, Diffraction2D
 
 
-class TestMakeLinearPlane:
+class TestGetLinearPlane:
     def test_simple(self):
         data_x, data_y = np.meshgrid(
             np.arange(-50, 50, dtype=np.float32), np.arange(-256, 0, dtype=np.float32)
@@ -59,6 +59,18 @@ class TestMakeLinearPlane:
             s.get_linear_plane()
         s.compute()
         s.get_linear_plane()
+
+    def test_wrong_navigation_input_1d_error(self):
+        s = BeamShift(np.zeros((50, 2)))
+        with pytest.raises(NotImplementedError):
+            s.get_linear_plane()
+
+    def test_wrong_navigation_input_3d_error(self):
+        s = BeamShift(np.zeros((50, 40, 30, 2)))
+        with pytest.raises(NotImplementedError):
+            s.get_linear_plane()
+        s1 = s.inav[:, :, 10]
+        s1.get_linear_plane()
 
 
 class TestBeamShiftFitCorners:
