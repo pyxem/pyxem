@@ -39,7 +39,9 @@ class BeamShift(DiffractionVectors1D):
         removal="1.0.0",
     )
     def make_linear_plane(self, **kwargs):
-        return self.get_linear_plane(**kwargs)
+        s_linear_plane = self.get_linear_plane(**kwargs)
+        self.data = s_linear_plane.data
+        self.events.data_changed.trigger(None)
 
     def get_linear_plane(self, mask=None, fit_corners=None):
         """Fit linear planes to the beam shifts, which replaces the original data.
