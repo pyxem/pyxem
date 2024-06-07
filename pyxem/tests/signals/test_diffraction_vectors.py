@@ -32,6 +32,7 @@ from pyxem.utils._subpixel_finding import (
     _get_experimental_square,
     _conventional_xc,
 )
+from pyxem.data import tilt_boundary_data
 from hyperspy.axes import UniformDataAxis
 
 # DiffractionVectors correspond to a single list of vectors, a map of vectors
@@ -816,3 +817,14 @@ class TestSlicingVectors:
         assert vectors.num_columns == 2
         lazy_vectors = vectors.as_lazy()
         assert lazy_vectors.num_columns == 2
+
+
+class TestMask:
+    def test_remove_peaks(self):
+        s = tilt_boundary_data()
+        s.calibration.center = None
+        temp = s.template_match_disk(disk_r=5, subtract_min=False)  # Just right
+        vectors = temp.get_diffraction_vectors(threshold_abs=0.4, min_distance=5)
+        mask = vectors.to_mask(disk_r=12)
+        masked_s = s * ~mask
+        assert np.max(masked_s.data) < 2
