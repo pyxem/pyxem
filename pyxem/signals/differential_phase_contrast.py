@@ -40,6 +40,7 @@ class DPCSignal1D(Signal1D):
     and the second navigation is the y-shift (s.inav[1]).
 
     """
+
     _signal_type = "dpc"
 
     def __init__(self, *args, **kwargs):
@@ -63,7 +64,6 @@ class DPCSignal1D(Signal1D):
         s_beam_shift = self.T
         s_beam_shift.set_signal_type("beam_shift")
         return s_beam_shift
-
 
 
 class DPCSignal2D(Signal2D):
