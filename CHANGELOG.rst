@@ -7,24 +7,36 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_,
 and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
-Unreleased: Restructuring of DPC processing
-===========================================
+
+Unreleased
+==========
+
+Restructuring of DPC processing
+-------------------------------
 - Total restructure of data processing of DPC data. This has now all been moved to the :class:`pyxem.signals.BeamShift` class.
 - `DPCBaseSignal`, `DPCSignal1D`, `DPCSignal2D`, `LazyDPCBaseSignal`, `LazyDPCSignal1D`, `LazyDPCSignal2D` has been deprecated.
 - `Diffraction2D.center_of_mass` has been deprecated. The functionality now resides in :meth:`pyxem.signals.Diffraction2D.get_center_beam_position`. Use `get_center_beam_position(method="center_of_mass")`
 - Several `dummy_data` functions has been renamed to reflect this change: `dpc_signal` to `beam_shift_signal`
 - `get_color_image_with_indicator` has been renamed and moved, :func:`pyxem.utils.plotting.plot_beam_shift_color`
 - `correct_ramp` has been deprecated, with the functionality now residing in :meth:`pyxem.signals.BeamShift.get_linear_plane`. You can use `s_bs_lp = s_bs.get_linear_plane(fit_corners=0.05)`, then `s_bs -= s_bs_lp` to correct for the dscan shifts
-- `:meth:`pyxem.signals.BeamShift.get_linear_plane` now returns a new signal, instead of altering the old one.
+- `:meth:`pyxem.signals.BeamShift.make_linear_plane` is being deprecated, and replaced with `:meth:`pyxem.signals.BeamShift.get_linear_plane`. It now returns a new signal, instead of altering the old one.
 - `gaussian_blur` and `flip_axis_90_degrees` has been deprecated, as this can easily be done using `s.map`
 
 
-Unreleased
-==========
 Fixed
 -----
 - Fixed indexing error in :meth:`~pyxem.signals.Diffraction2D.get_direct_beam_position` (#1080)
 
+Added
+-----
+- Added Examples for doing a Circular Hough Transform and Increased Documentation for Filtering Data (#1082)
+Added
+-----
+- Added `circular_background` to :meth:`~pyxem.signals.Diffraction2D.template_match_disk` to account for
+  an amorphous circular background when template matching (#1084)
+
+- Added new datasets of in situ crystalization, Ag SPED,
+  Organic Semiconductor Orientation mapping, Orientation Mapping, and DPC (#1081)
 
 
 2024-05-08 - version 0.18.0

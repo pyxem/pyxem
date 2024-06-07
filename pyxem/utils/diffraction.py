@@ -26,6 +26,7 @@ import scipy.ndimage as ndi
 import pyxem as pxm  # for ElectronDiffraction2D
 
 from scipy.interpolate import interp1d
+from scipy.signal import fftconvolve
 from skimage import transform as tf
 from skimage.feature import match_template
 from skimage import morphology, filters
@@ -48,6 +49,18 @@ except ImportError:
     CUPY_INSTALLED = False
     cp = None
     ndigpu = None
+
+new_float_type = {
+    # preserved types
+    np.float32().dtype.char: np.float32,
+    np.float64().dtype.char: np.float64,
+    np.complex64().dtype.char: np.complex64,
+    np.complex128().dtype.char: np.complex128,
+    # altered types
+    np.float16().dtype.char: np.float32,
+    "g": np.float64,  # np.float128 ; doesn't exist on windows
+    "G": np.complex128,  # np.complex256 ; doesn't exist on windows
+}
 
 
 def _index_coords(z, origin=None):
@@ -883,7 +896,137 @@ def normalize_template_match(z, template, subtract_min=True, pad_input=True, **k
     **kwargs :
         Keyword arguments to be passed to :func:`skimage.feature.match_template`
     """
-    template_match = match_template(z, template, pad_input=pad_input, **kwargs)
+    if kwargs.pop("circular_background", False):
+        template_match = match_template_dilate(z, template, **kwargs)
+    else:
+        template_match = match_template(z, template, pad_input=pad_input, **kwargs)
     if subtract_min:
         template_match = template_match - np.min(template_match)
     return template_match
+
+
+def _supported_float_type(input_dtype, allow_complex=False):
+    """Return an appropriate floating-point dtype for a given dtype.
+
+    float32, float64, complex64, complex128 are preserved.
+    float16 is promoted to float32.
+    complex256 is demoted to complex128.
+    Other types are cast to float64.
+
+    Parameters
+    ----------
+    input_dtype : np.dtype or tuple of np.dtype
+        The input dtype. If a tuple of multiple dtypes is provided, each
+        dtype is first converted to a supported floating point type and the
+        final dtype is then determined by applying `np.result_type` on the
+        sequence of supported floating point types.
+    allow_complex : bool, optional
+        If False, raise a ValueError on complex-valued inputs.
+
+    Returns
+    -------
+    float_type : dtype
+        Floating-point dtype for the image.
+    """
+    if isinstance(input_dtype, tuple):
+        return np.result_type(*(_supported_float_type(d) for d in input_dtype))
+    input_dtype = np.dtype(input_dtype)
+    if not allow_complex and input_dtype.kind == "c":
+        raise ValueError("complex valued input is not supported")
+    return new_float_type.get(input_dtype.char, np.float64)
+
+
+def match_template_dilate(
+    image, template, template_dilation=2, mode="constant", constant_values=0
+):
+    """Matches a template with an image using a window normalized cross-correlation.
+
+    This performs very well for image with different background intensities.  This is a slower version
+    of the skimage :func:`skimage.feature.match_template` but performs better for images with circular
+    variations in background intensity, specifically accounting for an amorphous halo around the
+    diffraction pattern.
+
+    Parameters
+    ----------
+    image : np.array
+        Image to be matched
+    template : np.array
+        Template to preform the normalized cross-correlation with
+    template_dilation : int
+        The number of pixels to dilate the template by for the windowed cross-correlation
+    mode : str
+        Padding mode for the image. Options are 'constant', 'edge', 'wrap', 'reflect'
+    constant_values : int
+        Value to pad the image with if mode is 'constant'
+
+    Returns
+    -------
+    response : np.array
+        The windowed cross-correlation of the image and template
+    """
+
+    image = image.astype(float, copy=False)
+    if image.ndim < template.ndim:  # pragma: no cover
+        raise ValueError(
+            "Dimensionality of template must be less than or "
+            "equal to the dimensionality of image."
+        )
+    if np.any(np.less(image.shape, template.shape)):  # pragma: no cover
+        raise ValueError("Image must be larger than template.")
+
+    image_shape = image.shape
+    float_dtype = _supported_float_type(image.dtype)
+
+    template = np.pad(template, template_dilation)
+    pad_width = tuple((width, width) for width in template.shape)
+    if mode == "constant":
+        image = np.pad(
+            image, pad_width=pad_width, mode=mode, constant_values=constant_values
+        )
+    else:
+        image = np.pad(image, pad_width=pad_width, mode=mode)
+
+    dilated_template = morphology.dilation(
+        template, footprint=morphology.disk(template_dilation)
+    )
+    # Use special case for 2-D images for much better performance in
+    # computation of integral images
+    image_window_sum = fftconvolve(image, dilated_template[::-1, ::-1], mode="valid")[
+        1:-1, 1:-1
+    ]
+    image_window_sum2 = fftconvolve(
+        image**2, dilated_template[::-1, ::-1], mode="valid"
+    )[1:-1, 1:-1]
+
+    template_mean = template[
+        dilated_template.astype(bool)
+    ].mean()  # only consider the pixels in the dilated template
+    template_volume = np.sum(dilated_template)
+    template_ssd = np.sum((template - template_mean) ** 2)
+
+    xcorr = fftconvolve(image, template[::-1, ::-1], mode="valid")[1:-1, 1:-1]
+    numerator = xcorr - image_window_sum * template_mean
+
+    denominator = image_window_sum2
+    np.multiply(image_window_sum, image_window_sum, out=image_window_sum)
+    np.divide(image_window_sum, template_volume, out=image_window_sum)
+    denominator -= image_window_sum
+    denominator *= template_ssd
+    np.maximum(denominator, 0, out=denominator)  # sqrt of negative number not allowed
+    np.sqrt(denominator, out=denominator)
+
+    response = np.zeros_like(xcorr, dtype=float_dtype)
+
+    # avoid zero-division
+    mask = denominator > np.finfo(float_dtype).eps
+
+    response[mask] = numerator[mask] / denominator[mask]
+
+    slices = []
+    for i in range(template.ndim):
+        d0 = (template.shape[i] - 1) // 2
+        d1 = d0 + image_shape[i]
+
+        slices.append(slice(d0, d1))
+
+    return response[tuple(slices)]

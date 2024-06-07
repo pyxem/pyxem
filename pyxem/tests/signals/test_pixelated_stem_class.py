@@ -305,6 +305,13 @@ class TestDiffraction2DTemplateMatchDisk:
         assert s.data.shape == s_template1.data.shape
         assert not (s_template0.data == s_template1.data).all()
 
+    @pytest.mark.parametrize("mode", ["constant", "reflect"])
+    def test_template_circular(self, mode):
+        s = Diffraction2D(np.random.randint(100, size=(5, 5, 20, 20)))
+        s_template = s.template_match_disk(circular_background=True, mode=mode)
+        assert s.data.shape == s_template.data.shape
+        assert not s_template._lazy
+
 
 class TestDiffraction2DTemplateMatchRing:
     def test_simple(self):

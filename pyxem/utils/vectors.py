@@ -840,13 +840,13 @@ def points_to_polygon(points, num_points=50):
     """
     if len(points) == 0:
         return np.array([[0, 0], [0, 0], [0, 0]])
-    sorted_points = points[np.argsort(points[:, 0])]
-    min_x = sorted_points[0, 0]
-    max_x = sorted_points[-1, 0]
+    sorted_points = points[np.argsort(points[:, 1])]
+    min_x = sorted_points[0, 1]
+    max_x = sorted_points[-1, 1]
     sorted_index = np.linspace(min_x, max_x, num_points)
 
-    lo = np.searchsorted(sorted_points[:, 0], sorted_index[:-1], side="left")
-    hi = np.searchsorted(sorted_points[:, 0], sorted_index[1:], side="right")
+    lo = np.searchsorted(sorted_points[:, 1], sorted_index[:-1], side="left")
+    hi = np.searchsorted(sorted_points[:, 1], sorted_index[1:], side="right")
 
     min_points = []
     for l, h, x in zip(lo, hi, sorted_index):
@@ -855,7 +855,7 @@ def points_to_polygon(points, num_points=50):
         else:
             min_points.append(
                 [
-                    np.min(sorted_points[l:h][:, 1]),
+                    np.min(sorted_points[l:h][:, 0]),
                     x,
                 ]
             )
@@ -865,7 +865,7 @@ def points_to_polygon(points, num_points=50):
         if l == h:
             pass
         else:
-            max_points.append([np.max(sorted_points[l:h][:, 1]), x])
+            max_points.append([np.max(sorted_points[l:h][:, 0]), x])
     all_points = min_points + max_points[::-1]
     all_points = np.array(all_points)
     return all_points
@@ -916,6 +916,6 @@ def convert_to_markers(
             x_values = x_inds[lo_y:hi_y, 2]
             y_values = x_inds[lo_y:hi_y, 3]
             labels = np.array(x_inds[lo_y:hi_y, -1], dtype=int)
-            by_ind_peaks[i, j] = np.stack((y_values, x_values), axis=1)
-            by_ind_colors[i, j] = colors_by_index[labels]
+            by_ind_peaks[j, i] = np.stack((y_values, x_values), axis=1)
+            by_ind_colors[j, i] = colors_by_index[labels]
     return by_ind_peaks, by_ind_colors, colors_by_index

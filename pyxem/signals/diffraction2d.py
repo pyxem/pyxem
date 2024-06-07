@@ -987,7 +987,8 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             If True, will return a LazyDiffraction2D object. If False,
             will compute the result and return a Diffraction2D object.
         kwargs :
-            Passed to :func:`pyxem.utils.diffraction.normalize_template_match`
+            Passed to :func:`pyxem.utils.diffraction.normalize_template_match` or
+            the :func:`hyperspy.api.BaseSignal.map` method.
 
         Returns
         -------
@@ -1025,11 +1026,16 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         ----------
         r_inner, r_outer : scalar, optional
             Inner and outer radius of the rings.
+        lazy_output : bool, default True
+            If True, will return a LazyDiffraction2D object. If False,
+            will compute the result and return a Diffraction2D object.
+        show_progressbar : bool, default True
         inplace : bool, optional
             If True, the data is replaced by the filtered data. If False, a
             new signal is returned. Default False.
         kwargs :
-            Passed to :func:`pyxem.utils.diffraction.normalize_template_match`
+            Passed to :func:`pyxem.utils.diffraction.normalize_template_match` or
+            the :func:`hyperspy.api.BaseSignal.map` method.
 
         Returns
         -------
@@ -1069,6 +1075,10 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         The function must take a numpy or dask array as input and return a
         numpy or dask array as output which has the same shape, and axes as
         the input.
+
+        This can be useful for adjusting the data inplace or for filtering the
+        data using something like a Gaussian Kernel to average neighboring
+        diffraction patterns.
 
         Parameters
         ----------

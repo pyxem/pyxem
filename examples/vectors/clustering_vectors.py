@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 from sklearn.cluster import DBSCAN
 
 # Getting the vectors for some dataset
-s = pxm.data.mgo_nanocrystals()
+s = pxm.data.mgo_nanocrystals(allow_download=True)
 s.data[s.data < 120] = 1
 s.filter(gaussian_filter, sigma=(0.5, 0.5, 0, 0), inplace=True)  # only in real space
 s.template_match_disk(disk_r=3, subtract_min=False, inplace=True)
@@ -24,6 +24,9 @@ flat_vectors = (
     vectors.flatten_diffraction_vectors()
 )  # flatten the vectors into a 2D array
 scan = DBSCAN(eps=1.0, min_samples=2)
+# %%
+# Clustering the Vectors
+# ======================
 # It is very important that we first normalize the real and reciprocal space distances
 # The column scale factors map the real space and reciprocal space distances to the same scale
 # Here this means that the clustering algorithm operates on 10 nm in real space and .1 nm^-1 in
@@ -58,6 +61,10 @@ clusterer = DBSCAN(min_samples=2, eps=20)
 clustered2 = clustered.cluster_labeled_vectors(method=clusterer)
 m, p = clustered2.to_markers(s, alpha=0.8, get_polygons=True)
 
+# %%
+# Visualizing the Clustering
+# ==========================
+#
 # This clustering is decent.  It shows that there might be some small tilt boundaries in the data
 # which segment some of the nano-crystals into different clusters.  It also shows the effect of using
 # a phosphor screen which has some pretty severe after glow.  This results in a smearing of the
@@ -66,3 +73,5 @@ s.plot()
 s.add_marker(m)
 s.add_marker(p, plot_on_signal=False)
 # %%
+
+# sphinx_gallery_thumbnail_number = 3

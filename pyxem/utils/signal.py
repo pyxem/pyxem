@@ -21,6 +21,7 @@
 # This code is not used internally and so can safely be deleted at the end of the deprecation period
 
 from pyxem.utils._deprecated import deprecated
+import dask.array as da
 
 
 @deprecated(since="0.18.0", removal="0.19.0")
@@ -163,3 +164,31 @@ def transfer_navigation_axes_to_signal_axes(new_signal, old_signal):
         ax_new.units = ax_old.units
 
     return new_signal
+
+
+def compute_markers(markers):
+    """Compute the markers for a list of markers quickly by merging all of the dask arrays
+
+    Parameters
+    ----------
+    markers : list
+        List of markers.
+
+    Returns
+    -------
+    markers : list
+        List of markers now computed
+    """
+    to_compute = []
+    for m in markers:
+        for k, i in m.kwargs.items():
+            if isinstance(i, da.Array):
+                to_compute.append(i)
+    computed = da.compute(to_compute)
+    ind = 0
+    for m in markers:
+        for k, i in m.kwargs.items():
+            if isinstance(i, da.Array):
+                m.kwargs[k] = computed[0][ind]
+                ind += 1
+    return markers

@@ -255,7 +255,7 @@ class LabeledDiffractionVectors2D(DiffractionVectors2D):
 
         """
         offsets, colors, colors_by_index = convert_to_markers(self, signal)
-        points = hs.plot.markers.Points(offsets=offsets.T, color=colors.T, **kwargs)
+        points = hs.plot.markers.Points(offsets=offsets.T, edgecolor=colors.T, **kwargs)
         if get_polygons:
             verts = self.map_vectors(
                 points_to_polygon, num_points=num_points, dtype=object

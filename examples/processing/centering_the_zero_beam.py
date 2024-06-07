@@ -10,6 +10,7 @@ import pyxem as pxm
 
 s = pxm.data.tilt_boundary_data(correct_pivot_point=False)
 
+# %%
 # Getting the Position of the Zero beam
 # -------------------------------------
 # The zero beam position can be obtained using the :meth:`get_direct_beam_position` method.
@@ -25,6 +26,7 @@ s_shifts.plot()  # Plotting the shifts
 s_linear_plane = s_shifts.get_linear_plane()  # Making a linear plane to remove the systematic shift
 s_linear_plane.plot()  # Plotting the shifts after making a linear plane
 
+# %%
 # Centering the Zero Beam
 # -----------------------
 # The zero beam can be centered using the :meth:`center_direct_beam` method.

@@ -13,7 +13,7 @@ Note that this workflow might change (simplify and improve!) in the future as py
 1.0.0 is developed/released.
 """
 
-########################################################################################
+# %%
 # First, we import the necessary packages and make a single test diffraction pattern.
 import pyxem.data.dummy_data.make_diffraction_test_data as mdtd
 import pyxem as pxm
@@ -33,15 +33,13 @@ s.set_signal_type("electron_diffraction")
 s.plot()
 
 # %%
+# Using RANSAC Ellipse Determination
+# ----------------------------------
+# The RANSAC algorithm is a robust method for fitting an ellipse to points with outliers. Here we
+# use it to determine the elliptic distortion of the diffraction pattern and exclude the zero
+# beam as "outliers".  We can also manually exclude other points from the fit by using the
+# mask parameter.
 
-"""
-Using RANSAC Ellipse Determination
-----------------------------------
-The RANSAC algorithm is a robust method for fitting an ellipse to points with outliers. Here we
-use it to determine the elliptic distortion of the diffraction pattern and exclude the zero
-beam as "outliers".  We can also manually exclude other points from the fit by using the
-mask parameter.
-"""
 
 center, affine, params, pos, inlier = pxm.utils.ransac_ellipse_tools.determine_ellipse(
     s, use_ransac=True, return_params=True
@@ -55,14 +53,13 @@ s.plot()
 s.add_marker(in_points, plot_marker=True)
 s.add_marker(el, plot_marker=True)
 s.add_marker(out_points, plot_marker=True)
-# %%
 
-"""
-Using Manual Ellipse Determination
-----------------------------------
-Sometimes it is useful to force the ellipse to fit certain points.  For example, here we
-can force the ellipse to fit the first ring by masking the zero beam.
-"""
+# %%
+# Using Manual Ellipse Determination
+# ----------------------------------
+# Sometimes it is useful to force the ellipse to fit certain points.  For example, here we
+# can force the ellipse to fit the first ring by masking the zero beam.
+
 
 mask = s.get_direct_beam_mask(radius=20)
 
@@ -97,16 +94,12 @@ hs.plot.plot_images(
     colorbar=None,
 )
 # %%
-
-
-"""
-Ellipse from Points
--------------------
-This workflow will likely change slightly in the future to add better parllelism,
-but here is how to determine the ellipticity from a set of points.
-"""
-
+# Ellipse from Points
+# -------------------
+# This workflow will likely change slightly in the future to add better parllelism,
+# but here is how to determine the ellipticity from a set of points.
 # making a test elliptical diffraction pattern
+
 xf, yf, a, b, r, nt = 100, 115, 45, 35, 0, 15
 data_points = ret.make_ellipse_data_points(xf, yf, a, b, r, nt)
 image = np.zeros(shape=(200, 210), dtype=np.float32)
@@ -118,7 +111,9 @@ data = np.zeros((2, 3, 210, 200), dtype=np.float32)
 data[:, :] = image.T
 s = Diffraction2D(data)
 
+# %%
 # Finding the peaks
+
 s_t = s.template_match_disk(disk_r=5)
 peak_array = s_t.find_peaks(
     method="difference_of_gaussian",
