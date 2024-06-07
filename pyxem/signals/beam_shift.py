@@ -44,7 +44,8 @@ class BeamShift(DiffractionVectors1D):
         self.events.data_changed.trigger(None)
 
     def get_linear_plane(self, mask=None, fit_corners=None):
-        """Fit linear planes to the beam shifts, which replaces the original data.
+        """Fit linear planes to the beam shifts, and returns a BeamShift signal
+        with the planes.
 
         In many scanning transmission electron microscopes, the center position of the
         diffraction pattern will change as a function of the scan position. This is most
@@ -54,7 +55,7 @@ class BeamShift(DiffractionVectors1D):
         diffraction contrast. So while it is possible to correct for the beam shift
         by finding the center position in each diffraction pattern, this can lead to
         features such as interfaces or grain boundaries affecting the centering of the
-        diffraction pattern. As the shift caused by the scan system is a slow and
+        diffraction pattern. As the shift caused by the scan system is slow and
         monotonic, it can often be approximated by fitting linear planes to
         the x- and y- beam shifts.
 
@@ -63,7 +64,7 @@ class BeamShift(DiffractionVectors1D):
         diffracting regions, a mask can be used to ignore fitting the plane to
         these regions.
 
-        This method does this, and replaces the original beam shift data with these
+        This method does this, and returns a new BeamShift signal with these
         fitted planes. The beam shift signal can then be directly used in the
         :meth:`~pyxem.signals.Diffraction2D.center_direct_beam` method.
 
@@ -86,7 +87,12 @@ class BeamShift(DiffractionVectors1D):
         >>> s = pxm.signals.BeamShift(np.random.randint(0, 99, (100, 120, 2)))
         >>> s_mask = hs.signals.Signal2D(np.zeros((100, 120), dtype=bool))
         >>> s_mask.data[20:-20, 20:-20] = True
-        >>> s.get_linear_plane(mask=s_mask)
+        >>> s_linear_plane = s.get_linear_plane(mask=s_mask)
+
+        For magnetic DPC signals, one would typically want to subtract these linear
+        planes from the original signal
+
+        >>> s_corr = s - s_linear_plane
 
         """
         if self._lazy:
@@ -121,7 +127,9 @@ class BeamShift(DiffractionVectors1D):
         self, histogram_range=None, masked=None, bins=200, spatial_std=3
     ):
         """
-        Useful for finding the distribution of magnetic vectors(?).
+        Useful for finding the distribution of the beam shifts.
+        Especially useful for magnetic signals, as it can tell us about
+        the domain distribution.
 
         Parameters
         ----------
