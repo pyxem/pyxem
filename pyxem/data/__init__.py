@@ -73,5 +73,4 @@ __all__ = [
     "feal_stripes",
     "sped_ag",
     "pdcusi_insitu",
->>>>>>> main
 ]
