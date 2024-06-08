@@ -30,15 +30,12 @@ Fixed
 Added
 -----
 - Added Examples for doing a Circular Hough Transform and Increased Documentation for Filtering Data (#1082)
-
-
-Added
------
 - Added `circular_background` to :meth:`~pyxem.signals.Diffraction2D.template_match_disk` to account for
   an amorphous circular background when template matching (#1084)
-
 - Added new datasets of in situ crystalization, Ag SPED,
   Organic Semiconductor Orientation mapping, Orientation Mapping, and DPC (#1081)
+- Added a new method for calibrating the camera length
+  based on a :class:`pyxem.signals.ElectronDiffraction1D` signal (#1085)
 - Added Vectors to mask in :meth:`~pyxem.signals.DiffractionVectors.to_mask` (#1087)
 
 2024-05-08 - version 0.18.0
