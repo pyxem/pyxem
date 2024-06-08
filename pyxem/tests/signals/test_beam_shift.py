@@ -25,7 +25,7 @@ import pyxem.data.dummy_data.dummy_data as dd
 from pyxem.signals import BeamShift, LazyBeamShift, Diffraction2D
 
 
-class TestGetLinearPlane:
+class TestMakeLinearPlane:
     def test_simple(self):
         data_x, data_y = np.meshgrid(
             np.arange(-50, 50, dtype=np.float32), np.arange(-256, 0, dtype=np.float32)
@@ -34,8 +34,20 @@ class TestGetLinearPlane:
         s = BeamShift(data)
         s.change_dtype("float32")
         s_orig = s.deepcopy()
+        s.make_linear_plane()
+        assert s.data == approx(s_orig.data, abs=1e-7)
+
+
+class TestGetLinearPlane:
+    def test_simple(self):
+        data_x, data_y = np.meshgrid(
+            np.arange(-50, 50, dtype=np.float32), np.arange(-256, 0, dtype=np.float32)
+        )
+        data = np.stack((data_y, data_x), -1)
+        s = BeamShift(data)
+        s.change_dtype("float32")
         s_lp = s.get_linear_plane()
-        assert s_lp.data == approx(s_orig.data, abs=1e-7)
+        assert s_lp.data == approx(s.data, abs=1e-7)
 
     def test_mask(self):
         data_x, data_y = np.meshgrid(
@@ -71,6 +83,11 @@ class TestGetLinearPlane:
             s.get_linear_plane()
         s1 = s.inav[:, :, 10]
         s1.get_linear_plane()
+
+    def test_wrong_input_fit_corners_and_mask(self):
+        s = BeamShift(np.zeros((5, 5, 2)))
+        with pytest.raises(ValueError):
+            s.get_linear_plane(fit_corners=0.05, mask=np.ones((5, 5)))
 
 
 class TestBeamShiftFitCorners:
@@ -275,9 +292,8 @@ class TestGetMagnitudeSignal:
         s_magnitude.data[10, 15] = 0
         assert (s_magnitude.data == 0).all()
 
-    def test_get_magnitude_signal_errors(self):
-        s = BeamShift(np.zeros((2, 100, 100)))
-
+    def test_wrong_input_autolim_mangnitude_limits(self):
+        s = BeamShift(np.zeros((10, 10, 2)))
         with pytest.raises(ValueError):
             s.get_magnitude_signal(autolim=True, magnitude_limits=(0, 30))
 
@@ -300,6 +316,13 @@ class TestGetPhaseSignal:
         s.get_phase_signal()
 
 
+class TestGetColorSignal:
+    def test_get_color_signal(self):
+        s = BeamShift(np.random.random(size=(10, 10, 2)))
+        s_color = s.get_color_signal()
+        s_color.axes_manager.shape == (10, 10)
+
+
 class TestGetMagnitudePhaseSignal:
     def test_get_magnitude_phase_signal(self):
         data_random = np.random.random(size=(64, 64, 2))
@@ -320,6 +343,17 @@ class TestGetMagnitudePhaseSignal:
         assert (s_color.data["R"] == 0).all()
         assert (s_color.data["G"] == 0).all()
         assert (s_color.data["B"] == 0).all()
+
+
+class TestPlot:
+    def test_simple_plot(self):
+        s = BeamShift(np.zeros((10, 10, 2)))
+        s.plot()
+
+    def test_lazy_error(self):
+        s = BeamShift(np.zeros((10, 10, 2))).as_lazy()
+        with pytest.raises(ValueError):
+            s.plot()
 
 
 class TestGetBivariateHistogram:
