@@ -31,9 +31,9 @@ from diffsims.utils.ring_pattern_utils import (
     generate_ring_pattern,
 )
 
-from pyxem.signals import ElectronDiffraction2D
 from pyxem.utils.pyfai_utils import get_azimuthal_integrator, _get_setup
 from pyxem.utils._deprecated import deprecated
+from pyxem.signals import ElectronDiffraction2D
 
 
 class CalibrationGenerator:
@@ -223,6 +223,7 @@ class CalibrationGenerator:
             Difference between distortion corrected data and simulated symmetric
             ring pattern.
         """
+
         # Check all required parameters are defined as attributes
         if self.diffraction_pattern is None:
             raise ValueError(

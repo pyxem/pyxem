@@ -32,6 +32,7 @@ from pyxem.signals import (
     PolarDiffraction2D,
     DiffractionVectors,
 )
+from pyxem.data.dummy_data import make_diffraction_test_data as mdtd
 
 
 class TestComputeAndAsLazy2D:
@@ -105,9 +106,9 @@ class TestAzimuthalIntegral1d:
 
     def test_unit(self, ones):
         dif = Diffraction2D(data=[[1, 1], [1, 1]])
-        assert dif.unit is None
+        assert dif.unit is "px"
         dif.unit = "!23"
-        assert dif.unit is None
+        assert dif.unit is "px"
 
     def test_unit_set(self, ones):
         assert ones.unit == "2th_deg"
@@ -935,6 +936,424 @@ class TestGetDirectBeamPosition:
         assert s_shift.data.shape == shift_data_shape
 
 
+class TestDiffraction2DGetDirectBeamPositionCenterOfMass:
+    def test_center_of_mass_0d(self):
+        x_im, y_im, x, y = 7, 9, 2, 3
+        array = np.zeros(shape=(y_im, x_im))
+        array[y, x] = 1
+        s = Diffraction2D(array)
+        s_bs = s.get_direct_beam_position(method="center_of_mass")
+        x_new, y_new = (x_im / 2) - x, (y_im / 2) - y
+        assert (s_bs.isig[0].data == x_new).all()
+        assert (s_bs.isig[1].data == y_new).all()
+        assert s_bs.axes_manager.navigation_shape == ()
+        assert s_bs.axes_manager.signal_shape == (2,)
+
+    def test_center_of_mass_1d(self):
+        x_im, y_im, x, y = 7, 9, 2, 3
+        array = np.zeros(shape=(5, y_im, x_im))
+        array[:, y, x] = 1
+        s = Diffraction2D(array)
+        s_bs = s.get_direct_beam_position(method="center_of_mass")
+        x_new, y_new = (x_im / 2) - x, (y_im / 2) - y
+        assert (s_bs.isig[0].data == x_new).all()
+        assert (s_bs.isig[1].data == y_new).all()
+        assert s_bs.axes_manager.navigation_shape == (5,)
+        assert s_bs.axes_manager.signal_shape == (2,)
+
+    def test_center_of_mass(self):
+        x_im, y_im, x, y = 10, 10, 5, 7
+        array = np.zeros(shape=(10, 10, y_im, x_im))
+        array[:, :, y, x] = 1
+        s = Diffraction2D(array)
+        s_bs = s.get_direct_beam_position(method="center_of_mass")
+        x_new, y_new = (x_im / 2) - x, (y_im / 2) - y
+        assert (s_bs.isig[0].data == x_new).all()
+        assert (s_bs.isig[1].data == y_new).all()
+        assert s_bs.axes_manager.navigation_shape == (10, 10)
+        assert s_bs.axes_manager.signal_shape == (2,)
+
+    def test_center_of_mass_random_position(self):
+        x_im, y_im = 10, 10
+        array = np.zeros(shape=(10, 10, y_im, x_im))
+        x_array = np.random.randint(0, 10, size=(y_im, x_im))
+        y_array = np.random.randint(0, 10, size=(y_im, x_im))
+        for i in range(10):
+            for j in range(10):
+                array[i, j, y_array[i, j], x_array[i, j]] = 1
+        s = Diffraction2D(array)
+        s_bs = s.get_direct_beam_position(method="center_of_mass")
+        x_new, y_new = (x_im / 2) - x_array, (y_im / 2) - y_array
+        assert (s_bs.isig[0].data == x_new.astype(float)).all()
+        assert (s_bs.isig[1].data == y_new.astype(float)).all()
+
+    def test_center_of_mass_different_shapes(self):
+        x_nav, y_nav, x_im, y_im = 10, 5, 8, 15
+        array = np.zeros(shape=(y_nav, x_nav, y_im, x_im))
+        x_array = np.random.randint(1, 7, size=(5, 10))
+        y_array = np.random.randint(1, 14, size=(5, 10))
+        for i in range(5):
+            for j in range(10):
+                array[i, j, y_array[i, j], x_array[i, j]] = 1
+        s = Diffraction2D(array)
+        s_bs = s.get_direct_beam_position(method="center_of_mass")
+        x_new, y_new = (x_im / 2) - x_array, (y_im / 2) - y_array
+        assert (s_bs.isig[0].data == x_new).all()
+        assert (s_bs.isig[1].data == y_new).all()
+        assert s_bs.axes_manager.navigation_shape == (x_nav, y_nav)
+        assert s_bs.axes_manager.signal_shape == (2,)
+
+    def test_center_of_mass_different_shapes2(self):
+        psX, psY = 11, 9
+        s = mdtd.generate_4d_data(probe_size_x=psX, probe_size_y=psY, ring_x=None)
+        s_bs = s.get_direct_beam_position(method="center_of_mass")
+        assert s_bs.axes_manager.shape == (psX, psY, 2)
+
+    def test_different_shape_no_blur_no_downscale(self):
+        y, x = np.mgrid[75:83:9j, 85:95:11j]
+        x_im, y_im = 160, 140
+        s = mdtd.generate_4d_data(
+            probe_size_x=11,
+            probe_size_y=9,
+            ring_x=None,
+            image_size_x=x_im,
+            image_size_y=y_im,
+            disk_x=x,
+            disk_y=y,
+            disk_r=40,
+            disk_I=20,
+            blur=False,
+            blur_sigma=1,
+            downscale=False,
+        )
+        s_bs = s.get_direct_beam_position(method="center_of_mass")
+        x_new, y_new = (x_im / 2) - x, (y_im / 2) - y
+        assert (s_bs.isig[0].data == x_new).all()
+        assert (s_bs.isig[1].data == y_new).all()
+
+    def test_different_shape_no_downscale(self):
+        y, x = np.mgrid[75:83:9j, 85:95:11j]
+        x_im, y_im = 160, 140
+        s = mdtd.generate_4d_data(
+            probe_size_x=11,
+            probe_size_y=9,
+            ring_x=None,
+            image_size_x=x_im,
+            image_size_y=y_im,
+            disk_x=x,
+            disk_y=y,
+            disk_r=40,
+            disk_I=20,
+            blur=True,
+            blur_sigma=1,
+            downscale=False,
+        )
+        s_bs = s.get_direct_beam_position(method="center_of_mass")
+        x_new, y_new = (x_im / 2) - x, (y_im / 2) - y
+        np.testing.assert_allclose(s_bs.isig[0].data, x_new)
+        np.testing.assert_allclose(s_bs.isig[1].data, y_new)
+
+    def test_mask(self):
+        y, x = np.mgrid[75:83:9j, 85:95:11j]
+        x_im, y_im = 160, 140
+        s = mdtd.generate_4d_data(
+            probe_size_x=11,
+            probe_size_y=9,
+            ring_x=None,
+            image_size_x=x_im,
+            image_size_y=y_im,
+            disk_x=x,
+            disk_y=y,
+            disk_r=40,
+            disk_I=20,
+            blur=False,
+            blur_sigma=1,
+            downscale=False,
+        )
+        s.data[:, :, 15, 10] = 1000000
+        s_bs0 = s.get_direct_beam_position(method="center_of_mass")
+        s_bs1 = s.get_direct_beam_position(method="center_of_mass", mask=(90, 79, 60))
+        x_new, y_new = (x_im / 2) - x, (y_im / 2) - y
+        assert not (s_bs0.isig[0].data == x_new).all()
+        assert not (s_bs0.isig[1].data == y_new).all()
+        assert (s_bs1.isig[0].data == x_new).all()
+        assert (s_bs1.isig[1].data == y_new).all()
+
+    def test_mask_2(self):
+        x, y = 60, 50
+        x_im, y_im = 120, 100
+        s = mdtd.generate_4d_data(
+            probe_size_x=5,
+            probe_size_y=5,
+            ring_x=None,
+            image_size_x=x_im,
+            image_size_y=y_im,
+            disk_x=x,
+            disk_y=y,
+            disk_r=20,
+            disk_I=20,
+            blur=False,
+            downscale=False,
+        )
+        x_new, y_new = (x_im / 2) - x, (y_im / 2) - y
+
+        # Add one large value
+        s.data[:, :, 50, 30] = 200000  # Large value to the left of the disk
+
+        # Center of mass should not be in center of the disk, due to the
+        # large value.
+        s_bs1 = s.get_direct_beam_position(method="center_of_mass")
+        assert not (s_bs1.isig[0].data == x_new).all()
+        assert (s_bs1.isig[1].data == y_new).all()
+
+        # Here, the large value is masked
+        s_bs2 = s.get_direct_beam_position(method="center_of_mass", mask=(60, 50, 25))
+        assert (s_bs2.isig[0].data == x_new).all()
+        assert (s_bs2.isig[1].data == y_new).all()
+
+        # Here, the large value is right inside the edge of the mask
+        s_bs3 = s.get_direct_beam_position(method="center_of_mass", mask=(60, 50, 31))
+        assert not (s_bs3.isig[0].data == x_new).all()
+        assert (s_bs3.isig[1].data == y_new).all()
+
+        # Here, the large value is right inside the edge of the mask
+        s_bs4 = s.get_direct_beam_position(method="center_of_mass", mask=(59, 50, 30))
+        assert not (s_bs4.isig[0].data == x_new).all()
+        assert (s_bs4.isig[1].data == y_new).all()
+
+        s.data[:, :, 50, 30] = 0
+        s.data[:, :, 80, 60] = 200000  # Large value under the disk
+
+        # The large value is masked
+        s_bs5 = s.get_direct_beam_position(method="center_of_mass", mask=(60, 50, 25))
+        assert (s_bs5.isig[0].data == x_new).all()
+        assert (s_bs5.isig[1].data == y_new).all()
+
+        # The large value just not masked
+        s_bs6 = s.get_direct_beam_position(method="center_of_mass", mask=(60, 50, 31))
+        assert (s_bs6.isig[0].data == x_new).all()
+        assert not (s_bs6.isig[1].data == y_new).all()
+
+        # The large value just not masked
+        s_bs7 = s.get_direct_beam_position(method="center_of_mass", mask=(60, 55, 25))
+        assert (s_bs7.isig[0].data == x_new).all()
+        assert not (s_bs7.isig[1].data == y_new).all()
+
+    def test_threshold(self):
+        x_im, y_im = 120, 100
+        x, y = 60, 50
+        s = mdtd.generate_4d_data(
+            probe_size_x=4,
+            probe_size_y=3,
+            ring_x=None,
+            image_size_x=x_im,
+            image_size_y=y_im,
+            disk_x=x,
+            disk_y=y,
+            disk_r=20,
+            disk_I=20,
+            blur=False,
+            blur_sigma=1,
+            downscale=False,
+        )
+        x_new, y_new = (x_im / 2) - x, (y_im / 2) - y
+        s.data[:, :, 0:30, 0:30] = 5
+
+        # The extra values are ignored due to thresholding
+        s_bs0 = s.get_direct_beam_position(method="center_of_mass", threshold=2)
+        assert (s_bs0.isig[0].data == x_new).all()
+        assert (s_bs0.isig[1].data == y_new).all()
+
+        # The extra values are not ignored
+        s_bs1 = s.get_direct_beam_position(method="center_of_mass", threshold=1)
+        assert not (s_bs1.isig[0].data == x_new).all()
+        assert not (s_bs1.isig[1].data == y_new).all()
+
+        # The extra values are not ignored
+        s_bs2 = s.get_direct_beam_position(method="center_of_mass")
+        assert not (s_bs2.isig[0].data == x_new).all()
+        assert not (s_bs2.isig[1].data == y_new).all()
+
+    def test_threshold_and_mask(self):
+        x_im, y_im = 120, 100
+        x, y = 60, 50
+        s = mdtd.generate_4d_data(
+            probe_size_x=4,
+            probe_size_y=3,
+            ring_x=None,
+            image_size_x=x_im,
+            image_size_y=y_im,
+            disk_x=x,
+            disk_y=y,
+            disk_r=20,
+            disk_I=20,
+            blur=False,
+            blur_sigma=1,
+            downscale=False,
+        )
+        x_new, y_new = (x_im / 2) - x, (y_im / 2) - y
+        s.data[:, :, 0:30, 0:30] = 5
+        s.data[:, :, 1, -2] = 60
+
+        # The extra values are ignored due to thresholding and mask
+        s_bs0 = s.get_direct_beam_position(
+            method="center_of_mass", threshold=3, mask=(60, 50, 50)
+        )
+        assert (s_bs0.isig[0].data == x_new).all()
+        assert (s_bs0.isig[1].data == y_new).all()
+
+        # The extra values are not ignored
+        s_bs1 = s.get_direct_beam_position(method="center_of_mass", mask=(60, 50, 50))
+        assert not (s_bs1.isig[0].data == x_new).all()
+        assert not (s_bs1.isig[1].data == y_new).all()
+
+        # The extra values are not ignored
+        s_bs2 = s.get_direct_beam_position(method="center_of_mass", threshold=3)
+        assert not (s_bs2.isig[0].data == x_new).all()
+        assert not (s_bs2.isig[1].data == y_new).all()
+
+        # The extra values are not ignored
+        s_bs3 = s.get_direct_beam_position(method="center_of_mass")
+        assert not (s_bs3.isig[0].data == x_new).all()
+        assert not (s_bs3.isig[1].data == y_new).all()
+
+    def test_1d_signal(self):
+        x_im, y_im = 120, 100
+        x = np.arange(45, 45 + 9).reshape((1, 9))
+        y = np.arange(55, 55 + 9).reshape((1, 9))
+        s = mdtd.generate_4d_data(
+            probe_size_x=9,
+            probe_size_y=1,
+            ring_x=None,
+            image_size_x=x_im,
+            image_size_y=y_im,
+            disk_x=x,
+            disk_y=y,
+            disk_r=20,
+            disk_I=20,
+            blur=False,
+            blur_sigma=1,
+            downscale=False,
+        )
+        x_new, y_new = (x_im / 2) - x, (y_im / 2) - y
+        s_bs = s.inav[:, 0].get_direct_beam_position(method="center_of_mass")
+        assert (s_bs.isig[0].data == x_new).all()
+        assert (s_bs.isig[1].data == y_new).all()
+
+    def test_0d_signal(self):
+        x_im, y_im = 120, 100
+        x, y = 40, 51
+        s = mdtd.generate_4d_data(
+            probe_size_x=1,
+            probe_size_y=1,
+            ring_x=None,
+            image_size_x=x_im,
+            image_size_y=y_im,
+            disk_x=x,
+            disk_y=y,
+            disk_r=20,
+            disk_I=20,
+            blur=False,
+            blur_sigma=1,
+            downscale=False,
+        )
+        x_new, y_new = (x_im / 2) - x, (y_im / 2) - y
+        s_bs = s.inav[0, 0].get_direct_beam_position(method="center_of_mass")
+        assert (s_bs.isig[0].data == x_new).all()
+        assert (s_bs.isig[1].data == y_new).all()
+
+    def test_lazy(self):
+        x_im, y_im = 160, 140
+        y, x = np.mgrid[75:83:9j, 85:95:11j]
+        s = mdtd.generate_4d_data(
+            probe_size_x=11,
+            probe_size_y=9,
+            ring_x=None,
+            image_size_x=x_im,
+            image_size_y=y_im,
+            disk_x=x,
+            disk_y=y,
+            disk_r=40,
+            disk_I=20,
+            blur=True,
+            blur_sigma=1,
+            downscale=False,
+        )
+        x_new, y_new = (x_im / 2) - x, (y_im / 2) - y
+        s_lazy = LazyDiffraction2D(da.from_array(s.data, chunks=(1, 1, 140, 160)))
+        s_lazy_bs = s_lazy.get_direct_beam_position(method="center_of_mass")
+        np.testing.assert_allclose(s_lazy_bs.isig[0].data, x_new)
+        np.testing.assert_allclose(s_lazy_bs.isig[1].data, y_new)
+
+        s_lazy_1d = s_lazy.inav[0]
+        s_lazy_1d_bs = s_lazy_1d.get_direct_beam_position(method="center_of_mass")
+        np.testing.assert_allclose(s_lazy_1d_bs.isig[0].data, x_new[:, 0])
+        np.testing.assert_allclose(s_lazy_1d_bs.isig[1].data, y_new[:, 0])
+
+        s_lazy_0d = s_lazy.inav[0, 0]
+        s_lazy_0d_bs = s_lazy_0d.get_direct_beam_position(method="center_of_mass")
+        np.testing.assert_allclose(s_lazy_0d_bs.isig[0].data, x_new[0, 0])
+        np.testing.assert_allclose(s_lazy_0d_bs.isig[1].data, y_new[0, 0])
+
+    def test_compare_lazy_and_nonlazy(self):
+        x_im, y_im = 160, 140
+        y, x = np.mgrid[75:83:9j, 85:95:11j]
+        s = mdtd.generate_4d_data(
+            probe_size_x=11,
+            probe_size_y=9,
+            ring_x=None,
+            image_size_x=x_im,
+            image_size_y=y_im,
+            disk_x=x,
+            disk_y=y,
+            disk_r=40,
+            disk_I=20,
+            blur=True,
+            blur_sigma=1,
+            downscale=False,
+        )
+        s_lazy = LazyDiffraction2D(da.from_array(s.data, chunks=(1, 1, 140, 160)))
+        s_bs = s.get_direct_beam_position(method="center_of_mass")
+        s_lazy_bs = s_lazy.get_direct_beam_position(method="center_of_mass")
+        np.testing.assert_equal(s_bs.data, s_lazy_bs.data)
+
+        bs_nav_extent = s_bs.axes_manager.navigation_extent
+        lazy_bs_nav_extent = s_lazy_bs.axes_manager.navigation_extent
+        assert bs_nav_extent == lazy_bs_nav_extent
+
+        bs_sig_extent = s_bs.axes_manager.signal_extent
+        lazy_bs_sig_extent = s_lazy_bs.axes_manager.signal_extent
+        assert bs_sig_extent == lazy_bs_sig_extent
+
+    def test_lazy_result(self):
+        data = da.ones((10, 10, 20, 20), chunks=(10, 10, 10, 10))
+        s_lazy = LazyDiffraction2D(data)
+        s_lazy_bs = s_lazy.get_direct_beam_position(
+            method="center_of_mass", lazy_output=True
+        )
+        assert s_lazy_bs._lazy
+        assert s_lazy_bs.axes_manager.navigation_shape == (10, 10)
+
+        s_lazy_1d = s_lazy.inav[0]
+        s_lazy_1d_bs = s_lazy_1d.get_direct_beam_position(
+            method="center_of_mass", lazy_output=True
+        )
+        assert s_lazy_1d_bs._lazy
+        assert s_lazy_1d_bs.axes_manager.navigation_shape == (10,)
+
+        s_lazy_0d = s_lazy.inav[0, 0]
+        s_lazy_0d_bs = s_lazy_0d.get_direct_beam_position(
+            method="center_of_mass", lazy_output=True
+        )
+        assert s_lazy_0d_bs._lazy
+        assert s_lazy_0d_bs.axes_manager.navigation_shape == ()
+
+    def test_center_of_mass_inplace(self):
+        with pytest.raises(ValueError):
+            d = Diffraction2D(np.zeros((10, 10, 20, 20)))
+            d.get_direct_beam_position(method="center_of_mass", inplace=True)
+
+
 class TestCenterDirectBeam:
     def setup_method(self):
         data = np.zeros((8, 6, 20, 16), dtype=np.int16)
@@ -1148,8 +1567,8 @@ class TestFindVectors:
         s = self.s
         vectors = s.get_diffraction_vectors()
         assert isinstance(vectors, DiffractionVectors)
-        assert vectors.column_names == ["<undefined>", "<undefined>", "intensity"]
-        assert vectors.units == ["<undefined>", "<undefined>", "a.u."]
+        assert vectors.column_names == ["ky", "kx", "intensity"]
+        assert vectors.units == ["px", "px", "a.u."]
 
 
 class TestSubtractingDiffractionBackground:

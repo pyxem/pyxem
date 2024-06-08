@@ -25,11 +25,10 @@ try:
     CUPY_INSTALLED = True
 except ImportError:
     CUPY_INSTALLED = False
-
 from pyxem import components
 from pyxem import detectors
-from pyxem import generators
 from pyxem import signals
+from pyxem import generators
 from pyxem import data
 
 from . import release_info

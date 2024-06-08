@@ -129,6 +129,8 @@ class DiffractionVectors(BaseSignal):
             vectors = vectors[0]
         if self.num_columns == 1:
             vectors = np.array([vectors]).T
+        if vectors.ndim == 1:
+            vectors = np.array([vectors])
         for i, row in enumerate(vectors):
             table += "<tr>"
             table += f"<td><center>{i}</center></td>"

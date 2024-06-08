@@ -38,6 +38,7 @@ from packaging.version import Version
 from pyxem.utils.pyfai_utils import get_azimuthal_integrator
 from pyxem.utils.cuda_utils import is_cupy_array
 from pyxem.utils._deprecated import deprecated
+import pyxem.utils._pixelated_stem_tools as pst
 
 try:
     import cupy as cp
@@ -623,7 +624,34 @@ def find_beam_center_blur(z, sigma):
     return dispatcher.array(center)
 
 
-def center_of_mass(z, mask=None, threshold=None):
+def find_center_of_mass(
+    signal,
+    threshold=None,
+    mask=None,
+    **kwargs,
+):
+    if "inplace" in kwargs and kwargs["inplace"]:
+        raise ValueError("Inplace is not allowed for center_of_mass")
+    else:
+        kwargs["inplace"] = False
+
+    det_shape = signal.axes_manager.signal_shape
+    if mask is not None:
+        x, y, r = mask
+        mask = pst._make_circular_mask(x, y, det_shape[0], det_shape[1], r)
+
+    ans = signal.map(
+        center_of_mass_from_image,
+        threshold=threshold,
+        mask=mask,
+        **kwargs,
+    )
+    ans.set_signal_type("beam_shift")
+    ans.axes_manager.signal_axes[0].name = "Beam position"
+    return ans
+
+
+def center_of_mass_from_image(z, mask=None, threshold=None):
     """Estimate direct beam position by calculating the center of mass of the
     image.
 

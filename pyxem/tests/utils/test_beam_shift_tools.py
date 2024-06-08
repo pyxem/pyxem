@@ -23,109 +23,75 @@ import numpy as np
 from numpy.testing import assert_allclose
 
 import hyperspy.api as hs
-
-from pyxem.signals.differential_phase_contrast import make_bivariate_histogram
-import pyxem.utils._pixelated_stem_tools as pst
+import pyxem.utils._beam_shift_tools as bst
 
 
 class TestGetRgbPhaseMagnitudeArray:
     def test_simple(self):
         phase = np.zeros((50, 50))
         magnitude = np.zeros((50, 50))
-        rgb_array = pst._get_rgb_phase_magnitude_array(phase, magnitude)
+        rgb_array = bst._get_rgb_phase_magnitude_array(phase, magnitude)
         assert (rgb_array == 0.0).all()
 
     def test_magnitude_zero(self):
         phase = np.random.random((50, 50))
         magnitude = np.zeros((50, 50))
-        rgb_array = pst._get_rgb_phase_magnitude_array(phase, magnitude)
+        rgb_array = bst._get_rgb_phase_magnitude_array(phase, magnitude)
         assert (rgb_array == 0.0).all()
 
     def test_all_same(self):
         phase = np.ones((50, 50))
         magnitude = np.ones((50, 50))
-        rgb_array = pst._get_rgb_phase_magnitude_array(phase, magnitude)
+        rgb_array = bst._get_rgb_phase_magnitude_array(phase, magnitude)
         assert (rgb_array == rgb_array[0][0]).all()
 
 
 class TestGetRgbPhaseArray:
     def test_all_same0(self):
         phase = np.zeros((50, 50))
-        rgb_array = pst._get_rgb_phase_array(phase)
+        rgb_array = bst._get_rgb_phase_array(phase)
         assert (rgb_array == rgb_array[0][0]).all()
 
     def test_all_same1(self):
         phase = np.ones((50, 50))
-        rgb_array = pst._get_rgb_phase_array(phase)
+        rgb_array = bst._get_rgb_phase_array(phase)
         assert (rgb_array == rgb_array[0][0]).all()
 
 
 class TestFindPhase:
     def test_simple(self):
         phase = np.zeros((50, 50))
-        phase0 = pst._find_phase(phase)
+        phase0 = bst._find_phase(phase)
         assert (phase0 == 0.0).all()
 
     def test_rotation(self):
         phase = np.zeros((50, 50))
-        phase0 = pst._find_phase(phase, rotation=90)
+        phase0 = bst._find_phase(phase, rotation=90)
         assert (phase0 == np.pi / 2).all()
-        phase1 = pst._find_phase(phase, rotation=45)
+        phase1 = bst._find_phase(phase, rotation=45)
         assert (phase1 == np.pi / 4).all()
-        phase2 = pst._find_phase(phase, rotation=180)
+        phase2 = bst._find_phase(phase, rotation=180)
         assert (phase2 == np.pi).all()
-        phase3 = pst._find_phase(phase, rotation=360)
+        phase3 = bst._find_phase(phase, rotation=360)
         assert (phase3 == 0).all()
-        phase4 = pst._find_phase(phase, rotation=-90)
+        phase4 = bst._find_phase(phase, rotation=-90)
         assert (phase4 == 3 * np.pi / 2).all()
 
     def test_max_phase(self):
         phase = (np.ones((50, 50)) * np.pi * 0.5) + np.pi
-        phase0 = pst._find_phase(phase, max_phase=np.pi)
+        phase0 = bst._find_phase(phase, max_phase=np.pi)
         assert (phase0 == np.pi / 2).all()
-
-
-class TestMakeBivariateHistogram:
-    def test_single_x(self):
-        size = 100
-        x, y = np.ones(size), np.zeros(size)
-        s = make_bivariate_histogram(x, y)
-        hist_iX = s.axes_manager[0].value2index(1.0)
-        hist_iY = s.axes_manager[1].value2index(0.0)
-        assert s.data[hist_iY, hist_iX] == size
-        s.data[hist_iY, hist_iX] = 0
-        assert not s.data.any()
-
-    def test_single_negative_x(self):
-        size = 100
-        x, y = -np.ones(size), np.zeros(size)
-        s = make_bivariate_histogram(x, y)
-        hist_iX = s.axes_manager[0].value2index(-1)
-        hist_iY = s.axes_manager[1].value2index(0)
-        assert s.data[hist_iY, hist_iX] == size
-        s.data[hist_iY, hist_iX] = 0
-        assert not s.data.any()
-
-    def test_single_negative_x_y(self):
-        size = 100
-        x, y = -np.ones(size), np.ones(size)
-        s = make_bivariate_histogram(x, y)
-        hist_iX = s.axes_manager[0].value2index(-1)
-        hist_iY = s.axes_manager[1].value2index(1)
-        assert s.data[hist_iY, hist_iX] == size
-        s.data[hist_iY, hist_iX] = 0
-        assert not s.data.any()
 
 
 class TestGetCornerSlices:
     @pytest.mark.parametrize("corner_size", [0.02, 0.05, 0.20, 0.23])
     def test_corner_size(self, corner_size):
         size = 100
-        s = hs.signals.Signal2D(np.zeros((size, size)))
-        corner_slice_list = pst._get_corner_slices(s, corner_size=corner_size)
+        s = hs.signals.Signal2D(np.zeros((size, size))).T
+        corner_slice_list = bst._get_corner_slices(s, corner_size=corner_size)
         corner_shape = (round(size * corner_size), round(size * corner_size))
         for corner_slice in corner_slice_list:
-            s_corner = s.isig[corner_slice]
+            s_corner = s.inav[corner_slice]
             assert s_corner.axes_manager.shape == corner_shape
 
     def test_signal_slice_values(self):
@@ -134,64 +100,64 @@ class TestGetCornerSlices:
         data[:20, -20:] = 5
         data[-20:, :20] = 10
         data[-20:, -20:] = 8
-        s = hs.signals.Signal2D(data)
-        corner_slice_list = pst._get_corner_slices(s, corner_size=0.05)
-        assert (s.isig[corner_slice_list[0]].data == 2).all()
-        assert (s.isig[corner_slice_list[1]].data == 10).all()
-        assert (s.isig[corner_slice_list[2]].data == 5).all()
-        assert (s.isig[corner_slice_list[3]].data == 8).all()
+        s = hs.signals.Signal2D(data).T
+        corner_slice_list = bst._get_corner_slices(s, corner_size=0.05)
+        assert (s.inav[corner_slice_list[0]].data == 2).all()
+        assert (s.inav[corner_slice_list[1]].data == 10).all()
+        assert (s.inav[corner_slice_list[2]].data == 5).all()
+        assert (s.inav[corner_slice_list[3]].data == 8).all()
 
     def test_non_square_signal(self):
         corner_size = 0.05
         size_x, size_y = 100, 200
-        s = hs.signals.Signal2D(np.zeros((size_y, size_x)))
-        corner_slice_list = pst._get_corner_slices(s, corner_size=0.05)
+        s = hs.signals.Signal2D(np.zeros((size_y, size_x))).T
+        corner_slice_list = bst._get_corner_slices(s, corner_size=0.05)
         corner_shape = (round(size_x * corner_size), round(size_y * corner_size))
         for corner_slice in corner_slice_list:
-            s_corner = s.isig[corner_slice]
+            s_corner = s.inav[corner_slice]
             assert s_corner.axes_manager.shape == corner_shape
 
     def test_wrong_input_dimensions(self):
         s = hs.signals.Signal2D(np.ones((2, 10, 10)))
         with pytest.raises(ValueError):
-            pst._get_corner_slices(s)
+            bst._get_corner_slices(s)
         s = hs.signals.Signal2D(np.ones((2, 2, 10, 10)))
         with pytest.raises(ValueError):
-            pst._get_corner_slices(s)
+            bst._get_corner_slices(s)
         s = hs.signals.Signal1D(np.ones(10))
         with pytest.raises(ValueError):
-            pst._get_corner_slices(s)
+            bst._get_corner_slices(s)
 
 
 class TestPlaneParametersToImage:
     def test_simple(self):
         p = [0, 0, 1, 0]
         xaxis, yaxis = range(100), range(110)
-        image = pst._plane_parameters_to_image(p, xaxis, yaxis)
+        image = bst._plane_parameters_to_image(p, xaxis, yaxis)
         assert_allclose(image, 0)
 
     def test_offset(self):
         p = [0, 0, 1, 3]
         xaxis, yaxis = range(100), range(110)
-        image = pst._plane_parameters_to_image(p, xaxis, yaxis)
+        image = bst._plane_parameters_to_image(p, xaxis, yaxis)
         assert_allclose(image, -3)
 
     def test_x_plane(self):
         p = [1, 0, 1, 0]
         xaxis, yaxis = range(100), range(110)
-        image = pst._plane_parameters_to_image(p, xaxis, yaxis)
+        image = bst._plane_parameters_to_image(p, xaxis, yaxis)
         assert image[0, 0] > image[0, -1]
 
     def test_y_plane(self):
         p = [0, 1, 1, 0]
         xaxis, yaxis = range(100), range(110)
-        image = pst._plane_parameters_to_image(p, xaxis, yaxis)
+        image = bst._plane_parameters_to_image(p, xaxis, yaxis)
         assert image[0, 0] > image[-1, 0]
 
     def test_last_parameter(self):
         p = [0, 0, 2, 4]
         xaxis, yaxis = range(100), range(110)
-        image = pst._plane_parameters_to_image(p, xaxis, yaxis)
+        image = bst._plane_parameters_to_image(p, xaxis, yaxis)
         assert_allclose(image, -2)
 
 
@@ -200,25 +166,25 @@ class TestGetLinearPlaneFromSignal2d:
         s0, s1 = hs.signals.Signal2D(np.meshgrid(range(100), range(110)))
         s0.change_dtype("float64")
         s1.change_dtype("float64")
-        s0_plane = pst._get_linear_plane_from_signal2d(s0)
-        s1_plane = pst._get_linear_plane_from_signal2d(s1)
+        s0_plane = bst._get_linear_plane_from_signal2d(s0)
+        s1_plane = bst._get_linear_plane_from_signal2d(s1)
         np.testing.assert_almost_equal(s0_plane.data, s0.data)
         np.testing.assert_almost_equal(s1_plane.data, s1.data)
 
     def test_zeros_values(self):
         s = hs.signals.Signal2D(np.zeros((100, 200), dtype=np.float32))
-        s_plane = pst._get_linear_plane_from_signal2d(s)
+        s_plane = bst._get_linear_plane_from_signal2d(s)
         np.testing.assert_almost_equal(s_plane.data, s.data)
 
     def test_ones_values(self):
         s = hs.signals.Signal2D(np.ones((100, 200), dtype=np.float32))
-        s_plane = pst._get_linear_plane_from_signal2d(s)
+        s_plane = bst._get_linear_plane_from_signal2d(s)
         np.testing.assert_almost_equal(s_plane.data, s.data)
 
     def test_negative_values(self):
         data = np.ones((110, 100)) * -10
         s = hs.signals.Signal2D(data)
-        s_plane = pst._get_linear_plane_from_signal2d(s)
+        s_plane = bst._get_linear_plane_from_signal2d(s)
         np.testing.assert_almost_equal(s_plane.data, s.data)
 
     def test_mask(self):
@@ -227,8 +193,8 @@ class TestGetLinearPlaneFromSignal2d:
         data[50, 51] = 10000
         mask[50, 51] = True
         s = hs.signals.Signal2D(data)
-        plane_no_mask = pst._get_linear_plane_from_signal2d(s)
-        plane_mask = pst._get_linear_plane_from_signal2d(s, mask=mask)
+        plane_no_mask = bst._get_linear_plane_from_signal2d(s)
+        plane_mask = bst._get_linear_plane_from_signal2d(s, mask=mask)
         assert plane_no_mask != approx(1.0)
         assert plane_mask == approx(1.0)
 
@@ -242,7 +208,7 @@ class TestGetLinearPlaneFromSignal2d:
         mask = np.zeros_like(s.data, dtype=bool)
         s.data[50, 51] = 10000
         mask[50, 51] = True
-        plane_mask = pst._get_linear_plane_from_signal2d(s, mask=mask)
+        plane_mask = bst._get_linear_plane_from_signal2d(s, mask=mask)
         np.testing.assert_allclose(plane_mask, s_orig.data, atol=1e-6)
 
     def test_crop_signal(self):
@@ -257,22 +223,115 @@ class TestGetLinearPlaneFromSignal2d:
         s_crop.data[50, 51] = 10000
         mask = np.zeros_like(s_crop.data, dtype=bool)
         mask[50, 51] = True
-        plane = pst._get_linear_plane_from_signal2d(s_crop, mask=mask)
+        plane = bst._get_linear_plane_from_signal2d(s_crop, mask=mask)
         np.testing.assert_almost_equal(plane, s_crop_orig.data, decimal=6)
 
     def test_wrong_input_dimensions(self):
         s = hs.signals.Signal2D(np.ones((2, 10, 10)))
         with pytest.raises(ValueError):
-            pst._get_linear_plane_from_signal2d(s)
+            bst._get_linear_plane_from_signal2d(s)
         s = hs.signals.Signal2D(np.ones((2, 2, 10, 10)))
         with pytest.raises(ValueError):
-            pst._get_linear_plane_from_signal2d(s)
+            bst._get_linear_plane_from_signal2d(s)
         s = hs.signals.Signal1D(np.ones(10))
         with pytest.raises(ValueError):
-            pst._get_linear_plane_from_signal2d(s)
+            bst._get_linear_plane_from_signal2d(s)
 
     def test_wrong_mask_dimensions(self):
         s = hs.signals.Signal2D(np.ones((10, 10)))
         mask = np.zeros((11, 9), dtype=bool)
         with pytest.raises(ValueError):
-            pst._get_linear_plane_from_signal2d(s, mask=mask)
+            bst._get_linear_plane_from_signal2d(s, mask=mask)
+
+
+class TestGetLimitsFromArray:
+    def test_simple(self):
+        data_array0 = np.array((5, 10))
+        clim0 = bst._get_limits_from_array(data_array0, sigma=4)
+        assert (data_array0.min(), data_array0.max()) == clim0
+        data_array1 = np.array((5, -10))
+        clim1 = bst._get_limits_from_array(data_array1, sigma=4)
+        assert (data_array1.min(), data_array1.max()) == clim1
+        data_array2 = np.array((-5, 10))
+        clim2 = bst._get_limits_from_array(data_array2, sigma=4)
+        assert (data_array2.min(), data_array2.max()) == clim2
+        data_array3 = np.array((-5, -10))
+        clim3 = bst._get_limits_from_array(data_array3, sigma=4)
+        assert (data_array3.min(), data_array3.max()) == clim3
+
+    def test_simple_sigma(self):
+        data_array0 = np.array((5, 10))
+        clim0 = bst._get_limits_from_array(data_array0, sigma=0)
+        assert (data_array0.mean(), data_array0.mean()) == clim0
+        data_array1 = np.array((5, -10))
+        clim1 = bst._get_limits_from_array(data_array1, sigma=0)
+        assert (data_array1.mean(), data_array1.mean()) == clim1
+        data_array2 = np.array((-5, 10))
+        clim2 = bst._get_limits_from_array(data_array2, sigma=0)
+        assert (data_array2.mean(), data_array2.mean()) == clim2
+        data_array3 = np.array((-5, -10))
+        clim3 = bst._get_limits_from_array(data_array3, sigma=0)
+        assert (data_array3.mean(), data_array3.mean()) == clim3
+
+    def test_ignore_zeros(self):
+        data_array0 = np.zeros(shape=(100, 100))
+        value = 50
+        data_array0[:, 70:80] = value
+        clim0_0 = bst._get_limits_from_array(data_array0, ignore_zeros=True)
+        assert (value, value) == clim0_0
+        clim0_1 = bst._get_limits_from_array(data_array0, sigma=0)
+        assert (data_array0.mean(), data_array0.mean()) == clim0_1
+        clim0_2 = bst._get_limits_from_array(data_array0, sigma=1)
+        assert (0.0, 20.0) == clim0_2
+
+    def test_ignore_edges(self):
+        data_array = np.ones(shape=(100, 100)) * 5000
+        value = 50
+        data_array[1:-1, 1:-1] = value
+        clim0 = bst._get_limits_from_array(data_array, ignore_edges=True)
+        assert (value, value) == clim0
+        clim1 = bst._get_limits_from_array(data_array, ignore_edges=False)
+        assert not ((value, value) == clim1)
+
+
+class TestMakeBivariateHistogram:
+    def test_make_bivariate_histogram(self):
+        x, y = np.ones((100, 100)), np.ones((100, 100))
+        bst._make_bivariate_histogram(
+            x_position=x,
+            y_position=y,
+            histogram_range=None,
+            masked=None,
+            bins=200,
+            spatial_std=3,
+        )
+
+    def test_single_x(self):
+        size = 100
+        x, y = np.ones(size), np.zeros(size)
+        s = bst._make_bivariate_histogram(x, y)
+        hist_iX = s.axes_manager[0].value2index(1.0)
+        hist_iY = s.axes_manager[1].value2index(0.0)
+        assert s.data[hist_iY, hist_iX] == size
+        s.data[hist_iY, hist_iX] = 0
+        assert not s.data.any()
+
+    def test_single_negative_x(self):
+        size = 100
+        x, y = -np.ones(size), np.zeros(size)
+        s = bst._make_bivariate_histogram(x, y)
+        hist_iX = s.axes_manager[0].value2index(-1)
+        hist_iY = s.axes_manager[1].value2index(0)
+        assert s.data[hist_iY, hist_iX] == size
+        s.data[hist_iY, hist_iX] = 0
+        assert not s.data.any()
+
+    def test_single_negative_x_y(self):
+        size = 100
+        x, y = -np.ones(size), np.ones(size)
+        s = bst._make_bivariate_histogram(x, y)
+        hist_iX = s.axes_manager[0].value2index(-1)
+        hist_iY = s.axes_manager[1].value2index(1)
+        assert s.data[hist_iY, hist_iX] == size
+        s.data[hist_iY, hist_iX] = 0
+        assert not s.data.any()

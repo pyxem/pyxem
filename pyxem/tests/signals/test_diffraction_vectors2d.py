@@ -120,7 +120,6 @@ class TestVector2DSubclass:
         assert isinstance(sliced, DiffractionVectors1D)
         assert isinstance(sliced, Signal1D)
         assert sliced.axes_manager.signal_shape == (20,)
-        assert sliced.column_names == "x"
 
     def test_flatten(self, vectors):
         flatten_diffraction_vectors = vectors.flatten_diffraction_vectors()

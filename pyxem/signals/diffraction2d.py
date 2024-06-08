@@ -15,12 +15,15 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+from copy import deepcopy
+
 import numpy as np
 from scipy.ndimage import rotate
 from skimage import morphology
 import dask.array as da
 from dask.diagnostics import ProgressBar
 from tqdm import tqdm
+from traits.api import Undefined
 import warnings
 
 import hyperspy.api as hs
@@ -50,11 +53,11 @@ from pyxem.utils.diffraction import (
     apply_transformation,
     find_beam_center_blur,
     find_beam_center_interpolate,
+    find_center_of_mass,
     find_hot_pixels,
     integrate_radially,
     medfilt_1d,
     sigma_clip,
-    center_of_mass,
 )
 from pyxem.utils._azimuthal_integrations import (
     _slice_radial_integrate,
@@ -117,6 +120,20 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         """
         super().__init__(*args, **kwargs)
         self.calibration = Calibration(self)
+        # setting some sensible defaults for the axes
+        if self.axes_manager.navigation_dimension == 2:
+            ax1 = self.axes_manager.navigation_axes[0]
+            ax2 = self.axes_manager.navigation_axes[1]
+            ax1.name = "x" if ax1.name is Undefined else ax1.name
+            ax2.name = "y" if ax2.name is Undefined else ax2.name
+            ax1.units = "px" if ax1.units is Undefined else ax1.units
+            ax2.units = "px" if ax2.units is Undefined else ax2.units
+        s_ax1 = self.axes_manager.signal_axes[0]
+        s_ax2 = self.axes_manager.signal_axes[1]
+        s_ax1.name = "kx" if s_ax1.name is Undefined else s_ax1.name
+        s_ax2.name = "ky" if s_ax2.name is Undefined else s_ax2.name
+        s_ax1.units = "px" if s_ax1.units is Undefined else s_ax1.units
+        s_ax2.units = "px" if s_ax2.units is Undefined else s_ax2.units
 
     def apply_affine_transformation(
         self, D, order=1, keep_dtype=False, inplace=True, *args, **kwargs
@@ -668,6 +685,23 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             Array containing the shifts for each SED pattern, with the first
             signal index being the x-shift and the second the y-shift.
 
+        Examples
+        --------
+        Using center of mass method
+
+        >>> s = pxm.data.dummy_data.get_disk_shift_simple_test_signal()
+        >>> s_bs = s.get_direct_beam_position(method="center_of_mass")
+        >>> s_bs_color = s_bs.get_color_signal()
+
+        Also threshold
+
+        >>> s_bs = s.get_direct_beam_position(method="center_of_mass", threshold=2)
+
+        Get a lazy signal, then calculate afterwards
+
+        >>> s_bs = s.center_of_mass(lazy_output=True, method="center_of_mass")
+        >>> s_bs.compute(show_progressbar=False)
+
         """
         if half_square_width is not None and signal_slice is not None:
             raise ValueError(
@@ -713,7 +747,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             "cross_correlate": find_beam_offset_cross_correlation,
             "blur": find_beam_center_blur,
             "interpolate": find_beam_center_interpolate,
-            "center_of_mass": None,
+            "center_of_mass": find_center_of_mass,
         }
 
         method_function = _select_method_from_method_dict(
@@ -756,12 +790,13 @@ class Diffraction2D(CommonDiffraction, Signal2D):
                 x = x - signal_slice[0]
                 y = y - signal_slice[2]
                 kwargs["mask"] = (x, y, r)
-            centers = signal.center_of_mass(
-                lazy_result=lazy_output,
+            centers = find_center_of_mass(
+                signal,
+                lazy_output=lazy_output,
                 show_progressbar=False,
                 **kwargs,
             )
-            shifts = -centers.T + origin_coordinates
+            shifts = -centers + origin_coordinates
 
         if signal_slice is not None:
             shifted_center = [(low_x + high_x) / 2, (low_y + high_y) / 2]
@@ -770,7 +805,11 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             shifts = shifts + shift
 
         shifts.set_signal_type("beam_shift")
-
+        shifts.axes_manager.signal_axes[0].name = "Beam position"
+        shifts.column_names = ["x-shift", "y-shift"]
+        shifts.units = ["px", "px"]  # shifts are in pixels
+        shifts.metadata.add_node("Shifts")  # add information about the signal Axes
+        shifts.metadata.Shifts.signal_axes = deepcopy(self.axes_manager.signal_axes)
         return shifts
 
     @deprecated_argument(
@@ -930,70 +969,6 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             mask=mask,
         )
         return s_out
-
-    @deprecated_argument(
-        since="0.15.0", name="lazy_result", alternative="lazy_output", removal="1.00.0"
-    )
-    def center_of_mass(
-        self,
-        threshold=None,
-        mask=None,
-        **kwargs,
-    ):
-        """Get the centre of the STEM diffraction pattern using
-        center of mass. Threshold can be set to only use the most
-        intense parts of the pattern. A mask can be used to exclude
-        parts of the diffraction pattern.
-
-        Parameters
-        ----------
-        threshold : number, optional
-            The thresholding will be done at mean times
-            this threshold value.
-        mask : tuple (x, y, r), optional
-            Round mask centered on x and y, with radius r. These are pixel values rather
-            than physical units. Default None which means no mask is used.
-
-        Returns
-        -------
-        DPCSignal
-            DPCSignal with beam shifts along the navigation dimension
-            and spatial dimensions as the signal dimension(s).
-
-        Examples
-        --------
-        With mask centered at x=105, y=120 and 30 pixel radius
-
-        >>> s = pxm.data.dummy_data.get_disk_shift_simple_test_signal()
-        >>> mask = (25, 25, 10)
-        >>> s_com = s.center_of_mass(mask=mask, show_progressbar=False)
-        >>> s_color = s_com.get_color_signal()
-
-        Also threshold
-
-        >>> s_com = s.center_of_mass(threshold=1.5, show_progressbar=False)
-
-        Get a lazy signal, then calculate afterwards
-
-        >>> s_com = s.center_of_mass(lazy_result=True, show_progressbar=False)
-        >>> s_com.compute(show_progressbar=False)
-
-        """
-        if "inplace" in kwargs and kwargs["inplace"]:
-            raise ValueError("Inplace is not allowed for center_of_mass")
-        else:
-            kwargs["inplace"] = False
-
-        det_shape = self.axes_manager.signal_shape
-        if mask is not None:
-            x, y, r = mask
-            mask = pst._make_circular_mask(x, y, det_shape[0], det_shape[1], r)
-
-        ans = self.map(center_of_mass, threshold=threshold, mask=mask, **kwargs)
-        ans = ans.T
-        ans.set_signal_type("dpc")
-        ans.axes_manager.navigation_axes[0].name = "Beam position"
-        return ans
 
     @deprecated_argument(
         name="lazy_result", alternative="lazy_output", since="0.15.0", removal="1.0.0"

@@ -610,12 +610,12 @@ class TestGenerate4dData:
         assert (s.data == 0).all()
 
     def test_ring_center(self):
-        x, y = 40, 51
+        im_x, im_y, x, y = 120, 100, 40, 51
         s = mdtd.generate_4d_data(
             probe_size_x=4,
             probe_size_y=5,
-            image_size_x=120,
-            image_size_y=100,
+            image_size_x=im_x,
+            image_size_y=im_y,
             disk_x=x,
             disk_y=y,
             disk_r=10,
@@ -628,12 +628,14 @@ class TestGenerate4dData:
             blur=False,
             downscale=False,
         )
-        s_com = s.center_of_mass()
-        assert (s_com.inav[0].data == x).all()
-        assert (s_com.inav[1].data == y).all()
+        s_bs = s.get_direct_beam_position(method="center_of_mass")
+        x_new = (im_x / 2) - x
+        y_new = (im_y / 2) - y
+        assert (s_bs.isig[0].data == x_new).all()
+        assert (s_bs.isig[1].data == y_new).all()
 
     def test_ring_ellipse_center(self):
-        x, y = 40, 51
+        im_x, im_y, x, y = 120, 100, 40, 51
         s = mdtd.generate_4d_data(
             probe_size_x=4,
             probe_size_y=5,
@@ -646,9 +648,11 @@ class TestGenerate4dData:
             blur=False,
             downscale=False,
         )
-        s_com = s.center_of_mass()
-        assert (s_com.inav[0].data == x).all()
-        assert (s_com.inav[1].data == y).all()
+        s_bs = s.get_direct_beam_position(method="center_of_mass")
+        x_new = (im_x / 2) - x
+        y_new = (im_y / 2) - y
+        assert (s_bs.isig[0].data == x_new).all()
+        assert (s_bs.isig[1].data == y_new).all()
 
     def test_input_numpy_array(self):
         size = (20, 10)

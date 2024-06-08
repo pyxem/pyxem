@@ -1,4 +1,5 @@
 from pyxem.utils import plotting as plu
+from pyxem.signals import BeamShift
 import matplotlib.pyplot as plt
 import pytest
 import numpy as np
@@ -45,3 +46,20 @@ def test_plot_sim_over_pattern_fail(mock_simulation):
         plu.plot_template_over_pattern(
             pattern, mock_simulation, coordinate_system="dracula"
         )
+
+
+def test_plot_beam_shift_color():
+    s = BeamShift(np.random.random(size=(100, 100, 2)))
+    plu.plot_beam_shift_color(s)
+    plu.plot_beam_shift_color(
+        s,
+        phase_rotation=45,
+        indicator_rotation=10,
+        autolim=True,
+        autolim_sigma=1,
+        scalebar_size=10,
+    )
+    plu.plot_beam_shift_color(s, only_phase=True)
+    plu.plot_beam_shift_color(s, autolim=False, magnitude_limits=(0, 0.5))
+    fig, ax = plt.subplots()
+    plu.plot_beam_shift_color(s, ax=ax)

@@ -29,7 +29,10 @@ def slice_signal(arr, col_slice, row_slice):
         row_slice = [
             row_slice,
         ]
-    return arr[row_slice, col_slice]
+    if arr.ndim == 1:
+        return arr[col_slice]
+    else:
+        return arr[row_slice, col_slice]
 
 
 # Note this functionality should be upstreamed to hyperspy and replaced by equivalent functionality
@@ -75,9 +78,26 @@ class Slicer:
         if self.signal.offsets is not None:
             slic.offsets = np.array(self.signal.offsets)[col_slice]
         if self.signal.column_names is not None:
-            slic.column_names = np.array(self.signal.column_names)[col_slice]
+            from pyxem.signals import DiffractionVectors1D, DiffractionVectors2D
+
+            if isinstance(slic, DiffractionVectors1D) and isinstance(
+                self.signal, DiffractionVectors2D
+            ):
+                name = np.array(self.signal.column_names)[col_slice]
+                slic.axes_manager.signal_axes[0].name = "" if name is None else name
+                slic.column_names = None
+            else:
+                slic.column_names = np.array(self.signal.column_names)[col_slice]
         if self.signal.units is not None:
-            slic.units = np.array(self.signal.units)[col_slice]
+            from pyxem.signals import DiffractionVectors1D, DiffractionVectors2D
+
+            if isinstance(slic, DiffractionVectors1D) and isinstance(
+                self.signal, DiffractionVectors2D
+            ):
+                unit = np.array(self.signal.units)[col_slice]
+                slic.axes_manager.signal_axes[0].units = "" if unit is None else unit
+            else:
+                slic.column_names = np.array(self.signal.column_names)[col_slice]
         return slic
 
     def str2slice(self, item):

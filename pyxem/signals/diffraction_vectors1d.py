@@ -16,9 +16,11 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 from hyperspy.signals import Signal1D
+from pyxem.signals import DiffractionVectors
+from hyperspy.utils.plot import plot_images
 
 
-class DiffractionVectors1D(Signal1D):
+class DiffractionVectors1D(DiffractionVectors, Signal1D):
     """A Collection of Diffraction Vectors with a defined 1D set of vectors.
 
     For every navigation position there is specifically one vector that represents
@@ -46,7 +48,35 @@ class DiffractionVectors1D(Signal1D):
     _signal_dimension = 1
     _signal_type = "diffraction_vectors"
 
-    def __init__(self, *args, **kwargs):
-        self.column_scale = kwargs.get("column_scale", None)
-        self.column_offsets = kwargs.get("column_offsets", None)
-        super().__init__(*args, **kwargs)
+    def plot(self, tight_layout=True, **kwargs):
+        """
+        Plot the beam shifts, utilizing HyperSpy's :func:`hyperspy.api.plot.plot_images`
+        function. Each Vector is plotted as a separate image with the column names as labels.
+
+        Parameters
+        ----------
+        tight_layout : bool, optional
+            Whether to use tight layout in the plot. The default is True.
+        **kwargs : dict
+            Keyword arguments to pass to :func:`hyperspy.api.plot.plot_images`.
+
+        """
+        if self._lazy:
+            raise ValueError(
+                "plot is not implemented for lazy signals, " "run compute() first"
+            )
+        vectors = self.T
+
+        if "suptitle" not in kwargs:
+            kwargs["label"] = [c if c is not None else "" for c in self.column_names]
+        axes_list = plot_images(
+            vectors,
+            tight_layout=tight_layout,
+            **kwargs,
+        )
+        return axes_list
+
+    def flatten_diffraction_vectors(self, **kwargs):
+        raise NotImplementedError(
+            "flatten_diffraction_vectors is not implemented yet for DiffractionVectors1D."
+        )

@@ -66,6 +66,7 @@ def get_DisplacementGradientMap(
     get_single_DisplacementGradientTensor()
 
     """
+
     # Calculate displacement gradient tensor across map.
     D = strained_vectors.map(
         get_single_DisplacementGradientTensor,
