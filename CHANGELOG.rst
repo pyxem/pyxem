@@ -56,6 +56,8 @@ Added
   an amorphous circular background when template matching (#1084)
 - Added new datasets of in situ crystalization, Ag SPED,
   Organic Semiconductor Orientation mapping, Orientation Mapping, and DPC (#1081)
+- Added a new method for calibrating the camera length
+  based on a :class:`pyxem.signals.ElectronDiffraction1D` signal (#1085)
 - Added Vectors to mask in :meth:`~pyxem.signals.DiffractionVectors.to_mask` (#1087)
 - Add :meth:`pyxem.signals.PolarDiffraction2D.get_orientation` to get the phase orientation (#1073)
 - Add :class:`pyxem.signals.OrientationMap` to organize and visualize orientation results (#1073)

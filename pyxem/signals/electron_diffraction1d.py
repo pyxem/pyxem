@@ -51,7 +51,6 @@ class ElectronDiffraction1D(Diffraction1D):
     ):
         """Creates a model for fitting diffraction peaks for a ring pattern using a series of Gaussians.
 
-
         This is primarily useful for calibration but could be potentially used for other things like
         phase segmentation from 1D diffraction patterns.  The lack of a parallel option for model fitting
         in hyperspy limits that usefulness for 4D STEM.  If that is something you are interested in doing,
@@ -75,6 +74,10 @@ class ElectronDiffraction1D(Diffraction1D):
         -------
         model : hyperspy.models.Model1D
             The model for fitting the diffraction peaks to a 1D diffraction pattern.
+
+        Notes
+        -----
+        This functionality is still under development and may change slightly in the future.
 
         """
         if starting_scale == None:
@@ -102,6 +105,24 @@ class ElectronDiffraction1D(Diffraction1D):
         return model
 
     def model2theta_scale(self, simulation, model, beam_energy):
+        """Find the theta calibration scale for a 1d diffraction pattern based
+        on a :class:`diffsims.simulations.Simulation1D`, a :class:`hyperspy.models.Model1D`
+        and the beam energy.
+
+        Parameters
+        ----------
+        simulation : diffsims.simulations.Simulation1D
+            The simulation of a 1D "powder" diffraction pattern.
+        model : hyperspy.models.Model1D
+            The model for fitting the diffraction peaks to a 1D diffraction pattern.
+        beam_energy : float
+            The beam energy in keV.
+
+        Notes
+        -----
+        This functionality is still under development and may change slightly in the future.
+        """
+
         def f(x, m):
             return x * m
 
@@ -141,6 +162,10 @@ class ElectronDiffraction1D(Diffraction1D):
             The camera length in meters for the experiment.  Note that this is often
             slightly different than the micrscope setting, however this calibrated
             value is more accurate then the calculated value from the micrscope.
+
+        Notes
+        -----
+        This functionality is still under development and may change slightly in the future.
         """
         theta_scale = self.model2theta_scale(simulation, model, beam_energy)
         camera_length = physical_pixel_size / np.tan(theta_scale)
