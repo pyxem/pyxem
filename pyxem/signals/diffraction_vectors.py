@@ -1305,7 +1305,7 @@ class DiffractionVectors(BaseSignal):
 
         return xim
 
-    def to_mask(self, disk_r, columns=[0, 1], signal_axes=None):
+    def to_mask(self, disk_r, signal_axes=None):
         """Convert the diffraction vectors to a N-D mask.
 
         This can be useful for Orientation Mapping including the fitting of mulitple
