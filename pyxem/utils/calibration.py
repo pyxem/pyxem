@@ -218,10 +218,10 @@ class Calibration:
         )
 
         unit_factors = {
-            "k_nm^-1": 1,
-            "k_A^-1": 0.1,
-            "q_nm^-1": 1 / (2 * np.pi),
-            "q_A^-1": 0.1 / (2 * np.pi),
+            "k_nm^-1": 10,
+            "k_A^-1": 1,
+            "q_nm^-1": 10 / (2 * np.pi),
+            "q_A^-1": 1 / (2 * np.pi),
         }
         if units not in unit_factors.keys():
             raise ValueError(
