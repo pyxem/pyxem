@@ -22,7 +22,7 @@ jobs:
           - os: ubuntu-latest
             python-version: 3.8
 
-            DEPENDENCIES: diffsims==0.6.rc1 hyperspy~=2.0.rc0 lmfit==0.9.12 matplotlib==3.7.5 orix==0.12.1 scikit-image==0.19.0 scikit-learn==1.0.0
+            DEPENDENCIES: diffsims==0.6.0 hyperspy==2.0.0 lmfit==0.9.12 matplotlib==3.7.5 orix==0.12.1 scikit-image==0.19.0 scikit-learn==1.0.0
             LABEL: -oldest
     steps:
       - uses: actions/checkout@v3
