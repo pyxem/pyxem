@@ -8,8 +8,8 @@ The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`
 and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
 
-Unreleased
-==========
+2024-06-08 - version 0.19.0
+===========================
 
 Restructuring of DPC processing
 -------------------------------
@@ -22,7 +22,6 @@ Restructuring of DPC processing
 - `:meth:`pyxem.signals.BeamShift.make_linear_plane` is being deprecated, and replaced with `:meth:`pyxem.signals.BeamShift.get_linear_plane`. It now returns a new signal, instead of altering the old one.
 - `gaussian_blur` and `flip_axis_90_degrees` has been deprecated, as this can easily be done using `s.map`
 
-
 Fixed
 -----
 - Fixed indexing error in :meth:`~pyxem.signals.Diffraction2D.get_direct_beam_position` (#1080)
@@ -30,19 +29,16 @@ Fixed
 Added
 -----
 - Added Examples for doing a Circular Hough Transform and Increased Documentation for Filtering Data (#1082)
-
-
-Added
------
 - Added `circular_background` to :meth:`~pyxem.signals.Diffraction2D.template_match_disk` to account for
   an amorphous circular background when template matching (#1084)
-
 - Added new datasets of in situ crystalization, Ag SPED,
   Organic Semiconductor Orientation mapping, Orientation Mapping, and DPC (#1081)
 - Added Vectors to mask in :meth:`~pyxem.signals.DiffractionVectors.to_mask` (#1087)
+- Add :meth:`pyxem.signals.PolarDiffraction2D.get_orientation` to get the phase orientation (#1073)
+- Add :class:`pyxem.signals.OrientationMap` to organize and visualize orientation results (#1073)
 
 2024-05-08 - version 0.18.0
-==========
+===========================
 Fixed
 -----
 - Fixed pytest failure. Changed ``setup`` --> ``setup_method`` (#997)
