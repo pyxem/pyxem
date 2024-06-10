@@ -188,7 +188,7 @@ def vectors_to_intensity(vectors, scale=1):
     return (vectors.intensity / np.max(vectors.intensity)) * scale
 
 
-def vectors_to_text(vectors):
+def vectors_to_text(vectors, fast=True):
     """
     Convert a set of diffraction vectors to text. For use with the map function
     and making text markers.
@@ -196,14 +196,17 @@ def vectors_to_text(vectors):
 
     def add_bar(i: int) -> str:
         if i < 0:
-            return f"$\\bar{{{abs(i)}}}$"
+            return f"\\bar{{{abs(i)}}}"
         else:
             return f"{i}"
 
     out = []
-    for hkl in vectors.hkl:
+    for hkl in vectors.origional_hkl:
         h, k, l = np.round(hkl).astype(np.int16)
-        out.append(f"({add_bar(h)} {add_bar(k)} {add_bar(l)})")
+        if fast:
+            out.append(f"{h} {k} {l}")
+        else:
+            out.append(f"({add_bar(h)} {add_bar(k)} {add_bar(l)})")
     return out
 
 
@@ -234,6 +237,7 @@ def extract_vectors_from_orientation_map(result, all_vectors, n_best_index=0):
     # Copy manually, as deepcopy adds a lot of overhead with the phase
     intensity = vectors.intensity
     vectors = DiffractingVector(vectors.phase, xyz=vectors.data.copy())
+    hkl = vectors.hkl
     # Flip y, as discussed in https://github.com/pyxem/pyxem/issues/925
     vectors.y = -vectors.y
 
@@ -244,6 +248,7 @@ def extract_vectors_from_orientation_map(result, all_vectors, n_best_index=0):
     vectors = DiffractingVector(
         vectors.phase, xyz=vectors.data.copy(), intensity=intensity
     )
+    vectors.origional_hkl = hkl
 
     # Mirror if necessary.
     # Mirroring, in this case, means casting (r, theta) to (r, -theta).
@@ -527,6 +532,7 @@ class OrientationMap(DiffractionVectors2D):
         text_kwargs: dict = None,
         include_intensity: bool = False,
         intesity_scale: float = 1,
+        fast: bool = True,
         **kwargs,
     ) -> Sequence[hs.plot.markers.Markers]:
         """Convert the orientation map to a set of markers for plotting.
@@ -549,6 +555,8 @@ class OrientationMap(DiffractionVectors2D):
             having a larger marker size.
         lazy_output: bool
             If True, the output will be a lazy signal. If None, the output will be lazy if the input is lazy.
+        fast: bool
+            If True the annotations will print as -h rather than \\bar{h}
 
         Returns
         -------
@@ -607,13 +615,9 @@ class OrientationMap(DiffractionVectors2D):
                     ragged=True,
                     output_dtype=object,
                     output_signal_size=(),
+                    fast=fast,
                 )
                 # New signal for offset coordinates, as using inplace=True shifts the point markers too
-                text_coords = coords.map(
-                    lambda x: x + annotation_shift,
-                    inplace=False,
-                    lazy_output=True,
-                )
                 text_coords = coords.map(
                     lambda x: x + annotation_shift,
                     inplace=False,

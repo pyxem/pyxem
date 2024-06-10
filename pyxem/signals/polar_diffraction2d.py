@@ -316,7 +316,6 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
         n_keep=None,
         frac_keep=0.1,
         n_best=1,
-        gamma=0.5,
         normalize_templates=True,
         **kwargs,
     ):
@@ -355,8 +354,6 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
         ----------
             .. bibliography::
         """
-        if gamma != 1:
-            self.data = self.data**gamma
         (
             r_templates,
             theta_templates,
@@ -384,6 +381,7 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
             transpose=True,
             output_signal_size=(n_best, 4),
             output_dtype=float,
+            **kwargs,
         )
 
         # Translate in-plane rotation from index to degrees
