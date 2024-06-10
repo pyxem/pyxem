@@ -839,7 +839,7 @@ class OrientationMap(DiffractionVectors2D):
             offset_transform="display",
             offsets=[[0, 0]],
         )
-        return polygon_sector, texts, mesh
+        return polygon_sector, mesh, texts
 
     def to_ipf_colormap(
         self,
