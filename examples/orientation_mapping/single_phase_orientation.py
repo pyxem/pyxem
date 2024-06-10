@@ -55,7 +55,7 @@ sim = generator.calculate_diffraction2d(
 # there?" rather than "Is the Bragg vector the right intensity?" patially because the intensity of the Bragg vector might have
 # many different effects.
 
-
+polar_si = polar_si**0.5  # gamma correction.
 orientation_map = polar_si.get_orientation(sim)
 orientation_map.plot_over_signal(simulated_si, vmax="96th")
 
