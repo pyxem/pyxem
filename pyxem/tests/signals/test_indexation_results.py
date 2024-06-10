@@ -243,7 +243,7 @@ class TestOrientationResult:
 
         generator = SimulationGenerator(200, minimum_intensity=0.05)
         rotations = get_sample_reduced_fundamental(
-            resolution=1, point_group=phase.point_group
+            resolution=2, point_group=phase.point_group
         )
         rotations2 = get_sample_reduced_fundamental(
             resolution=1, point_group=phase2.point_group

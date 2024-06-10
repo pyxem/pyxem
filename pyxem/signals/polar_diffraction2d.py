@@ -336,13 +336,7 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
         n_best : int
             The number of best matching orientations to keep.
         normalize_templates : bool
-            Normalize the templates to the same intensity.
-        gamma : float
-            The gamma correction applied to the diffraction patterns. The default
-            value is 0.5 which takes the square root of the diffraction patterns to
-            increase the intensity of the low intensity reflections and decrease the
-            intensity of the high intensity reflections. In most cases gamma<1 is a
-            good starting point.  See :cite:`pyxemorientationmapping2022` for more information.
+            Normalize the templates to the same intensity..
         kwargs : dict
             Any additional options for the :meth:`~hyperspy.signal.BaseSignal.map` function.
         Returns
@@ -350,9 +344,24 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
         orientation : BaseSignal
             A signal with the orientation at each navigation position.
 
+        Notes
+        -----
+            A gamma correction is often applied to the diffraction patterns. A good value
+            to start with is thethe square root (gamma=0.5) of the diffraction patterns to
+            increase the intensity of the low intensity reflections and decrease the
+            intensity of the high intensity reflections. This can be applied via:
+
+            >>> s_gamma = s**0.5
+
+            In most cases gamma<1 See :cite:`pyxemorientationmapping2022` for more information.
+            Additionally, subtracting a small value can sometimes be helpful as it penalizes
+            diffraction patterns which do not have the full compliment of simulated diffraction
+            vectors.
+
         References
         ----------
             .. bibliography::
+
         """
         (
             r_templates,

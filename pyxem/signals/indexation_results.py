@@ -196,7 +196,7 @@ def vectors_to_text(vectors, fast=True):
 
     def add_bar(i: int) -> str:
         if i < 0:
-            return f"\\bar{{{abs(i)}}}"
+            return f"$\\bar{{{abs(i)}}}$"
         else:
             return f"{i}"
 
@@ -328,7 +328,11 @@ class OrientationMap(DiffractionVectors2D):
             raise ValueError(
                 "Cannot create rotation from lazy signal. Please compute the signal first."
             )
-        all_rotations = Rotation.stack(self.simulation.rotations).flatten()
+        if isinstance(self.simulation.rotations, (list, np.ndarray)):
+            quats = np.vstack([r.data for r in self.simulation.rotations])
+            all_rotations = Rotation(data=quats)
+        else:
+            all_rotations = self.simulation.rotations
         rotations = self.map(
             rotation_from_orientation_map,
             rots=all_rotations.data,
