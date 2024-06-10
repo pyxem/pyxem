@@ -57,6 +57,7 @@ sim = generator.calculate_diffraction2d(
 # This should be fairly good at finding the orientation of the grains on each side of the tilt boundary.
 # The rotation is stored in the rotation column of the orientation map or .isg[2,0] if you want to use the
 # rotation as a navigator or plot it directly.
+polar_si_tilt = polar_si_tilt**0.5  # gamma correction
 
 orientation_map = polar_si_tilt.get_orientation(sim)
 orientation_map.plot_over_signal(simulated_si_tilt)

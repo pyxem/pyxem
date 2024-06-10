@@ -56,6 +56,7 @@ sim = generator.calculate_diffraction2d(
     reciprocal_radius=2,
     with_direct_beam=False,
 )
+polar_multi = polar_multi**0.5  # gamma correction
 orientation_map = polar_multi.get_orientation(sim)
 
 

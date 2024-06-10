@@ -227,7 +227,8 @@ class TestOrientationResult:
             reciprocal_radius=2,
             with_direct_beam=True,
         )
-        orientations = polar.get_orientation(sims, alpha=1)  # in this case we
+        polar = polar**0.5
+        orientations = polar.get_orientation(sims)
         return orientations, r, s
 
     @pytest.fixture(scope="class")
@@ -242,7 +243,7 @@ class TestOrientationResult:
 
         generator = SimulationGenerator(200, minimum_intensity=0.05)
         rotations = get_sample_reduced_fundamental(
-            resolution=1, point_group=phase.point_group
+            resolution=2, point_group=phase.point_group
         )
         rotations2 = get_sample_reduced_fundamental(
             resolution=1, point_group=phase2.point_group
@@ -294,14 +295,23 @@ class TestOrientationResult:
         assert np.all(crystal_map.phase_id < 2)
 
     @pytest.mark.parametrize("annotate", [True, False])
+    @pytest.mark.parametrize("fast", [True, False])
     @pytest.mark.parametrize("lazy_output", [True, False])
     @pytest.mark.parametrize("add_intensity", [True, False])
     def test_to_markers(
-        self, simple_multi_rot_orientation_result, annotate, lazy_output, add_intensity
+        self,
+        simple_multi_rot_orientation_result,
+        annotate,
+        lazy_output,
+        add_intensity,
+        fast,
     ):
         orientations, rotations, s = simple_multi_rot_orientation_result
         markers = orientations.to_markers(
-            lazy_output=lazy_output, annotate=annotate, include_intensity=add_intensity
+            lazy_output=lazy_output,
+            annotate=annotate,
+            include_intensity=add_intensity,
+            fast=fast,
         )
         assert isinstance(markers[0], hs.plot.markers.Markers)
 
