@@ -473,10 +473,11 @@ class OrientationMap(DiffractionVectors2D):
         """
 
         if self.simulation.has_multiple_phases:
+            # With different phases, we cannot have a signal anymore, as the first dimension is now the phase
+            vectors_signal = np.array([sim for sim in self.simulation])
+        else:
             # Use vector data as signal in case of different vectors per navigation position
             vectors_signal = hs.signals.Signal1D(self.simulation.coordinates)
-        else:
-            vectors_signal = hs.signals.Signal1D([sim for sim in self.simulations])
         v = self.map(
             extract_vectors_from_orientation_map,
             all_vectors=vectors_signal,
@@ -547,15 +548,30 @@ class OrientationMap(DiffractionVectors2D):
             raise ValueError(
                 "Cannot create markers from lazy signal. Please compute the signal first."
             )
-        if self.simulation.has_multiple_phases:
-            raise ValueError("Multiple phases found in simulation")
-        polygon_sector, texts, maxes, mins = get_ipf_outline(
-            self.simulaiton.phases, offset=offset, scale=scale
-        )
 
-        orients = self.to_single_phase_orientations()
-        vectors = orients * Vector3d.zvector()
-        vectors = vectors.in_fundamental_sector(self.simulation.phases.point_group)
+        rot = self.to_rotation()
+        vectors = rot * Vector3d.zvector()
+        phase_idxs = self.to_phase_index()
+        num_phases = np.max(phase_idxs) + 1
+        polygon_sector = [None] * num_phases
+        texts = [None] * num_phases
+        maxes = [None] * num_phases
+        mins = [None] * num_phases
+        if phase_idxs is None:
+            vectors = vectors.in_fundamental_sector(self.simulation.phases.point_group)
+            phase_idxs = np.zeros(vectors.shape, dtype=int)
+            polygon_sector[0], texts[0], maxes[0], mins[0] = get_ipf_outline(
+                self.simulation.phases, offset=offset, scale=scale
+            )
+        else:
+            
+            for i, phase in enumerate(self.simulation.phases):
+                vectors[phase_idxs == i] = vectors[phase_idxs == i].in_fundamental_sector(phase.point_group)
+                polygon_sector[i], texts[i], maxes[i], mins[i] = get_ipf_outline(
+                    self.simulation.phases[i], offset=offset, scale=scale
+                )
+        
+
         s = StereographicProjection()
         x, y = s.vector2xy(vectors)
         x = x.reshape(vectors.shape)
@@ -566,7 +582,8 @@ class OrientationMap(DiffractionVectors2D):
 
         for i in np.ndindex(offsets.shape):
             off = np.vstack((x[i], y[i])).T
-            norm_points = (off - ((maxes + mins) / 2)) / (maxes - mins) * scale
+            phase_idx = phase_idxs[i][0]
+            norm_points = (off - ((maxes[phase_idx] + mins[phase_idx]) / 2)) / (maxes[phase_idx] - mins[phase_idx]) * scale
             norm_points = norm_points + offset
             offsets[i] = norm_points
             correlation[i] = cor[i] / np.max(cor[i]) * 0.5
@@ -588,7 +605,7 @@ class OrientationMap(DiffractionVectors2D):
             facecolor="green",
         )
 
-        return square, polygon_sector, best_points, texts
+        return square, *polygon_sector, best_points, *texts
 
     def to_markers(
         self,
