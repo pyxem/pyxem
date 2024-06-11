@@ -440,9 +440,7 @@ def vectors_from_orientation_map(result, all_vectors, n_best_index=0):
     rotation = Rotation.from_euler(
         (mirror * rotation, 0, 0), degrees=True, direction="crystal2lab"
     )
-    assert len(vectors.shape) == 1
-    assert vectors.size > 1
-    assert rotation.data.size == 4
+
     vectors = ~rotation * vectors.to_miller()
     vectors = DiffractingVector(
         vectors.phase, xyz=vectors.data.copy(), intensity=intensity
