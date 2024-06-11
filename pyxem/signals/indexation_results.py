@@ -170,6 +170,71 @@ def _get_second_best_phase(z):
     else:
         return -1
 
+def get_ipf_outline(
+    phase: Phase, include_labels: bool = True, offset: float = 0.85, scale: float = 0.2
+):
+    """Get the outline of the IPF for the orientation map as a marker in the
+    upper right hand corner including labels if desired.
+
+    Parameters
+    ----------
+    phase: Phase
+        The phase to use, defining the symmerty reduced zone
+    include_labels : bool
+        If True, the labels for the axes will be included.
+    offset : float
+        The offset of the markers from the lower left of the plot (as a fraction of the axis).
+    scale : float
+        The scale (as a fraction of the axis) for the markers.
+
+    Returns
+    -------
+    polygon_sector : hs.plot.markers.Polygons
+        The outline of the IPF as a marker
+    texts : hs.plot.markers.Texts
+        The text labels for the IPF axes
+    maxes : np.ndarray
+        The maximum values for the axes
+    mins : np.ndarray
+        The minimum values for the axes
+    """
+    # Creating Lines around QuadMesh
+    sector = phase.point_group.fundamental_sector
+    s = StereographicProjection()
+
+    edges = _closed_edges_in_hemisphere(sector.edges, sector)
+    ex, ey = s.vector2xy(edges)
+    original_offset = np.vstack((ex, ey)).T
+    mins, maxes = original_offset.min(axis=0), original_offset.max(axis=0)
+    original_offset = (
+        (original_offset - ((maxes + mins) / 2)) / (maxes - mins) * scale
+    )
+    original_offset = original_offset + offset
+    polygon_sector = hs.plot.markers.Polygons(
+        verts=original_offset[np.newaxis],
+        transform="axes",
+        alpha=1,
+        facecolor="none",
+    )
+    if include_labels:
+        labels = _get_ipf_axes_labels(
+            sector.vertices, symmetry=phase.point_group
+        )
+        tx, ty = s.vector2xy(sector.vertices)
+        texts_offset = np.vstack((tx, ty)).T
+        texts_offset = (
+            (texts_offset - ((maxes + mins) / 2)) / (maxes - mins) * scale
+        )
+        texts_offset = texts_offset + offset
+        texts = hs.plot.markers.Texts(
+            texts=labels,
+            offsets=texts_offset,
+            sizes=(1,),
+            offset_transform="axes",
+            facecolor="k",
+        )
+        return polygon_sector, texts, maxes, mins
+
 
 def vectors_to_coordinates(vectors):
     """
@@ -484,8 +549,8 @@ class OrientationMap(DiffractionVectors2D):
             )
         if self.simulation.has_multiple_phases:
             raise ValueError("Multiple phases found in simulation")
-        polygon_sector, texts, maxes, mins = self._get_ipf_outline(
-            offset=offset, scale=scale
+        polygon_sector, texts, maxes, mins = get_ipf_outline(
+            self.simulaiton.phases, offset=offset, scale=scale
         )
 
         orients = self.to_single_phase_orientations()
@@ -724,68 +789,6 @@ class OrientationMap(DiffractionVectors2D):
             all_markers = compute_markers(all_markers)
         return all_markers
 
-    def _get_ipf_outline(
-        self, include_labels: bool = True, offset: float = 0.85, scale: float = 0.2
-    ):
-        """Get the outline of the IPF for the orientation map as a marker in the
-        upper right hand corner including labels if desired.
-
-        Parameters
-        ----------
-        include_labels : bool
-            If True, the labels for the axes will be included.
-        offset : float
-            The offset of the markers from the lower left of the plot (as a fraction of the axis).
-        scale : float
-            The scale (as a fraction of the axis) for the markers.
-
-        Returns
-        -------
-        polygon_sector : hs.plot.markers.Polygons
-            The outline of the IPF as a marker
-        texts : hs.plot.markers.Texts
-            The text labels for the IPF axes
-        maxes : np.ndarray
-            The maximum values for the axes
-        mins : np.ndarray
-            The minimum values for the axes
-        """
-        # Creating Lines around QuadMesh
-        sector = self.simulation.phases.point_group.fundamental_sector
-        s = StereographicProjection()
-
-        edges = _closed_edges_in_hemisphere(sector.edges, sector)
-        ex, ey = s.vector2xy(edges)
-        original_offset = np.vstack((ex, ey)).T
-        mins, maxes = original_offset.min(axis=0), original_offset.max(axis=0)
-        original_offset = (
-            (original_offset - ((maxes + mins) / 2)) / (maxes - mins) * scale
-        )
-        original_offset = original_offset + offset
-        polygon_sector = hs.plot.markers.Polygons(
-            verts=original_offset[np.newaxis],
-            transform="axes",
-            alpha=1,
-            facecolor="none",
-        )
-        if include_labels:
-            labels = _get_ipf_axes_labels(
-                sector.vertices, symmetry=self.simulation.phases.point_group
-            )
-            tx, ty = s.vector2xy(sector.vertices)
-            texts_offset = np.vstack((tx, ty)).T
-            texts_offset = (
-                (texts_offset - ((maxes + mins) / 2)) / (maxes - mins) * scale
-            )
-            texts_offset = texts_offset + offset
-            texts = hs.plot.markers.Texts(
-                texts=labels,
-                offsets=texts_offset,
-                sizes=(1,),
-                offset_transform="axes",
-                facecolor="k",
-            )
-            return polygon_sector, texts, maxes, mins
 
     def get_ipf_annotation_markers(self, offset: float = 0.85, scale: float = 0.2):
         """Get the outline of the IPF for the orientation map as a marker in the
@@ -809,7 +812,7 @@ class OrientationMap(DiffractionVectors2D):
             The color mesh for the IPF (using :class:`matplotlib.collections.QuadMesh`)
         """
 
-        polygon_sector, texts, _, _ = self._get_ipf_outline(offset=offset, scale=scale)
+        polygon_sector, texts, _, _ = get_ipf_outline(self.simulation.phases, offset=offset, scale=scale)
 
         # Create Color Mesh
         color_key = DirectionColorKeyTSL(symmetry=self.simulation.phases.point_group)
