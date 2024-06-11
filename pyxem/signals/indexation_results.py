@@ -394,10 +394,10 @@ class OrientationMap(DiffractionVectors2D):
             symmetry=self.simulation.phases.point_group,
         )
 
-    def to_single_phase_vectors(
+    def to_vectors(
         self, n_best_index: int = 0, **kwargs
     ) -> hs.signals.Signal1D:
-        """Get the reciprocal lattice vectors for a single-phase simulation.
+        """Get the reciprocal lattice vectors for each navigation position.
 
         Parameters
         ----------
@@ -408,10 +408,10 @@ class OrientationMap(DiffractionVectors2D):
         """
 
         if self.simulation.has_multiple_phases:
-            raise ValueError("Multiple phases found in simulation")
-
-        # Use vector data as signal in case of different vectors per navigation position
-        vectors_signal = hs.signals.Signal1D(self.simulation.coordinates)
+            # Use vector data as signal in case of different vectors per navigation position
+            vectors_signal = hs.signals.Signal1D(self.simulation.coordinates)
+        else:
+            vectors_signal = hs.signals.Signal1D([sim for sim in self.simulations])
         v = self.map(
             extract_vectors_from_orientation_map,
             all_vectors=vectors_signal,
@@ -580,7 +580,7 @@ class OrientationMap(DiffractionVectors2D):
             navigation_chunks = None
         all_markers = []
         for n in range(n_best):
-            vectors = self.to_single_phase_vectors(
+            vectors = self.to_vectors(
                 lazy_output=True, navigation_chunks=navigation_chunks
             )
             color = marker_colors[n % len(marker_colors)]
