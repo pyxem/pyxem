@@ -366,7 +366,7 @@ def rotation_from_orientation_map(result, rots):
     return ori
 
 
-def extract_vectors_from_orientation_map(result, all_vectors, n_best_index=0):
+def vectors_from_orientation_map(result, all_vectors, n_best_index=0):
     index, _, rotation, mirror = result[n_best_index, :].T
     index = index.astype(int)
     if all_vectors.ndim == 0:
@@ -383,6 +383,9 @@ def extract_vectors_from_orientation_map(result, all_vectors, n_best_index=0):
     rotation = Rotation.from_euler(
         (mirror * rotation, 0, 0), degrees=True, direction="crystal2lab"
     )
+    assert len(vectors.shape) == 1
+    assert vectors.size > 1
+    assert rotation.data.size == 4
     vectors = ~rotation * vectors.to_miller()
     vectors = DiffractingVector(
         vectors.phase, xyz=vectors.data.copy(), intensity=intensity
@@ -551,7 +554,7 @@ class OrientationMap(DiffractionVectors2D):
             # Use vector data as signal in case of different vectors per navigation position
             vectors_signal = hs.signals.Signal1D(self.simulation.coordinates)
         v = self.map(
-            extract_vectors_from_orientation_map,
+            vectors_from_orientation_map,
             all_vectors=vectors_signal,
             inplace=False,
             output_signal_size=(),
@@ -626,7 +629,7 @@ class OrientationMap(DiffractionVectors2D):
         cors = self.data[..., 1]
         if not self.simulation.has_multiple_phases:
             vecs = vecs.in_fundamental_sector(self.simulation.phases)
-            return self._to_single_phase_ipf_markers(
+            return vectors_to_single_phase_ipf_markers(
                 vecs,
                 self.simulation.phases,
                 cors,
@@ -642,7 +645,7 @@ class OrientationMap(DiffractionVectors2D):
             # As a workaround, set alpha to 0 for the wrong phase
             phase_cors = cors * (phase_idxs == phase_idx)
             markers += list(
-                self._to_single_phase_ipf_markers(
+                vectors_to_single_phase_ipf_markers(
                     phase_vecs,
                     phase,
                     phase_cors,
@@ -963,7 +966,6 @@ class OrientationMap(DiffractionVectors2D):
         colors = [p.color_rgb for p in self.simulation.phases]
 
         float_rgb = np.take(colors, phase_idxs[..., 0], axis=0)
-        print(float_rgb.shape)
         int_rgb = (float_rgb * 255).astype(np.uint8)
 
         s = hs.signals.Signal1D(int_rgb)
