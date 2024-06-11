@@ -347,13 +347,13 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
         Notes
         -----
             A gamma correction is often applied to the diffraction patterns. A good value
-            to start with is thethe square root (gamma=0.5) of the diffraction patterns to
+            to start with is the square root (gamma=0.5) of the diffraction patterns to
             increase the intensity of the low intensity reflections and decrease the
             intensity of the high intensity reflections. This can be applied via:
 
             >>> s_gamma = s**0.5
 
-            In most cases gamma<1 See :cite:`pyxemorientationmapping2022` for more information.
+            In most cases gamma < 1 See :cite:`pyxemorientationmapping2022` for more information.
             Additionally, subtracting a small value can sometimes be helpful as it penalizes
             diffraction patterns which do not have the full compliment of simulated diffraction
             vectors.

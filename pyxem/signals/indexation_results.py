@@ -201,7 +201,7 @@ def vectors_to_text(vectors, fast=True):
             return f"{i}"
 
     out = []
-    for hkl in vectors.origional_hkl:
+    for hkl in vectors.original_hkl:
         h, k, l = np.round(hkl).astype(np.int16)
         if fast:
             out.append(f"{h} {k} {l}")
@@ -248,7 +248,7 @@ def extract_vectors_from_orientation_map(result, all_vectors, n_best_index=0):
     vectors = DiffractingVector(
         vectors.phase, xyz=vectors.data.copy(), intensity=intensity
     )
-    vectors.origional_hkl = hkl
+    vectors.original_hkl = hkl
 
     # Mirror if necessary.
     # Mirroring, in this case, means casting (r, theta) to (r, -theta).

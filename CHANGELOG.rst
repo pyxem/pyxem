@@ -8,6 +8,13 @@ The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`
 and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
 
+2024-06-10 - version 0.19.1
+===========================
+Fixed
+-----
+- Fixed bugs releated to orientation mapping with multiple phases and the plotting of the
+  vector annotations. (#1090)
+
 2024-06-08 - version 0.19.0
 ===========================
 
