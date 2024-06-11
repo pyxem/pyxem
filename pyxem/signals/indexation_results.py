@@ -240,6 +240,63 @@ def get_ipf_outline(
         return polygon_sector, texts, maxes, mins
 
 
+def get_ipf_annotation_markers(phase: Phase, offset: float = 0.85, scale: float = 0.2):
+    """Get the outline of the IPF for the orientation map as a marker in the
+    upper right hand corner including labels if desired. As well as the color
+    mesh for the IPF.
+
+    Parameters
+    ----------
+    offset : float
+        The offset of the markers from the lower left of the plot (as a fraction of the axis).
+    scale : float
+        The scale (as a fraction of the axis) for the markers.
+
+    Returns
+    -------
+    polygon_sector : hs.plot.markers.Polygons
+        The outline of the IPF as a marker
+    texts : hs.plot.markers.Texts
+        The text labels for the IPF axes
+    mesh : hs.plot.markers.Markers
+        The color mesh for the IPF (using :class:`matplotlib.collections.QuadMesh`)
+    """
+
+    polygon_sector, texts, _, _ = get_ipf_outline(
+        phase, offset_x=offset, offset_y=offset, scale=scale
+    )
+
+    # Create Color Mesh
+    color_key = DirectionColorKeyTSL(symmetry=phase.point_group)
+    g, ext = color_key._create_rgba_grid(return_extent=True)
+
+    max_x = np.max(ext[1])
+    min_x = np.min(ext[1])
+
+    max_y = np.max(ext[0])
+    min_y = np.min(ext[0])
+
+    # center extent:
+    y = np.linspace(ext[0][0], ext[0][1], g.shape[1] + 1) - ((max_y + min_y) / 2)
+
+    y = y / (max_y - min_y) * scale + offset
+
+    x = np.linspace(ext[1][1], ext[1][0], g.shape[0] + 1) - ((max_x + min_x) / 2)
+
+    x = x / (max_x - min_x) * scale + offset
+    xx, yy = np.meshgrid(y, x)
+
+    mesh = hs.plot.markers.Markers(
+        collection=QuadMesh,
+        coordinates=np.stack((xx, yy), axis=-1),
+        array=g,
+        transform="axes",
+        offset_transform="display",
+        offsets=[[0, 0]],
+    )
+    return polygon_sector, mesh, texts
+
+
 def vectors_to_single_phase_ipf_markers(
     vectors: Vector3d,
     phase: Phase,
@@ -628,7 +685,7 @@ class OrientationMap(DiffractionVectors2D):
         vecs = rots * Vector3d.zvector()
         cors = self.data[..., 1]
         if not self.simulation.has_multiple_phases:
-            vecs = vecs.in_fundamental_sector(self.simulation.phases)
+            vecs = vecs.in_fundamental_sector(self.simulation.phases.point_group)
             return vectors_to_single_phase_ipf_markers(
                 vecs,
                 self.simulation.phases,
@@ -855,62 +912,6 @@ class OrientationMap(DiffractionVectors2D):
             all_markers = compute_markers(all_markers)
         return all_markers
 
-    def get_ipf_annotation_markers(self, offset: float = 0.85, scale: float = 0.2):
-        """Get the outline of the IPF for the orientation map as a marker in the
-        upper right hand corner including labels if desired. As well as the color
-        mesh for the IPF.
-
-        Parameters
-        ----------
-        offset : float
-            The offset of the markers from the lower left of the plot (as a fraction of the axis).
-        scale : float
-            The scale (as a fraction of the axis) for the markers.
-
-        Returns
-        -------
-        polygon_sector : hs.plot.markers.Polygons
-            The outline of the IPF as a marker
-        texts : hs.plot.markers.Texts
-            The text labels for the IPF axes
-        mesh : hs.plot.markers.Markers
-            The color mesh for the IPF (using :class:`matplotlib.collections.QuadMesh`)
-        """
-
-        polygon_sector, texts, _, _ = get_ipf_outline(
-            self.simulation.phases, offset=offset, scale=scale
-        )
-
-        # Create Color Mesh
-        color_key = DirectionColorKeyTSL(symmetry=self.simulation.phases.point_group)
-        g, ext = color_key._create_rgba_grid(return_extent=True)
-
-        max_x = np.max(ext[1])
-        min_x = np.min(ext[1])
-
-        max_y = np.max(ext[0])
-        min_y = np.min(ext[0])
-
-        # center extent:
-        y = np.linspace(ext[0][0], ext[0][1], g.shape[1] + 1) - ((max_y + min_y) / 2)
-
-        y = y / (max_y - min_y) * scale + offset
-
-        x = np.linspace(ext[1][1], ext[1][0], g.shape[0] + 1) - ((max_x + min_x) / 2)
-
-        x = x / (max_x - min_x) * scale + offset
-        xx, yy = np.meshgrid(y, x)
-
-        mesh = hs.plot.markers.Markers(
-            collection=QuadMesh,
-            coordinates=np.stack((xx, yy), axis=-1),
-            array=g,
-            transform="axes",
-            offset_transform="display",
-            offsets=[[0, 0]],
-        )
-        return polygon_sector, mesh, texts
-
     def to_ipf_colormap(
         self,
         direction: Vector3d = Vector3d.zvector(),
@@ -941,7 +942,7 @@ class OrientationMap(DiffractionVectors2D):
         s = s.T
 
         if add_markers:
-            annotations = self.get_ipf_annotation_markers()
+            annotations = get_ipf_annotation_markers(self.simulation.phases)
             s.add_marker(
                 annotations,
                 permanent=True,
@@ -950,7 +951,7 @@ class OrientationMap(DiffractionVectors2D):
                 plot_on_signal=False,
             )
         return s
-    
+
     def to_phase_map(self):
         """Create a colored navigator which can be passed as the
         navigator argument to the `plot` method of some signal.
@@ -961,7 +962,7 @@ class OrientationMap(DiffractionVectors2D):
         """
         if not self.simulation.has_multiple_phases:
             raise ValueError("Only a single phase present in simulation")
-        
+
         phase_idxs = self.to_phase_index()
         colors = [p.color_rgb for p in self.simulation.phases]
 
@@ -1014,7 +1015,9 @@ class OrientationMap(DiffractionVectors2D):
             ipf_markers = self.to_ipf_markers()
             signal.add_marker(ipf_markers)
         if add_ipf_colorkey:
-            signal.add_marker(self.get_ipf_annotation_markers(), plot_on_signal=False)
+            signal.add_marker(
+                get_ipf_annotation_markers(self.simulation.phases), plot_on_signal=False
+            )
 
 
 class GenericMatchingResults:
