@@ -43,6 +43,7 @@ from orix.plot import IPFColorKeyTSL, DirectionColorKeyTSL
 import hyperspy.api as hs
 import numpy as np
 from matplotlib.collections import QuadMesh
+from matplotlib.colors import Normalize
 
 import numpy as np
 import hyperspy.api as hs
@@ -300,10 +301,12 @@ def get_ipf_annotation_markers(phase: Phase, offset: float = 0.85, scale: float 
 def vectors_to_single_phase_ipf_markers(
     vectors: Vector3d,
     phase: Phase,
-    correlation: np.ndarray,
+    normalized_correlation: np.ndarray,
     offset_x: float = 0.85,
     offset_y: float = 0.85,
     scale: float = 0.2,
+    color: str = "green",
+    cmap: str = None,
 ):
     """Convert the orientation map to a set of inverse pole figure
     markers which visualizes the best matching orientations in the
@@ -311,6 +314,13 @@ def vectors_to_single_phase_ipf_markers(
 
     Parameters
     ----------
+    vectors : Vector3d
+        The vectors to display. These will be projected into the fundamental sector
+    phase : Phase
+        The phase for the fundamental sector
+    normalized_correrlation : np.ndarray
+        Correlation scores, normalized to lie between 0 and 1.
+        Used for alpha for single-color plotting, and for the color map
     offset : float
         The offset of the markers from the center of the plot
     scale : float
@@ -332,17 +342,16 @@ def vectors_to_single_phase_ipf_markers(
     x = x.reshape(vectors.shape)
     y = y.reshape(vectors.shape)
     offsets = np.empty(shape=vectors.shape[:-1], dtype=object)
-    alpha = np.empty(shape=vectors.shape[:-1], dtype=object)
+    alpha = np.ones(shape=vectors.shape[:-1], dtype=object)
 
+    # For each set of n_best, we reverse the order (using [::-1])
+    # to ensure the best spot is displayed on top
     for i in np.ndindex(offsets.shape):
         off = np.vstack((x[i], y[i])).T
         norm_points = (off - ((maxes + mins) / 2)) / (maxes.max() - mins.min()) * scale
         norm_points = norm_points + offset
-        offsets[i] = norm_points
-        max_cor = np.max(correlation[i])
-        if max_cor == 0:
-            max_cor = 1
-        alpha[i] = correlation[i] / max_cor * 0.5
+        offsets[i] = norm_points[::-1]
+        alpha[i] = normalized_correlation[i][::-1]
 
     square = hs.plot.markers.Squares(
         offsets=[offset],
@@ -360,7 +369,10 @@ def vectors_to_single_phase_ipf_markers(
         sizes=(4,),
         offset_transform="axes",
         alpha=alpha.T,
-        facecolor="green",
+        facecolor=color,
+        cmap=cmap,
+        array=None if cmap is None else alpha.T,
+        norm=Normalize(0, 1),
     )
     markers.append(best_points)
 
@@ -667,6 +679,8 @@ class OrientationMap(DiffractionVectors2D):
         offset_x: float = 0.85,
         offset_y: float = 0.85,
         scale: float = 0.2,
+        color: str = "green",
+        cmap: str = None,
     ):
         """Convert the orientation map to a set of inverse pole figure
         markers which visualizes the best matching orientations in the
@@ -678,12 +692,17 @@ class OrientationMap(DiffractionVectors2D):
             The offset of the markers from the center of the plot
         scale : float
             The scale (as a fraction of the axis) for the markers.
+        color : str
+            The color of the markers. Overridden by cmap, if not None
+        cmap : str
+            Use a color map to show correlation scores.
+            Takes priority over the `color` parameter
         """
         rots = self.to_rotation()
         vecs = rots * Vector3d.zvector()
-        cors = self.data[..., 1]
+        # Normalize the correlation scores
+        cors = self.data[..., 1] / np.max(self.data[..., 1], axis=-1)[..., np.newaxis]
         if not self.simulation.has_multiple_phases:
-            vecs = vecs.in_fundamental_sector(self.simulation.phases.point_group)
             return vectors_to_single_phase_ipf_markers(
                 vecs,
                 self.simulation.phases,
@@ -691,22 +710,25 @@ class OrientationMap(DiffractionVectors2D):
                 offset_x=offset_x,
                 offset_y=offset_y,
                 scale=scale,
+                color=color,
+                cmap=cmap,
             )
         # Multiple phases, we make a few different IPFs
         markers = []
         phase_idxs = self.to_phase_index()
         for phase_idx, phase in enumerate(self.simulation.phases):
-            phase_vecs = vecs.in_fundamental_sector(phase.point_group)
             # As a workaround, set alpha to 0 for the wrong phase
             phase_cors = cors * (phase_idxs == phase_idx)
             markers += list(
                 vectors_to_single_phase_ipf_markers(
-                    phase_vecs,
+                    vecs,
                     phase,
                     phase_cors,
                     offset_x=offset_x,
                     offset_y=offset_y - 1.5 * scale * phase_idx,
                     scale=scale,
+                    color=color,
+                    cmap=cmap,
                 )
             )
         return markers
@@ -979,6 +1001,7 @@ class OrientationMap(DiffractionVectors2D):
         add_ipf_markers=True,
         add_ipf_colorkey=True,
         vector_kwargs=None,
+        ipf_marker_show_correlation=False,
         **kwargs,
     ):
         """Convenience method to plot the orientation map and the n-best matches over the signal.
@@ -1010,7 +1033,8 @@ class OrientationMap(DiffractionVectors2D):
         if add_vector_markers:
             signal.add_marker(self.to_markers(1, **vector_kwargs))
         if add_ipf_markers:
-            ipf_markers = self.to_ipf_markers()
+            cmap = "magma" if ipf_marker_show_correlation else None
+            ipf_markers = self.to_ipf_markers(cmap=cmap)
             signal.add_marker(ipf_markers)
         if add_ipf_colorkey:
             signal.add_marker(
