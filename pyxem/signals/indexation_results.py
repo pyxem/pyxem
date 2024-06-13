@@ -772,7 +772,7 @@ class OrientationMap(DiffractionVectors2D):
 
         This will not look good if the rotations used in the simulation(s) consists of
         multiple different regions in the IPF.
-        
+
         """
         phase_idx_signal = hs.signals.Signal1D(self.to_phase_index())
         phases = self.simulation.phases
