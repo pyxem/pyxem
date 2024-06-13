@@ -768,8 +768,11 @@ class OrientationMap(DiffractionVectors2D):
 
         Notes
         -----
+        It is recommended to have a large `n_keep` for this to look nice, e.g. 75% of the simulation bank.
+
         This will not look good if the rotations used in the simulation(s) consists of
         multiple different regions in the IPF.
+        
         """
         phase_idx_signal = hs.signals.Signal1D(self.to_phase_index())
         phases = self.simulation.phases
@@ -1140,9 +1143,9 @@ class OrientationMap(DiffractionVectors2D):
         signal,
         add_vector_markers=True,
         add_ipf_markers=True,
+        add_ipf_correlation_heatmap=False,
         add_ipf_colorkey=True,
         vector_kwargs=None,
-        ipf_marker_show_correlation=False,
         **kwargs,
     ):
         """Convenience method to plot the orientation map and the n-best matches over the signal.
@@ -1155,6 +1158,9 @@ class OrientationMap(DiffractionVectors2D):
             If True, the vector markers will be added to the signal.
         add_ipf_markers : bool
             If True, the IPF best fit will be added to the signal in an overlay
+        add_ipf_correlation_heatmap : bool
+            If True, a correlation score heatmap as an IPF will be added to the signal in an overlay.
+            This overrides the `add_ipf_markers` parameter.
         add_ipf_colorkey : bool
             If True, the IPF colorkey will be added to the signal
         vector_kwargs : dict
@@ -1173,10 +1179,12 @@ class OrientationMap(DiffractionVectors2D):
         signal.plot(navigator=nav, **kwargs)
         if add_vector_markers:
             signal.add_marker(self.to_markers(1, **vector_kwargs))
-        if add_ipf_markers:
-            cmap = "magma" if ipf_marker_show_correlation else None
-            ipf_markers = self.to_ipf_markers(cmap=cmap)
+        if add_ipf_markers and not add_ipf_correlation_heatmap:
+            ipf_markers = self.to_ipf_markers()
             signal.add_marker(ipf_markers)
+        if add_ipf_correlation_heatmap:
+            heatmap_markers = self.to_ipf_correlation_heatmap_markers()
+            signal.add_marker(heatmap_markers)
         if add_ipf_colorkey:
             signal.add_marker(
                 get_ipf_annotation_markers(self.simulation.phases), plot_on_signal=False
