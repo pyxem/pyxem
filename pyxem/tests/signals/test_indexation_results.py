@@ -385,3 +385,16 @@ class TestOrientationResult:
             ]
         )
         multi_phase_orientation_result.plot_over_signal(s)
+
+    def test_to_ipf_correlation_heatmap_markers_single_phase(
+        self, simple_multi_rot_orientation_result
+    ):
+        orientations, rotations, s = simple_multi_rot_orientation_result
+        markers = orientations.to_ipf_correlation_heatmap_markers()
+        assert all(isinstance(m, hs.plot.markers.Markers) for m in markers)
+
+    def test_to_ipf_correlation_heatmap_markers_multi_phase(
+        self, multi_phase_orientation_result
+    ):
+        markers = multi_phase_orientation_result.to_ipf_correlation_heatmap_markers()
+        assert all(isinstance(m, hs.plot.markers.Markers) for m in markers)
