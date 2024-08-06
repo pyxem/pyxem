@@ -24,6 +24,5 @@ explanations of the functionality.
     components
     dummy_data
     generators
-    libraries
     signals
     utils
