@@ -179,7 +179,7 @@ def _slice_radial_integrate1d(
         for index, fa in zip(ind, f):
             total = total + img[index[0], index[1]] * fa
         if mean:
-            total_f = 0.0
+            total_f = np.finfo(np.float32).eps
             if mask is not None:
                 total_f = total_f + mask[ind[0], ind[1]] * fa
             else:
