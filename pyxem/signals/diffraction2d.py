@@ -36,14 +36,8 @@ from hyperspy.axes import UniformDataAxis
 from pyxem.signals import (
     CommonDiffraction,
 )
-from pyxem.utils.pyfai_utils import (
-    get_azimuthal_integrator,
-    _get_radial_extent,
-    _get_setup,
-)
+
 from pyxem.utils.diffraction import (
-    azimuthal_integrate1d,
-    azimuthal_integrate2d,
     gain_normalise,
     remove_bad_pixels,
     circular_mask,
@@ -55,9 +49,6 @@ from pyxem.utils.diffraction import (
     find_beam_center_interpolate,
     find_center_of_mass,
     find_hot_pixels,
-    integrate_radially,
-    medfilt_1d,
-    sigma_clip,
 )
 from pyxem.utils._azimuthal_integrations import (
     _slice_radial_integrate,
@@ -1652,184 +1643,14 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             )
         return variance
 
-    """ Methods associated with radial integration, not pyFAI based """
+    """ Methods associated with radial integration """
 
-    @deprecated(
-        since="0.17",
-        alternative="pyxem.signals.diffraction2d.azimuthal_integral2d",
-        removal="1.0.0",
-    )
-    def angular_slice_radial_average(
-        self,
-        angleN=20,
-        centre_x=None,
-        centre_y=None,
-        slice_overlap=None,
-        show_progressbar=True,
-    ):
-        """Do radial average of different angular slices.
-        Useful for analysing anisotropy in round diffraction features,
-        such as diffraction rings from polycrystalline materials or
-        higher order Laue zone rings.
-
-        Parameters
-        ----------
-        angleN : int, default 20
-            Number of angular slices. If angleN=4, each slice
-            will be 90 degrees. The average will start in the top left
-            corner (0, 0) when plotting using s.plot(), and go clockwise.
-        centre_x, centre_y : int or NumPy array, optional
-            If given as int, all the diffraction patterns will have the same
-            centre position. Each diffraction pattern can also have different
-            centre position, by passing a NumPy array with the same dimensions
-            as the navigation axes.
-            Note: in either case both x and y values must be given. If one is
-            missing, both will be set from the signal (0., 0.) positions.
-            If no values are given, the (0., 0.) positions in the signal will
-            be used.
-        slice_overlap : float, optional
-            Amount of overlap between the slices, given in fractions of
-            angle slice (0 to 1). For angleN=4, each slice will be 90
-            degrees. If slice_overlap=0.5, each slice will overlap by 45
-            degrees on each side. The range of the slices will then be:
-            (-45, 135), (45, 225), (135, 315) and (225, 45).
-            Default off: meaning there is no overlap between the slices.
-        show_progressbar : bool
-            Default True
-
-        Returns
-        -------
-        signal : HyperSpy 1D signal
-            With one more navigation dimensions (the angular slices) compared
-            to the input signal.
-
-        Examples
-        --------
-        >>> s = pxm.data.dummy_data.get_holz_simple_test_signal()
-        >>> s_com = s.center_of_mass(show_progressbar=False)
-        >>> s_ar = s.angular_slice_radial_average(
-        ...     angleN=10, centre_x=s_com.inav[0].data,
-        ...     centre_y=s_com.inav[1].data, slice_overlap=0.2,
-        ...     show_progressbar=False)
-        >>> s_ar.plot() # doctest: +SKIP
-
-        """
-        signal_list = []
-        angle_list = []
-        if slice_overlap is None:
-            slice_overlap = 0
-        else:
-            if (slice_overlap < 0) or (slice_overlap > 1):
-                raise ValueError(
-                    "slice_overlap is {0}. But must be between "
-                    "0 and 1".format(slice_overlap)
-                )
-        angle_step = 2 * np.pi / angleN
-        for i in range(angleN):
-            angle0 = (angle_step * i) - (angle_step * slice_overlap)
-            angle1 = (angle_step * (i + 1)) + (angle_step * slice_overlap)
-            angle_list.append((angle0, angle1))
-        if (centre_x is None) or (centre_y is None):
-            centre_x, centre_y = pst._make_centre_array_from_signal(self)
-        elif (not isiterable(centre_x)) or (not isiterable(centre_y)):
-            centre_x, centre_y = pst._make_centre_array_from_signal(
-                self, x=centre_x, y=centre_y
-            )
-
-        for angle in tqdm(angle_list, disable=(not show_progressbar)):
-            mask_array = self.angular_mask(
-                angle[0], angle[1], centre_x_array=centre_x, centre_y_array=centre_y
-            )
-            s_r = self.radial_average(
-                centre_x=centre_x,
-                centre_y=centre_y,
-                mask_array=mask_array,
-                show_progressbar=show_progressbar,
-            )
-            signal_list.append(s_r)
-        angle_scale = angle_list[1][1] - angle_list[0][1]
-        signal = hs.stack(signal_list, new_axis_name="Angle slice")
-        signal.axes_manager["Angle slice"].offset = angle_scale / 2
-        signal.axes_manager["Angle slice"].scale = angle_scale
-        signal.axes_manager["Angle slice"].units = "Radians"
-        signal.axes_manager[-1].name = "Scattering angle"
-        return signal
-
-    """ Methods associated with radial integration, pyFAI based """
-
-    @property
-    def ai(self):
-        try:
-            return self.metadata.Signal["ai"]
-        except AttributeError:
-            raise ValueError("ai property is not currently set")
-
-    @deprecated(
-        since="0.18",
-        removal="1.0.0",
-        alternative="pyxem.signals.diffraction2d.calibration",
-    )
-    def set_ai(
-        self, center=None, wavelength=None, affine=None, radial_range=None, **kwargs
-    ):
-        """This function sets the .ai parameter which stores an ~pyfai.AzimuthalIntegrator object based on
-        the current calibration applied to the diffraction pattern.
-
-        Parameters
-        --------
-        center: (x,y) or None
-            The center of the diffraction pattern.  If None, the center is the middle of the image.
-        wavelength: float
-            The wavelength of the energy in 1/meters.  For proper treatment of Ewald Sphere
-        affine: numpy.Array 3x3
-            A 3x3 array which describes the affine distortion of the pattern. This is translated
-            to a spline interpolation which is used in the pyFAI implementations
-        radial_range: (start,stop)
-            The start and stop of the radial range in real units
-
-        Returns
-        -------
-        None :
-            The metadata item Signal.ai is set
-
-        """
-        if wavelength is None and self.unit not in ["2th_deg", "2th_rad"]:
-            raise ValueError(
-                "if the unit is not '2th_deg' or '2th_rad' then a wavelength must be given."
-            )
-
-        pixel_scale = [
-            self.axes_manager.signal_axes[0].scale,
-            self.axes_manager.signal_axes[1].scale,
-        ]
-
-        sig_shape = self.axes_manager.signal_shape
-        setup = _get_setup(wavelength, self.unit, pixel_scale, radial_range)
-        detector, dist, radial_range = setup
-        ai = get_azimuthal_integrator(
-            detector=detector,
-            detector_distance=dist,
-            shape=sig_shape,
-            center=center,
-            affine=affine,
-            wavelength=wavelength,
-            **kwargs,
-        )
-        self.metadata.set_item("Signal.ai", ai)
-        return None
-
-    @deprecated_argument(
-        name="lazy_result", since="0.14", removal="1.0.0", alternative="lazy_output"
-    )
     def get_azimuthal_integral1d(
         self,
         npt,
         mask=None,
         radial_range=None,
-        azimuth_range=None,
         inplace=False,
-        method="splitpixel_pyxem",
-        sum=False,
         **kwargs,
     ):
         """Creates a polar reprojection using pyFAI's azimuthal integrate 2d. This method is designed
@@ -1852,13 +1673,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             from -pi to pi
         inplace : bool
             If the signal is overwritten or copied to a new signal
-        method : str
-             Can be “numpy”, “cython”, “BBox” or “splitpixel”, “lut”, “csr”,
-             “nosplit_csr”, “full_csr”, “lut_ocl” and “csr_ocl” if you want
-             to go on GPU. To Specify the device: “csr_ocl_1,2”
-        sum : bool
-            If true returns the pixel split sum rather than the azimuthal integration which
-            gives the mean.
+
 
         Other Parameters
         -------
@@ -1898,52 +1713,22 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         --------
         pyxem.signals.Diffraction2D.get_azimuthal_integral2d
         """
-        usepyfai = method not in ["splitpixel_pyxem"]
-        if not usepyfai:
-            # get_slices1d should be sped up in the future by
-            # getting rid of shapely and using numba on the for loop
-            indexes, facts, factor_slices, radial_range = self.calibration.get_slices1d(
-                npt, radial_range=radial_range
-            )
-            if mask is None:
-                mask = self.calibration.mask
-            integration = self.map(
-                _slice_radial_integrate1d,
-                indexes=indexes,
-                factors=facts,
-                factor_slices=factor_slices,
-                inplace=inplace,
-                mask=mask,
-                **kwargs,
-            )
-        else:
-            if "wavelength" in kwargs:
-                warnings.warn(
-                    "The wavelength parameter was removed in 0.14. The wavelength "
-                    "can be set using the `set_ai` function or using `s.beam_energy`"
-                    " for `ElectronDiffraction2D` signals"
-                )
-                kwargs.pop("wavelength")
-
-            sig_shape = self.axes_manager.signal_shape
-            if radial_range is None:
-                radial_range = _get_radial_extent(
-                    ai=self.ai, shape=sig_shape, unit=self.unit
-                )
-                radial_range[0] = 0
-            integration = self.map(
-                azimuthal_integrate1d,
-                azimuthal_integrator=self.ai,
-                npt_rad=npt,
-                azimuth_range=azimuth_range,
-                radial_range=radial_range,
-                method=method,
-                inplace=inplace,
-                unit=self.unit,
-                mask=mask,
-                sum=sum,
-                **kwargs,
-            )
+        # get_slices1d should be sped up in the future by
+        # getting rid of shapely and using numba on the for loop
+        indexes, facts, factor_slices, radial_range = self.calibration.get_slices1d(
+            npt, radial_range=radial_range
+        )
+        if mask is None:
+            mask = self.calibration.mask
+        integration = self.map(
+            _slice_radial_integrate1d,
+            indexes=indexes,
+            factors=facts,
+            factor_slices=factor_slices,
+            inplace=inplace,
+            mask=mask,
+            **kwargs,
+        )
         s = self if inplace else integration
         k_axis = s.axes_manager.signal_axes[0]
         if not isinstance(k_axis, UniformDataAxis):
@@ -1963,9 +1748,6 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         radial_range=None,
         azimuth_range=None,
         inplace=False,
-        method="splitpixel_pyxem",
-        sum=False,
-        correctSolidAngle=True,
         **kwargs,
     ):
         """Creates a polar reprojection using pyFAI's azimuthal integrate 2d. This method is designed
@@ -1990,11 +1772,6 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             from -pi to pi
         inplace: bool
             If the signal is overwritten or copied to a new signal
-        method: str
-            Can be “numpy”, “cython”, “BBox” or “splitpixel”, “lut”, “csr”,
-            “nosplit_csr”, “full_csr”, “lut_ocl” and “csr_ocl” if you want
-            to go on GPU. To Specify the device: “csr_ocl_1,2”.  For pure
-            pyxem based methods use "splitpixel_pyxem".
         sum: bool
             If true the radial integration is returned rather then the Azimuthal Integration.
         correctSolidAngle: bool
@@ -2046,74 +1823,47 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         if azimuth_range is None:
             azimuth_range = (-np.pi, np.pi)
 
-        usepyfai = method not in ["splitpixel_pyxem"]
-        if not usepyfai:
-            # get_slices2d should be sped up in the future by
-            # getting rid of shapely and using numba on the for loop
-            slices, factors, factors_slice, radial_range = (
-                self.calibration.get_slices2d(
-                    npt,
-                    npt_azim,
-                    radial_range=radial_range,
-                    azimuthal_range=azimuth_range,
-                )
+        # get_slices2d should be sped up in the future by
+        # getting rid of shapely and using numba on the for loop
+        slices, factors, factors_slice, radial_range = self.calibration.get_slices2d(
+            npt,
+            npt_azim,
+            radial_range=radial_range,
+            azimuthal_range=azimuth_range,
+        )
+        if self._gpu and CUPY_INSTALLED:  # pragma: no cover
+            from pyxem.utils._azimuthal_integrations import (
+                _slice_radial_integrate_cupy,
             )
-            if self._gpu and CUPY_INSTALLED:  # pragma: no cover
-                from pyxem.utils._azimuthal_integrations import (
-                    _slice_radial_integrate_cupy,
-                )
 
-                slices = cp.asarray(slices)
-                factors = cp.asarray(factors)
-                factors_slice = cp.asarray(factors_slice)
-                integration = self._blockwise(
-                    _slice_radial_integrate_cupy,
-                    slices=slices,
-                    factors=factors,
-                    factors_slice=factors_slice,
-                    npt=npt,
-                    npt_azim=npt_azim,
-                    inplace=inplace,
-                    signal_shape=(npt, npt_azim),
-                    mask=mask,
-                    dtype=float,
-                    **kwargs,
-                )
-            else:
-                if mask is None:
-                    mask = self.calibration.mask
-                integration = self.map(
-                    _slice_radial_integrate,
-                    slices=slices,
-                    factors=factors,
-                    factors_slice=factors_slice,
-                    npt_rad=npt,
-                    npt_azim=npt_azim,
-                    inplace=inplace,
-                    mask=mask,
-                    **kwargs,
-                )
-
+            slices = cp.asarray(slices)
+            factors = cp.asarray(factors)
+            factors_slice = cp.asarray(factors_slice)
+            integration = self._blockwise(
+                _slice_radial_integrate_cupy,
+                slices=slices,
+                factors=factors,
+                factors_slice=factors_slice,
+                npt=npt,
+                npt_azim=npt_azim,
+                inplace=inplace,
+                signal_shape=(npt, npt_azim),
+                mask=mask,
+                dtype=float,
+                **kwargs,
+            )
         else:
-            sig_shape = self.axes_manager.signal_shape
-            if radial_range is None:
-                radial_range = _get_radial_extent(
-                    ai=self.ai, shape=sig_shape, unit=self.unit
-                )
-                radial_range[0] = 0
+            if mask is None:
+                mask = self.calibration.mask
             integration = self.map(
-                azimuthal_integrate2d,
-                azimuthal_integrator=self.ai,
+                _slice_radial_integrate,
+                slices=slices,
+                factors=factors,
+                factors_slice=factors_slice,
                 npt_rad=npt,
                 npt_azim=npt_azim,
-                azimuth_range=azimuth_range,
-                radial_range=radial_range,
-                method=method,
                 inplace=inplace,
-                unit=self.unit,
                 mask=mask,
-                sum=sum,
-                correctSolidAngle=correctSolidAngle,
                 **kwargs,
             )
 
@@ -2135,320 +1885,6 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         k_axis.name = "Radius"
         k_axis.scale = (radial_range[1] - radial_range[0]) / npt
-        k_axis.offset = radial_range[0]
-
-        return integration
-
-    def get_radial_integral(
-        self,
-        npt,
-        npt_rad,
-        mask=None,
-        radial_range=None,
-        azimuth_range=None,
-        inplace=False,
-        method="splitpixel",
-        sum=False,
-        correctSolidAngle=True,
-        **kwargs,
-    ):
-        """Calculate the radial integrated profile curve as I = f(chi)
-
-        Parameters
-        ----------
-        npt: int
-            The number of radial points to calculate
-        npt_rad: int
-            number of points in the radial space. Too few points may lead to huge rounding errors.
-        mask:  boolean array or BaseSignal
-            A boolean mask to apply to the data to exclude some points.
-            If mask is a BaseSignal then it is iterated over as well.
-        radial_range: None or (float, float)
-            The radial range over which to perform the integration. Default is
-            the full frame
-        azimuth_range:None or (float, float)
-            The azimuthal range over which to perform the integration. Default is
-            from -pi to pi
-        inplace: bool
-            If the signal is overwritten or copied to a new signal
-        method: str
-            Can be “numpy”, “cython”, “BBox” or “splitpixel”, “lut”, “csr”,
-            “nosplit_csr”, “full_csr”, “lut_ocl” and “csr_ocl” if you want
-            to go on GPU. To Specify the device: “csr_ocl_1,2”
-        sum: bool
-            If true the radial integration is returned rather then the Azimuthal Integration.
-        correctSolidAngle: bool
-            Account for Ewald sphere or not. From PYFAI.
-
-        Other Parameters
-        -------
-        dummy: float
-            Value for dead/masked pixels
-        delta_dummy: float
-            Percision value for dead/masked pixels
-        correctSolidAngle: bool
-            Correct for the solid angle of each pixel if True
-        dark: ndarray
-            The dark noise image
-        flat: ndarray
-            The flat field correction image
-        safe: bool
-            Do some extra checks to ensure LUT/CSR is still valid. False is faster.
-        show_progressbar: bool
-            If True shows a progress bar for the mapping function
-
-        Returns
-        -------
-        polar: PolarDiffraction2D
-            A polar diffraction signal
-
-        Examples
-        --------
-        Basic case using "2th_deg" units (no wavelength needed)
-
-        >>> ds.unit = "2th_deg"
-        >>> ds.set_ai()
-        >>> ds.get_radial_integral(npt=100, npt_rad=400)
-
-        Basic case using a curved Ewald Sphere approximation and pyXEM units
-        (wavelength needed)
-
-        >>> ds.unit = "k_nm^-1" # setting units
-        >>> ds.set_ai(wavelength=2.5e-12)
-        >>> ds.get_radial_integral(npt=100,npt_rad=400)
-
-        """
-        sig_shape = self.axes_manager.signal_shape
-        if radial_range is None:
-            radial_range = _get_radial_extent(
-                ai=self.ai, shape=sig_shape, unit=self.unit
-            )
-            radial_range[0] = 0
-        integration = self.map(
-            integrate_radially,
-            azimuthal_integrator=self.ai,
-            npt=npt,
-            npt_rad=npt_rad,
-            azimuth_range=azimuth_range,
-            radial_range=radial_range,
-            method=method,
-            inplace=inplace,
-            radial_unit=self.unit,
-            mask=mask,
-            sum=sum,
-            correctSolidAngle=correctSolidAngle,
-            **kwargs,
-        )
-
-        s = self if inplace else integration
-
-        # Dealing with axis changes
-        k_axis = s.axes_manager.signal_axes[0]
-        k_axis.name = "Radius"
-        k_axis.scale = (radial_range[1] - radial_range[0]) / npt
-        k_axis.offset = radial_range[0]
-
-        return integration
-
-    def get_medfilt1d(
-        self,
-        npt_rad=1028,
-        npt_azim=512,
-        mask=None,
-        inplace=False,
-        method="splitpixel",
-        sum=False,
-        correctSolidAngle=True,
-        **kwargs,
-    ):
-        """Calculate the radial integrated profile curve as I = f(chi)
-
-        Parameters
-        ----------
-        npt_rad: int
-             The number of radial points.
-        npt_azim: int
-             The number of radial points
-        mask:  boolean array or BaseSignal
-            A boolean mask to apply to the data to exclude some points.
-            If mask is a BaseSignal then it is iterated over as well.
-        inplace: bool
-            If the signal is overwritten or copied to a new signal
-        method: str
-            Can be “numpy”, “cython”, “BBox” or “splitpixel”, “lut”, “csr”,
-            “nosplit_csr”, “full_csr”, “lut_ocl” and “csr_ocl” if you want
-            to go on GPU. To Specify the device: “csr_ocl_1,2”
-        sum: bool
-            If true the radial integration is returned rather then the Azimuthal Integration.
-        correctSolidAngle: bool
-            Account for Ewald sphere or not. From PYFAI.
-
-        Other Parameters
-        -------
-        dummy: float
-            Value for dead/masked pixels
-        delta_dummy: float
-            Percision value for dead/masked pixels
-        correctSolidAngle: bool
-            Correct for the solid angle of each pixel if True
-        dark: ndarray
-            The dark noise image
-        flat: ndarray
-            The flat field correction image
-        safe: bool
-            Do some extra checks to ensure LUT/CSR is still valid. False is faster.
-        show_progressbar: bool
-            If True shows a progress bar for the mapping function
-
-
-        Returns
-        -------
-        polar: PolarDiffraction2D
-            A polar diffraction signal
-
-        Examples
-        --------
-        Basic case using "2th_deg" units (no wavelength needed)
-
-        >>> ds.unit = "2th_deg"
-        >>> ds.set_ai()
-        >>> ds.get_radial_integral(npt=100, npt_rad=400)
-
-        Basic case using a curved Ewald Sphere approximation and pyXEM units
-        (wavelength needed)
-
-        >>> ds.unit = "k_nm^-1" # setting units
-        >>> ds.set_ai(wavelength=2.5e-12)
-        >>> ds.get_radial_integral(npt=100,npt_rad=400)
-
-        """
-        sig_shape = self.axes_manager.signal_shape
-        radial_range = _get_radial_extent(ai=self.ai, shape=sig_shape, unit=self.unit)
-        radial_range[0] = 0
-        integration = self.map(
-            medfilt_1d,
-            azimuthal_integrator=self.ai,
-            npt_rad=npt_rad,
-            npt_azim=npt_azim,
-            method=method,
-            inplace=inplace,
-            unit=self.unit,
-            mask=mask,
-            correctSolidAngle=correctSolidAngle,
-            **kwargs,
-        )
-
-        s = self if inplace else integration
-
-        # Dealing with axis changes
-        k_axis = s.axes_manager.signal_axes[0]
-        k_axis.name = "Radius"
-        k_axis.scale = (radial_range[1] - radial_range[0]) / npt_rad
-        # k_axis.units = unit.unit_symbol
-        k_axis.offset = radial_range[0]
-
-        return integration
-
-    def sigma_clip(
-        self,
-        npt_rad=1028,
-        npt_azim=512,
-        mask=None,
-        thres=3,
-        max_iter=5,
-        inplace=False,
-        method="splitpixel",
-        sum=False,
-        correctSolidAngle=True,
-        **kwargs,
-    ):
-        """Perform the 2D integration and perform a sigm-clipping
-        iterative filter along each row. see the doc of scipy.stats.sigmaclip for the options.
-
-        Parameters
-        ----------
-        npt_rad: int
-             The number of radial points.
-        npt_azim: int
-             The number of radial points
-        mask:  boolean array or BaseSignal
-            A boolean mask to apply to the data to exclude some points.
-            If mask is a BaseSignal then it is iterated over as well.
-        inplace: bool
-            If the signal is overwritten or copied to a new signal
-        method: str
-            Can be “numpy”, “cython”, “BBox” or “splitpixel”, “lut”, “csr”,
-            “nosplit_csr”, “full_csr”, “lut_ocl” and “csr_ocl” if you want
-            to go on GPU. To Specify the device: “csr_ocl_1,2”
-        sum: bool
-            If true the radial integration is returned rather then the Azimuthal Integration.
-        correctSolidAngle: bool
-            Account for Ewald sphere or not. From PYFAI.
-
-        Other Parameters
-        -------
-        dummy: float
-            Value for dead/masked pixels
-        delta_dummy: float
-            Percision value for dead/masked pixels
-        correctSolidAngle: bool
-            Correct for the solid angle of each pixel if True
-        dark: ndarray
-            The dark noise image
-        flat: ndarray
-            The flat field correction image
-        safe: bool
-            Do some extra checks to ensure LUT/CSR is still valid. False is faster.
-        show_progressbar: bool
-            If True shows a progress bar for the mapping function
-
-
-        Returns
-        -------
-        polar: PolarDiffraction2D
-            A polar diffraction signal
-
-        Examples
-        --------
-        Basic case using "2th_deg" units (no wavelength needed)
-
-        >>> ds.unit = "2th_deg"
-        >>> ds.set_ai()
-        >>> ds.get_radial_integral(npt=100, npt_rad=400)
-
-        Basic case using a curved Ewald Sphere approximation and pyXEM units
-        (wavelength needed)
-
-        >>> ds.unit = "k_nm^-1" # setting units
-        >>> ds.set_ai(wavelength=2.5e-12)
-        >>> ds.get_radial_integral(npt=100,npt_rad=400)
-
-        """
-        sig_shape = self.axes_manager.signal_shape
-        radial_range = _get_radial_extent(ai=self.ai, shape=sig_shape, unit=self.unit)
-        radial_range[0] = 0
-        integration = self.map(
-            sigma_clip,
-            azimuthal_integrator=self.ai,
-            npt_rad=npt_rad,
-            npt_azim=npt_azim,
-            method=method,
-            max_iter=max_iter,
-            thres=thres,
-            inplace=inplace,
-            unit=self.unit,
-            mask=mask,
-            correctSolidAngle=correctSolidAngle,
-            **kwargs,
-        )
-
-        s = self if inplace else integration
-
-        # Dealing with axis changes
-        k_axis = s.axes_manager.signal_axes[0]
-        k_axis.name = "Radius"
-        k_axis.scale = (radial_range[1] - radial_range[0]) / npt_rad
-        # k_axis.units = unit.unit_symbol
         k_axis.offset = radial_range[0]
 
         return integration
