@@ -502,54 +502,6 @@ class Calibration:
             for ax, off in zip(self.signal.axes_manager.signal_axes, center):
                 ax.offset = -off * ax.scale
 
-    def to_pyfai(self):
-        """
-        Convert the calibration to a pyfai AzimuthalIntegrator.
-
-        Returns
-        -------
-        """
-        from pyFAI.detectors import Detector
-        from pyxem.utils.pyfai_utils import _get_setup, get_azimuthal_integrator
-
-        if self.flat_ewald:
-            pixel_scale = self.scale
-            if self.wavelength is None:
-                raise ValueError(
-                    "The wavelength must be set before converting to a pyfai AzimuthalIntegrator"
-                )
-            setup = _get_setup(
-                wavelength=self.wavelength,
-                pyxem_unit=self.units[0],
-                pixel_scale=pixel_scale,
-            )
-            detector, dist, radial_range = setup
-        else:
-            pixel_size = self.signal.metadata.get_item(
-                "Acquisition_instrument.TEM.pixel_size"
-            )
-            dist = self.signal.metadata.get_item(
-                "Acquisition_instrument.TEM.detector_distance"
-            )
-            if pixel_size is None or dist is None:
-                raise ValueError(
-                    "The dector must be first initialized with the s.calibration.detector method"
-                )
-            detector = Detector(
-                pixel1=pixel_size,
-                pixel2=pixel_size,
-            )
-
-        ai = get_azimuthal_integrator(
-            detector=detector,
-            detector_distance=dist,
-            shape=self.shape,
-            center=self.center,
-            affine=self.affine,
-            wavelength=self.wavelength,
-        )
-        return ai
-
 
 @deprecated(
     since="0.18.0",

@@ -185,29 +185,3 @@ class TestCalibrationClass:
             == "Calibration for <Diffraction2D, title: , dimensions: (|10, 10)>, "
             "Ewald sphere: curved, shape: (10, 10), affine: False, mask: False"
         )
-
-    def test_to_pyfai_no_unit(self, calibration):
-        with pytest.raises(ValueError):
-            calibration.to_pyfai()
-
-    def test_to_pyfai_flat(self, calibration):
-        from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
-
-        calibration.units = "k_nm^-1"
-        calibration.beam_energy = 200
-        ai = calibration.to_pyfai()
-        assert isinstance(ai, AzimuthalIntegrator)
-
-    def test_to_pyfai_curved(self, calibration):
-        from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
-
-        calibration.beam_energy = 200
-        calibration.detector(pixel_size=1, detector_distance=1, units="k_nm^-1")
-        ai = calibration.to_pyfai()
-        assert isinstance(ai, AzimuthalIntegrator)
-
-    def test_to_pyfai_failure(self, calibration):
-        calibration.signal.axes_manager.signal_axes[0].convert_to_non_uniform_axis()
-        calibration.signal.axes_manager.signal_axes[1].convert_to_non_uniform_axis()
-        with pytest.raises(ValueError):
-            ai = calibration.to_pyfai()
