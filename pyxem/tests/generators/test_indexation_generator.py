@@ -21,27 +21,18 @@ import numpy as np
 import hyperspy.api as hs
 import dask.array as da
 
-from hyperspy._signals.signal2d import Signal2D
 from diffsims.libraries.vector_library import DiffractionVectorLibrary
 from diffsims.sims.diffraction_simulation import ProfileSimulation
-from diffsims.generators.diffraction_generator import DiffractionGenerator
-from diffsims.generators.library_generator import DiffractionLibraryGenerator
-from diffsims.libraries.structure_library import StructureLibrary
 
 from pyxem.generators import (
-    IndexationGenerator,
-    TemplateIndexationGenerator,
     ProfileIndexationGenerator,
     VectorIndexationGenerator,
-    AcceleratedIndexationGenerator,
 )
 from pyxem.signals import (
-    ElectronDiffraction2D,
     DiffractionVectors,
 )
 from pyxem.utils.indexation_utils import OrientationResult
 from unittest.mock import Mock
-import sys
 
 
 def generate_library(good_library):
@@ -71,31 +62,6 @@ def generate_library(good_library):
     library = {}
     library["dummyphase"] = {"simulations": simlist, "orientations": orientations}
     return library
-
-
-def test_old_indexer_routine():
-    with pytest.raises(ValueError):
-        _ = IndexationGenerator("a", "b")
-    with pytest.raises(ValueError):
-        _ = TemplateIndexationGenerator("a", "b")
-
-
-@pytest.mark.skipif(sys.platform == "darwin", reason="Fails on Mac OSX")
-@pytest.mark.slow
-@pytest.mark.parametrize("good_library", [True, False])
-def test_AcceleratedIndexationGenerator(good_library):
-    signal = ElectronDiffraction2D((np.ones((2, 2, 256, 256)))).as_lazy()
-    library = generate_library(good_library=good_library)
-
-    if good_library:
-        acgen = AcceleratedIndexationGenerator(signal, library)
-        d = acgen.correlate(n_largest=2)
-
-    elif not good_library:
-        with pytest.raises(ValueError):
-            acgen = AcceleratedIndexationGenerator(signal, library)
-
-    return None
 
 
 @pytest.fixture

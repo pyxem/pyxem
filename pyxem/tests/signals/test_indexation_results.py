@@ -31,7 +31,6 @@ from orix.sampling import get_sample_reduced_fundamental
 from orix.quaternion import Rotation, Orientation
 from orix.crystal_map import CrystalMap
 
-from pyxem.generators import TemplateIndexationGenerator
 from pyxem.signals import VectorMatchingResults, DiffractionVectors, OrientationMap
 from pyxem.utils.indexation_utils import OrientationResult
 from pyxem.data import (
