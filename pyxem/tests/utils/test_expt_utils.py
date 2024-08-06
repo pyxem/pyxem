@@ -32,9 +32,6 @@ from pyxem.utils.diffraction import (
     investigate_dog_background_removal_interactive,
     find_beam_center_blur,
     find_beam_center_interpolate,
-    azimuthal_integrate1d,
-    azimuthal_integrate2d,
-    find_hot_pixels,
 )
 
 
