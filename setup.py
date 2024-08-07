@@ -94,11 +94,9 @@ setup(
         "matplotlib     >= 3.7.5",
         "numba",
         "numpy",
-        "numexpr        != 2.8.6",  # bug in 2.8.6 for greek letters need for pyfai
         "orix           >= 0.12.1",
         "pooch",
         "psutil",
-        "pyfai           <= 2023.9.0",  # breaking changes
         "scikit-image   >= 0.19.0, !=0.21.0",  # regression in ellipse fitting"
         "scikit-learn   >= 1.0",
         "shapely        > 2.0.0",  # major changes

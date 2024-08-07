@@ -19,7 +19,6 @@
 import pytest
 import numpy as np
 
-from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
 from hyperspy.signals import Signal2D
 from hyperspy.roi import Line2DROI
 from diffsims.utils.ring_pattern_utils import generate_ring_pattern
@@ -277,17 +276,3 @@ class TestEmptyCalibrationGenerator:
             empty_calgen.get_navigation_calibration(
                 line_roi=line, x1=12.0, x2=172.0, n=1, xspace=500.0
             )
-
-    def test_to_ai(self, calgen):
-        calgen.get_elliptical_distortion(
-            mask_radius=10,
-            direct_beam_amplitude=450,
-            scale=95,
-            amplitude=1200,
-            asymmetry=1.5,
-            spread=2.8,
-            rotation=10,
-        )
-        calgen.diffraction_calibration = (1, 1)
-        ai = calgen.to_ai(wavelength=(2.53 * 10**-12))
-        assert isinstance(ai, AzimuthalIntegrator)

@@ -19,11 +19,8 @@ explanations of the functionality.
     :toctree: generated
     :template: custom-module-template.rst
 
-    detectors
     data
     components
-    dummy_data
     generators
-    libraries
     signals
     utils
