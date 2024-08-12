@@ -16,7 +16,7 @@ sphinx:
 # check-demos is a custom command to fetch the demo notebooks
 # from the pyxem/pyxem-demos repository
 build:
-  os: ubuntu-22.04
+  os: ubuntu-24.04
   tools:
     python: "3.11"
   jobs:
