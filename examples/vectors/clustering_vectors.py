@@ -13,7 +13,8 @@ import matplotlib.pyplot as plt
 from sklearn.cluster import DBSCAN
 
 # Getting the vectors for some dataset
-s = pxm.data.mgo_nanocrystals(allow_download=True)
+# s = pxm.data.mgo_nanocrystals(allow_download=True)
+s = pxm.data.simulated_overlap()
 s.data[s.data < 120] = 1
 s.filter(gaussian_filter, sigma=(0.5, 0.5, 0, 0), inplace=True)  # only in real space
 s.template_match_disk(disk_r=3, subtract_min=False, inplace=True)
