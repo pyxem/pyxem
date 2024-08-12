@@ -37,6 +37,9 @@ from pyxem.data.simulated_si import (
     si_grains_simple,
     si_rotations_line,
 )
+
+from pyxem.data.simulated_overlap import simulated_overlap
+
 from pyxem.data.simulated_fe import fe_bcc_phase, fe_fcc_phase, fe_multi_phase_grains
 from pyxem.data._data import (
     au_grating,
@@ -73,4 +76,5 @@ __all__ = [
     "feal_stripes",
     "sped_ag",
     "pdcusi_insitu",
+    "simulated_overlap",
 ]
