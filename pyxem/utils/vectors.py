@@ -414,7 +414,6 @@ def cluster(
     if remove_nan:
         isnan = ~np.isnan(vectors).any(axis=1)
         vectors = vectors[isnan]
-        data = data[isnan]
     vectors = vectors / np.array(column_scale_factors)
     clusters = method.fit(vectors)
     labels = clusters.labels_
@@ -422,7 +421,13 @@ def cluster(
         label, counts = np.unique(labels, return_counts=True)
         below_min_v = label[counts < min_vectors]
         labels[np.isin(labels, below_min_v)] = -1
-    vectors_and_labels = np.hstack([data, labels[:, np.newaxis]])
+    one_neg = np.array((-1,) * len(data))[
+        :,
+        np.newaxis,
+    ]
+    vectors_and_labels = np.hstack([data, one_neg])
+    if remove_nan:
+        vectors_and_labels[isnan, -1] = labels
     return vectors_and_labels
 
 
