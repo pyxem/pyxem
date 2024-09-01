@@ -34,59 +34,8 @@ from pyxem.utils.indexation_utils import (
 )
 from pyxem.utils.vectors import detector_to_fourier
 from pyxem.utils._signals import (
-    _select_method_from_method_dict,
     _transfer_navigation_axes,
 )
-
-
-class IndexationGenerator:
-    """Generates an indexer for data using a number of methods.
-
-    .. deprecated:: 0.14.0
-    `IndexationGenerator` will be removed in pyxem 0.15.0
-
-    Parameters
-    ----------
-    signal : ElectronDiffraction2D
-        The signal of electron diffraction patterns to be indexed.
-    diffraction_library : DiffractionLibrary
-        The library of simulated diffraction patterns for indexation.
-
-    Returns
-    -------
-    ValueError : "use AcceleratedIndexationGenerator or VectorIndexationGenerator"
-    """
-
-    def __init__(self, signal, diffraction_library):
-        raise ValueError(
-            "use AcceleratedIndexationGenerator or VectorIndexationGenerator"
-        )
-
-
-class TemplateIndexationGenerator:
-    """Generates an indexer for data using a number of methods.
-
-    .. deprecated:: 0.14.0
-    `TemplateIndexationGenerator` will be removed in pyxem 0.15.0
-
-    Parameters
-    ----------
-    signal : ElectronDiffraction2D
-        The signal of electron diffraction patterns to be indexed.
-    diffraction_library : DiffractionLibrary
-        The library of simulated diffraction patterns for indexation.
-
-    Returns
-    -------
-    ValueError : "use AcceleratedIndexationGenerator or VectorIndexationGenerator"
-
-
-    """
-
-    def __init__(self, signal, diffraction_library):
-        raise ValueError(
-            "use AcceleratedIndexationGenerator or VectorIndexationGenerator"
-        )
 
 
 class AcceleratedIndexationGenerator:
@@ -344,7 +293,7 @@ def _refine_orientation(
     verbose=False,
 ):
     """
-    Refine a single orientation agains the given cartesian vector coordinates.
+    Refine a single orientation against the given cartesian vector coordinates.
 
     Parameters
     ----------
