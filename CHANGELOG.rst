@@ -13,6 +13,9 @@ Version 1.0.0
 Removed
 -------
 - Removed Dependency on pyfai.  Azimuthal integration is all handled internally (#1103)
+- Removed Generator classes that were deprecated (#1102)
+    - Removed IndexationGenerator, CalibrationGenerator, VirtualImageGenerator,
+      SubpixelRefinementGenerator, VarianceGenerator, PDFGenerator1D, and VirtualDarkFieldGenerator
 
 
 2024-06-10 - version 0.19.1
