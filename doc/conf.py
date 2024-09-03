@@ -107,9 +107,6 @@ html_theme_options = {
     "navigation_with_keys": True,
     "show_toc_level": 2,
     "use_edit_page_button": True,
-    "announcement": "Check out the "
-    "<a href='https://www.diamond.ac.uk/Home/Events/2024/HyperSpy-Workshop-2024.html'>Hyperspy Workshop</a> "
-    "May 13-17, 2024 Online",
     "switcher": {
         "json_url": "https://pyxem.readthedocs.io/en/latest/_static/switcher.json",
         "version_match": version_match,
