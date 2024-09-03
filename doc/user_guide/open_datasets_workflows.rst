@@ -4,7 +4,8 @@ Open datasets and workflows
 
 Here are some open datasets which are helpful for running some of the functions using real data:
 
-#. `Data <https://drive.google.com/open?id=11CV7_wkFIsOtDICOcil8Bo25fo0NlR9I>`_ for the demo notebooks.
+#. The :ref:`pyxem.data` module included pyxem will either download data from
+   the `zenodo <https://zenodo.org/records/11284654>`_ repo or create dummy datasets on the fly.
 
 #. 4D-STEM atomic resolution dataset of a perovskite oxide thin film: https://zenodo.org/record/4727847/files/011_big_film_512x512_updated.hspy?download=1.
 
