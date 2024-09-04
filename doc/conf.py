@@ -150,8 +150,9 @@ if "dev" in version:
 else:
     release_version = "v" + version
 # This is processed by Jinja2 and inserted before each notebook
-nbsphinx_prolog = (
-    r"""
+
+nbsphinx_prolog = str(
+    r"""    
 {% set docname = 'doc/' + env.doc2path(env.docname, base=None) %}
 .. raw:: html
     <style>a:hover { text-decoration: underline; }</style>
