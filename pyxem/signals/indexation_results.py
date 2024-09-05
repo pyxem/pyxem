@@ -436,6 +436,15 @@ def rotation_from_orientation_map(result, rots):
     return ori
 
 
+@deprecated(
+    since="0.20",
+    removal="1.0.0",
+    alternative="pyxem.signals.indexation_results.vectors_from_orientation_map",
+)
+def extract_vectors_from_orientation_map(result, all_vectors, n_best_index=0):
+    return vectors_from_orientation_map(result, all_vectors, n_best_index=n_best_index)
+
+
 def vectors_from_orientation_map(result, all_vectors, n_best_index=0):
     index, _, rotation, mirror = result[n_best_index, :].T
     index = index.astype(int)
@@ -603,6 +612,16 @@ class OrientationMap(DiffractionVectors2D):
             ),
             symmetry=self.simulation.phases.point_group,
         )
+
+    @deprecated(
+        since="0.20",
+        removal="1.0.0",
+        alternative="pyxem.signals.OrientationMap.to_vectors",
+    )
+    def to_single_phase_vectors(
+        self, n_best_index: int = 0, **kwargs
+    ) -> hs.signals.Signal1D:
+        return self.to_vectors(n_best_index=n_best_index, **kwargs)
 
     def to_vectors(self, n_best_index: int = 0, **kwargs) -> hs.signals.Signal1D:
         """Get the reciprocal lattice vectors for each navigation position.
