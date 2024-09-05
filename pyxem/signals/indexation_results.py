@@ -53,6 +53,7 @@ from pyxem.utils.indexation_utils import get_nth_best_solution
 from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
 from pyxem.utils._signals import _transfer_navigation_axes
 from pyxem.utils.signal import compute_markers
+from pyxem.utils._deprecated import deprecated
 
 
 def crystal_from_vector_matching(z_matches):
