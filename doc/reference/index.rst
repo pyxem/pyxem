@@ -22,7 +22,6 @@ explanations of the functionality.
     detectors
     data
     components
-    dummy_data
     generators
     libraries
     signals
