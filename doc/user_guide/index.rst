@@ -10,6 +10,7 @@
     :hidden:
 
     installing.rst
+    using_a_jupyter_notebook.rst
     loading_data.rst
     distributed_big_data.rst
     gpu_computations.rst

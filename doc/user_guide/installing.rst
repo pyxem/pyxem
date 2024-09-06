@@ -6,7 +6,7 @@ Installing pyxem
 
 There are a couple of different ways to install pyxem. The easiest way is to use the
 hyperspy-bundle. If you don't have much experience with managing Python environments, we
-highly recommend using the `hyperspy-bundle<https://hyperspy.org/hyperspy-bundle/download.html>_`.
+highly recommend using the `hyperspy-bundle <https://hyperspy.org/hyperspy-bundle/download.html>`_.
 The bundle is a pre-configured Python environment that includes pyxem and all its dependencies.
 
 It includes many other packages that are useful for electron microscopy data analysis, such
