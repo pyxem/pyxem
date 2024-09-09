@@ -48,7 +48,7 @@ class DiffractionVectors1D(DiffractionVectors, Signal1D):
     _signal_dimension = 1
     _signal_type = "diffraction_vectors"
 
-    def plot(self, tight_layout=True, **kwargs):
+    def plot(self, tight_layout: bool = True, **kwargs):
         """
         Plot the beam shifts, utilizing HyperSpy's :func:`hyperspy.api.plot.plot_images`
         function. Each Vector is plotted as a separate image with the column names as labels.

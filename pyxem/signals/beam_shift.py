@@ -21,10 +21,12 @@ import numpy as np
 from scipy.ndimage import rotate
 from hyperspy._signals.lazy import LazySignal
 from hyperspy.axes import UniformDataAxis
+import hyperspy.api as hs
 
 import pyxem.utils._beam_shift_tools as bst
 from pyxem.signals import DiffractionVectors1D
 from pyxem.utils._deprecated import deprecated
+from typing import Sequence, Tuple
 
 
 class BeamShift(DiffractionVectors1D):
@@ -43,7 +45,9 @@ class BeamShift(DiffractionVectors1D):
         self.data = s_linear_plane.data
         self.events.data_changed.trigger(None)
 
-    def get_linear_plane(self, mask=None, fit_corners=None):
+    def get_linear_plane(
+        self, mask: hs.signals.BaseSignal = None, fit_corners: float = None
+    ):
         """Fit linear planes to the beam shifts, and returns a BeamShift signal
         with the planes.
 
@@ -124,7 +128,11 @@ class BeamShift(DiffractionVectors1D):
         return s_bs
 
     def get_bivariate_histogram(
-        self, histogram_range=None, masked=None, bins=200, spatial_std=3
+        self,
+        histogram_range: Tuple[float] = None,
+        masked=None,
+        bins: int = 200,
+        spatial_std: float = 3,
     ):
         """
         Useful for finding the distribution of the beam shifts.
@@ -173,7 +181,9 @@ class BeamShift(DiffractionVectors1D):
         )
         return s_hist
 
-    def pixels_to_calibrated_units(self, signal_axes=None, inplace=False, **kwargs):
+    def pixels_to_calibrated_units(
+        self, signal_axes=None, inplace: bool = False, **kwargs
+    ):
         """Convert the beam shifts from pixels to calibrated units using the
         signal axes passed or saved in the metadata.
 
@@ -212,7 +222,10 @@ class BeamShift(DiffractionVectors1D):
         )
 
     def get_magnitude_signal(
-        self, autolim=True, autolim_sigma=4, magnitude_limits=None
+        self,
+        autolim: bool = True,
+        autolim_sigma: float = 4,
+        magnitude_limits: Tuple[float] = None,
     ):
         """Get beam shift magnitude image visualized as greyscale.
 
@@ -276,7 +289,12 @@ class BeamShift(DiffractionVectors1D):
         )
         return s_magnitude
 
-    def phase_retrieval(self, method="kottler", mirroring=False, mirror_flip=False):
+    def phase_retrieval(
+        self,
+        method: str = "kottler",
+        mirroring: bool = False,
+        mirror_flip: bool = False,
+    ):
         """Retrieve the phase from two orthogonal phase gradients.
 
         Parameters
@@ -412,7 +430,7 @@ class BeamShift(DiffractionVectors1D):
         )
         return signal
 
-    def get_phase_signal(self, rotation=None):
+    def get_phase_signal(self, rotation: float = None):
         """Get beam shift phase image visualized using continuous color scale.
 
         Converts the x and y beam shifts into an RGB array, showing the
@@ -472,7 +490,11 @@ class BeamShift(DiffractionVectors1D):
         return self.get_magnitude_phase_signal(**kwargs)
 
     def get_magnitude_phase_signal(
-        self, rotation=None, autolim=True, autolim_sigma=4, magnitude_limits=None
+        self,
+        rotation: float = None,
+        autolim: bool = True,
+        autolim_sigma: float = 4,
+        magnitude_limits: Tuple[float] = None,
     ):
         """Get beam shift image visualized using continuous color scale.
 
@@ -542,7 +564,7 @@ class BeamShift(DiffractionVectors1D):
         s_rgb.change_dtype("rgb16")
         return s_rgb
 
-    def rotate_beam_shifts(self, angle):
+    def rotate_beam_shifts(self, angle: float):
         """Rotate the beam shift vector.
 
         Parameters
@@ -571,7 +593,7 @@ class BeamShift(DiffractionVectors1D):
         s_new = self._deepcopy_with_new_data(np.stack((x_new, y_new), axis=-1))
         return s_new
 
-    def rotate_scan_dimensions(self, angle, reshape=False):
+    def rotate_scan_dimensions(self, angle: float, reshape: bool = False):
         """Rotate the scan dimensions by angle.
 
         Parameters
