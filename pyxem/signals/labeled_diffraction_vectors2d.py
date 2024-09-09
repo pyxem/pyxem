@@ -15,11 +15,12 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
-
+import sklearn.base
 
 from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
 import numpy as np
 import matplotlib.pyplot as plt
+from typing import Tuple
 
 
 import hyperspy.api as hs
@@ -52,7 +53,14 @@ class LabeledDiffractionVectors2D(DiffractionVectors2D):
         self.metadata.VectorMetadata["is_clustered"] = value
 
     @only_signal_axes
-    def map_vectors(self, func, dtype, label_index=-1, shape=None, **kwargs):
+    def map_vectors(
+        self,
+        func,
+        dtype: np.dtype,
+        label_index: int = -1,
+        shape: Tuple[int] = None,
+        **kwargs,
+    ):
         """
         Parameters
         ----------
@@ -93,14 +101,14 @@ class LabeledDiffractionVectors2D(DiffractionVectors2D):
     @only_signal_axes
     def plot_clustered(
         self,
-        nav_columms=None,
-        signal_columns=None,
-        navigation_pixels=(105, 105),
-        scales=None,
-        offsets=None,
-        labels=None,
+        nav_columms: Tuple[int] = None,
+        signal_columns: Tuple[int] = None,
+        navigation_pixels: Tuple[int] = (105, 105),
+        scales: Tuple[float] = None,
+        offsets: Tuple[float] = None,
+        labels: Tuple[str] = None,
         signal=None,
-        figsize=None,
+        figsize: Tuple[float] = None,
     ):
         """Plot the clustered vectors and the characteristic diffraction patterns
 
@@ -178,7 +186,11 @@ class LabeledDiffractionVectors2D(DiffractionVectors2D):
 
     @only_signal_axes
     def cluster_labeled_vectors(
-        self, method, columns=None, preprocessing="mean", **kwargs
+        self,
+        method: sklearn.base.ClusterMixin,
+        columns: Tuple[int] = None,
+        preprocessing: str = "mean",
+        **kwargs,
     ):
         """A function to cluster the labeled vectors in the dataset.
 
@@ -232,7 +244,9 @@ class LabeledDiffractionVectors2D(DiffractionVectors2D):
         return new_signal
 
     @only_signal_axes
-    def to_markers(self, signal, get_polygons=False, num_points=10, **kwargs):
+    def to_markers(
+        self, signal, get_polygons: bool = False, num_points: int = 10, **kwargs
+    ):
         """Convert the labeled vectors to markers
 
         Parameters

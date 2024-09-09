@@ -37,11 +37,11 @@ class PolarVectors(DiffractionVectors):
 
     def get_angles(
         self,
-        intensity_index=2,
-        intensity_threshold=None,
-        accept_threshold=0.05,
-        min_k=0.05,
-        min_angle=None,
+        intensity_index: int = 2,
+        intensity_threshold: float = None,
+        accept_threshold: float = 0.05,
+        min_k: float = 0.05,
+        min_angle: float = None,
         **kwargs
     ):
         """Calculate the angles between pairs of 3 diffraction vectors.
@@ -102,7 +102,7 @@ class PolarVectors(DiffractionVectors):
          ``get_angles method``.  If False, the vectors are in the form (r, theta)."""
         return self.column_names[1] == "delta phi"
 
-    def to_cartesian(self, has_delta_angle=None):
+    def to_cartesian(self, has_delta_angle: bool = None):
         """Convert the vectors to cartesian coordinates.
 
         Parameters
@@ -135,7 +135,9 @@ class PolarVectors(DiffractionVectors):
         cartesian_vectors.set_signal_type("diffraction_vectors")
         return cartesian_vectors
 
-    def to_markers(self, has_delta_angle=None, cartesian=True, **kwargs):
+    def to_markers(
+        self, has_delta_angle: bool = None, cartesian: bool = True, **kwargs
+    ):
         """Convert the vectors to markers to be plotted on a signal.
 
         Parameters
