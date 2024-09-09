@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-
+from typing import Sequence, Union
 from hyperspy.signals import Signal2D
 from hyperspy._signals.lazy import LazySignal
 
@@ -38,7 +38,11 @@ class Power2D(Signal2D):
 
     _signal_type = "power"
 
-    def get_map(self, k_region=None, symmetry=None):
+    def get_map(
+        self,
+        k_region: Union[Sequence[int], Sequence[float]] = None,
+        symmetry: Sequence[int] = None,
+    ):
         """Creates a 2 dimensional map of from the power spectrum.
 
         Parameters
@@ -76,7 +80,13 @@ class Power2D(Signal2D):
                 )
         return sym_map
 
-    def plot_symmetries(self, k_region=None, symmetry=None, *args, **kwargs):
+    def plot_symmetries(
+        self,
+        k_region: Union[Sequence[int], Sequence[float]] == None,
+        symmetry: Sequence[int] = None,
+        *args,
+        **kwargs
+    ):
         """Plots the symmetries in the list of symmetries. Plot symmetries takes all of the arguments that imshow does.
 
         Parameters
