@@ -22,11 +22,14 @@ import dask.array as da
 from hyperspy.api import interactive
 from hyperspy.misc.utils import isiterable
 import hyperspy.api as hs
+from hyperspy.signal import BaseSignal
+from hyperspy.roi import BaseROI
 
 from traits.trait_base import Undefined
 from pyxem import CUPY_INSTALLED
 from hyperspy.misc.utils import _get_block_pattern, add_scalar_axis
 from tlz import concat
+from typing import Union, Sequence
 
 if CUPY_INSTALLED:
     import cupy as cp
@@ -133,7 +136,7 @@ class CommonDiffraction:
         out.set_signal_type("")
         return out.transpose(out_signal_axes)
 
-    def plot_integrated_intensity(self, roi, out_signal_axes=None, **kwargs):
+    def plot_integrated_intensity(self, roi: BaseROI, out_signal_axes=None, **kwargs):
         """Interactively plots the integrated intensity over the scattering
         range defined by the roi.
 
@@ -186,7 +189,9 @@ class CommonDiffraction:
         # Plot the result
         out.plot(**kwargs)
 
-    def get_virtual_image(self, rois, new_axis_dict=None, normalize=False):
+    def get_virtual_image(
+        self, rois: Sequence[BaseROI], new_axis_dict=None, normalize=False
+    ):
         """Get a virtual images from a set of rois
 
         Parameters
@@ -234,7 +239,7 @@ class CommonDiffraction:
             vdfim.map(normalize_virtual_images, show_progressbar=False)
         return vdfim
 
-    def get_integrated_intensity(self, roi, out_signal_axes=None):
+    def get_integrated_intensity(self, roi: BaseROI, out_signal_axes=None):
         """Obtains the intensity integrated over the scattering range as
         defined by the roi.
 
@@ -277,7 +282,13 @@ class CommonDiffraction:
 
     get_integrated_intensity.__doc__ %= OUT_SIGNAL_AXES_DOCSTRING
 
-    def add_navigation_signal(self, data, name="nav1", unit=None, nav_plot=False):
+    def add_navigation_signal(
+        self,
+        data: Union[np.ndarray, BaseSignal],
+        name: str = "nav1",
+        unit: str = None,
+        nav_plot: bool = False,
+    ):
         """Adds in a navigation signal to the metadata.  Any type of navigation signal is acceptable.
 
         Parameters

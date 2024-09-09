@@ -232,7 +232,7 @@ class ElectronDiffraction1D(Diffraction1D):
                 exposure_time,
             )
 
-    def set_diffraction_calibration(self, calibration):
+    def set_diffraction_calibration(self, calibration: float):
         """Set diffraction profile channel size in reciprocal Angstroms.
 
         Parameters
@@ -246,7 +246,7 @@ class ElectronDiffraction1D(Diffraction1D):
         dx.scale = calibration
         dx.units = "$A^{-1}$"
 
-    def set_scan_calibration(self, calibration):
+    def set_scan_calibration(self, calibration: float):
         """Set scan pixel size in nanometres.
 
         Parameters

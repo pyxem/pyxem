@@ -29,6 +29,7 @@ from pyxem.signals import DiffractionVectors1D
 from pyxem.utils._deprecated import deprecated
 from diffsims.utils.sim_utils import get_electron_wavelength
 from scipy.constants import c, e, m_e
+from typing import Sequence, Tuple
 
 
 class BeamShift(DiffractionVectors1D):
@@ -167,7 +168,11 @@ class BeamShift(DiffractionVectors1D):
         return s_bs
 
     def get_bivariate_histogram(
-        self, histogram_range=None, masked=None, bins=200, spatial_std=3
+        self,
+        histogram_range: Tuple[float] = None,
+        masked=None,
+        bins: int = 200,
+        spatial_std: float = 3,
     ):
         """
         Useful for finding the distribution of the beam shifts.
@@ -360,7 +365,10 @@ class BeamShift(DiffractionVectors1D):
         signal.add_marker(marker)
 
     def get_magnitude_signal(
-        self, autolim=True, autolim_sigma=4, magnitude_limits=None
+        self,
+        autolim: bool = True,
+        autolim_sigma: float = 4,
+        magnitude_limits: Tuple[float] = None,
     ):
         """Get beam shift magnitude image visualized as greyscale.
 
@@ -424,7 +432,12 @@ class BeamShift(DiffractionVectors1D):
         )
         return s_magnitude
 
-    def phase_retrieval(self, method="kottler", mirroring=False, mirror_flip=False):
+    def phase_retrieval(
+        self,
+        method: str = "kottler",
+        mirroring: bool = False,
+        mirror_flip: bool = False,
+    ):
         """Retrieve the phase from two orthogonal phase gradients.
 
         Parameters
@@ -706,7 +719,7 @@ class BeamShift(DiffractionVectors1D):
             s_rgb.add_marker(color_wheel_marker, permanent=True, plot_marker=False)
         return s_rgb
 
-    def rotate_beam_shifts(self, angle):
+    def rotate_beam_shifts(self, angle: float):
         """Rotate the beam shift vector.
 
         Parameters
@@ -735,7 +748,7 @@ class BeamShift(DiffractionVectors1D):
         s_new = self._deepcopy_with_new_data(np.stack((x_new, y_new), axis=-1))
         return s_new
 
-    def rotate_scan_dimensions(self, angle, reshape=False):
+    def rotate_scan_dimensions(self, angle: float, reshape: bool = False):
         """Rotate the scan dimensions by angle.
 
         Parameters
