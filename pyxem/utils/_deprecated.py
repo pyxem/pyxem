@@ -202,7 +202,12 @@ class extend_docs:
         if self.remove_first_param:
             extend_params = extend_params[1:]
         if self.method_name is not None:
+            ext_params = []
             for e in extend_params:
-                e.desc.append(f"Passed to the  `{self.method_name}` method.")
-        main_doc["Other Parameters"] = main_doc["Other Parameters"] + extend_params
-        return str(main_params)
+                if e.name not in [
+                    p.name for p in main_doc["Parameters"]
+                ]:  # remove duplicates
+                    e.desc.append(f"Passed to the :func:`{self.method_name}` method.")
+                    ext_params.append(e)
+        main_doc["Other Parameters"] = main_doc["Other Parameters"] + ext_params
+        return str(main_doc)
