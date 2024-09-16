@@ -85,6 +85,7 @@ from pyxem.utils._background_subtraction import (
     _subtract_radial_median,
 )
 from pyxem.utils.calibration import Calibration
+from pyxem.utils._deprecated import extend_docs
 
 from pyxem import CUPY_INSTALLED
 
@@ -136,6 +137,11 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         s_ax1.units = "px" if s_ax1.units is Undefined else s_ax1.units
         s_ax2.units = "px" if s_ax2.units is Undefined else s_ax2.units
 
+    @extend_docs(
+        BaseSignal.map,
+        remove_first_param=True,
+        method_name="hyperspy.signal.BaseSignal.map",
+    )
     def apply_affine_transformation(
         self,
         D: Union[np.ndarray, Signal2D],
@@ -385,6 +391,11 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         return signal_mask
 
+    @extend_docs(
+        BaseSignal.map,
+        remove_first_param=True,
+        method_name="hyperspy.signal.BaseSignal.map",
+    )
     def apply_gain_normalisation(
         self,
         dark_reference: Union[np.ndarray, Signal2D],
@@ -422,6 +433,31 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
     @deprecated_argument(
         name="lazy_result", alternative="lazy_output", since="0.15.0", removal="1.0.0"
+    )
+    @extend_docs(
+        BaseSignal.map,
+        remove_first_param=True,
+        method_name="hyperspy.signal.BaseSignal.map",
+    )
+    @extend_docs(
+        _subtract_dog,
+        remove_first_param=True,
+        method_name="pyxem.utils._background_subtraction._subtract_dog",
+    )
+    @extend_docs(
+        _subtract_median,
+        remove_first_param=True,
+        method_name="pyxem.utils._background_subtraction._subtract_median",
+    )
+    @extend_docs(
+        _subtract_radial_median,
+        remove_first_param=True,
+        method_name="pyxem.utils._background_subtraction._subtract_radial_median",
+    )
+    @extend_docs(
+        _subtract_hdome,
+        remove_first_param=True,
+        method_name="pyxem.utils._background_subtraction._subtract_hdome",
     )
     def subtract_diffraction_background(
         self, method: str = "median kernel", inplace: bool = False, **kwargs
@@ -647,6 +683,11 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
     @deprecated_argument(
         name="lazy_result", since="0.14", removal="1.0.0", alternative="lazy_output"
+    )
+    @extend_docs(
+        find_beam_offset_cross_correlation,
+        remove_first_param=True,
+        method_name="pyxem.utils.diffraction.find_beam_offset_cross_correlation",
     )
     def get_direct_beam_position(
         self,
