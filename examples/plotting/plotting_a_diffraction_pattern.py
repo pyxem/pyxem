@@ -24,10 +24,11 @@ mulit_phase.plot()
 mulit_phase.plot(norm="log")
 
 # %%
-# You can also add a small value to the data to avoid the log(0) problem.
-# This doesn't change the underlying data, only creates a new signal for plotting!
+# You can also use the `symlog` norm to plot the diffraction pattern with a logarithmic scale
+# but with a linear scale around zero. This can be useful to see the zero beam and the high k values.
+# additionally you can visualize negative and positive values as well.
 
-(mulit_phase + 1).plot(norm="log")
+mulit_phase.plot(norm="symlog")
 
 # %%
 # We can also set vmin and vmax to control the contrast. This can be useful to see the high k values.
