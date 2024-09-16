@@ -51,6 +51,7 @@ from pyxem.data._data import (
     sped_ag,
     pdcusi_insitu,
 )
+from pyxem.data.simulated_dpc import simulated_stripes
 
 __all__ = [
     "au_grating",
@@ -65,6 +66,7 @@ __all__ = [
     "si_grains",
     "si_grains_simple",
     "si_rotations_line",
+    "simulated_stripes",
     "fe_multi_phase_grains",
     "fe_fcc_phase",
     "fe_bcc_phase",
