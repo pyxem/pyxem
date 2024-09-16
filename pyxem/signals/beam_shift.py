@@ -128,7 +128,7 @@ class BeamShift(DiffractionVectors1D):
             if mask.dtype != bool:
                 raise ValueError("mask needs to be an array of bools")
         if constrain_magnitude:
-            plane_image = bst._get_linear_xy_planes_from_signal2d(self, mask=mask)
+            plane_image = bst._get_linear_plane_by_minimizing_magnitude_variance(self, mask=mask)
         else:
             plane_image_x = bst._get_linear_plane_from_signal2d(s_shift_x, mask=mask)
             plane_image_y = bst._get_linear_plane_from_signal2d(s_shift_y, mask=mask)

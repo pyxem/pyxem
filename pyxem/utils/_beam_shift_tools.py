@@ -105,7 +105,7 @@ def _f_min(X, p):
 def _residuals(params, X):
     return _f_min(X, params)
 
-def _distance_residuals(params, X):
+def _magnitude_deviations(params, X):
     plane_x_xy = params[0:2]
     plane_y_xy = params[3:5]
     distance_x = (plane_x_xy * X[:, :2]).sum(axis=1) + params[2]
@@ -167,7 +167,7 @@ def _get_linear_plane_from_signal2d(signal, mask=None, initial_values=None):
     return plane
 
 
-def _get_linear_xy_planes_from_signal2d(signal, mask=None, initial_values=None):
+def _get_linear_plane_by_minimizing_magnitude_variance(signal, mask=None, initial_values=None):
     if len(signal.axes_manager.navigation_axes) != 2:
         raise ValueError("signal needs to have 1 navigation dimensions")
     if len(signal.axes_manager.signal_axes) != 1:
@@ -188,7 +188,7 @@ def _get_linear_xy_planes_from_signal2d(signal, mask=None, initial_values=None):
             raise ValueError("signal and mask need to have the same navigation shape")
         points = points[np.invert(mask).flatten()]
 
-    p = opt.leastsq(_distance_residuals, initial_values, args=points)[0]
+    p = opt.leastsq(_magnitude_deviations, initial_values, args=points)[0]
 
     x, y = np.meshgrid(xaxis, yaxis)
     z_x = p[0] * x + p[1] * y + p[2]
