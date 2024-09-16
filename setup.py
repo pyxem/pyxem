@@ -94,6 +94,7 @@ setup(
         "matplotlib     >= 3.7.5",
         "numba",
         "numpy",
+        "numpydoc",  # for editing docstrings
         "numexpr        != 2.8.6",  # bug in 2.8.6 for greek letters need for pyfai
         "orix           >= 0.12.1",
         "pooch",
