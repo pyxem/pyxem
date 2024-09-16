@@ -105,6 +105,15 @@ def _f_min(X, p):
 def _residuals(params, X):
     return _f_min(X, params)
 
+def _distance_residuals(params, X):
+    plane_x_xy = params[0:2]
+    plane_y_xy = params[3:5]
+    distance_x = (plane_x_xy * X[:, :2]).sum(axis=1) + params[2]
+    distance_y = (plane_y_xy * X[:, :2]).sum(axis=1) + params[5]
+    distance = np.sqrt(((distance_x - X[:, 2]) ** 2 + (distance_y - X[:, 3]) ** 2))
+
+    return distance - np.mean(distance)
+
 
 def _plane_parameters_to_image(p, xaxis, yaxis):
     """Get a plane 2D array from plane parameters.
@@ -156,6 +165,36 @@ def _get_linear_plane_from_signal2d(signal, mask=None, initial_values=None):
 
     plane = _plane_parameters_to_image(p, xaxis, yaxis)
     return plane
+
+
+def _get_linear_xy_planes_from_signal2d(signal, mask=None, initial_values=None):
+    if len(signal.axes_manager.navigation_axes) != 2:
+        raise ValueError("signal needs to have 1 navigation dimensions")
+    if len(signal.axes_manager.signal_axes) != 1:
+        raise ValueError("signal needs to have 2 signal dimension")
+    if initial_values is None:
+        initial_values = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+
+    signal = signal.T
+    sam = signal.axes_manager.signal_axes
+    xaxis, yaxis = sam[0].axis, sam[1].axis
+    x, y = np.meshgrid(xaxis, yaxis)
+    xx, yy = x.flatten(), y.flatten()
+    values_x = signal.data[0].flatten()
+    values_y = signal.data[1].flatten()
+    points = np.stack((xx, yy, values_x, values_y)).T
+    if mask is not None:
+        if mask.__array__().shape != signal.T.__array__().shape[:2]:
+            raise ValueError("signal and mask need to have the same navigation shape")
+        points = points[np.invert(mask).flatten()]
+
+    p = opt.leastsq(_distance_residuals, initial_values, args=points)[0]
+
+    x, y = np.meshgrid(xaxis, yaxis)
+    z_x = p[0] * x + p[1] * y + p[2]
+    z_y = p[3] * x + p[4] * y + p[5]
+
+    return np.stack((z_x, z_y), axis=-1)
 
 
 def _get_limits_from_array(data, sigma=4, ignore_zeros=False, ignore_edges=False):

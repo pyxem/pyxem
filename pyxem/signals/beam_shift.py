@@ -43,7 +43,7 @@ class BeamShift(DiffractionVectors1D):
         self.data = s_linear_plane.data
         self.events.data_changed.trigger(None)
 
-    def get_linear_plane(self, mask=None, fit_corners=None):
+    def get_linear_plane(self, mask=None, fit_corners=None, constrain_magnitude=False):
         """Fit linear planes to the beam shifts, and returns a BeamShift signal
         with the planes.
 
@@ -81,6 +81,14 @@ class BeamShift(DiffractionVectors1D):
         fit_corners : float, optional
             Make a mask so that the planes are fitted to the corners of the
             signal. This mush be set with a number, like 0.05 (5%) or 0.10 (10%).
+        constrain_magnitude : bool, optional
+            Fits the linear planes so there are deflection with constant magnitude.
+            In the presence of electromagnetic fields in the sample area, least squares 
+            fitting can give inaccurate results. If the region is expected to have 
+            uniform field strength, we can fit planes by trying to minimise the variance
+            of the magnitudes, giving a constant deflection magnitude.
+            Note that for this to work several field directions must be present. Extra 
+            care must be taken in presence of significant noise.
 
         Examples
         --------
@@ -116,10 +124,15 @@ class BeamShift(DiffractionVectors1D):
         s_shift_x = self.isig[0].T
         s_shift_y = self.isig[1].T
         if mask is not None:
-            mask = mask.__array__()
-        plane_image_x = bst._get_linear_plane_from_signal2d(s_shift_x, mask=mask)
-        plane_image_y = bst._get_linear_plane_from_signal2d(s_shift_y, mask=mask)
-        plane_image = np.stack((plane_image_x, plane_image_y), -1)
+            mask = mask.__array__()            
+            if mask.dtype != bool:
+                raise ValueError("mask needs to be an array of bools")
+        if constrain_magnitude:
+            plane_image = bst._get_linear_xy_planes_from_signal2d(self, mask=mask)
+        else:
+            plane_image_x = bst._get_linear_plane_from_signal2d(s_shift_x, mask=mask)
+            plane_image_y = bst._get_linear_plane_from_signal2d(s_shift_y, mask=mask)
+            plane_image = np.stack((plane_image_x, plane_image_y), -1)
         s_bs = self._deepcopy_with_new_data(plane_image)
         return s_bs
 
