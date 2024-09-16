@@ -689,6 +689,16 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         remove_first_param=True,
         method_name="pyxem.utils.diffraction.find_beam_offset_cross_correlation",
     )
+    @extend_docs(
+        find_beam_center_blur,
+        remove_first_param=True,
+        method_name="pyxem.utils.diffraction.find_beam_center_blur",
+    )
+    @extend_docs(
+        find_beam_center_interpolate,
+        remove_first_param=True,
+        method_name="pyxem.utils.diffraction.find_beam_center_interpolate",
+    )
     def get_direct_beam_position(
         self,
         method: str,
@@ -872,6 +882,21 @@ class Diffraction2D(CommonDiffraction, Signal2D):
     @deprecated_argument(
         name="lazy_result", since="0.15", removal="1.0.0", alternative="lazy_output"
     )
+    @extend_docs(
+        find_beam_center_blur,
+        remove_first_param=True,
+        method_name="pyxem.utils.diffraction.find_beam_center_blur",
+    )
+    @extend_docs(
+        find_beam_center_interpolate,
+        remove_first_param=True,
+        method_name="pyxem.utils.diffraction.find_beam_center_interpolate",
+    )
+    @extend_docs(
+        find_beam_offset_cross_correlation,
+        remove_first_param=True,
+        method_name="pyxem.utils.diffraction.find_beam_offset_cross_correlation",
+    )
     def center_direct_beam(
         self,
         method: str = None,
@@ -1035,6 +1060,11 @@ class Diffraction2D(CommonDiffraction, Signal2D):
     @deprecated_argument(
         name="lazy_result", alternative="lazy_output", since="0.15.0", removal="1.0.0"
     )
+    @extend_docs(
+        normalize_template_match,
+        remove_first_param=True,
+        method_name="pyxem.utils.diffraction.normalize_template_match",
+    )
     def template_match_disk(self, disk_r: float = 4, inplace: bool = False, **kwargs):
         """Template match the signal dimensions with a disk.
 
@@ -1077,6 +1107,11 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
     @deprecated_argument(
         name="lazy_result", alternative="lazy_output", since="0.15.0", removal="1.0.0"
+    )
+    @extend_docs(
+        normalize_template_match,
+        remove_first_param=True,
+        method_name="pyxem.utils.diffraction.normalize_template_match",
     )
     def template_match_ring(
         self, r_inner: float = 5, r_outer: float = 7, inplace: bool = False, **kwargs
@@ -1176,6 +1211,11 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         else:
             return self._deepcopy_with_new_data(data=new_data)
 
+    @extend_docs(
+        normalize_template_match,
+        remove_first_param=True,
+        method_name="pyxem.utils.diffraction.normalize_template_match",
+    )
     def template_match(self, template: np.ndarray, inplace: bool = False, **kwargs):
         """Template match the signal dimensions with a binary image.
 
@@ -1223,6 +1263,11 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         )
 
     @deprecated(since="0.15.0", removal="1.0.0")
+    @extend_docs(
+        normalize_template_match,
+        remove_first_param=True,
+        method_name="pyxem.utils.diffraction.normalize_template_match",
+    )
     def template_match_with_binary_image(
         self,
         binary_image: np.ndarray,
@@ -1272,6 +1317,11 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             **kwargs,
         )
 
+    @extend_docs(
+        Signal2D.find_peaks,
+        remove_first_param=True,
+        method_name="hyperspy.api.signals.Signal2D.find_peaks",
+    )
     def get_diffraction_vectors(
         self,
         center: Tuple[float] = None,
