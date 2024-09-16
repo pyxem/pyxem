@@ -34,7 +34,9 @@ class PairDistributionFunction1D(Signal1D):
 
     _signal_type = "pair_distribution_function"
 
-    def normalise_signal(self, s_min=0, inplace=False, *args, **kwargs):
+    def normalise_signal(
+        self, s_min: float = 0, inplace: bool = False, *args, **kwargs
+    ):
         """
         Normalises the Reduced PDF signal to having a maximum of 1.
         This is applied to each pdf separately in a multidimensional signal.

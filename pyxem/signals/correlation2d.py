@@ -29,6 +29,7 @@ from pyxem.utils._correlations import (
     _corr_to_power,
 )
 from pyxem.signals.common_diffraction import CommonDiffraction
+from typing import Sequence
 
 
 class Correlation2D(Signal2D, CommonDiffraction):
@@ -36,7 +37,7 @@ class Correlation2D(Signal2D, CommonDiffraction):
 
     _signal_type = "correlation"
 
-    def get_angular_power(self, inplace=False, **kwargs):
+    def get_angular_power(self, inplace: bool = False, **kwargs):
         """Returns the power spectrum of the angular auto-correlation function
         in the form of a Signal2D class.
 
@@ -72,7 +73,7 @@ class Correlation2D(Signal2D, CommonDiffraction):
         fourier_axis.scale = 1
         return power
 
-    def get_summed_angular_power(self, inplace=False, **kwargs):
+    def get_summed_angular_power(self, inplace: bool = False, **kwargs):
         """Returns the power spectrum of the summed angular auto-correlation function
         over all real space positions.  Averages the angular correlation.
 
@@ -101,11 +102,11 @@ class Correlation2D(Signal2D, CommonDiffraction):
 
     def get_symmetry_coefficient(
         self,
-        symmetries=[2, 3, 4, 5, 6, 7, 8, 9, 10],
-        angular_range=0,
-        method="average",
-        include_duplicates=False,
-        normalize=True,
+        symmetries: Sequence[int] = [2, 3, 4, 5, 6, 7, 8, 9, 10],
+        angular_range: float = 0,
+        method: str = "average",
+        include_duplicates: bool = False,
+        normalize: bool = True,
         **kwargs
     ):
         """This function is for finding and extracting information about clusters

@@ -18,10 +18,12 @@
 
 from functools import cached_property, partial
 from warnings import warn
+from typing import Tuple, Union, Sequence
 
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
+import sklearn.base
 from scipy.spatial import distance_matrix
 import dask.array as da
 
@@ -52,6 +54,7 @@ from pyxem.utils._subpixel_finding import (
     _get_simulated_disc,
     _wrap_columns,
 )
+
 
 from pyxem.utils._deprecated import deprecated
 
@@ -179,7 +182,12 @@ class DiffractionVectors(BaseSignal):
 
     @classmethod
     def from_peaks(
-        cls, peaks, center=None, calibration=None, column_names=None, units=None
+        cls,
+        peaks: BaseSignal,
+        center: Union[np.ndarray, Tuple[float]] = None,
+        calibration: Union[np.ndarray, Tuple[float]] = None,
+        column_names: Tuple[str] = None,
+        units: Tuple[str] = None,
     ):
         """Takes a list of peak positions (pixel coordinates) and returns
         an instance of `Diffraction2D`
@@ -284,12 +292,12 @@ class DiffractionVectors(BaseSignal):
 
     def subpixel_refine(
         self,
-        signal,
-        method="center-of-mass",
-        disk_r=None,
-        upsample_factor=2,
-        square_size=10,
-        columns=None,
+        signal: BaseSignal,
+        method: str = "center-of-mass",
+        disk_r: float = None,
+        upsample_factor: int = 2,
+        square_size: int = 10,
+        columns: Sequence[int] = None,
         **kwargs,
     ):
         """
@@ -371,7 +379,12 @@ class DiffractionVectors(BaseSignal):
         return self.get_pixel_vectors()
 
     def get_pixel_vectors(
-        self, offsets=None, scales=None, square_size=None, shape=None, columns=None
+        self,
+        offsets: Sequence[float] = None,
+        scales: Sequence[float] = None,
+        square_size: Sequence[float] = None,
+        shape: Sequence[int] = None,
+        columns: Sequence[int] = None,
     ):
         """Returns the diffraction vectors in pixel coordinates."""
         if offsets is None:
@@ -452,7 +465,7 @@ class DiffractionVectors(BaseSignal):
             return self.metadata.VectorMetadata["units"]
 
     @units.setter
-    def units(self, value):
+    def units(self, value: Union[str, Sequence[str]]):
         if isinstance(value, str) and self.num_columns == 1:
             value = [value]
         if (
@@ -477,7 +490,7 @@ class DiffractionVectors(BaseSignal):
         return self.metadata.VectorMetadata["scales"]
 
     @scales.setter
-    def scales(self, value):
+    def scales(self, value: Union[float, Sequence[float]]):
         if isiterable(value) and len(value) == self.num_columns:
             self.metadata.VectorMetadata["scales"] = value
         elif isiterable(value) and len(value) != self.num_columns:
@@ -500,7 +513,7 @@ class DiffractionVectors(BaseSignal):
             return self.metadata.VectorMetadata["column_names"]
 
     @column_names.setter
-    def column_names(self, value):
+    def column_names(self, value: Union[str, Sequence[str]]):
         if value is None:
             value = [f"column_{i}" for i in range(self.num_columns)]
 
@@ -519,7 +532,7 @@ class DiffractionVectors(BaseSignal):
         return self.metadata.VectorMetadata["offsets"]
 
     @offsets.setter
-    def offsets(self, value):
+    def offsets(self, value: Union[float, Sequence[float]]):
         if isiterable(value) and len(value) == self.num_columns:
             self.metadata.VectorMetadata["offsets"] = np.array(value)
 
@@ -659,7 +672,7 @@ class DiffractionVectors(BaseSignal):
 
     def flatten_diffraction_vectors(
         self,
-        real_units=True,
+        real_units: bool = True,
     ):
         """Flattens the diffraction vectors into a `DiffractionVector2D` object.
 
@@ -939,7 +952,7 @@ class DiffractionVectors(BaseSignal):
         )
         signal.add_marker(marker, plot_marker=True, permanent=False)
 
-    def get_magnitudes(self, columns=None, *args, **kwargs):
+    def get_magnitudes(self, columns: Sequence[int] = None, *args, **kwargs):
         """Calculate the magnitude of diffraction vectors.
 
         Parameters
@@ -970,7 +983,7 @@ class DiffractionVectors(BaseSignal):
 
         return magnitudes
 
-    def get_magnitude_histogram(self, bins, *args, **kwargs):
+    def get_magnitude_histogram(self, bins: np.ndarray, *args, **kwargs):
         """Obtain a histogram of gvector magnitudes.
 
         Parameters
@@ -1009,11 +1022,11 @@ class DiffractionVectors(BaseSignal):
 
     def cluster(
         self,
-        method,
-        columns=None,
-        column_scale_factors=None,
-        min_vectors=None,
-        remove_nan=True,
+        method: sklearn.base.ClusterMixin,
+        columns: Sequence[int] = None,
+        column_scale_factors: Sequence[float] = None,
+        min_vectors: int = None,
+        remove_nan: bool = True,
     ):
         """This method clusters a list of vectors both in reciprocal space and in real space.
         The output is a list of vectors with a "label" which defines the cluster that each vector
@@ -1119,7 +1132,9 @@ class DiffractionVectors(BaseSignal):
 
         return flattened_vectors.get_unique_vectors(*args, **kwargs)
 
-    def filter_magnitude(self, min_magnitude, max_magnitude, *args, **kwargs):
+    def filter_magnitude(
+        self, min_magnitude: float, max_magnitude: float, *args, **kwargs
+    ):
         """
         Filter the diffraction vectors to accept only those with a magnitude within a user specified range.
 
@@ -1154,7 +1169,13 @@ class DiffractionVectors(BaseSignal):
         )
         return filtered_vectors
 
-    def filter_basis(self, basis, distance=0.5, columns=[0, 1], **kwargs):
+    def filter_basis(
+        self,
+        basis: Union[np.ndarray, BaseSignal],
+        distance: float = 0.5,
+        columns=[0, 1],
+        **kwargs,
+    ):
         """
 
         Filter vectors to only the set of vectors which is close to a basis set of vectors.
@@ -1201,7 +1222,7 @@ class DiffractionVectors(BaseSignal):
         )
         return filtered_vectors
 
-    def filter_detector_edge(self, exclude_width, *args, **kwargs):
+    def filter_detector_edge(self, exclude_width: int, *args, **kwargs):
         """Filter the diffraction vectors to accept only those not within a
         user specified proximity to the detector edge.
 
@@ -1239,7 +1260,7 @@ class DiffractionVectors(BaseSignal):
         )
         return filtered_vectors
 
-    def to_polar(self, columns=None, **kwargs):
+    def to_polar(self, columns: Sequence[int] = None, **kwargs):
         """Convert the diffraction vectors to polar coordinates.
 
         Parameters
@@ -1270,7 +1291,9 @@ class DiffractionVectors(BaseSignal):
         polar_vectors.units[1] = "rad"
         return polar_vectors
 
-    def get_diffracting_pixels_map(self, in_range=None, binary=False):
+    def get_diffracting_pixels_map(
+        self, in_range: Tuple[float] = None, binary: bool = False
+    ):
         """Map of the number of vectors at each navigation position.
 
         Parameters
@@ -1305,7 +1328,7 @@ class DiffractionVectors(BaseSignal):
 
         return xim
 
-    def to_mask(self, disk_r, signal_axes=None):
+    def to_mask(self, disk_r: float, signal_axes=None):
         """Convert the diffraction vectors to a N-D mask.
 
         This can be useful for Orientation Mapping including the fitting of mulitple
@@ -1357,7 +1380,7 @@ class DiffractionVectors(BaseSignal):
         return mask
 
     def calculate_cartesian_coordinates(
-        self, accelerating_voltage, camera_length, *args, **kwargs
+        self, accelerating_voltage: float, camera_length: float, *args, **kwargs
     ):
         """Get cartesian coordinates of the diffraction vectors.
 

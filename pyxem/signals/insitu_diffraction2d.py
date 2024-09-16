@@ -22,6 +22,7 @@ from hyperspy._signals.lazy import LazySignal
 
 import numpy as np
 from hyperspy.roi import RectangularROI
+from hyperspy.roi import BaseROI
 
 import dask.array as da
 from dask.graph_manipulation import clone
@@ -54,7 +55,7 @@ class InSituDiffraction2D(Diffraction2D):
         """Roll time axis to default index (2)"""
         return self.rollaxis(time_axis, 2)
 
-    def get_time_series(self, roi=None, time_axis=2):
+    def get_time_series(self, roi: BaseROI = None, time_axis: int = 2):
         """Create a intensity time series from virtual aperture defined by roi.
 
         Parameters
@@ -86,7 +87,11 @@ class InSituDiffraction2D(Diffraction2D):
         return virtual_series
 
     def get_drift_vectors(
-        self, time_axis=2, reference="cascade", sub_pixel_factor=10, **kwargs
+        self,
+        time_axis: int = 2,
+        reference: str = "cascade",
+        sub_pixel_factor: float = 10,
+        **kwargs
     ):
         """Calculate real space drift vectors from time series of images
 
@@ -123,7 +128,11 @@ class InSituDiffraction2D(Diffraction2D):
         return shift_vectors
 
     def correct_real_space_drift(
-        self, shifts=None, time_axis=2, order=1, lazy_result=True
+        self,
+        shifts: Signal1D = None,
+        time_axis: int = 2,
+        order: int = 1,
+        lazy_result: bool = True,
     ):
         """
         Perform real space drift registration on the dataset.
@@ -210,7 +219,7 @@ class InSituDiffraction2D(Diffraction2D):
         return registered_data
 
     def correct_real_space_drift_fast(
-        self, shifts=None, time_axis=2, order=1, **kwargs
+        self, shifts: Signal1D = None, time_axis: int = 2, order: int = 1, **kwargs
     ):
         """
         Perform real space drift registration on the dataset with fast performance
@@ -294,12 +303,12 @@ class InSituDiffraction2D(Diffraction2D):
 
     def get_g2_2d_kresolved(
         self,
-        time_axis=2,
-        normalization="split",
-        k1bin=1,
-        k2bin=1,
-        tbin=1,
-        resample_time=None,
+        time_axis: int = 2,
+        normalization: str = "split",
+        k1bin: int = 1,
+        k2bin: int = 1,
+        tbin: int = 1,
+        resample_time: int = None,
     ):
         """
         Calculate k resolved g2 from in situ diffraction signal

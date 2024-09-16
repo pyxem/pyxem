@@ -20,6 +20,7 @@
 This module contains utility functions for processing electron diffraction
 patterns.
 """
+import typing
 
 import numpy as np
 import scipy.ndimage as ndi
@@ -324,7 +325,7 @@ def sigma_clip(z, azimuthal_integrator, npt_rad, npt_azim, mask=None, **kwargs):
     return output[1]
 
 
-def gain_normalise(z, dref, bref):
+def gain_normalise(z: np.ndarray, dref: np.ndarray, bref: np.ndarray):
     """Apply gain normalization to experimentally acquired electron
     diffraction pattern.
 
@@ -345,7 +346,7 @@ def gain_normalise(z, dref, bref):
     return ((z - dref) / (bref - dref)) * np.mean((bref - dref))
 
 
-def remove_dead(z, deadpixels):
+def remove_dead(z: np.ndarray, deadpixels: np.ndarray):
     """Remove dead pixels from experimental electron diffraction patterns.
 
     Parameters
@@ -368,7 +369,7 @@ def remove_dead(z, deadpixels):
     return z_bar
 
 
-def convert_affine_to_transform(D, shape):
+def convert_affine_to_transform(D: np.ndarray, shape: typing.Tuple):
     """Converts an affine transform on a diffraction pattern to a suitable
     form for :func:`skimage.transform.warp`
 
@@ -402,7 +403,14 @@ def convert_affine_to_transform(D, shape):
     return transformation
 
 
-def apply_transformation(z, transformation, keep_dtype, order=1, *args, **kwargs):
+def apply_transformation(
+    z: np.ndarray,
+    transformation: np.ndarray,
+    keep_dtype: bool,
+    order: int = 1,
+    *args,
+    **kwargs,
+):
     """Apply a transformation to a 2-dimensional array.
 
     Parameters
@@ -444,7 +452,7 @@ def apply_transformation(z, transformation, keep_dtype, order=1, *args, **kwargs
     return trans
 
 
-def regional_filter(z, h):
+def regional_filter(z: np.ndarray, h: float):
     """Perform a h-dome regional filtering of the an image for background
     subtraction.
 

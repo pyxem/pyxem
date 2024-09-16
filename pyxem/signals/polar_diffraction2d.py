@@ -15,11 +15,13 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
-
-
+import numpy as np
 from hyperspy.signals import Signal2D
 from hyperspy._signals.lazy import LazySignal
 from numpy import rad2deg
+from typing import Union, Tuple
+
+from diffsims.simulations import Simulation2D
 
 from pyxem.signals.common_diffraction import CommonDiffraction
 from pyxem.utils._correlations import _correlation, _power, _pearson_correlation
@@ -50,7 +52,11 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
     _signal_type = "polar_diffraction"
 
     def get_angular_correlation(
-        self, mask=None, normalize=True, inplace=False, **kwargs
+        self,
+        mask: Union[np.ndarray, Signal2D] = None,
+        normalize: bool = True,
+        inplace: bool = False,
+        **kwargs,
     ):
         r"""Calculate the angular auto-correlation function in the form of a Signal2D class.
 
@@ -95,7 +101,13 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
         s.set_signal_type("correlation")
         return correlation
 
-    def get_angular_power(self, mask=None, normalize=True, inplace=False, **kwargs):
+    def get_angular_power(
+        self,
+        mask: Union[np.ndarray, Signal2D] = None,
+        normalize: bool = True,
+        inplace: bool = False,
+        **kwargs,
+    ):
         """Calculate the power spectrum of the angular auto-correlation function
         in the form of a Signal2D class.
 
@@ -137,7 +149,11 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
         return power
 
     def get_full_pearson_correlation(
-        self, mask=None, krange=None, inplace=False, **kwargs
+        self,
+        mask: Union[np.ndarray, Signal2D] = None,
+        krange: Union[Tuple[float], Tuple[int]] = None,
+        inplace: bool = False,
+        **kwargs,
     ):
         """Calculate the fully convolved pearson rotational correlation in the
         form of a Signal1D class.
@@ -200,7 +216,11 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
         return self.get_full_pearson_correlation(**kwargs)
 
     def get_resolved_pearson_correlation(
-        self, mask=None, krange=None, inplace=False, **kwargs
+        self,
+        mask: Union[np.ndarray, Signal2D] = None,
+        krange: Union[Tuple[float], Tuple[int]] = None,
+        inplace: bool = False,
+        **kwargs,
     ):
         """Calculate the pearson rotational correlation with k resolution in
         the form of a Signal2D class.
@@ -268,7 +288,7 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
         return correlation
 
     def subtract_diffraction_background(
-        self, method="radial median", inplace=False, **kwargs
+        self, method: str = "radial median", inplace: bool = False, **kwargs
     ):
         """Background subtraction of the diffraction data.
 
@@ -312,11 +332,11 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
 
     def get_orientation(
         self,
-        simulation,
-        n_keep=None,
-        frac_keep=0.1,
-        n_best=1,
-        normalize_templates=True,
+        simulation: Simulation2D,
+        n_keep: int = None,
+        frac_keep: float = 0.1,
+        n_best: int = 1,
+        normalize_templates: bool = True,
         **kwargs,
     ):
         """Match the orientation with some simulated diffraction patterns using

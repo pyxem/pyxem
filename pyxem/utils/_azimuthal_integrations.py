@@ -18,6 +18,7 @@
 
 """Utils for azimuthal integration."""
 
+from typing import Tuple
 import numpy as np
 
 from shapely import Polygon, box
@@ -33,14 +34,14 @@ if CUPY_INSTALLED:
 
 @numba.njit(parallel=True, nogil=True)
 def _slice_radial_integrate(
-    img,
-    factors,
-    factors_slice,
-    slices,
-    npt_rad,
-    npt_azim,
-    mask=None,
-    mean=False,
+    img: np.ndarray,
+    factors: np.ndarray,
+    factors_slice: np.ndarray,
+    slices: Tuple[int],
+    npt_rad: int,
+    npt_azim: int,
+    mask: np.ndarray = None,
+    mean: bool = False,
 ):  # pragma: no cover
     """Slice the image into small chunks and multiply by the factors.
 
@@ -144,13 +145,18 @@ def __slice_radial_integrate_cupy(
 
 @numba.njit
 def _slice_radial_integrate1d(
-    img, indexes, factors, factor_slices, mask=None, mean=False
+    img: np.ndarray,
+    indexes: np.ndarray,
+    factors: np.ndarray,
+    factor_slices: np.ndarray,
+    mask: np.ndarray = None,
+    mean: bool = False,
 ):  # pragma: no cover
     """Slice the image into small chunks and multiply by the factors.
 
     Parameters
     ----------
-    img: np.array
+    img: np.ndarray
         The image to be sliced
     indexes:
         The indexes of the pixels to multiply by the `factors`

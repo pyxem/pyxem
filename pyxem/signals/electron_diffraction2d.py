@@ -18,6 +18,7 @@
 
 
 import numpy as np
+from typing import Tuple
 
 from pyxem.signals.diffraction2d import Diffraction2D, LazyDiffraction2D
 from diffsims.utils.sim_utils import get_electron_wavelength
@@ -87,7 +88,7 @@ class ElectronDiffraction2D(Diffraction2D):
             return None
 
     @beam_energy.setter
-    def beam_energy(self, energy):
+    def beam_energy(self, energy: float):
         self.metadata.set_item("Acquisition_instrument.TEM.beam_energy", energy)
 
     @property
@@ -98,7 +99,7 @@ class ElectronDiffraction2D(Diffraction2D):
             return None
 
     @camera_length.setter
-    def camera_length(self, length):
+    def camera_length(self, length: float):
         self.metadata.set_item("Acquisition_instrument.TEM.camera_length", length)
 
     @property
@@ -106,7 +107,7 @@ class ElectronDiffraction2D(Diffraction2D):
         return self.axes_manager.signal_axes[0].scale
 
     @diffraction_calibration.setter
-    def diffraction_calibration(self, calibration):
+    def diffraction_calibration(self, calibration: float):
         self.axes_manager.signal_axes[0].scale = calibration
         self.axes_manager.signal_axes[1].scale = calibration
 
@@ -115,19 +116,19 @@ class ElectronDiffraction2D(Diffraction2D):
         return self.axes_manager.navigation_axes[0].scale
 
     @scan_calibration.setter
-    def scan_calibration(self, calibration):
+    def scan_calibration(self, calibration: float):
         self.axes_manager.navigation_axes[0].scale = calibration
         self.axes_manager.navigation_axes[1].scale = calibration
 
     def set_experimental_parameters(
         self,
-        beam_energy=None,
-        camera_length=None,
-        scan_rotation=None,
-        convergence_angle=None,
-        rocking_angle=None,
-        rocking_frequency=None,
-        exposure_time=None,
+        beam_energy: float = None,
+        camera_length: float = None,
+        scan_rotation: float = None,
+        convergence_angle: float = None,
+        rocking_angle: float = None,
+        rocking_frequency: float = None,
+        exposure_time: float = None,
     ):
         """Set experimental parameters in metadata.
 
@@ -175,7 +176,9 @@ class ElectronDiffraction2D(Diffraction2D):
                 exposure_time,
             )
 
-    def set_diffraction_calibration(self, calibration, center=None):
+    def set_diffraction_calibration(
+        self, calibration: float, center: Tuple[float] = None
+    ):
         """Set diffraction pattern pixel size in reciprocal Angstroms and origin
         location.
 
@@ -203,7 +206,7 @@ class ElectronDiffraction2D(Diffraction2D):
         dy.offset = -center[1]
         dy.units = "$A^{-1}$"
 
-    def set_scan_calibration(self, calibration):
+    def set_scan_calibration(self, calibration: float):
         """Set scan pixel size in nanometres.
 
         Parameters

@@ -20,6 +20,7 @@
 
 import numpy as np
 import json
+import typing
 
 from diffsims.utils.sim_utils import get_electron_wavelength
 import hyperspy.api as hs
@@ -76,7 +77,7 @@ class Calibration:
         return self.signal.metadata.get_item("General.affine_transformation")
 
     @affine.setter
-    def affine(self, affine):
+    def affine(self, affine: np.ndarray):
         self.signal.metadata.set_item("General.affine_transformation", affine)
 
     @property
@@ -85,7 +86,7 @@ class Calibration:
         return self.signal.metadata.get_item("General.mask")
 
     @mask.setter
-    def mask(self, mask):
+    def mask(self, mask: np.ndarray):
         self.signal.metadata.set_item("General.mask", mask)
 
     @property
@@ -97,7 +98,7 @@ class Calibration:
             return None
 
     @scale.setter
-    def scale(self, scale):
+    def scale(self, scale: typing.Union[typing.Iterable[float], float]):
         """Set the scale in pixels"""
         if not self.flat_ewald:
             raise ValueError("Scale can only be set if the ewald sphere is flat")
@@ -111,7 +112,7 @@ class Calibration:
         return [s.units for s in self.signal.axes_manager.signal_axes]
 
     @units.setter
-    def units(self, units):
+    def units(self, units: typing.Union[typing.Iterable[str], str]):
         # maybe consider converting the scales as well?
         for ax in self.signal.axes_manager.signal_axes:
             ax.units = units
@@ -121,7 +122,7 @@ class Calibration:
         return self.signal.metadata.get_item("Acquisition_instrument.TEM.wavelength")
 
     @wavelength.setter
-    def wavelength(self, wavelength):
+    def wavelength(self, wavelength: typing.Union[typing.Iterable[float], float]):
         self.signal.metadata.set_item(
             "Acquisition_instrument.TEM.wavelength", wavelength
         )
@@ -136,7 +137,7 @@ class Calibration:
             return None
 
     @beam_energy.setter
-    def beam_energy(self, beam_energy):
+    def beam_energy(self, beam_energy: typing.Union[typing.Iterable[float], float]):
         self.signal.metadata.set_item(
             "Acquisition_instrument.TEM.beam_energy", beam_energy
         )
@@ -150,7 +151,7 @@ class Calibration:
         return self.signal.metadata.get_item("Acquisition_instrument.TEM.detector_gain")
 
     @detector_gain.setter
-    def detector_gain(self, gain):
+    def detector_gain(self, gain: typing.Union[typing.Iterable[float], float]):
         """
         Calibrate the signal with a known detector gain. This works by dividing the signal the average
         number of counts per electron.  It also sets the appropriate metadata for setting the color
@@ -169,12 +170,12 @@ class Calibration:
 
     def detector(
         self,
-        pixel_size,
-        detector_distance,
-        beam_energy=None,
-        wavelength=None,
-        center=None,
-        units="k_nm^-1",
+        pixel_size: float,
+        detector_distance: float,
+        beam_energy: float = None,
+        wavelength: float = None,
+        center: typing.Tuple[float] = None,
+        units: str = "k_nm^-1",
     ):
         """
         Calibrate the signal with a known pixel size, detector distance, and beam energy/wavelength.
@@ -316,7 +317,15 @@ class Calibration:
             extents.append(extent)
         return extents
 
-    def get_slices2d(self, npt, npt_azim, radial_range=None, azimuthal_range=None):
+    def get_slices2d(
+        self,
+        npt: int,
+        npt_azim: int,
+        radial_range: typing.Union[typing.Sequence[float], typing.Sequence[int]] = None,
+        azimuthal_range: typing.Union[
+            typing.Sequence[float], typing.Sequence[int]
+        ] = None,
+    ):
         """Get the slices and factors for some image that can be used to
         slice the image for 2d integration.
 
@@ -353,7 +362,11 @@ class Calibration:
             radial_range = (0, max_range)
         return radial_range
 
-    def get_slices1d(self, npt, radial_range=None):
+    def get_slices1d(
+        self,
+        npt: int,
+        radial_range: typing.Union[typing.Sequence[float], typing.Sequence[int]] = None,
+    ):
         """Get the slices and factors for some image that can be used to
         slice the image for 1d integration.
 
@@ -488,7 +501,7 @@ class Calibration:
             ]
 
     @center.setter
-    def center(self, center=None):
+    def center(self, center: typing.Iterable[float] = None):
         """Set the center in pixels"""
         if not self.flat_ewald:
             raise ValueError(

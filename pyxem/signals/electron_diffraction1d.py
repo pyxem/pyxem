@@ -36,13 +36,13 @@ class ElectronDiffraction1D(Diffraction1D):
 
     def set_experimental_parameters(
         self,
-        accelerating_voltage=None,
-        camera_length=None,
-        scan_rotation=None,
-        convergence_angle=None,
-        rocking_angle=None,
-        rocking_frequency=None,
-        exposure_time=None,
+        accelerating_voltage: float = None,
+        camera_length: float = None,
+        scan_rotation: float = None,
+        convergence_angle: float = None,
+        rocking_angle: float = None,
+        rocking_frequency: float = None,
+        exposure_time: float = None,
     ):
         """Set experimental parameters in metadata.
 
@@ -92,7 +92,7 @@ class ElectronDiffraction1D(Diffraction1D):
                 exposure_time,
             )
 
-    def set_diffraction_calibration(self, calibration):
+    def set_diffraction_calibration(self, calibration: float):
         """Set diffraction profile channel size in reciprocal Angstroms.
 
         Parameters
@@ -106,7 +106,7 @@ class ElectronDiffraction1D(Diffraction1D):
         dx.scale = calibration
         dx.units = "$A^{-1}$"
 
-    def set_scan_calibration(self, calibration):
+    def set_scan_calibration(self, calibration: float):
         """Set scan pixel size in nanometres.
 
         Parameters

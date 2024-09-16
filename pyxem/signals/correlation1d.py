@@ -23,6 +23,7 @@ from hyperspy._signals.lazy import LazySignal
 import numpy as np
 from fractions import Fraction as frac
 from pyxem.utils._correlations import _get_interpolation_matrix, _symmetry_stem
+from typing import Sequence
 
 
 class Correlation1D(Signal1D):
@@ -40,11 +41,11 @@ class Correlation1D(Signal1D):
 
     def get_symmetry_coefficient(
         self,
-        angular_range=0.1,
-        symmetries=[2, 3, 4, 5, 6, 7, 8, 9, 10],
-        method="average",
-        include_duplicates=False,
-        normalize=True,
+        angular_range: float = 0.1,
+        symmetries: Sequence[int] = [2, 3, 4, 5, 6, 7, 8, 9, 10],
+        method: str = "average",
+        include_duplicates: bool = False,
+        normalize: bool = True,
     ):
         """Return symmetry coefficient from pearson correlation function at all real
         space positions (n from 2 to 10).

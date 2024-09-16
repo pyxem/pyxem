@@ -19,6 +19,7 @@
 
 import numpy as np
 from warnings import warn
+from typing import Sequence
 
 from scipy.spatial import distance_matrix
 from sklearn.cluster import DBSCAN
@@ -44,11 +45,11 @@ class DiffractionVectors2D(DiffractionVectors, Signal2D):
 
     def get_unique_vectors(
         self,
-        distance_threshold=0.01,
-        method="distance_comparison",
-        min_samples=1,
-        return_clusters=False,
-        columns=(-2, -1),
+        distance_threshold: float = 0.01,
+        method: str = "distance_comparison",
+        min_samples: int = 1,
+        return_clusters: bool = False,
+        columns: Sequence[int] = (-2, -1),
     ):
         """Returns diffraction vectors considered unique by:
         strict comparison, distance comparison with a specified
@@ -184,7 +185,9 @@ class DiffractionVectors2D(DiffractionVectors, Signal2D):
     def from_peaks(cls, **kwargs):
         raise NotImplementedError("This method is not implemented for 2D vectors")
 
-    def filter_detector_edge(self, exclude_width, columns=[-2, -1]):
+    def filter_detector_edge(
+        self, exclude_width: int, columns: Sequence[int] = [-2, -1]
+    ):
         """Filter the diffraction vectors to accept only those not within a
         user specified proximity to the detector edge.
 
@@ -232,7 +235,13 @@ class DiffractionVectors2D(DiffractionVectors, Signal2D):
     def has_navigation_axis(self):
         return len(self.axes_manager.navigation_axes) > 0
 
-    def to_roi(self, radius=0.1, columns=None, include_labels=False, **kwargs):
+    def to_roi(
+        self,
+        radius: float = 0.1,
+        columns: Sequence[int] = None,
+        include_labels: bool = False,
+        **kwargs,
+    ):
         """
         Convert the diffraction vectors to regions of interest (ROIs) for creating virtual images.
 
