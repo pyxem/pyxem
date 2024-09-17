@@ -94,7 +94,7 @@ class BeamShift(DiffractionVectors1D):
             where the first three entries are for the x-shift, being in order the
             step in x, step in y and the initial value at (0, 0). Similarly for the
             last three entries for the y-shift. Currently only implemented for the
-            case when constrain_magnitude is `True`.
+            case when `constrain_magnitude` is `True`.
         constrain_magnitude : bool, optional
             Fits the linear planes to deflections with constant magnitude.
             In the presence of electromagnetic fields in the sample area, least squares
