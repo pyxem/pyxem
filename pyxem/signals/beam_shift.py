@@ -43,7 +43,13 @@ class BeamShift(DiffractionVectors1D):
         self.data = s_linear_plane.data
         self.events.data_changed.trigger(None)
 
-    def get_linear_plane(self, mask=None, fit_corners=None, initial_values=None, constrain_magnitude=False):
+    def get_linear_plane(
+        self,
+        mask=None,
+        fit_corners=None,
+        initial_values=None,
+        constrain_magnitude=False,
+    ):
         """Fit linear planes to the beam shifts, and returns a BeamShift signal
         with the planes.
 
@@ -91,11 +97,11 @@ class BeamShift(DiffractionVectors1D):
             case when constrain_magnitude is `True`.
         constrain_magnitude : bool, optional
             Fits the linear planes to deflections with constant magnitude.
-            In the presence of electromagnetic fields in the sample area, least squares 
-            fitting can give inaccurate results. If the region is expected to have 
+            In the presence of electromagnetic fields in the sample area, least squares
+            fitting can give inaccurate results. If the region is expected to have
             uniform field strength, we can fit planes by trying to minimise the variance
             of the magnitudes, giving a constant deflection magnitude.
-            Note that for this to work several field directions must be present. Extra 
+            Note that for this to work several field directions must be present. Extra
             care must be taken in presence of significant noise.
 
         Examples
@@ -132,11 +138,13 @@ class BeamShift(DiffractionVectors1D):
         s_shift_x = self.isig[0].T
         s_shift_y = self.isig[1].T
         if mask is not None:
-            mask = mask.__array__()            
+            mask = mask.__array__()
             if mask.dtype != bool:
-                raise ValueError("mask needs to be an array of bools")
+                raise ValueError("mask needs to have a datatype of bool")
         if constrain_magnitude:
-            plane_image = bst._get_linear_plane_by_minimizing_magnitude_variance(self, mask=mask, initial_values=initial_values)
+            plane_image = bst._get_linear_plane_by_minimizing_magnitude_variance(
+                self, mask=mask, initial_values=initial_values
+            )
         else:
             plane_image_x = bst._get_linear_plane_from_signal2d(s_shift_x, mask=mask)
             plane_image_y = bst._get_linear_plane_from_signal2d(s_shift_y, mask=mask)
