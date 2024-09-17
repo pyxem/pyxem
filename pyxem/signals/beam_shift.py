@@ -96,7 +96,8 @@ class BeamShift(DiffractionVectors1D):
             last three entries for the y-shift. Currently only implemented for the
             case when `constrain_magnitude` is `True`.
         constrain_magnitude : bool, optional
-            Fits the linear planes to deflections with constant magnitude.
+            Fits the linear planes to deflections with constant magnitude. By default
+            set to `False`.
             In the presence of electromagnetic fields in the sample area, least squares
             fitting can give inaccurate results. If the region is expected to have
             uniform field strength, we can fit planes by trying to minimise the variance
