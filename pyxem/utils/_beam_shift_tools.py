@@ -169,9 +169,9 @@ def _get_linear_plane_from_signal2d(signal, mask=None, initial_values=None):
 
 def _get_linear_plane_by_minimizing_magnitude_variance(signal, mask=None, initial_values=None):
     if len(signal.axes_manager.navigation_axes) != 2:
-        raise ValueError("signal needs to have 1 navigation dimensions")
+        raise ValueError("signal needs to have 2 navigation dimensions")
     if len(signal.axes_manager.signal_axes) != 1:
-        raise ValueError("signal needs to have 2 signal dimension")
+        raise ValueError("signal needs to have 1 signal dimension")
     if initial_values is None:
         initial_values = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
 

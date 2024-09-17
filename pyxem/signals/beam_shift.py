@@ -87,9 +87,10 @@ class BeamShift(DiffractionVectors1D):
             [d/dx, d/dy, x_0, d/dx, d/dy, y_0]
             where the first three entries are for the x-shift, being in order the
             step in x, step in y and the initial value at (0, 0). Similarly for the
-            last three entries for the y-shift.
+            last three entries for the y-shift. Currently only implemented for the
+            case when constrain_magnitude is `True`.
         constrain_magnitude : bool, optional
-            Fits the linear planes so there are deflection with constant magnitude.
+            Fits the linear planes to deflections with constant magnitude.
             In the presence of electromagnetic fields in the sample area, least squares 
             fitting can give inaccurate results. If the region is expected to have 
             uniform field strength, we can fit planes by trying to minimise the variance
