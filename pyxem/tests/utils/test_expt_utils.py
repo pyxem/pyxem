@@ -21,7 +21,6 @@ import numpy as np
 from scipy.ndimage import gaussian_filter
 from matplotlib import pyplot as plt
 
-from pyFAI.detectors import Detector
 
 from pyxem.utils.diffraction import (
     _index_coords,
@@ -33,9 +32,6 @@ from pyxem.utils.diffraction import (
     investigate_dog_background_removal_interactive,
     find_beam_center_blur,
     find_beam_center_interpolate,
-    azimuthal_integrate1d,
-    azimuthal_integrate2d,
-    find_hot_pixels,
 )
 
 
@@ -194,45 +190,3 @@ def test_find_beam_center_interpolate_2(center_expected, sigma):
     z = gaussian_filter(z, sigma=sigma)
     centers = find_beam_center_interpolate(z, sigma=5, upsample_factor=100, kind=3)
     assert np.allclose(centers, center_expected, atol=0.2)
-
-
-class TestAzimuthalIntegration:
-    @pytest.fixture
-    def radial_pattern(self):
-        x, y = np.ogrid[-5:5, -5:5]
-        radial = (x**2 + y**2) * np.pi
-        radial[radial == 0] = 1
-        return 100 / radial
-
-    def test_1d_integrate(self, radial_pattern):
-        from pyxem.utils.pyfai_utils import get_azimuthal_integrator
-
-        dect = Detector(pixel1=1e-4, pixel2=1e-4)
-        ai = get_azimuthal_integrator(
-            detector=dect, detector_distance=1, shape=np.shape(radial_pattern)
-        )
-        integration = azimuthal_integrate1d(
-            radial_pattern,
-            ai,
-            npt_rad=100,
-            method="numpy",
-            unit="2th_rad",
-            correctSolidAngle=True,
-        )
-
-    def test_2d_integrate(self, radial_pattern):
-        from pyxem.utils.pyfai_utils import get_azimuthal_integrator
-
-        dect = Detector(pixel1=1e-4, pixel2=1e-4)
-        ai = get_azimuthal_integrator(
-            detector=dect, detector_distance=1, shape=np.shape(radial_pattern)
-        )
-        integration = azimuthal_integrate2d(
-            radial_pattern,
-            ai,
-            npt_rad=100,
-            npt_azim=100,
-            method="numpy",
-            unit="2th_rad",
-            correctSolidAngle=True,
-        )

@@ -35,7 +35,6 @@ from skimage.registration import phase_cross_correlation
 from tqdm import tqdm
 from packaging.version import Version
 
-from pyxem.utils.pyfai_utils import get_azimuthal_integrator
 from pyxem.utils.cuda_utils import is_cupy_array
 from pyxem.utils._deprecated import deprecated
 import pyxem.utils._pixelated_stem_tools as pst
