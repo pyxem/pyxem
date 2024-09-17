@@ -84,8 +84,11 @@ class TestGetLinearPlane:
 
         s = BeamShift(data)
 
+        s_lp = s.get_linear_plane()#constrain_magnitude=True)
+        assert not np.allclose(s_lp.data, base_plane.data, rtol=1e-7)
+        
         s_lp = s.get_linear_plane(constrain_magnitude=True)
-        assert s_lp.data == approx(base_plane.data, abs=1e-7)
+        assert np.allclose(s_lp.data, base_plane.data, rtol=1e-7)
 
     def test_lazy_input_error(self):
         s = LazyBeamShift(da.zeros((50, 40, 2)))
