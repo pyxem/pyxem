@@ -43,7 +43,7 @@ class BeamShift(DiffractionVectors1D):
         self.data = s_linear_plane.data
         self.events.data_changed.trigger(None)
 
-    def get_linear_plane(self, mask=None, fit_corners=None, constrain_magnitude=False):
+    def get_linear_plane(self, mask=None, fit_corners=None, initial_values=None, constrain_magnitude=False):
         """Fit linear planes to the beam shifts, and returns a BeamShift signal
         with the planes.
 
@@ -81,6 +81,13 @@ class BeamShift(DiffractionVectors1D):
         fit_corners : float, optional
             Make a mask so that the planes are fitted to the corners of the
             signal. This mush be set with a number, like 0.05 (5%) or 0.10 (10%).
+        initial_values : array of floats, optional
+            Initial guess for the plane parameters. Useful to vary if the plane fitting
+            does not give desirable results. The parameters are as follows:
+            [d/dx, d/dy, x_0, d/dx, d/dy, y_0]
+            where the first three entries are for the x-shift, being in order the
+            step in x, step in y and the initial value at (0, 0). Similarly for the
+            last three entries for the y-shift.
         constrain_magnitude : bool, optional
             Fits the linear planes so there are deflection with constant magnitude.
             In the presence of electromagnetic fields in the sample area, least squares 
@@ -128,7 +135,7 @@ class BeamShift(DiffractionVectors1D):
             if mask.dtype != bool:
                 raise ValueError("mask needs to be an array of bools")
         if constrain_magnitude:
-            plane_image = bst._get_linear_plane_by_minimizing_magnitude_variance(self, mask=mask)
+            plane_image = bst._get_linear_plane_by_minimizing_magnitude_variance(self, mask=mask, initial_values=initial_values)
         else:
             plane_image_x = bst._get_linear_plane_from_signal2d(s_shift_x, mask=mask)
             plane_image_y = bst._get_linear_plane_from_signal2d(s_shift_y, mask=mask)

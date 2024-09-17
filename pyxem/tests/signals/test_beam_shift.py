@@ -65,6 +65,28 @@ class TestGetLinearPlane:
         s_lp = s.get_linear_plane(mask=s_mask)
         assert s_lp.data == approx(s_orig.data, abs=1e-6)
 
+    def test_constrain_magnitude(self):
+        
+        p = [0.5]*6 # Plane parameters
+        x, y = np.meshgrid(np.arange(256), np.arange(256))
+        base_plane_x = p[0] * x + p[1] * y + p[2]
+        base_plane_y = p[3] * x + p[4] * y + p[5]
+
+        base_plane = np.stack((base_plane_x,base_plane_y)).T
+        data = base_plane.copy()
+
+        shifts = np.zeros_like(data)
+        shifts[:128,128:] =(10,10)
+        shifts[:128,:128] =(-10,-10)
+        shifts[128:,128:] =(-10,10)
+        shifts[128:,:128] =(10,10)
+        data += shifts
+
+        s = BeamShift(data)
+
+        s_lp = s.get_linear_plane(constrain_magnitude=True)
+        assert s_lp.data == approx(base_plane.data, abs=1e-7)
+
     def test_lazy_input_error(self):
         s = LazyBeamShift(da.zeros((50, 40, 2)))
         with pytest.raises(ValueError):
