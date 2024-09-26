@@ -39,6 +39,12 @@ mulit_phase.plot(norm="symlog")
 mulit_phase.plot(vmax="99th")
 
 # %%
+# We can also use a gamma correction to control and optimize the contrast.
+
+mulit_phase.plot(norm="power", gamma=0.4)
+
+
+# %%
 # Note: that any of the plots are interactive if you add:
 # %matplotlib ipympl or %matplotlib qt at the beginning of a Jupyter notebook cell.
 # %matplotlib inline will make the plots static.
