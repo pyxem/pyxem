@@ -48,7 +48,7 @@ class BeamShift(DiffractionVectors1D):
         mask=None,
         fit_corners=None,
         initial_values=None,
-        constrain_magnitude=False,
+        constrain_magnitude_variance=False,
     ):
         """Fit linear planes to the beam shifts, and returns a BeamShift signal
         with the planes.
@@ -89,13 +89,17 @@ class BeamShift(DiffractionVectors1D):
             signal. This mush be set with a number, like 0.05 (5%) or 0.10 (10%).
         initial_values : array of floats, optional
             Initial guess for the plane parameters. Useful to vary if the plane fitting
-            does not give desirable results. The parameters are as follows:
+            does not give desirable results. 
+            The x- and y-shifts are described by two linear planes with three parameters. 
+            The two first parameters, d/dx and d/dy, are the changes in x- or y-shift 
+            as you move one position in the navigation space in respectively the x- and y-
+            directions. The third parameter, x_0 or y_0, are respectively the x- and y-
+            shifts in the (0, 0) navigation position. The parameters are laid out thusly,
+            with the first three being for the x-shifts and the rest for the y-shifts:
             [d/dx, d/dy, x_0, d/dx, d/dy, y_0]
-            where the first three entries are for the x-shift, being in order the
-            step in x, step in y and the initial value at (0, 0). Similarly for the
-            last three entries for the y-shift. Currently only implemented for the
-            case when `constrain_magnitude` is `True`.
-        constrain_magnitude : bool, optional
+            Currently only implemented for the case when `constrain_magnitude_variance` 
+            is `True`.
+        constrain_magnitude_variance : bool, optional
             Fits the linear planes to deflections with constant magnitude. By default
             set to `False`.
             In the presence of electromagnetic fields in the sample area, least squares
@@ -103,7 +107,9 @@ class BeamShift(DiffractionVectors1D):
             uniform field strength, we can fit planes by trying to minimise the variance
             of the magnitudes, giving a constant deflection magnitude.
             Note that for this to work several field directions must be present. Extra
-            care must be taken in presence of significant noise.
+            care must be taken in presence of significant noise, such as with a mask.
+            If desirable results are not found, try varying the `initial_values`
+            parameter.
 
         Examples
         --------
@@ -142,7 +148,7 @@ class BeamShift(DiffractionVectors1D):
             mask = mask.__array__()
             if mask.dtype != bool:
                 raise ValueError("mask needs to have a datatype of bool")
-        if constrain_magnitude:
+        if constrain_magnitude_variance:
             plane_image = bst._get_linear_plane_by_minimizing_magnitude_variance(
                 self, mask=mask, initial_values=initial_values
             )
