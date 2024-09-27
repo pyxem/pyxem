@@ -65,7 +65,7 @@ class TestGetLinearPlane:
         s_lp = s.get_linear_plane(mask=s_mask)
         assert s_lp.data == approx(s_orig.data, abs=1e-6)
 
-    def test_constrain_magnitude(self):
+    def test_constrain_magnitude_variance(self):
 
         p = [0.5] * 6  # Plane parameters
         x, y = np.meshgrid(np.arange(256), np.arange(256))
@@ -84,13 +84,13 @@ class TestGetLinearPlane:
 
         s = BeamShift(data)
 
-        s_lp = s.get_linear_plane()  # constrain_magnitude=True)
+        s_lp = s.get_linear_plane()
         assert not np.allclose(s_lp.data, base_plane.data, rtol=1e-7)
 
-        s_lp = s.get_linear_plane(constrain_magnitude=True)
+        s_lp = s.get_linear_plane(constrain_magnitude_variance=True)
         assert np.allclose(s_lp.data, base_plane.data, rtol=1e-7)
 
-    def test_constrain_magnitude_mask(self):
+    def test_constrain_magnitude_variance_mask(self):
 
         p = [0.5] * 6  # Plane parameters
         x, y = np.meshgrid(np.arange(256), np.arange(256))
@@ -115,13 +115,13 @@ class TestGetLinearPlane:
 
         s = BeamShift(data)
 
-        s_lp = s.get_linear_plane(constrain_magnitude=True)
+        s_lp = s.get_linear_plane(constrain_magnitude_variance=True)
         assert not np.allclose(s_lp.data, base_plane.data, rtol=1e-7)
 
-        s_lp = s.get_linear_plane(constrain_magnitude=True, mask=mask)
+        s_lp = s.get_linear_plane(constrain_magnitude_variance=True, mask=mask)
         assert np.allclose(s_lp.data, base_plane.data, rtol=1e-7)
 
-    def test_constrain_magnitude_initial_values(self):
+    def test_constrain_magnitude_variance_initial_values(self):
 
         p = [0.5] * 6  # Plane parameters
         x, y = np.meshgrid(np.arange(256), np.arange(256))
@@ -140,13 +140,13 @@ class TestGetLinearPlane:
         s = BeamShift(data)
 
         # Plane fitting does poorly here, likely due to not enough different domains
-        s_lp = s.get_linear_plane(constrain_magnitude=True)
+        s_lp = s.get_linear_plane(constrain_magnitude_variance=True)
         assert not np.allclose(s_lp.data, base_plane.data, rtol=1e-7)
 
         # Varying the initial values around can help find different planes
         initial_values = [1.0] * 6
         s_lp = s.get_linear_plane(
-            constrain_magnitude=True, initial_values=initial_values
+            constrain_magnitude_variance=True, initial_values=initial_values
         )
         assert np.allclose(s_lp.data, base_plane.data, rtol=1e-7)
 
