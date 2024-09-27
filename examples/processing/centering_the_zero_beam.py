@@ -43,15 +43,17 @@ hs.plot.plot_images([s_pacbed, s_pacbed_centered], label=["Original", "Centered"
 # Centering the Zero Beam with constant deflection magnitude
 # -----------------------
 # In the presence of electromagnetic fields in the entire sample area, 
-# the plane fitting can fail However, if there are several domains expected 
+# the plane fitting can fail. However, if there are several domains expected 
 # to have equal deflection magnitude, we can try to fit a plane to this by 
 # minimizing the magnitude variance.
 
 def direct_beam_dataset_with_constant_shift_magnitude():
 
+    direct_beam_radius = 10
+
     import numpy as np
     bright_field_disk = np.zeros((128,128),dtype=np.int16)
-    bright_field_disk[np.sum((np.mgrid[:128,:128]-64)**2,axis=0) < 10**2 ] = 500
+    bright_field_disk[np.sum((np.mgrid[:128,:128]-64)**2,axis=0) < direct_beam_radius**2 ] = 500
 
     probes = np.zeros((20,20),dtype=int)
     probes = bright_field_disk[np.newaxis][probes]
@@ -81,14 +83,16 @@ probes = direct_beam_dataset_with_constant_shift_magnitude()
 s_shifts = probes.get_direct_beam_position(method="center_of_mass")
 
 # %%
-# We call `get_linear_plane` with `constrain_magnitude_variance=True`. 
+# We call `get_linear_plane` with `constrain_magnitude_variance=True`. Then
+# we can center the direct beam as normal.
 s_linear_plane = s_shifts.get_linear_plane(constrain_magnitude_variance=True)
-s_shifts.data -= s_linear_plane.data
 
 probes.center_direct_beam(shifts=s_linear_plane)
 probes.plot()
 
 # %%
 # The found electromagnetic domains can be visualized like such.
+s_shifts.data -= s_linear_plane.data
 s_shifts.get_magnitude_phase_signal().plot()
+
 # %%
