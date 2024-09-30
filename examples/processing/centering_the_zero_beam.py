@@ -45,7 +45,7 @@ hs.plot.plot_images([s_pacbed, s_pacbed_centered], label=["Original", "Centered"
 # In the presence of electromagnetic fields in the entire sample area, 
 # the plane fitting can fail. However, if there are several domains expected 
 # to have equal deflection magnitude, we can try to fit a plane to this by 
-# minimizing the magnitude variance.
+# minimizing the magnitude variance. You may need a mask for good performance.
 
 def direct_beam_dataset_with_constant_shift_magnitude():
 
@@ -78,17 +78,16 @@ def direct_beam_dataset_with_constant_shift_magnitude():
     probes.center_direct_beam(shifts=-data)
     return probes
 
-probes = direct_beam_dataset_with_constant_shift_magnitude()
+s_probes = direct_beam_dataset_with_constant_shift_magnitude()
 
-s_shifts = probes.get_direct_beam_position(method="center_of_mass")
+s_shifts = s_probes.get_direct_beam_position(method="center_of_mass")
 
 # %%
 # We call `get_linear_plane` with `constrain_magnitude_variance=True`. Then
 # we can center the direct beam as normal.
 s_linear_plane = s_shifts.get_linear_plane(constrain_magnitude_variance=True)
 
-probes.center_direct_beam(shifts=s_linear_plane)
-probes.plot()
+s_probes.center_direct_beam(shifts=s_linear_plane)
 
 # %%
 # The found electromagnetic domains can be visualized like such.
