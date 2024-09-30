@@ -65,6 +65,91 @@ class TestGetLinearPlane:
         s_lp = s.get_linear_plane(mask=s_mask)
         assert s_lp.data == approx(s_orig.data, abs=1e-7)
 
+    def test_constrain_magnitude_variance(self):
+
+        p = [0.5] * 6  # Plane parameters
+        x, y = np.meshgrid(np.arange(256), np.arange(256))
+        base_plane_x = p[0] * x + p[1] * y + p[2]
+        base_plane_y = p[3] * x + p[4] * y + p[5]
+
+        base_plane = np.stack((base_plane_x, base_plane_y)).T
+        data = base_plane.copy()
+
+        shifts = np.zeros_like(data)
+        shifts[:128, 128:] = (10, 10)
+        shifts[:128, :128] = (-10, -10)
+        shifts[128:, 128:] = (-10, 10)
+        shifts[128:, :128] = (10, 10)
+        data += shifts
+
+        s = BeamShift(data)
+
+        s_lp = s.get_linear_plane()
+        assert not np.allclose(s_lp.data, base_plane.data, rtol=1e-7)
+
+        s_lp = s.get_linear_plane(constrain_magnitude_variance=True)
+        assert np.allclose(s_lp.data, base_plane.data, rtol=1e-7)
+
+    def test_constrain_magnitude_variance_mask(self):
+
+        p = [0.5] * 6  # Plane parameters
+        x, y = np.meshgrid(np.arange(256), np.arange(256))
+        base_plane_x = p[0] * x + p[1] * y + p[2]
+        base_plane_y = p[3] * x + p[4] * y + p[5]
+
+        base_plane = np.stack((base_plane_x, base_plane_y)).T
+        data = base_plane.copy()
+
+        shifts = np.zeros_like(data)
+        shifts[:128, 128:] = (10, 10)
+        shifts[:128, :128] = (-10, -10)
+        shifts[128:, 128:] = (-10, 10)
+        shifts[128:, :128] = (10, 10)
+        shifts[:, -10:] = (9999, 1321)
+        shifts[:, :10] = (2213, -9879)
+        data += shifts
+
+        mask = np.zeros((256, 256), dtype=bool)
+        mask[:, -10:] = True
+        mask[:, :10] = True
+
+        s = BeamShift(data)
+
+        s_lp = s.get_linear_plane(constrain_magnitude_variance=True)
+        assert not np.allclose(s_lp.data, base_plane.data, rtol=1e-7)
+
+        s_lp = s.get_linear_plane(constrain_magnitude_variance=True, mask=mask)
+        assert np.allclose(s_lp.data, base_plane.data, rtol=1e-7)
+
+    def test_constrain_magnitude_variance_initial_values(self):
+
+        p = [0.5] * 6  # Plane parameters
+        x, y = np.meshgrid(np.arange(256), np.arange(256))
+        base_plane_x = p[0] * x + p[1] * y + p[2]
+        base_plane_y = p[3] * x + p[4] * y + p[5]
+
+        base_plane = np.stack((base_plane_x, base_plane_y)).T
+        data = base_plane.copy()
+
+        shifts = np.zeros_like(data)
+        shifts[:128, 128:] = (10, 10)
+        shifts[:128, :128] = (-10, -10)
+        shifts[128:, :] = (-10, 10)
+        data += shifts
+
+        s = BeamShift(data)
+
+        # Plane fitting does poorly here, likely due to not enough different domains
+        s_lp = s.get_linear_plane(constrain_magnitude_variance=True)
+        assert not np.allclose(s_lp.data, base_plane.data, rtol=1e-7)
+
+        # Varying the initial values around can help find different planes
+        initial_values = [1.0] * 6
+        s_lp = s.get_linear_plane(
+            constrain_magnitude_variance=True, initial_values=initial_values
+        )
+        assert np.allclose(s_lp.data, base_plane.data, rtol=1e-7)
+
     def test_lazy_input_error(self):
         s = LazyBeamShift(da.zeros((50, 40, 2)))
         with pytest.raises(ValueError):
@@ -88,6 +173,15 @@ class TestGetLinearPlane:
         s = BeamShift(np.zeros((5, 5, 2)))
         with pytest.raises(ValueError):
             s.get_linear_plane(fit_corners=0.05, mask=np.ones((5, 5)))
+
+    def test_non_bool_mask(self):
+        s = BeamShift(np.zeros((50, 40, 2)))
+        mask = np.zeros((50, 40), dtype=np.int32)
+        s_mask = Signal2D(mask)
+        with pytest.raises(ValueError):
+            s.get_linear_plane(mask=s_mask)
+        s_mask.change_dtype(bool)
+        s.get_linear_plane(mask=s_mask)
 
 
 class TestBeamShiftFitCorners:

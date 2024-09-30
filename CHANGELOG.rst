@@ -15,6 +15,11 @@ Fixed
 - Fixed bugs releated to orientation mapping with multiple phases and the plotting of the
   vector annotations. (#1090)
 
+Added
+-----
+- Added a way to fit linear planes in :meth:`pyxem.signals.BeamShift.get_linear_plane` by minimizing magnitude variance. (#1116)
+- In :meth:`pyxem.signals.BeamShift.get_linear_plane` exposed initial values for optimization to make it more flexible. (#1116)
+
 2024-06-08 - version 0.19.0
 ===========================
 
