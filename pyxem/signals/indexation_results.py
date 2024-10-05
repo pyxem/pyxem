@@ -44,6 +44,7 @@ import hyperspy.api as hs
 import numpy as np
 from matplotlib.collections import QuadMesh
 from matplotlib.colors import Normalize
+from scipy.spatial import Delaunay
 
 import numpy as np
 import hyperspy.api as hs
@@ -732,6 +733,141 @@ class OrientationMap(DiffractionVectors2D):
                 )
             )
         return markers
+
+    def get_ipf_correlation_heatmap(
+        self,
+        offset_x: float = 0.85,
+        offset_y: float = 0.85,
+        scale: float = 0.2,
+        cmap: str = "inferno",
+    ):
+        """Get the outline of the IPF for the orientation map as a marker in the
+        upper right hand corner including labels if desired. As well as the color
+        mesh for the IPF.
+
+        Parameters
+        ----------
+        offset : float
+            The offset of the markers from the lower left of the plot (as a fraction of the axis).
+        scale : float
+            The scale (as a fraction of the axis) for the markers.
+
+        Returns
+        -------
+        polygon_sector : hs.plot.markers.Polygons
+            The outline of the IPF as a marker
+        texts : hs.plot.markers.Texts
+            The text labels for the IPF axes
+        mesh : hs.plot.markers.Markers
+            The color mesh for the IPF (using :class:`matplotlib.collections.QuadMesh`)
+        
+        Notes
+        -----
+        This will not look good if the rotations used in the simulation(s) consists of
+        multiple different regions in the IPF.
+        """
+        phase_idx_signal = hs.signals.Signal1D(self.to_phase_index())
+        phases = self.simulation.phases
+        rotations = self.simulation.rotations
+        if not self.simulation.has_multiple_phases:
+            phases = [phases]
+            rotations = [rotations]
+            phase_idx_signal = 0
+
+        s = StereographicProjection()
+        rotation_sizes = np.cumsum([0] + [r.size for r in rotations])
+
+        markers = []
+
+        for phase_idx, phase in enumerate(phases):
+            offset = np.array([offset_x, offset_y])
+            polygon_sector, texts, maxs, mins = get_ipf_outline(
+                phase, offset_x=offset_x, offset_y=offset_y, scale=scale
+            )
+            # We make a mesh of the correlation scores,
+            # But we mask out the <n_best rotations.
+            # Fetch all possible zone axes for the phase to speed up calculations
+            rots = rotations[phase_idx]
+            vecs = rots * Vector3d.zvector()
+
+            x, y = s.vector2xy(vecs)
+            xy = np.vstack((x, y)).T
+
+            new_x = np.linspace(mins[0], maxs[0], 100 + 1)
+            new_y = np.linspace(mins[1], maxs[1], 100 + 1)
+            xx, yy = np.meshgrid(new_x, new_y)
+            out_xy = np.stack((xx, yy), axis=-1)
+            new_xy = np.vstack((xx[:-1, :-1].flatten(), yy[:-1, :-1].flatten())).T
+
+            # Interpolate the values to a grid.
+            # This is usually slow, e.g. using scipy.interpolate.griddata.
+            # Since the data coordinates and interpolated coordinates
+            # are always the same, and since we use linear interpolation,
+            # we can pre-calculate the barycentric weights for Delaunay triangles
+            # https://stackoverflow.com/a/20930910
+            tri = Delaunay(xy, incremental=False)
+            simplex = tri.find_simplex(new_xy)
+
+            # points outside the convex hull gets assigned the index -1.
+            # We later mask these out
+            outside = simplex < 0
+
+            vertices = np.take(tri.simplices, simplex, axis=0)
+            temp = np.take(tri.transform, simplex, axis=0)
+            delta = new_xy - temp[:, -1]
+            bary = np.einsum("njk,nk->nj", temp[:, :-1, :], delta)
+            weights = np.hstack((bary, 1 - bary.sum(axis=1, keepdims=True)))
+
+            def interpolate(values):
+                return np.einsum("nj,nj->n", np.take(values, vertices), weights)
+
+            def interpolate_and_mask_correlations(result, phase_idxs):
+                indices, correlation, _, _ = result[phase_idxs == phase_idx].T
+                max_cor = result[:, 1].max()
+                indices = indices.astype(int) - rotation_sizes[phase_idx] - 1
+                all_correlations = np.full(x.shape, np.nan)
+                all_correlations[indices] = correlation / max_cor
+                out = interpolate(all_correlations)
+                out[outside] = np.nan
+                return out
+
+            g = self.map(
+                interpolate_and_mask_correlations,
+                phase_idxs=phase_idx_signal,
+                inplace=False,
+                ragged=True,
+            ).data
+
+            # Scale the coordinates
+            out_xy = (out_xy - ((maxs + mins) / 2)) / (maxs.max() - mins.min()) * scale
+            out_xy += offset
+
+            mesh = hs.plot.markers.Markers(
+                collection=QuadMesh,
+                coordinates=out_xy,
+                array=g.T,
+                transform="axes",
+                offset_transform="display",
+                offsets=[[0, 0]],
+                norm=Normalize(0, 1),
+                cmap=cmap,
+            )
+            square = hs.plot.markers.Squares(
+                offsets=[offset],
+                widths=(scale + scale / 2,),
+                units="width",
+                offset_transform="axes",
+                facecolor="white",
+                edgecolor="black",
+            )
+
+            markers.append(square)
+            markers.append(polygon_sector)
+            markers.append(mesh)
+            markers.append(texts)
+
+            offset_y -= 1.5 * scale
+        return (*markers,)
 
     def to_markers(
         self,
