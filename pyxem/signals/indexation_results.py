@@ -697,7 +697,12 @@ class OrientationMap(DiffractionVectors2D):
             The color of the markers. Overridden by cmap, if not None
         cmap : str
             Use a color map to show correlation scores.
-            Takes priority over the `color` parameter
+            Takes priority over the `color` parameter.
+
+        Notes
+        -----
+        This function can be slow with a large n_keep.
+        Use `to_ipf_correlation_heatmap_markers` instead.
         """
         rots = self.to_rotation()
         vecs = rots * Vector3d.zvector()
@@ -734,7 +739,7 @@ class OrientationMap(DiffractionVectors2D):
             )
         return markers
 
-    def get_ipf_correlation_heatmap(
+    def to_ipf_correlation_heatmap_markers(
         self,
         offset_x: float = 0.85,
         offset_y: float = 0.85,
@@ -760,7 +765,7 @@ class OrientationMap(DiffractionVectors2D):
             The text labels for the IPF axes
         mesh : hs.plot.markers.Markers
             The color mesh for the IPF (using :class:`matplotlib.collections.QuadMesh`)
-        
+
         Notes
         -----
         This will not look good if the rotations used in the simulation(s) consists of
