@@ -1128,6 +1128,8 @@ class OrientationMap(DiffractionVectors2D):
             raise ValueError("Only a single phase present in simulation")
 
         phase_idxs = self.to_phase_index()
+        # in case n_best = 1
+        phase_idxs = phase_idxs.reshape(*self.axes_manager._navigation_shape_in_array, -1)
         colors = [p.color_rgb for p in self.simulation.phases]
 
         float_rgb = np.take(colors, phase_idxs[..., 0], axis=0)
