@@ -947,6 +947,29 @@ class OrientationMap(DiffractionVectors2D):
                 plot_on_signal=False,
             )
         return s
+    
+    def to_phase_map(self):
+        """Create a colored navigator which can be passed as the
+        navigator argument to the `plot` method of some signal.
+
+        Returns
+        -------
+        hs.signals.BaseSignal
+        """
+        if not self.simulation.has_multiple_phases:
+            raise ValueError("Only a single phase present in simulation")
+        
+        phase_idxs = self.to_phase_index()
+        colors = [p.color_rgb for p in self.simulation.phases]
+
+        float_rgb = np.take(colors, phase_idxs[..., 0], axis=0)
+        print(float_rgb.shape)
+        int_rgb = (float_rgb * 255).astype(np.uint8)
+
+        s = hs.signals.Signal1D(int_rgb)
+        s.change_dtype("rgb8")
+        s = s.T
+        return s
 
     def plot_over_signal(
         self,
@@ -975,7 +998,11 @@ class OrientationMap(DiffractionVectors2D):
             Additional keyword arguments to pass to the
             :meth:`hyperspy.api.signals.Signal2D.plot` method
         """
-        nav = self.to_ipf_colormap(add_markers=False)
+        if self.simulation.has_multiple_phases:
+            nav = self.to_phase_map()
+            add_ipf_colorkey = False
+        else:
+            nav = self.to_ipf_colormap(add_markers=False)
         if vector_kwargs is None:
             vector_kwargs = dict()
         signal.plot(navigator=nav, **kwargs)
