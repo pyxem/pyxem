@@ -107,6 +107,8 @@ html_theme_options = {
     "navigation_with_keys": True,
     "show_toc_level": 2,
     "use_edit_page_button": True,
+    "announcement": "Check out the new "
+    "<a href='https://pyxem.readthedocs.io/en/latest/examples/index.html'>Examples Gallery!</a> ",
     "switcher": {
         "json_url": "https://pyxem.readthedocs.io/en/latest/_static/switcher.json",
         "version_match": version_match,

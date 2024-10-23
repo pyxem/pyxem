@@ -23,8 +23,8 @@ s = fe_multi_phase_grains().as_lazy()
 # --------------------------
 # To solve the first problem, you can:
 #
-# 1. Precompute the navigator using
-# :external+hyperspy:meth:`~.api.signals.BaseSignal.plot` or :external+hyperspy:meth:`_signals.lazy.LazySignal.compute_navigator`
+# 1. Precompute the navigator using the :meth:`hyperspy.api.signals.plot` method or
+# the :meth:`hyperspy._signals.LazySignal.compute_navigator` method
 # which will compute the navigator and store it in the signal. This will make plotting faster.
 
 s.compute_navigator()
@@ -36,7 +36,7 @@ print(s.navigator)
 # 2. You can also set the navigator directly using `s.navigator = ...` if you have a navigator
 # that you want to use. This is useful if a virtual image is created along with the signal when
 # the data is acquired.  This will also save the navigator in the metadata. This is similar to the
-# :external+hyperspy:meth:`_signals.lazy.LazySignal.compute_navigator` function of the signal and
+# :meth:`hyperspy._signals.LazySignal.compute_navigator`method of the signal and
 # will be saved when the signal is saved.
 
 dummy_navigator = hs.signals.Signal2D(np.ones((20, 20)))  # just a dummy navigator
