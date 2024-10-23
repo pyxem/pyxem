@@ -93,22 +93,6 @@ class CalibrationGenerator:
         )
         return information_string
 
-    def to_ai(self, wavelength, **kwargs):
-        sig_shape = np.shape(self.diffraction_pattern)
-        unit = "k_A^-1"
-        setup = _get_setup(wavelength, unit, self.diffraction_calibration)
-        detector, dist, radial_range = setup
-        ai = get_azimuthal_integrator(
-            detector=detector,
-            detector_distance=dist,
-            shape=sig_shape,
-            center=self.center,
-            affine=self.affine_matrix,
-            wavelength=wavelength,
-            **kwargs,
-        )
-        return ai
-
     def get_elliptical_distortion(
         self,
         mask_radius,
