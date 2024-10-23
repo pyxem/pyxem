@@ -1,7 +1,7 @@
 repos:
   - repo: https://github.com/psf/black
     # Version can be updated by running "pre-commit autoupdate"
-    rev: 24.8.0
+    rev: 24.10.0
     hooks:
       - id: black
 ci:
