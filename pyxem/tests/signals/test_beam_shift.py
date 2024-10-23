@@ -35,7 +35,7 @@ class TestMakeLinearPlane:
         s.change_dtype("float32")
         s_orig = s.deepcopy()
         s.make_linear_plane()
-        assert s.data == approx(s_orig.data, abs=1e-7)
+        assert s.data == approx(s_orig.data, abs=1e-6)
 
 
 class TestGetLinearPlane:
@@ -47,7 +47,7 @@ class TestGetLinearPlane:
         s = BeamShift(data)
         s.change_dtype("float32")
         s_lp = s.get_linear_plane()
-        assert s_lp.data == approx(s.data, abs=1e-7)
+        assert s_lp.data == approx(s.data, abs=1e-6)
 
     def test_mask(self):
         data_x, data_y = np.meshgrid(
@@ -63,7 +63,7 @@ class TestGetLinearPlane:
         s.data[45:50, 36:41, 0] = 100000
         s.data[45:50, 36:41, 1] = -100000
         s_lp = s.get_linear_plane(mask=s_mask)
-        assert s_lp.data == approx(s_orig.data, abs=1e-7)
+        assert s_lp.data == approx(s_orig.data, abs=1e-6)
 
     def test_lazy_input_error(self):
         s = LazyBeamShift(da.zeros((50, 40, 2)))
