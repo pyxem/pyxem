@@ -42,7 +42,6 @@ class TestDiffractionVariance:
             )
         )
         var.unit = "2th_rad"
-        var.set_ai()
         integration = var.get_azimuthal_integral1d(npt=10)
         assert isinstance(integration, DiffractionVariance1D)
 

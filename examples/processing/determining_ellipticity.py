@@ -83,7 +83,7 @@ s.add_marker(el, plot_marker=True)
 
 s.unit = "k_nm^-1"
 s.beam_energy = 200
-s.set_ai(affine=affine)
+s.calibration.affine = affine
 az = s.get_azimuthal_integral2d(npt=100, inplace=False)
 corr = s.apply_affine_transformation(affine, inplace=False)
 

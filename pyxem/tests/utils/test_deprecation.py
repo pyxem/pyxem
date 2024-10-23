@@ -22,6 +22,7 @@ import numpy as np
 import pytest
 
 from pyxem.utils._deprecated import deprecated, deprecated_argument
+from pyxem.common import VisibleDeprecationWarning
 
 
 class TestDeprecationWarning:
@@ -36,7 +37,7 @@ class TestDeprecationWarning:
             """Some docstring."""
             return n + 1
 
-        with pytest.warns(np.VisibleDeprecationWarning) as record:
+        with pytest.warns(VisibleDeprecationWarning) as record:
             assert foo(4) == 5
         desired_msg = (
             "Function `foo()` is deprecated and will be removed in version 0.8. Use "
@@ -59,7 +60,7 @@ class TestDeprecationWarning:
             """
             return n + 2
 
-        with pytest.warns(np.VisibleDeprecationWarning) as record2:
+        with pytest.warns(VisibleDeprecationWarning) as record2:
             assert foo2(4) == 6
         desired_msg2 = "Function `foo2()` is deprecated."
         assert str(record2[0].message) == desired_msg2
@@ -76,7 +77,7 @@ class TestDeprecationWarning:
         def foo(n):
             return n + 1
 
-        with pytest.warns(np.VisibleDeprecationWarning) as record:
+        with pytest.warns(VisibleDeprecationWarning) as record:
             assert foo(4) == 5
         desired_msg = (
             "Function `foo()` is deprecated and will be removed in version 0.8. Use "
@@ -115,7 +116,7 @@ class TestDeprecateArgument:
             assert my_foo.bar_arg(b=1) == {"b": 1}
 
         # Warns
-        with pytest.warns(np.VisibleDeprecationWarning) as record2:
+        with pytest.warns(VisibleDeprecationWarning) as record2:
             assert my_foo.bar_arg(a=2) == {"a": 2}
         assert str(record2[0].message) == (
             r"Argument `a` is deprecated and will be removed in version 1.4. "
@@ -124,7 +125,7 @@ class TestDeprecateArgument:
         )
 
         # Warns with alternative
-        with pytest.warns(np.VisibleDeprecationWarning) as record3:
+        with pytest.warns(VisibleDeprecationWarning) as record3:
             assert my_foo.bar_arg_alt(a=3) == {"b": 3}
         assert str(record3[0].message) == (
             r"Argument `a` is deprecated and will be removed in version 1.4. "
