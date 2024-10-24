@@ -8,15 +8,15 @@ The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`
 and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
 
-Version 1.0.0
-===========================
+Unreleased
+==========
+Added
+-----
+- Added Examples for general plotting functions focusing on plotting diffraction patterns (#1108)
+
 Removed
 -------
 - Removed Dependency on pyfai.  Azimuthal integration is all handled internally (#1103)
-- Removed Generator classes that were deprecated (#1102)
-    - Removed IndexationGenerator, CalibrationGenerator, VirtualImageGenerator,
-      SubpixelRefinementGenerator, VarianceGenerator, PDFGenerator1D, and VirtualDarkFieldGenerator
-
 
 2024-06-10 - version 0.19.1
 ===========================
