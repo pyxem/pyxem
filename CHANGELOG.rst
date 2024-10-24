@@ -13,6 +13,7 @@ Unreleased
 Added
 -----
 - Added Examples for general plotting functions focusing on plotting diffraction patterns (#1108)
+- Added support for marker plotting for multi-phase orientation mapping results (#1092)
 
 Removed
 -------
