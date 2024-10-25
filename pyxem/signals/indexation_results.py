@@ -43,6 +43,8 @@ from orix.plot import IPFColorKeyTSL, DirectionColorKeyTSL
 import hyperspy.api as hs
 import numpy as np
 from matplotlib.collections import QuadMesh
+from matplotlib.colors import Normalize
+from scipy.spatial import Delaunay
 
 import numpy as np
 import hyperspy.api as hs
@@ -51,6 +53,7 @@ from pyxem.utils.indexation_utils import get_nth_best_solution
 from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
 from pyxem.utils._signals import _transfer_navigation_axes
 from pyxem.utils.signal import compute_markers
+from pyxem.utils._deprecated import deprecated
 
 
 def crystal_from_vector_matching(z_matches):
@@ -171,6 +174,213 @@ def _get_second_best_phase(z):
         return -1
 
 
+def get_ipf_outline(
+    phase: Phase,
+    include_labels: bool = True,
+    offset_x: float = 0.85,
+    offset_y: float = 0.85,
+    scale: float = 0.2,
+):
+    """Get the outline of the IPF for the orientation map as a marker in the
+    upper right hand corner including labels if desired.
+
+    Parameters
+    ----------
+    phase: Phase
+        The phase to use, defining the symmerty reduced zone
+    include_labels : bool
+        If True, the labels for the axes will be included.
+    offset : float
+        The offset of the markers from the lower left of the plot (as a fraction of the axis).
+    scale : float
+        The scale (as a fraction of the axis) for the markers.
+
+    Returns
+    -------
+    polygon_sector : hs.plot.markers.Polygons
+        The outline of the IPF as a marker
+    texts : hs.plot.markers.Texts
+        The text labels for the IPF axes
+    maxes : np.ndarray
+        The maximum values for the axes
+    mins : np.ndarray
+        The minimum values for the axes
+    """
+    offset = np.array([offset_x, offset_y])
+    # Creating Lines around QuadMesh
+    sector = phase.point_group.fundamental_sector
+    s = StereographicProjection()
+
+    edges = _closed_edges_in_hemisphere(sector.edges, sector)
+    ex, ey = s.vector2xy(edges)
+    original_offset = np.vstack((ex, ey)).T
+    mins, maxes = original_offset.min(axis=0), original_offset.max(axis=0)
+    original_offset = (
+        (original_offset - ((maxes + mins) / 2)) / (maxes.max() - mins.min()) * scale
+    )
+    original_offset = original_offset + offset
+    polygon_sector = hs.plot.markers.Polygons(
+        verts=original_offset[np.newaxis],
+        transform="axes",
+        alpha=1,
+        facecolor="none",
+    )
+    if include_labels:
+        labels = _get_ipf_axes_labels(sector.vertices, symmetry=phase.point_group)
+        tx, ty = s.vector2xy(sector.vertices)
+        texts_offset = np.vstack((tx, ty)).T
+        texts_offset = (
+            (texts_offset - ((maxes + mins) / 2)) / (maxes.max() - mins.min()) * scale
+        )
+        texts_offset = texts_offset + offset
+        texts = hs.plot.markers.Texts(
+            texts=labels,
+            offsets=texts_offset,
+            sizes=(1,),
+            offset_transform="axes",
+            facecolor="k",
+        )
+        return polygon_sector, texts, maxes, mins
+
+
+def get_ipf_annotation_markers(phase: Phase, offset: float = 0.85, scale: float = 0.2):
+    """Get the outline of the IPF for the orientation map as a marker in the
+    upper right hand corner including labels if desired. As well as the color
+    mesh for the IPF.
+
+    Parameters
+    ----------
+    offset : float
+        The offset of the markers from the lower left of the plot (as a fraction of the axis).
+    scale : float
+        The scale (as a fraction of the axis) for the markers.
+
+    Returns
+    -------
+    polygon_sector : hs.plot.markers.Polygons
+        The outline of the IPF as a marker
+    texts : hs.plot.markers.Texts
+        The text labels for the IPF axes
+    mesh : hs.plot.markers.Markers
+        The color mesh for the IPF (using :class:`matplotlib.collections.QuadMesh`)
+    """
+
+    polygon_sector, texts, _, _ = get_ipf_outline(
+        phase, offset_x=offset, offset_y=offset, scale=scale
+    )
+
+    # Create Color Mesh
+    color_key = DirectionColorKeyTSL(symmetry=phase.point_group)
+    g, ext = color_key._create_rgba_grid(return_extent=True)
+
+    max_x = np.max(ext[1])
+    min_x = np.min(ext[1])
+
+    max_y = np.max(ext[0])
+    min_y = np.min(ext[0])
+
+    # center extent:
+    y = np.linspace(ext[0][0], ext[0][1], g.shape[1] + 1) - ((max_y + min_y) / 2)
+
+    y = y / (max_y - min_y) * scale + offset
+
+    x = np.linspace(ext[1][1], ext[1][0], g.shape[0] + 1) - ((max_x + min_x) / 2)
+
+    x = x / (max_x - min_x) * scale + offset
+    xx, yy = np.meshgrid(y, x)
+
+    mesh = hs.plot.markers.Markers(
+        collection=QuadMesh,
+        coordinates=np.stack((xx, yy), axis=-1),
+        array=g,
+        transform="axes",
+        offset_transform="display",
+        offsets=[[0, 0]],
+    )
+    return polygon_sector, mesh, texts
+
+
+def vectors_to_single_phase_ipf_markers(
+    vectors: Vector3d,
+    phase: Phase,
+    normalized_correlation: np.ndarray,
+    offset_x: float = 0.85,
+    offset_y: float = 0.85,
+    scale: float = 0.2,
+    color: str = "green",
+    cmap: str = None,
+):
+    """Convert the orientation map to a set of inverse pole figure
+    markers which visualizes the best matching orientations in the
+    reduced S2 space.
+
+    Parameters
+    ----------
+    vectors : Vector3d
+        The vectors to display. These will be projected into the fundamental sector
+    phase : Phase
+        The phase for the fundamental sector
+    normalized_correrlation : np.ndarray
+        Correlation scores, normalized to lie between 0 and 1.
+        Used for alpha for single-color plotting, and for the color map
+    offset : float
+        The offset of the markers from the center of the plot
+    scale : float
+        The scale (as a fraction of the axis) for the markers.
+    """
+    offset = np.array([offset_x, offset_y])
+
+    markers = []
+
+    vectors = vectors.in_fundamental_sector(phase.point_group)
+    polygon_sector, texts, maxes, mins = get_ipf_outline(
+        phase, offset_x=offset_x, offset_y=offset_y, scale=scale
+    )
+    markers.append(polygon_sector)
+    markers.append(texts)
+
+    s = StereographicProjection()
+    x, y = s.vector2xy(vectors)
+    x = x.reshape(vectors.shape)
+    y = y.reshape(vectors.shape)
+    offsets = np.empty(shape=vectors.shape[:-1], dtype=object)
+    alpha = np.ones(shape=vectors.shape[:-1], dtype=object)
+
+    # For each set of n_best, we reverse the order (using [::-1])
+    # to ensure the best spot is displayed on top
+    for i in np.ndindex(offsets.shape):
+        off = np.vstack((x[i], y[i])).T
+        norm_points = (off - ((maxes + mins) / 2)) / (maxes.max() - mins.min()) * scale
+        norm_points = norm_points + offset
+        offsets[i] = norm_points[::-1]
+        alpha[i] = normalized_correlation[i][::-1]
+
+    square = hs.plot.markers.Squares(
+        offsets=[offset],
+        widths=(scale + scale / 2,),
+        units="width",
+        offset_transform="axes",
+        facecolor="white",
+        edgecolor="black",
+    )
+    # Square needs to be on the bottom
+    markers.insert(0, square)
+
+    best_points = hs.plot.markers.Points(
+        offsets=offsets.T,
+        sizes=(4,),
+        offset_transform="axes",
+        alpha=alpha.T,
+        facecolor=color,
+        cmap=cmap,
+        array=None if cmap is None else alpha.T,
+        norm=Normalize(0, 1),
+    )
+    markers.append(best_points)
+
+    return (*markers,)
+
+
 def vectors_to_coordinates(vectors):
     """
     Convert a set of diffraction vectors to coordinates. For use with the map
@@ -227,7 +437,16 @@ def rotation_from_orientation_map(result, rots):
     return ori
 
 
+@deprecated(
+    since="0.20",
+    removal="1.0.0",
+    alternative="pyxem.signals.indexation_results.vectors_from_orientation_map",
+)
 def extract_vectors_from_orientation_map(result, all_vectors, n_best_index=0):
+    return vectors_from_orientation_map(result, all_vectors, n_best_index=n_best_index)
+
+
+def vectors_from_orientation_map(result, all_vectors, n_best_index=0):
     index, _, rotation, mirror = result[n_best_index, :].T
     index = index.astype(int)
     if all_vectors.ndim == 0:
@@ -244,6 +463,7 @@ def extract_vectors_from_orientation_map(result, all_vectors, n_best_index=0):
     rotation = Rotation.from_euler(
         (mirror * rotation, 0, 0), degrees=True, direction="crystal2lab"
     )
+
     vectors = ~rotation * vectors.to_miller()
     vectors = DiffractingVector(
         vectors.phase, xyz=vectors.data.copy(), intensity=intensity
@@ -394,10 +614,18 @@ class OrientationMap(DiffractionVectors2D):
             symmetry=self.simulation.phases.point_group,
         )
 
+    @deprecated(
+        since="0.20",
+        removal="1.0.0",
+        alternative="pyxem.signals.OrientationMap.to_vectors",
+    )
     def to_single_phase_vectors(
         self, n_best_index: int = 0, **kwargs
     ) -> hs.signals.Signal1D:
-        """Get the reciprocal lattice vectors for a single-phase simulation.
+        return self.to_vectors(n_best_index=n_best_index, **kwargs)
+
+    def to_vectors(self, n_best_index: int = 0, **kwargs) -> hs.signals.Signal1D:
+        """Get the reciprocal lattice vectors for each navigation position.
 
         Parameters
         ----------
@@ -408,12 +636,13 @@ class OrientationMap(DiffractionVectors2D):
         """
 
         if self.simulation.has_multiple_phases:
-            raise ValueError("Multiple phases found in simulation")
-
-        # Use vector data as signal in case of different vectors per navigation position
-        vectors_signal = hs.signals.Signal1D(self.simulation.coordinates)
+            # With different phases, we cannot have a signal anymore, as the first dimension is now the phase
+            vectors_signal = np.array([sim for sim in self.simulation])
+        else:
+            # Use vector data as signal in case of different vectors per navigation position
+            vectors_signal = hs.signals.Signal1D(self.simulation.coordinates)
         v = self.map(
-            extract_vectors_from_orientation_map,
+            vectors_from_orientation_map,
             all_vectors=vectors_signal,
             inplace=False,
             output_signal_size=(),
@@ -466,7 +695,14 @@ class OrientationMap(DiffractionVectors2D):
             phase_list=phases,
         )
 
-    def to_ipf_markers(self, offset: float = 0.85, scale: float = 0.2):
+    def to_ipf_markers(
+        self,
+        offset_x: float = 0.85,
+        offset_y: float = 0.85,
+        scale: float = 0.2,
+        color: str = "green",
+        cmap: str = None,
+    ):
         """Convert the orientation map to a set of inverse pole figure
         markers which visualizes the best matching orientations in the
         reduced S2 space.
@@ -477,53 +713,189 @@ class OrientationMap(DiffractionVectors2D):
             The offset of the markers from the center of the plot
         scale : float
             The scale (as a fraction of the axis) for the markers.
+        color : str
+            The color of the markers. Overridden by cmap, if not None
+        cmap : str
+            Use a color map to show correlation scores.
+            Takes priority over the `color` parameter.
+
+        Notes
+        -----
+        This function can be slow with a large n_keep.
+        Use `to_ipf_correlation_heatmap_markers` instead.
         """
-        if self._lazy:
-            raise ValueError(
-                "Cannot create markers from lazy signal. Please compute the signal first."
+        rots = self.to_rotation()
+        vecs = rots * Vector3d.zvector()
+        # Normalize the correlation scores
+        cors = self.data[..., 1] / np.max(self.data[..., 1], axis=-1)[..., np.newaxis]
+        if not self.simulation.has_multiple_phases:
+            return vectors_to_single_phase_ipf_markers(
+                vecs,
+                self.simulation.phases,
+                cors,
+                offset_x=offset_x,
+                offset_y=offset_y,
+                scale=scale,
+                color=color,
+                cmap=cmap,
             )
-        if self.simulation.has_multiple_phases:
-            raise ValueError("Multiple phases found in simulation")
-        polygon_sector, texts, maxes, mins = self._get_ipf_outline(
-            offset=offset, scale=scale
-        )
+        # Multiple phases, we make a few different IPFs
+        markers = []
+        phase_idxs = self.to_phase_index()
+        for phase_idx, phase in enumerate(self.simulation.phases):
+            # As a workaround, set alpha to 0 for the wrong phase
+            phase_cors = cors * (phase_idxs == phase_idx)
+            markers += list(
+                vectors_to_single_phase_ipf_markers(
+                    vecs,
+                    phase,
+                    phase_cors,
+                    offset_x=offset_x,
+                    offset_y=offset_y - 1.5 * scale * phase_idx,
+                    scale=scale,
+                    color=color,
+                    cmap=cmap,
+                )
+            )
+        return markers
 
-        orients = self.to_single_phase_orientations()
-        vectors = orients * Vector3d.zvector()
-        vectors = vectors.in_fundamental_sector(self.simulation.phases.point_group)
+    def to_ipf_correlation_heatmap_markers(
+        self,
+        offset_x: float = 0.85,
+        offset_y: float = 0.85,
+        scale: float = 0.2,
+        cmap: str = "inferno",
+    ):
+        """Get the outline of the IPF for the orientation map as a marker in the
+        upper right hand corner including labels if desired. As well as the color
+        mesh for the IPF.
+
+        Parameters
+        ----------
+        offset : float
+            The offset of the markers from the lower left of the plot (as a fraction of the axis).
+        scale : float
+            The scale (as a fraction of the axis) for the markers.
+
+        Returns
+        -------
+        polygon_sector : hs.plot.markers.Polygons
+            The outline of the IPF as a marker
+        texts : hs.plot.markers.Texts
+            The text labels for the IPF axes
+        mesh : hs.plot.markers.Markers
+            The color mesh for the IPF (using :class:`matplotlib.collections.QuadMesh`)
+
+        Notes
+        -----
+        It is recommended to have a large `n_keep` for this to look nice, e.g. 75% of the simulation bank.
+
+        This will not look good if the rotations used in the simulation(s) consists of
+        multiple different regions in the IPF.
+
+        """
+        phase_idx_signal = hs.signals.Signal1D(self.to_phase_index())
+        phases = self.simulation.phases
+        rotations = self.simulation.rotations
+        if not self.simulation.has_multiple_phases:
+            phases = [phases]
+            rotations = [rotations]
+            phase_idx_signal = 0
+
         s = StereographicProjection()
-        x, y = s.vector2xy(vectors)
-        x = x.reshape(vectors.shape)
-        y = y.reshape(vectors.shape)
-        cor = self.data[..., 1]
-        offsets = np.empty(shape=vectors.shape[:-1], dtype=object)
-        correlation = np.empty(shape=vectors.shape[:-1], dtype=object)
+        rotation_sizes = np.cumsum([0] + [r.size for r in rotations])
 
-        for i in np.ndindex(offsets.shape):
-            off = np.vstack((x[i], y[i])).T
-            norm_points = (off - ((maxes + mins) / 2)) / (maxes - mins) * scale
-            norm_points = norm_points + offset
-            offsets[i] = norm_points
-            correlation[i] = cor[i] / np.max(cor[i]) * 0.5
+        markers = []
 
-        square = hs.plot.markers.Squares(
-            offsets=[[offset, offset]],
-            widths=(scale + scale / 2,),
-            units="width",
-            offset_transform="axes",
-            facecolor="white",
-            edgecolor="black",
-        )
+        for phase_idx, phase in enumerate(phases):
+            offset = np.array([offset_x, offset_y])
+            polygon_sector, texts, maxs, mins = get_ipf_outline(
+                phase, offset_x=offset_x, offset_y=offset_y, scale=scale
+            )
+            # We make a mesh of the correlation scores,
+            # But we mask out the <n_best rotations.
+            # Fetch all possible zone axes for the phase to speed up calculations
+            rots = rotations[phase_idx]
+            vecs = rots * Vector3d.zvector()
 
-        best_points = hs.plot.markers.Points(
-            offsets=offsets.T,
-            sizes=(4,),
-            offset_transform="axes",
-            alpha=correlation.T,
-            facecolor="green",
-        )
+            x, y = s.vector2xy(vecs)
+            xy = np.vstack((x, y)).T
 
-        return square, polygon_sector, best_points, texts
+            new_x = np.linspace(mins[0], maxs[0], 100 + 1)
+            new_y = np.linspace(mins[1], maxs[1], 100 + 1)
+            xx, yy = np.meshgrid(new_x, new_y)
+            out_xy = np.stack((xx, yy), axis=-1)
+            new_xy = np.vstack((xx[:-1, :-1].flatten(), yy[:-1, :-1].flatten())).T
+
+            # Interpolate the values to a grid.
+            # This is usually slow, e.g. using scipy.interpolate.griddata.
+            # Since the data coordinates and interpolated coordinates
+            # are always the same, and since we use linear interpolation,
+            # we can pre-calculate the barycentric weights for Delaunay triangles
+            # https://stackoverflow.com/a/20930910
+            tri = Delaunay(xy, incremental=False)
+            simplex = tri.find_simplex(new_xy)
+
+            # points outside the convex hull gets assigned the index -1.
+            # We later mask these out
+            outside = simplex < 0
+
+            vertices = np.take(tri.simplices, simplex, axis=0)
+            temp = np.take(tri.transform, simplex, axis=0)
+            delta = new_xy - temp[:, -1]
+            bary = np.einsum("njk,nk->nj", temp[:, :-1, :], delta)
+            weights = np.hstack((bary, 1 - bary.sum(axis=1, keepdims=True)))
+
+            def interpolate(values):
+                return np.einsum("nj,nj->n", np.take(values, vertices), weights)
+
+            def interpolate_and_mask_correlations(result, phase_idxs):
+                indices, correlation, _, _ = result[phase_idxs == phase_idx].T
+                max_cor = result[:, 1].max()
+                indices = indices.astype(int) - rotation_sizes[phase_idx] - 1
+                all_correlations = np.full(x.shape, np.nan)
+                all_correlations[indices] = correlation / max_cor
+                out = interpolate(all_correlations)
+                out[outside] = np.nan
+                return out
+
+            g = self.map(
+                interpolate_and_mask_correlations,
+                phase_idxs=phase_idx_signal,
+                inplace=False,
+                ragged=True,
+            ).data
+
+            # Scale the coordinates
+            out_xy = (out_xy - ((maxs + mins) / 2)) / (maxs.max() - mins.min()) * scale
+            out_xy += offset
+
+            mesh = hs.plot.markers.Markers(
+                collection=QuadMesh,
+                coordinates=out_xy,
+                array=g.T,
+                transform="axes",
+                offset_transform="display",
+                offsets=[[0, 0]],
+                norm=Normalize(0, 1),
+                cmap=cmap,
+            )
+            square = hs.plot.markers.Squares(
+                offsets=[offset],
+                widths=(scale + scale / 2,),
+                units="width",
+                offset_transform="axes",
+                facecolor="white",
+                edgecolor="black",
+            )
+
+            markers.append(square)
+            markers.append(polygon_sector)
+            markers.append(mesh)
+            markers.append(texts)
+
+            offset_y -= 1.5 * scale
+        return (*markers,)
 
     def to_markers(
         self,
@@ -580,7 +952,7 @@ class OrientationMap(DiffractionVectors2D):
             navigation_chunks = None
         all_markers = []
         for n in range(n_best):
-            vectors = self.to_single_phase_vectors(
+            vectors = self.to_vectors(
                 lazy_output=True, navigation_chunks=navigation_chunks
             )
             color = marker_colors[n % len(marker_colors)]
@@ -724,123 +1096,6 @@ class OrientationMap(DiffractionVectors2D):
             all_markers = compute_markers(all_markers)
         return all_markers
 
-    def _get_ipf_outline(
-        self, include_labels: bool = True, offset: float = 0.85, scale: float = 0.2
-    ):
-        """Get the outline of the IPF for the orientation map as a marker in the
-        upper right hand corner including labels if desired.
-
-        Parameters
-        ----------
-        include_labels : bool
-            If True, the labels for the axes will be included.
-        offset : float
-            The offset of the markers from the lower left of the plot (as a fraction of the axis).
-        scale : float
-            The scale (as a fraction of the axis) for the markers.
-
-        Returns
-        -------
-        polygon_sector : hs.plot.markers.Polygons
-            The outline of the IPF as a marker
-        texts : hs.plot.markers.Texts
-            The text labels for the IPF axes
-        maxes : np.ndarray
-            The maximum values for the axes
-        mins : np.ndarray
-            The minimum values for the axes
-        """
-        # Creating Lines around QuadMesh
-        sector = self.simulation.phases.point_group.fundamental_sector
-        s = StereographicProjection()
-
-        edges = _closed_edges_in_hemisphere(sector.edges, sector)
-        ex, ey = s.vector2xy(edges)
-        original_offset = np.vstack((ex, ey)).T
-        mins, maxes = original_offset.min(axis=0), original_offset.max(axis=0)
-        original_offset = (
-            (original_offset - ((maxes + mins) / 2)) / (maxes - mins) * scale
-        )
-        original_offset = original_offset + offset
-        polygon_sector = hs.plot.markers.Polygons(
-            verts=original_offset[np.newaxis],
-            transform="axes",
-            alpha=1,
-            facecolor="none",
-        )
-        if include_labels:
-            labels = _get_ipf_axes_labels(
-                sector.vertices, symmetry=self.simulation.phases.point_group
-            )
-            tx, ty = s.vector2xy(sector.vertices)
-            texts_offset = np.vstack((tx, ty)).T
-            texts_offset = (
-                (texts_offset - ((maxes + mins) / 2)) / (maxes - mins) * scale
-            )
-            texts_offset = texts_offset + offset
-            texts = hs.plot.markers.Texts(
-                texts=labels,
-                offsets=texts_offset,
-                sizes=(1,),
-                offset_transform="axes",
-                facecolor="k",
-            )
-            return polygon_sector, texts, maxes, mins
-
-    def get_ipf_annotation_markers(self, offset: float = 0.85, scale: float = 0.2):
-        """Get the outline of the IPF for the orientation map as a marker in the
-        upper right hand corner including labels if desired. As well as the color
-        mesh for the IPF.
-
-        Parameters
-        ----------
-        offset : float
-            The offset of the markers from the lower left of the plot (as a fraction of the axis).
-        scale : float
-            The scale (as a fraction of the axis) for the markers.
-
-        Returns
-        -------
-        polygon_sector : hs.plot.markers.Polygons
-            The outline of the IPF as a marker
-        texts : hs.plot.markers.Texts
-            The text labels for the IPF axes
-        mesh : hs.plot.markers.Markers
-            The color mesh for the IPF (using :class:`matplotlib.collections.QuadMesh`)
-        """
-
-        polygon_sector, texts, _, _ = self._get_ipf_outline(offset=offset, scale=scale)
-
-        # Create Color Mesh
-        color_key = DirectionColorKeyTSL(symmetry=self.simulation.phases.point_group)
-        g, ext = color_key._create_rgba_grid(return_extent=True)
-
-        max_x = np.max(ext[1])
-        min_x = np.min(ext[1])
-
-        max_y = np.max(ext[0])
-        min_y = np.min(ext[0])
-
-        # center extent:
-        y = np.linspace(ext[0][0], ext[0][1], g.shape[1] + 1) - ((max_y + min_y) / 2)
-
-        y = y / (max_y - min_y) * scale + offset
-
-        x = np.linspace(ext[1][1], ext[1][0], g.shape[0] + 1) - ((max_x + min_x) / 2)
-
-        x = x / (max_x - min_x) * scale + offset
-        xx, yy = np.meshgrid(y, x)
-
-        mesh = hs.plot.markers.Markers(
-            collection=QuadMesh,
-            coordinates=np.stack((xx, yy), axis=-1),
-            array=g,
-            transform="axes",
-            offset_transform="display",
-            offsets=[[0, 0]],
-        )
-        return polygon_sector, mesh, texts
-
     def to_ipf_colormap(
         self,
         direction: Vector3d = Vector3d.zvector(),
@@ -871,7 +1126,7 @@ class OrientationMap(DiffractionVectors2D):
         s = s.T
 
         if add_markers:
-            annotations = self.get_ipf_annotation_markers()
+            annotations = get_ipf_annotation_markers(self.simulation.phases)
             s.add_marker(
                 annotations,
                 permanent=True,
@@ -881,11 +1136,38 @@ class OrientationMap(DiffractionVectors2D):
             )
         return s
 
+    def to_phase_map(self):
+        """Create a colored navigator which can be passed as the
+        navigator argument to the `plot` method of some signal.
+
+        Returns
+        -------
+        hs.signals.BaseSignal
+        """
+        if not self.simulation.has_multiple_phases:
+            raise ValueError("Only a single phase present in simulation")
+
+        phase_idxs = self.to_phase_index()
+        # in case n_best = 1
+        phase_idxs = phase_idxs.reshape(
+            *self.axes_manager._navigation_shape_in_array, -1
+        )
+        colors = [p.color_rgb for p in self.simulation.phases]
+
+        float_rgb = np.take(colors, phase_idxs[..., 0], axis=0)
+        int_rgb = (float_rgb * 255).astype(np.uint8)
+
+        s = hs.signals.Signal1D(int_rgb)
+        s.change_dtype("rgb8")
+        s = s.T
+        return s
+
     def plot_over_signal(
         self,
         signal,
         add_vector_markers=True,
         add_ipf_markers=True,
+        add_ipf_correlation_heatmap=False,
         add_ipf_colorkey=True,
         vector_kwargs=None,
         **kwargs,
@@ -900,6 +1182,9 @@ class OrientationMap(DiffractionVectors2D):
             If True, the vector markers will be added to the signal.
         add_ipf_markers : bool
             If True, the IPF best fit will be added to the signal in an overlay
+        add_ipf_correlation_heatmap : bool
+            If True, a correlation score heatmap as an IPF will be added to the signal in an overlay.
+            This overrides the `add_ipf_markers` parameter.
         add_ipf_colorkey : bool
             If True, the IPF colorkey will be added to the signal
         vector_kwargs : dict
@@ -908,17 +1193,26 @@ class OrientationMap(DiffractionVectors2D):
             Additional keyword arguments to pass to the
             :meth:`hyperspy.api.signals.Signal2D.plot` method
         """
-        nav = self.to_ipf_colormap(add_markers=False)
+        if self.simulation.has_multiple_phases:
+            nav = self.to_phase_map()
+            add_ipf_colorkey = False
+        else:
+            nav = self.to_ipf_colormap(add_markers=False)
         if vector_kwargs is None:
             vector_kwargs = dict()
         signal.plot(navigator=nav, **kwargs)
         if add_vector_markers:
             signal.add_marker(self.to_markers(1, **vector_kwargs))
-        if add_ipf_markers:
+        if add_ipf_markers and not add_ipf_correlation_heatmap:
             ipf_markers = self.to_ipf_markers()
             signal.add_marker(ipf_markers)
+        if add_ipf_correlation_heatmap:
+            heatmap_markers = self.to_ipf_correlation_heatmap_markers()
+            signal.add_marker(heatmap_markers)
         if add_ipf_colorkey:
-            signal.add_marker(self.get_ipf_annotation_markers(), plot_on_signal=False)
+            signal.add_marker(
+                get_ipf_annotation_markers(self.simulation.phases), plot_on_signal=False
+            )
 
 
 class GenericMatchingResults:
