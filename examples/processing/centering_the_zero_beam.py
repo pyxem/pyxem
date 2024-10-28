@@ -41,57 +41,39 @@ hs.plot.plot_images([s_pacbed, s_pacbed_centered], label=["Original", "Centered"
 
 # %%
 # Centering the Zero Beam with constant deflection magnitude
-# -----------------------
-# In the presence of electromagnetic fields in the entire sample area, 
-# the plane fitting can fail. However, if there are several domains expected 
-# to have equal deflection magnitude, we can try to fit a plane to this by 
-# minimizing the magnitude variance. You may need a mask for good performance.
+# ----------------------------------------------------------
+# In the presence of electromagnetic fields in the entire sample area,
+# the plane fitting can fail. In this case, two seperate effects can be observed:
+#
+# 1. The zero beam position varies systematically with the scan position due to the effects of descan
+# 2. The zero beam will be deflected from electromagnetic fields in the sample
+#
+# Assuming that the effects of 1 are systematic and that the electomagnetic fields are
+# large we can try to fit a plane to correct for effects of 1 by minimizing the magnitude
+# variance. You may need a mask for good performance.
 
-def direct_beam_dataset_with_constant_shift_magnitude():
-
-    direct_beam_radius = 10
-
-    import numpy as np
-    bright_field_disk = np.zeros((128,128),dtype=np.int16)
-    bright_field_disk[np.sum((np.mgrid[:128,:128]-64)**2,axis=0) < direct_beam_radius**2 ] = 500
-
-    probes = np.zeros((20,20),dtype=int)
-    probes = bright_field_disk[np.newaxis][probes]
-    probes = pxm.signals.Diffraction2D(probes)
-
-
-    p = [0.5] * 6  # Plane parameters
-    x, y = np.meshgrid(np.arange(20), np.arange(20))
-    base_plane_x = p[0] * x + p[1] * y + p[2]
-    base_plane_y = p[3] * x + p[4] * y + p[5]
-
-    base_plane = np.stack((base_plane_x, base_plane_y)).T
-    data = base_plane.copy()
-
-    shifts = np.zeros_like(data)
-    shifts[:10, 10:] = (10, 10)
-    shifts[:10, :10] = (10, -10)
-    shifts[10:, 10:] = (-10, 10)
-    shifts[10:, :10] = (-10, -10)
-    data += shifts
-    data = pxm.signals.BeamShift(data)
-    probes.center_direct_beam(shifts=-data)
-    return probes
-
-s_probes = direct_beam_dataset_with_constant_shift_magnitude()
+s_probes = pxm.data.simulated_constant_shift_magnitude()
 
 s_shifts = s_probes.get_direct_beam_position(method="center_of_mass")
 
 # %%
+# Getting the Linear Plane
+# ------------------------
 # We call `get_linear_plane` with `constrain_magnitude_variance=True`. Then
 # we can center the direct beam as normal.
+s_shifts.plot(suptitle="Before Constrained Linear Plane Fit")
 s_linear_plane = s_shifts.get_linear_plane(constrain_magnitude_variance=True)
+s_linear_plane.plot(suptitle="After Constrained Linear Plane Fit")
 
 s_probes.center_direct_beam(shifts=s_linear_plane)
 
 # %%
-# The found electromagnetic domains can be visualized like such.
-s_shifts.data -= s_linear_plane.data
+# Getting the Electromagnetic Domains
+# -----------------------------------
+# The found electromagnetic domains can be visualized by subtracting the linear plane from the original shifts.
+# This is done by subtracting the linear plane determined from the constrained magnitude variance
+# from the original shifts.
+s_shifts -= s_linear_plane
 s_shifts.get_magnitude_phase_signal().plot()
 
 # %%
