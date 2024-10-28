@@ -7,12 +7,10 @@ jobs:
     name: Docs (PR comments)
     runs-on: ubuntu-latest
     env:
-      BUILD_DEPS: python3-dev build-essential graphviz
+      BUILD_DEPS: build-essential graphviz python3.12
       LATEX_DEPS: dvipng latexmk texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended
 
     steps:
-      - uses: actions/checkout@v3.3.0
-
       - uses: ericpre/sphinx-action@latest_sphinx
         with:
           pre-build-command: "apt-get update -y && apt-get install -y ${{ env.BUILD_DEPS }} ${{ env.LATEX_DEPS }} && apt-get install -y git && pip install .[all,doc] && make demos"
