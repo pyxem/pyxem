@@ -6,16 +6,35 @@ jobs:
   build_doc:
     name: Docs (PR comments)
     runs-on: ubuntu-latest
-    env:
-      BUILD_DEPS: build-essential graphviz python3.12
-      LATEX_DEPS: dvipng latexmk texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended
-
     steps:
-      - uses: ericpre/sphinx-action@latest_sphinx
+      - uses: actions/checkout@v4
         with:
-          pre-build-command: "apt-get update -y && apt-get install -y ${{ env.BUILD_DEPS }} ${{ env.LATEX_DEPS }} && apt-get install -y git && pip install .[all,doc] && make demos"
-          build-command: make html
-          docs-folder: doc/
+          fetch-depth: 0
+
+      - name: Install Ubuntu packages
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install graphviz
+          sudo apt-get install build-essential
+          sudo apt-get install latexmk
+          sudo apt-get install texlive-fonts-recommended
+
+      - uses: actions/setup-python@v5
+        name: Install Python
+        with:
+          python-version: '3.11'
+
+      - name: Install pyxem
+        shell: bash -l {0}
+        run: |
+          pip install .[all,doc]
+
+      - name: Build Documentation
+        shell: bash -l {0}
+        run: |
+          cd doc
+          make html
 
       - uses: actions/upload-artifact@v3
         with:
