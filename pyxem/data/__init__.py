@@ -51,7 +51,10 @@ from pyxem.data._data import (
     sped_ag,
     pdcusi_insitu,
 )
-from pyxem.data.simulated_dpc import simulated_stripes
+from pyxem.data.simulated_dpc import (
+    simulated_stripes,
+    simulated_constant_shift_magnitude,
+)
 
 __all__ = [
     "au_grating",
@@ -75,4 +78,5 @@ __all__ = [
     "feal_stripes",
     "sped_ag",
     "pdcusi_insitu",
+    "simulated_constant_shift_magnitude",
 ]
