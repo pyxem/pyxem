@@ -90,13 +90,16 @@ class BeamShift(DiffractionVectors1D):
         initial_values : array of floats, optional
             Initial guess for the plane parameters. Useful to vary if the plane fitting
             does not give desirable results. 
-            The x- and y-shifts are described by two linear planes with three parameters. 
-            The two first parameters, d/dx and d/dy, are the changes in x- or y-shift 
-            as you move one position in the navigation space in respectively the x- and y-
-            directions. The third parameter, x_0 or y_0, are respectively the x- and y-
-            shifts in the (0, 0) navigation position. The parameters are laid out thusly,
-            with the first three being for the x-shifts and the rest for the y-shifts:
-            [d/dx, d/dy, x_0, d/dx, d/dy, y_0]
+            The horizontal- and vertical-shifts are described by two linear planes 
+            with three parameters. The two first parameters, d/dx and d/dy, are the changes 
+            in horizontal-shift as you move one position in the navigation space in 
+            respectively the x- and y-directions. I. e. they are the steps in 
+            horizontal-shift as you change x- or y-coordinates. The third parameter,
+            shift_0, is the horizontal-shift in the (0, 0) navigation position. The 
+            vertical-shift are described by similar parameters. In this argument
+            supply the plane parameters in the following way, with the first three 
+            being for the horizontal-shift and the rest for the vertical-shift:
+            [d/dx, d/dy, shift_0, d/dx, d/dy, shift_0]
             Currently only implemented for the case when `constrain_magnitude_variance` 
             is `True`.
         constrain_magnitude_variance : bool, optional

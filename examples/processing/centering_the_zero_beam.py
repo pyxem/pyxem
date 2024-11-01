@@ -43,14 +43,15 @@ hs.plot.plot_images([s_pacbed, s_pacbed_centered], label=["Original", "Centered"
 # Centering the Zero Beam with constant deflection magnitude
 # ----------------------------------------------------------
 # In the presence of electromagnetic fields in the entire sample area,
-# the plane fitting can fail. In this case, two seperate effects can be observed:
+# the plane fitting can fail. In this case, two separate effects can be observed:
 #
 # 1. The zero beam position varies systematically with the scan position due to the effects of descan
 # 2. The zero beam will be deflected from electromagnetic fields in the sample
 #
-# Assuming that the effects of 1 are systematic and that the electomagnetic fields are
-# large we can try to fit a plane to correct for effects of 1 by minimizing the magnitude
-# variance. You may need a mask for good performance.
+# Assuming that the effects of 1 are systematic and that the electromagnetic fields have
+# constant strengths, we can try to fit a plane to correct for effects of 1 by minimizing the 
+# magnitude variance. You may need use a mask and/or have several electromagnetic 
+# domains for good performance.
 
 s_probes = pxm.data.simulated_constant_shift_magnitude()
 
@@ -75,5 +76,10 @@ s_probes.center_direct_beam(shifts=s_linear_plane)
 # from the original shifts.
 s_shifts -= s_linear_plane
 s_shifts.get_magnitude_phase_signal().plot()
+
+# For more realistic data, the linear plane optimization algorithm can give poor results. In this case,
+# you can change the initial values for the optimization algorithm by using the `initial_values` parameter
+# in `get_linear_plane`. See the docstring for more information. Try varying this and see if the plane
+# changes significantly.
 
 # %%
