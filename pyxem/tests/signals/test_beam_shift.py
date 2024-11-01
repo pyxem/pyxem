@@ -66,7 +66,6 @@ class TestGetLinearPlane:
         assert s_lp.data == approx(s_orig.data, abs=1e-6)
 
     def test_constrain_magnitude_variance(self):
-
         p = [0.5] * 6  # Plane parameters
         x, y = np.meshgrid(np.arange(256), np.arange(256))
         base_plane_x = p[0] * x + p[1] * y + p[2]
@@ -91,7 +90,6 @@ class TestGetLinearPlane:
         assert np.allclose(s_lp.data, base_plane.data, rtol=1e-7)
 
     def test_constrain_magnitude_variance_mask(self):
-
         p = [0.5] * 6  # Plane parameters
         x, y = np.meshgrid(np.arange(256), np.arange(256))
         base_plane_x = p[0] * x + p[1] * y + p[2]
@@ -121,8 +119,12 @@ class TestGetLinearPlane:
         s_lp = s.get_linear_plane(constrain_magnitude_variance=True, mask=mask)
         assert np.allclose(s_lp.data, base_plane.data, rtol=1e-7)
 
-    def test_constrain_magnitude_variance_initial_values(self):
+        # Check wrong mask dimensions
+        mask = mask[:255]
+        with pytest.raises(ValueError):
+            s_lp = s.get_linear_plane(constrain_magnitude_variance=True, mask=mask)
 
+    def test_constrain_magnitude_variance_initial_values(self):
         p = [0.5] * 6  # Plane parameters
         x, y = np.meshgrid(np.arange(256), np.arange(256))
         base_plane_x = p[0] * x + p[1] * y + p[2]
@@ -157,17 +159,23 @@ class TestGetLinearPlane:
         s.compute()
         s.get_linear_plane()
 
-    def test_wrong_navigation_input_1d_error(self):
+    @pytest.mark.parametrize("constrain_magnitude_variance", [False, True])
+    def test_wrong_navigation_input_1d_error(self, constrain_magnitude_variance):
         s = BeamShift(np.zeros((50, 2)))
         with pytest.raises(NotImplementedError):
-            s.get_linear_plane()
+            s.get_linear_plane(
+                constrain_magnitude_variance=constrain_magnitude_variance
+            )
 
-    def test_wrong_navigation_input_3d_error(self):
+    @pytest.mark.parametrize("constrain_magnitude_variance", [False, True])
+    def test_wrong_navigation_input_3d_error(self, constrain_magnitude_variance):
         s = BeamShift(np.zeros((50, 40, 30, 2)))
         with pytest.raises(NotImplementedError):
-            s.get_linear_plane()
+            s.get_linear_plane(
+                constrain_magnitude_variance=constrain_magnitude_variance
+            )
         s1 = s.inav[:, :, 10]
-        s1.get_linear_plane()
+        s1.get_linear_plane(constrain_magnitude_variance=constrain_magnitude_variance)
 
     def test_wrong_input_fit_corners_and_mask(self):
         s = BeamShift(np.zeros((5, 5, 2)))
