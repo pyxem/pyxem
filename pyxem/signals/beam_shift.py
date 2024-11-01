@@ -89,18 +89,18 @@ class BeamShift(DiffractionVectors1D):
             signal. This mush be set with a number, like 0.05 (5%) or 0.10 (10%).
         initial_values : array of floats, optional
             Initial guess for the plane parameters. Useful to vary if the plane fitting
-            does not give desirable results. 
-            The horizontal- and vertical-shifts are described by two linear planes 
-            with three parameters. The two first parameters, d/dx and d/dy, are the changes 
-            in horizontal-shift as you move one position in the navigation space in 
-            respectively the x- and y-directions. I. e. they are the steps in 
+            does not give desirable results.
+            The horizontal- and vertical-shifts are described by two linear planes
+            with three parameters. The two first parameters, d/dx and d/dy, are the changes
+            in horizontal-shift as you move one position in the navigation space in
+            respectively the x- and y-directions. I. e. they are the steps in
             horizontal-shift as you change x- or y-coordinates. The third parameter,
-            shift_0, is the horizontal-shift in the (0, 0) navigation position. The 
+            shift_0, is the horizontal-shift in the (0, 0) navigation position. The
             vertical-shift are described by similar parameters. In this argument
-            supply the plane parameters in the following way, with the first three 
+            supply the plane parameters in the following way, with the first three
             being for the horizontal-shift and the rest for the vertical-shift:
             [d/dx, d/dy, shift_0, d/dx, d/dy, shift_0]
-            Currently only implemented for the case when `constrain_magnitude_variance` 
+            Currently only implemented for the case when `constrain_magnitude_variance`
             is `True`.
         constrain_magnitude_variance : bool, optional
             Fits the linear planes to deflections with constant magnitude. By default

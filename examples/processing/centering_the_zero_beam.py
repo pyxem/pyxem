@@ -49,8 +49,8 @@ hs.plot.plot_images([s_pacbed, s_pacbed_centered], label=["Original", "Centered"
 # 2. The zero beam will be deflected from electromagnetic fields in the sample
 #
 # Assuming that the effects of 1 are systematic and that the electromagnetic fields have
-# constant strengths, we can try to fit a plane to correct for effects of 1 by minimizing the 
-# magnitude variance. You may need use a mask and/or have several electromagnetic 
+# constant strengths, we can try to fit a plane to correct for effects of 1 by minimizing the
+# magnitude variance. You may need use a mask and/or have several electromagnetic
 # domains for good performance.
 
 s_probes = pxm.data.simulated_constant_shift_magnitude()
