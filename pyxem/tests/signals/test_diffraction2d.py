@@ -126,6 +126,22 @@ class TestAzimuthalIntegral1d:
         np.testing.assert_array_almost_equal(ones.data[0:8], np.ones(8))
         assert az is None
 
+    def test_mask_mean(self, ones):
+        ones.calibration.center = None
+        ones.calibration.scale = 0.2
+        mask = np.zeros(ones.data.shape, dtype=bool)
+        mask[0:5, 0:5] = True
+        ones.calibration.mask = mask
+        az = ones.get_azimuthal_integral1d(
+            npt=10,
+            inplace=True,
+            radial_range=[0.0, 0.8],
+            mean=True,
+        )
+        assert isinstance(ones, Diffraction1D)
+        np.testing.assert_array_almost_equal(ones.data[0:8], np.ones(8))
+        assert az is None
+
     def test_1d_azimuthal_integral_inplace(self, ones):
         az = ones.get_azimuthal_integral1d(
             npt=10,
