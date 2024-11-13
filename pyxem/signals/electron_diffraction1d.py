@@ -22,6 +22,7 @@ from scipy.optimize import curve_fit
 from hyperspy._signals.lazy import LazySignal
 import hyperspy.api as hs
 from diffsims.utils.sim_utils import get_electron_wavelength
+from diffsims.simulations.simulation1d import Simulation1D
 
 from pyxem.signals.diffraction1d import Diffraction1D
 
@@ -47,6 +48,7 @@ class ElectronDiffraction1D(Diffraction1D):
         power_law_background=True,
         starting_scale=None,
         auto_limit_peaks=True,
+        center_lim=0.05,
         fit=True,
     ):
         """Creates a model for fitting diffraction peaks for a ring pattern using a series of Gaussians.
@@ -95,8 +97,8 @@ class ElectronDiffraction1D(Diffraction1D):
             if (
                 auto_limit_peaks
             ):  # guessing some reasonable parameters for "typical" diffraction rings
-                g.centre.bmin = r / starting_scale - 0.15 / starting_scale
-                g.centre.bmax = r / starting_scale + 0.15 / starting_scale
+                g.centre.bmin = r / starting_scale - center_lim / starting_scale
+                g.centre.bmax = r / starting_scale + center_lim / starting_scale
                 g.sigma.bmax = 0.03 / starting_scale
                 g.sigma.bmin = 0.01 / starting_scale
             model.append(g)
@@ -160,8 +162,8 @@ class ElectronDiffraction1D(Diffraction1D):
         -------
         camera_length : float
             The camera length in meters for the experiment.  Note that this is often
-            slightly different than the micrscope setting, however this calibrated
-            value is more accurate then the calculated value from the micrscope.
+            slightly different from the micrscope setting, however this calibrated
+            value is more accurate than the calculated value from the micrscope.
 
         Notes
         -----

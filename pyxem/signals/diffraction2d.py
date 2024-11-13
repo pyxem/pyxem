@@ -1730,14 +1730,15 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             **kwargs,
         )
         s = self if inplace else integration
-        k_axis = s.axes_manager.signal_axes[0]
-        if not isinstance(k_axis, UniformDataAxis):
-            k_axis.convert_to_uniform_axis()
-        # Dealing with axis changes
-        k_axis.name = "Radius"
-        k_axis.scale = (radial_range[1] - radial_range[0]) / npt
-        k_axis.offset = radial_range[0]
+        ax = UniformDataAxis(
+            name="Radius",
+            units=s.axes_manager.signal_axes[0].units,
+            size=npt,
+            scale=(radial_range[1] - radial_range[0]) / npt,
+            offset=radial_range[0],
+        )
 
+        s.axes_manager.set_axis(ax, -1)
         return integration
 
     def get_azimuthal_integral2d(
