@@ -1727,17 +1727,20 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             factor_slices=factor_slices,
             inplace=inplace,
             mask=mask,
+            output_dtype=float,
+            output_signal_size=(npt,),
             **kwargs,
         )
         s = self if inplace else integration
-        k_axis = s.axes_manager.signal_axes[0]
-        if not isinstance(k_axis, UniformDataAxis):
-            k_axis.convert_to_uniform_axis()
-        # Dealing with axis changes
-        k_axis.name = "Radius"
-        k_axis.scale = (radial_range[1] - radial_range[0]) / npt
-        k_axis.offset = radial_range[0]
+        ax = UniformDataAxis(
+            name="Radius",
+            units=s.axes_manager.signal_axes[0].units,
+            size=npt,
+            scale=(radial_range[1] - radial_range[0]) / npt,
+            offset=radial_range[0],
+        )
 
+        s.axes_manager.set_axis(ax, -1)
         return integration
 
     def get_azimuthal_integral2d(
@@ -1863,6 +1866,8 @@ class Diffraction2D(CommonDiffraction, Signal2D):
                 npt_rad=npt,
                 npt_azim=npt_azim,
                 inplace=inplace,
+                output_dtype=float,  # upcast to float (maybe we should force conversion)
+                output_signal_size=(npt, npt_azim),
                 mask=mask,
                 **kwargs,
             )
@@ -1871,21 +1876,24 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         s.set_signal_type("polar_diffraction")
 
         # Dealing with axis changes
-        t_axis = s.axes_manager.signal_axes[0]
-        k_axis = s.axes_manager.signal_axes[1]
-        if not isinstance(k_axis, UniformDataAxis):
-            k_axis.convert_to_uniform_axis()
-        if not isinstance(t_axis, UniformDataAxis):
-            t_axis.convert_to_uniform_axis()
 
-        t_axis.name = "Radians"
-        t_axis.units = "Rad"
-        t_axis.scale = (azimuth_range[1] - azimuth_range[0]) / npt_azim
-        t_axis.offset = azimuth_range[0]
+        k_axis = UniformDataAxis(
+            name="Radius",
+            units=s.axes_manager.signal_axes[0].units,
+            size=npt,
+            scale=(radial_range[1] - radial_range[0]) / npt,
+            offset=radial_range[0],
+        )
+        t_axis = UniformDataAxis(
+            name="Radians",
+            units="Rad",
+            size=npt_azim,
+            scale=(azimuth_range[1] - azimuth_range[0]) / npt_azim,
+            offset=azimuth_range[0],
+        )
 
-        k_axis.name = "Radius"
-        k_axis.scale = (radial_range[1] - radial_range[0]) / npt
-        k_axis.offset = radial_range[0]
+        s.axes_manager.set_axis(k_axis, -2)
+        s.axes_manager.set_axis(t_axis, -1)
 
         return integration
 

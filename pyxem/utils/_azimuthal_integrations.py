@@ -181,7 +181,9 @@ def _slice_radial_integrate1d(
         if mean:
             total_f = np.finfo(np.float32).eps
             if mask is not None:
-                total_f = total_f + mask[ind[0], ind[1]] * fa
+                for index, fa in zip(ind, f):
+                    if not mask[index[0], index[1]]:
+                        total_f = total_f + fa
             else:
                 for index, fa in zip(ind, f):
                     total_f = total_f + fa

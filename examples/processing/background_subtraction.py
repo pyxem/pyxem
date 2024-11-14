@@ -1,6 +1,6 @@
 """
 Background subtraction
-==============
+======================
 
 If your diffraction data is noisy, you might want to subtract the background from the
 dataset. Pyxem offers some built-in functionality for this, with the
