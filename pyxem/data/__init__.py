@@ -50,6 +50,9 @@ from pyxem.data._data import (
     feal_stripes,
     sped_ag,
     pdcusi_insitu,
+    au_grating_20cm,
+    small_ptychography,
+    au_phase,
 )
 from pyxem.data.simulated_dpc import (
     simulated_stripes,
@@ -79,4 +82,7 @@ __all__ = [
     "sped_ag",
     "pdcusi_insitu",
     "simulated_constant_shift_magnitude",
+    "au_grating_20cm",
+    "small_ptychography",
+    "au_phase",
 ]

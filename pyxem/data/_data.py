@@ -15,7 +15,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
-
+import orix.crystal_map
 import pooch
 from pyxem.data._registry import _file_names_hash, _urls
 import hyperspy.api as hs
@@ -332,6 +332,63 @@ def mgo_nanocrystals(allow_download=False, **kwargs):  # pragma: no cover
     file_path = sample.fetch_file_path(allow_download=allow_download)
     store = zarr.ZipStore(file_path)  # for loading from zip
     return hs.load(store, **kwargs)
+
+
+def au_grating_20cm(allow_download=False, **kwargs):  # pragma: no cover
+    """A PACBED image of Gold grating with 20cm camera length
+    for demonstrating the calibration of the camera length.
+
+    Data can be acessed from https://zenodo.org/records/14113591
+
+    Parameters
+    ----------
+    allow_download: bool
+        If True, the file will be downloaded from the repository to the local cache.
+    **kwargs
+        Keyword arguments passed to :func:`~hyperspy.api.load`.
+
+    Examples
+    --------
+    >>> import pyxem as pxm
+    >>> s = pxm.data.au_grating_20cm()
+    >>> print(s)
+    <Signal2D, title: , dimensions: (|256, 256)>
+    """
+    grating = Dataset("au_xgrating_20cm.tif")
+    file_path = grating.fetch_file_path(allow_download=allow_download)
+    return hs.load(file_path, **kwargs)
+
+
+def au_phase(allow_download=False, **kwargs):  # pragma: no cover
+    """A gold phase object for use in orix.
+
+    Data can be acessed from https://zenodo.org/records/14113591
+    Parameters
+    ----------
+    allow_download: bool
+        If True, the file will be downloaded from the repository to the local cache.
+    **kwargs
+        Keyword arguments passed to :func:`~orix.crystal_map.Phase.from_cif`.
+    Examples
+    --------
+    >>> import pyxem as pxm
+    >>> s = pxm.data.au_phase()
+
+    """
+
+    sample = Dataset("au.cif")
+    file_path = sample.fetch_file_path(allow_download=allow_download)
+    return orix.crystal_map.Phase.from_cif(file_path, **kwargs)
+
+
+def small_ptychography(allow_download=False, **kwargs):  # pragma: no cover
+    """A small 4-D STEM dataset of a bilayer WS2. Each Diffraction pattern is only
+    8x8 pixels so the dataset is quite small although for simple non iterative
+    ptychography 8x8 pixels should be sufficient.
+    """
+    ptychography = Dataset("smallPtychography.hspy")
+    file_path = ptychography.fetch_file_path(allow_download=allow_download)
+    return hs.load(file_path, **kwargs)
 
 
 class Dataset:

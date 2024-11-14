@@ -12,7 +12,6 @@ any questions.
 """
 
 from diffsims.generators.simulation_generator import SimulationGenerator
-from orix.crystal_map import Phase
 import pyxem as pxm
 import hyperspy.api as hs
 import numpy as np
@@ -22,11 +21,10 @@ import matplotlib.pyplot as plt
 
 
 # Load the data and the cif file
-au_dpeg = hs.load(
-    "../PycharmProjects/pyxem/examples/processing/au_xgrating_20cm.tif",
-    signal_type="electron_diffraction",
+au_dpeg = pxm.data.au_grating_20cm(
+    allow_download=True, signal_type="electron_diffraction"
 )
-gold_phase = Phase.from_cif("../PycharmProjects/pyxem/examples/processing/au.cif")
+gold_phase = pxm.data.au_phase(allow_download=True)  # Orix.CrystalMap.Phase object
 
 # %%
 # Create a Simulation Generator
