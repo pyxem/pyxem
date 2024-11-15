@@ -221,8 +221,8 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         Examples
         --------
         >>> s = pxm.data.dummy_data.get_disk_shift_simple_test_signal()
-        >>> s_c = s.center_of_mass(threshold=3., show_progressbar=False)
-        >>> s_c -= 25 # To shift the center disk to the middle (25, 25)
+        >>> s_c = s.get_direct_beam_position(method="center_of_mass", threshold=3.)
+        >>> s_c = -s_c # To shift in right direction
         >>> s_shift = s.shift_diffraction(
         ...     s_c.inav[0].data, s_c.inav[1].data,
         ...     show_progressbar=False)
@@ -649,8 +649,9 @@ class Diffraction2D(CommonDiffraction, Signal2D):
                 with standard deviation ``sigma``.
            "center_of_mass": The center is found using a calculation of the center of mass.
                 Optionally a ``mask`` can be applied to focus on just the center of some
-                dataset. A threshold value can also be given to suppress contrast from
-                weaker diffraction features.
+                dataset. To suppress contrast from diffuse scattering, a threshold value
+                ``threshold`` can also be given. The mean intensity of the diffraction image
+                will be multiplied by this and any values below the product will be set to 0.
         lazy_output : optional
             If True, s_shifts will be a lazy signal. If False, a non-lazy signal.
             By default, if the signal is (non-)lazy, the result will also be (non-)lazy.
@@ -668,7 +669,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             Additional arguments accepted by :func:`pyxem.utils.diffraction.find_beam_center_blur`,
             :func:`pyxem.utils.diffraction.find_beam_center_interpolate`,
             :func:`pyxem.utils.diffraction.find_beam_offset_cross_correlation`,
-            and :func:`pyxem.signals.diffraction2d.Diffraction2D.center_of_mass`,
+            and :func:`pyxem.signals.diffraction.center_of_mass_from_image`,
 
         Returns
         -------
@@ -690,7 +691,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Get a lazy signal, then calculate afterwards
 
-        >>> s_bs = s.center_of_mass(lazy_output=True, method="center_of_mass")
+        >>> s_bs = s.get_direct_beam_position(lazy_output=True, method="center_of_mass")
         >>> s_bs.compute(show_progressbar=False)
 
         """
@@ -851,7 +852,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             :func:`pyxem.utils.diffraction.find_beam_center_interpolate`,
             :func:`pyxem.utils.diffraction.find_beam_offset_cross_correlation`,
             :func:`pyxem.signals.diffraction2d.Diffraction2D.get_direct_beam_position`,
-            and :func:`pyxem.signals.diffraction2d.Diffraction2D.center_of_mass`,
+            and :func:`pyxem.signals.diffraction.center_of_mass_from_image`,
 
         Example
         -------
@@ -910,8 +911,8 @@ class Diffraction2D(CommonDiffraction, Signal2D):
     def threshold_and_mask(self, threshold=None, mask=None, show_progressbar=True):
         """Get a thresholded and masked of the signal.
 
-        Useful for figuring out optimal settings for the
-        :meth:`pyxem.signals.Diffraction2D.center_of_mass` method.
+        Useful for figuring out optimal settings when using 'center_of_mass' in
+        :meth:`pyxem.signals.Diffraction2D.get_direct_beam_position`.
 
         Parameters
         ----------
@@ -937,7 +938,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         See Also
         --------
-        center_of_mass
+        get_direct_beam_position
 
         """
         if self._lazy:
