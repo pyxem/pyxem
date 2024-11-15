@@ -106,9 +106,9 @@ class TestAzimuthalIntegral1d:
 
     def test_unit(self, ones):
         dif = Diffraction2D(data=[[1, 1], [1, 1]])
-        assert dif.unit is "px"
+        assert dif.unit == "px"
         dif.unit = "!23"
-        assert dif.unit is "px"
+        assert dif.unit == "px"
 
     def test_unit_set(self, ones):
         assert ones.unit == "2th_deg"

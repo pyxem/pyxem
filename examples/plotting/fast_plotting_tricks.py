@@ -8,7 +8,7 @@ this mostly happens with "large" data that is loaded Lazily.
 There are a couple of different ways that plotting in hyperspy/pyxem can be slow:
 
 1. The data is too large and the navigator is being recalculated every time you plot. (i.e. calling s.plot()
- takes a long time to render)
+takes a long time to render)
 2. Dragging the navigator is slow and laggy.
 """
 
