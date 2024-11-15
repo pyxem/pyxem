@@ -15,7 +15,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
-
+import pytest
 from pytest import approx, mark
 import math
 
@@ -762,7 +762,7 @@ class TestGetEllipseModelRansac:
             semi_len_max=semi_len_max,
             semi_len_ratio_lim=semi_len_ratio_lim,
             min_samples=15,
-            max_trials=5,
+            max_trials=50,
         )
         for iy, ix in np.ndindex(peak_array.shape[:2]):
             if ellipse_array[iy, ix] is not None:
