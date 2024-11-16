@@ -540,6 +540,7 @@ class OrientationMap(DiffractionVectors2D):
     def num_rows(self):
         return self.axes_manager.signal_axes[1].size
 
+
     def to_rotation(self, flatten=False):
         """
         Convert the orientation map to a set of `orix.Quaternion.Rotation` objects.
