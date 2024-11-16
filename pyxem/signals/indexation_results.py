@@ -442,20 +442,29 @@ def rotation_from_orientation_map(result, rots):
     removal="1.0.0",
     alternative="pyxem.signals.indexation_results.vectors_from_orientation_map",
 )
-def extract_vectors_from_orientation_map(result, all_vectors, n_best_index=0):
-    return vectors_from_orientation_map(result, all_vectors, n_best_index=n_best_index)
+def extract_vectors_from_orientation_map(**kwargs):
+    return vectors_from_orientation_map(**kwargs)
 
 
-def vectors_from_orientation_map(result, all_vectors, n_best_index=0):
+
+def vectors_from_orientation_map(result, vectors, phases, phase_index, intensities, n_best_index=0):
+    """
+    Note that any function which passes a large number of python objects back/forth to dask causes
+    lots of overhead.  We are going to try to stick with just passing numpy arrays... Also,
+    the Orix Rotation class has a really high overhead which is unfortunate. That is something to
+    consider optimizing in the future.
+    """
     index, _, rotation, mirror = result[n_best_index, :].T
     index = index.astype(int)
-    if all_vectors.ndim == 0:
-        vectors = all_vectors
+    if vectors.ndim == 0:
+        data = vectors
+        phase = phases
     else:
-        vectors = all_vectors[index]
+        data = vectors[index]
+        phase = phases[phase_index[index]]
+        intensities = intensities[index]
     # Copy manually, as deepcopy adds a lot of overhead with the phase
-    intensity = vectors.intensity
-    vectors = DiffractingVector(vectors.phase, xyz=vectors.data.copy())
+    vectors = DiffractingVector(phase, xyz=data.copy())
     hkl = vectors.hkl
     # Flip y, as discussed in https://github.com/pyxem/pyxem/issues/925
     vectors.y = -vectors.y
@@ -466,7 +475,7 @@ def vectors_from_orientation_map(result, all_vectors, n_best_index=0):
 
     vectors = ~rotation * vectors.to_miller()
     vectors = DiffractingVector(
-        vectors.phase, xyz=vectors.data.copy(), intensity=intensity
+        vectors.phase, xyz=vectors.data.copy(), intensity=intensities
     )
     vectors.original_hkl = hkl
 
@@ -641,9 +650,14 @@ class OrientationMap(DiffractionVectors2D):
         else:
             # Use vector data as signal in case of different vectors per navigation position
             vectors_signal = hs.signals.Signal1D(self.simulation.coordinates)
+
+        data, intensities, phases, phase_indices = self.get_simulation_arrays()
         v = self.map(
             vectors_from_orientation_map,
-            all_vectors=vectors_signal,
+            vectors=data,
+            phases=phases,
+            phase_index=phase_indices,
+            intensities=intensities,
             inplace=False,
             output_signal_size=(),
             output_dtype=object,
@@ -653,6 +667,21 @@ class OrientationMap(DiffractionVectors2D):
         )
         v.metadata.simulation = None
         return v
+
+    def get_simulation_arrays(self):
+        data = np.array([sim.data for sim in self.simulation], dtype=object)
+        intensities = np.array([sim.intensity for sim in self.simulation], dtype=object)
+        if self.simulation.has_multiple_phases:
+            phases = self.simulation.phases
+            csum = np.append([0,],np.cumsum([r.size for r in self.simulation.rotations]))
+            phase_indices = np.zeros(csum[-1], dtype=int)
+            for c in range(len(self.simulation.rotations)):
+                phase_indices[csum[c]:csum[c + 1]] = c
+        else:
+            phases = [self.simulation.phases, ]
+            phase_indices = np.zeros(self.simulation.rotations.size, dtype=int)
+        return data, intensities, phases, phase_indices
+
 
     def to_crystal_map(self) -> CrystalMap:
         """Convert the orientation map to an :class:`orix.crystal_map.CrystalMap` object
