@@ -34,7 +34,7 @@ jobs:
         shell: bash -l {0}
         run: |
           cd doc
-          make html --jobs "auto"
+          make html
 
       - uses: actions/upload-artifact@v3
         with:
