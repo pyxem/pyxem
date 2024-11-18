@@ -446,8 +446,9 @@ def extract_vectors_from_orientation_map(**kwargs):
     return vectors_from_orientation_map(**kwargs)
 
 
-
-def vectors_from_orientation_map(result, vectors, phases, phase_index, intensities, n_best_index=0):
+def vectors_from_orientation_map(
+    result, vectors, phases, phase_index, intensities, n_best_index=0
+):
     """
     Note that any function which passes a large number of python objects back/forth to dask causes
     lots of overhead.  We are going to try to stick with just passing numpy arrays... Also,
@@ -539,7 +540,6 @@ class OrientationMap(DiffractionVectors2D):
     @property
     def num_rows(self):
         return self.axes_manager.signal_axes[1].size
-
 
     def to_rotation(self, flatten=False):
         """
@@ -674,15 +674,21 @@ class OrientationMap(DiffractionVectors2D):
         intensities = np.array([sim.intensity for sim in self.simulation], dtype=object)
         if self.simulation.has_multiple_phases:
             phases = self.simulation.phases
-            csum = np.append([0,],np.cumsum([r.size for r in self.simulation.rotations]))
+            csum = np.append(
+                [
+                    0,
+                ],
+                np.cumsum([r.size for r in self.simulation.rotations]),
+            )
             phase_indices = np.zeros(csum[-1], dtype=int)
             for c in range(len(self.simulation.rotations)):
-                phase_indices[csum[c]:csum[c + 1]] = c
+                phase_indices[csum[c] : csum[c + 1]] = c
         else:
-            phases = [self.simulation.phases, ]
+            phases = [
+                self.simulation.phases,
+            ]
             phase_indices = np.zeros(self.simulation.rotations.size, dtype=int)
         return data, intensities, phases, phase_indices
-
 
     def to_crystal_map(self) -> CrystalMap:
         """Convert the orientation map to an :class:`orix.crystal_map.CrystalMap` object
