@@ -67,7 +67,7 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest -n ${{ steps.cpus.outputs.count }} --cov=pyxem --runslow --pyargs pyxem
+          pytest -n ${{ steps.cpus.outputs.count }} --cov=pyxem --runslow --pyargs pyxem --durations=50
 
       - name: Generate line coverage
         if: ${{ matrix.os == 'ubuntu-latest' }}
