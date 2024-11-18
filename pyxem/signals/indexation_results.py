@@ -449,8 +449,12 @@ def extract_vectors_from_orientation_map(result, all_vectors, n_best_index=0):
 def vectors_from_orientation_map(result, all_vectors, n_best_index=0):
     index, _, rotation, mirror = result[n_best_index, :].T
     index = index.astype(int)
-    if all_vectors.ndim == 0:
+    if isinstance(all_vectors, DiffractingVector) and all_vectors.ndim == 1:
+        # Only one simulation
         vectors = all_vectors
+    elif all_vectors.ndim == 0:
+        # Only one simulation, but in an array
+        vectors = np.atleast_1d(all_vectors)[0]
     else:
         vectors = all_vectors[index]
     # Copy manually, as deepcopy adds a lot of overhead with the phase
@@ -463,11 +467,14 @@ def vectors_from_orientation_map(result, all_vectors, n_best_index=0):
     rotation = Rotation.from_euler(
         (mirror * rotation, 0, 0), degrees=True, direction="crystal2lab"
     )
-
+    coordinate_format = vectors.coordinate_format
     vectors = ~rotation * vectors.to_miller()
     vectors = DiffractingVector(
-        vectors.phase, xyz=vectors.data.copy(), intensity=intensity
+        vectors.phase,
+        xyz=-vectors.data.copy(),  # Negating for proper alignment - is this flipping z direction?
+        intensity=intensity,
     )
+    vectors.coordinate_format = coordinate_format
     vectors.original_hkl = hkl
 
     # Mirror if necessary.
@@ -907,7 +914,7 @@ class OrientationMap(DiffractionVectors2D):
         annotation_shift: Sequence[float] = None,
         text_kwargs: dict = None,
         include_intensity: bool = False,
-        intesity_scale: float = 1,
+        intensity_scale: float = 1,
         fast: bool = True,
         **kwargs,
     ) -> Sequence[hs.plot.markers.Markers]:
@@ -953,13 +960,13 @@ class OrientationMap(DiffractionVectors2D):
         all_markers = []
         for n in range(n_best):
             vectors = self.to_vectors(
-                lazy_output=True, navigation_chunks=navigation_chunks
+                n_best_index=n, lazy_output=True, navigation_chunks=navigation_chunks
             )
             color = marker_colors[n % len(marker_colors)]
             if include_intensity:
                 intensity = vectors.map(
                     vectors_to_intensity,
-                    scale=intesity_scale,
+                    scale=intensity_scale,
                     inplace=False,
                     ragged=True,
                     output_dtype=object,
@@ -1007,9 +1014,28 @@ class OrientationMap(DiffractionVectors2D):
             all_markers = compute_markers(all_markers)
         return all_markers
 
+    @deprecated(
+        since="0.20.0",
+        alternative="pyxem.signals.OrientationMap.to_polar_markers",
+        removal="1.0.0",
+    )
     def to_single_phase_polar_markers(
         self,
         signal_axes: Sequence[BaseDataAxis],
+        n_best: int = 1,
+        marker_colors: str = ("red", "blue", "green", "orange", "purple"),
+        lazy_output: bool = None,
+        **kwargs,
+    ) -> Iterator[hs.plot.markers.Markers]:
+        return self.to_polar_markers(
+            n_best=n_best,
+            marker_colors=marker_colors,
+            lazy_output=lazy_output,
+            **kwargs,
+        )
+
+    def to_polar_markers(
+        self,
         n_best: int = 1,
         marker_colors: str = ("red", "blue", "green", "orange", "purple"),
         lazy_output: bool = None,
@@ -1038,53 +1064,22 @@ class OrientationMap(DiffractionVectors2D):
             An list of markers for each of the n_best solutions
 
         """
-        (
-            r_templates,
-            theta_templates,
-            intensities_templates,
-        ) = self.simulation.polar_flatten_simulations(
-            signal_axes[1].axis, signal_axes[0].axis
-        )
-
         if lazy_output is None:
             lazy_output = self._lazy
 
-        def marker_generator_factory(n_best_entry: int, r_axis, theta_axis):
-            theta_min, theta_max = theta_axis.min(), theta_axis.max()
-
-            def marker_generator(entry):
-                index, _, rotation, mirror = entry[n_best_entry]
-                index = index.astype(int)
-                mirror = mirror.astype(int)
-
-                r_ind = r_templates[index]
-                r = r_axis[r_ind]
-
-                theta_ind = theta_templates[index]
-                theta = theta_axis[::mirror][theta_ind] + np.deg2rad(rotation)
-
-                # Rotate as per https://github.com/pyxem/pyxem/issues/925
-                theta += np.pi
-
-                # handle wrap-around theta
-                theta -= theta_min
-                theta %= theta_max - theta_min
-                theta += theta_min
-
-                mask = r != 0
-                return np.vstack((theta[mask], r[mask])).T
-
-            return marker_generator
+        def vec2polar(vector):
+            r, t = vector.to_flat_polar()
+            # flip y
+            t = -t
+            return np.vstack([t, r]).T
 
         all_markers = []
         for n in range(n_best):
             color = marker_colors[n % len(marker_colors)]
-            markers_signal = self.map(
-                marker_generator_factory(n, signal_axes[1].axis, signal_axes[0].axis),
-                inplace=False,
-                ragged=True,
-                lazy_output=True,
-            )
+
+            vecs = self.to_vectors(n)
+            markers_signal = vecs.map(vec2polar, inplace=False, ragged=True)
+
             if "sizes" not in kwargs:
                 kwargs["sizes"] = 15
             markers = hs.plot.markers.Points.from_signal(
