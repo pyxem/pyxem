@@ -86,7 +86,7 @@ setup(
     packages=find_packages(),
     extras_require=extra_feature_requirements,
     install_requires=[
-        "dask",
+        "dask           <= 2024.8.0",  # test possible regression...
         "diffsims       >= 0.6.0",
         "hyperspy       >= 2.0",
         "h5py",
