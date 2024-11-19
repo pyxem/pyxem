@@ -28,6 +28,7 @@ from pyxem.utils.indexation_utils import (
     _mixed_matching_lib_to_polar,
     _get_integrated_polar_templates,
     _norm_rows,
+    _get_max_n,
 )
 
 from pyxem.utils._background_subtraction import (
@@ -346,6 +347,10 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
 
         Notes
         -----
+            If :code:`n_best` exceeds :code:`n_keep` or :code:`frac_keep * N` for :code:`N` simulations,
+            then full correlation is performed on :code:`n_best` simulations instead. This ensures the
+            output contains :code:`n_best` simulations.
+
             A gamma correction is often applied to the diffraction patterns. A good value
             to start with is the square root (gamma=0.5) of the diffraction patterns to
             increase the intensity of the low intensity reflections and decrease the
@@ -377,6 +382,11 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
         )
         if normalize_templates:
             intensities_templates = _norm_rows(intensities_templates)
+
+        max_n = _get_max_n(N=r_templates.shape[0], n_keep=n_keep, frac_keep=frac_keep)
+        if max_n < n_best:
+            # n_keep takes precedence over frac_keep, so this ensures we get n_best simulations in the result
+            n_keep = n_best
         orientation = self.map(
             _mixed_matching_lib_to_polar,
             integrated_templates=integrated_templates,
