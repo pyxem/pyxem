@@ -326,14 +326,22 @@ class TestOrientationResult:
         markers = orientations.to_markers()
         assert isinstance(markers[0].kwargs["offsets"], da.Array)
 
-    def test_to_markers_polar(self, simple_multi_rot_orientation_result):
+    def test_to_single_phase_markers_polar(self, simple_multi_rot_orientation_result):
         orientations, rotations, s = simple_multi_rot_orientation_result
         polar = s.get_azimuthal_integral2d(
             npt=100, npt_azim=180, inplace=False, mean=True
         )
-        markers = orientations.to_single_phase_polar_markers(
-            polar.axes_manager.signal_axes
-        )
+        from pyxem.common import VisibleDeprecationWarning
+
+        with pytest.warns(VisibleDeprecationWarning):
+            markers = orientations.to_single_phase_polar_markers(
+                polar.axes_manager.signal_axes
+            )
+        assert isinstance(markers[0], hs.plot.markers.Markers)
+
+    def test_to_markers_polar(self, simple_multi_rot_orientation_result):
+        orientations, rotations, s = simple_multi_rot_orientation_result
+        markers = orientations.to_polar_markers()
         assert isinstance(markers[0], hs.plot.markers.Markers)
 
     def test_to_ipf_markers(self, simple_multi_rot_orientation_result):
@@ -442,3 +450,52 @@ class TestOrientationResult:
     ):
         markers = multi_phase_orientation_result.to_ipf_correlation_heatmap_markers()
         assert all(isinstance(m, hs.plot.markers.Markers) for m in markers)
+
+    def test_vector_markers_correctness(self):
+        """
+        Check if the markers are plotted correctly by performing orientation mapping 
+        on a non-centrosymmetric signal, where only one quadrant is non-zero, 
+        using a template with only one diffraction spot.
+        This spot should then be plotted in the correct quadrant.
+        """
+        from pyxem.signals import Diffraction2D
+
+        # Simple signal: 1 in first quadrant, 0 elsewhere
+        signal = Diffraction2D(np.array([[[[0, 1], [0, 0]]]]))
+        signal.calibration(center=None)
+        polar = signal.get_azimuthal_integral2d(npt=10, npt_azim=36)
+
+        from diffpy.structure import Lattice, Atom, Structure
+        from orix.crystal_map import Phase
+
+        # Primitive cubic structure, any will do
+        l = Lattice(5, 5, 5, 90, 90, 90)
+        a = [Atom("Au", xyz=[0, 0, 0], lattice=l)]
+        s = Structure(a, l)
+        p = Phase(space_group=221, structure=s)
+        gen = SimulationGenerator()
+        sim = gen.calculate_diffraction2d(p, with_direct_beam=False)
+
+        # Set intensities to 0 for all vectors except one
+        _, _, v = sim.get_simulation(0)
+        v.intensity[:-1] = 0
+        v.intensity[-1] = 1
+
+        # Perform matching
+        res = polar.get_orientation(sim)
+
+        # Check cartesian
+        x, y = res.to_markers()[0].kwargs["offsets"][0, 0][-1]
+        assert x > 0
+        # When plotting, the y-axis points downwards, but pyxem defines it as upwards.
+        # Therefore, the first quadrant, as pyxem defines it, has negative y when plotting.
+        assert y < 0
+
+        # Check polar
+        r, t = res.to_polar_markers()[0].kwargs["offsets"][0, 0][-1]
+        assert r > 0
+        assert 0 < t < np.pi / 2
+
+
+if __name__ == "__main__":
+    TestOrientationResult().test_vector_markers_correctness()
