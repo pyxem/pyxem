@@ -453,8 +453,8 @@ class TestOrientationResult:
 
     def test_vector_markers_correctness(self):
         """
-        Check if the markers are plotted correctly by performing orientation mapping 
-        on a non-centrosymmetric signal, where only one quadrant is non-zero, 
+        Check if the markers are plotted correctly by performing orientation mapping
+        on a non-centrosymmetric signal, where only one quadrant is non-zero,
         using a template with only one diffraction spot.
         This spot should then be plotted in the correct quadrant.
         """
@@ -495,7 +495,3 @@ class TestOrientationResult:
         r, t = res.to_polar_markers()[0].kwargs["offsets"][0, 0][-1]
         assert r > 0
         assert 0 < t < np.pi / 2
-
-
-if __name__ == "__main__":
-    TestOrientationResult().test_vector_markers_correctness()
