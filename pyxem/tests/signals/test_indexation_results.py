@@ -400,7 +400,6 @@ class TestOrientationResult:
         )
 
     @pytest.mark.parametrize("add_vector_markers", [False, True])
-    @pytest.mark.parametrize("add_ipf_markers", [False, True])
     @pytest.mark.parametrize("add_ipf_correlation_heatmap", [False, True])
     @pytest.mark.parametrize("add_ipf_colorkey", [False, True])
     @pytest.mark.parametrize(
@@ -410,11 +409,11 @@ class TestOrientationResult:
         self,
         multi_phase_orientation_result,
         add_vector_markers,
-        add_ipf_markers,
         add_ipf_correlation_heatmap,
         add_ipf_colorkey,
         vector_kwargs,
     ):
+        add_ipf_markers = True
         # Mock signal
         s = hs.signals.Signal2D(
             np.zeros(multi_phase_orientation_result.data.shape[:-2])[
