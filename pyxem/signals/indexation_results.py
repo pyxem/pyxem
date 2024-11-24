@@ -17,31 +17,25 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 from warnings import warn
-from typing import Union, Literal, Sequence, Iterator
+from typing import Sequence, Iterator
 from traits.api import Undefined
 
-import hyperspy.api as hs
 from hyperspy._signals.lazy import LazySignal
 from hyperspy.signal import BaseSignal
-from hyperspy.axes import AxesManager, BaseDataAxis
-import numpy as np
+from hyperspy.axes import BaseDataAxis
 from orix.crystal_map import CrystalMap, Phase, PhaseList
 from orix.quaternion import Rotation, Orientation
-from orix.vector import Vector3d
-from orix.plot import IPFColorKeyTSL
+
 from transforms3d.euler import mat2euler
 from diffsims.crystallography._diffracting_vector import DiffractingVector
-from orix.vector import Vector3d
-from orix.projections import StereographicProjection
-from orix.plot.inverse_pole_figure_plot import _get_ipf_axes_labels
-from orix.vector.fundamental_sector import _closed_edges_in_hemisphere
+
+from orix.quaternion.quaternion import qu_rotate_vec
 from orix.vector import Vector3d
 from orix.projections import StereographicProjection
 from orix.plot.inverse_pole_figure_plot import _get_ipf_axes_labels
 from orix.vector.fundamental_sector import _closed_edges_in_hemisphere
 from orix.plot import IPFColorKeyTSL, DirectionColorKeyTSL
-import hyperspy.api as hs
-import numpy as np
+
 from matplotlib.collections import QuadMesh
 from matplotlib.colors import Normalize
 from scipy.spatial import Delaunay
@@ -470,14 +464,10 @@ def vectors_from_orientation_map(
     # Flip y, as discussed in https://github.com/pyxem/pyxem/issues/925
     vectors.y = -vectors.y
 
-    rotation = Rotation.from_euler(
-        (mirror * rotation, 0, 0), degrees=True, direction="crystal2lab"
-    )
-
-    vectors = ~rotation * vectors.to_miller()
-    vectors = DiffractingVector(
-        vectors.phase, xyz=vectors.data.copy(), intensity=intensities
-    )
+    angle = np.deg2rad(mirror * rotation)
+    rot_coj = np.array([np.cos(0.5 * angle), 0, 0, -np.sin(0.5 * angle)])
+    data = qu_rotate_vec(rot_coj, vectors.data)
+    vectors = DiffractingVector(vectors.phase, xyz=data, intensity=intensities)
     vectors.original_hkl = hkl
 
     # Mirror if necessary.
