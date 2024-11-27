@@ -380,7 +380,7 @@ def vectors_to_coordinates(vectors):
     Convert a set of diffraction vectors to coordinates. For use with the map
     function and making markers.
     """
-    return np.vstack((vectors.x, vectors.y)).T
+    return np.vstack((vectors[:, 0], vectors[:, 1])).T
 
 
 def vectors_to_intensity(vectors, scale=1):
@@ -389,7 +389,7 @@ def vectors_to_intensity(vectors, scale=1):
     function and making markers.
     """
 
-    return (vectors.intensity / np.max(vectors.intensity)) * scale
+    return (vectors[:, 3] / np.max(vectors[:, 3])) * scale
 
 
 def vectors_to_text(vectors, fast=True):
@@ -405,7 +405,7 @@ def vectors_to_text(vectors, fast=True):
             return f"{i}"
 
     out = []
-    for hkl in vectors.original_hkl:
+    for hkl in vectors[:, 4:]:
         h, k, l = np.round(hkl).astype(np.int16)
         if fast:
             out.append(f"{h} {k} {l}")
@@ -441,26 +441,52 @@ def extract_vectors_from_orientation_map(**kwargs):
 
 
 def vectors_from_orientation_map(
-    result, vectors, phases, phase_index, intensities, n_best_index=0
+    result,
+    vectors,
+    phases,
+    phase_index,
+    hkl,
+    intensities,
+    n_best_index=0,
+    return_object=True,
 ):
     """
     Note that any function which passes a large number of python objects back/forth to dask causes
     lots of overhead.  We are going to try to stick with just passing numpy arrays... Also,
     the Orix Rotation class has a really high overhead which is unfortunate. That is something to
     consider optimizing in the future.
+
+    Parameters
+    ----------
+    result : np.ndarray
+        The result array from the orientation map
+    vectors : DiffractingVector
+        The vectors from the simulation
+    phases : List of orix.crystal_map.Phase
+        The phase array from the simulation
+    phase_index : np.ndarray
+        The index of the phase for each vector
+    intensities : np.ndarray
+        The intensities of the vectors
+    n_best_index : int
+        The index of the best match to use
+    return_object : bool
+        If True, return a DiffractingVector object, otherwise return a numpy array with a stack of
+        [x, y, z, intensity, h, k, l]
     """
     index, _, rotation, mirror = result[n_best_index, :].T
     index = index.astype(int)
     if vectors.ndim == 0:
         data = vectors
         phase = phases
+        hkl = hkl
     else:
         data = vectors[index]
         phase = phases[phase_index[index]]
         intensities = intensities[index]
+        hkl = hkl[index]
     # Copy manually, as deepcopy adds a lot of overhead with the phase
-    vectors = DiffractingVector(phase, xyz=data.copy())
-    hkl = vectors.hkl
+    vectors = DiffractingVector(phase, xyz=data)
     # Flip y, as discussed in https://github.com/pyxem/pyxem/issues/925
     vectors.y = -vectors.y
 
@@ -475,7 +501,10 @@ def vectors_from_orientation_map(
     # This is equivalent to (x, y) -> (x, -y)
     vectors.y = mirror * vectors.y
 
-    return vectors
+    if return_object:
+        return vectors
+    else:
+        return np.hstack((vectors.data, vectors.intensity[:, np.newaxis], hkl))
 
 
 def orientation2phase(orientations, sizes):
@@ -624,7 +653,9 @@ class OrientationMap(DiffractionVectors2D):
     ) -> hs.signals.Signal1D:
         return self.to_vectors(n_best_index=n_best_index, **kwargs)
 
-    def to_vectors(self, n_best_index: int = 0, **kwargs) -> hs.signals.Signal1D:
+    def to_vectors(
+        self, n_best_index: int = 0, return_object: bool = True, **kwargs
+    ) -> hs.signals.Signal1D:
         """Get the reciprocal lattice vectors for each navigation position.
 
         Parameters
@@ -642,11 +673,12 @@ class OrientationMap(DiffractionVectors2D):
             # Use vector data as signal in case of different vectors per navigation position
             vectors_signal = hs.signals.Signal1D(self.simulation.coordinates)
 
-        data, intensities, phases, phase_indices = self.get_simulation_arrays()
+        data, intensities, phases, phase_indices, hkl = self.get_simulation_arrays()
         v = self.map(
             vectors_from_orientation_map,
             vectors=data,
             phases=phases,
+            hkl=hkl,
             phase_index=phase_indices,
             intensities=intensities,
             inplace=False,
@@ -654,6 +686,7 @@ class OrientationMap(DiffractionVectors2D):
             output_dtype=object,
             show_progressbar=False,
             n_best_index=n_best_index,
+            return_object=return_object,
             **kwargs,
         )
         v.metadata.simulation = None
@@ -661,6 +694,7 @@ class OrientationMap(DiffractionVectors2D):
 
     def get_simulation_arrays(self):
         data = np.array([sim.data for sim in self.simulation], dtype=object)
+        hkl = np.array([sim.hkl for sim in self.simulation], dtype=object)
         intensities = np.array([sim.intensity for sim in self.simulation], dtype=object)
         if self.simulation.has_multiple_phases:
             phases = self.simulation.phases
@@ -678,7 +712,7 @@ class OrientationMap(DiffractionVectors2D):
                 self.simulation.phases,
             ]
             phase_indices = np.zeros(self.simulation.rotations.size, dtype=int)
-        return data, intensities, phases, phase_indices
+        return data, intensities, phases, phase_indices, hkl
 
     def to_crystal_map(self) -> CrystalMap:
         """Convert the orientation map to an :class:`orix.crystal_map.CrystalMap` object
@@ -979,7 +1013,9 @@ class OrientationMap(DiffractionVectors2D):
         all_markers = []
         for n in range(n_best):
             vectors = self.to_vectors(
-                lazy_output=True, navigation_chunks=navigation_chunks
+                lazy_output=True,
+                navigation_chunks=navigation_chunks,
+                return_object=False,
             )
             color = marker_colors[n % len(marker_colors)]
             if include_intensity:
