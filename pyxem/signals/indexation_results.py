@@ -491,11 +491,21 @@ def vectors_from_orientation_map(
     # Flip y, as discussed in https://github.com/pyxem/pyxem/issues/925
     vectors.y = -vectors.y
 
-    angle = np.deg2rad(mirror * rotation)
-    rot_coj = np.array([np.cos(0.5 * angle), 0, 0, -np.sin(0.5 * angle)])
-    data = qu_rotate_vec(rot_coj, vectors.data)
-    vectors = DiffractingVector(vectors.phase, xyz=data, intensity=intensities)
+    rotation = Rotation.from_euler(
+        (mirror * rotation, 0, 0), degrees=True, direction="crystal2lab"
+    )
+
+    vectors = ~rotation * vectors.to_miller()
+    vectors = DiffractingVector(
+        vectors.phase, xyz=vectors.data.copy(), intensity=intensities
+    )
     vectors.original_hkl = hkl
+
+    # angle = np.deg2rad(mirror * rotation)
+    # rot_coj = np.array([np.cos(0.5 * angle), 0, 0, -np.sin(0.5 * angle)])
+    # data = qu_rotate_vec(rot_coj, vectors.data)
+    # vectors = DiffractingVector(vectors.phase, xyz=data, intensity=intensities)
+    # vectors.original_hkl = hkl
 
     # Mirror if necessary.
     # Mirroring, in this case, means casting (r, theta) to (r, -theta).
