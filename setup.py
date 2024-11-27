@@ -40,6 +40,7 @@ extra_feature_requirements = {
     ],
     "tests": [
         "pytest     >= 5.0",
+        "pytest-timeout",
         "pytest-cov >= 2.8.1",
         "pytest-xdist",
         "pytest-rerunfailures",
