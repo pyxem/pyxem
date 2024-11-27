@@ -43,7 +43,7 @@ from scipy.spatial import Delaunay
 import numpy as np
 import hyperspy.api as hs
 
-from pyxem.utils.indexation_utils import get_nth_best_solution
+from pyxem.utils.indexation_utils import get_nth_best_solution, dict2phase, phase2dict
 from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
 from pyxem.utils._signals import _transfer_navigation_axes
 from pyxem.utils.signal import compute_markers
@@ -485,6 +485,7 @@ def vectors_from_orientation_map(
         phase = phases[phase_index[index]]
         intensities = intensities[index]
         hkl = hkl[index]
+    phase = dict2phase(**phase)
     # Copy manually, as deepcopy adds a lot of overhead with the phase
     vectors = DiffractingVector(phase, xyz=data)
     # Flip y, as discussed in https://github.com/pyxem/pyxem/issues/925
@@ -674,10 +675,12 @@ class OrientationMap(DiffractionVectors2D):
             vectors_signal = hs.signals.Signal1D(self.simulation.coordinates)
 
         data, intensities, phases, phase_indices, hkl = self.get_simulation_arrays()
+
+        phases_dicts = [phase2dict(p) for p in phases]
         v = self.map(
             vectors_from_orientation_map,
             vectors=data,
-            phases=phases,
+            phases=phases_dicts,
             hkl=hkl,
             phase_index=phase_indices,
             intensities=intensities,

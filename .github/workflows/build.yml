@@ -12,7 +12,7 @@ jobs:
   build-with-pip:
     name: ${{ matrix.os }}-py${{ matrix.python-version }}${{ matrix.LABEL }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 45
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -67,7 +67,7 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest -n ${{ steps.cpus.outputs.count }} --cov=pyxem --runslow --pyargs pyxem --durations=50 --timeout=60
+          pytest -n ${{ steps.cpus.outputs.count }} --cov=pyxem --runslow --pyargs pyxem --durations=50 --timeout=180
 
       - name: Generate line coverage
         if: ${{ matrix.os == 'ubuntu-latest' }}

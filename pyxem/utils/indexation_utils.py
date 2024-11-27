@@ -48,6 +48,8 @@ from pyxem.utils.polar_transform_utils import (
     get_template_polar_coordinates,
     _warp_polar_custom,
 )
+from diffpy.structure import Atom, Structure, Lattice
+from orix.crystal_map import Phase
 
 try:
     import cupy as cp
@@ -1766,4 +1768,49 @@ def results_dict_to_crystal_map(
         y=y,
         phase_list=phase_list,
         prop=props,
+    )
+
+
+def structure2dict(structure):
+    atoms = structure.tolist()
+    elements = [a.element for a in atoms]
+    positions = structure.xyz
+    lattice = [
+        structure.lattice.a,
+        structure.lattice.b,
+        structure.lattice.c,
+        structure.lattice.alpha,
+        structure.lattice.beta,
+        structure.lattice.gamma,
+    ]
+    return dict(
+        elements=elements, positions=positions, lattice=lattice, title=structure.title
+    )
+
+
+def dict2structure(elements, positions, lattice, title):
+    atoms = [Atom(atype=e, xyz=p) for e, p in zip(elements, positions)]
+    lat = Lattice(*lattice)
+    return Structure(atoms, lattice=lat, title=title)
+
+
+def phase2dict(phase):
+    structure_dict = structure2dict(phase.structure)
+    return dict(
+        name=phase.name,
+        space_group=phase.space_group.number,
+        point_group=phase.point_group.name,
+        color=phase.color,
+        structure=structure_dict,
+    )
+
+
+def dict2phase(name, space_group, point_group, color, structure):
+    struct = dict2structure(**structure)
+    return Phase(
+        name=name,
+        space_group=space_group,
+        point_group=point_group,
+        color=color,
+        structure=struct,
     )
