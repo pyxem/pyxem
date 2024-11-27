@@ -29,7 +29,6 @@ from orix.quaternion import Rotation, Orientation
 from transforms3d.euler import mat2euler
 from diffsims.crystallography._diffracting_vector import DiffractingVector
 
-from orix.quaternion.quaternion import qu_rotate_vec
 from orix.vector import Vector3d
 from orix.projections import StereographicProjection
 from orix.plot.inverse_pole_figure_plot import _get_ipf_axes_labels
