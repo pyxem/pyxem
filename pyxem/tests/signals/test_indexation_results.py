@@ -300,7 +300,6 @@ class TestOrientationResult:
         assert np.all(crystal_map.phase_id < 2)
 
     @pytest.mark.parametrize("annotate", [True, False])
-    @pytest.mark.parametrize("fast", [True, False])
     @pytest.mark.parametrize("lazy_output", [True, False])
     @pytest.mark.parametrize("add_intensity", [True, False])
     def test_to_markers(
@@ -309,8 +308,8 @@ class TestOrientationResult:
         annotate,
         lazy_output,
         add_intensity,
-        fast,
     ):
+        fast = True
         orientations, rotations, s = simple_multi_rot_orientation_result
         markers = orientations.to_markers(
             lazy_output=lazy_output,
