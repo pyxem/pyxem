@@ -44,11 +44,11 @@ def si_tilt():
 
     top = np.tile(
         dp1,
-        (10, 5, 1, 1),
+        (4, 2, 1, 1),
     )
     bottom = np.tile(
         dp2,
-        (10, 5, 1, 1),
+        (4, 2, 1, 1),
     )
     total = np.hstack((top, bottom))
     tilt = Diffraction2D(total)
@@ -99,7 +99,7 @@ def si_grains_from_orientations(
     return grains
 
 
-def si_grains(num_grains=4, seed=2, size=20, recip_pixels=128, return_rotations=False):
+def si_grains(num_grains=4, seed=2, size=6, recip_pixels=128, return_rotations=False):
     """Generate a simulated dataset with grains in random orientations"""
     p = si_phase()
     rotations = Orientation.random(num_grains, symmetry=p.point_group)
@@ -113,7 +113,7 @@ def si_grains(num_grains=4, seed=2, size=20, recip_pixels=128, return_rotations=
         return grains
 
 
-def si_grains_simple(seed=2, size=20, recip_pixels=128, return_rotations=False):
+def si_grains_simple(seed=2, size=6, recip_pixels=128, return_rotations=False):
     """Generate a simulated dataset with low-index zone axes"""
     p = si_phase()
     rotations = Orientation.from_euler(

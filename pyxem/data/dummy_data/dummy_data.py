@@ -116,7 +116,7 @@ def get_holz_simple_test_signal(lazy=False):
     return s
 
 
-def get_holz_heterostructure_test_signal(lazy=False):
+def get_holz_heterostructure_test_signal(lazy=False, probe_size_x=40, probe_size_y=40):
     """Get HyperSpy 2D signal with 2D navigation dimensions for HOLZ testing.
 
     The centre, radius and intensity of the ring varies as a function of probe
@@ -140,9 +140,15 @@ def get_holz_heterostructure_test_signal(lazy=False):
     >>> s = pxm.data.dummy_data.get_holz_heterostructure_test_signal(lazy=True)
 
     """
-    probe_size_x, probe_size_y = 40, 40
     px, py = np.mgrid[0:probe_size_x:1, 0:probe_size_y:1]
-    x, y = np.mgrid[36:38:40j, 41:43:40j]
+
+    centerx = probe_size_x // 2
+    centery = probe_size_x // 2
+
+    x, y = np.mgrid[
+        centerx - 4 : centerx - 2 : probe_size_x * 1j,
+        centery + 1 : centery + 3 : probe_size_y * 1j,
+    ]
     disk_r = 10
     disk_I = np.ones_like(x) * 100 + np.random.random() * 20
     g_r = Gaussian(A=20, centre=25, sigma=5)

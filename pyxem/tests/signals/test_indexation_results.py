@@ -266,12 +266,12 @@ class TestOrientationResult:
             Orientation.from_euler([0, 0, 0]), degrees=True
         )
         assert np.all(
-            degrees_between[:, :5] <= 1
+            degrees_between[:, :2] <= 1
         )  # off by 1 degree (due to pixelation?)
         degrees_between = orients.angle_with(
             Orientation.from_euler([10, 0, 0], degrees=True), degrees=True
         )
-        assert np.all(degrees_between[:, 5:] <= 1)
+        assert np.all(degrees_between[:, 2:] <= 1)
 
     def test_grain_orientation_result(self, simple_multi_rot_orientation_result):
         orientations, rotations, s = simple_multi_rot_orientation_result
