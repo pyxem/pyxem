@@ -368,7 +368,6 @@ class TestOrientationResult:
         with pytest.raises(ValueError):
             rotations = orientations.to_crystal_map()
 
-    @pytest.mark.skipif(sys.platform == "win32", reason="Very Slow on Windows")
     @pytest.mark.parametrize("add_vector_markers", [False, True])
     @pytest.mark.parametrize("add_ipf_markers", [False, True])
     @pytest.mark.parametrize("add_ipf_correlation_heatmap", [False, True])
@@ -395,7 +394,6 @@ class TestOrientationResult:
             vector_kwargs=vector_kwargs,
         )
 
-    @pytest.mark.skipif(sys.platform == "win32", reason="Very Slow on Windows")
     @pytest.mark.parametrize("add_vector_markers", [False, True])
     @pytest.mark.parametrize("add_ipf_correlation_heatmap", [False, True])
     @pytest.mark.parametrize("add_ipf_colorkey", [False, True])
@@ -433,7 +431,6 @@ class TestOrientationResult:
         markers = orientations.to_ipf_correlation_heatmap_markers()
         assert all(isinstance(m, hs.plot.markers.Markers) for m in markers)
 
-    @pytest.mark.skipif(sys.platform == "win32", reason="Very Slow on Windows")
     def test_to_ipf_correlation_heatmap_markers_multi_phase(
         self, multi_phase_orientation_result
     ):
