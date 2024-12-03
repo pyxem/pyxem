@@ -18,13 +18,10 @@
 
 import numpy as np
 import pytest
-from matplotlib import pyplot as plt
 from transforms3d.euler import euler2mat
 import dask.array as da
 
-from diffsims.libraries.structure_library import StructureLibrary
-from diffsims.generators.diffraction_generator import DiffractionGenerator
-from diffsims.generators.library_generator import DiffractionLibraryGenerator
+import sys
 
 from diffsims.generators.simulation_generator import SimulationGenerator
 from orix.sampling import get_sample_reduced_fundamental
@@ -32,7 +29,6 @@ from orix.quaternion import Rotation, Orientation
 from orix.crystal_map import CrystalMap
 from orix.vector import Vector3d
 
-from pyxem.generators import TemplateIndexationGenerator
 from pyxem.signals import VectorMatchingResults, DiffractionVectors, OrientationMap
 from pyxem.utils.indexation_utils import OrientationResult
 from pyxem.data import (
@@ -372,6 +368,7 @@ class TestOrientationResult:
         with pytest.raises(ValueError):
             rotations = orientations.to_crystal_map()
 
+    @pytest.mark.skipif(sys.platform == "win32", reason="Very Slow on Windows")
     @pytest.mark.parametrize("add_vector_markers", [False, True])
     @pytest.mark.parametrize("add_ipf_markers", [False, True])
     @pytest.mark.parametrize("add_ipf_correlation_heatmap", [False, True])
@@ -398,6 +395,7 @@ class TestOrientationResult:
             vector_kwargs=vector_kwargs,
         )
 
+    @pytest.mark.skipif(sys.platform == "win32", reason="Very Slow on Windows")
     @pytest.mark.parametrize("add_vector_markers", [False, True])
     @pytest.mark.parametrize("add_ipf_correlation_heatmap", [False, True])
     @pytest.mark.parametrize("add_ipf_colorkey", [False, True])
@@ -435,6 +433,7 @@ class TestOrientationResult:
         markers = orientations.to_ipf_correlation_heatmap_markers()
         assert all(isinstance(m, hs.plot.markers.Markers) for m in markers)
 
+    @pytest.mark.skipif(sys.platform == "win32", reason="Very Slow on Windows")
     def test_to_ipf_correlation_heatmap_markers_multi_phase(
         self, multi_phase_orientation_result
     ):
