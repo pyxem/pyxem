@@ -10,12 +10,17 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 
 Unreleased
 ==========
+Fixed
+-----
+- Fixed inconsistency with vector markers' positions when plotting orientation mapping results (#1126)
+
 Added
 -----
 - Added Examples for general plotting functions focusing on plotting diffraction patterns (#1108)
 - Added support for marker plotting for multi-phase orientation mapping results (#1092)
 - Cleaned up the Documentation for installation (#1109)
 - Added an Example for determining the calibration (#1085)
+- Added support for multi-phase orientation mapping markers on polar signals (#1126)
 
 Removed
 -------
