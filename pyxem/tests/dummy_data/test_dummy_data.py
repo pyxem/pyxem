@@ -20,7 +20,6 @@ import pytest
 import pyxem.data.dummy_data as dd
 
 
-@pytest.mark.slow
 class TestDummyDataModule:
     def test_simple_disk_shift(self):
         s = dd.get_disk_shift_simple_test_signal()
@@ -47,11 +46,13 @@ class TestDummyDataModule:
         assert hasattr(s, "plot")
 
     def test_get_holz_heterostructure_test_signal(self):
-        s = dd.get_holz_heterostructure_test_signal()
+        s = dd.get_holz_heterostructure_test_signal(probe_size_x=8, probe_size_y=8)
         assert hasattr(s, "plot")
         assert not s._lazy
 
-        s = dd.get_holz_heterostructure_test_signal(lazy=True)
+        s = dd.get_holz_heterostructure_test_signal(
+            lazy=True, probe_size_x=8, probe_size_y=8
+        )
         assert s._lazy
 
     def test_get_stripe_pattern_beam_shift_signal(self):

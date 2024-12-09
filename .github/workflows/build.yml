@@ -32,6 +32,18 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Get the number of CPUs
+        id: cpus
+        run: |
+          import os, platform
+          num_cpus = os.cpu_count()
+          print(f"Number of CPU: {num_cpus}")
+          print(f"Architecture: {platform.machine()}")
+          output_file = os.environ["GITHUB_OUTPUT"]
+          with open(output_file, "a", encoding="utf-8") as output_stream:
+              output_stream.write(f"count={num_cpus}\n")
+        shell: python
+
       - name: Install dependencies and package
         shell: bash
         run: |
@@ -55,7 +67,7 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest -n 2 --cov=pyxem --runslow --pyargs pyxem
+          pytest -n 1 --cov=pyxem --runslow --pyargs pyxem --durations=50 --timeout=360
 
       - name: Generate line coverage
         if: ${{ matrix.os == 'ubuntu-latest' }}

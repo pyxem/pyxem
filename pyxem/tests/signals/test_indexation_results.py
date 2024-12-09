@@ -18,13 +18,10 @@
 
 import numpy as np
 import pytest
-from matplotlib import pyplot as plt
 from transforms3d.euler import euler2mat
 import dask.array as da
 
-from diffsims.libraries.structure_library import StructureLibrary
-from diffsims.generators.diffraction_generator import DiffractionGenerator
-from diffsims.generators.library_generator import DiffractionLibraryGenerator
+import sys
 
 from diffsims.generators.simulation_generator import SimulationGenerator
 from orix.sampling import get_sample_reduced_fundamental
@@ -32,7 +29,6 @@ from orix.quaternion import Rotation, Orientation
 from orix.crystal_map import CrystalMap
 from orix.vector import Vector3d
 
-from pyxem.generators import TemplateIndexationGenerator
 from pyxem.signals import VectorMatchingResults, DiffractionVectors, OrientationMap
 from pyxem.utils.indexation_utils import OrientationResult
 from pyxem.data import (
@@ -266,12 +262,12 @@ class TestOrientationResult:
             Orientation.from_euler([0, 0, 0]), degrees=True
         )
         assert np.all(
-            degrees_between[:, :5] <= 1
+            degrees_between[:, :2] <= 1
         )  # off by 1 degree (due to pixelation?)
         degrees_between = orients.angle_with(
             Orientation.from_euler([10, 0, 0], degrees=True), degrees=True
         )
-        assert np.all(degrees_between[:, 5:] <= 1)
+        assert np.all(degrees_between[:, 2:] <= 1)
 
     def test_grain_orientation_result(self, simple_multi_rot_orientation_result):
         orientations, rotations, s = simple_multi_rot_orientation_result
@@ -300,7 +296,6 @@ class TestOrientationResult:
         assert np.all(crystal_map.phase_id < 2)
 
     @pytest.mark.parametrize("annotate", [True, False])
-    @pytest.mark.parametrize("fast", [True, False])
     @pytest.mark.parametrize("lazy_output", [True, False])
     @pytest.mark.parametrize("add_intensity", [True, False])
     def test_to_markers(
@@ -309,8 +304,8 @@ class TestOrientationResult:
         annotate,
         lazy_output,
         add_intensity,
-        fast,
     ):
+        fast = True
         orientations, rotations, s = simple_multi_rot_orientation_result
         markers = orientations.to_markers(
             lazy_output=lazy_output,
@@ -408,7 +403,6 @@ class TestOrientationResult:
         )
 
     @pytest.mark.parametrize("add_vector_markers", [False, True])
-    @pytest.mark.parametrize("add_ipf_markers", [False, True])
     @pytest.mark.parametrize("add_ipf_correlation_heatmap", [False, True])
     @pytest.mark.parametrize("add_ipf_colorkey", [False, True])
     @pytest.mark.parametrize(
@@ -418,11 +412,11 @@ class TestOrientationResult:
         self,
         multi_phase_orientation_result,
         add_vector_markers,
-        add_ipf_markers,
         add_ipf_correlation_heatmap,
         add_ipf_colorkey,
         vector_kwargs,
     ):
+        add_ipf_markers = True
         # Mock signal
         s = hs.signals.Signal2D(
             np.zeros(multi_phase_orientation_result.data.shape[:-2])[

@@ -18,11 +18,17 @@ Added
 -----
 - Added Examples for general plotting functions focusing on plotting diffraction patterns (#1108)
 - Added support for marker plotting for multi-phase orientation mapping results (#1092)
+- Cleaned up the Documentation for installation (#1109)
+- Added an Example for determining the calibration (#1085)
 - Added support for multi-phase orientation mapping markers on polar signals (#1126)
 
 Removed
 -------
 - Removed Dependency on pyfai.  Azimuthal integration is all handled internally (#1103)
+
+Fixed
+-----
+- Speed up creation of markers for Orientation Mapping (#1125)
 
 2024-06-10 - version 0.19.1
 ===========================
