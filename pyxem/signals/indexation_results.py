@@ -1137,18 +1137,33 @@ class OrientationMap(DiffractionVectors2D):
         """
         if lazy_output is None:
             lazy_output = self._lazy
+        if not lazy_output:
+            navigation_chunks = (5,) * self.axes_manager.navigation_dimension
+        else:
+            navigation_chunks = None
 
         def vec2polar(vector):
-            r, t = vector.to_flat_polar()
+            # Bug with dtype of python float
+            vector = vector.astype(np.float64)
+            r = np.linalg.norm(vector[:, :2], axis=1)
+            theta = np.arctan2(
+                vector[:, 1],
+                vector[:, 0],
+            )
             # flip y
-            t = -t
-            return np.vstack([t, r]).T
+            theta = -theta
+            return np.vstack([theta, r]).T
 
         all_markers = []
         for n in range(n_best):
             color = marker_colors[n % len(marker_colors)]
 
-            vecs = self.to_vectors(n)
+            vecs = self.to_vectors(
+                n_best_index=n,
+                return_object=False,
+                lazy_output=True,
+                navigation_chunks=navigation_chunks,
+            )
             markers_signal = vecs.map(vec2polar, inplace=False, ragged=True)
 
             if "sizes" not in kwargs:
