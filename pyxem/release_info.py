@@ -1,5 +1,5 @@
 name = "pyxem"
-version = "0.19.1"
+version = "0.20.0"
 author = "Duncan Johnstone, Phillip Crout, Carter Francis, Magnus Nord"
 copyright = "Copyright 2016-2024, The pyxem developers"
 # Contributors listed by original committer, maintainers, then other
@@ -16,12 +16,13 @@ credits = [
     "Eric Prestat",
     "Ben Martineau",
     "Tina Bergh",
+    "Viljar Johan Femoen",
     "Niels Cautaerts",
     "Håkon Wiik Ånes",
     "Stef Smeets",
-    "Viljar Johan Femoen",
     "Andrew Ross",
     "Joseph Broussard",
+    "Sivert Dagenborg",
     "Shuoyuan Huang",
     "Sean Collins",
     "Tom Furnival",
@@ -31,7 +32,6 @@ credits = [
     "Mohsen Danaie",
     "Andrew Herzing",
     "Tim Poon",
-    "Sivert Dagenborg",
     "Ruben Bjørge",
     "Tiarnan Doherty",
     "Affan Iqbal",

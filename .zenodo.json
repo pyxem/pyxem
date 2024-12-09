@@ -38,6 +38,10 @@
       "affiliation": "Norwegian University of Science and Technology"
     },
     {
+      "name":"Viljar Johan Femoen",
+      "affiliation": "Norwegian University of Science and Technology"
+    },
+    {
       "name":"Niels Cautaerts",
       "orcid": "0000-0002-6402-9879"
     },
@@ -50,14 +54,13 @@
       "name":"Stef Smeets"
     },
     {
-      "name":"Viljar Johan Femoen",
-      "affiliation": "Norwegian University of Science and Technology"
-    },
-    {
       "name":"Andrew Ross"
     },
     {
       "name":"Joseph Broussard"
+    },
+    {
+      "name": "Sivert Dagenborg"
     },
     {
       "name":"Shuoyuan Huang",
@@ -87,9 +90,6 @@
     },
     {
       "name":"Tim Poon"
-    },
-    {
-      "name": "Sivert Dagenborg"
     },
     {
       "name": "Ruben Bjørge",

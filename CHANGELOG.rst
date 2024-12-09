@@ -8,11 +8,12 @@ The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`
 and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
 
-Unreleased
+2024-12-09 - version 0.20.0
 ==========
 Fixed
 -----
 - Fixed inconsistency with vector markers' positions when plotting orientation mapping results (#1126)
+- Speed up creation of markers for Orientation Mapping (#1125)
 
 Added
 -----
@@ -21,14 +22,12 @@ Added
 - Cleaned up the Documentation for installation (#1109)
 - Added an Example for determining the calibration (#1085)
 - Added support for multi-phase orientation mapping markers on polar signals (#1126)
+- Added support for numpy 2.0.0
 
 Removed
 -------
 - Removed Dependency on pyfai.  Azimuthal integration is all handled internally (#1103)
 
-Fixed
------
-- Speed up creation of markers for Orientation Mapping (#1125)
 
 2024-06-10 - version 0.19.1
 ===========================
