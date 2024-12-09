@@ -40,6 +40,8 @@ from pyxem.data import (
     fe_bcc_phase,
     fe_fcc_phase,
 )
+
+from pyxem.signals.indexation_results import vectors_from_orientation_map, phase2dict
 import hyperspy.api as hs
 
 
@@ -489,3 +491,24 @@ class TestOrientationResult:
         r, t = res.to_polar_markers()[0].kwargs["offsets"][0, 0][-1]
         assert r > 0
         assert 0 < t < np.pi / 2
+
+    def test_vectors_from_orientation_map(self, single_rot_orientation_result):
+        data, intensities, phases, phase_indices, hkl = (
+            single_rot_orientation_result.get_simulation_arrays()
+        )
+        phases_dicts = [phase2dict(p) for p in phases]
+        original_data = data.copy()
+        v = vectors_from_orientation_map(
+            single_rot_orientation_result.data[0, 0],
+            vectors=data,
+            phases=phases_dicts,
+            hkl=hkl,
+            phase_index=phase_indices,
+            intensities=intensities,
+            n_best_index=0,
+        )
+
+        np.testing.assert_almost_equal(
+            v.original_hkl, single_rot_orientation_result.simulation.coordinates.hkl
+        )
+        np.testing.assert_equal(original_data, data)
