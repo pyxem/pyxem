@@ -486,7 +486,7 @@ def vectors_from_orientation_map(
         hkl = hkl[index]
     phase = dict2phase(**phase)
     # Copy manually, as deepcopy adds a lot of overhead with the phase
-    vectors = DiffractingVector(phase, xyz=data)
+    vectors = DiffractingVector(phase, xyz=data.copy())
     # Flip y, as discussed in https://github.com/pyxem/pyxem/issues/925
     vectors.y = -vectors.y
 
@@ -497,7 +497,7 @@ def vectors_from_orientation_map(
     vectors = ~rotation * vectors.to_miller()
     vectors = DiffractingVector(
         vectors.phase,
-        xyz=-vectors.data.copy(),  # Negating for proper alignment - is this flipping z direction?
+        xyz=-vectors.data,  # Negating for proper alignment - is this flipping z direction?
         intensity=intensities,
     )
     vectors.coordinate_format = coordinate_format
