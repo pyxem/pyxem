@@ -48,6 +48,7 @@ from .make_diffraction_test_data import (
     DiffractionTestImage,
     DiffractionTestDataset,
 )
+from .make_overlapping_nanocrystals import CrystalSTEMSimulation
 
 
 __all__ = [
@@ -75,4 +76,5 @@ __all__ = [
     "generate_4d_data",
     "DiffractionTestImage",
     "DiffractionTestDataset",
+    "CrystalSTEMSimulation",
 ]
