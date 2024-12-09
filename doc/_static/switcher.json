@@ -5,9 +5,14 @@
         "url": "https://pyxem.readthedocs.io/en/latest/"
     },
     {
-        "name": "stable",
-        "version": "0.19.0",
-        "url": "https://pyxem.readthedocs.io/en/stable/"
+        "name": "0.20.0",
+        "version": "0.20.0",
+        "url": "https://pyxem.readthedocs.io/en/v0.20.0/"
+    },
+    {
+        "name": "0.19.1",
+        "version": "0.19.1",
+        "url": "https://pyxem.readthedocs.io/en/v0.19.1/"
     },
     {
         "version": "0.18.0",
