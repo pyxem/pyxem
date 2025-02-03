@@ -16,8 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Signal classes for diffraction data.
-"""
+"""Signal classes for diffraction data."""
 
 
 from .common_diffraction import CommonDiffraction
