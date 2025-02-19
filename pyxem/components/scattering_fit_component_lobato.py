@@ -15,11 +15,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
-"""
-A HyperSpy fitting component to fit the independent atomic scattering
-background to a radial profile.
 
-"""
 import numpy as np
 
 from hyperspy.component import Component
@@ -27,45 +23,46 @@ from diffsims.utils.lobato_scattering_params import ATOMIC_SCATTERING_PARAMS_LOB
 
 
 class ScatteringFitComponentLobato(Component):
+    """
+    A scattering component to fit background atomic scattering.
+    Calculates the sum of the squares sum_squares = sum (ci * fi**2 )
+    and the square of the sum square_sum = (sum(ci * fi))**2
+    for atomic fraction ci with electron scattering factor fi.
+    The latter is used for normalisation.
+
+    N and C are fitting parameters for the Component class.
+
+    The fitted function f is of the form:
+
+    f = sum(fi), fi = ai(2 + bi*g^2) / (1 + bi*g^2)^2
+    where 1 < i < 5, ai, and bi are tabulated constants, and
+    g = 1/d = 2sin(theta)/lambda is the scattering vector magnitude.
+    The factors are tabulated in ATOMIC_SCATTERING_PARAMS_LOBATO.
+
+
+    The parametrisation is detailed in [1].
+
+    Parameters
+    ----------
+    elements: list of str
+        A list of elements present (by symbol).
+    fracs: list of float
+        A list of fraction of the respective elements. Should sum to 1.
+    N : float
+        The "slope" of the fit.
+    C : float
+        An additive constant to the fit.
+
+    References
+    ----------
+    [1] Lobato, I., & Van Dyck, D. (2014). An accurate parameterization for
+    scattering factors, electron densities and electrostatic potentials for
+    neutral atoms that obey all physical constraints. Acta Crystallographica
+    Section A: Foundations and Advances, 70(6), 636-649.
+
+    """
+
     def __init__(self, elements, fracs, N=1.0, C=0.0):
-        """
-        A scattering component to fit background atomic scattering.
-        Calculates the sum of the squares sum_squares = sum (ci * fi**2 )
-        and the square of the sum square_sum = (sum(ci * fi))**2
-        for atomic fraction ci with electron scattering factor fi.
-        The latter is used for normalisation.
-
-        N and C are fitting parameters for the Component class.
-
-        The fitted function f is of the form:
-
-        f = sum(fi), fi = ai(2 + bi*g^2) / (1 + bi*g^2)^2
-        where 1 < i < 5, ai, and bi are tabulated constants, and
-        g = 1/d = 2sin(theta)/lambda is the scattering vector magnitude.
-        The factors are tabulated in ATOMIC_SCATTERING_PARAMS_LOBATO.
-
-
-        The parametrisation is detailed in [1].
-
-        Parameters
-        ----------
-        elements: list of str
-            A list of elements present (by symbol).
-        fracs: list of float
-            A list of fraction of the respective elements. Should sum to 1.
-        N : float
-            The "slope" of the fit.
-        C : float
-            An additive constant to the fit.
-
-        References
-        ----------
-        [1] Lobato, I., & Van Dyck, D. (2014). An accurate parameterization for
-        scattering factors, electron densities and electrostatic potentials for
-        neutral atoms that obey all physical constraints. Acta Crystallographica
-        Section A: Foundations and Advances, 70(6), 636-649.
-
-        """
         Component.__init__(self, ["N", "C"])
         self._whitelist["elements"] = ("init,sig", elements)
         self._whitelist["fracs"] = ("init,sig", fracs)
@@ -84,6 +81,11 @@ class ScatteringFitComponentLobato(Component):
         The function "function" is called innately by HyperSpy's fitting
         algorithm, and represents the appropriate atomic scattering factor
         function presented respectively in Lobato & Van Dyck (2014).
+
+        Parameters
+        ----------
+        x : array-like
+            The scattering vector magnitude
 
         """
         N = self.N.value

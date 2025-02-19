@@ -27,42 +27,43 @@ from diffsims.utils.atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
 
 
 class ScatteringFitComponentXTables(Component):
+    """
+    A scattering component to fit background atomic scattering.
+    Calculates the sum of the squares sum_squares = sum (ci * fi**2 )
+    and the square of the sum square_sum = (sum(ci * fi))**2
+    for atomic fraction ci with electron scattering factor fi.
+    The latter is used for normalisation.
+
+    N and C are fitting parameters for the Component class.
+
+    The fitted function f is of the form:
+
+    f = sum(fi), fi = ai * exp(-bi*g^2)
+    where 1 < i < 5, ai, and bi are tabulated constants, and
+    g = 1/d = 2sin(theta)/lambda is the scattering vector magnitude.
+    The factors are tabulated in ATOMIC_SCATTERING_PARAMS_XTABLES.
+
+    The fitted scattering factor is from [1].
+
+    Parameters
+    ----------
+    elements: list of str
+        A list of elements present (by symbol).
+    fracs: list of float
+        A list of fraction of the respective elements. Should sum to 1.
+    N : float
+        The "slope" of the fit.
+    C : float
+        An additive constant to the fit.
+
+    References
+    ----------
+    [1] Prince, E. (2004). International tables for crystallography.
+    Vol. C, table 4.3.2.3.
+    """
+
     def __init__(self, elements, fracs, N=1.0, C=0.0):
-        """
-        A scattering component to fit background atomic scattering.
-        Calculates the sum of the squares sum_squares = sum (ci * fi**2 )
-        and the square of the sum square_sum = (sum(ci * fi))**2
-        for atomic fraction ci with electron scattering factor fi.
-        The latter is used for normalisation.
 
-        N and C are fitting parameters for the Component class.
-
-        The fitted function f is of the form:
-
-        f = sum(fi), fi = ai * exp(-bi*g^2)
-        where 1 < i < 5, ai, and bi are tabulated constants, and
-        g = 1/d = 2sin(theta)/lambda is the scattering vector magnitude.
-        The factors are tabulated in ATOMIC_SCATTERING_PARAMS_XTABLES.
-
-        The fitted scattering factor is from [1].
-
-        Parameters
-        ----------
-        elements: list of str
-            A list of elements present (by symbol).
-        fracs: list of float
-            A list of fraction of the respective elements. Should sum to 1.
-        N : float
-            The "slope" of the fit.
-        C : float
-            An additive constant to the fit.
-
-        References
-        ----------
-        [1] Prince, E. (2004). International tables for crystallography.
-        Vol. C, table 4.3.2.3.
-
-        """
         Component.__init__(self, ["N", "C"])
         self._whitelist["elements"] = ("init,sig", elements)
         self._whitelist["fracs"] = ("init,sig", fracs)
@@ -81,6 +82,11 @@ class ScatteringFitComponentXTables(Component):
         The function "function" is called innately by HyperSpy's fitting
         algorithm, and represents the appropriate atomic scattering factor
         function.
+
+        Parameters
+        ----------
+        x : array-like
+            The scattering vector magnitude.
 
         """
         N = self.N.value
