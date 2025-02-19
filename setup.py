@@ -105,7 +105,7 @@ setup(
         "tqdm",
         "traits",
         "transforms3d",
-        "zarr",  # for fast saving/loading
+        "zarr            < 3.0.0",  # for fast saving/loading (>=3.0.0 is not compatible)
     ],
     python_requires=">=3.7",
     package_data={
