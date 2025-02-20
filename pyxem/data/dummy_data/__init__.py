@@ -17,8 +17,7 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
-"""Dummy data for testing and examples.
-"""
+"""Dummy data for testing and examples."""
 
 from .dummy_data import (
     get_disk_shift_simple_test_signal,
