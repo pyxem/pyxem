@@ -110,7 +110,7 @@ html_theme_options = {
     "announcement": "Need Help? Register for the"
     "<a href='https://www.diamond.ac.uk/Home/Events/2025/HyperSpy-Workshop-2025.html'>"
     "Diamond 2025 Hyperspy Workshop</a> or "
-    "<a href='https://mmconference.microscopy.org/sunday-short-courses'> M&M 2025 Hyperspy Workshop ",
+    "<a href='https://mmconference.microscopy.org/sunday-short-courses'> M&M 2025 Hyperspy Workshop </a>",
     "switcher": {
         "json_url": "https://pyxem.readthedocs.io/en/latest/_static/switcher.json",
         "version_match": version_match,
