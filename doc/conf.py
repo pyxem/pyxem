@@ -107,8 +107,10 @@ html_theme_options = {
     "navigation_with_keys": True,
     "show_toc_level": 2,
     "use_edit_page_button": True,
-    "announcement": "Check out the new "
-    "<a href='https://pyxem.readthedocs.io/en/latest/examples/index.html'>Examples Gallery!</a> ",
+    "announcement": "Need Help? Register for the"
+    "<a href='https://www.diamond.ac.uk/Home/Events/2025/HyperSpy-Workshop-2025.html'>"
+    "Diamond 2025 Hyperspy Workshop</a> or "
+    "<a href='https://mmconference.microscopy.org/sunday-short-courses'> M&M 2025 Hyperspy Workshop ",
     "switcher": {
         "json_url": "https://pyxem.readthedocs.io/en/latest/_static/switcher.json",
         "version_match": version_match,
