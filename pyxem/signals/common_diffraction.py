@@ -94,7 +94,7 @@ class CommonDiffraction:
                 return isinstance(self.data, cp.ndarray)
 
     @property
-    def unit(self):
+    def unit(self) -> str:
         if self.axes_manager.signal_axes[0].units is Undefined:
             print("The unit hasn't been set yet")
             return
@@ -102,7 +102,7 @@ class CommonDiffraction:
             return self.axes_manager.signal_axes[0].units
 
     @unit.setter
-    def unit(self, unit):
+    def unit(self, unit: str):
         """Set the units
 
         Parameters
@@ -190,8 +190,11 @@ class CommonDiffraction:
         out.plot(**kwargs)
 
     def get_virtual_image(
-        self, rois: Sequence[BaseROI], new_axis_dict=None, normalize=False
-    ):
+        self,
+        rois: Sequence[BaseROI],
+        new_axis_dict: dict = None,
+        normalize: bool = False,
+    ) -> BaseSignal:
         """Get a virtual images from a set of rois
 
         Parameters
@@ -239,7 +242,9 @@ class CommonDiffraction:
             vdfim.map(normalize_virtual_images, show_progressbar=False)
         return vdfim
 
-    def get_integrated_intensity(self, roi: BaseROI, out_signal_axes=None):
+    def get_integrated_intensity(
+        self, roi: BaseROI, out_signal_axes=None
+    ) -> BaseSignal:
         """Obtains the intensity integrated over the scattering range as
         defined by the roi.
 
