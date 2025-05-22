@@ -104,5 +104,31 @@ class DisplacementGradientMap(Signal2D):
         theta = R.map(_get_rotation_angle, inplace=False)
         theta = theta.transpose(2)
         strain_results = stack([e11, e22, e12, theta])
+        strain_map = StrainMap(strain_results)
+        if len(strain_map.axes_manager.signal_axes) == 2:
+            strain_map.axes_manager.signal_axes[0].name = (
+                self.axes_manager.navigation_axes[0].name
+            )
+            strain_map.axes_manager.signal_axes[0].scale = (
+                self.axes_manager.navigation_axes[0].scale
+            )
+            strain_map.axes_manager.signal_axes[0].units = (
+                self.axes_manager.navigation_axes[0].units
+            )
+            strain_map.axes_manager.signal_axes[0].offset = (
+                self.axes_manager.navigation_axes[0].offset
+            )
 
-        return StrainMap(strain_results)
+            strain_map.axes_manager.signal_axes[1].name = (
+                self.axes_manager.navigation_axes[1].name
+            )
+            strain_map.axes_manager.signal_axes[1].scale = (
+                self.axes_manager.navigation_axes[1].scale
+            )
+            strain_map.axes_manager.signal_axes[1].units = (
+                self.axes_manager.navigation_axes[1].units
+            )
+            strain_map.axes_manager.signal_axes[1].offset = (
+                self.axes_manager.navigation_axes[1].offset
+            )
+        return strain_map

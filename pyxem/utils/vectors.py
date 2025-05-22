@@ -368,21 +368,22 @@ def filter_vectors_near_basis(vectors, basis, columns=[0, 1], distance=None):
     closest_vectors: array-like
         An array of vectors which are the closest to the basis considered.
     """
-    vectors = vectors[:, columns]
+    new_vectors = vectors[:, columns]
     if basis.ndim == 1:  # possible bug in hyperspy map with iterating basis
         basis = basis.reshape(1, -1)
-    if len(vectors) == 0:
-        vectors = np.empty(basis.shape)
-        vectors[:, :] = np.nan
-        return vectors
-    distance_mat = cdist(vectors, basis)
+    basis = basis[:, columns]
+    if len(new_vectors) == 0:
+        end_shape = (basis.shape[0], vectors.shape[1])
+        new_vectors = np.empty(end_shape)
+        new_vectors[:, :] = np.nan
+        return new_vectors
+    distance_mat = cdist(new_vectors, basis)
     closest_index = np.argmin(distance_mat, axis=0)
     min_distance = distance_mat[closest_index, np.arange(len(basis), dtype=int)]
     closest_vectors = vectors[closest_index]
     if distance is not None:
         if closest_vectors.dtype == int:
             closest_vectors = closest_vectors.astype(float)
-
         closest_vectors[min_distance > distance, :] = np.nan
     return closest_vectors
 

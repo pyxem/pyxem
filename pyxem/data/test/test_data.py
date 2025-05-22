@@ -25,6 +25,7 @@ from pyxem.data import (
     sample_with_g,
     mgo_nanocrystals,
     tilt_boundary_data,
+    simulated_strain,
 )
 from pyxem.data._data import Dataset
 import pytest
@@ -73,3 +74,8 @@ class TestLoadData:
     def test_Dataset_url(self):
         pdnip = Dataset("PdNiP.zspy")
         assert "PdNiP.zspy" in pdnip.url
+
+    def test_simulated_strain(self):
+        s = simulated_strain()
+        assert s.axes_manager.signal_shape == (512, 512)
+        assert s.axes_manager.navigation_shape == (32, 32)

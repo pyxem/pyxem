@@ -62,6 +62,8 @@ from pyxem.data.simulated_dpc import (
     simulated_constant_shift_magnitude,
 )
 
+from pyxem.data.simulated_strain import simulated_strain
+
 __all__ = [
     "au_grating",
     "pdnip_glass",
@@ -89,4 +91,5 @@ __all__ = [
     "small_ptychography",
     "au_phase",
     "simulated_overlap",
+    "simulated_strain",
 ]
