@@ -60,7 +60,7 @@ def _make_circular_mask(centerX, centerY, imageSizeX, imageSizeY, radius):
     Examples
     --------
     >>> import numpy as np
-    >>> import pyxem.utils.pixelated_stem_tools as pst
+    >>> import pyxem.utils._pixelated_stem_tools as pst
     >>> image = np.ones((9, 9))
     >>> mask = pst._make_circular_mask(4, 4, 9, 9, 2)
     >>> image_masked = image*mask
@@ -179,7 +179,7 @@ def _get_angle_sector_mask(
     Examples
     --------
     >>> import numpy as np
-    >>> import pyxem.utils.pixelated_stem_tools as pst
+    >>> import pyxem.utils._pixelated_stem_tools as pst
     >>> s = pxm.signals.Diffraction2D(np.arange(100).reshape(10, 10))
     >>> s.axes_manager.signal_axes[0].offset = -5
     >>> s.axes_manager.signal_axes[1].offset = -5

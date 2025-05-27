@@ -21,7 +21,7 @@
 """ Utils for Pair Distribution Function (PDF) analysis. """
 
 import numpy as np
-from _deprecated import deprecated
+from pyxem.utils._deprecated import deprecated
 
 
 @deprecated(since="0.18.0", removal="1.0.0")
