@@ -12,7 +12,7 @@ jobs:
   build-with-pip:
     name: ${{ matrix.os }}-py${{ matrix.python-version }}${{ matrix.LABEL }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 45
+    timeout-minutes: 25
     strategy:
       fail-fast: false
       matrix:
@@ -63,11 +63,11 @@ jobs:
       - name: Run docstring tests
         continue-on-error: true
         run: |
-          pytest --doctest-modules --doctest-continue-on-failure --ignore-glob=pyxem/tests pyxem
+          pytest --doctest-modules --doctest-continue-on-failure --ignore-glob=pyxem/tests --ignore-glob=pyxem/data pyxem
 
       - name: Run tests
         run: |
-          pytest -n 1 --cov=pyxem --runslow --pyargs pyxem --durations=50 --timeout=360
+          pytest --cov=pyxem --runslow --pyargs pyxem --durations=50 --timeout=360
 
       - name: Generate line coverage
         if: ${{ matrix.os == 'ubuntu-latest' }}
