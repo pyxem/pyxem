@@ -13,7 +13,9 @@ from pyxem.data import fe_multi_phase_grains, fe_bcc_phase, fe_fcc_phase
 from diffsims.generators.simulation_generator import SimulationGenerator
 from orix.quaternion import Rotation
 from orix.sampling import get_sample_reduced_fundamental
+import hyperspy.api as hs
 
+hs.set_log_level("ERROR")
 mulit_phase = fe_multi_phase_grains()
 
 # %%
@@ -56,11 +58,44 @@ sim = generator.calculate_diffraction2d(
     reciprocal_radius=2,
     with_direct_beam=False,
 )
-polar_multi = polar_multi**0.5  # gamma correction
-orientation_map = polar_multi.get_orientation(sim)
+# %%
+# Orientation Mapping
+# -------------------
+# Now we can calculate the orientation map using the polar signal and the simulated diffraction pattern
+# Sometimes a gamma correction helps to re-normalize the intensity of the simulated diffraction pattern
+# and increase the intensity of the high k diffraction spots. Unfortunately this is quite dependent on the
+# detector response/ sample thickness etc. As a result there is no good rule of thumb.  As such it is important
+# to play with this value/ use the background correction to get the best results.
+# Additionally, here we have set the n_best to -1 which means that we will return all the
+# orientations in the simulation. This is not always the best option as it can lead to
+# memory spikes. It does allow us to plot a very nice heatmap of the orientation.
+# Which is useful for understanding the orientation mapping process and mis-orientations.
 
+
+polar_multi = polar_multi**0.5  # gamma correction
+orientation_map = polar_multi.get_orientation(sim, n_best=-1, frac_keep=1)
+
+
+# %%
+# Plotting The Orientation Mapping
+# --------------------------------
+# We can then plot the orientation map using the :meth:`pyxem.signals.OrientationMap.plot_over_signal` method.
+# Here we have set add_ipf_correlation_heatmap=True which will add a heatmap of the IPF correlation.
+
+orientation_map.plot_over_signal(
+    mulit_phase, vmax="99th", add_ipf_correlation_heatmap=True
+)
+
+# %%
+# Getting the Crystal Map
+# -----------------------
+# Now we can calculate the orientation map using the polar signal and the simulated diffraction pattern
+# Sometimes a gamma correction helps to re-normalize the intensity of the simulated diffraction pattern
+# and increase the intensity of the high k diffraction spots. Unfortunately this is quite dependent on the
+# detector response/ sample thickness etc. As a result there is no good rule of thumb.  As such it is important
+# to play with this value/ use the background correction to get the best results.
 
 cmap = orientation_map.to_crystal_map()
 cmap.plot()
 # %%
-# sphinx_gallery_thumbnail_number = 3
+# sphinx_gallery_thumbnail_number = 4
