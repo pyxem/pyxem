@@ -184,7 +184,7 @@ def cuag_orientations(allow_download=False, **kwargs):  # pragma: no cover
     Examples
     --------
     >>> import pyxem as pxm
-    >>> s = pxm.data.cuag_orientations(allow_download=True)
+    >>> s = pxm.data.cuag_orientations()
     >>> print(s)
     """
     import zarr
@@ -211,7 +211,7 @@ def organic_semiconductor(allow_download=False, **kwargs):  # pragma: no cover
     Examples
     --------
     >>> import pyxem as pxm
-    >>> s = pxm.data.organic_semiconductor(allow_download=True)
+    >>> s = pxm.data.organic_semiconductor()
     >>> print(s)
     """
     import zarr
@@ -242,7 +242,7 @@ def pdcusi_insitu(allow_download=False, **kwargs):  # pragma: no cover
     Examples
     --------
     >>> import pyxem as pxm
-    >>> s = pxm.data.pdcusi_insitu(allow_download=True)
+    >>> s = pxm.data.pdcusi_insitu()
     >>> print(s)
 
     """
@@ -389,6 +389,36 @@ def small_ptychography(allow_download=False, **kwargs):  # pragma: no cover
     ptychography = Dataset("smallPtychography.hspy")
     file_path = ptychography.fetch_file_path(allow_download=allow_download)
     return hs.load(file_path, **kwargs)
+
+
+def zrcual_1(allow_download=False, **kwargs):  # pragma: no cover
+    """A small 4-D STEM dataset of a ZrCuAl metallic glass for FEM analysis."""
+    import zarr
+
+    sample = Dataset("pos1-1.zspy")
+    file_path = sample.fetch_file_path(allow_download=allow_download)
+    store = zarr.ZipStore(file_path)  # for loading from zip
+    return hs.load(store, **kwargs)
+
+
+def zrcual_2(allow_download=False, **kwargs):  # pragma: no cover
+    """A small 4-D STEM dataset of a ZrCuAl metallic glass for FEM analysis."""
+    import zarr
+
+    sample = Dataset("pos5-1.zspy")
+    file_path = sample.fetch_file_path(allow_download=allow_download)
+    store = zarr.ZipStore(file_path)  # for loading from zip
+    return hs.load(store, **kwargs)
+
+
+def zrcual_3(allow_download=False, **kwargs):  # pragma: no cover
+    """A small 4-D STEM dataset of a ZrCuAl metallic glass for FEM analysis."""
+    import zarr
+
+    sample = Dataset("pos6-1.zspy")
+    file_path = sample.fetch_file_path(allow_download=allow_download)
+    store = zarr.ZipStore(file_path)  # for loading from zip
+    return hs.load(store, **kwargs)
 
 
 class Dataset:

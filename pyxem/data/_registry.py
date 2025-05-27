@@ -22,7 +22,7 @@ This data can be used to test pyXem and to provide examples.
 """
 
 
-_zenodo_url = "https://zenodo.org/records/14113591/files"
+_zenodo_url = "https://zenodo.org/records/15490547/files"  # version 0.9.0
 # file name : hash
 _file_names_hash = {
     "au_xgrating_100kX.hspy": "md5:b0733af9d0a272fc1a47e2f56a324fe5",
@@ -43,6 +43,9 @@ _file_names_hash = {
     "au_xgrating_20cm.tif": "md5:06192653b9f7841f16a29d3d04e0fd06",
     "au.cif": "md5:4cb2856e8ed9ffac34f5fa22424cd2a2",
     "smallPtychography.hspy": "md5:df9376d5c020a23f0f7f51cfe79f303f",
+    "pos6-1.zspy": "md5:102d95883974acb8f6698dcec52676c7",
+    "pos5-1.zspy": "md5:351e8bfc12f2628edc3009cd5a429f4d",
+    "pos1-1.zspy": "md5:2195347310aa35d6835dc141d07f783f",
 }
 # add to _urls and to _file_names_hash
 # if you want to download the data from a different location

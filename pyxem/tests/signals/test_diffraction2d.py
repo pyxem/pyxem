@@ -106,9 +106,9 @@ class TestAzimuthalIntegral1d:
 
     def test_unit(self, ones):
         dif = Diffraction2D(data=[[1, 1], [1, 1]])
-        assert dif.unit is "px"
+        assert dif.unit == "px"
         dif.unit = "!23"
-        assert dif.unit is "px"
+        assert dif.unit == "px"
 
     def test_unit_set(self, ones):
         assert ones.unit == "2th_deg"
@@ -472,7 +472,7 @@ class TestAzimuthalIntegral2d:
         quadrant = arange.get_azimuthal_integral2d(
             npt=10, npt_azim=10, azimuth_range=azimuthal_range, mean=True
         )
-        assert np.allclose(quadrant.data[~np.isnan(quadrant.data)], expected_output)
+        assert np.allclose(quadrant.data[quadrant.data != 0], expected_output)
 
 
 class TestVirtualImaging:
