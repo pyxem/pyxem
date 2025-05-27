@@ -2,8 +2,8 @@
 Strain Mapping
 ==============
 
-Strain mapping in pyxem is done by fitting a `DisplacementGradientMap` to the data. This can be  distortion
-in an image around some central point.
+Strain mapping in pyxem is done by fitting a `DisplacementGradientMap` to the data. This can be thought of as
+image distortion around some central point.
 """
 
 from pyxem.data import simulated_strain

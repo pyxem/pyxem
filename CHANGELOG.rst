@@ -7,6 +7,19 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_,
 and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
+2024-05-27 - version 0.21.0
+===========================
+Added
+-----
+- Added examples for strain mapping and FEM (#1138)
+- Added a new ZrCuAl dataset (#1138)
+- Added a `get_strain_maps` method to simplify strain mapping (#1138)
+
+
+Fixed
+-----
+- Fixed bug in strain mapping for passing `DiffractionVectors` as a basis (#1138)
+- Changed `dqe` to `gain` in Azimuthal integration (#1138)
 
 2024-12-09 - version 0.20.0
 ==========

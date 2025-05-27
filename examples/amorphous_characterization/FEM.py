@@ -1,7 +1,7 @@
 """
 Fluctuation Electron Microscopy
 ===============================
-This example shows you how to perform a fluctuation electron mircoscopy (FEM) analysis.
+This example shows you how to perform a fluctuation electron microscopy (FEM) analysis.
 
 In this example we will focus on calculating :math: V_\\Omega (k) which is defined as,
 
@@ -81,7 +81,7 @@ az.sum().plot()
 # and the center as described above. Restricting the radial range is also nice to remove
 # the effects of the high intensity at the top end. Adding a mask can also be helpful for
 # reducing the effects of a beam stop. The `gain` parameter is number of detector units for 1 electron.
-# It's used for the Possion noise correction. If the data are already calibrated in units of electron counts,
+# It's used for the Poisson noise correction. If the data are already calibrated in units of electron counts,
 # use a gain of 1.
 
 mask = summed < 10000
@@ -113,7 +113,7 @@ haadf = s.metadata.HAADF.intensity
 # the HAADF intensity at a position of known sample thickness. In this case, the slope is 440.46 digital
 # counts / nm of sample thickness.
 #
-# TEM sample thickness for amorphous materials can be measured indepedently either using electron energy
+# TEM sample thickness for amorphous materials can be measured independently either using electron energy
 # loss spectroscopy (EELS), in which the inelastic mean free path of the material must be known, or using total
 # elastic scattering, in which case the elastic mean free path of the material must be known. A reasonable model
 # for the elastic mean free path for many inorganic materials may be found
@@ -148,7 +148,7 @@ var = [
     for f in filtered
 ]
 
-# Note that the y-axis is the varaiance here. Hyperspy just always labels this as "Intensity"
+# Note that the y-axis is the variance here. Hyperspy just always labels this as "Intensity"
 for v in var:
     v.axes_manager[0].units = "$nm^{-1}$"
 hs.plot.plot_spectra(var, legend=["thickness<17.5nm", "thickness<18.5nm"])

@@ -16,7 +16,7 @@ from orix.sampling import get_sample_reduced_fundamental
 import hyperspy.api as hs
 
 hs.set_log_level("ERROR")
-mulit_phase = fe_multi_phase_grains()
+multi_phase = fe_multi_phase_grains()
 
 # %%
 # First we center the diffraction patterns and get a polar signal
@@ -25,15 +25,15 @@ mulit_phase = fe_multi_phase_grains()
 # The mean=True argument will return the mean pixel value in each bin rather than the sum
 # this makes the high k values more visible
 
-mulit_phase.calibration.center = None
-polar_multi = mulit_phase.get_azimuthal_integral2d(
+multi_phase.calibration.center = None
+polar_multi = multi_phase.get_azimuthal_integral2d(
     npt=100, npt_azim=360, inplace=False, mean=True
 )
 polar_multi.plot()
 
 # %%
-# Now we can get make a simulation. In this case we want to set a minimum_intensity which removes the low intensity reflections.
-# we also sample the S2 space using the :func`orix.sampling.get_sample_reduced_fundamental`
+# Now we can get make a simulation. In this case we want to set a minimum_intensity which removes the
+# low intensity reflections. We also sample the S2 space using the :func`orix.sampling.get_sample_reduced_fundamental`
 # We have two phases here so we can make a simulation object with both of the phases.
 
 bcc = fe_bcc_phase()
@@ -83,7 +83,7 @@ orientation_map = polar_multi.get_orientation(sim, n_best=-1, frac_keep=1)
 # Here we have set add_ipf_correlation_heatmap=True which will add a heatmap of the IPF correlation.
 
 orientation_map.plot_over_signal(
-    mulit_phase, vmax="99th", add_ipf_correlation_heatmap=True
+    multi_phase, vmax="99th", add_ipf_correlation_heatmap=True
 )
 
 # %%
