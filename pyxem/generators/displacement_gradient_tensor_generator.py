@@ -79,6 +79,7 @@ def get_DisplacementGradientMap(
         weights=weights,
         inplace=False,
         output_signal_size=(3, 3),
+        ragged=False,
         output_dtype=np.float64,
         columns=columns,
         **kwargs

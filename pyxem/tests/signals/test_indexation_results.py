@@ -45,6 +45,15 @@ from pyxem.signals.indexation_results import vectors_from_orientation_map, phase
 import hyperspy.api as hs
 
 
+@pytest.fixture(scope="module", autouse=True)
+def single_threaded_on_mac():
+    """Ensure tests run single-threaded if executed on macOS."""
+    if sys.platform == "darwin":
+        import dask
+
+        dask.config.set(scheduler="single-threaded")
+
+
 @pytest.fixture
 def sp_vector_match_result():
     # We require (total_error of row_1 > correlation row_2)

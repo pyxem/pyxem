@@ -149,6 +149,12 @@ signals:
     dtype: real
     lazy: False
     module: pyxem.signals.tensor_field
+  LazyDisplacementGradientMap:
+    signal_type: tensor_field
+    signal_dimension: 2
+    dtype: real
+    lazy: True
+    module: pyxem.signals.tensor_field
   VirtualDarkFieldImage:
     signal_type: virtual_dark_field
     signal_dimension: 2

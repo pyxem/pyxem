@@ -24,6 +24,7 @@ from hyperspy.signals import Signal2D
 from hyperspy.utils import stack
 
 from pyxem.signals import StrainMap
+from hyperspy._signals.lazy import LazySignal
 
 
 def _polar_decomposition(image, side):
@@ -95,6 +96,8 @@ class DisplacementGradientMap(Signal2D):
         strain_results : BaseSignal
             Signal of shape < 4 | , > , navigation order is e11,e22,e12,theta
         """
+        if self._lazy:
+            self.compute()
         R, U = self.polar_decomposition()
 
         e11 = np.reciprocal(U.isig[0, 0].T) - 1
@@ -132,3 +135,9 @@ class DisplacementGradientMap(Signal2D):
                 self.axes_manager.navigation_axes[1].offset
             )
         return strain_map
+
+
+class LazyDisplacementGradientMap(LazySignal, DisplacementGradientMap):
+    """Lazy signal class for Tensor Fields."""
+
+    pass

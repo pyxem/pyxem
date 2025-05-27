@@ -25,6 +25,7 @@ from pyxem.tests.generators.test_displacement_gradient_tensor_generator import (
 )
 from pyxem.generators import get_DisplacementGradientMap
 from pyxem.signals.strain_map import _get_rotation_matrix
+from pyxem.data import simulated_strain
 
 
 @pytest.fixture()
@@ -139,3 +140,77 @@ def test_trace(Displacement_Grad_Map):
         np.add(rotation_beta.inav[0].data, rotation_beta.inav[1].data),
         decimal=2,
     )
+
+
+@pytest.mark.parametrize("lazy", [True, False])
+def test_filter_basis(lazy):
+    """
+    This test is a workflow test for filtering basis for strain mapping.
+    """
+    signal = simulated_strain(
+        navigation_shape=(16, 16),
+        signal_shape=(128, 128),
+        disk_radius=10,
+        num_electrons=None,
+        strain_matrix=None,
+        lazy=True,
+    )
+
+    temp = signal.template_match_disk(disk_r=10, subtract_min=False)
+    vectors = temp.get_diffraction_vectors(threshold_abs=0.4, min_distance=5)
+    vectors = vectors.filter_magnitude(0.1, 1)
+    unstrained_vectors = vectors.inav[0, 0]
+    filtered_vectors = vectors.filter_basis(unstrained_vectors)
+    filtered_vectors.compute()
+    assert filtered_vectors.data.shape == (16, 16, 4, 3)
+    assert filtered_vectors.axes_manager[0].name == "x"
+    assert filtered_vectors.axes_manager[1].name == "y"
+
+
+@pytest.mark.parametrize("lazy", [True, False])
+def test_get_strain(lazy):
+    """
+    This test is a workflow test for the strain map. It checks that the strain map can be
+    calculated and that the results are as expected.
+    """
+    signal = simulated_strain(
+        navigation_shape=(16, 16),
+        signal_shape=(128, 128),
+        disk_radius=10,
+        num_electrons=None,
+        strain_matrix=None,
+        lazy=True,
+    )
+
+    temp = signal.template_match_disk(disk_r=10, subtract_min=False)
+    vectors = temp.get_diffraction_vectors(threshold_abs=0.4, min_distance=5)
+    vectors = vectors.filter_magnitude(0.1, 1)
+    unstrained_vectors = vectors.inav[0, 0]
+    strain = vectors.get_strain_maps(unstrained_vectors=unstrained_vectors)
+
+    assert strain.axes_manager[1].name == signal.axes_manager.navigation_axes[0].name
+    assert strain.axes_manager[1].scale == signal.axes_manager.navigation_axes[0].scale
+    assert strain.axes_manager[1].units == signal.axes_manager.navigation_axes[0].units
+    assert strain.axes_manager[2].name == signal.axes_manager.navigation_axes[1].name
+    assert strain.axes_manager[2].scale == signal.axes_manager.navigation_axes[1].scale
+    assert strain.axes_manager[2].units == signal.axes_manager.navigation_axes[1].units
+
+
+def test_get_strain_error():
+    signal = simulated_strain(
+        navigation_shape=(16, 16),
+        signal_shape=(128, 128),
+        disk_radius=10,
+        num_electrons=None,
+        strain_matrix=None,
+        lazy=True,
+    )
+
+    temp = signal.template_match_disk(disk_r=10, subtract_min=False)
+    vectors = temp.get_diffraction_vectors(threshold_abs=0.4, min_distance=5)
+    vectors = vectors.filter_magnitude(0.1, 0.2)
+    unstrained_vectors = vectors.inav[0, 0]
+    with pytest.raises(ValueError):
+        vectors.get_strain_maps(
+            unstrained_vectors=unstrained_vectors, return_residuals=True
+        )

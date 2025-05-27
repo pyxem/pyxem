@@ -1237,15 +1237,25 @@ class DiffractionVectors(BaseSignal):
             DiffractionVectors class will be returned otherwise an instance
             of the DiffractionVectors2D class will be returned.
         """
-        ragged = isinstance(basis, BaseSignal) and (
+        if isinstance(basis, BaseSignal) and (
             basis.axes_manager.navigation_shape == self.axes_manager.navigation_shape
-        )
-        kwargs["ragged"] = ragged
-        if not ragged and isinstance(basis, LazySignal):
-            basis.compute()
-            basis = basis.data[0]  # remove extra dimension
+        ):
+            kwargs["ragged"] = True
+        else:
+            if isinstance(basis, LazySignal):
+                basis.compute()
+                basis = basis.data[0]  # remove extra dimension
+            elif isinstance(basis, BaseSignal) and basis.ragged:
+                basis = basis.data[0]  # remove extra dimension
+            elif isinstance(basis, BaseSignal):
+                basis = basis.data
+            kwargs["ragged"] = False
+        if not isinstance(basis, BaseSignal) and (
+            basis.ndim != 2 or basis.shape[0] < 1
+        ):
+            raise ValueError("The basis must be a 2D array with at least 1 vectors.")
 
-        if not ragged:
+        if not kwargs.get("ragged", False):
             kwargs["output_signal_size"] = (basis.shape[0], self.num_columns)
 
             kwargs["output_dtype"] = float
