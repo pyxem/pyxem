@@ -47,7 +47,11 @@ import hyperspy.api as hs
 
 @pytest.fixture(scope="module", autouse=True)
 def single_threaded_on_mac():
-    """Ensure tests run single-threaded if executed on macOS."""
+    """Ensure tests run single-threaded if executed on macOS.
+
+    This is a workaround, likely related to numpy/numba wheels from pypi.
+    See pyxem/pull/1138 for more details.
+    """
     if sys.platform == "darwin":
         import dask
 
