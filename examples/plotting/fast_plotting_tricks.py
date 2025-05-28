@@ -10,6 +10,7 @@ There are a couple of different ways that plotting in hyperspy/pyxem can be slow
 1. The data is too large and the navigator is being recalculated every time you plot. (i.e. calling s.plot()
  takes a long time to render)
 2. Dragging the navigator is slow and laggy.
+
 """
 
 from pyxem.data import fe_multi_phase_grains
@@ -79,6 +80,7 @@ s.plot()
 # ---------------
 # 4. Finally, you can always consider saving the data in a more performant format like `.zspy`
 # This will make loading the data faster which will in turn make plotting faster!
+
 s.save("fast_and_compressed.zspy")
 
 hs.load("fast_and_compressed.zspy").plot()  # reload the data and plot it

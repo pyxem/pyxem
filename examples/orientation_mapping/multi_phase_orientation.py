@@ -15,7 +15,6 @@ from orix.quaternion import Rotation
 from orix.sampling import get_sample_reduced_fundamental
 import hyperspy.api as hs
 
-hs.set_log_level("ERROR")
 multi_phase = fe_multi_phase_grains()
 
 # %%
@@ -33,7 +32,7 @@ polar_multi.plot()
 
 # %%
 # Now we can get make a simulation. In this case we want to set a minimum_intensity which removes the
-# low intensity reflections. We also sample the S2 space using the :func`orix.sampling.get_sample_reduced_fundamental`
+# low intensity reflections. We also sample the S2 space using the :func:`orix.sampling.get_sample_reduced_fundamental`
 # We have two phases here so we can make a simulation object with both of the phases.
 
 bcc = fe_bcc_phase()

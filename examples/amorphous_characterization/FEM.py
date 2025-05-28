@@ -3,17 +3,16 @@ Fluctuation Electron Microscopy
 ===============================
 This example shows you how to perform a fluctuation electron microscopy (FEM) analysis.
 
-In this example we will focus on calculating :math: V_\\Omega (k) which is defined as,
+In this example we will focus on calculating :math:`V_\\Omega (k)` which is defined as,
 
 Equation 1:
 
 .. math::
 
     V_\\Omega (k) = \\frac{\\langle I{^2}(k) \\rangle{_r} - \\langle I(k)\\rangle_r^2}{\\langle I(k)\\rangle_r^2 } - \\frac{G}{\\langle I(k)\\rangle_r}
-,
 
-where :math: I(k) is the diffracted electron intensity averaged over the polar angle at constant scattering
-vector magnitude k, :math: <>_r indicates averaging over probe positions, and G is the gain of the electron camera
+where :math:`I(k)` is the diffracted electron intensity averaged over the polar angle at constant scattering
+vector magnitude k, :math:`<>_r` indicates averaging over probe positions, and G is the gain of the electron camera
 in counts per electron for counted or data from hybrid pixel detectors this value is 1 otherwise it will be some
 mean value. The first term is the definition of the variance, and the second term is a correction to
 the variance for Poisson noise in the data.
@@ -60,7 +59,8 @@ summed.axes_manager.signal_axes[0].offset = 0
 # %%
 # Checking
 # --------
-# Let's check to make sure that things are behaving.  We can first plot the ellipse over the data and then take the azimuthal integral/sum.
+# Let's check to make sure that things are behaving.  We can first plot the ellipse over
+# the data and then take the azimuthal integral/sum.
 # That should end up a nice straight line
 
 summed.plot()
@@ -77,7 +77,7 @@ az.sum().plot()
 # %%
 # Getting the Variance
 # --------------------
-# The `get_variance` function will calculate the variance using the affine correction
+# The :meth:`~.signals.diffraction2d.get_variance function will calculate the variance using the affine correction
 # and the center as described above. Restricting the radial range is also nice to remove
 # the effects of the high intensity at the top end. Adding a mask can also be helpful for
 # reducing the effects of a beam stop. The `gain` parameter is number of detector units for 1 electron.
@@ -97,8 +97,8 @@ variance.plot()
 # thickness-related differences in the diffracted intensity  will dominate structure-related
 # differences and therefore dominate. This effect can be avoided by using the HAADF signal or
 # the high-angle scattering within the diffraction pattern to determine the local sample thickness,
-# grouping the diffraction patterns into bins of nearly constant thickness, and only computing :math: V_\\Omega (k)
-# for data inside a single bin. The :math: V_\\Omega (k) from different thickness bins then can be averaged
+# grouping the diffraction patterns into bins of nearly constant thickness, and only computing :math:`V_\\Omega (k)`
+# for data inside a single bin. The :math:`V_\\Omega (k)` from different thickness bins then can be averaged
 # together. See Hwang and Voyles Microscopy and Microanalysis 17, 67–74 (2011), DOI: 10.1017/S1431927610094109
 # and Li et al. Microscopy and Microanalysis 20, 1605–1618 (2014). DOI: 10.1017/s1431927614012756 for more details.
 
@@ -118,6 +118,7 @@ haadf = s.metadata.HAADF.intensity
 # elastic scattering, in which case the elastic mean free path of the material must be known. A reasonable model
 # for the elastic mean free path for many inorganic materials may be found
 # in Zhang et al. Ultramicroscopy 171, 89–95 (2016), DOI: 10.1016/j.ultramic.2016.09.005.
+
 thickness = (haadf - 26265) / 440.46
 
 

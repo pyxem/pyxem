@@ -5,19 +5,51 @@ from pyxem.signals import Diffraction2D
 from pyxem.data import si_phase
 from skimage.draw import ellipse, disk
 from scipy.ndimage import gaussian_filter
+import numpy.typing as npt
 
 
 def create_diffraction_pattern(
-    simulation,
-    shape=(512, 512),
-    direct_beam_position=None,
-    radius=20,
-    num_electrons=None,
-    in_plane_angle=0,
-    calibration=0.01,
-    mirrored=False,
-    transformation_matrix=None,
+    simulation: SimulationGenerator,
+    shape: tuple = (512, 512),
+    direct_beam_position: tuple = None,
+    radius: int = 20,
+    num_electrons: int = None,
+    in_plane_angle: float = 0,
+    calibration: float = 0.01,
+    mirrored: bool = False,
+    transformation_matrix: npt.NDArray = None,
 ):
+    """
+    Create a simulated (spot) diffraction pattern based on the provided simulation.
+
+    Parameters
+    ----------
+    simulation: SimulationGenerator
+        An instance of SimulationGenerator that contains the diffraction simulation data.
+    shape: tuple
+        The shape of the output diffraction pattern, e.g. (512, 512).
+    direct_beam_position: tuple, optional
+        The position of the direct beam in the diffraction pattern. If None, it defaults to the center of the shape.
+    radius: int
+        The radius of the disk used to simulate the diffraction spots in pixels.
+    num_electrons: int, optional
+        The number of electrons to simulate in the diffraction pattern. If None, no Poisson noise is applied.
+    in_plane_angle: float
+        The in-plane angle for rotating the diffraction pattern.
+    calibration:
+        The calibration factor for the diffraction pattern, in units of Angstroms per pixel.
+    mirrored: bool
+        If True, the diffraction pattern will be mirrored.
+    transformation_matrix:
+        A transformation matrix to apply to the diffraction pattern coordinates.
+        If None, no transformation is applied.
+
+    Returns
+    -------
+    numpy.ndarray
+        A 2D array representing the simulated diffraction pattern.
+
+    """
     if direct_beam_position is None:
         direct_beam_position = (shape[1] // 2, shape[0] // 2)
     transformed = simulation._get_transformed_coordinates(
@@ -55,13 +87,38 @@ def create_diffraction_pattern(
 
 
 def simulated_strain(
-    navigation_shape=(32, 32),
-    signal_shape=(512, 512),
-    disk_radius=20,
-    num_electrons=1e5,
-    strain_matrix=None,
-    lazy=False,
+    navigation_shape: tuple = (32, 32),
+    signal_shape: tuple = (512, 512),
+    disk_radius: int = 20,
+    num_electrons: int = 1e5,
+    strain_matrix: npt.NDArray = None,
+    lazy: bool = False,
 ):
+    """
+    Create a simulated strain map from a simulated diffraction pattern and a strain matrix.
+
+    Parameters
+    ----------
+    navigation_shape: tuple
+        The shape of the navigation axes, e.g. (32, 32).
+    signal_shape: tuple
+        The shape of the signal axes, e.g. (512, 512).
+    disk_radius: int
+        The radius of the disk used to create the diffraction pattern.
+    num_electrons:
+        The number of electrons (per pixel) to simulate in the diffraction pattern.
+    strain_matrix:
+        A 3x3 matrix representing the strain to apply to the diffraction pattern.
+        If None, a default strain matrix is used.
+    lazy: bool
+        If True, the returned signal will be lazy, otherwise it will be eager.
+        Default is False.
+
+    Returns
+    -------
+    Diffraction2D
+        A simulated diffraction pattern with applied strain.
+    """
     if strain_matrix is None:
         strain_matrix = np.array([[0.1, 0.05, 0], [0.15, 0.2, 0], [0, 0, 1]])
     p = si_phase()
@@ -99,17 +156,11 @@ def simulated_strain(
         )
 
     strained = Diffraction2D(data)
-    strained.axes_manager.signal_axes[0].name = "kx"
-    strained.axes_manager.signal_axes[1].name = "kx"
-    strained.axes_manager.signal_axes[0].units = r"$\AA^{-1}$"
-    strained.axes_manager.signal_axes[1].units = r"$\AA^{-1}$"
-    strained.axes_manager.signal_axes[0].scale = 0.01
-    strained.axes_manager.signal_axes[1].scale = 0.01
 
-    strained.axes_manager.navigation_axes[0].name = "x"
-    strained.axes_manager.navigation_axes[1].name = "y"
-    strained.axes_manager.navigation_axes[0].units = "nm"
-    strained.axes_manager.navigation_axes[1].units = "nm"
+    strained.axes_manager.signal_axes.set(
+        name=("kx", "ky"), units=r"$\AA^{-1}$", scale=0.01
+    )
+    strained.axes_manager.navigation_axes.set(name=("x", "y"), units="nm", scale=1.0)
 
     strained.calibration.center = None
 
