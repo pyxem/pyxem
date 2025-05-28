@@ -77,10 +77,10 @@ az.sum().plot()
 # %%
 # Getting the Variance
 # --------------------
-# The :meth:`~.signals.diffraction2d.get_variance function will calculate the variance using the affine correction
+# The :meth:`~.signals.diffraction2d.get_variance` function will calculate the variance using the affine correction
 # and the center as described above. Restricting the radial range is also nice to remove
 # the effects of the high intensity at the top end. Adding a mask can also be helpful for
-# reducing the effects of a beam stop. The `gain` parameter is number of detector units for 1 electron.
+# reducing the effects of a beam stop. The ``gain`` parameter is number of detector units for 1 electron.
 # It's used for the Poisson noise correction. If the data are already calibrated in units of electron counts,
 # use a gain of 1.
 

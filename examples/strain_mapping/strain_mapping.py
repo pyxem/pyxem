@@ -51,7 +51,7 @@ strained_signal.add_marker(markers)
 # ----------------------
 # We can just use the first ring of the diffraction pattern to determine the strain. We can do this by
 # using the :meth:`~.signals.DiffractionVectors.filter_magnitude` method. You can also look at the
-# ` example to see
+# :ref:`filtering vectors <_sphx_glr_examples_vectors_masking_vectors.py>` example to see
 # how to select which vectors you want to use more generally. You can also just manually input the un-strained
 # vectors or use simulated/ rotated vectors as well.
 
