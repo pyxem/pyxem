@@ -60,7 +60,9 @@ class Correlation2D(Signal2D, CommonDiffraction):
         power: Signal2D
             The power spectrum of the Signal2D
         """
-        power = self.map(_corr_to_power, inplace=inplace, **kwargs)
+        power = self.map(
+            _corr_to_power, silence_warnings=True, inplace=inplace, **kwargs
+        )
 
         s = self if inplace else power
 
@@ -143,7 +145,12 @@ class Correlation2D(Signal2D, CommonDiffraction):
         ]
 
         signals = self.map(
-            _symmetry_stem, interpolation=interp, inplace=False, method=method, **kwargs
+            _symmetry_stem,
+            interpolation=interp,
+            inplace=False,
+            method=method,
+            silence_warnings=True,
+            **kwargs
         )
         if method in ["max", "first"]:
             normalize = False

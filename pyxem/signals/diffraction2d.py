@@ -1733,6 +1733,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             mask=mask,
             output_dtype=float,
             output_signal_size=(npt,),
+            silence_warnings=True,
             **kwargs,
         )
         s = self if inplace else integration
@@ -1875,6 +1876,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
                 output_signal_size=(npt, npt_azim),
                 mask=mask,
                 mean=mean,
+                silence_warnings=True,
                 **kwargs,
             )
 

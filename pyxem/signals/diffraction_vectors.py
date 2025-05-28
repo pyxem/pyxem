@@ -358,6 +358,7 @@ class DiffractionVectors(BaseSignal):
             offsets=offsets,
             scales=scales,
             columns=columns,
+            silence_warnings=True,
             **kwargs,
         )
         refined_vectors.set_signal_type("diffraction_vectors")
@@ -413,6 +414,7 @@ class DiffractionVectors(BaseSignal):
             inplace=False,
             ragged=True,
             columns=columns,
+            silence_warnings=True,
         )
         return pixels
 
@@ -543,6 +545,7 @@ class DiffractionVectors(BaseSignal):
             other=other,
             inplace=False,
             ragged=self.ragged,
+            silence_warnings=True,
             **kwargs,
         )
 
@@ -556,6 +559,7 @@ class DiffractionVectors(BaseSignal):
             other=other,
             inplace=False,
             ragged=self.ragged,
+            silence_warnings=True,
             **kwargs,
         )
 
@@ -569,6 +573,7 @@ class DiffractionVectors(BaseSignal):
             other=other,
             inplace=False,
             ragged=self.ragged,
+            silence_warnings=True,
             **kwargs,
         )
 
@@ -582,6 +587,7 @@ class DiffractionVectors(BaseSignal):
             other=other,
             inplace=False,
             ragged=self.ragged,
+            silence_warnings=True,
             **kwargs,
         )
 
@@ -910,7 +916,12 @@ class DiffractionVectors(BaseSignal):
         return fig
 
     def to_markers(self, **kwargs):
-        new = self.map(_reverse_pos, inplace=False, ragged=True)
+        new = self.map(
+            _reverse_pos,
+            inplace=False,
+            ragged=True,
+            silence_warnings=True,
+        )
         return Points(offsets=new.data.T, **kwargs)
 
     @deprecated(
@@ -966,7 +977,9 @@ class DiffractionVectors(BaseSignal):
         def get_magnitude(x):
             return np.linalg.norm(x[:, columns], axis=-1)
 
-        magnitudes = self.map(get_magnitude, inplace=False, *args, **kwargs)
+        magnitudes = self.map(
+            get_magnitude, inplace=False, silence_warnings=True, *args, **kwargs
+        )
 
         return magnitudes
 
@@ -1058,6 +1071,7 @@ class DiffractionVectors(BaseSignal):
             remove_nan=remove_nan,
             output_signal_size=signal_shape,
             output_dtype=dtype,
+            silence_warnings=True,
         )
         new_signal.column_names = np.append(self.column_names, ["cluster"])
         new_signal.units = np.append(self.units, ["n.a."])
@@ -1149,6 +1163,7 @@ class DiffractionVectors(BaseSignal):
             min_magnitude=min_magnitude,
             max_magnitude=max_magnitude,
             inplace=False,
+            silence_warnings=True,
             *args,
             **kwargs,
         )
@@ -1266,6 +1281,7 @@ class DiffractionVectors(BaseSignal):
             distance=distance,
             inplace=False,
             columns=columns,
+            silence_warnings=True,
             **kwargs,
         )
         return filtered_vectors
@@ -1303,6 +1319,7 @@ class DiffractionVectors(BaseSignal):
             y_threshold=y_threshold,
             inplace=False,
             ragged=True,
+            silence_warnings=True,
             *args,
             **kwargs,
         )
@@ -1330,6 +1347,7 @@ class DiffractionVectors(BaseSignal):
             inplace=False,
             ragged=self.ragged,
             columns=columns,
+            silence_warnings=True,
             **kwargs,
         )
         polar_vectors.set_signal_type("polar_vectors")
@@ -1358,11 +1376,13 @@ class DiffractionVectors(BaseSignal):
         """
         if in_range:
             filtered = self.filter_magnitude(in_range[0], in_range[1])
-            xim = filtered.map(get_npeaks, inplace=False, ragged=False).as_signal2D(
-                (0, 1)
-            )
+            xim = filtered.map(
+                get_npeaks, inplace=False, silence_warnings=True, ragged=False
+            ).as_signal2D((0, 1))
         else:
-            xim = self.map(get_npeaks, inplace=False, ragged=False).as_signal2D((0, 1))
+            xim = self.map(
+                get_npeaks, silence_warnings=True, inplace=False, ragged=False
+            ).as_signal2D((0, 1))
         # Make binary if specified
         if binary is True:
             xim = xim >= 1.0
@@ -1422,6 +1442,7 @@ class DiffractionVectors(BaseSignal):
             output_signal_size=tuple(shape),
             output_dtype=bool,
             ragged=False,
+            silence_warnings=True,
         )
         return mask
 

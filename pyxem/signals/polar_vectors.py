@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2016-2024 The pyXem developers
 #
 # This file is part of pyXem.
@@ -84,6 +83,7 @@ class PolarVectors(DiffractionVectors):
             min_angle=min_angle,
             inplace=False,
             ragged=True,
+            silence_warnings=True,
             **kwargs,
         )
         # set the column names
@@ -121,6 +121,7 @@ class PolarVectors(DiffractionVectors):
         if has_delta_angle:
             cartesian_vectors = self.map(
                 to_cart_three_angles,
+                silence_warnings=True,
                 inplace=False,
                 ragged=True,
             )
@@ -129,6 +130,7 @@ class PolarVectors(DiffractionVectors):
                 polar_to_cartesian,
                 inplace=False,
                 ragged=True,
+                silence_warnings=True,
             )
         cartesian_vectors.column_names = ["x", "y"]
         cartesian_vectors.units = [self.units[0], self.units[0]]
