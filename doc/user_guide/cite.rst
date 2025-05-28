@@ -21,5 +21,5 @@ In addition if you are releasing the data and code related to the work please ad
 link to the data on the Open Datasets page.  Consider adding a new demo notebook as well
 if you are using a novel workflow.
 
-A list of papers citing pyxem can be found `here
-<https://scholar.google.com/scholar?q=pyxem>`_.
+A list of papers citing pyxem can be found by searching for "pyxem" on
+google scholar.

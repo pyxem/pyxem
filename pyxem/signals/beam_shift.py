@@ -628,7 +628,7 @@ class BeamShift(DiffractionVectors1D):
         Rotate data by 10 degrees clockwise
 
         >>> s = pxm.data.dummy_data.get_simple_beam_shift_signal()
-        >>> s_rot = s.rotate_data(10)
+        >>> s_rot = s.rotate_scan_dimensions(10)
         >>> s_rot.plot()
 
         """

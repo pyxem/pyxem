@@ -622,7 +622,16 @@ class OrientationMap(DiffractionVectors2D):
         """
         if self.simulation.has_multiple_phases:
             sizes = np.cumsum([i.size for i in self.simulation.rotations])
-            return self.map(orientation2phase, sizes=sizes, inplace=False).data
+            if self.num_rows == 1:
+                output_size = ()
+            else:
+                output_size = (self.num_rows,)
+            return self.map(
+                orientation2phase,
+                sizes=sizes,
+                inplace=False,
+                output_signal_size=output_size,
+            ).data
         else:
             return None
 

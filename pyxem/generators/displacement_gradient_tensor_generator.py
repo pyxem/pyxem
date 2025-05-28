@@ -23,7 +23,12 @@ from pyxem.signals.tensor_field import DisplacementGradientMap
 
 
 def get_DisplacementGradientMap(
-    strained_vectors, unstrained_vectors, weights=None, return_residuals=False, **kwargs
+    strained_vectors,
+    unstrained_vectors,
+    weights=None,
+    return_residuals=False,
+    columns=[0, 1],
+    **kwargs
 ):
     r"""Calculates the displacement gradient tensor at each navigation position in a map.
 
@@ -74,10 +79,12 @@ def get_DisplacementGradientMap(
         weights=weights,
         inplace=False,
         output_signal_size=(3, 3),
+        ragged=False,
         output_dtype=np.float64,
+        columns=columns,
         **kwargs
     )
-
+    D.set_signal_type("tensor_field")
     if return_residuals:
         R = strained_vectors.map(
             get_single_DisplacementGradientTensor,
@@ -86,15 +93,16 @@ def get_DisplacementGradientMap(
             inplace=False,
             output_dtype=np.float64,
             return_residuals=True,
+            columns=columns,
             **kwargs
         )
-        return DisplacementGradientMap(D), R
+        return D, R
     else:
-        return DisplacementGradientMap(D)
+        return D
 
 
 def get_single_DisplacementGradientTensor(
-    Vs, Vu=None, weights=None, return_residuals=False
+    Vs, Vu=None, weights=None, return_residuals=False, columns=[0, 1]
 ):
     r"""Calculates the displacement gradient tensor from a pairs of vectors.
 
@@ -131,6 +139,8 @@ def get_single_DisplacementGradientTensor(
     get_DisplacementGradientMap()
 
     """
+    Vu = Vu[:, columns]
+    Vs = Vs[:, columns]
     is_row_nan = np.logical_not(np.any(np.isnan(Vs), axis=1))
     Vs = Vs[is_row_nan]
     Vu = Vu[is_row_nan]
@@ -138,6 +148,7 @@ def get_single_DisplacementGradientTensor(
     if Vu is not None:
         if Vu.dtype == object:
             Vu = Vu[()]
+
     if weights is not None:
         # see https://stackoverflow.com/questions/27128688
         weights = np.asarray(weights)

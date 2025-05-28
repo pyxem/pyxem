@@ -56,11 +56,35 @@ from pyxem.data._data import (
     au_grating_20cm,
     small_ptychography,
     au_phase,
+    zrcual_1,
+    zrcual_2,
+    zrcual_3,
 )
 from pyxem.data.simulated_dpc import (
     simulated_stripes,
     simulated_constant_shift_magnitude,
 )
+
+__doctest_skip__ = [
+    "au_grating",
+    "au_grating_20cm",
+    "cuag_orientations",
+    "pdnip_glass",
+    "zrnb_precipitate",
+    "twinned_nanowire",
+    "sample_with_g",
+    "organic_semiconductor",
+    "pdcusi_insitu",
+    "feal_stripes",
+    "sped_ag",
+    "mgo_nanocrystals",
+    "zrcual_1",
+    "zrcual_2",
+    "zrcual_3",
+    "small_ptychography",
+]
+
+from pyxem.data.simulated_strain import simulated_strain
 
 __all__ = [
     "au_grating",
@@ -89,4 +113,5 @@ __all__ = [
     "small_ptychography",
     "au_phase",
     "simulated_overlap",
+    "simulated_strain",
 ]

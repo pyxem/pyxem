@@ -24,8 +24,9 @@ from scipy.spatial import distance_matrix
 from sklearn.cluster import DBSCAN
 
 from hyperspy.signals import Signal2D
+from hyperspy._signals.lazy import LazySignal
 from hyperspy.roi import CircleROI
-from pyxem.signals import DiffractionVectors
+from pyxem.signals.diffraction_vectors import DiffractionVectors, LazyDiffractionVectors
 import hyperspy.api as hs
 
 
@@ -266,3 +267,7 @@ class DiffractionVectors2D(DiffractionVectors, Signal2D):
             return rois, texts
         else:
             return rois
+
+
+class LazyDiffractionVectors2D(LazySignal, DiffractionVectors2D):
+    pass

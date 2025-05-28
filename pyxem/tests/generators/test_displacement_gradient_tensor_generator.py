@@ -169,7 +169,7 @@ class TestLazyNotLazy:
         D = get_DisplacementGradientMap(vs, vs_ref)
         assert D.axes_manager.navigation_shape == (2, 4)
         assert D.axes_manager.signal_shape == (3, 3)
-        strain_map = D.get_strain_maps()
+        D.get_strain_maps()
 
     def test_lazy(self):
         vs = self.vs.as_lazy()
@@ -177,4 +177,4 @@ class TestLazyNotLazy:
         D = get_DisplacementGradientMap(vs, vs_ref)
         assert D.axes_manager.navigation_shape == (2, 4)
         assert D.axes_manager.signal_shape == (3, 3)
-        strain_map = D.get_strain_maps()
+        D.get_strain_maps()

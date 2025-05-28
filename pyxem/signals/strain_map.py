@@ -19,7 +19,7 @@
 import numpy as np
 
 from hyperspy.signals import Signal2D
-
+import hyperspy.api as hs
 from pyxem.utils._signals import _transfer_signal_axes
 
 
@@ -130,3 +130,27 @@ class StrainMap(Signal2D):
             transposed_to_new_basis, current_basis_x=x_new, metadata=meta_dict
         )
         return _transfer_signal_axes(strainmap, self)
+
+    def plot(
+        self,
+        cmap="hot",
+        axes_decor="off",
+        scalebar="all",
+        scalebar_color="black",
+        tight_layout=True,
+        per_row=2,
+        label=None,
+    ):
+        """Plot the strain map."""
+        if label is None:
+            label = ["e11", "e22", "e12", "theta"]
+        return hs.plot.plot_images(
+            self,
+            per_row=2,
+            label=label,
+            tight_layout=True,
+            cmap=cmap,
+            axes_decor=axes_decor,
+            scalebar=scalebar,
+            scalebar_color=scalebar_color,
+        )

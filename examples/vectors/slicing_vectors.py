@@ -1,5 +1,5 @@
 """
-Operations on vectors
+Operations on Vectors
 =====================
 
 This example shows how to perform some basic operations slicing and selecting vectors.

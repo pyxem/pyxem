@@ -335,7 +335,8 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
         frac_keep : float
             The fraction of the best matching orientations to keep.
         n_best : int
-            The number of best matching orientations to keep.
+            The number of best matching orientations to return. If n_best == -1 all of the
+            orientations and correlations are returned.
         normalize_templates : bool
             Normalize the templates to the same intensity..
         kwargs : dict
@@ -356,7 +357,7 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
             increase the intensity of the low intensity reflections and decrease the
             intensity of the high intensity reflections. This can be applied via:
 
-            >>> s_gamma = s**0.5
+            `s_gamma = s**0.5`
 
             In most cases gamma < 1 See :cite:`pyxemorientationmapping2022` for more information.
             Additionally, subtracting a small value can sometimes be helpful as it penalizes
@@ -382,6 +383,9 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
         )
         if normalize_templates:
             intensities_templates = _norm_rows(intensities_templates)
+
+        if n_best == -1:
+            n_best = r_templates.shape[0]
 
         max_n = _get_max_n(N=r_templates.shape[0], n_keep=n_keep, frac_keep=frac_keep)
         if max_n < n_best:

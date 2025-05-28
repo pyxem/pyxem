@@ -1526,11 +1526,14 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
     """ Variance generation methods """
 
+    @deprecated_argument(
+        name="dqe", alternative="gain", since="0.20.0", removal="1.0.0"
+    )
     def get_variance(
         self,
         npt,
         method="Omega",
-        dqe=None,
+        gain=None,
         spatial=False,
         navigation_axes=None,
         **kwargs,
@@ -1544,8 +1547,8 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             The number of points to use in the azimuthal integration
         method : 'Omega' or 'r' or 're' or 'VImage', optional
             The method used to calculate the variance. Details in [1]
-        dqe : int, optional
-            The detector quantum efficiency or the pixel value for one electron.
+        gain : int, optional
+            The gain pixel value for one electron.
         spatial : bool, optional
             Included intermediate spatial variance in output (only available if method=='r')
         navigation_axes : list or none, optional
@@ -1591,11 +1594,11 @@ class Diffraction2D(CommonDiffraction, Signal2D):
                 (one_d_integration**2).mean(axis=navigation_axes)
                 / one_d_integration.mean(axis=navigation_axes) ** 2
             ) - 1
-            if dqe is not None:
+            if gain is not None:
                 sum_points = self.get_azimuthal_integral1d(npt=npt, **kwargs).mean(
                     axis=navigation_axes
                 )
-                variance = variance - ((sum_points**-1) * dqe)
+                variance = variance - ((sum_points**-1) * gain)
 
         elif method == "r":
             one_d_integration = self.get_azimuthal_integral1d(
@@ -1607,8 +1610,8 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             # Full variance is the same as the unshifted phi=0 term in angular correlation
             full_variance = (integration_squared / one_d_integration**2) - 1
 
-            if dqe is not None:
-                full_variance = full_variance - ((one_d_integration**-1) * dqe)
+            if gain is not None:
+                full_variance = full_variance - ((one_d_integration**-1) * gain)
 
             variance = full_variance.mean(axis=navigation_axes)
 
@@ -1626,19 +1629,19 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             )
             variance = (integration_squared / one_d_integration**2) - 1
 
-            if dqe is not None:
+            if gain is not None:
                 sum_int = self.get_azimuthal_integral1d(npt=npt, **kwargs).mean()
-                variance = variance - (sum_int**-1) * (1 / dqe)
+                variance = variance - (sum_int**-1) * (1 / gain)
 
         elif method == "VImage":
             variance_image = (
                 (self**2).mean(axis=navigation_axes)
                 / self.mean(axis=navigation_axes) ** 2
             ) - 1
-            if dqe is not None:
+            if gain is not None:
                 variance_image = variance_image - (
                     self.sum(axis=navigation_axes) ** -1
-                ) * (1 / dqe)
+                ) * (1 / gain)
             variance = variance_image.get_azimuthal_integral1d(
                 npt=npt, mean=True, **kwargs
             )
@@ -1752,6 +1755,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         radial_range=None,
         azimuth_range=None,
         inplace=False,
+        mean=False,
         **kwargs,
     ):
         """Creates a polar reprojection using pyFAI's azimuthal integrate 2d. This method is designed
@@ -1776,7 +1780,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             from -pi to pi
         inplace: bool
             If the signal is overwritten or copied to a new signal
-        sum: bool
+        mean: bool
             If true the radial integration is returned rather then the Azimuthal Integration.
         correctSolidAngle: bool
             Account for Ewald sphere or not. From PYFAI.
@@ -1870,6 +1874,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
                 output_dtype=float,  # upcast to float (maybe we should force conversion)
                 output_signal_size=(npt, npt_azim),
                 mask=mask,
+                mean=mean,
                 **kwargs,
             )
 

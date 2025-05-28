@@ -1154,6 +1154,59 @@ class DiffractionVectors(BaseSignal):
         )
         return filtered_vectors
 
+    def get_strain_maps(
+        self, unstrained_vectors, distance=0.5, columns=None, return_residuals=False
+    ):
+        """Calculate the strain map from the diffraction vectors.
+
+        Parameters
+        ----------
+        unstrained_vectors : DiffractionVectors
+            The unstrained vector to be used to calculate the strain map.
+            If None, the unstrained vector will be calculated from the
+            diffraction vectors.
+        columns : list
+            The columns of the diffraction vectors to be used to calculate
+            the strain map. If None, the first two columns will be used.
+
+        Returns
+        -------
+        strain_map : Signal2D
+            The strain map.
+        """
+        # TODO: remove this import when the function is moved to a utility module
+
+        from pyxem.generators.displacement_gradient_tensor_generator import (
+            get_DisplacementGradientMap,
+        )
+
+        if isinstance(unstrained_vectors, LazySignal):
+            unstrained_vectors.compute()
+            unstrained_vectors = unstrained_vectors.data[0]  # remove extra dimension
+        if columns is None:
+            columns = [0, 1]
+        filtered_vectors = self.filter_basis(
+            basis=unstrained_vectors, distance=distance, columns=columns
+        )
+        if isinstance(filtered_vectors, LazySignal):
+            filtered_vectors.compute()
+        if return_residuals:
+            strain_map, residual = get_DisplacementGradientMap(
+                filtered_vectors,
+                unstrained_vectors,
+                return_residuals=return_residuals,
+                columns=columns,
+            )
+            return strain_map.get_strain_maps(), residual
+        else:
+            strain_map = get_DisplacementGradientMap(
+                filtered_vectors,
+                unstrained_vectors,
+                return_residuals=return_residuals,
+                columns=columns,
+            )
+            return strain_map.get_strain_maps()
+
     def filter_basis(self, basis, distance=0.5, columns=[0, 1], **kwargs):
         """
 
@@ -1184,12 +1237,27 @@ class DiffractionVectors(BaseSignal):
             DiffractionVectors class will be returned otherwise an instance
             of the DiffractionVectors2D class will be returned.
         """
-        ragged = isinstance(basis, BaseSignal) and (
+        if isinstance(basis, BaseSignal) and (
             basis.axes_manager.navigation_shape == self.axes_manager.navigation_shape
-        )
-        kwargs["ragged"] = ragged
-        if not ragged:
-            kwargs["output_signal_size"] = np.shape(basis)
+        ):
+            kwargs["ragged"] = True
+        else:
+            if isinstance(basis, LazySignal):
+                basis.compute()
+                basis = basis.data[0]  # remove extra dimension
+            elif isinstance(basis, BaseSignal) and basis.ragged:
+                basis = basis.data[0]  # remove extra dimension
+            elif isinstance(basis, BaseSignal):
+                basis = basis.data
+            kwargs["ragged"] = False
+        if not isinstance(basis, BaseSignal) and (
+            basis.ndim != 2 or basis.shape[0] < 1
+        ):
+            raise ValueError("The basis must be a 2D array with at least 1 vectors.")
+
+        if not kwargs.get("ragged", False):
+            kwargs["output_signal_size"] = (basis.shape[0], self.num_columns)
+
             kwargs["output_dtype"] = float
 
         filtered_vectors = self.map(
@@ -1197,6 +1265,7 @@ class DiffractionVectors(BaseSignal):
             basis=basis,
             distance=distance,
             inplace=False,
+            columns=columns,
             **kwargs,
         )
         return filtered_vectors

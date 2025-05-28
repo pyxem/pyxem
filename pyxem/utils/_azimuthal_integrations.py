@@ -69,16 +69,24 @@ def _slice_radial_integrate(
     for i in prange(len(factors_slice)):
         ii, jj = i // npt_azim, i % npt_azim
         if mean:  # divide by the total number of pixels
-            val[ii, jj] = np.sum(
-                img[slices[i][0] : slices[i][2], slices[i][1] : slices[i][3]]
-                * factors[factors_slice[i][0] : factors_slice[i][1]].reshape(
-                    (slices[i][2] - slices[i][0], slices[i][3] - slices[i][1])
-                )
-            ) / np.sum(
+            total = np.sum(
                 factors[factors_slice[i][0] : factors_slice[i][1]].reshape(
                     (slices[i][2] - slices[i][0], slices[i][3] - slices[i][1])
                 )
             )
+            if total == 0:
+                val[ii, jj] = 0
+            else:
+                val[ii, jj] = np.sum(
+                    img[slices[i][0] : slices[i][2], slices[i][1] : slices[i][3]]
+                    * factors[factors_slice[i][0] : factors_slice[i][1]].reshape(
+                        (slices[i][2] - slices[i][0], slices[i][3] - slices[i][1])
+                    )
+                ) / np.sum(
+                    factors[factors_slice[i][0] : factors_slice[i][1]].reshape(
+                        (slices[i][2] - slices[i][0], slices[i][3] - slices[i][1])
+                    )
+                )
         else:
             val[ii, jj] = np.sum(
                 img[slices[i][0] : slices[i][2], slices[i][1] : slices[i][3]]
