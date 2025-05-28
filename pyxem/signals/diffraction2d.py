@@ -1737,15 +1737,13 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             **kwargs,
         )
         s = self if inplace else integration
-        ax = UniformDataAxis(
+
+        s.axes_manager.signal_axes.set(
             name="Radius",
             units=s.axes_manager.signal_axes[0].units,
-            size=npt,
             scale=(radial_range[1] - radial_range[0]) / npt,
             offset=radial_range[0],
         )
-
-        s.axes_manager.set_axis(ax, -1)
         return integration
 
     def get_azimuthal_integral2d(
@@ -1885,23 +1883,15 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         # Dealing with axis changes
 
-        k_axis = UniformDataAxis(
-            name="Radius",
-            units=s.axes_manager.signal_axes[0].units,
-            size=npt,
-            scale=(radial_range[1] - radial_range[0]) / npt,
-            offset=radial_range[0],
+        s.axes_manager.signal_axes.set(
+            name=["Radians", "Radius"],
+            units=["Rad", s.axes_manager.signal_axes[0].units],
+            scale=[
+                (azimuth_range[1] - azimuth_range[0]) / npt_azim,
+                (radial_range[1] - radial_range[0]) / npt,
+            ],
+            offset=[azimuth_range[0], radial_range[0]],
         )
-        t_axis = UniformDataAxis(
-            name="Radians",
-            units="Rad",
-            size=npt_azim,
-            scale=(azimuth_range[1] - azimuth_range[0]) / npt_azim,
-            offset=azimuth_range[0],
-        )
-
-        s.axes_manager.set_axis(k_axis, -2)
-        s.axes_manager.set_axis(t_axis, -1)
 
         return integration
 

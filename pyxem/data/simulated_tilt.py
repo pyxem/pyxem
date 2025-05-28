@@ -21,8 +21,5 @@ def tilt_boundary_data(correct_pivot_point=True):
         xx, yy = np.meshgrid(range(10), range(10))
         shifts = np.stack([xx * 0.5, yy * 0.5], axis=-1)
         s.center_direct_beam(shifts=hs.signals.Signal1D(shifts))
-    s.axes_manager[2].scale = 0.3
-    s.axes_manager[3].scale = 0.3
-    s.axes_manager[2].offset = -0.3 * 128
-    s.axes_manager[3].offset = -0.3 * 128
+    s.axes_manager.signal_axes.set(scale=0.3, offset=-0.3 * 128)
     return s

@@ -117,6 +117,40 @@ class Calibration:
             ax.units = units
 
     @property
+    def camera_length(self):
+        """
+        The camera length in mm.
+        This is the "distance" from the sample to the detector.
+        """
+        return self.signal.metadata.get_item("Acquisition_instrument.TEM.camera_length")
+
+    @camera_length.setter
+    def camera_length(self, camera_length):
+        """Set the camera length in mm."""
+        if camera_length is not None:
+            self.signal.metadata.set_item(
+                "Acquisition_instrument.TEM.camera_length", camera_length
+            )
+        else:
+            self.signal.metadata.remove_item("Acquisition_instrument.TEM.camera_length")
+
+    @property
+    def convergence_angle(self):
+        """
+        The convergence angle of the beam in mrad.
+        """
+        return self.signal.metadata.get_item(
+            "Acquisition_instrument.TEM.convergence_angle"
+        )
+
+    @convergence_angle.setter
+    def convergence_angle(self, convergence_angle):
+        """Set the convergence angle of the beam in mrad."""
+        self.signal.metadata.set_item(
+            "Acquisition_instrument.TEM.convergence_angle", convergence_angle
+        )
+
+    @property
     def wavelength(self):
         return self.signal.metadata.get_item("Acquisition_instrument.TEM.wavelength")
 

@@ -76,6 +76,16 @@ class TestCalibrationClass:
         calibration(wavelength=0.02508)
         assert calibration.wavelength == 0.02508
 
+    def test_get_camera_length(self, calibration):
+        assert calibration.camera_length is None
+        calibration.camera_length = 0.038
+        assert calibration.camera_length == 0.038
+
+    def test_set_convergence_angle(self, calibration):
+        assert calibration.convergence_angle is None
+        calibration.convergence_angle = 1.5
+        assert calibration.convergence_angle == 1.5
+
     def test_set_scale(self, calibration):
         calibration(scale=0.01)
         assert calibration.signal.axes_manager[0].scale == 0.01
