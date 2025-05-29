@@ -23,6 +23,7 @@ from hyperspy._signals.lazy import LazySignal
 from hyperspy.axes import UniformDataAxis
 
 import pyxem.utils._beam_shift_tools as bst
+from pyxem.utils.plotting import make_color_wheel_marker
 from pyxem.signals import DiffractionVectors1D
 from pyxem.utils._deprecated import deprecated
 
@@ -451,7 +452,7 @@ class BeamShift(DiffractionVectors1D):
         )
         return signal
 
-    def get_phase_signal(self, rotation=None):
+    def get_phase_signal(self, rotation=None, add_color_wheel_marker=True):
         """Get beam shift phase image visualized using continuous color scale.
 
         Converts the x and y beam shifts into an RGB array, showing the
@@ -499,6 +500,12 @@ class BeamShift(DiffractionVectors1D):
         s_rgb = self._deepcopy_with_new_data(rgb_array_16bit)
         s_rgb.change_dtype("uint16")
         s_rgb.change_dtype("rgb16")
+        if add_color_wheel_marker:
+            # Add a color wheel marker to the signal
+            color_wheel_marker = make_color_wheel_marker(
+                rotation=rotation, only_phase=True
+            )
+            s_rgb.add_marker(color_wheel_marker, permanent=True)
         return s_rgb
 
     @deprecated(
@@ -511,7 +518,12 @@ class BeamShift(DiffractionVectors1D):
         return self.get_magnitude_phase_signal(**kwargs)
 
     def get_magnitude_phase_signal(
-        self, rotation=None, autolim=True, autolim_sigma=4, magnitude_limits=None
+        self,
+        rotation=None,
+        autolim=True,
+        autolim_sigma=4,
+        magnitude_limits=None,
+        add_color_wheel_marker=True,
     ):
         """Get beam shift image visualized using continuous color scale.
 
@@ -579,6 +591,11 @@ class BeamShift(DiffractionVectors1D):
         s_rgb = self._deepcopy_with_new_data(rgb_array_16bit)
         s_rgb.change_dtype("uint16")
         s_rgb.change_dtype("rgb16")
+
+        if add_color_wheel_marker:
+            # Add a color wheel marker to the signal
+            color_wheel_marker = make_color_wheel_marker(rotation=rotation)
+            s_rgb.add_marker(color_wheel_marker, permanent=True)
         return s_rgb
 
     def rotate_beam_shifts(self, angle):
