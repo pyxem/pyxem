@@ -1771,7 +1771,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         )
 
         s.axes_manager.set_axis(ax, -1)
-        return s
+        return integration
 
     def get_azimuthal_integral2d(
         self,
