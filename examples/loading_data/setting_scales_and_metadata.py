@@ -26,11 +26,11 @@ strained_signal = simulated_strain(
 # it will set that property for all dimensions.
 
 
-strained_signal.axels_manager.navigation_axes.set(
+strained_signal.axes_manager.navigation_axes.set(
     scale=0.1, units="nm", name=["x", "y"], offset=[2, 3]  # offset in nm,
 )
 
-strained_signal.axels_manager.signal_axes.set(
+strained_signal.axes_manager.signal_axes.set(
     scale=0.1, units="nm", name=["q_x", "q_y"], offset=[2, 3]  # offset in nm
 )
 
@@ -50,6 +50,9 @@ strained_signal.calibration.detector_gain = 1
 # calibration object for convenience. For example:
 
 strained_signal.calibration.beam_energy = 200  # in keV
+strained_signal.calibration.pixel_size = (
+    15e-6  # in meters, this is the physical pixel size of the detector
+)
 strained_signal.center = (
     None  # Set the center to be the center of the signal (changes offsets)
 )
@@ -58,4 +61,3 @@ strained_signal.center = (
     256,
 )  # Set the center to be at (256, 256) in pixel coordinates
 strained_signal.calibration.convergence_angle = 1.5  # in mrad
-strained_signal.calibration.camera_length = 44  # in mm
