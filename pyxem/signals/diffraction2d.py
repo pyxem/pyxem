@@ -255,6 +255,24 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         if not inplace:
             return s_shift
 
+    def rebin(self, new_shape=None, scale=None, out=None, *args, **kwargs):
+        factors = self._validate_rebin_args_and_get_factors(
+            new_shape=new_shape,
+            scale=scale,
+        )
+
+        ret = super().rebin(new_shape=new_shape, scale=scale, out=out, *args, **kwargs)
+        if out is not None:
+            ret = out
+        if ret.calibration.pixel_size is not None:
+            # If the pixel size is set, we need to adjust the scale
+            # to account for the pixel size. Only the last 2 factors...
+            ret.calibration.pixel_size = [
+                f * px for f, px in zip(factors[-2:][::-1], ret.calibration.pixel_size)
+            ]
+
+        return ret
+
     def rotate_diffraction(self, angle, show_progressbar=True):
         """
         Rotate the diffraction dimensions.
@@ -1385,7 +1403,11 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             s_nav.compute()
         self._navigator_probe = s_nav
 
-    def plot(self, *args, **kwargs):
+    def plot(self, units=None, *args, **kwargs):
+        old_units = None
+        if units is not None:
+            old_units = self.calibration.units[0]
+            self.calibration.change_signal_units(new_unit=units)
         if "navigator" in kwargs:
             super().plot(*args, **kwargs)
         elif self.axes_manager.navigation_dimension > 2:
@@ -1411,6 +1433,9 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             s_nav = self._navigator_probe
             kwargs["navigator"] = s_nav
             super().plot(*args, **kwargs)
+        if old_units is not None:
+            # Reset the units to the original ones
+            self.calibration.change_signal_units(new_unit=old_units)
 
     @deprecated(since="0.16.0", removal="1.0.0")
     def add_peak_array_as_markers(self, peak_array, permanent=True, **kwargs):
@@ -1737,13 +1762,15 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             **kwargs,
         )
         s = self if inplace else integration
-
-        s.axes_manager.signal_axes.set(
+        ax = UniformDataAxis(
             name="Radius",
             units=s.axes_manager.signal_axes[0].units,
+            size=npt,
             scale=(radial_range[1] - radial_range[0]) / npt,
             offset=radial_range[0],
         )
+
+        s.axes_manager.set_axis(ax, -1)
         return integration
 
     def get_azimuthal_integral2d(
@@ -1882,16 +1909,23 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         s.set_signal_type("polar_diffraction")
 
         # Dealing with axis changes
-
-        s.axes_manager.signal_axes.set(
-            name=["Radians", "Radius"],
-            units=["Rad", s.axes_manager.signal_axes[0].units],
-            scale=[
-                (azimuth_range[1] - azimuth_range[0]) / npt_azim,
-                (radial_range[1] - radial_range[0]) / npt,
-            ],
-            offset=[azimuth_range[0], radial_range[0]],
+        k_axis = UniformDataAxis(
+            name="Radius",
+            units=s.axes_manager.signal_axes[0].units,
+            size=npt,
+            scale=(radial_range[1] - radial_range[0]) / npt,
+            offset=radial_range[0],
         )
+        t_axis = UniformDataAxis(
+            name="Radians",
+            units="Rad",
+            size=npt_azim,
+            scale=(azimuth_range[1] - azimuth_range[0]) / npt_azim,
+            offset=azimuth_range[0],
+        )
+
+        s.axes_manager.set_axis(k_axis, -2)
+        s.axes_manager.set_axis(t_axis, -1)
 
         return integration
 

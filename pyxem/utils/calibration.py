@@ -30,6 +30,16 @@ from pyxem.utils._azimuthal_integrations import _get_control_points, _get_factor
 from pyxem.utils._deprecated import deprecated
 
 
+unit_equivalents = {
+    "nm^-1": "nm$^{-1}$",
+    "A^-1": r"$\AA^{-1}$",
+    "k_nm^-1": "nm$^{-1}$",
+    "k_A^-1": r"$\AA^{-1}$",
+    "nm-1": "nm$^{-1}$",
+    "A-1": r"$\AA^{-1}$",
+}
+
+
 class Calibration:
     """
     This is a class to hold the calibration parameters for some dataset
@@ -70,6 +80,117 @@ class Calibration:
         for key, value in kwargs.items():
             setattr(self, key, value)
 
+    def _repr_html_(self):
+        """Return an HTML representation of the Calibration object."""
+
+        pixel_size = np.array(getattr(self, "pixel_size", "N/A"))
+        pixel_size = f"{pixel_size * 1e6:.2f}" if pixel_size != "N/A" else "N/A"
+
+        camera_length = getattr(self, "camera_length", 0) * 1000
+        camera_length = f"{camera_length:.2f}" if camera_length > 0 else "N/A"
+
+        html = f"""
+            <table style="border-collapse: collapse; width: 50%;">
+            <caption style="font-weight: bold; font-size: 1.2em;">Calibration</caption>
+            <tr><th style="border: 1px solid #ccc; padding: 4px;">Attribute</th>
+                <th style="border: 1px solid #ccc; padding: 4px;">Value</th></tr>
+            <tr><td style="border: 1px solid #ccc; padding: 4px;">Scale</td>
+                <td style="border: 1px solid #ccc; padding: 4px;">{self.scale}</td></tr>
+            <tr><td style="border: 1px solid #ccc; padding: 4px;">Units</td>
+                <td style="border: 1px solid #ccc; padding: 4px;">{self.units}</td></tr>
+            <tr><td style="border: 1px solid #ccc; padding: 4px;">Center</td>
+                <td style="border: 1px solid #ccc; padding: 4px;">{self.center}</td></tr>
+            <tr><td style="border: 1px solid #ccc; padding: 4px;">Beam Energy (keV)</td>
+                <td style="border: 1px solid #ccc; padding: 4px;">{getattr(self, 'beam_energy', 'N/A')}</td></tr>
+            <tr><td style="border: 1px solid #ccc; padding: 4px;">Pixel Size (um)</td>
+                <td style="border: 1px solid #ccc; padding: 4px;">{pixel_size}</td></tr>
+            <tr><td style="border: 1px solid #ccc; padding: 4px;">Camera Length (mm)</td>
+                <td style="border: 1px solid #ccc; padding: 4px;">{camera_length}</td></tr>
+        </table>
+        """
+        return html
+
+    def change_signal_units(self, new_unit):
+        """Change the units of the signal axes.
+
+        Parameters
+        ----------
+        unit: str
+            The new unit to set for the signal axes.
+
+                        angle_one_pix = np.arctan2(self.scale[0]/10, 1/self.wavelength)
+            camera_length = self.pixel_size/ np.tan(angle_one_pix)
+            self.camera_length = camera_length
+        """
+        if new_unit in unit_equivalents.keys():
+            new_unit = unit_equivalents[new_unit]
+
+        self.set_camera_length_from_calibration()
+
+        if new_unit == "px":
+            # If the new unit is pixels, we need to set the scale to 1
+            scale = 1
+            offset = np.array(self.center) * -1
+        elif new_unit == "mrad":
+            scale = (
+                np.arctan2(self.pixel_size, self.camera_length) * 1000
+            )  # convert to mrad
+            offset = np.array(self.center) * -scale
+        elif new_unit == "nm$^{-1}$":
+            ang_scale = np.arctan2(
+                self.pixel_size,
+                self.camera_length,
+            )
+            scale = np.tan(ang_scale) * (1 / self.wavelength) * 10
+            offset = np.array(self.center) * -scale
+        elif new_unit == r"$\AA^{-1}$":
+            ang_scale = np.arctan2(self.pixel_size, self.camera_length)
+            scale = np.tan(ang_scale) * (1 / self.wavelength)
+            offset = np.array(self.center) * -scale
+        else:
+            raise ValueError(
+                f"Cannot change units to {new_unit}. "
+                "Must be one of 'px', 'mrad', 'nm$^{-1}$', or r'$\\AA^{-1}$'."
+            )
+        # Set the new units and scale
+        self.signal.axes_manager.signal_axes.set(
+            units=new_unit, scale=scale, offset=offset
+        )
+
+    def set_camera_length_from_calibration(self):
+        """Sets the camera length from the calibration parameters.
+
+        Many times the camera length is not exactly known.  Values from the
+        microscope are often not exactly accurate.  This method will set the
+        camera length based on the units and the scale currently set for
+        some signal. This does require that the detector pixel size and the
+        beam energy are set as well.
+        """
+        if not self.flat_ewald:
+            raise ValueError(
+                "Cannot set camera length from calibration if the ewald sphere is not flat."
+            )
+        units = self.units[0]
+        if units in unit_equivalents.keys():
+            units = unit_equivalents[units]
+        if units == "mrad":
+            camera_length = self.pixel_size[0] / np.tan(self.scale[0] / 1000)
+            self.camera_length = camera_length
+        elif units == "nm$^{-1}$":
+            angle_one_pix = np.arctan2(self.scale[0] / 10, 1 / self.wavelength)
+            camera_length = self.pixel_size[0] / np.tan(angle_one_pix)
+            self.camera_length = camera_length
+        elif units == r"$\AA^{-1}$":
+            angle_one_pix = np.arctan2(self.scale[0], 1 / self.wavelength)
+            camera_length = self.pixel_size[0] / np.tan(angle_one_pix)
+            self.camera_length = camera_length
+        elif units == "px":
+            pass
+        else:
+            raise ValueError(
+                f"Cannot set camera length from calibration if the units are {self.units[0]}"
+            )
+
     @property
     def affine(self):
         """Set the affine transformation to apply to the data."""
@@ -90,7 +211,7 @@ class Calibration:
 
     @property
     def scale(self):
-        """Return the scale in pixels"""
+        """Return the scale in units of the axes."""
         if self.flat_ewald:
             return [s.scale for s in self.signal.axes_manager.signal_axes]
         else:
@@ -98,7 +219,7 @@ class Calibration:
 
     @scale.setter
     def scale(self, scale):
-        """Set the scale in pixels"""
+        """Set the scale in units of the axes."""
         if not self.flat_ewald:
             raise ValueError("Scale can only be set if the ewald sphere is flat")
         center = self.center  # save the center
@@ -119,7 +240,7 @@ class Calibration:
     @property
     def camera_length(self):
         """
-        The camera length in mm.
+        The camera length in meters.
         This is the "distance" from the sample to the detector.
         """
         return self.signal.metadata.get_item("Acquisition_instrument.TEM.camera_length")
@@ -133,6 +254,25 @@ class Calibration:
             )
         else:
             self.signal.metadata.remove_item("Acquisition_instrument.TEM.camera_length")
+
+    @property
+    def pixel_size(self):
+        """
+        The pixel size in m.
+        This is the size of a pixel in real space.
+        """
+        return self.signal.metadata.get_item("Acquisition_instrument.TEM.pixel_size")
+
+    @pixel_size.setter
+    def pixel_size(self, pixel_size):
+        """Set the pixel size in m."""
+        if isinstance(pixel_size, float):
+            pixel_size = self.signal.axes_manager.signal_dimension * [
+                pixel_size,
+            ]
+        self.signal.metadata.set_item(
+            "Acquisition_instrument.TEM.pixel_size", pixel_size
+        )
 
     @property
     def convergence_angle(self):
@@ -152,6 +292,7 @@ class Calibration:
 
     @property
     def wavelength(self):
+        """The electron wavelength in A^-1."""
         return self.signal.metadata.get_item("Acquisition_instrument.TEM.wavelength")
 
     @wavelength.setter
