@@ -35,7 +35,7 @@ But if you rebin in some other software it is important to keep in mind.
 
 from pyxem.data import pdnip_glass
 
-g = pdnip_glass()
+g = pdnip_glass(allow_download=True)
 g.calibration.beam_energy = 200
 g.calibration.pixel_size = (
     15e-6 * 2
