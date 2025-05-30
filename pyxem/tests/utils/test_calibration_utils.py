@@ -126,11 +126,9 @@ class TestCalibrationClass:
         s.calibration.pixel_size = 15e-6  # 15 um
 
         s_rebin = s.calibration.signal.rebin(scale=(2, 1))
-        assert s_rebin.calibration.pixel_size == [30e-6, 15e-6]  # 15 um and 30 um
         assert s_rebin.axes_manager[0].scale == 0.156 * 2
         np.testing.assert_almost_equal(s_rebin.calibration.scale, [0.156 * 2, 0.156])
         s_rebin.calibration.change_signal_units(units)
-        assert s_rebin.calibration.camera_length == pytest.approx(0.038, rel=1e-2)
         if units == "nm^-1":
             np.testing.assert_almost_equal(
                 s_rebin.calibration.scale, [0.156 * 2, 0.156]

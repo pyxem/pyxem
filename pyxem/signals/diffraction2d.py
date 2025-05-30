@@ -255,24 +255,6 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         if not inplace:
             return s_shift
 
-    def rebin(self, new_shape=None, scale=None, out=None, *args, **kwargs):
-        factors = self._validate_rebin_args_and_get_factors(
-            new_shape=new_shape,
-            scale=scale,
-        )
-
-        ret = super().rebin(new_shape=new_shape, scale=scale, out=out, *args, **kwargs)
-        if out is not None:
-            ret = out
-        if ret.calibration.pixel_size is not None:
-            # If the pixel size is set, we need to adjust the scale
-            # to account for the pixel size. Only the last 2 factors...
-            ret.calibration.pixel_size = [
-                f * px for f, px in zip(factors[-2:][::-1], ret.calibration.pixel_size)
-            ]
-
-        return ret
-
     def rotate_diffraction(self, angle, show_progressbar=True):
         """
         Rotate the diffraction dimensions.
