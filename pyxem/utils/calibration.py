@@ -83,8 +83,8 @@ class Calibration:
     def _repr_html_(self):
         """Return an HTML representation of the Calibration object."""
 
-        pixel_size = np.array(getattr(self, "pixel_size", 0))
-        pixel_size = f"{pixel_size * 1e6:.2f}" if pixel_size > 0 else "N/A"
+        pixel_size = np.array(getattr(self, "pixel_size", "N/A"))
+        pixel_size = f"{pixel_size * 1e6:.2f}" if pixel_size != "N/A" else "N/A"
 
         camera_length = getattr(self, "camera_length", 0) * 1000
         camera_length = f"{camera_length:.2f}" if camera_length > 0 else "N/A"
