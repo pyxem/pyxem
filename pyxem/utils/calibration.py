@@ -33,6 +33,7 @@ from pyxem.utils._deprecated import deprecated
 unit_equivalents = {
     "nm^-1": "nm$^{-1}$",
     "A^-1": r"$\AA^{-1}$",
+    "$A^{-1}$": r"$\AA^{-1}$",
     "k_nm^-1": "nm$^{-1}$",
     "k_A^-1": r"$\AA^{-1}$",
     "nm-1": "nm$^{-1}$",
@@ -75,6 +76,7 @@ class Calibration:
             A boolean array to be added to the integrator.
         """
         self.signal = signal
+        self._mrad_scale = None
 
     def __call__(self, **kwargs):
         for key, value in kwargs.items():
@@ -84,9 +86,12 @@ class Calibration:
         """Return an HTML representation of the Calibration object."""
 
         pixel_size = np.array(getattr(self, "pixel_size", "N/A"))
-        pixel_size = f"{pixel_size * 1e6:.2f}" if pixel_size != "N/A" else "N/A"
+        if isinstance(pixel_size, np.ndarray):
+            pixel_size = f"{pixel_size * 1e6}"
 
-        camera_length = getattr(self, "camera_length", 0) * 1000
+        camera_length = getattr(self, "camera_length", 0)
+        if camera_length is None:
+            camera_length = 0
         camera_length = f"{camera_length:.2f}" if camera_length > 0 else "N/A"
 
         html = f"""
@@ -125,27 +130,20 @@ class Calibration:
         if new_unit in unit_equivalents.keys():
             new_unit = unit_equivalents[new_unit]
 
-        self.set_camera_length_from_calibration()
+        self.set_mrad_scale_from_calibration()
 
         if new_unit == "px":
             # If the new unit is pixels, we need to set the scale to 1
             scale = 1
             offset = np.array(self.center) * -1
         elif new_unit == "mrad":
-            scale = (
-                np.arctan2(self.pixel_size, self.camera_length) * 1000
-            )  # convert to mrad
+            scale = np.array(self._mrad_scale)
             offset = np.array(self.center) * -scale
         elif new_unit == "nm$^{-1}$":
-            ang_scale = np.arctan2(
-                self.pixel_size,
-                self.camera_length,
-            )
-            scale = np.tan(ang_scale) * (1 / self.wavelength) * 10
+            scale = np.tan(self._mrad_scale) * (1 / self.wavelength) * 10
             offset = np.array(self.center) * -scale
         elif new_unit == r"$\AA^{-1}$":
-            ang_scale = np.arctan2(self.pixel_size, self.camera_length)
-            scale = np.tan(ang_scale) * (1 / self.wavelength)
+            scale = np.tan(self._mrad_scale) * (1 / self.wavelength)
             offset = np.array(self.center) * -scale
         else:
             raise ValueError(
@@ -156,6 +154,31 @@ class Calibration:
         self.signal.axes_manager.signal_axes.set(
             units=new_unit, scale=scale, offset=offset
         )
+
+    def set_mrad_scale_from_calibration(self):
+        """
+        Set the mrad scale from the calibration parameters.
+        """
+        scales = []
+        for u, s in zip(self.units, self.scale):
+            if u in unit_equivalents.keys():
+                u = unit_equivalents[u]
+            if u == "mrad":
+                scales.append(s)
+            elif u == "nm$^{-1}$":
+                angle_one_pix = np.arctan2(s / 10, 1 / self.wavelength)
+                scales.append(np.tan(angle_one_pix))
+            elif u == r"$\AA^{-1}$":
+                angle_one_pix = np.arctan2(s, 1 / self.wavelength)
+                scales.append(np.tan(angle_one_pix))
+            else:
+                scales = self._mrad_scale
+                if scales is None:
+                    raise ValueError(
+                        f"Cannot set mrad scale from calibration unless already set if the units are {u}. "
+                        "Must be one of 'mrad', 'nm$^{-1}$', or r'$\\AA^{-1}$'."
+                    )
+        self._mrad_scale = scales
 
     def set_camera_length_from_calibration(self):
         """Sets the camera length from the calibration parameters.

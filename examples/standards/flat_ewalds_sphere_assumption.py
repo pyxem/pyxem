@@ -4,42 +4,17 @@ Flat Ewald's Sphere Assumption
 In most cases, the Ewald's sphere is assumed to be flat for diffraction patterns when doing 4D STEM.
 This is almost always a good assumption.  That being said there are a couple of common units
 used with 4D STEM (e.g. nm^-1, mrad, pixel coordinates) and it is important to understand how these
-units relate to each other.
+units relate to each other.  These units are also related to the camera length, pixel size, and beam energy
+(wavelength) of the microscope.  In reality the beam energy is really the only thing that you need to
+know.
 
-We try to make this as easy as possible in Pyxem.  In general, we approach this problem by requiring three
-pieces of information to be set in the calibration:
-
-1. The beam energy (in keV)
-2. The physical pixel size (in meters)
-3. The camera length (in meters)**
-
-The first two are readily available from the microscope and the camera manufacturer. The camera length, especially
-given by the microscope manufacturer, is often inaccurate. To get around this you can set the scale directly using
-mrad, nm^-1, or A^-1 and then as long as the beam energy and pixel size are set, the camera length will be
-automatically calculated.  Once those three pieces of information are set, it's easy to switch between the
-different units.
-
-
-.. image:: CalibrationFlat.png
-  :width: 400
-  :alt: An image showing the relationship between the camera length, pixel size, beam energy (wavelength), and the
-   different units used in Pyxem.
-
-Let's look at an example of this using the `ZrNb Precipitate` dataset.  This dataset was taken using a Gen 1 Titan
-at 200 keV on a DE 16 with a physical pixel size of 6.5 um.
-
-It's important to note that rebinning will "effectively" change the pixel size. We've tried to make this work
-seamlessly in Pyxem, so you can rebin the data and the calibration will automatically adjust to the new pixel size.
-But if you rebin in some other software it is important to keep in mind.
+Let's look at an example of this using the `ZrNb Precipitate` dataset.
 """
 
 from pyxem.data import pdnip_glass
 
 g = pdnip_glass(allow_download=True)
 g.calibration.beam_energy = 200
-g.calibration.pixel_size = (
-    15e-6 * 2
-)  # this dataset was taken with 2x binning on a Celeritas with 15 um pixels
 
 # %%
 # Changing to mrad

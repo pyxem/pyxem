@@ -1551,6 +1551,14 @@ class TestPlotNavigator:
         s._navigator_probe = s_nav
         s.plot()
 
+    def test_plot_units(self):
+        s = Diffraction2D(np.random.randint(0, 256, (8, 9, 10, 30), dtype=np.uint8))
+        s.axes_manager.signal_axes[0].units = "nm^-1"
+        s.axes_manager.signal_axes[1].units = "nm^-1"
+        s.calibration.beam_energy = 200
+        s.plot(units="mrad")
+        plt.close("all")
+
 
 class TestFilter:
     @pytest.fixture
