@@ -40,17 +40,18 @@ g.plot()
 # We can also change to pixel coordinates. This will set the scale to 1 and the units to "px". But we won't
 # lose the calibration information, so we can switch back to nm^-1 or mrad easily.
 g.calibration.change_signal_units("px")
+print(g.calibration._mrad_scale)  # scale in mrad
 
 g.plot()
+print("after", g.calibration._mrad_scale)  # scale in mrad
 
 # %%
 # Rebinning
 # =========
-# We can also rebin the data in pyxem and the calibration will automatically adjust to the new pixel size.
-# This works by changing the physical pixel size based on the rebinning factor.
+# We can also rebin the data in pyxem and the calibration will automatically adjust
 
+g.calibration.change_signal_units("nm^-1")
 g_rebinned = g.rebin(scale=(1, 1, 2, 2))
-g_rebinned.calibration.change_signal_units("nm^-1")
 g_rebinned.plot()
 
 

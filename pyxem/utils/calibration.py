@@ -130,7 +130,14 @@ class Calibration:
         if new_unit in unit_equivalents.keys():
             new_unit = unit_equivalents[new_unit]
 
-        self.set_mrad_scale_from_calibration()
+        u = self.units[0]
+        if u in unit_equivalents.keys():
+            u = unit_equivalents[u]
+        print(f"Changing units from {u} to {new_unit}")
+        print(f"Current mrad scale: {self._mrad_scale}")
+        if u in ["mrad", "nm$^{-1}$", r"$\AA^{-1}$"]:
+            # If the units are already in mrad, nm^-1, or A^-1, we need to set the mrad scale
+            self.set_mrad_scale_from_calibration()
 
         if new_unit == "px":
             # If the new unit is pixels, we need to set the scale to 1
@@ -140,6 +147,7 @@ class Calibration:
             scale = np.array(self._mrad_scale)
             offset = np.array(self.center) * -scale
         elif new_unit == "nm$^{-1}$":
+            print(self._mrad_scale)
             scale = np.tan(self._mrad_scale) * (1 / self.wavelength) * 10
             offset = np.array(self.center) * -scale
         elif new_unit == r"$\AA^{-1}$":
