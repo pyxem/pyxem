@@ -63,6 +63,7 @@ from pyxem.data._data import (
 from pyxem.data.simulated_dpc import (
     simulated_stripes,
     simulated_constant_shift_magnitude,
+    simulated_pn_junction,
 )
 
 __doctest_skip__ = [
@@ -114,4 +115,5 @@ __all__ = [
     "au_phase",
     "simulated_overlap",
     "simulated_strain",
+    "simulated_pn_junction",
 ]
