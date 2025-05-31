@@ -26,6 +26,7 @@ import pyxem.utils._beam_shift_tools as bst
 from pyxem.utils.plotting import make_color_wheel_marker
 from pyxem.signals import DiffractionVectors1D
 from pyxem.utils._deprecated import deprecated
+from diffsims.utils.sim_utils import get_electron_wavelength
 
 
 class BeamShift(DiffractionVectors1D):
@@ -213,6 +214,56 @@ class BeamShift(DiffractionVectors1D):
         )
         return s_hist
 
+    @property
+    def beam_energy(self):
+        try:
+            return self.metadata.get_item("Acquisition_instrument.TEM.beam_energy")
+        except KeyError:
+            return None
+
+    @beam_energy.setter
+    def beam_energy(self, beam_energy):
+        self.metadata.set_item("Acquisition_instrument.TEM.beam_energy", beam_energy)
+        self.metadata.set_item(
+            "Acquisition_instrument.TEM.wavelength",
+            get_electron_wavelength(beam_energy),
+        )
+
+    def calibrate_electric_shifts(self, thickness):
+        """
+        Calibrate the shifts into the electric field
+
+        m_0 * gamma * |v|^2 * theta / e*t = E
+
+        where m_0 is the electron rest mass, gamma is the Relativistic factor, t is the
+        thickness m_0 is the electron rest mass, e is the electron charge, and theta
+        is the deflection angle in radians.
+
+        Parameters
+        ----------
+        thickness : float
+            The thickness of the sample in nm.
+        """
+        if self.units != ["mrad", "mrad"]:
+            raise ValueError(
+                "The beam shifts must be in mrad units to calibrate to electric field."
+                "Please call `pixels_to_calibrated_units` first."
+            )
+        thickness = thickness * 1e-9  # Convert thickness from nm to m
+        m_0 = 9.10938356e-31  # kg
+        e = 1.602176634e-19  # C
+        c = 2.99792458e8  # m/s, speed of light
+        volts = self.beam_energy * 1000
+        velocity = c * np.sqrt(1 - (1 / (1 + (volts * e / (m_0 * c**2))) ** 2))  # m/s
+        y = 1 / np.sqrt(1 - (velocity**2 / 2.99792458e8**2))  # Relativistic factor
+        shifts = ((self / 1000) * m_0 * y * np.abs(velocity) ** 2) / (
+            -e * thickness
+        )  # convert to rad
+        shifts = shifts / 1e8  # Convert to MV/cm
+        shifts.units = ["MV/cm", "MV/cm"]
+        shifts.metadata.Signal.quantity = "MV/cm"
+        return shifts
+
     def pixels_to_calibrated_units(self, signal_axes=None, inplace=False, **kwargs):
         """Convert the beam shifts from pixels to calibrated units using the
         signal axes passed or saved in the metadata.
@@ -242,14 +293,16 @@ class BeamShift(DiffractionVectors1D):
         ]
         scales = [s.scale for s in signal_axes]
 
-        return self.map(
-            lambda x: x * scales,
-            output_signal_dtype=float,
+        cal_com = self.map(
+            lambda x, scale: x * scale,
+            output_dtype=float,
             output_signal_size=(2,),
-            scales=np.array(scales),
+            scale=np.array(scales),
             inplace=inplace,
             **kwargs
         )
+        cal_com.units = [s.units for s in signal_axes]
+        return cal_com
 
     def get_magnitude_signal(
         self, autolim=True, autolim_sigma=4, magnitude_limits=None
@@ -595,7 +648,7 @@ class BeamShift(DiffractionVectors1D):
         if add_color_wheel_marker:
             # Add a color wheel marker to the signal
             color_wheel_marker = make_color_wheel_marker(rotation=rotation)
-            s_rgb.add_marker(color_wheel_marker, permanent=True)
+            s_rgb.add_marker(color_wheel_marker, permanent=True, plot_marker=False)
         return s_rgb
 
     def rotate_beam_shifts(self, angle):
