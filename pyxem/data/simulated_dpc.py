@@ -99,13 +99,13 @@ def simulated_pn_junction(beam_shifts=None):
     """
     if beam_shifts is None:
         beam_shifts = np.array([[4, 3]])
-    data = np.zeros((60, 60, 256, 256))
+    data = np.zeros((30, 30, 256, 256))
     rr, cc = disk(center=(128, 128), radius=72)
     data[:, :, rr, cc] = 100
     data = np.random.poisson(data)  # Add Poisson noise
     s = pxm.signals.ElectronDiffraction2D(data)
-    shifts = np.zeros((60, 60, 2))
-    shifts[:, 25:35] = beam_shifts
+    shifts = np.zeros((30, 30, 2))
+    shifts[:, 12:18] = beam_shifts
     shifts = gaussian_filter(shifts, sigma=1.0)  # Smooth the shifts
     bs = pxm.signals.BeamShift(shifts)
 
