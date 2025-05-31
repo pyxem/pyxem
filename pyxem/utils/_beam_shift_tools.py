@@ -240,17 +240,25 @@ def _find_phase(phase, rotation=None, max_phase=2 * np.pi):
 
 
 def _get_rgb_phase_magnitude_array(
-    phase, magnitude, rotation=None, magnitude_limits=None, max_phase=2 * np.pi
+    phase,
+    magnitude,
+    rotation=None,
+    magnitude_limits=None,
+    max_phase=2 * np.pi,
+    only_phase=False,
 ):
     phase = _find_phase(phase, rotation=rotation, max_phase=max_phase)
     phase = phase / (2 * np.pi)
 
-    if magnitude_limits is not None:
-        np.clip(magnitude, magnitude_limits[0], magnitude_limits[1], out=magnitude)
-    magnitude_max = magnitude.max()
-    if magnitude_max == 0:
-        magnitude_max = 1
-    magnitude = magnitude / magnitude_max
+    if not only_phase:
+        if magnitude_limits is not None:
+            np.clip(magnitude, magnitude_limits[0], magnitude_limits[1], out=magnitude)
+        magnitude_max = magnitude.max()
+        if magnitude_max == 0:
+            magnitude_max = 1
+        magnitude = magnitude / magnitude_max
+    else:
+        magnitude = np.ones_like(phase)
     S = np.ones_like(phase)
     HSV = np.dstack((phase, S, magnitude))
     RGB = hsv_to_rgb(HSV)

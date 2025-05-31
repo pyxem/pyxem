@@ -93,6 +93,7 @@ class Correlation1D(Signal1D):
             show_progressbar=True,
             inplace=False,
             method=method,
+            silence_warnings=True,
         )
         if method == "max" or method == "first":
             normalize = False

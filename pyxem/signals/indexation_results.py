@@ -602,6 +602,7 @@ class OrientationMap(DiffractionVectors2D):
             lazy_output=False,
             output_signal_size=(self.num_rows, 4),
             output_dtype=float,
+            silence_warnings=True,
         )
 
         rots = Rotation(rotations)
@@ -631,6 +632,7 @@ class OrientationMap(DiffractionVectors2D):
                 sizes=sizes,
                 inplace=False,
                 output_signal_size=output_size,
+                silence_warnings=True,
             ).data
         else:
             return None
@@ -660,6 +662,7 @@ class OrientationMap(DiffractionVectors2D):
                 inplace=False,
                 output_signal_size=(self.num_rows, 4),
                 output_dtype=float,
+                silence_warnings=True,
                 **kwargs,
             ),
             symmetry=self.simulation.phases.point_group,
@@ -711,6 +714,7 @@ class OrientationMap(DiffractionVectors2D):
             show_progressbar=False,
             n_best_index=n_best_index,
             return_object=return_object,
+            silence_warnings=True,
             **kwargs,
         )
         v.metadata.simulation = None
@@ -948,6 +952,7 @@ class OrientationMap(DiffractionVectors2D):
                 phase_idxs=phase_idx_signal,
                 inplace=False,
                 ragged=True,
+                silence_warnings=True,
             ).data
 
             # Scale the coordinates
@@ -1053,6 +1058,7 @@ class OrientationMap(DiffractionVectors2D):
                     output_signal_size=(),
                     navigation_chunks=navigation_chunks,
                     lazy_output=True,
+                    silence_warnings=True,
                 ).data.T
                 kwargs["sizes"] = intensity
 
@@ -1064,6 +1070,7 @@ class OrientationMap(DiffractionVectors2D):
                 output_signal_size=(),
                 navigation_chunks=navigation_chunks,
                 lazy_output=True,
+                silence_warnings=True,
             )
             markers = hs.plot.markers.Points.from_signal(
                 coords, facecolor="none", edgecolor=color, **kwargs
@@ -1078,6 +1085,7 @@ class OrientationMap(DiffractionVectors2D):
                     ragged=True,
                     output_dtype=object,
                     output_signal_size=(),
+                    silence_warnings=True,
                     fast=fast,
                 )
                 # New signal for offset coordinates, as using inplace=True shifts the point markers too
@@ -1085,6 +1093,7 @@ class OrientationMap(DiffractionVectors2D):
                     lambda x: x + annotation_shift,
                     inplace=False,
                     lazy_output=True,
+                    silence_warnings=True,
                 )
                 text_markers = hs.plot.markers.Texts.from_signal(
                     text_coords, texts=texts.data.T, color=text_color, **text_kwargs
@@ -1173,7 +1182,12 @@ class OrientationMap(DiffractionVectors2D):
                 lazy_output=True,
                 navigation_chunks=navigation_chunks,
             )
-            markers_signal = vecs.map(vec2polar, inplace=False, ragged=True)
+            markers_signal = vecs.map(
+                vec2polar,
+                inplace=False,
+                ragged=True,
+                silence_warnings=True,
+            )
 
             if "sizes" not in kwargs:
                 kwargs["sizes"] = 15
@@ -1319,7 +1333,11 @@ class GenericMatchingResults:
         :class:`~orix.crystal_map.CrystalMap`
 
         """
-        _s = self.data.map(_get_best_match, inplace=False)
+        _s = self.data.map(
+            _get_best_match,
+            inplace=False,
+            silence_warnings=True,
+        )
 
         """ Gets properties """
         phase_id = _s.isig[0].data.flatten()
@@ -1341,10 +1359,14 @@ class GenericMatchingResults:
 
         """ add various properties """
         phase_reliabilty = self.data.map(
-            _get_phase_reliability, inplace=False
+            _get_phase_reliability,
+            inplace=False,
+            silence_warnings=True,
         ).data.flatten()
         second_phase = self.data.map(
-            _get_second_best_phase, inplace=False
+            _get_second_best_phase,
+            inplace=False,
+            silence_warnings=True,
         ).data.flatten()
         properties = {
             "score": score,
@@ -1402,7 +1424,11 @@ class VectorMatchingResults(BaseSignal):
             'phase_reliability'
         """
         crystal_map = self.map(
-            crystal_from_vector_matching, inplace=False, *args, **kwargs
+            crystal_from_vector_matching,
+            inplace=False,
+            silence_warnings=True,
+            *args,
+            **kwargs,
         )
 
         crystal_map = _transfer_navigation_axes(crystal_map, self)

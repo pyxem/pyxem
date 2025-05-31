@@ -85,6 +85,7 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
             mask=mask,
             normalize=normalize,
             inplace=inplace,
+            silence_warnings=True,
             **kwargs,
         )
         s = self if inplace else correlation
@@ -124,7 +125,13 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
             return None
         """
         power = self.map(
-            _power, axis=1, mask=mask, normalize=normalize, inplace=inplace, **kwargs
+            _power,
+            axis=1,
+            mask=mask,
+            normalize=normalize,
+            inplace=inplace,
+            silence_warnings=True,
+            **kwargs,
         )
 
         s = self if inplace else power
@@ -179,7 +186,13 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
                 mask.axes_manager[-1].offset = self.axes_manager[-1].offset
                 mask.crop(-1, start=krange[0], end=krange[1])
 
-        correlation = s_.map(_pearson_correlation, mask=mask, inplace=inplace, **kwargs)
+        correlation = s_.map(
+            _pearson_correlation,
+            mask=mask,
+            inplace=inplace,
+            silence_warnings=True,
+            **kwargs,
+        )
 
         s = s_ if inplace else correlation
         s.set_signal_type("correlation")
@@ -245,7 +258,12 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
                 mask.crop(-1, start=krange[0], end=krange[1])
 
         correlation = s_.map(
-            _pearson_correlation, mask=mask, mode="kresolved", inplace=inplace, **kwargs
+            _pearson_correlation,
+            mask=mask,
+            mode="kresolved",
+            inplace=inplace,
+            silence_warnings=True,
+            **kwargs,
         )
 
         s = s_ if inplace else correlation
@@ -308,6 +326,7 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
             inplace=inplace,
             output_dtype=self.data.dtype,
             output_signal_size=self.axes_manager._signal_shape_in_array,
+            silence_warnings=True,
             **kwargs,
         )
 
@@ -404,6 +423,7 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
             transpose=True,
             output_signal_size=(n_best, 4),
             output_dtype=float,
+            silence_warnings=True,
             **kwargs,
         )
 

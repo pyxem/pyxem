@@ -1385,7 +1385,11 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             s_nav.compute()
         self._navigator_probe = s_nav
 
-    def plot(self, *args, **kwargs):
+    def plot(self, units=None, *args, **kwargs):
+        old_units = None
+        if units is not None:
+            old_units = self.calibration.units[0]
+            self.calibration.change_signal_units(new_unit=units)
         if "navigator" in kwargs:
             super().plot(*args, **kwargs)
         elif self.axes_manager.navigation_dimension > 2:
@@ -1411,6 +1415,9 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             s_nav = self._navigator_probe
             kwargs["navigator"] = s_nav
             super().plot(*args, **kwargs)
+        if old_units is not None:
+            # Reset the units to the original ones
+            self.calibration.change_signal_units(new_unit=old_units)
 
     @deprecated(since="0.16.0", removal="1.0.0")
     def add_peak_array_as_markers(self, peak_array, permanent=True, **kwargs):
@@ -1733,6 +1740,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             mask=mask,
             output_dtype=float,
             output_signal_size=(npt,),
+            silence_warnings=True,
             **kwargs,
         )
         s = self if inplace else integration
@@ -1875,6 +1883,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
                 output_signal_size=(npt, npt_azim),
                 mask=mask,
                 mean=mean,
+                silence_warnings=True,
                 **kwargs,
             )
 
@@ -1882,7 +1891,6 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         s.set_signal_type("polar_diffraction")
 
         # Dealing with axis changes
-
         k_axis = UniformDataAxis(
             name="Radius",
             units=s.axes_manager.signal_axes[0].units,
