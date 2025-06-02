@@ -80,6 +80,7 @@ def simulated_constant_shift_magnitude(beam_radius=10):
     data += shifts
     data = pxm.signals.BeamShift(data)
     probes.center_direct_beam(shifts=-data)
+    probes.metadata["title"] = "Simulated Constant Shift Magnitude"
     return probes
 
 
@@ -116,6 +117,6 @@ def simulated_pn_junction(beam_shifts=None):
     s.axes_manager.navigation_axes.set(
         name=["x", "y"], scale=[1, 1], units=["nm", "nm"]
     )
-
+    s.metadata["title"] = "Simulated pn-junction"
     s.calibration.beam_energy = 200  # Set the beam energy to 200 keV
     return s

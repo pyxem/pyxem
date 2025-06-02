@@ -249,6 +249,11 @@ class BeamShift(DiffractionVectors1D):
                 "The beam shifts must be in mrad units to calibrate to electric field."
                 "Please call `pixels_to_calibrated_units` first."
             )
+        if self.beam_energy is None:
+            raise ValueError(
+                "The beam energy must be set in the metadata to calibrate to electric field."
+                "Please set the beam energy using `beam_energy` property."
+            )
         thickness = thickness * 1e-9  # Convert thickness from nm to m
         m_0 = 9.10938356e-31  # kg
         e = 1.602176634e-19  # C

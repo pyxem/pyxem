@@ -15,19 +15,22 @@ This can be also expressed as:
 
 .. math::
 
-    \\frac{m_0 \\gamma | \\nu |^2 \\theta}{et} \approx E_{xy}
+    \\frac{m_0 \\gamma | \\nu |^2 \\theta}{et} \\approx E_{xy}
 
 or solving for the electric field in the y (or x) direction:
 
 .. math::
 
-    \\frac{m_0 \\gamma | \\nu |^2 \\theta_y}{et} \approx E_{y}
+    \\frac{m_0 \\gamma | \\nu |^2 \\theta_y}{et} \\approx E_{y}
 
 Where :math:`m_0` is the rest mass of the electron,
 :math:`\\gamma` is the Lorentz factor,
 :math:`| \\nu |` is the speed of the electron,
 :math:`e` is the elementary charge, and :math:`t` is the thickness of
 the sample and :math:`\\theta_y` is the deflection angle in the y direction.
+
+Special thanks to Dr. Barnaby Levin for helping with the math and documentation for
+Electric Field Mapping.
 """
 
 from pyxem.data import simulated_pn_junction
@@ -53,9 +56,9 @@ rotated.plot()
 # Finding a Profile
 # =================
 # Now we can make a nice profile of the electric field using a line profile. Let's make this interactive using
-# a hyperspy ROI widgets. I think this should work best with the ``qt`` backend, although the ``ipympl`` backend
-# should also work (hopefully). This is also just kind of a fun example of how to use hyperspy's interactive
-# tools.
+# a hyperspy ROI widgets. This should work best with the ``qt`` backend, although the ``ipympl`` backend
+# should also work (hopefully). We could do this not interactively but this is a  fun example of how to use
+# hyperspy's interactive tools.
 
 # %matplotlib qt
 
@@ -88,7 +91,7 @@ E_x.plot(fig=sub2)
 E_y.plot(fig=sub3)
 
 
-def get_profile(signal, roi, ind=0, out=None):
+def get_profile(ind=0, out=None):
     res = line(rotated, axes=(0, 1)).isig[ind].T
     if out is not None:
         out.data[:] = res.data
