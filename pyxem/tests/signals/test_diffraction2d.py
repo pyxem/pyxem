@@ -484,6 +484,9 @@ class TestVirtualImaging:
         diffraction_pattern.plot_integrated_intensity(roi)
         plt.close("all")
 
+    def test_plot_line_profile(self, diffraction_pattern):
+        diffraction_pattern.add_interactive_line_profile(linewidth=10)
+
     @pytest.mark.parametrize("has_nan", [True, False])
     def test_get_integrated_intensity(self, diffraction_pattern, has_nan):
         roi = hs.roi.CircleROI(3, 3, 5)
