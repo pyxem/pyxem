@@ -1385,7 +1385,22 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             s_nav.compute()
         self._navigator_probe = s_nav
 
-    def plot(self, units=None, *args, **kwargs):
+    def plot(self, units: str = None, *args, **kwargs):
+        """Plot the signal.
+
+        This method is a wrapper around the hyperspy plot method. See :meth:`hyperspy.api.signals.BaseSignal.plot`
+        for more information.
+
+        Parameters
+        ----------
+        units: str, optional
+            The units to use for the signal. If None, the current units are used otherwise the units are
+            temporarily changed to plot the signal. Options are "px", "nm^-1", "A^-1" or "mrad
+        args:
+            Additional positional arguments passed to the hyperspy plot method.
+        kwargs:
+            Additional keyword arguments passed to the hyperspy plot method.
+        """
         old_units = None
         if units is not None:
             old_units = self.calibration.units[0]
