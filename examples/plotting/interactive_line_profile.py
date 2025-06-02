@@ -48,10 +48,6 @@ profile = hs.interactive(
         line_roi.events.changed,
         strained_signal.axes_manager.events.indices_changed,
     ],
-    recompute_out_event=[
-        line_roi.events.changed,
-        strained_signal.axes_manager.events.indices_changed,
-    ],
 )
 line_roi.add_widget(strained_signal, axes=(2, 3))
 hs.plot.plot_spectra(

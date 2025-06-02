@@ -105,8 +105,6 @@ def get_profile(ind=0, out=None):
 for i, s in enumerate([E_x, E_y]):
     hs.interactive(
         get_profile,
-        signal=s,
-        roi=line,
         out=s,
         event=line.events.changed,
         recompute_out_event=line.events.changed,
