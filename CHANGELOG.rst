@@ -7,13 +7,17 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_,
 and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
-2024-05-27 - version 0.21.0
+2025-06-04 - version 0.21.0
 ===========================
 Added
 -----
 - Added examples for strain mapping and FEM (#1138)
 - Added a new ZrCuAl dataset (#1138)
 - Added a `get_strain_maps` method to simplify strain mapping (#1138)
+- Added the ability to pass units for beam energy and camera length. (#1139)
+- Added methods for calculating electric field. (#1139)
+- Added a method for showing a 1d profile (#1139)
+- Added new examples for loading binary data, calibrating and plotting with different units (#1139)
 
 
 Fixed
