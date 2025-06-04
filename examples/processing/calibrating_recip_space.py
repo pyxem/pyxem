@@ -130,10 +130,12 @@ y0 = [
     0,
 ] * len(x)
 
+hkl = [str(h) for h in sim1d.hkl]
+
 offsets = np.vstack((x, y)).T
 t = hs.plot.markers.Texts(
     offsets,
-    texts=sim1d.hkl,
+    texts=hkl,
     offset_transform="relative",
     horizontalalignment="left",
     verticalalignment="bottom",
