@@ -97,7 +97,7 @@ class TestCalibrationClass:
         calibration.scale = 0.156
         calibration.units = "nm^-1"
         calibration.beam_energy = 200
-        calibration.pixel_size = 15e-6  # 15 um
+        calibration.physical_pixel_size = 15e-6  # 15 um
         calibration.set_camera_length_from_calibration()
         assert calibration.camera_length == pytest.approx(0.038, rel=1e-2)
 
@@ -106,15 +106,15 @@ class TestCalibrationClass:
         calibration.scale = 0.156
         calibration.units = "nm^-1"
         calibration.beam_energy = 200
-        calibration.pixel_size = 15e-6  # 15 um
-        calibration.change_signal_units(units)
+        calibration.physical_pixel_size = 15e-6  # 15 um
+        calibration.convert_signal_units(units)
         if units == "nm^-1":
             np.testing.assert_almost_equal(calibration.scale, [0.156, 0.156])
         elif units == "A^-1":
             np.testing.assert_almost_equal(calibration.scale, [0.0156, 0.0156])
         elif units == "px":
             np.testing.assert_almost_equal(calibration.scale, [1, 1])
-        calibration.change_signal_units("nm^-1")
+        calibration.convert_signal_units("nm^-1")
         np.testing.assert_almost_equal(calibration.scale, [0.156, 0.156])
 
     @pytest.mark.parametrize("units", ["nm^-1", "A^-1", "px", "mrad"])
@@ -123,12 +123,12 @@ class TestCalibrationClass:
         s.calibration.scale = 0.156
         s.calibration.units = "nm^-1"
         s.calibration.beam_energy = 200
-        s.calibration.pixel_size = 15e-6  # 15 um
+        s.calibration.physical_pixel_size = 15e-6  # 15 um
 
         s_rebin = s.calibration.signal.rebin(scale=(2, 1))
         assert s_rebin.axes_manager[0].scale == 0.156 * 2
         np.testing.assert_almost_equal(s_rebin.calibration.scale, [0.156 * 2, 0.156])
-        s_rebin.calibration.change_signal_units(units)
+        s_rebin.calibration.convert_signal_units(units)
         if units == "nm^-1":
             np.testing.assert_almost_equal(
                 s_rebin.calibration.scale, [0.156 * 2, 0.156]
@@ -139,7 +139,7 @@ class TestCalibrationClass:
             )
         elif units == "px":
             np.testing.assert_almost_equal(s_rebin.calibration.scale, [1, 1])
-        s_rebin.calibration.change_signal_units("nm^-1")
+        s_rebin.calibration.convert_signal_units("nm^-1")
         np.testing.assert_almost_equal(s_rebin.calibration.scale, [0.156 * 2, 0.156])
 
     def test_set_failure(self, calibration):

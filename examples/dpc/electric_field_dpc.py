@@ -38,7 +38,7 @@ import matplotlib.pyplot as plt
 import hyperspy.api as hs
 
 s = simulated_pn_junction()
-s.calibration.change_signal_units("mrad")
+s.calibration.convert_signal_units("mrad")
 com = s.get_direct_beam_position(method="center_of_mass")
 cal = com.pixels_to_calibrated_units()
 ecal = cal.calibrate_electric_shifts(thickness=60)
@@ -71,7 +71,7 @@ sub3 = fig.add_subfigure(gs[4:6, 3:])
 rot_signal = rotated.get_magnitude_phase_signal(add_color_wheel_marker=False)
 
 rot_signal.metadata.General.title = "Mag. + Phase"
-line = hs.roi.Line2DROI(x1=15, y1=27, x2=43, y2=27, linewidth=40)
+line = hs.roi.Line2DROI(x1=5, y1=16, x2=27, y2=16, linewidth=10)
 
 E_x = line(rotated, axes=(0, 1)).isig[1].T
 E_y = line(rotated, axes=(0, 1)).isig[0].T

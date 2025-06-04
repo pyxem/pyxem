@@ -31,7 +31,7 @@ strained_signal.axes_manager.navigation_axes.set(
 )
 
 strained_signal.axes_manager.signal_axes.set(
-    scale=0.1, units="nm", name=["q_x", "q_y"], offset=[2, 3]  # offset in nm
+    scale=0.1, units="nm^-1", name=["kx", "ky"], offset=[2, 3]  # offset in nm
 )
 
 # %%
@@ -50,7 +50,7 @@ strained_signal.calibration.detector_gain = 1
 # calibration object for convenience. For example:
 
 strained_signal.calibration.beam_energy = 200  # in keV
-strained_signal.calibration.pixel_size = (
+strained_signal.calibration.physical_pixel_size = (
     15e-6  # in meters, this is the physical pixel size of the detector
 )
 strained_signal.center = (

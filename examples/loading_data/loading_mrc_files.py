@@ -32,7 +32,7 @@ with zipfile.ZipFile(file_path, "r") as zip_ref:
 # Loading the MRC file
 # --------------------
 # We can now load the file using the ``load`` method from hyperspy.  This method uses
-# the :ref:`MRC Reader <https://hyperspy.org/rosettasciio/supported_formats/mrc.html#mrc-format>`_
+# the `MRC Reader <https://hyperspy.org/rosettasciio/supported_formats/mrc.html#mrc-format>`_
 # to read the file. In this case, because the file was collected with a Direct Electron camera,
 # the metadata is automatically loaded as well.
 
@@ -51,6 +51,7 @@ signal = hs.load(
 
 signal = hs.load("ZrNbMrc/20241021_00405_movie.mrc", lazy=True)
 
+signal
 # %%
 # Controlling the Chunk Size
 # --------------------------
@@ -65,6 +66,7 @@ signal = hs.load(
     "ZrNbMrc/20241021_00405_movie.mrc", lazy=True, chunks=("auto", "auto", -1, -1)
 )
 
+signal
 # %%
 # Slicing the Signal
 # ------------------

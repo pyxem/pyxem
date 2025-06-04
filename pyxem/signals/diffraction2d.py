@@ -1404,7 +1404,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         old_units = None
         if units is not None:
             old_units = self.calibration.units[0]
-            self.calibration.change_signal_units(new_unit=units)
+            self.calibration.convert_signal_units(new_unit=units)
         if "navigator" in kwargs:
             super().plot(*args, **kwargs)
         elif self.axes_manager.navigation_dimension > 2:
@@ -1432,7 +1432,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             super().plot(*args, **kwargs)
         if old_units is not None:
             # Reset the units to the original ones
-            self.calibration.change_signal_units(new_unit=old_units)
+            self.calibration.convert_signal_units(new_unit=old_units)
 
     def add_interactive_line_profile(self, **kwargs):
         """Add an interactive line profile to the signal plot.

@@ -18,6 +18,7 @@
 
 
 import numpy as np
+import scipy.constants
 from scipy.ndimage import rotate
 from hyperspy._signals.lazy import LazySignal
 from hyperspy.axes import UniformDataAxis
@@ -27,6 +28,7 @@ from pyxem.utils.plotting import make_color_wheel_marker
 from pyxem.signals import DiffractionVectors1D
 from pyxem.utils._deprecated import deprecated
 from diffsims.utils.sim_utils import get_electron_wavelength
+from scipy.constants import c, e, m_e
 
 
 class BeamShift(DiffractionVectors1D):
@@ -255,13 +257,10 @@ class BeamShift(DiffractionVectors1D):
                 "Please set the beam energy using `beam_energy` property."
             )
         thickness = thickness * 1e-9  # Convert thickness from nm to m
-        m_0 = 9.10938356e-31  # kg
-        e = 1.602176634e-19  # C
-        c = 2.99792458e8  # m/s, speed of light
         volts = self.beam_energy * 1000
-        velocity = c * np.sqrt(1 - (1 / (1 + (volts * e / (m_0 * c**2))) ** 2))  # m/s
-        y = 1 / np.sqrt(1 - (velocity**2 / 2.99792458e8**2))  # Relativistic factor
-        shifts = ((self / 1000) * m_0 * y * np.abs(velocity) ** 2) / (
+        velocity = c * np.sqrt(1 - (1 / (1 + (volts * e / (m_e * c**2))) ** 2))  # m/s
+        y = 1 / np.sqrt(1 - (velocity**2 / c**2))  # Relativistic factor
+        shifts = ((self / 1000) * m_e * y * np.abs(velocity) ** 2) / (
             -e * thickness
         )  # convert to rad
         shifts = shifts / 1e8  # Convert to MV/cm
