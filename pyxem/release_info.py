@@ -1,7 +1,7 @@
 name = "pyxem"
-version = "0.20.dev0"
+version = "0.21.0"
 author = "Duncan Johnstone, Phillip Crout, Carter Francis, Magnus Nord"
-copyright = "Copyright 2016-2024, The pyxem developers"
+copyright = "Copyright 2016-2025, The pyxem developers"
 # Contributors listed by original committer, maintainers, then other
 # within groups organised by  number of commits.
 # See: https://github.com/pyxem/pyxem/graphs/contributors

@@ -1,4 +1,4 @@
-# Copyright 2016-2024 The pyXem developers
+# Copyright 2016-2025 The pyXem developers
 #
 # This file is part of pyXem.
 #
