@@ -62,9 +62,7 @@ signal
 # are the reciprocal space dimensions, as we usually ``map`` over those dimensions we can set them
 # to ``-1`` to indicate that we want to load all the data in those dimensions at once.
 
-signal = hs.load(
-    "ZrNbMrc/20241021_00405_movie.mrc", lazy=True, chunks=("auto", "auto", -1, -1)
-)
+signal = hs.load("ZrNbMrc/20241021_00405_movie.mrc", lazy=True, chunks=(10, 10, -1, -1))
 
 signal
 # %%
