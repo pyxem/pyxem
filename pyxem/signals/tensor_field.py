@@ -84,7 +84,9 @@ class DisplacementGradientMap(Signal2D):
             The strain tensor field.
 
         """
-        RU = self.map(_polar_decomposition, side="right", inplace=False)
+        RU = self.map(
+            _polar_decomposition, side="right", inplace=False, silence_warnings=True
+        )
         return RU.isig[:, :, 0], RU.isig[:, :, 1]
 
     def get_strain_maps(self):
@@ -104,7 +106,7 @@ class DisplacementGradientMap(Signal2D):
         e12 = U.isig[0, 1].T
         # e21 = U.isig[1, 0].T # Same as e12
         e22 = np.reciprocal(U.isig[1, 1].T) - 1
-        theta = R.map(_get_rotation_angle, inplace=False)
+        theta = R.map(_get_rotation_angle, inplace=False, silence_warnings=True)
         theta = theta.transpose(2)
         strain_results = stack([e11, e22, e12, theta])
         strain_map = StrainMap(strain_results)

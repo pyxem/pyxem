@@ -88,7 +88,7 @@ setup(
     extras_require=extra_feature_requirements,
     install_requires=[
         "dask",
-        "diffsims       >= 0.6.0",
+        "diffsims       >= 0.7.0",  # ensure we use the latest version
         "hyperspy       >= 2.0",
         "h5py",
         "lmfit          >= 0.9.12",

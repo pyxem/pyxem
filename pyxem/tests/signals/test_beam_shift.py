@@ -23,6 +23,7 @@ import dask.array as da
 from hyperspy.signals import Signal2D
 import pyxem.data.dummy_data.dummy_data as dd
 from pyxem.signals import BeamShift, LazyBeamShift, Diffraction2D
+from hyperspy.axes import UniformDataAxis
 
 
 class TestMakeLinearPlane:
@@ -237,6 +238,54 @@ class TestBeamShiftFitCorners:
         s_corr = s - s.get_linear_plane(fit_corners=0.05)
         s_corr.data[add_number_slice] -= 1000
         assert s_corr.data == approx(0.0, abs=1e-8)
+
+    def test_calibrate_electric_shifts(self):
+        data = np.zeros((100, 100, 2))
+        data[45:55, :] = 3
+        s = BeamShift(data)
+        s.metadata.add_node("Shifts")  # add information about the signal Axes
+        s.metadata.Shifts.signal_axes = (
+            UniformDataAxis(units="mrad", scale=0.01, offset=0.0, name="x"),
+            UniformDataAxis(units="mrad", scale=0.01, offset=0.0, name="y"),
+        )
+
+        cal = s.pixels_to_calibrated_units()
+        cal.beam_energy = 200
+        cal = cal.calibrate_electric_shifts(thickness=60)
+        assert cal.data[0, :, 0] == approx(0)
+        assert cal.data[45, :, 1] == approx(-1.7187, abs=1e-3)
+
+    def test_calibrate_electric_shifts_failure_units(self):
+        data = np.zeros((100, 100, 2))
+        data[45:55, :] = 3
+        s = BeamShift(data)
+        s.metadata.add_node("Shifts")
+
+        s.metadata.Shifts.signal_axes = (
+            UniformDataAxis(units="nm^-1", scale=0.01, offset=0.0, name="x"),
+            UniformDataAxis(units="nm^-1", scale=0.01, offset=0.0, name="y"),
+        )
+
+        cal = s.pixels_to_calibrated_units()
+        with pytest.raises(ValueError):
+            # This should raise an error because the beam energy is not set
+            cal.calibrate_electric_shifts(thickness=60)
+
+    def test_calibrate_electric_shifts_failure(self):
+        data = np.zeros((100, 100, 2))
+        data[45:55, :] = 3
+        s = BeamShift(data)
+        s.metadata.add_node("Shifts")
+
+        s.metadata.Shifts.signal_axes = (
+            UniformDataAxis(units="mrad", scale=0.01, offset=0.0, name="x"),
+            UniformDataAxis(units="mrad", scale=0.01, offset=0.0, name="y"),
+        )
+
+        cal = s.pixels_to_calibrated_units()
+        with pytest.raises(ValueError):
+            # This should raise an error because the beam energy is not set
+            cal.calibrate_electric_shifts(thickness=60)
 
     def test_large_values_not_in_corners(self):
         s = BeamShift(np.zeros((100, 100, 2)))

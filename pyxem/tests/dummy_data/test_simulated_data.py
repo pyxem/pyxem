@@ -18,9 +18,30 @@
 
 from pyxem.data.dummy_data import CrystalSTEMSimulation
 
-from pyxem.data import simulated_overlap
+from pyxem.data import (
+    simulated_overlap,
+    simulated_pn_junction,
+    simulated_constant_shift_magnitude,
+)
+from pyxem.signals import ElectronDiffraction2D, Diffraction2D
 
 
 class TestMakeOverlapData:
     def test_init(self):
         s = simulated_overlap()
+
+
+class TestDPC:
+    def test_pn_junction(self):
+        s = simulated_pn_junction()
+        assert isinstance(s, ElectronDiffraction2D)
+        assert s.metadata["title"] == "Simulated pn-junction"
+        assert s.axes_manager.signal_axes[0].units == "nm^-1"
+        assert s.axes_manager.signal_axes[1].units == "nm^-1"
+
+    def test_simulated_constant_shift_magnitude(self):
+        s = simulated_constant_shift_magnitude()
+        assert isinstance(s, Diffraction2D)
+        assert s.metadata["title"] == "Simulated Constant Shift Magnitude"
+        assert s.axes_manager.signal_axes[0].units == "px"
+        assert s.axes_manager.signal_axes[1].units == "px"

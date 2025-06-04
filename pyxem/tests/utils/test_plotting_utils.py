@@ -1,5 +1,6 @@
 from pyxem.utils import plotting as plu
 from pyxem.signals import BeamShift
+import hyperspy.api as hs
 import matplotlib.pyplot as plt
 import pytest
 import numpy as np
@@ -63,3 +64,8 @@ def test_plot_beam_shift_color():
     plu.plot_beam_shift_color(s, autolim=False, magnitude_limits=(0, 0.5))
     fig, ax = plt.subplots()
     plu.plot_beam_shift_color(s, ax=ax)
+
+
+def test_color_wheel_marker():
+    color_wheel_marker = plu.make_color_wheel_marker()
+    assert isinstance(color_wheel_marker, hs.plot.markers.Markers)

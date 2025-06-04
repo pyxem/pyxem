@@ -20,6 +20,8 @@
 
 import math
 import matplotlib.pyplot as plt
+from matplotlib.collections import QuadMesh
+import hyperspy.api as hs
 import numpy as np
 from pyxem.utils.polar_transform_utils import (
     get_template_cartesian_coordinates,
@@ -29,6 +31,7 @@ from pyxem.utils.polar_transform_utils import (
 from pyxem.utils.diffraction import find_beam_center_blur
 import pyxem.utils._beam_shift_tools as bst
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
+from scipy.ndimage import gaussian_filter
 
 __all__ = [
     "plot_template_over_pattern",
@@ -221,7 +224,11 @@ def plot_beam_shift_color(
     if ax_indicator is not False:
         if ax_indicator is None:
             ax_indicator = fig.add_subplot(331)
-        _make_color_wheel(ax_indicator, rotation=indicator_rotation + phase_rotation)
+        _make_color_wheel(
+            ax_indicator,
+            rotation=indicator_rotation + phase_rotation,
+            only_phase=only_phase,
+        )
     ax.set_axis_off()
     if scalebar_size is not None:
         scalebar_label = "{0} {1}".format(scalebar_size, s.axes_manager[0].units)
@@ -232,7 +239,7 @@ def plot_beam_shift_color(
     return fig
 
 
-def _make_color_wheel(ax, rotation=None):
+def _make_color_wheel(ax, rotation=None, only_phase=False):
     x, y = np.mgrid[-2.0:2.0:500j, -2.0:2.0:500j]
     r = (x**2 + y**2) ** 0.5
     t = np.arctan2(x, y)
@@ -246,8 +253,63 @@ def _make_color_wheel(ax, rotation=None):
 
     mask = r_masked.mask
     r_masked.data[r_masked.mask] = r_masked.mean()
-    rgb_array = bst._get_rgb_phase_magnitude_array(t, r_masked.data)
+    rgb_array = bst._get_rgb_phase_magnitude_array(
+        t, r_masked.data, only_phase=only_phase
+    )
     rgb_array = np.dstack((rgb_array, np.invert(mask)))
 
     ax.imshow(rgb_array, interpolation="quadric", origin="lower")
     ax.set_axis_off()
+
+
+def make_color_wheel_marker(rotation=None, offsets=None, scale=0.2, only_phase=False):
+    """Create a color wheel marker for use in hyperspy.
+
+    Parameters
+    ----------
+    rotation : float, optional
+        Rotation of the color wheel in degrees. Default is None, which means no rotation.
+    offsets : list of lists, optional
+        Offsets for the marker in axes coordinates. Default is [[0.8, 0.8]].
+    scale : float, optional
+        Scale factor for the marker size. Default is 0.2.
+    """
+    if offsets is None:
+        offsets = [[0.8, 0.8]]
+    x, y = np.mgrid[-2.0:2.0:360j, -2.0:2.0:360j]
+    r = (x**2 + y**2) ** 0.5
+    t = np.arctan2(x, y)
+    if rotation is not None:
+        t += math.radians(rotation)
+        t = (t + np.pi) % (2 * np.pi) - np.pi
+
+    r_masked = np.ma.masked_where((2.0 < r) | (r < 1.0), r)
+    r_masked -= 1.0
+
+    r_masked.data[r_masked.mask] = r_masked.mean()
+    rgb_array = bst._get_rgb_phase_magnitude_array(
+        t, r_masked.data, only_phase=only_phase
+    )
+    mask = (
+        np.ma.masked_where((2.0 < r) | (r < 1.05), r) - 1.0
+    ).mask  # slightly larger...
+    alpha = np.invert(mask).astype(np.float32)
+    alpha = gaussian_filter(alpha, sigma=1.5)  # Smooth the alpha channel
+    rgb_array = np.dstack((rgb_array, alpha))  # Create RGBA array
+
+    coords = np.stack([x, y], axis=-1)
+    coords = coords * scale / 4  # Scale the coordinates
+    quad = hs.plot.markers.Markers(
+        collection=QuadMesh,
+        coordinates=coords,
+        array=rgb_array[1:, 1:],
+        cmap="hsv",
+        transform="axes",
+        offset_transform="axes",
+        offsets=offsets,
+        alpha=1,
+        antialiaseds=[
+            True,
+        ],
+    )
+    return quad

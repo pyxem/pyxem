@@ -484,6 +484,9 @@ class TestVirtualImaging:
         diffraction_pattern.plot_integrated_intensity(roi)
         plt.close("all")
 
+    def test_plot_line_profile(self, diffraction_pattern):
+        diffraction_pattern.add_interactive_line_profile(linewidth=10)
+
     @pytest.mark.parametrize("has_nan", [True, False])
     def test_get_integrated_intensity(self, diffraction_pattern, has_nan):
         roi = hs.roi.CircleROI(3, 3, 5)
@@ -1550,6 +1553,14 @@ class TestPlotNavigator:
         s_nav = Diffraction2D(np.zeros((2, 19)))
         s._navigator_probe = s_nav
         s.plot()
+
+    def test_plot_units(self):
+        s = Diffraction2D(np.random.randint(0, 256, (8, 9, 10, 30), dtype=np.uint8))
+        s.axes_manager.signal_axes[0].units = "nm^-1"
+        s.axes_manager.signal_axes[1].units = "nm^-1"
+        s.calibration.beam_energy = 200
+        s.plot(units="mrad")
+        plt.close("all")
 
 
 class TestFilter:

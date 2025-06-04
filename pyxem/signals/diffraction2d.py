@@ -1385,7 +1385,26 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             s_nav.compute()
         self._navigator_probe = s_nav
 
-    def plot(self, *args, **kwargs):
+    def plot(self, units: str = None, *args, **kwargs):
+        """Plot the signal.
+
+        This method is a wrapper around the hyperspy plot method. See :meth:`hyperspy.api.signals.BaseSignal.plot`
+        for more information.
+
+        Parameters
+        ----------
+        units: str, optional
+            The units to use for the signal. If None, the current units are used otherwise the units are
+            temporarily changed to plot the signal. Options are "px", "nm^-1", "A^-1" or "mrad
+        args:
+            Additional positional arguments passed to the hyperspy plot method.
+        kwargs:
+            Additional keyword arguments passed to the hyperspy plot method.
+        """
+        old_units = None
+        if units is not None:
+            old_units = self.calibration.units[0]
+            self.calibration.convert_signal_units(new_unit=units)
         if "navigator" in kwargs:
             super().plot(*args, **kwargs)
         elif self.axes_manager.navigation_dimension > 2:
@@ -1411,6 +1430,48 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             s_nav = self._navigator_probe
             kwargs["navigator"] = s_nav
             super().plot(*args, **kwargs)
+        if old_units is not None:
+            # Reset the units to the original ones
+            self.calibration.convert_signal_units(new_unit=old_units)
+
+    def add_interactive_line_profile(self, **kwargs):
+        """Add an interactive line profile to the signal plot.
+
+        This method allows you to add a line profile to the signal plot which can be
+        useful for measuring intensity variations along a line on the signal.
+
+        Parameters
+        ----------
+        **kwargs : dict
+            Additional keyword arguments to customize the line profile, such as
+            'color', 'linewidth', etc. These will be passed to :class:`~hyperspy.api.roi.Line2D`
+        """
+        if self._plot is None:
+            self.plot()
+        args = []
+        for ax in self.axes_manager.signal_axes:
+            a = ax.axis
+            args.append(a[len(a) // 4])
+            args.append(a[(len(a) // 4) * 3])
+
+        line_roi = hs.roi.Line2DROI(
+            x1=args[0], y1=args[2], x2=args[1], y2=args[3], **kwargs
+        )
+
+        def get_current_profile():
+            return line_roi(self.get_current_signal())
+
+        profile = hs.interactive(
+            get_current_profile,
+            event=[line_roi.events.changed, self.axes_manager.events.indices_changed],
+        )
+        line_roi.add_widget(self, axes=(2, 3))
+        hs.plot.plot_spectra(
+            [
+                profile,
+            ]
+        )
+        return profile
 
     @deprecated(since="0.16.0", removal="1.0.0")
     def add_peak_array_as_markers(self, peak_array, permanent=True, **kwargs):
@@ -1733,6 +1794,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             mask=mask,
             output_dtype=float,
             output_signal_size=(npt,),
+            silence_warnings=True,
             **kwargs,
         )
         s = self if inplace else integration
@@ -1875,6 +1937,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
                 output_signal_size=(npt, npt_azim),
                 mask=mask,
                 mean=mean,
+                silence_warnings=True,
                 **kwargs,
             )
 
@@ -1882,7 +1945,6 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         s.set_signal_type("polar_diffraction")
 
         # Dealing with axis changes
-
         k_axis = UniformDataAxis(
             name="Radius",
             units=s.axes_manager.signal_axes[0].units,

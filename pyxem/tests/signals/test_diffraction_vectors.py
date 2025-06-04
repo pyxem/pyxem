@@ -446,11 +446,9 @@ class TestConvertVectors:
         for i in np.ndindex(test_data.shape):
             test_data[i] = np.random.random((np.random.randint(2, 6), 2))
         dv = DiffractionVectors(test_data)
-        dv.axes_manager[0].name = "x"
-        dv.axes_manager[1].name = "y"
-        dv.axes_manager[0].scale = 1
-        dv.axes_manager[1].scale = 2
-        dv.axes_manager[0].offset = 1
+        dv.axes_manager.navigation_axes.set(
+            name=["x", "y"], scale=[1, 2], offset=[1, 0]
+        )
         flat = dv._get_navigation_positions(flatten=False, real_units=True)
         np.testing.assert_array_equal(flat[0, 0, 0], 0)
         np.testing.assert_array_equal(flat[0, 0, 1], 1)
@@ -462,15 +460,9 @@ class TestConvertVectors:
         for i in np.ndindex(test_data.shape):
             test_data[i] = np.random.random((np.random.randint(2, 6), 2))
         dv = DiffractionVectors(test_data)
-        dv.axes_manager[0].name = "x"
-        dv.axes_manager[1].name = "y"
-        dv.axes_manager[2].name = "time"
-        dv.axes_manager[0].scale = 1
-        dv.axes_manager[1].scale = 2
-        dv.axes_manager[2].scale = 3
-        dv.axes_manager[0].offset = 1
-        dv.axes_manager[1].offset = 2
-        dv.axes_manager[2].offset = 3
+        dv.axes_manager.navigation_axes.set(
+            name=["x", "y", "time"], scale=[1, 2, 3], offset=[1, 2, 3]
+        )
         flat = dv.flatten_diffraction_vectors(real_units=True)
         assert flat.column_names[0] == "x"
         assert flat.column_names[1] == "y"
