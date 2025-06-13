@@ -402,7 +402,7 @@ class TestDiffraction2DRotateDiffraction:
 
 
 class TestDiffraction2DShiftDiffraction:
-    @pytest.mark.parametrize("shift_x,shift_y", [(2, 5), (-6, -1), (2, -4)])
+    @pytest.mark.parametrize("shift_x, shift_y", [(2, 5), (-6, -1), (2, -4)])
     def test_single_shift(self, shift_x, shift_y):
         s = Diffraction2D(np.zeros((10, 10, 30, 40)))
         x, y = 20, 10
@@ -412,7 +412,7 @@ class TestDiffraction2DShiftDiffraction:
         s_shift.data[:, :, y - shift_y, x - shift_x] = 0
         assert s_shift.data.sum() == 0
 
-    @pytest.mark.parametrize("centre_x,centre_y", [(25, 25), (30, 20)])
+    @pytest.mark.parametrize("centre_x, centre_y", [(25, 25), (30, 20)])
     def test_random_shifts(self, centre_x, centre_y):
         y, x = np.mgrid[20:30:7j, 20:30:5j]
         s = mdtd.generate_4d_data(
