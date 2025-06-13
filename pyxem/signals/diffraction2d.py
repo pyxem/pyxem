@@ -235,13 +235,10 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         ...     show_progressbar=False)
 
         """
-
-        if (not isiterable(shift_x)) or (not isiterable(shift_y)):
-            shift_x, shift_y = pst._make_centre_array_from_signal(
-                self, x=shift_x, y=shift_y
-            )
-        s_shift_x = BaseSignal(shift_x).T
-        s_shift_y = BaseSignal(shift_y).T
+        if isiterable(shift_x) or isiterable(shift_y):
+            # shifts depend on navigation position
+            shift_x = BaseSignal(shift_x).T
+            shift_y = BaseSignal(shift_y).T
 
         s_shift = self.map(
             pst._shift_single_frame,
@@ -249,8 +246,10 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             ragged=False,
             show_progressbar=show_progressbar,
             interpolation_order=interpolation_order,
-            shift_x=s_shift_x,
-            shift_y=s_shift_y,
+            shift_x=shift_x,
+            shift_y=shift_y,
+            output_dtype=self.data.dtype,
+            output_signal_size=self.axes_manager.signal_shape[::-1],
         )
         if not inplace:
             return s_shift

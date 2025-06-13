@@ -89,24 +89,6 @@ def _find_longest_distance(
     return max_value
 
 
-def _make_centre_array_from_signal(signal, x=None, y=None):
-    a_m = signal.axes_manager
-    shape = a_m.navigation_shape[::-1]
-    if x is None:
-        centre_x_array = np.ones(shape) * a_m.signal_axes[0].value2index(0)
-    else:
-        centre_x_array = np.ones(shape) * x
-    if y is None:
-        centre_y_array = np.ones(shape) * a_m.signal_axes[1].value2index(0)
-    else:
-        centre_y_array = np.ones(shape) * y
-    if not isiterable(centre_x_array):
-        centre_x_array = np.array([centre_x_array])
-    if not isiterable(centre_y_array):
-        centre_y_array = np.array([centre_y_array])
-    return (centre_x_array, centre_y_array)
-
-
 def _get_radial_profile_of_diff_image(
     diff_image, centre_x, centre_y, normalize, radial_array_size, mask=None
 ):
