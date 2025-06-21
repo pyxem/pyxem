@@ -709,6 +709,12 @@ class TestGetDirectBeamPosition:
         with pytest.raises(RuntimeError):
             s.get_direct_beam_position(method="blur", sigma=1)
 
+    def test_plot_on_signal(self):
+        s = self.s
+        s.plot()
+        shifts = s.get_direct_beam_position(method="blur", sigma=1)
+        shifts.plot_on_signal(s)
+
 
 class TestDiffraction2DGetDirectBeamPositionCenterOfMass:
     def test_center_of_mass_0d(self):

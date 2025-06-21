@@ -252,8 +252,8 @@ class TestBeamShiftFitCorners:
         cal = s.pixels_to_calibrated_units()
         cal.beam_energy = 200
         cal = cal.calibrate_electric_shifts(thickness=60)
-        assert cal.data[0, :, 0] == approx(0)
-        assert cal.data[45, :, 1] == approx(-1.7187, abs=1e-3)
+        np.testing.assert_allclose(cal.data[0, :, 0], 0.28645094)
+        np.testing.assert_allclose(cal.data[45, :, 1], -1.432254694)
 
     def test_calibrate_electric_shifts_failure_units(self):
         data = np.zeros((100, 100, 2))

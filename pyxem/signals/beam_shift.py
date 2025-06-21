@@ -22,6 +22,7 @@ import scipy.constants
 from scipy.ndimage import rotate
 from hyperspy._signals.lazy import LazySignal
 from hyperspy.axes import UniformDataAxis
+import hyperspy.api as hs
 
 import pyxem.utils._beam_shift_tools as bst
 from pyxem.utils.plotting import make_color_wheel_marker
@@ -297,16 +298,58 @@ class BeamShift(DiffractionVectors1D):
         ]
         scales = [s.scale for s in signal_axes]
 
+        offsets = np.array([axis.offset for axis in signal_axes])
+        scales = np.array([axis.scale for axis in signal_axes])
+        frame_centers = np.array([axis.size / 2 for axis in signal_axes])
+
+        # shifts are defined with respect to the center of the frame,
+        # so we need to correct for offset and the center
         cal_com = self.map(
-            lambda x, scale: x * scale,
+            lambda x, offset, scale, frame_center: (x - frame_center) * scale - offset,
             output_dtype=float,
             output_signal_size=(2,),
-            scale=np.array(scales),
+            offset=offsets,
+            scale=scales,
+            frame_center=frame_centers,
             inplace=inplace,
             **kwargs
         )
         cal_com.units = [s.units for s in signal_axes]
         return cal_com
+
+    def plot_on_signal(self, signal, **kwargs):
+        """
+        Plot the beam shifts on top of a signal.
+
+        Parameters
+        ----------
+        signal : HyperSpy Signal2D
+            The signal to plot the beam shifts on top of.
+        **kwargs : dict
+            Additional keyword arguments to pass to the marker.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> import pyxem as pxm
+        >>> s = pxm.data.tilt_boundary_data(correct_pivot_point=False)
+        >>> shifts = s.get_beam_shift_signal(method="blur", sigma=5)
+        >>> shifts.plot_on_signal(s)
+
+        """
+        shifts = self.pixels_to_calibrated_units(
+            signal_axes=signal.axes_manager.signal_axes, inplace=False
+            )
+        
+        offsets = np.empty(signal.axes_manager.navigation_shape, dtype=object)
+        for i in np.ndindex(signal.axes_manager.navigation_shape):
+            offsets[i] = -shifts.data[i[::-1]]
+        kwargs.setdefault("color", "red")
+        marker = hs.plot.markers.Points(offsets=offsets, **kwargs)
+        signal.add_marker(marker)
 
     def get_magnitude_signal(
         self, autolim=True, autolim_sigma=4, magnitude_limits=None
