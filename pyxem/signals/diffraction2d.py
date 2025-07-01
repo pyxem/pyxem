@@ -665,6 +665,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         lazy_output=None,
         signal_slice=None,
         half_square_width=None,
+        show_slice_on_plot=False,
         **kwargs,
     ):
         """Estimate the direct beam position in each experimentally acquired
@@ -701,6 +702,9 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             diffracted spots brighter than the direct beam. Crops the diffraction
             pattern to `half_square_width` pixels around the center of the diffraction
             pattern. Only one of `half_square_width` or signal_slice can be defined.
+        show_slice_on_plot : bool
+            Add a marker on the signal to indicate the area considered in the estimation
+            of the direct beam. Default is True.
         **kwargs:
             Additional arguments accepted by :func:`pyxem.utils.diffraction.find_beam_center_blur`,
             :func:`pyxem.utils.diffraction.find_beam_center_interpolate`,
@@ -754,7 +758,25 @@ class Diffraction2D(CommonDiffraction, Signal2D):
                     sig_axes,
                 )
             ]
+
             signal = self.isig[low_x:high_x, low_y:high_y]
+            if show_slice_on_plot:
+                # convert to values, use numpy advanced indexing
+                low_x_, high_x_ = self.axes_manager.signal_axes[0].axis[
+                    (low_x, high_x),
+                ]
+                low_y_, high_y_ = self.axes_manager.signal_axes[1].axis[
+                    (low_y, high_y),
+                ]
+                w, h = high_x_ - low_x_, high_y_ - low_y_
+                marker = hs.plot.markers.Rectangles(
+                    offsets=(low_x_ + w / 2, low_y_ + h / 2),
+                    widths=(w,),
+                    heights=(h,),
+                    color="red",
+                    facecolor="none",
+                )
+                self.add_marker(marker)
         else:
             signal = self
 

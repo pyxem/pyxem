@@ -684,6 +684,25 @@ class TestGetDirectBeamPosition:
         s_shift.compute()
         assert s_shift.data.shape == shift_data_shape
 
+    @pytest.mark.parametrize("signal_slice", [(5, 8, 5, 8), None])
+    def test_show_slice_on_plot(self, signal_slice):
+        s = self.s
+        s.plot()
+        s.get_direct_beam_position(
+            method="blur", sigma=1, signal_slice=signal_slice, show_slice_on_plot=True
+        )
+
+    @pytest.mark.parametrize("half_square_width", [5, None])
+    def test_show_slice_on_plot_half_square_width(self, half_square_width):
+        s = self.s
+        s.plot()
+        s.get_direct_beam_position(
+            method="blur",
+            sigma=1,
+            half_square_width=half_square_width,
+            show_slice_on_plot=True,
+        )
+
 
 class TestDiffraction2DGetDirectBeamPositionCenterOfMass:
     def test_center_of_mass_0d(self):
