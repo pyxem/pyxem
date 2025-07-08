@@ -735,6 +735,12 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         >>> s_bs.compute(show_progressbar=False)
 
         """
+        for axis in self.axes_manager.signal_axes:
+            if not axis.is_uniform:
+                raise RuntimeError(
+                    "The `center_direct_beam` method only works with uniform axes."
+                )
+
         if half_square_width is not None and signal_slice is not None:
             raise ValueError(
                 "Only one of `signal_slice` or `half_sqare_width` " "can be defined"
@@ -957,6 +963,16 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             lazy_output=lazy_output,
             **align_kwargs,
         )
+
+        s = self if inplace else aligned
+        # Set center of the diffraction pattern to (0, 0)
+        offsets = -np.array(
+            [
+                (axis.high_value - axis.low_value) / 2
+                for axis in s.axes_manager.signal_axes
+            ]
+        )
+        s.axes_manager.signal_axes.set(offset=offsets)
 
         if return_shifts and inplace:
             return shifts

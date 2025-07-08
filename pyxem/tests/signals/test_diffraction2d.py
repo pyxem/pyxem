@@ -703,6 +703,12 @@ class TestGetDirectBeamPosition:
             show_slice_on_plot=True,
         )
 
+    def test_signal_axes_non_uniform(self):
+        s = self.s
+        s.axes_manager.signal_axes[0].convert_to_non_uniform_axis()
+        with pytest.raises(RuntimeError):
+            s.get_direct_beam_position(method="blur", sigma=1)
+
 
 class TestDiffraction2DGetDirectBeamPositionCenterOfMass:
     def test_center_of_mass_0d(self):
@@ -1208,13 +1214,19 @@ class TestCenterDirectBeam:
         assert ((8 - x_pos_list) == s_shifts.isig[0].data[0]).all()
         assert ((10 - y_pos_list) == s_shifts.isig[1].data[:, 0]).all()
 
-    def test_return_axes_manager(self):
+    @pytest.mark.parametrize("inplace", [True, False])
+    def test_axes_manager(self, inplace):
         s = self.s
-        s.center_direct_beam(method="blur", sigma=1)
+        s2 = s.center_direct_beam(method="blur", sigma=1, inplace=inplace)
+        if not inplace:
+            s = s2
         assert s.axes_manager[0].scale == 0.5
         assert s.axes_manager[1].scale == 0.6
-        assert s.axes_manager[2].scale == 3
-        assert s.axes_manager[3].scale == 4
+        signal_axes = s.axes_manager.signal_axes
+        assert signal_axes[0].scale == 3
+        assert signal_axes[1].scale == 4
+        assert signal_axes[0].offset == -22.5
+        assert signal_axes[1].offset == -38
 
     def test_shifts_input(self):
         s = self.s
