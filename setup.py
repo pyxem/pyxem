@@ -89,7 +89,7 @@ setup(
     install_requires=[
         "dask",
         "diffsims       >= 0.7.0",  # ensure we use the latest version
-        "hyperspy       >= 2.0",
+        "hyperspy       >= 2.2.0",  # Use axes_manager set/get functionality
         "h5py",
         "lmfit          >= 1.0.0",  # support for recent version of numpy
         "matplotlib     >= 3.7.5",
