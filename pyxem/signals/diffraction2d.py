@@ -666,6 +666,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         signal_slice=None,
         half_square_width=None,
         show_slice_on_plot=False,
+        subpixel=True,
         **kwargs,
     ):
         """Estimate the direct beam position in each experimentally acquired
@@ -705,7 +706,15 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         show_slice_on_plot : bool
             Add a marker on the signal to indicate the area considered in the estimation
             of the direct beam. Default is True.
-        **kwargs:
+        subpixel : bool
+            For ``blur`` and ``interpolate`` method only - other methods process with
+            subpixel precision. If True, the beam position is calculated with subpixel
+            precision by upsampling before measuring the beam position.
+            The upsampling factor can be adjusted by passing the ``upsampling_factor``
+            parameter (default is 4.0).
+            If False, the beam position is calculated without subpixel precision.
+            Default is True.
+        **kwargs : dict
             Additional arguments accepted by :func:`pyxem.utils.diffraction.find_beam_center_blur`,
             :func:`pyxem.utils.diffraction.find_beam_center_interpolate`,
             :func:`pyxem.utils.diffraction.find_beam_offset_cross_correlation`,
@@ -721,9 +730,9 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         --------
         Using center of mass method
 
-        >>> s = pxm.data.dummy_data.get_disk_shift_simple_test_signal()
+        >>> s = pxm.data.tilt_boundary_data(correct_pivot_point=False)
         >>> s_bs = s.get_direct_beam_position(method="center_of_mass")
-        >>> s_bs_color = s_bs.get_color_signal()
+        >>> s_bs_color = s_bs.get_magnitude_phase_signal()
 
         Also threshold
 
@@ -734,6 +743,12 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         >>> s_bs = s.get_direct_beam_position(lazy_output=True, method="center_of_mass")
         >>> s_bs.compute(show_progressbar=False)
 
+        Setting the upsampling factor (default 4.0) for setting the subpixel precision with
+        the blur method
+
+        >>> s_shifts = s.get_direct_beam_position(
+        ...     method="blur", sigma=5, half_square_width=15, upsampling_factor=2.0
+        ... )
         """
         for axis in self.axes_manager.signal_axes:
             if not axis.is_uniform:
@@ -809,13 +824,18 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         method_function = _select_method_from_method_dict(
             method, method_dict, print_help=False, **kwargs
         )
-
+        if subpixel and method in ["blur", "interpolate"]:
+            kwargs.setdefault("upsample_factor", 5.0)
+            if kwargs.get("upsample_factor") <= 1.0:
+                raise ValueError(
+                    "To use subpixel precision, `upsample_factor` must be higher than 1.0."
+                )
         if method == "cross_correlate":
             shifts = signal.map(
                 method_function,
                 inplace=False,
                 output_signal_size=(2,),
-                output_dtype=np.float32,
+                output_dtype=np.float16,
                 lazy_output=lazy_output,
                 **kwargs,
             )
@@ -824,7 +844,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
                 method_function,
                 inplace=False,
                 output_signal_size=(2,),
-                output_dtype=np.int16,
+                output_dtype=np.float16,
                 lazy_output=lazy_output,
                 **kwargs,
             )
@@ -834,7 +854,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
                 method_function,
                 inplace=False,
                 output_signal_size=(2,),
-                output_dtype=np.float32,
+                output_dtype=np.float16,
                 lazy_output=lazy_output,
                 **kwargs,
             )
@@ -950,14 +970,12 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         if shifts is None:
             shifts = self.get_direct_beam_position(
-                method=method, lazy_output=lazy_output, **kwargs
+                method=method, lazy_output=lazy_output, subpixel=subpixel, **kwargs
             )
-        if "order" not in align_kwargs:
-            if subpixel:
-                align_kwargs["order"] = 1
-            else:
-                align_kwargs["order"] = 0
-        aligned = self.shift_diffraction(
+
+        align_kwargs.setdefault("order", 1 if subpixel else 0)
+        aligned = self.map(
+            _align_single_frame,
             shifts=shifts,
             inplace=inplace,
             lazy_output=lazy_output,

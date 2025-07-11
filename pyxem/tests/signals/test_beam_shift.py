@@ -16,14 +16,16 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+import dask.array as da
+from hyperspy.signals import Signal2D
+from hyperspy.axes import UniformDataAxis
 import pytest
 from pytest import approx
 import numpy as np
-import dask.array as da
-from hyperspy.signals import Signal2D
+
+from pyxem.common import VisibleDeprecationWarning
 import pyxem.data.dummy_data.dummy_data as dd
 from pyxem.signals import BeamShift, LazyBeamShift, Diffraction2D
-from hyperspy.axes import UniformDataAxis
 
 
 class TestMakeLinearPlane:
@@ -351,62 +353,42 @@ class TestFullDirectBeamCentering:
         s.axes_manager[3].offset = 30
         self.s = s
 
-    def test_simple(self):
+    @pytest.mark.parametrize("nav_dim", [1, 2])
+    def test_simple(self, nav_dim):
         s = self.s
-        s_beam_shift = s.get_direct_beam_position(method="blur", sigma=1)
+        if nav_dim == 1:
+            s = s.inav[0]
+        s_beam_shift = s.get_direct_beam_position(
+            method="blur", sigma=1, subpixel=False
+        )
         s.center_direct_beam(shifts=s_beam_shift)
-        assert (s.data[:, :, 8, 8] == 10).all()
-        s.data[:, :, 8, 8] = 0
-        assert not s.data.any()
+        np.testing.assert_allclose(s.data[..., 8, 8], 10)
+        s.data[..., 8, 8] = 0
+        np.testing.assert_allclose(s.data, 0)
 
-    def test_simple_1d(self):
-        s = self.s.inav[0]
-        s_beam_shift = s.get_direct_beam_position(method="blur", sigma=1)
-        s.center_direct_beam(shifts=s_beam_shift)
-        assert (s.data[:, 8, 8] == 10).all()
-        s.data[:, 8, 8] = 0
-        assert not s.data.any()
-
-    def test_simple_lazy(self):
-        s = self.s
-        s = s.as_lazy()
-        s_beam_shift = s.get_direct_beam_position(method="blur", sigma=1)
-        s.center_direct_beam(shifts=s_beam_shift)
-        s.compute()
-        assert (s.data[:, :, 8, 8] == 10).all()
-        s.data[:, :, 8, 8] = 0
-        assert not s.data.any()
-
-    def test_mask(self):
+    @pytest.mark.parametrize("lazy", [False, True])
+    def test_mask(self, lazy):
         s = self.s
         s.data[1, 2, 2, 3] = 1000
+        if lazy:
+            s = self.s.as_lazy()
         mask = np.zeros((3, 3), dtype=bool)
         mask[1, 2] = True
         s_mask = Signal2D(mask)
-        s_beam_shift = s.get_direct_beam_position(method="blur", sigma=1)
+        s_beam_shift = s.get_direct_beam_position(
+            method="blur", sigma=1, subpixel=False
+        )
+        if lazy:
+            s_beam_shift.compute()
         s_linear_plane = s_beam_shift.get_linear_plane(mask=s_mask)
         s.center_direct_beam(shifts=s_linear_plane)
-        assert s.data[:, :, 8, 8] == approx(10, abs=1e-5)
+        if lazy:
+            s.compute()
+        np.testing.assert_allclose(s.data[..., 8, 8], 10, atol=1e-5)
         s.data[:, :, 8, 8] = 0
         s.data[1, 2, 3, 2] = 0
-        assert s.data == approx(0.0, abs=1e-4)
 
-    def test_mask_lazy(self):
-        s = self.s
-        s.data[1, 2, 2, 3] = 1000
-        s = self.s.as_lazy()
-        mask = np.zeros((3, 3), dtype=bool)
-        mask[1, 2] = True
-        s_mask = Signal2D(mask)
-        s_beam_shift = s.get_direct_beam_position(method="blur", sigma=1)
-        s_beam_shift.compute()
-        s_linear_plane = s_beam_shift.get_linear_plane(mask=s_mask)
-        s.center_direct_beam(shifts=s_linear_plane)
-        s.compute()
-        assert s.data[:, :, 8, 8] == approx(10, abs=1e-5)
-        s.data[:, :, 8, 8] = 0
-        s.data[1, 2, 3, 2] = 0
-        assert s.data == approx(0.0, abs=1e-4)
+        np.testing.assert_allclose(s.data, 0, atol=1e-4)
 
 
 class TestGetMagnitudeSignal:
@@ -470,7 +452,8 @@ class TestGetPhaseSignal:
 class TestGetColorSignal:
     def test_get_color_signal(self):
         s = BeamShift(np.random.random(size=(10, 10, 2)))
-        s_color = s.get_color_signal()
+        with pytest.warns(VisibleDeprecationWarning):
+            s_color = s.get_color_signal()
         s_color.axes_manager.shape == (10, 10)
 
 

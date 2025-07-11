@@ -296,7 +296,7 @@ class BeamShift(DiffractionVectors1D):
             s.convert_to_uniform_axis() if not isinstance(s, UniformDataAxis) else s
             for s in signal_axes
         ]
-        scales = [s.scale for s in signal_axes]
+        scales = [axis.scale for axis in signal_axes]
 
         offsets = np.array([axis.offset for axis in signal_axes])
         scales = np.array([axis.scale for axis in signal_axes])
@@ -312,6 +312,7 @@ class BeamShift(DiffractionVectors1D):
             scale=scales,
             frame_center=frame_centers,
             inplace=inplace,
+            show_progressbar=False,
             **kwargs
         )
         cal_com.units = [s.units for s in signal_axes]
@@ -342,8 +343,8 @@ class BeamShift(DiffractionVectors1D):
         """
         shifts = self.pixels_to_calibrated_units(
             signal_axes=signal.axes_manager.signal_axes, inplace=False
-            )
-        
+        )
+
         offsets = np.empty(signal.axes_manager.navigation_shape, dtype=object)
         for i in np.ndindex(signal.axes_manager.navigation_shape):
             offsets[i] = -shifts.data[i[::-1]]
