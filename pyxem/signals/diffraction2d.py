@@ -18,7 +18,7 @@
 from copy import deepcopy
 
 import numpy as np
-from scipy.ndimage import rotate
+import scipy.ndimage as ndi
 from skimage import morphology
 import dask.array as da
 from dask.diagnostics import ProgressBar
@@ -313,7 +313,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         """
         s_rotated = self.map(
-            rotate,
+            ndi.rotate,
             ragged=False,
             angle=-angle,
             reshape=False,
@@ -667,6 +667,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         half_square_width=None,
         show_slice_on_plot=False,
         subpixel=True,
+        prefilter_sigma=None,
         **kwargs,
     ):
         """Estimate the direct beam position in each experimentally acquired
@@ -714,6 +715,11 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             parameter (default is 4.0).
             If False, the beam position is calculated without subpixel precision.
             Default is True.
+        prefilter_sigma : float, optional
+            Standard deviation for the Gaussian kernel used for prefiltering the data
+            with the before finding the direct beam. If None, no prefiltering is done.
+            If int or float, filtering is applied to the navigation axes only. Use
+            iterable to filter in both navigation and signal axes.
         **kwargs : dict
             Additional arguments accepted by :func:`pyxem.utils.diffraction.find_beam_center_blur`,
             :func:`pyxem.utils.diffraction.find_beam_center_interpolate`,
@@ -749,6 +755,13 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         >>> s_shifts = s.get_direct_beam_position(
         ...     method="blur", sigma=5, half_square_width=15, upsampling_factor=2.0
         ... )
+
+        Using a pre-filtering step before finding the direct beam
+
+        >>> s_shifts = s.get_direct_beam_position(
+        ...     method="blur", sigma=5, half_square_width=15, prefilter_sigma=2.0
+        ... )
+
         """
         for axis in self.axes_manager.signal_axes:
             if not axis.is_uniform:
@@ -769,7 +782,9 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             max_y = int(signal_center[1] + half_square_width)
             signal_slice = (min_x, max_x, min_y, max_y)
 
-        if signal_slice is not None:  # Crop the data
+        if signal_slice is None:
+            signal = self
+        else:  # Crop the data
             sig_axes = self.axes_manager.signal_axes
             sig_axes = np.repeat(sig_axes, 2)
             low_x, high_x, low_y, high_y = [
@@ -798,8 +813,25 @@ class Diffraction2D(CommonDiffraction, Signal2D):
                     facecolor="none",
                 )
                 self.add_marker(marker)
-        else:
-            signal = self
+
+        if prefilter_sigma is not None:
+            if not isiterable(prefilter_sigma):
+                # Prefilter in navigation space only
+                prefilter_sigma = (
+                    prefilter_sigma,
+                ) * signal.axes_manager.navigation_dimension + (
+                    0,
+                ) * signal.axes_manager.signal_dimension
+            if self._lazy:
+                from dask_image.ndfilters import gaussian_filter
+
+                gaussian_function = gaussian_filter
+            else:
+                gaussian_function = ndi.gaussian_filter
+
+            signal.filter(
+                gaussian_function, sigma=prefilter_sigma, inplace=True, mode="nearest"
+            )
 
         if "lazy_result" in kwargs:
             warnings.warn(

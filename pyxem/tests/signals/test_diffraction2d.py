@@ -632,6 +632,21 @@ class TestGetDirectBeamPosition:
         )
         assert s.axes_manager.navigation_shape == s_shift.axes_manager.navigation_shape
 
+    @pytest.mark.parametrize("lazy", [True, False])
+    def test_prefilter(self, lazy):
+        if lazy:
+            pytest.importorskip("dask_image")
+        s = self.s
+        if lazy:
+            s = s.as_lazy()
+        dx, dy = self.dx, self.dy
+        x_pos_list, y_pos_list = self.x_pos_list, self.y_pos_list
+        s_shift = s.get_direct_beam_position(
+            method="blur", sigma=1, subpixel=False, prefilter_sigma=1.0
+        )
+        if lazy:
+            s_shift.compute()
+
     def test_fail_get_direct_beam(self):
         with pytest.raises(ValueError):
             s = self.s
