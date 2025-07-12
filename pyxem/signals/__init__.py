@@ -18,39 +18,7 @@
 
 """Signal classes for diffraction data.
 """
-
-
-from .common_diffraction import CommonDiffraction
-from .correlation2d import Correlation2D, LazyCorrelation2D
-from .diffraction_variance1d import DiffractionVariance1D
-from .diffraction_variance2d import DiffractionVariance2D, ImageVariance
-from .diffraction_vectors import DiffractionVectors
-from .diffraction_vectors2d import DiffractionVectors2D
-from .diffraction_vectors1d import DiffractionVectors1D
-from .beam_shift import BeamShift, LazyBeamShift
-from .differential_phase_contrast import (
-    DPCSignal1D,
-    DPCSignal2D,
-    LazyDPCSignal1D,
-    LazyDPCSignal2D,
-)
-from .diffraction1d import Diffraction1D, LazyDiffraction1D
-from .diffraction2d import Diffraction2D, LazyDiffraction2D
-from .polar_vectors import PolarVectors, LazyPolarVectors
-from .electron_diffraction1d import ElectronDiffraction1D, LazyElectronDiffraction1D
-from .electron_diffraction2d import ElectronDiffraction2D, LazyElectronDiffraction2D
-from .indexation_results import VectorMatchingResults, OrientationMap
-from .pair_distribution_function1d import PairDistributionFunction1D
-from .polar_diffraction2d import PolarDiffraction2D, LazyPolarDiffraction2D
-from .power2d import Power2D, LazyPower2D
-from .reduced_intensity1d import ReducedIntensity1D
-from .segments import LearningSegment, VDFSegment
-from .strain_map import StrainMap
-from .correlation1d import Correlation1D, LazyCorrelation1D
-from .tensor_field import DisplacementGradientMap
-from .virtual_dark_field_image import VirtualDarkFieldImage
-from .insitu_diffraction2d import InSituDiffraction2D
-from .labeled_diffraction_vectors2d import LabeledDiffractionVectors2D
+import importlib
 
 
 __all__ = [
@@ -59,10 +27,8 @@ __all__ = [
     "LazyCorrelation2D",
     "BeamShift",
     "LazyBeamShift",
-    "DPCBaseSignal",
     "DPCSignal1D",
     "DPCSignal2D",
-    "LazyDPCBaseSignal",
     "LazyDPCSignal1D",
     "LazyDPCSignal2D",
     "DiffractionVariance1D",
@@ -99,3 +65,60 @@ __all__ = [
     "LabeledDiffractionVectors2D",
     "OrientationMap",
 ]
+
+
+def __dir__():
+    return sorted(__all__)
+
+
+_import_mapping = {
+    "CommonDiffraction": ".common_diffraction",
+    "Correlation2D": ".correlation2d",
+    "LazyCorrelation2D": ".correlation2d",
+    "DiffractionVariance1D": ".diffraction_variance1d",
+    "DiffractionVariance2D": ".diffraction_variance2d",
+    "ImageVariance": ".diffraction_variance2d",
+    "DiffractionVectors": ".diffraction_vectors",
+    "DiffractionVectors2D": ".diffraction_vectors2d",
+    "DiffractionVectors1D": ".diffraction_vectors1d",
+    "BeamShift": ".beam_shift",
+    "LazyBeamShift": ".beam_shift",
+    "DPCSignal1D": ".differential_phase_contrast",
+    "DPCSignal2D": ".differential_phase_contrast",
+    "LazyDPCSignal1D": ".differential_phase_contrast",
+    "LazyDPCSignal2D": ".differential_phase_contrast",
+    "Diffraction1D": ".diffraction1d",
+    "LazyDiffraction1D": ".diffraction1d",
+    "Diffraction2D": ".diffraction2d",
+    "LazyDiffraction2D": ".diffraction2d",
+    "PolarVectors": ".polar_vectors",
+    "LazyPolarVectors": ".polar_vectors",
+    "ElectronDiffraction1D": ".electron_diffraction1d",
+    "LazyElectronDiffraction1D": ".electron_diffraction1d",
+    "ElectronDiffraction2D": ".electron_diffraction2d",
+    "LazyElectronDiffraction2D": ".electron_diffraction2d",
+    "VectorMatchingResults": ".indexation_results",
+    "OrientationMap": ".indexation_results",
+    "PairDistributionFunction1D": ".pair_distribution_function1d",
+    "PolarDiffraction2D": ".polar_diffraction2d",
+    "LazyPolarDiffraction2D": ".polar_diffraction2d",
+    "Power2D": ".power2d",
+    "LazyPower2D": ".power2d",
+    "ReducedIntensity1D": ".reduced_intensity1d",
+    "LearningSegment": ".segments",
+    "VDFSegment": ".segments",
+    "StrainMap": ".strain_map",
+    "Correlation1D": ".correlation1d",
+    "LazyCorrelation1D": ".correlation1d",
+    "DisplacementGradientMap": ".tensor_field",
+    "VirtualDarkFieldImage": ".virtual_dark_field_image",
+    "InSituDiffraction2D": ".insitu_diffraction2d",
+    "LabeledDiffractionVectors2D": ".labeled_diffraction_vectors2d",
+}
+
+
+def __getattr__(name):
+    if name in __all__:
+        import_path = "pyxem.signals" + _import_mapping.get(name)
+        return getattr(importlib.import_module(import_path), name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

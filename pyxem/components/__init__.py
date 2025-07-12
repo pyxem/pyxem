@@ -18,9 +18,7 @@
 
 """Classes for analyzing components in a material"""
 
-from .reduced_intensity_correction_component import ReducedIntensityCorrectionComponent
-from .scattering_fit_component_lobato import ScatteringFitComponentLobato
-from .scattering_fit_component_xtables import ScatteringFitComponentXTables
+import importlib
 
 
 __all__ = [
@@ -28,3 +26,21 @@ __all__ = [
     "ScatteringFitComponentLobato",
     "ScatteringFitComponentXTables",
 ]
+
+
+def __dir__():
+    return sorted(__all__)
+
+
+_import_mapping = {
+    "ReducedIntensityCorrectionComponent": ".reduced_intensity_correction_component",
+    "ScatteringFitComponentLobato": ".scattering_fit_component_lobato",
+    "ScatteringFitComponentXTables": ".scattering_fit_component_xtables",
+}
+
+
+def __getattr__(name):
+    if name in __all__:
+        import_path = "pyxem.components" + _import_mapping.get(name)
+        return getattr(importlib.import_module(import_path), name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

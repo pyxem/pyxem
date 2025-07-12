@@ -21,8 +21,6 @@ from scipy.optimize import curve_fit
 
 from hyperspy._signals.lazy import LazySignal
 import hyperspy.api as hs
-from diffsims.utils.sim_utils import get_electron_wavelength
-from diffsims.simulations.simulation1d import Simulation1D
 
 from pyxem.signals.diffraction1d import Diffraction1D
 
@@ -124,6 +122,8 @@ class ElectronDiffraction1D(Diffraction1D):
         -----
         This functionality is still under development and may change slightly in the future.
         """
+        # lazily import get_electron_wavelength
+        from diffsims.utils.sim_utils import get_electron_wavelength
 
         def f(x, m):
             return x * m

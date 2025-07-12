@@ -33,17 +33,7 @@
     calibration
 
 """
-
-
-from pyxem.utils.ransac_ellipse_tools import determine_ellipse
-from pyxem.utils.calibration import find_diffraction_calibration
-from pyxem.utils.plotting import plot_template_over_pattern
-
-from pyxem.utils import vectors
-from pyxem.utils import plotting
-from pyxem.utils import ransac_ellipse_tools
-from pyxem.utils import calibration
-from pyxem.utils import diffraction
+import importlib
 
 __all__ = [
     "find_diffraction_calibration",
@@ -55,3 +45,24 @@ __all__ = [
     "plotting",
     "diffraction",
 ]
+
+
+def __dir__():
+    return sorted(__all__)
+
+
+_import_mapping = {
+    "determine_ellipse": ".ransac_ellipse_tools",
+    "find_diffraction_calibration": ".calibration",
+    "plot_template_over_pattern": ".plotting",
+}
+
+
+def __getattr__(name):
+    if name in __all__:
+        if name in _import_mapping.keys():
+            import_path = "pyxem.utils" + _import_mapping.get(name)
+            return getattr(importlib.import_module(import_path), name)
+        else:
+            return importlib.import_module("." + name, "pyxem.utils")
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

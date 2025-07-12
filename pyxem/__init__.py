@@ -16,19 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-
+import importlib
 import logging
-
-try:
-    import cupy as cp
-
-    CUPY_INSTALLED = True
-except ImportError:
-    CUPY_INSTALLED = False
-from pyxem import components
-from pyxem import signals
-from pyxem import generators
-from pyxem import data
 
 from . import release_info
 
@@ -44,6 +33,11 @@ __all__ = [
     "CUPY_INSTALLED",
 ]
 
+
+def __dir__():
+    return sorted(__all__)
+
+
 __version__ = release_info.version
 __author__ = release_info.author
 __copyright__ = release_info.copyright
@@ -52,3 +46,20 @@ __license__ = release_info.license
 __maintainer__ = release_info.maintainer
 __email__ = release_info.email
 __status__ = release_info.status
+
+
+def __getattr__(name):
+    if name in __all__:  # pragma: no cover
+        if name == "CUPY_INSTALLED":
+            try:
+                import cupy as cp
+
+                CUPY_INSTALLED = True
+            except ImportError:
+                CUPY_INSTALLED = False
+            return CUPY_INSTALLED
+        # We can't get this block covered in the test suite because it is
+        # already imported, when running the test suite.
+        return importlib.import_module("." + name, "pyxem")
+
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
