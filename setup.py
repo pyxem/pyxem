@@ -71,11 +71,11 @@ setup(
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
         "Development Status :: 4 - Beta",
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
@@ -89,12 +89,12 @@ setup(
     install_requires=[
         "dask",
         "diffsims       >= 0.7.0",  # ensure we use the latest version
-        "hyperspy       >= 2.0",
+        "hyperspy       >= 2.2.0",  # Use axes_manager set/get functionality
         "h5py",
-        "lmfit          >= 0.9.12",
+        "lmfit          >= 1.0.0",  # support for recent version of numpy
         "matplotlib     >= 3.7.5",
         "numba",
-        "numpy",
+        "numpy          >= 1.23.0",  # Needed for numpy.typing
         "orix           >= 0.12.1",
         "pooch",
         "psutil",
@@ -107,7 +107,7 @@ setup(
         "transforms3d",
         "zarr            < 3.0.0",  # for fast saving/loading (>=3.0.0 is not compatible)
     ],
-    python_requires=">=3.7",
+    python_requires=">=3.9",
     package_data={
         "": ["LICENSE", "README.rst"],
         "pyxem": ["*.py", "hyperspy_extension.yaml"],

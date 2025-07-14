@@ -7,6 +7,17 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_,
 and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
+Unreleased
+==========
+Changed
+-------
+- Drop support for python 3.8. (#1147)
+
+Fixed
+-----
+- Add explicit support for python 3.12 and 3.13 and update test matrix. (#1147)
+
+
 2025-06-04 - version 0.21.0
 ===========================
 Added
