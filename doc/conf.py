@@ -216,6 +216,7 @@ sphinx_gallery_conf = {
         if "SPHINX_GALLERY_PARALLEL" in os.environ
         else (1 if os.environ.get("READTHEDOCS") == "True" else False)
     ),
+    "capture_repr": ("_repr_html_",),  # Capture HTML representations
 }
 graphviz_output_format = "svg"
 
