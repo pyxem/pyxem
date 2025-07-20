@@ -21,6 +21,7 @@ build:
     python: "3.11"
   apt_packages:
     - optipng
+    - graphviz
 
   jobs:
     pre_install:
