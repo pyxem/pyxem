@@ -1035,7 +1035,8 @@ class DiffractionTestImage:
                 if not (px == 0 and py == 0):
                     x = int(round(vx * px + cx))
                     y = int(round(vy * py + cy))
-                    self.add_disk(x, y, intensity=intensity)
+                    if x < self.image_x and y < self.image_y:
+                        self.add_disk(x, y, intensity=intensity)
 
     def _get_background_lorentz(self):
         width = self._background_lorentz_width
