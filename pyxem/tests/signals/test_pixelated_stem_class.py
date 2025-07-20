@@ -25,6 +25,7 @@ from skimage import morphology
 from hyperspy.signals import Signal2D, BaseSignal
 
 import pyxem.signals
+from pyxem.common import VisibleDeprecationWarning
 from pyxem.signals import Diffraction2D, LazyDiffraction2D
 import pyxem.utils.ransac_ellipse_tools as ret
 from pyxem.data.dummy_data import make_diffraction_test_data as mdtd
@@ -402,17 +403,25 @@ class TestDiffraction2DRotateDiffraction:
 
 
 class TestDiffraction2DShiftDiffraction:
-    @pytest.mark.parametrize("shift_x,shift_y", [(2, 5), (-6, -1), (2, -4)])
+    @pytest.mark.parametrize("shift_x, shift_y", [(2, 5), (-6, -1), (2, -4)])
     def test_single_shift(self, shift_x, shift_y):
         s = Diffraction2D(np.zeros((10, 10, 30, 40)))
         x, y = 20, 10
         s.data[:, :, y, x] = 1
-        s_shift = s.shift_diffraction(shift_x=shift_x, shift_y=shift_y)
+        with pytest.warns(VisibleDeprecationWarning):
+            s_shift = s.shift_diffraction(shift_x=shift_x, shift_y=shift_y)
         assert s_shift.data[0, 0, y - shift_y, x - shift_x] == 1
         s_shift.data[:, :, y - shift_y, x - shift_x] = 0
         assert s_shift.data.sum() == 0
 
-    @pytest.mark.parametrize("centre_x,centre_y", [(25, 25), (30, 20)])
+        # check that the result is the same when using `shifts`
+        shifts = [-shift_x, -shift_y]
+        s_shift2 = s.shift_diffraction(shifts=shifts)
+        assert s_shift2.data[0, 0, y - shift_y, x - shift_x] == 1
+        s_shift2.data[:, :, y - shift_y, x - shift_x] = 0
+        assert s_shift2.data.sum() == 0
+
+    @pytest.mark.parametrize("centre_x, centre_y", [(25, 25), (30, 20)])
     def test_random_shifts(self, centre_x, centre_y):
         y, x = np.mgrid[20:30:7j, 20:30:5j]
         s = mdtd.generate_4d_data(
@@ -425,17 +434,24 @@ class TestDiffraction2DShiftDiffraction:
             ring_x=None,
         )
         s_bs = s.get_direct_beam_position(method="center_of_mass")
-        s_shift = s.shift_diffraction(
-            shift_x=-s_bs.isig[0].data, shift_y=-s_bs.isig[1].data
-        )
+        with pytest.warns(VisibleDeprecationWarning):
+            s_shift = s.shift_diffraction(
+                shift_x=-s_bs.isig[0].data, shift_y=-s_bs.isig[1].data
+            )
         s_shift_c = s_shift.get_direct_beam_position(method="center_of_mass")
         assert s_shift_c.data == pytest.approx(0.0)
+
+        # check that the result is the same when using `shifts`
+        s_shift2 = s.shift_diffraction(shifts=s_bs)
+        s_shift_c2 = s_shift2.get_direct_beam_position(method="center_of_mass")
+        assert s_shift_c2.data == pytest.approx(0.0)
 
     def test_inplace(self):
         s = Diffraction2D(np.zeros((10, 10, 30, 40)))
         x, y, shift_x, shift_y = 20, 10, 4, -3
         s.data[:, :, y, x] = 1
-        s.shift_diffraction(shift_x=shift_x, shift_y=shift_y, inplace=True)
+        with pytest.warns(VisibleDeprecationWarning):
+            s.shift_diffraction(shift_x=shift_x, shift_y=shift_y, inplace=True)
         assert s.data[0, 0, y - shift_y, x - shift_x] == 1
         s.data[:, :, y - shift_y, x - shift_x] = 0
         assert s.data.sum() == 0
@@ -447,11 +463,20 @@ class TestDiffraction2DShiftDiffraction:
         data = da.from_array(data, chunks=(5, 5, 5, 5))
         s = LazyDiffraction2D(data)
         shift_x, shift_y = 4, 3
-        s_shift = s.shift_diffraction(shift_x=shift_x, shift_y=shift_y)
+        with pytest.warns(VisibleDeprecationWarning):
+            s_shift = s.shift_diffraction(shift_x=shift_x, shift_y=shift_y)
         s_shift.compute()
         assert s_shift.data[0, 0, y - shift_y, x - shift_x] == 1
         s_shift.data[:, :, y - shift_y, x - shift_x] = 0
         assert s_shift.data.sum() == 0
+
+    def test_arguments_error(self):
+        s = Diffraction2D(np.zeros((2, 2, 5, 10)))
+        with pytest.raises(ValueError):
+            with pytest.warns(VisibleDeprecationWarning):
+                s.shift_diffraction(shift_x=1, shift_y=2, shifts=[1, 2])
+        with pytest.raises(ValueError):
+            s.shift_diffraction()
 
 
 class TestComputeAndAsLazy:

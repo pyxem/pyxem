@@ -74,6 +74,12 @@ doc/reference/generated*
 doc/examples/*
 doc/sg_execution_times.rst
 
+examples/plotting/*.zspy*
+examples/loading_data/*.zip
+examples/loading_data/ZrNbMrc/*
+__MACOSX
+
+
 # PyBuilder
 target/
 

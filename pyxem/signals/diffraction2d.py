@@ -181,26 +181,42 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             **kwargs,
         )
 
+    @deprecated_argument(name="shift_x", since="0.21.1", removal="1.0.0")
+    @deprecated_argument(name="shift_y", since="0.21.1", removal="1.0.0")
+    @deprecated_argument(
+        name="interpolation_order", since="0.21.1", removal="1.0.0", alternative="order"
+    )
     def shift_diffraction(
         self,
-        shift_x,
-        shift_y,
-        interpolation_order=1,
+        shift_x=None,
+        shift_y=None,
+        shifts=None,
+        interpolation_order=None,
+        order=1,
         inplace=False,
+        lazy_output=None,
         show_progressbar=True,
+        **kwargs,
     ):
-        """Shift the diffraction patterns in a pixelated STEM signal.
-
-        The points outside the boundaries are set to zero.
+        """
+        Shift the diffraction patterns.
 
         Parameters
         ----------
         shift_x, shift_y : int or NumPy array
-            If given as int, all the diffraction patterns will have the same
+            Deprecated. If given as int, all the diffraction patterns will have the same
             shifts. Each diffraction pattern can also have different shifts,
             by passing a NumPy array with the same dimensions as the navigation
             axes.
+        shifts : list of number of length 2 or BaseSignal
+            If list of number, shift the diffraction patterns by the same value
+            for all navigation positions.
+            If BaseSignal, shift the diffraction patterns with different values for
+            each navigation position. Both shifts and the signal need to have the same
+            navigation shape, and shifts needs to have one signal dimension with size 2.
         interpolation_order : int
+            Deprecated. Same as `order`, but kept for backwards compatibility.
+        order : int
             When shifting, a spline interpolation is used. This parameter
             sets the order of this spline. Must be between 0 and 5.
             Note that in some low-signal and high noise datasets, using a
@@ -213,45 +229,65 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             is returned.
         show_progressbar : bool
             Default True.
+        **kwargs : dict
+            Additional keyword arguments to be passed to :func:`scipy.ndimage.shift`.
 
         Returns
         -------
         shifted_signal : Diffraction2D signal
 
+        See Also
+        --------
+        get_direct_beam_position, center_direct_beam
+
         Examples
         --------
         >>> s = pxm.data.dummy_data.get_disk_shift_simple_test_signal()
         >>> s_c = s.get_direct_beam_position(method="center_of_mass", threshold=3.)
-        >>> s_c = -s_c # To shift in right direction
-        >>> s_shift = s.shift_diffraction(
-        ...     s_c.inav[0].data, s_c.inav[1].data,
-        ...     show_progressbar=False)
+        >>> s_shift = s.shift_diffraction(shifts=s_c, show_progressbar=False)
         >>> s_shift.plot()
 
         Using a different interpolation order
 
         >>> s_shift = s.shift_diffraction(
-        ...     s_c.inav[0].data, s_c.inav[1].data, interpolation_order=3,
+        ...     shifts=s_c, order=3,
         ...     show_progressbar=False)
 
         """
 
-        if (not isiterable(shift_x)) or (not isiterable(shift_y)):
-            shift_x, shift_y = pst._make_centre_array_from_signal(
-                self, x=shift_x, y=shift_y
+        if (shift_x is not None or shift_y is not None) and shifts is not None:
+            raise ValueError(
+                "Both (`shift_x`, `shift_y`) and `shifts` can not be used together. "
+                "Use `shifts` since `shift_x`, `shift_y` are deprecated."
             )
-        s_shift_x = BaseSignal(shift_x).T
-        s_shift_y = BaseSignal(shift_y).T
+
+        if shift_x is not None and shift_y is not None:
+            shifts = [-shift_x, -shift_y]
+            if isiterable(shift_x) or isiterable(shift_y):
+                # shifts depend on navigation position
+                shifts = BaseSignal(np.stack(shifts)).transpose(signal_axes=(-1,))
+
+        elif shifts is None:
+            raise ValueError(
+                "Either `shifts` or both `shift_x` and `shift_y` must be provided. "
+                "Use `shifts` since `shift_x`, `shift_y` are deprecated."
+            )
+
+        if interpolation_order is not None:
+            order = interpolation_order
+        kwargs["order"] = order
 
         s_shift = self.map(
-            pst._shift_single_frame,
+            _align_single_frame,
+            shifts=shifts,
             inplace=inplace,
-            ragged=False,
+            lazy_output=lazy_output,
+            output_dtype=self.data.dtype,
+            output_signal_size=self.axes_manager.signal_shape[::-1],
             show_progressbar=show_progressbar,
-            interpolation_order=interpolation_order,
-            shift_x=s_shift_x,
-            shift_y=s_shift_y,
+            **kwargs,
         )
+
         if not inplace:
             return s_shift
 
@@ -848,11 +884,13 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             Parameters passed to the alignment function. See scipy.ndimage.shift
             for more information about the parameters.
         *args, **kwargs :
-            Additional arguments accepted by :func:`pyxem.utils.diffraction.find_beam_center_blur`,
-            :func:`pyxem.utils.diffraction.find_beam_center_interpolate`,
-            :func:`pyxem.utils.diffraction.find_beam_offset_cross_correlation`,
-            :func:`pyxem.signals.diffraction2d.Diffraction2D.get_direct_beam_position`,
-            and :func:`pyxem.signals.diffraction.center_of_mass_from_image`,
+            Additional arguments accepted by
+
+            - :func:`pyxem.utils.diffraction.find_beam_center_blur`
+            - :func:`pyxem.utils.diffraction.find_beam_center_interpolate`
+            - :func:`pyxem.utils.diffraction.find_beam_offset_cross_correlation`
+            - :func:`pyxem.utils.diffraction.center_of_mass_from_image`
+            - :meth:`pyxem.signals.Diffraction2D.get_direct_beam_position`
 
         Example
         -------
@@ -891,13 +929,10 @@ class Diffraction2D(CommonDiffraction, Signal2D):
                 align_kwargs["order"] = 1
             else:
                 align_kwargs["order"] = 0
-        aligned = self.map(
-            _align_single_frame,
+        aligned = self.shift_diffraction(
             shifts=shifts,
             inplace=inplace,
             lazy_output=lazy_output,
-            output_dtype=self.data.dtype,
-            output_signal_size=self.axes_manager.signal_shape[::-1],
             **align_kwargs,
         )
 

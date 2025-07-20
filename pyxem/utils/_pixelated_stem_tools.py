@@ -35,11 +35,6 @@ def _threshold_and_mask_single_frame(im, threshold=None, mask=None):
     return image
 
 
-def _shift_single_frame(im, shift_x, shift_y, interpolation_order=1):
-    im_shifted = ndi.shift(im, (-shift_y, -shift_x), order=interpolation_order)
-    return im_shifted
-
-
 def _make_circular_mask(centerX, centerY, imageSizeX, imageSizeY, radius):
     """Make a circular mask in a bool array for masking a region in an image.
 
@@ -87,24 +82,6 @@ def _find_longest_distance(
         int((centreX_max**2 + centreY_max**2) ** 0.5),
     )
     return max_value
-
-
-def _make_centre_array_from_signal(signal, x=None, y=None):
-    a_m = signal.axes_manager
-    shape = a_m.navigation_shape[::-1]
-    if x is None:
-        centre_x_array = np.ones(shape) * a_m.signal_axes[0].value2index(0)
-    else:
-        centre_x_array = np.ones(shape) * x
-    if y is None:
-        centre_y_array = np.ones(shape) * a_m.signal_axes[1].value2index(0)
-    else:
-        centre_y_array = np.ones(shape) * y
-    if not isiterable(centre_x_array):
-        centre_x_array = np.array([centre_x_array])
-    if not isiterable(centre_y_array):
-        centre_y_array = np.array([centre_y_array])
-    return (centre_x_array, centre_y_array)
 
 
 def _get_radial_profile_of_diff_image(

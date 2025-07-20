@@ -12,10 +12,16 @@ Unreleased
 Changed
 -------
 - Drop support for python 3.8. (#1147)
+- Refactor :meth:`~pyxem.signals.Diffraction2D.center_direct_beam` and :meth:`~pyxem.signals.Diffraction2D.shift_diffraction` to use consistent signature and avoid code duplication and  (#1144)
 
 Fixed
 -----
 - Add explicit support for python 3.12 and 3.13 and update test matrix. (#1147)
+
+Deprecated
+----------
+- The ``shift_x`` and ``shift_y`` arguments in :meth:`~pyxem.signals.Diffraction2D.shift_diffraction` are deprecated in favor of the ``shifts`` argument. (#1144)
+- The ``interpolation_order`` argument in :meth:`~pyxem.signals.Diffraction2D.shift_diffraction` have been renamed to ``order`` to be consistent with the signature of :meth:`~pyxem.signals.Diffraction2D.center_direct_beam` and :func:`scipy.ndimage.shift`. (#1144)
 
 
 2025-06-04 - version 0.21.0
@@ -37,7 +43,7 @@ Fixed
 - Changed `dqe` to `gain` in Azimuthal integration (#1138)
 
 2024-12-09 - version 0.20.0
-==========
+===========================
 Fixed
 -----
 - Fixed inconsistency with vector markers' positions when plotting orientation mapping results (#1126)
