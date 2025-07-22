@@ -34,7 +34,7 @@ s1d.sum().plot()
 from pyxem.utils._azimuthal_integrations import _get_control_points
 
 cp = _get_control_points(
-    10, npt_azim=72, radial_range=(0.2, 4), azimuthal_range=(-np.pi, np.pi), affine=None
+    5, npt_azim=36, radial_range=(0.2, 4), azimuthal_range=(-np.pi, np.pi), affine=None
 )[:, :, ::-1]
 poly = hs.plot.markers.Polygons(verts=cp, edgecolor="w", facecolor="none")
 s.plot()
@@ -44,7 +44,7 @@ s.add_marker(poly)
 # %%
 # Similarly, the `get_azimuthal_integral2d` method will return a `Polar2D` signal.
 
-s_polar = s.get_azimuthal_integral2d(npt=100, npt_azim=360, inplace=False)
+s_polar = s.get_azimuthal_integral2d(npt=100, npt_azim=180, inplace=False)
 s_polar.sum().plot()
 
 # %%
@@ -99,19 +99,19 @@ affine = np.array(
     [[0.9, 0.1, 0], [0.1, 0.9, 0], [0, 0, 1]]
 )  # Just a random affine transformation for illustration
 s.calibration(mask=mask, affine=affine)
-s.get_azimuthal_integral2d(npt=100, npt_azim=360, inplace=False).sum().plot()
+s.get_azimuthal_integral2d(npt=100, npt_azim=180, inplace=False).sum().plot()
 
 # %%
 # The `azimuth_range`-argument lets you choose what angular range to calculate the azimuthal integral for.
 # The range can be increasing, decreasing, and does not need to be a multiple of pi.
 
-pol1 = s.get_azimuthal_integral2d(npt=100, azimuth_range=(-np.pi, np.pi))
+pol1 = s.get_azimuthal_integral2d(npt=100, npt_azim=180, azimuth_range=(-np.pi, np.pi))
 
-pol2 = s.get_azimuthal_integral2d(npt=100, azimuth_range=(0, 1))
+pol2 = s.get_azimuthal_integral2d(npt=100, npt_azim=180, azimuth_range=(0, 1))
 
-pol3 = s.get_azimuthal_integral2d(npt=100, npt_azim=720, azimuth_range=(0, 4 * np.pi))
+pol3 = s.get_azimuthal_integral2d(npt=100, npt_azim=180, azimuth_range=(0, 4 * np.pi))
 
-pol4 = s.get_azimuthal_integral2d(npt=100, azimuth_range=(np.pi, 0))
+pol4 = s.get_azimuthal_integral2d(npt=100, npt_azim=90, azimuth_range=(np.pi, 0))
 
 hs.plot.plot_images(
     [pol1.sum(), pol2.sum(), pol3.sum(), pol4.sum()],

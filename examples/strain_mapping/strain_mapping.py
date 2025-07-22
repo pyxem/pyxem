@@ -18,9 +18,12 @@ import hyperspy.api as hs
 
 strained_signal = simulated_strain(
     navigation_shape=(32, 32),
-    signal_shape=(512, 512),
+    signal_shape=(
+        256,
+        256,
+    ),  # This should be larger for better results (for now we use 256x256 for demonstration)
     disk_radius=20,
-    num_electrons=1e5,
+    num_electrons=1e5,  # increasing the number of electrons will also improve the results
     strain_matrix=None,
     lazy=True,
 )
