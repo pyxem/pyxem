@@ -21,6 +21,7 @@ Changed
 -------
 - Drop support for python 3.8. (#1147)
 - Refactor :meth:`~pyxem.signals.Diffraction2D.center_direct_beam` and :meth:`~pyxem.signals.Diffraction2D.shift_diffraction` to use consistent signature and avoid code duplication and  (#1144)
+- Speed up documentation build by caching the gallery of examples and enable parallel build. (#1152)
 - Set axes offset after centering in :meth:`pyxem.signals.Diffraction2D.center_direct_beam`. (#1148)
 
 Fixed
