@@ -171,9 +171,12 @@ sphinx_gallery_conf = {
     "filename_pattern": "^((?!sgskip).)*$",  # pattern to define which will be executed
     "ignore_pattern": "_sgskip.py",  # pattern to define which will not be executed
     "reference_url": {"pyxem": None},
-    "show_memory": True,
+    "show_memory": False,  # not compatible with parallel building
+    # number of parallel processes to use for running examples
+    # use 2 for github CI, 2 workers will still be available for multiprocessing
+    # used in the examples
+    "parallel": 2,
 }
-
 autodoc_default_options = {
     "show-inheritance": True,
 }
