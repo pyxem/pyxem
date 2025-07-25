@@ -173,9 +173,12 @@ sphinx_gallery_conf = {
     "reference_url": {"pyxem": None},
     "show_memory": False,  # not compatible with parallel building
     # number of parallel processes to use for running examples
-    # use 2 for github CI, 2 workers will still be available for multiprocessing
-    # used in the examples
-    "parallel": 2,
+    # use 2 as default; for example on GitHub CI they will still be 2 workers available
+    # to run examples using multiprocessing
+    # on readthedocs, set environment variable SPHINX_GALLERY_PARALLEL to the number to 1
+    "parallel": os.getenv(
+        "SPHINX_GALLERY_PARALLEL", 1 if os.environ.get("READTHEDOCS") == "True" else 2
+    ),
 }
 autodoc_default_options = {
     "show-inheritance": True,
