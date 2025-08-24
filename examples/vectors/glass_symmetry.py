@@ -8,6 +8,11 @@ by looking at the angles between 3 vectors in the diffraction pattern at some ra
 groups of 3 vectors that are subtended by the same angle.
 
 This is a very simple example with more detailed examples to come.
+
+.. note::
+    This example may be skipped during automated documentation builds to speed up the 
+    build process. To run all examples locally, unset the PYXEM_SKIP_SLOW_EXAMPLES 
+    environment variable.
 """
 
 import pyxem as pxm

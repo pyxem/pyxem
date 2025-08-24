@@ -163,13 +163,37 @@ bibtex_bibfiles = ["bibliography.bib"]
 
 # -- Sphinx-Gallery---------------
 # https://sphinx-gallery.github.io
+import os
+
+# Check if we should skip slow examples (for faster CI builds)
+# This optimization significantly reduces build time for documentation builds
+# by skipping examples that download large datasets or are computationally intensive
+skip_slow_examples = os.environ.get("PYXEM_SKIP_SLOW_EXAMPLES", "").lower() in ("1", "true", "yes")
+
+# Pattern to exclude slow examples when PYXEM_SKIP_SLOW_EXAMPLES is set
+if skip_slow_examples:
+    # Skip examples that are known to be slow:
+    # - azimuthal_integration: ~53 seconds (intensive calculations)
+    # - FEM: ~53 seconds (large data download + processing) 
+    # - glass_symmetry: ~46 seconds (large data download)
+    # - strain_mapping: ~30 seconds (intensive simulated calculations)
+    slow_examples = [
+        "azimuthal_integration",
+        "FEM", 
+        "glass_symmetry",
+        "strain_mapping"
+    ]
+    ignore_pattern = f"({'|'.join(slow_examples)}|_sgskip)\\.py"
+else:
+    ignore_pattern = "_sgskip.py"
+
 sphinx_gallery_conf = {
     "backreferences_dir": "reference/generated",
     "doc_module": ("pyxem",),
     "examples_dirs": "../examples",  # path to your example scripts
     "gallery_dirs": "examples",  # path to where to save gallery generated output
     "filename_pattern": "^((?!sgskip).)*$",  # pattern to define which will be executed
-    "ignore_pattern": "_sgskip.py",  # pattern to define which will not be executed
+    "ignore_pattern": ignore_pattern,  # pattern to define which will not be executed
     "reference_url": {"pyxem": None},
     "show_memory": True,
 }

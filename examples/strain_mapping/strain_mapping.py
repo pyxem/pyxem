@@ -4,6 +4,11 @@ Strain Mapping
 
 Strain mapping in pyxem is done by fitting a :class:`~.signals.tensor_field.DisplacementGradientMap` to the data.
 This can be thought of as image distortion around some central point.
+
+.. note::
+    This example may be skipped during automated documentation builds to speed up the 
+    build process. To run all examples locally, unset the PYXEM_SKIP_SLOW_EXAMPLES 
+    environment variable.
 """
 
 from pyxem.data import simulated_strain

@@ -19,6 +19,11 @@ the variance for Poisson noise in the data.
 
 (There are several different possible variance signals. Here, we use the notation from
 Daulton, et al. Ultramicroscopy 110, 1279–1289 (2010), DOI: 10.1016/j.ultramic.2010.05.010.)
+
+.. note::
+    This example may be skipped during automated documentation builds to speed up the 
+    build process. To run all examples locally, unset the PYXEM_SKIP_SLOW_EXAMPLES 
+    environment variable.
 """
 
 import pyxem as pxm

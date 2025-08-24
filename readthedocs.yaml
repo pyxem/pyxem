@@ -22,6 +22,8 @@ build:
   jobs:
     pre_install:
       - bash doc/check-demos.sh
+  environment:
+    PYXEM_SKIP_SLOW_EXAMPLES: "1"  # Skip slow examples for faster RTD builds
 submodules:
   include: all
 

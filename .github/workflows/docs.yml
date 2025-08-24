@@ -35,6 +35,8 @@ jobs:
         run: |
           cd doc
           make html
+        env:
+          PYXEM_SKIP_SLOW_EXAMPLES: "1"  # Skip slow examples for faster CI builds
 
       - uses: actions/upload-artifact@v4
         with:

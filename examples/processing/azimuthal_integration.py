@@ -7,6 +7,11 @@ extracting radial profiles from diffraction patterns in 1 or 2 dimensions.  The 
 will split the pixels into radial bins and then sum the intensity in each bin resulting in
 a `Diffraction1D` or `Polar2D` signal.  In each case the total intensity of the diffraction
 pattern is preserved.
+
+.. note::
+    This example may be skipped during automated documentation builds to speed up the 
+    build process. To run all examples locally, unset the PYXEM_SKIP_SLOW_EXAMPLES 
+    environment variable.
 """
 
 import pyxem as pxm
