@@ -13,26 +13,19 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: Push to temporary staging branch
+      - name: Push branch to preview repo
         run: |
           BRANCH="rtd-staging-pr-${{ github.event.pull_request.number }}"
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git checkout -b $BRANCH
-          git push origin $BRANCH --force
-
-      - name: Trigger Read the Docs build
-        run: |
-          BRANCH="rtd-staging-pr-${{ github.event.pull_request.number }}"
-          curl -X POST \
-            -H "Authorization: Token ${{ secrets.RTD_TOKEN }}" \
-            https://readthedocs.org/api/v3/projects/${{ secrets.RTD_PROJECT }}/versions/$BRANCH/builds/
+          git remote add preview https://x-access-token:${{ secrets.DOCS_PREVIEW_PAT }}@github.com/cssfrancis/pyxem-docs-staging.git
+          git push preview HEAD:$BRANCH --force
 
       - name: Comment preview link on PR
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           header: docs-preview
           message: |
-            Your documentation preview is being built!  
+            📖 Your documentation preview is being built!  
             Once ready, you can view it here:  
-            https://yourproject--rtd-staging-pr-${{ github.event.pull_request.number }}.readthedocs.io/en/rtd-staging-pr-${{ github.event.pull_request.number }}/
+            https://pyxem-docs-preview.readthedocs.io/en/rtd-staging-pr-${{ github.event.pull_request.number }}/
