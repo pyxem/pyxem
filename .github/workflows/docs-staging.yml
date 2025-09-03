@@ -1,26 +1,36 @@
 name: Docs Staging Preview
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, synchronize, reopened]
 
 jobs:
   staging:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # needed if you modify the PR
+
     steps:
-      - name: Checkout PR
+      # Checkout the merge commit of the PR safely
+      - name: Checkout merge commit
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: refs/pull/${{ github.event.pull_request.number }}/merge
 
+      # Configure git user
+      - name: Configure git
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+      # Push temporary staging branch to preview repo
       - name: Push branch to preview repo
         run: |
           BRANCH="rtd-staging-pr-${{ github.event.pull_request.number }}"
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
           git remote add preview https://x-access-token:${{ secrets.DOCS_PREVIEW_PAT }}@github.com/cssfrancis/pyxem-docs-staging.git
           git push preview HEAD:$BRANCH --force
 
+      # Post preview link as sticky PR comment
       - name: Comment preview link on PR
         uses: marocchino/sticky-pull-request-comment@v2
         with:
