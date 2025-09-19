@@ -706,13 +706,13 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             pattern. Only one of `half_square_width` or signal_slice can be defined.
         show_slice_on_plot : bool
             Add a marker on the signal to indicate the area considered in the estimation
-            of the direct beam. Default is True.
+            of the direct beam. Default is False.
         subpixel : bool
             For ``blur`` and ``interpolate`` method only - other methods process with
             subpixel precision. If True, the beam position is calculated with subpixel
             precision by upsampling before measuring the beam position.
             The upsampling factor can be adjusted by passing the ``upsampling_factor``
-            parameter (default is 4.0).
+            parameter (default is 5.0).
             If False, the beam position is calculated without subpixel precision.
             Default is True.
         prefilter_sigma : float, optional
