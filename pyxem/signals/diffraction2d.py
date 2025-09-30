@@ -18,7 +18,7 @@
 from copy import deepcopy
 
 import numpy as np
-from scipy.ndimage import rotate
+import scipy.ndimage as ndi
 from skimage import morphology
 import dask.array as da
 from dask.diagnostics import ProgressBar
@@ -313,7 +313,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         """
         s_rotated = self.map(
-            rotate,
+            ndi.rotate,
             ragged=False,
             angle=-angle,
             reshape=False,
@@ -665,6 +665,9 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         lazy_output=None,
         signal_slice=None,
         half_square_width=None,
+        show_slice_on_plot=False,
+        subpixel=True,
+        prefilter_sigma=None,
         **kwargs,
     ):
         """Estimate the direct beam position in each experimentally acquired
@@ -701,7 +704,23 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             diffracted spots brighter than the direct beam. Crops the diffraction
             pattern to `half_square_width` pixels around the center of the diffraction
             pattern. Only one of `half_square_width` or signal_slice can be defined.
-        **kwargs:
+        show_slice_on_plot : bool
+            Add a marker on the signal to indicate the area considered in the estimation
+            of the direct beam. Default is False.
+        subpixel : bool
+            For ``blur`` and ``interpolate`` method only - other methods process with
+            subpixel precision. If True, the beam position is calculated with subpixel
+            precision by upsampling before measuring the beam position.
+            The upsampling factor can be adjusted by passing the ``upsampling_factor``
+            parameter (default is 5.0).
+            If False, the beam position is calculated without subpixel precision.
+            Default is True.
+        prefilter_sigma : float, optional
+            Standard deviation for the Gaussian kernel used for prefiltering the data
+            with the before finding the direct beam. If None, no prefiltering is done.
+            If int or float, filtering is applied to the navigation axes only. Use
+            iterable to filter in both navigation and signal axes.
+        **kwargs : dict
             Additional arguments accepted by :func:`pyxem.utils.diffraction.find_beam_center_blur`,
             :func:`pyxem.utils.diffraction.find_beam_center_interpolate`,
             :func:`pyxem.utils.diffraction.find_beam_offset_cross_correlation`,
@@ -717,9 +736,9 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         --------
         Using center of mass method
 
-        >>> s = pxm.data.dummy_data.get_disk_shift_simple_test_signal()
+        >>> s = pxm.data.tilt_boundary_data(correct_pivot_point=False)
         >>> s_bs = s.get_direct_beam_position(method="center_of_mass")
-        >>> s_bs_color = s_bs.get_color_signal()
+        >>> s_bs_color = s_bs.get_magnitude_phase_signal()
 
         Also threshold
 
@@ -730,7 +749,26 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         >>> s_bs = s.get_direct_beam_position(lazy_output=True, method="center_of_mass")
         >>> s_bs.compute(show_progressbar=False)
 
+        Setting the upsampling factor (default 4.0) for setting the subpixel precision with
+        the blur method
+
+        >>> s_shifts = s.get_direct_beam_position(
+        ...     method="blur", sigma=5, half_square_width=15, upsampling_factor=2.0
+        ... )
+
+        Using a pre-filtering step before finding the direct beam
+
+        >>> s_shifts = s.get_direct_beam_position(
+        ...     method="blur", sigma=5, half_square_width=15, prefilter_sigma=2.0
+        ... )
+
         """
+        for axis in self.axes_manager.signal_axes:
+            if not axis.is_uniform:
+                raise RuntimeError(
+                    "The `center_direct_beam` method only works with uniform axes."
+                )
+
         if half_square_width is not None and signal_slice is not None:
             raise ValueError(
                 "Only one of `signal_slice` or `half_sqare_width` " "can be defined"
@@ -744,7 +782,9 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             max_y = int(signal_center[1] + half_square_width)
             signal_slice = (min_x, max_x, min_y, max_y)
 
-        if signal_slice is not None:  # Crop the data
+        if signal_slice is None:
+            signal = self
+        else:  # Crop the data
             sig_axes = self.axes_manager.signal_axes
             sig_axes = np.repeat(sig_axes, 2)
             low_x, high_x, low_y, high_y = [
@@ -754,9 +794,44 @@ class Diffraction2D(CommonDiffraction, Signal2D):
                     sig_axes,
                 )
             ]
+
             signal = self.isig[low_x:high_x, low_y:high_y]
-        else:
-            signal = self
+            if show_slice_on_plot:
+                # convert to values, use numpy advanced indexing
+                low_x_, high_x_ = self.axes_manager.signal_axes[0].axis[
+                    (low_x, high_x),
+                ]
+                low_y_, high_y_ = self.axes_manager.signal_axes[1].axis[
+                    (low_y, high_y),
+                ]
+                w, h = high_x_ - low_x_, high_y_ - low_y_
+                marker = hs.plot.markers.Rectangles(
+                    offsets=(low_x_ + w / 2, low_y_ + h / 2),
+                    widths=(w,),
+                    heights=(h,),
+                    color="red",
+                    facecolor="none",
+                )
+                self.add_marker(marker)
+
+        if prefilter_sigma is not None:
+            if not isiterable(prefilter_sigma):
+                # Prefilter in navigation space only
+                prefilter_sigma = (
+                    prefilter_sigma,
+                ) * signal.axes_manager.navigation_dimension + (
+                    0,
+                ) * signal.axes_manager.signal_dimension
+            if self._lazy:
+                from dask_image.ndfilters import gaussian_filter
+
+                gaussian_function = gaussian_filter
+            else:
+                gaussian_function = ndi.gaussian_filter
+
+            signal.filter(
+                gaussian_function, sigma=prefilter_sigma, inplace=True, mode="nearest"
+            )
 
         if "lazy_result" in kwargs:
             warnings.warn(
@@ -781,13 +856,18 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         method_function = _select_method_from_method_dict(
             method, method_dict, print_help=False, **kwargs
         )
-
+        if subpixel and method in ["blur", "interpolate"]:
+            kwargs.setdefault("upsample_factor", 5.0)
+            if kwargs.get("upsample_factor") <= 1.0:
+                raise ValueError(
+                    "To use subpixel precision, `upsample_factor` must be higher than 1.0."
+                )
         if method == "cross_correlate":
             shifts = signal.map(
                 method_function,
                 inplace=False,
                 output_signal_size=(2,),
-                output_dtype=np.float32,
+                output_dtype=np.float16,
                 lazy_output=lazy_output,
                 **kwargs,
             )
@@ -796,7 +876,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
                 method_function,
                 inplace=False,
                 output_signal_size=(2,),
-                output_dtype=np.int16,
+                output_dtype=np.float16,
                 lazy_output=lazy_output,
                 **kwargs,
             )
@@ -806,7 +886,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
                 method_function,
                 inplace=False,
                 output_signal_size=(2,),
-                output_dtype=np.float32,
+                output_dtype=np.float16,
                 lazy_output=lazy_output,
                 **kwargs,
             )
@@ -922,19 +1002,27 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         if shifts is None:
             shifts = self.get_direct_beam_position(
-                method=method, lazy_output=lazy_output, **kwargs
+                method=method, lazy_output=lazy_output, subpixel=subpixel, **kwargs
             )
-        if "order" not in align_kwargs:
-            if subpixel:
-                align_kwargs["order"] = 1
-            else:
-                align_kwargs["order"] = 0
-        aligned = self.shift_diffraction(
+
+        align_kwargs.setdefault("order", 1 if subpixel else 0)
+        aligned = self.map(
+            _align_single_frame,
             shifts=shifts,
             inplace=inplace,
             lazy_output=lazy_output,
             **align_kwargs,
         )
+
+        s = self if inplace else aligned
+        # Set center of the diffraction pattern to (0, 0)
+        offsets = -np.array(
+            [
+                (axis.high_value - axis.low_value) / 2
+                for axis in s.axes_manager.signal_axes
+            ]
+        )
+        s.axes_manager.signal_axes.set(offset=offsets)
 
         if return_shifts and inplace:
             return shifts

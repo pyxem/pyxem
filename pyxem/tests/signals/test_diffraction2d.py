@@ -593,20 +593,10 @@ class TestGetDirectBeamPosition:
         "method,kwargs",
         [
             ("cross_correlate", {"radius_start": 0, "radius_finish": 2}),
-            (
-                "blur",
-                {
-                    "sigma": 1,
-                },
-            ),
-            (
-                "interpolate",
-                {
-                    "sigma": 1,
-                    "upsample_factor": 2,
-                    "kind": "nearest",
-                },
-            ),
+            ("blur", {"sigma": 1, "subpixel": True, "upsample_factor": 5}),
+            ("blur", {"sigma": 1, "subpixel": True, "upsample_factor": 1}),
+            ("blur", {"sigma": 1, "subpixel": False}),
+            ("interpolate", {"sigma": 1, "upsample_factor": 2, "kind": "nearest"}),
             ("center_of_mass", {"mask": (10, 13, 10)}),
         ],
     )
@@ -614,21 +604,48 @@ class TestGetDirectBeamPosition:
         s = self.s
         dx, dy = self.dx, self.dy
         s, x_pos_list, y_pos_list = self.s, self.x_pos_list, self.y_pos_list
+        # "cross_correlate" shifted by half a pixel
+        offset = 0.5 if method == "cross_correlate" else 0
+        atol = 0
+        if (
+            method == "blur"
+            and kwargs.get("subpixel")
+            and kwargs.get("upsample_factor") <= 1
+        ):
+            atol = 0.65
+            # upsample_factor is <= 1, meaning no subpixel
+            with pytest.raises(ValueError):
+                s_shift = s.get_direct_beam_position(
+                    method=method, signal_slice=sig_slice, **kwargs
+                )
+            return
+
         s_shift = s.get_direct_beam_position(
             method=method, signal_slice=sig_slice, **kwargs
         )
-        if method == "cross_correlate":
-            # shifted by half a pixel
-            assert (-(x_pos_list - dx / 2) == s_shift.isig[0].data[0] + 0.5).all()
-            assert (-(y_pos_list - dy / 2) == s_shift.isig[1].data[:, 0] + 0.5).all()
-        else:
-            np.testing.assert_array_almost_equal(
-                -(x_pos_list - dx / 2), s_shift.isig[0].data[0]
-            )
-            np.testing.assert_array_almost_equal(
-                -(y_pos_list - dy / 2), s_shift.isig[1].data[:, 0]
-            )
+
+        np.testing.assert_allclose(
+            -(x_pos_list - dx / 2), s_shift.isig[0].data[0] + offset, atol=0.65
+        )
+        np.testing.assert_allclose(
+            -(y_pos_list - dy / 2), s_shift.isig[1].data[:, 0] + offset, atol=0.65
+        )
         assert s.axes_manager.navigation_shape == s_shift.axes_manager.navigation_shape
+
+    @pytest.mark.parametrize("lazy", [True, False])
+    def test_prefilter(self, lazy):
+        if lazy:
+            pytest.importorskip("dask_image")
+        s = self.s
+        if lazy:
+            s = s.as_lazy()
+        dx, dy = self.dx, self.dy
+        x_pos_list, y_pos_list = self.x_pos_list, self.y_pos_list
+        s_shift = s.get_direct_beam_position(
+            method="blur", sigma=1, subpixel=False, prefilter_sigma=1.0
+        )
+        if lazy:
+            s_shift.compute()
 
     def test_fail_get_direct_beam(self):
         with pytest.raises(ValueError):
@@ -683,6 +700,37 @@ class TestGetDirectBeamPosition:
         assert s_shift.data.shape == shift_data_shape
         s_shift.compute()
         assert s_shift.data.shape == shift_data_shape
+
+    @pytest.mark.parametrize("signal_slice", [(5, 8, 5, 8), None])
+    def test_show_slice_on_plot(self, signal_slice):
+        s = self.s
+        s.plot()
+        s.get_direct_beam_position(
+            method="blur", sigma=1, signal_slice=signal_slice, show_slice_on_plot=True
+        )
+
+    @pytest.mark.parametrize("half_square_width", [5, None])
+    def test_show_slice_on_plot_half_square_width(self, half_square_width):
+        s = self.s
+        s.plot()
+        s.get_direct_beam_position(
+            method="blur",
+            sigma=1,
+            half_square_width=half_square_width,
+            show_slice_on_plot=True,
+        )
+
+    def test_signal_axes_non_uniform(self):
+        s = self.s
+        s.axes_manager.signal_axes[0].convert_to_non_uniform_axis()
+        with pytest.raises(RuntimeError):
+            s.get_direct_beam_position(method="blur", sigma=1)
+
+    def test_plot_on_signal(self):
+        s = self.s
+        s.plot()
+        shifts = s.get_direct_beam_position(method="blur", sigma=1)
+        shifts.plot_on_signal(s)
 
 
 class TestDiffraction2DGetDirectBeamPositionCenterOfMass:
@@ -1123,37 +1171,29 @@ class TestCenterDirectBeam:
         self.x_pos_list = x_pos_list
         self.y_pos_list = y_pos_list
 
-    def test_non_lazy(self):
+    @pytest.mark.parametrize("lazy_output", [True, False])
+    def test_non_lazy(self, lazy_output):
         s = self.s
-        s.center_direct_beam(method="blur", sigma=1)
-        assert s._lazy is False
+        s.center_direct_beam(
+            method="blur", subpixel=False, sigma=1, lazy_output=lazy_output
+        )
+        assert s._lazy is lazy_output
+        if lazy_output:
+            s.compute()
         assert (s.data[:, :, 10, 8] == 9).all()
         # Make sure only the pixel we expect to change, has actually changed
         s.data[:, :, 10, 8] = 0
         assert not s.data.any()
 
-    def test_non_lazy_lazy_result(self):
-        s = self.s
-        s.center_direct_beam(method="blur", sigma=1, lazy_output=True, inplace=True)
-        assert s._lazy is True
-        s.compute()
-        assert (s.data[:, :, 10, 8] == 9).all()
-        s.data[:, :, 10, 8] = 0
-        assert not s.data.any()
-
-    def test_lazy(self):
+    @pytest.mark.parametrize("lazy_output", [True, False])
+    def test_lazy(self, lazy_output):
         s_lazy = self.s_lazy
-        s_lazy.center_direct_beam(method="blur", sigma=1)
-        assert s_lazy._lazy is True
-        s_lazy.compute()
-        assert (s_lazy.data[:, :, 10, 8] == 9).all()
-        s_lazy.data[:, :, 10, 8] = 0
-        assert not s_lazy.data.any()
-
-    def test_lazy_not_lazy_result(self):
-        s_lazy = self.s_lazy
-        s_lazy.center_direct_beam(method="blur", sigma=1, lazy_output=False)
-        assert s_lazy._lazy is False
+        s_lazy.center_direct_beam(
+            method="blur", subpixel=False, sigma=1, lazy_output=lazy_output
+        )
+        assert s_lazy._lazy is lazy_output
+        if lazy_output:
+            s_lazy.compute()
         assert (s_lazy.data[:, :, 10, 8] == 9).all()
         s_lazy.data[:, :, 10, 8] = 0
         assert not s_lazy.data.any()
@@ -1170,65 +1210,49 @@ class TestCenterDirectBeam:
         assert s_lazy.axes_manager.shape == s_lazy_shape
         assert s_lazy.data.shape == data_lazy_shape
 
-    def test_return_shifts_non_lazy(self):
-        s = self.s
-        s_shifts = s.center_direct_beam(method="blur", sigma=1, return_shifts=True)
-        assert s_shifts._lazy is False
+    @pytest.mark.parametrize("lazy", [True, False])
+    def test_return_shifts(self, lazy):
+        s = self.s_lazy if lazy else self.s
+        s_shifts = s.center_direct_beam(
+            method="blur", subpixel=False, sigma=1, return_shifts=True
+        )
+        assert s_shifts._lazy is lazy
+        if lazy:
+            s_shifts.compute()
         nav_dim = s.axes_manager.navigation_dimension
         assert nav_dim == s_shifts.axes_manager.navigation_dimension
         x_pos_list, y_pos_list = self.x_pos_list, self.y_pos_list
         assert ((8 - x_pos_list) == s_shifts.isig[0].data[0]).all()
         assert ((10 - y_pos_list) == s_shifts.isig[1].data[:, 0]).all()
 
-    def test_return_shifts_lazy(self):
-        s_lazy = self.s_lazy
-        s_shifts = s_lazy.center_direct_beam(method="blur", sigma=1, return_shifts=True)
-        assert s_shifts._lazy is True
-        s_shifts.compute()
-        x_pos_list, y_pos_list = self.x_pos_list, self.y_pos_list
-        assert ((8 - x_pos_list) == s_shifts.isig[0].data[0]).all()
-        assert ((10 - y_pos_list) == s_shifts.isig[1].data[:, 0]).all()
-
-    def test_return_axes_manager(self):
+    @pytest.mark.parametrize("inplace", [True, False])
+    def test_axes_manager(self, inplace):
         s = self.s
-        s.center_direct_beam(method="blur", sigma=1)
+        s2 = s.center_direct_beam(method="blur", sigma=1, inplace=inplace)
+        if not inplace:
+            s = s2
         assert s.axes_manager[0].scale == 0.5
         assert s.axes_manager[1].scale == 0.6
-        assert s.axes_manager[2].scale == 3
-        assert s.axes_manager[3].scale == 4
+        signal_axes = s.axes_manager.signal_axes
+        assert signal_axes[0].scale == 3
+        assert signal_axes[1].scale == 4
+        assert signal_axes[0].offset == -22.5
+        assert signal_axes[1].offset == -38
 
-    def test_shifts_input(self):
+    @pytest.mark.parametrize("lazy_output", [True, False])
+    def test_shifts_input(self, lazy_output):
         s = self.s
-        s_shifts = s.get_direct_beam_position(method="blur", sigma=1, lazy_output=False)
+        s_shifts = s.get_direct_beam_position(
+            method="blur", sigma=1, subpixel=False, lazy_output=lazy_output
+        )
         s.center_direct_beam(shifts=s_shifts)
         assert (s.data[:, :, 10, 8] == 9).all()
         s.data[:, :, 10, 8] = 0
-        assert not s.data.any()
-
-    def test_shifts_input_lazy(self):
-        s = self.s
-        s_shifts = s.get_direct_beam_position(method="blur", sigma=1, lazy_output=True)
-        s.center_direct_beam(shifts=s_shifts)
-        assert (s.data[:, :, 10, 8] == 9).all()
-        s.data[:, :, 10, 8] = 0
-        assert not s.data.any()
-
-    def test_subpixel(self):
-        s = self.s
-        s_shifts = s.get_direct_beam_position(method="blur", sigma=1)
-        s_shifts += 0.5
-        s.change_dtype("float32")
-        s.center_direct_beam(shifts=s_shifts, subpixel=True)
-        assert (s.data[:, :, 10:12, 8:10] == 9 / 4).all()
-        s.data[:, :, 10:12, 8:10] = 0.0
         assert not s.data.any()
 
     def test_not_subpixel(self):
         s = self.s
-        s_shifts = s.get_direct_beam_position(method="blur", sigma=1)
-        s_shifts += 0.3
-        s.change_dtype("float32")
-        s.center_direct_beam(shifts=s_shifts, subpixel=False)
+        s.center_direct_beam(method="blur", sigma=1, subpixel=False)
         assert (s.data[:, :, 10, 8] == 9).all()
         s.data[:, :, 10, 8] = 0.0
         assert not s.data.any()
@@ -1255,9 +1279,11 @@ class TestCenterDirectBeam:
         s.data[:, :, 1, -1] = 1000
 
         s1 = s.deepcopy()
-        s.center_direct_beam(method="blur", sigma=1)
+        s.center_direct_beam(method="blur", sigma=1, subpixel=False)
         assert (s.data[:, :, 100, 100] == 1000).all()
-        s1.center_direct_beam(method="blur", sigma=1, half_square_width=5)
+        s1.center_direct_beam(
+            method="blur", sigma=1, half_square_width=5, subpixel=False
+        )
         assert (s1.data[:, :, 100, 100] == 9).all()
 
     def test_align_kwargs(self):

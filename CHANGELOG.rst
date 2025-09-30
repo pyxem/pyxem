@@ -9,10 +9,19 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 
 Unreleased
 ==========
+Added
+-----
+- Add ``show_slice_on_plot`` argument to :meth:`pyxem.signals.Diffraction2D.get_direct_beam_position`. (#1148)
+- Add ``spacing`` and ``spot_radius`` argument to :func:`pyxem.data.tilt_boundary_data` and add docstring. (#1148)
+- Add :meth:`pyxem.signals.BeamShift.plot_on_signal` function to visualise beam position on signal plot. (#1148)
+- Add ``subpixel`` precision for ``"blur"`` method in :meth:`pyxem.signals.Diffraction2D.get_direct_beam_position`. (#1148)
+- Add Gaussian prefiltering in navigation space in :meth:`pyxem.signals.Diffraction2D.get_direct_beam_position`. (#1148)
+
 Changed
 -------
 - Drop support for python 3.8. (#1147)
 - Refactor :meth:`~pyxem.signals.Diffraction2D.center_direct_beam` and :meth:`~pyxem.signals.Diffraction2D.shift_diffraction` to use consistent signature and avoid code duplication and  (#1144)
+- Set axes offset after centering in :meth:`pyxem.signals.Diffraction2D.center_direct_beam`. (#1148)
 
 Fixed
 -----

@@ -34,6 +34,7 @@ from skimage.draw import ellipse_perimeter
 from skimage.registration import phase_cross_correlation
 from tqdm import tqdm
 from packaging.version import Version
+from hyperspy.misc.utils import isiterable
 
 from pyxem.utils.cuda_utils import is_cupy_array
 from pyxem.utils._deprecated import deprecated
@@ -324,7 +325,7 @@ def reference_circle(coords, dimX, dimY, radius):
     return img
 
 
-def _find_peak_max(arr, sigma, upsample_factor, kind):
+def _find_peak_max(arr, sigma, upsample_factor=1.0, kind="nearest"):
     """Find the index of the pixel corresponding to peak maximum in 1D pattern
 
     Parameters
@@ -334,6 +335,7 @@ def _find_peak_max(arr, sigma, upsample_factor, kind):
     upsample_factor : int
         Upsample factor for subpixel maximum finding, i.e. the maximum will
         be found with a precision of 1 / upsample_factor of a pixel.
+        Default is 1.0
     kind : str or int, optional
         Specifies the kind of interpolation as a string (‘linear’, ‘nearest’,
         ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, ‘next’, where
@@ -370,7 +372,7 @@ def _find_peak_max(arr, sigma, upsample_factor, kind):
     return center
 
 
-def find_beam_center_interpolate(z, sigma, upsample_factor, kind):
+def find_beam_center_interpolate(z, sigma, upsample_factor=1.0, kind="nearest"):
     """Find the center of the primary beam in the image `img` by summing along
     X/Y directions and finding the position along the two directions independently.
 
@@ -404,29 +406,45 @@ def find_beam_center_interpolate(z, sigma, upsample_factor, kind):
     return center
 
 
-def find_beam_center_blur(z, sigma):
-    """Estimate direct beam position by blurring the image with a large
+def find_beam_center_blur(z, sigma, upsample_factor=1.0, order=1, **kwargs):
+    """
+    Estimate direct beam position by blurring the image with a large
     Gaussian kernel and finding the maximum.
 
     Parameters
     ----------
     sigma : float
         Sigma value for Gaussian blurring kernel.
+    upsample_factor : float
+        Factor by which to upsample the image before blurring and
+        finding the maximum. Passed to the ``zoom`` paramter of
+        the :func:`scipy.ndimage.zoom` function.
+    order : int
+        Interpolation order for the zoom operation. Default is 1 (linear).
+        Passed to the ``order`` parameter of the :func:`scipy.ndimage.zoom` function.
+    **kwargs : dict
+        Additional keyword arguments to be passed to the
+        `scipy.ndimage.zoom` function, such as `order` for interpolation order.
 
     Returns
     -------
     center : numpy.ndarray
         numpy.ndarray [x, y] containing indices of estimated direct beam positon.
     """
-    if is_cupy_array(z):
+    if is_cupy_array(z):  # pragma: no cover
         gaus = ndigpu.gaussian_filter
+        zoom_ = ndigpu.zoom
         dispatcher = cp
     else:
         gaus = ndi.gaussian_filter
+        zoom_ = ndi.zoom
         dispatcher = np
-    blurred = gaus(z, sigma, mode="wrap")
+    blurred = gaus(z, sigma, mode="constant")
+    if upsample_factor > 1.0:
+        # Upsample the image before taking the maximum value
+        blurred = zoom_(blurred, zoom=upsample_factor, order=order, **kwargs)
     center = dispatcher.unravel_index(blurred.argmax(), blurred.shape)[::-1]
-    return dispatcher.array(center)
+    return dispatcher.array(center) / upsample_factor
 
 
 def find_center_of_mass(
@@ -449,6 +467,8 @@ def find_center_of_mass(
         center_of_mass_from_image,
         threshold=threshold,
         mask=mask,
+        output_signal_size=(2,),
+        output_dtype=np.float16,
         **kwargs,
     )
     ans.set_signal_type("beam_shift")

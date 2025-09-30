@@ -18,6 +18,15 @@ s = pxm.data.tilt_boundary_data(correct_pivot_point=False)
 s_shifts = s.get_direct_beam_position(method="blur", sigma=5, half_square_width=20)
 s_shifts.plot()
 
+
+# %%
+# Visualize the Zero Beam Position
+# --------------------------------
+# To visualize the zero beam position, we can plot the beam position on the original signal.
+s.plot(axes_ticks=True)
+s_shifts.plot_on_signal(s)
+
+# %%
 # Getting a Linear Plane
 # ---------------------
 # In many instances the zero beam position will vary systematically with the scan position.

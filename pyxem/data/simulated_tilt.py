@@ -1,12 +1,35 @@
 import numpy as np
 from pyxem.data.dummy_data import make_diffraction_test_data as mdtd
 import hyperspy.api as hs
+from hyperspy.misc.utils import isiterable
 
 
-def tilt_boundary_data(correct_pivot_point=True):
-    di = mdtd.DiffractionTestImage(intensity_noise=False)
+def tilt_boundary_data(correct_pivot_point=True, spacing=20, spot_radius=7):
+    """
+    Create an ElectronDiffraction2D signal across a grain boundary.
+
+    Parameters
+    ----------
+    correct_pivot_point : bool, optional
+        If True, the direct beam will moved similarly to residual pivot
+        point that can be observed experimentally.
+    spacing : int or tuple, optional
+        The spacing between the disks in the diffraction pattern. If a single
+        integer is provided, it will be used for both x and y directions.
+    spot_radius : int, optional
+        The radius of the disks in the diffraction pattern.
+
+    Returns
+    -------
+    ElectronDiffraction2D
+        A signal of diffraction patterns across a grain boundary.
+    """
+    if not isiterable(spacing):
+        spacing = (spacing, spacing)
+
+    di = mdtd.DiffractionTestImage(disk_r=spot_radius, intensity_noise=False)
     di.add_disk(x=128, y=128, intensity=10.0)  # Add a zero beam disk at the center
-    di.add_cubic_disks(vx=20, vy=20, intensity=2.0, n=5)
+    di.add_cubic_disks(vx=spacing[0], vy=spacing[1], intensity=2.0, n=5)
     di.add_background_lorentz()
     di_rot = di.copy()
     di_rot.rotation = 10
