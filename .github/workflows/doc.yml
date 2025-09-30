@@ -7,21 +7,20 @@ on:
     branches: [ main ]
     tags: [ "v*" ]   # deploy versioned docs on tags like v1.2.0
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to deploy (for manual run)'
+        required: false
 
 jobs:
   Build:
-    # Use the "reusable workflow" from the hyperspy organisation
+    # Use the reusable workflow from the hyperspy organisation
     uses: hyperspy/.github/.github/workflows/doc.yml@main
     with:
-      # install with speed extra to avoid warnings
       pip_extra_doc: 'all,doc'
-      # graphviz is required to build mermaid graph
-      # optipng is required to optimize thumbnail
       install_package_ubuntu: graphviz optipng
       check_links: true
       doctest: false
-      # "-W --keep-going" should be used but there are currently too many failures
-      #SPHINXOPTS: '-W --keep-going --jobs 4'
       SPHINXOPTS: '--jobs 4'
       ORGANISATION: 'pyxem'
       CACHE_GALLERY_EXAMPLES: './doc/examples'
@@ -44,9 +43,9 @@ jobs:
 
       # Build redirect page for latest version
       - name: Build index redirect
-        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch')
+        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
         run: |
-          VERSION=${GITHUB_REF_NAME}   # e.g. v1.2.0
+          VERSION=${{ github.event.inputs.version || github.ref_name }}  # e.g. v1.2.0
           mkdir -p redirect
           cat <<EOF > redirect/index.html
           <!DOCTYPE html>
@@ -63,18 +62,18 @@ jobs:
 
       # Deploy versioned docs -> /vX.Y.Z/
       - name: Deploy versioned docs
-        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch')
+        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: ./doc/_build/html/
-          destination_dir: ${{ github.ref_name }}   # e.g. v1.2.0
+          destination_dir: ${{ github.event.inputs.version || github.ref_name }}   # e.g. v1.2.0
           force_orphan: false
 
       # Update root redirect to latest version
       - name: Update root redirect
-        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch')
+        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
