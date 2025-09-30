@@ -26,7 +26,7 @@ s_shifts.plot()
 s.plot(axes_ticks=True)
 s_shifts.plot_on_signal(s)
 
-
+# %%
 # Getting a Linear Plane
 # ---------------------
 # In many instances the zero beam position will vary systematically with the scan position.

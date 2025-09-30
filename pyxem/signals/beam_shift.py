@@ -18,7 +18,6 @@
 
 
 import numpy as np
-import scipy.constants
 from scipy.ndimage import rotate
 from hyperspy._signals.lazy import LazySignal
 from hyperspy.axes import UniformDataAxis
@@ -296,7 +295,6 @@ class BeamShift(DiffractionVectors1D):
             s.convert_to_uniform_axis() if not isinstance(s, UniformDataAxis) else s
             for s in signal_axes
         ]
-        scales = [axis.scale for axis in signal_axes]
 
         offsets = np.array([axis.offset for axis in signal_axes])
         scales = np.array([axis.scale for axis in signal_axes])
@@ -342,14 +340,14 @@ class BeamShift(DiffractionVectors1D):
 
         """
         shifts = self.pixels_to_calibrated_units(
-            signal_axes=signal.axes_manager.signal_axes, inplace=False
-        )
-
-        offsets = np.empty(signal.axes_manager.navigation_shape, dtype=object)
-        for i in np.ndindex(signal.axes_manager.navigation_shape):
-            offsets[i] = -shifts.data[i[::-1]]
+            signal_axes=signal.axes_manager.signal_axes, inplace=False)
+        ragged_1d_shifts = shifts.map(lambda x: np.array([-x,]),
+                                      inplace=False,
+                                      ragged=True,
+                                      output_dtype=object)
         kwargs.setdefault("color", "red")
-        marker = hs.plot.markers.Points(offsets=offsets, **kwargs)
+        # from signal will automatically flip the order of the vectors
+        marker = hs.plot.markers.Points.from_signal(ragged_1d_shifts, **kwargs)
         signal.add_marker(marker)
 
     def get_magnitude_signal(
