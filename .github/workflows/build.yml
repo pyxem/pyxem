@@ -71,19 +71,11 @@ jobs:
       - name: Generate line coverage
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
+          coverage xml
           coverage report --show-missing
 
-      - name: Upload coverage to Coveralls
-        if: ${{ matrix.os == 'ubuntu-latest' }}
-        uses: AndreMiras/coveralls-python-action@develop
+      - name: Upload coverage reports to Codecov
+        if: ${{ github.repository_owner == 'pyxem' }}
+        uses: codecov/codecov-action@v5
         with:
-          parallel: true
-
-  coveralls-finish:
-    needs: build-with-pip
-    runs-on: ubuntu-latest
-    steps:
-      - name: Coveralls finished
-        uses: AndreMiras/coveralls-python-action@develop
-        with:
-          parallel-finished: true
+          token: ${{ secrets.CODECOV_TOKEN }}

@@ -38,7 +38,7 @@ class deprecated:
     warning.
     Adapted from
     `scikit-image
-    <https://github.com/scikit-image/scikit-image/blob/main/skimage/_shared/utils.py>`_
+    <https://github.com/scikit-image/scikit-image/blob/main/src/skimage/_shared/utils.py>`_
     and `matplotlib
     <https://github.com/matplotlib/matplotlib/blob/master/lib/matplotlib/_api/deprecation.py>`_.
     """
