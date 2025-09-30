@@ -340,11 +340,18 @@ class BeamShift(DiffractionVectors1D):
 
         """
         shifts = self.pixels_to_calibrated_units(
-            signal_axes=signal.axes_manager.signal_axes, inplace=False)
-        ragged_1d_shifts = shifts.map(lambda x: np.array([-x,]),
-                                      inplace=False,
-                                      ragged=True,
-                                      output_dtype=object)
+            signal_axes=signal.axes_manager.signal_axes, inplace=False
+        )
+        ragged_1d_shifts = shifts.map(
+            lambda x: np.array(
+                [
+                    -x,
+                ]
+            ),
+            inplace=False,
+            ragged=True,
+            output_dtype=object,
+        )
         kwargs.setdefault("color", "red")
         # from signal will automatically flip the order of the vectors
         marker = hs.plot.markers.Points.from_signal(ragged_1d_shifts, **kwargs)
