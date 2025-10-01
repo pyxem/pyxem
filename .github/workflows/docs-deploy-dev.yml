@@ -1,0 +1,22 @@
+name: Docs Dev Deploy
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    uses: ./.github/workflows/docs-build.yaml
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy dev docs
+        uses: peaceiris/actions-gh-pages@4b09552702d0b65573696410d4707c765da2630b # uses a full len SHA per https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/find-and-customize-actions#using-shas
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./doc/_build/html/
+          destination_dir: dev
+          force_orphan: false
