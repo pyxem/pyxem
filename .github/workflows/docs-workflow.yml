@@ -1,0 +1,17 @@
+name: Docs Build
+
+on:
+  workflow_call:
+
+jobs:
+  Build:
+    uses: hyperspy/.github/.github/workflows/doc.yml@main
+    with:
+      pip_extra_doc: 'all,doc'
+      install_package_ubuntu: graphviz optipng
+      check_links: true
+      doctest: false
+      SPHINXOPTS: '--jobs 4' # use parallel build to speed up builds
+      ORGANISATION: 'pyxem'
+      CACHE_GALLERY_EXAMPLES: './doc/examples' # cache sphinx-gallery examples for faster builds
+      CACHE_POOCH: 'pyxem' # cache pooch downloads for pyxem data
