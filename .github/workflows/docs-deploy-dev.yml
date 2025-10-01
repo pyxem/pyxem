@@ -6,7 +6,7 @@ on:
     if: github.repository == 'pyxem/pyxem'
 jobs:
   build:
-    uses: ./.github/workflows/docs-build.yaml
+    uses: ./.github/workflows/docs-build.yml
 
   deploy:
     needs: build
