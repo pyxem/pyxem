@@ -35,16 +35,16 @@ jobs:
           EOF
 
       - name: Deploy versioned docs
-        uses: peaceiris/actions-gh-pages@4b09552702d0b65573696410d4707c765da2630b # uses a full len SHA per https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/find-and-customize-actions#using-shas
+        uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e # uses a full len SHA per https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/find-and-customize-actions#using-shas
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: ./doc/_build/html/
+          publish_dir: _build/html/
           destination_dir: ${{ github.event.inputs.version || github.ref_name }} # deploy to a folder matching the tag version
           force_orphan: false
 
       - name: Update root redirect
-        uses:  peaceiris/actions-gh-pages@4b09552702d0b65573696410d4707c765da2630b # uses a full len SHA per https://docs.github.com/en/actions/how-tos/write-workflows/choose-and-customize-actions#using-shas
+        uses:  peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e # uses a full len SHA per https://docs.github.com/en/actions/how-tos/write-workflows/choose-and-customize-actions#using-shas
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
