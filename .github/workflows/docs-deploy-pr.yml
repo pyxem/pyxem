@@ -11,11 +11,12 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    concurrency: preview-${{ github.ref }}
     steps:
       - name: Deploy PR preview
         uses: rossjrw/pr-preview-action@9f77b1d057b494e662c50b8ca40ecc63f21e0887 # uses a full len SHA per https://docs.github.com/en/actions/how-tos/write-workflows/choose-and-customize-actions#using-shas
         with:
-          source-dir: ./doc/_build/html/
+          source-dir: _build/html/
           deploy-repository: CSSFrancis/pyxem-docs-staging
           token: ${{ secrets.PREVIEW_DEPLOY_KEY }} # PAT with permissions to edit Content in CSSFrancis/pyxem-docs-staging
           comment: true # Add a comment to the PR with the preview link
