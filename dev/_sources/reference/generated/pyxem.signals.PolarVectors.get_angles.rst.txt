@@ -1,0 +1,6 @@
+get\_angles
+===========
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: PolarVectors.get_angles

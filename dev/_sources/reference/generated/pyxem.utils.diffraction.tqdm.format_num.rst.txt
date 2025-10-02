@@ -1,0 +1,6 @@
+format\_num
+===========
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. automethod:: tqdm.format_num

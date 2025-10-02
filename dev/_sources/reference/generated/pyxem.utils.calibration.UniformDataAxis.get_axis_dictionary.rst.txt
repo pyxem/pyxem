@@ -1,0 +1,6 @@
+get\_axis\_dictionary
+=====================
+
+.. currentmodule:: pyxem.utils.calibration
+
+.. automethod:: UniformDataAxis.get_axis_dictionary

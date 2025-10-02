@@ -1,0 +1,6 @@
+make\_probe\_navigation
+=======================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: Diffraction2D.make_probe_navigation

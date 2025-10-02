@@ -1,0 +1,6 @@
+to\_polar\_markers
+==================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: OrientationMap.to_polar_markers

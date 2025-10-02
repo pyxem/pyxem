@@ -1,0 +1,40 @@
+
+:orphan:
+
+.. _sphx_glr_examples_loading_data_sg_execution_times:
+
+
+Computation times
+=================
+**00:13.010** total execution time for 2 files **from examples/loading_data**:
+
+.. container::
+
+  .. raw:: html
+
+    <style scoped>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+    </style>
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script type="text/javascript" class="init">
+    $(document).ready( function () {
+        $('table.sg-datatable').DataTable({order: [[1, 'desc']]});
+    } );
+    </script>
+
+  .. list-table::
+   :header-rows: 1
+   :class: table table-striped sg-datatable
+
+   * - Example
+     - Time
+     - Mem (MB)
+   * - :ref:`sphx_glr_examples_loading_data_setting_scales_and_metadata.py` (``setting_scales_and_metadata.py``)
+     - 00:09.342
+     - 0.0
+   * - :ref:`sphx_glr_examples_loading_data_loading_mrc_files.py` (``loading_mrc_files.py``)
+     - 00:03.667
+     - 0.0

@@ -1,0 +1,6 @@
+cluster\_labeled\_vectors
+=========================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: LabeledDiffractionVectors2D.cluster_labeled_vectors

@@ -1,0 +1,9 @@
+format\_dict
+============
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autoproperty:: tqdm.format_dict
+
+.. minigallery:: pyxem.utils.diffraction.tqdm.format_dict
+    :add-heading: Examples using ``tqdm.format_dict``

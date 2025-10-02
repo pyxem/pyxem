@@ -1,0 +1,9 @@
+pixel\_vectors
+==============
+
+.. currentmodule:: pyxem.signals
+
+.. autoproperty:: DiffractionVectors.pixel_vectors
+
+.. minigallery:: pyxem.signals.DiffractionVectors.pixel_vectors
+    :add-heading: Examples using ``DiffractionVectors.pixel_vectors``

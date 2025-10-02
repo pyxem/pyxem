@@ -1,0 +1,9 @@
+convergence\_angle
+==================
+
+.. currentmodule:: pyxem.utils.calibration
+
+.. autoproperty:: Calibration.convergence_angle
+
+.. minigallery:: pyxem.utils.calibration.Calibration.convergence_angle
+    :add-heading: Examples using ``Calibration.convergence_angle``

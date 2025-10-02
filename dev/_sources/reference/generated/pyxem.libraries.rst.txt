@@ -1,0 +1,31 @@
+﻿libraries
+=========
+
+.. automodule:: pyxem.libraries
+
+    
+    
+    
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Classes
+
+    .. autosummary::
+        :toctree:
+        :template: custom-class-template.rst
+        
+        CalibrationDataLibrary
+    
+    
+
+    
+    
+    
+
+
+

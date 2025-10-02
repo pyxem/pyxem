@@ -1,0 +1,9 @@
+major
+=====
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autoproperty:: Version.major
+
+.. minigallery:: pyxem.utils.diffraction.Version.major
+    :add-heading: Examples using ``Version.major``

@@ -1,0 +1,6 @@
+plot
+====
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: Diffraction2D.plot

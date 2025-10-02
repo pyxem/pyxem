@@ -1,0 +1,6 @@
+cluster
+=======
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: DiffractionVectors.cluster

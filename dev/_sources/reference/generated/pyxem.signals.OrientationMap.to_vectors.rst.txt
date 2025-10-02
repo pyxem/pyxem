@@ -1,0 +1,6 @@
+to\_vectors
+===========
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: OrientationMap.to_vectors

@@ -1,0 +1,25 @@
+deprecated
+==========
+
+.. currentmodule:: pyxem.utils.calibration
+
+.. autoclass:: deprecated
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Methods
+
+    .. autosummary::
+        :toctree:
+        :template: custom-method-template.rst
+        
+        
+    
+    
+
+.. minigallery:: pyxem.utils.calibration.deprecated
+    :add-heading: Examples using ``deprecated``

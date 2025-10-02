@@ -1,0 +1,9 @@
+center\_of\_mass\_from\_image
+=============================
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autofunction:: center_of_mass_from_image
+
+.. minigallery:: pyxem.utils.diffraction.center_of_mass_from_image
+    :add-heading: Examples using ``center_of_mass_from_image``

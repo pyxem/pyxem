@@ -1,0 +1,9 @@
+points\_to\_poly\_collection
+============================
+
+.. currentmodule:: pyxem.utils.vectors
+
+.. autofunction:: points_to_poly_collection
+
+.. minigallery:: pyxem.utils.vectors.points_to_poly_collection
+    :add-heading: Examples using ``points_to_poly_collection``

@@ -1,0 +1,6 @@
+get\_vdf\_segments
+==================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: VirtualDarkFieldImage.get_vdf_segments

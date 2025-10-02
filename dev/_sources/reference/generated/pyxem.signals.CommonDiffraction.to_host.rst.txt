@@ -1,0 +1,6 @@
+to\_host
+========
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: CommonDiffraction.to_host

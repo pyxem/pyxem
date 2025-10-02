@@ -1,0 +1,31 @@
+IntegrationGenerator
+====================
+
+.. currentmodule:: pyxem.generators
+
+.. autoclass:: IntegrationGenerator
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Methods
+
+    .. autosummary::
+        :toctree:
+        :template: custom-method-template.rst
+        
+        
+        
+        IntegrationGenerator.extract_intensities
+        
+        
+        IntegrationGenerator.extract_intensities_summation_method
+        
+    
+    
+
+.. minigallery:: pyxem.generators.IntegrationGenerator
+    :add-heading: Examples using ``IntegrationGenerator``

@@ -1,0 +1,6 @@
+mask\_from\_bkgd\_pattern
+=========================
+
+.. currentmodule:: pyxem.generators
+
+.. automethod:: ReducedIntensityGenerator1D.mask_from_bkgd_pattern

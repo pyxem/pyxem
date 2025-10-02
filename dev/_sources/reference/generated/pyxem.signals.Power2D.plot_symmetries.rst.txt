@@ -1,0 +1,6 @@
+plot\_symmetries
+================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: Power2D.plot_symmetries

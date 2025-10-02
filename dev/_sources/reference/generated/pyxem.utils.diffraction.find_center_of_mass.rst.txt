@@ -1,0 +1,9 @@
+find\_center\_of\_mass
+======================
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autofunction:: find_center_of_mass
+
+.. minigallery:: pyxem.utils.diffraction.find_center_of_mass
+    :add-heading: Examples using ``find_center_of_mass``

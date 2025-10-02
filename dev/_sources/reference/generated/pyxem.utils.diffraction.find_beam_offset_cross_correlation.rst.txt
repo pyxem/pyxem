@@ -1,0 +1,9 @@
+find\_beam\_offset\_cross\_correlation
+======================================
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autofunction:: find_beam_offset_cross_correlation
+
+.. minigallery:: pyxem.utils.diffraction.find_beam_offset_cross_correlation
+    :add-heading: Examples using ``find_beam_offset_cross_correlation``

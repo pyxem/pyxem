@@ -1,0 +1,6 @@
+get\_strain\_maps
+=================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: DiffractionVectors.get_strain_maps

@@ -1,0 +1,9 @@
+mgo\_nanocrystals
+=================
+
+.. currentmodule:: pyxem.data
+
+.. autofunction:: mgo_nanocrystals
+
+.. minigallery:: pyxem.data.mgo_nanocrystals
+    :add-heading: Examples using ``mgo_nanocrystals``

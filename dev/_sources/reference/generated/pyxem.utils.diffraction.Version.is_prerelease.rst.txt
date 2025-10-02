@@ -1,0 +1,9 @@
+is\_prerelease
+==============
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autoproperty:: Version.is_prerelease
+
+.. minigallery:: pyxem.utils.diffraction.Version.is_prerelease
+    :add-heading: Examples using ``Version.is_prerelease``

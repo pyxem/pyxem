@@ -1,0 +1,9 @@
+convert\_affine\_to\_transform
+==============================
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autofunction:: convert_affine_to_transform
+
+.. minigallery:: pyxem.utils.diffraction.convert_affine_to_transform
+    :add-heading: Examples using ``convert_affine_to_transform``

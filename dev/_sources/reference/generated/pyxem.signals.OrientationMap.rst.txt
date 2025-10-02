@@ -1,0 +1,229 @@
+OrientationMap
+==============
+
+.. currentmodule:: pyxem.signals
+
+.. autoclass:: OrientationMap
+
+    
+    
+    .. rubric:: Attributes
+
+    .. autosummary::
+        :toctree:
+        :template: custom-attribute-template.rst
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        OrientationMap.num_rows
+        
+        
+        
+        
+        
+        
+        
+        
+        OrientationMap.simulation
+        
+        
+    
+    
+
+    
+    
+    .. rubric:: Methods
+
+    .. autosummary::
+        :toctree:
+        :template: custom-method-template.rst
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        OrientationMap.deepcopy
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        OrientationMap.get_simulation_arrays
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        OrientationMap.plot_over_signal
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        OrientationMap.to_crystal_map
+        
+        
+        
+        
+        OrientationMap.to_ipf_colormap
+        
+        
+        OrientationMap.to_ipf_correlation_heatmap_markers
+        
+        
+        OrientationMap.to_ipf_markers
+        
+        
+        OrientationMap.to_markers
+        
+        
+        
+        OrientationMap.to_phase_index
+        
+        
+        OrientationMap.to_phase_map
+        
+        
+        
+        OrientationMap.to_polar_markers
+        
+        
+        
+        OrientationMap.to_rotation
+        
+        
+        
+        OrientationMap.to_single_phase_orientations
+        
+        
+        OrientationMap.to_single_phase_polar_markers
+        
+        
+        OrientationMap.to_single_phase_vectors
+        
+        
+        OrientationMap.to_vectors
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    
+    
+
+.. minigallery:: pyxem.signals.OrientationMap
+    :add-heading: Examples using ``OrientationMap``

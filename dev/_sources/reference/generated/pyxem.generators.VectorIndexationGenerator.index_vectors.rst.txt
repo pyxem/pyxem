@@ -1,0 +1,6 @@
+index\_vectors
+==============
+
+.. currentmodule:: pyxem.generators
+
+.. automethod:: VectorIndexationGenerator.index_vectors

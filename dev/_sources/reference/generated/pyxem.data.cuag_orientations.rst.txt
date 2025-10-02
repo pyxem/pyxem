@@ -1,0 +1,9 @@
+cuag\_orientations
+==================
+
+.. currentmodule:: pyxem.data
+
+.. autofunction:: cuag_orientations
+
+.. minigallery:: pyxem.data.cuag_orientations
+    :add-heading: Examples using ``cuag_orientations``

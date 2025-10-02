@@ -1,0 +1,9 @@
+physical\_pixel\_size
+=====================
+
+.. currentmodule:: pyxem.utils.calibration
+
+.. autoproperty:: Calibration.physical_pixel_size
+
+.. minigallery:: pyxem.utils.calibration.Calibration.physical_pixel_size
+    :add-heading: Examples using ``Calibration.physical_pixel_size``

@@ -1,0 +1,9 @@
+index\_dataset\_with\_template\_rotation
+========================================
+
+.. currentmodule:: pyxem.utils.calibration
+
+.. autofunction:: index_dataset_with_template_rotation
+
+.. minigallery:: pyxem.utils.calibration.index_dataset_with_template_rotation
+    :add-heading: Examples using ``index_dataset_with_template_rotation``

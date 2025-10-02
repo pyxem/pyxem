@@ -1,0 +1,9 @@
+epoch
+=====
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autoproperty:: Version.epoch
+
+.. minigallery:: pyxem.utils.diffraction.Version.epoch
+    :add-heading: Examples using ``Version.epoch``

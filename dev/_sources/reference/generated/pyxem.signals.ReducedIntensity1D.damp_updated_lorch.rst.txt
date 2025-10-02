@@ -1,0 +1,6 @@
+damp\_updated\_lorch
+====================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: ReducedIntensity1D.damp_updated_lorch

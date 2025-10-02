@@ -1,0 +1,6 @@
+damp\_exponential
+=================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: ReducedIntensity1D.damp_exponential

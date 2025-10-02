@@ -1,0 +1,6 @@
+rotate\_beam\_shifts
+====================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: BeamShift.rotate_beam_shifts

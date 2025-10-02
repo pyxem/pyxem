@@ -1,0 +1,6 @@
+get\_strain\_maps
+=================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: DisplacementGradientMap.get_strain_maps

@@ -1,0 +1,9 @@
+ellipse\_to\_markers
+====================
+
+.. currentmodule:: pyxem.utils.ransac_ellipse_tools
+
+.. autofunction:: ellipse_to_markers
+
+.. minigallery:: pyxem.utils.ransac_ellipse_tools.ellipse_to_markers
+    :add-heading: Examples using ``ellipse_to_markers``

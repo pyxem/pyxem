@@ -1,0 +1,9 @@
+camera\_length
+==============
+
+.. currentmodule:: pyxem.signals
+
+.. autoproperty:: ElectronDiffraction2D.camera_length
+
+.. minigallery:: pyxem.signals.ElectronDiffraction2D.camera_length
+    :add-heading: Examples using ``ElectronDiffraction2D.camera_length``

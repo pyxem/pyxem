@@ -1,0 +1,6 @@
+rotate\_strain\_basis
+=====================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: StrainMap.rotate_strain_basis

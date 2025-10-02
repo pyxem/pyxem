@@ -1,0 +1,6 @@
+separate\_learning\_segments
+============================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: LearningSegment.separate_learning_segments

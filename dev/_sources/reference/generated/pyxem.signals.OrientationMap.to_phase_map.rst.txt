@@ -1,0 +1,6 @@
+to\_phase\_map
+==============
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: OrientationMap.to_phase_map

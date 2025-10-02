@@ -1,0 +1,34 @@
+VDFSegment
+==========
+
+.. currentmodule:: pyxem.signals
+
+.. autoclass:: VDFSegment
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Methods
+
+    .. autosummary::
+        :toctree:
+        :template: custom-method-template.rst
+        
+        
+        
+        VDFSegment.correlate_vdf_segments
+        
+        
+        VDFSegment.get_ncc_matrix
+        
+        
+        VDFSegment.get_virtual_electron_diffraction
+        
+    
+    
+
+.. minigallery:: pyxem.signals.VDFSegment
+    :add-heading: Examples using ``VDFSegment``

@@ -1,0 +1,9 @@
+fill\_value
+===========
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autoproperty:: interp1d.fill_value
+
+.. minigallery:: pyxem.utils.diffraction.interp1d.fill_value
+    :add-heading: Examples using ``interp1d.fill_value``

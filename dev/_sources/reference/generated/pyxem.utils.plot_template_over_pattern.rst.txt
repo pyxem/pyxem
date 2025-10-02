@@ -1,0 +1,9 @@
+plot\_template\_over\_pattern
+=============================
+
+.. currentmodule:: pyxem.utils
+
+.. autofunction:: plot_template_over_pattern
+
+.. minigallery:: pyxem.utils.plot_template_over_pattern
+    :add-heading: Examples using ``plot_template_over_pattern``

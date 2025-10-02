@@ -1,0 +1,6 @@
+format\_sizeof
+==============
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. automethod:: tqdm.format_sizeof

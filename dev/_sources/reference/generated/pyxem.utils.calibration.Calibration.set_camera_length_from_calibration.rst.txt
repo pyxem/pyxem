@@ -1,0 +1,6 @@
+set\_camera\_length\_from\_calibration
+======================================
+
+.. currentmodule:: pyxem.utils.calibration
+
+.. automethod:: Calibration.set_camera_length_from_calibration

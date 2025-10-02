@@ -1,0 +1,9 @@
+camera\_length
+==============
+
+.. currentmodule:: pyxem.utils.calibration
+
+.. autoproperty:: Calibration.camera_length
+
+.. minigallery:: pyxem.utils.calibration.Calibration.camera_length
+    :add-heading: Examples using ``Calibration.camera_length``

@@ -1,0 +1,6 @@
+center\_direct\_beam
+====================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: Diffraction2D.center_direct_beam

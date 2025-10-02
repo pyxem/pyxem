@@ -1,0 +1,9 @@
+vectors2image
+=============
+
+.. currentmodule:: pyxem.utils.vectors
+
+.. autofunction:: vectors2image
+
+.. minigallery:: pyxem.utils.vectors.vectors2image
+    :add-heading: Examples using ``vectors2image``

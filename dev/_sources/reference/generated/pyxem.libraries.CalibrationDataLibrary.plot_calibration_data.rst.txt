@@ -1,0 +1,6 @@
+plot\_calibration\_data
+=======================
+
+.. currentmodule:: pyxem.libraries
+
+.. automethod:: CalibrationDataLibrary.plot_calibration_data

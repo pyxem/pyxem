@@ -1,0 +1,9 @@
+apply\_transformation
+=====================
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autofunction:: apply_transformation
+
+.. minigallery:: pyxem.utils.diffraction.apply_transformation
+    :add-heading: Examples using ``apply_transformation``

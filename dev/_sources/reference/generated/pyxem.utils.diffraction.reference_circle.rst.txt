@@ -1,0 +1,9 @@
+reference\_circle
+=================
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autofunction:: reference_circle
+
+.. minigallery:: pyxem.utils.diffraction.reference_circle
+    :add-heading: Examples using ``reference_circle``

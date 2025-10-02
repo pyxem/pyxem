@@ -1,0 +1,28 @@
+ProfileIndexationGenerator
+==========================
+
+.. currentmodule:: pyxem.generators
+
+.. autoclass:: ProfileIndexationGenerator
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Methods
+
+    .. autosummary::
+        :toctree:
+        :template: custom-method-template.rst
+        
+        
+        
+        ProfileIndexationGenerator.index_peaks
+        
+    
+    
+
+.. minigallery:: pyxem.generators.ProfileIndexationGenerator
+    :add-heading: Examples using ``ProfileIndexationGenerator``

@@ -1,0 +1,6 @@
+status\_printer
+===============
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. automethod:: tqdm.status_printer

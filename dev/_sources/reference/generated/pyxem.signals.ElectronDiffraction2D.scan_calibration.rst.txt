@@ -1,0 +1,9 @@
+scan\_calibration
+=================
+
+.. currentmodule:: pyxem.signals
+
+.. autoproperty:: ElectronDiffraction2D.scan_calibration
+
+.. minigallery:: pyxem.signals.ElectronDiffraction2D.scan_calibration
+    :add-heading: Examples using ``ElectronDiffraction2D.scan_calibration``

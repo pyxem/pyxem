@@ -1,0 +1,9 @@
+vectors\_to\_polar
+==================
+
+.. currentmodule:: pyxem.utils.vectors
+
+.. autofunction:: vectors_to_polar
+
+.. minigallery:: pyxem.utils.vectors.vectors_to_polar
+    :add-heading: Examples using ``vectors_to_polar``

@@ -1,0 +1,9 @@
+detector\_to\_fourier
+=====================
+
+.. currentmodule:: pyxem.utils.vectors
+
+.. autofunction:: detector_to_fourier
+
+.. minigallery:: pyxem.utils.vectors.detector_to_fourier
+    :add-heading: Examples using ``detector_to_fourier``

@@ -1,0 +1,62 @@
+
+
+.. _sphx_glr_examples_loading_data:
+
+Loading Data
+============
+Below is a gallery of examples on how to load and calibrate data using pyxem.
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This is a simple example of how to load MRC files using Pyxem. The MRC file format is a common format for electron microscopy data.  It is a binary format that is used for storing 3D data, such as electron tomography but because it is a fairly simple format, it has been adopted in some cases to store 4D STEM data as well.">
+
+.. only:: html
+
+  .. image:: /examples/loading_data/images/thumb/sphx_glr_loading_mrc_files_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_loading_data_loading_mrc_files.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Loading MRC files (and other binary files)</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="For the most part Rosettasciio will automatically get the scales and the metadata from the file. Sometimes, however, you may want to set the scales and metadata yourself.">
+
+.. only:: html
+
+  .. image:: /examples/loading_data/images/thumb/sphx_glr_setting_scales_and_metadata_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_loading_data_setting_scales_and_metadata.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Setting Scales and Metadata</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/loading_data/loading_mrc_files
+   /examples/loading_data/setting_scales_and_metadata
+

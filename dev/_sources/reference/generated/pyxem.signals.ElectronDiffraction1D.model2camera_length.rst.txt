@@ -1,0 +1,6 @@
+model2camera\_length
+====================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: ElectronDiffraction1D.model2camera_length

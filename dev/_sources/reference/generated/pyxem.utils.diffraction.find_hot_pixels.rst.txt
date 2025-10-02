@@ -1,0 +1,9 @@
+find\_hot\_pixels
+=================
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autofunction:: find_hot_pixels
+
+.. minigallery:: pyxem.utils.diffraction.find_hot_pixels
+    :add-heading: Examples using ``find_hot_pixels``

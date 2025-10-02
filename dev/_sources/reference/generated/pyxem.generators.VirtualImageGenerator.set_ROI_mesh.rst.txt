@@ -1,0 +1,6 @@
+set\_ROI\_mesh
+==============
+
+.. currentmodule:: pyxem.generators
+
+.. automethod:: VirtualImageGenerator.set_ROI_mesh

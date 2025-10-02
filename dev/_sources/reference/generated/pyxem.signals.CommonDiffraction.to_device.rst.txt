@@ -1,0 +1,6 @@
+to\_device
+==========
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: CommonDiffraction.to_device

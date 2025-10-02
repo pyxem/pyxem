@@ -1,0 +1,6 @@
+to\_ipf\_colormap
+=================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: OrientationMap.to_ipf_colormap

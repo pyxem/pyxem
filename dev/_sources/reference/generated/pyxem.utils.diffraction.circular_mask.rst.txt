@@ -1,0 +1,9 @@
+circular\_mask
+==============
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autofunction:: circular_mask
+
+.. minigallery:: pyxem.utils.diffraction.circular_mask
+    :add-heading: Examples using ``circular_mask``

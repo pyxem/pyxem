@@ -1,0 +1,6 @@
+get\_diffracting\_pixels\_map
+=============================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: DiffractionVectors.get_diffracting_pixels_map

@@ -1,0 +1,58 @@
+DictionaryTreeBrowser
+=====================
+
+.. currentmodule:: pyxem.utils.calibration
+
+.. autoclass:: DictionaryTreeBrowser
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Methods
+
+    .. autosummary::
+        :toctree:
+        :template: custom-method-template.rst
+        
+        
+        
+        DictionaryTreeBrowser.add_dictionary
+        
+        
+        DictionaryTreeBrowser.add_node
+        
+        
+        DictionaryTreeBrowser.as_dictionary
+        
+        
+        DictionaryTreeBrowser.copy
+        
+        
+        DictionaryTreeBrowser.deepcopy
+        
+        
+        DictionaryTreeBrowser.export
+        
+        
+        DictionaryTreeBrowser.get_item
+        
+        
+        DictionaryTreeBrowser.has_item
+        
+        
+        DictionaryTreeBrowser.keys
+        
+        
+        DictionaryTreeBrowser.process_lazy_attributes
+        
+        
+        DictionaryTreeBrowser.set_item
+        
+    
+    
+
+.. minigallery:: pyxem.utils.calibration.DictionaryTreeBrowser
+    :add-heading: Examples using ``DictionaryTreeBrowser``

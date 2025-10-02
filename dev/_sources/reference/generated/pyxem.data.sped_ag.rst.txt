@@ -1,0 +1,9 @@
+sped\_ag
+========
+
+.. currentmodule:: pyxem.data
+
+.. autofunction:: sped_ag
+
+.. minigallery:: pyxem.data.sped_ag
+    :add-heading: Examples using ``sped_ag``

@@ -1,0 +1,6 @@
+format\_interval
+================
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. automethod:: tqdm.format_interval

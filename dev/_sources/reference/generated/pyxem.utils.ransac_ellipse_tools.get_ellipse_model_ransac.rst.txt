@@ -1,0 +1,9 @@
+get\_ellipse\_model\_ransac
+===========================
+
+.. currentmodule:: pyxem.utils.ransac_ellipse_tools
+
+.. autofunction:: get_ellipse_model_ransac
+
+.. minigallery:: pyxem.utils.ransac_ellipse_tools.get_ellipse_model_ransac
+    :add-heading: Examples using ``get_ellipse_model_ransac``

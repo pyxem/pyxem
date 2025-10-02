@@ -1,0 +1,231 @@
+BeamShift
+=========
+
+.. currentmodule:: pyxem.signals
+
+.. autoclass:: BeamShift
+
+    
+    
+    .. rubric:: Attributes
+
+    .. autosummary::
+        :toctree:
+        :template: custom-attribute-template.rst
+        
+        
+        
+        BeamShift.beam_energy
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    
+    
+
+    
+    
+    .. rubric:: Methods
+
+    .. autosummary::
+        :toctree:
+        :template: custom-method-template.rst
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        BeamShift.calibrate_electric_shifts
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        BeamShift.get_bivariate_histogram
+        
+        
+        
+        
+        
+        
+        
+        
+        BeamShift.get_color_signal
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        BeamShift.get_linear_plane
+        
+        
+        
+        BeamShift.get_magnitude_phase_signal
+        
+        
+        BeamShift.get_magnitude_signal
+        
+        
+        
+        
+        BeamShift.get_phase_signal
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        BeamShift.make_linear_plane
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        BeamShift.phase_retrieval
+        
+        
+        BeamShift.pixels_to_calibrated_units
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        BeamShift.plot_on_signal
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        BeamShift.rotate_beam_shifts
+        
+        
+        BeamShift.rotate_scan_dimensions
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    
+    
+
+.. minigallery:: pyxem.signals.BeamShift
+    :add-heading: Examples using ``BeamShift``

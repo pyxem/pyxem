@@ -1,0 +1,637 @@
+
+<!DOCTYPE html>
+
+<html data-content_root="../" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Contributing — pyxem 0.21.0 documentation</title>
+<script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+<!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+<noscript>
+<style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+</noscript>
+<!-- Loaded before other Sphinx assets -->
+<link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet"/>
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet"/>
+<link href="../_static/pygments.css?v=d75fae25" rel="stylesheet" type="text/css"/>
+<link href="../_static/graphviz.css?v=4ae1632d" rel="stylesheet" type="text/css"/>
+<link href="../_static/sphinx-codeautolink.css?v=b2176991" rel="stylesheet" type="text/css"/>
+<link href="../_static/copybutton.css?v=76b2166b" rel="stylesheet" type="text/css"/>
+<link href="../_static/sg_gallery.css?v=d2d258e8" rel="stylesheet" type="text/css"/>
+<link href="../_static/sg_gallery-binder.css?v=f4aeca0c" rel="stylesheet" type="text/css"/>
+<link href="../_static/sg_gallery-dataframe.css?v=2082cf3c" rel="stylesheet" type="text/css"/>
+<link href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" rel="stylesheet" type="text/css"/>
+<link href="../_static/sphinx-design.min.css?v=95c83b7e" rel="stylesheet" type="text/css"/>
+<!-- So that users can add custom icons -->
+<script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+<!-- Pre-loaded scripts that we'll load fully later -->
+<link as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" rel="preload"/>
+<link as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" rel="preload"/>
+<script src="../_static/documentation_options.js?v=88e4c0c0"></script>
+<script src="../_static/doctools.js?v=9bcbadda"></script>
+<script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+<script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+<script src="../_static/copybutton.js?v=f281be69"></script>
+<script src="../_static/design-tabs.js?v=f930bc37"></script>
+<script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+<script>DOCUMENTATION_OPTIONS.pagename = 'dev_guide/contributing';</script>
+<script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://pyxem.readthedocs.io/en/latest/_static/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.21';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+<link href="../_static/logo.ico" rel="icon"/>
+<link href="../genindex.html" rel="index" title="Index"/>
+<link href="../search.html" rel="search" title="Search"/>
+<link href="../changelog.html" rel="next" title="Changelog"/>
+<link href="intro.html" rel="prev" title="Contribute"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="en" name="docsearch:language"/>
+<meta content="0.21.0" name="docsearch:version"/>
+</head>
+<body data-bs-root-margin="0px 0px -60%" data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-default-mode="" data-offset="180">
+<div class="skip-link d-print-none" id="pst-skip-link"><a href="#main-content">Skip to main content</a></div>
+<div id="pst-scroll-pixel-helper"></div>
+<button class="btn rounded-pill" id="pst-back-to-top" type="button">
+<i class="fa-solid fa-arrow-up"></i>Back to top</button>
+<dialog id="pst-search-dialog">
+<form action="../search.html" class="bd-search d-flex align-items-center" method="get">
+<i class="fa-solid fa-magnifying-glass"></i>
+<input aria-label="Search the docs ..." autocapitalize="off" autocomplete="off" autocorrect="off" class="form-control" name="q" placeholder="Search the docs ..." spellcheck="false" type="search"/>
+<span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+</dialog>
+<div class="pst-async-banner-revealer d-none">
+<aside aria-label="Version warning" class="d-none d-print-none" id="bd-header-version-warning"></aside>
+</div>
+<aside aria-label="Announcement" class="bd-header-announcement">
+<div class="bd-header-announcement__content">Check out the new <a href="https://pyxem.readthedocs.io/en/latest/examples/index.html">Examples Gallery!</a> </div>
+</aside>
+<header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+<button aria-label="Site navigation" class="pst-navbar-icon sidebar-toggle primary-toggle">
+<span class="fa-solid fa-bars"></span>
+</button>
+<div class="col-lg-3 navbar-header-items__start">
+<div class="navbar-item">
+<a class="navbar-brand logo" href="../index.html">
+<img alt="pyxem 0.21.0 documentation - Home" class="logo__image only-light" src="../_static/logo.png"/>
+<img alt="pyxem 0.21.0 documentation - Home" class="logo__image only-dark pst-js-only" src="../_static/logo.png"/>
+</a></div>
+<div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+<button aria-controls="pst-version-switcher-list-2" aria-haspopup="listbox" aria-label="Version switcher list" class="version-switcher__button btn btn-sm dropdown-toggle" data-bs-toggle="dropdown" id="pst-version-switcher-button-2" type="button">
+    Choose version  <!-- this text may get changed later by javascript -->
+<span class="caret"></span>
+</button>
+<div aria-labelledby="pst-version-switcher-button-2" class="version-switcher__menu dropdown-menu list-group-flush py-0" id="pst-version-switcher-list-2" role="listbox">
+<!-- dropdown will be populated by javascript on page load -->
+</div>
+</div></div>
+</div>
+<div class="col-lg-9 navbar-header-items">
+<div class="me-auto navbar-header-items__center">
+<div class="navbar-item">
+<nav>
+<ul class="bd-navbar-elements navbar-nav">
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../intro.html">
+    Introduction
+  </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../user_guide/index.html">
+    User Guide
+  </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../examples/index.html">
+    Examples
+  </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../tutorials/index.html">
+    Tutorials
+  </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../reference/index.html">
+    Reference
+  </a>
+</li>
+<li class="nav-item current active">
+<a class="nav-link nav-internal" href="index.html">
+    Dev Guide
+  </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../changelog.html">
+    Changelog
+  </a>
+</li>
+</ul>
+</nav></div>
+</div>
+<div class="navbar-header-items__end">
+<div class="navbar-item navbar-persistent--container">
+<button aria-label="Search" class="btn search-button-field search-button__button pst-js-only" data-bs-placement="bottom" data-bs-toggle="tooltip" title="Search">
+<i class="fa-solid fa-magnifying-glass"></i>
+<span class="search-button__default-text">Search</span>
+<span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+</div>
+<div class="navbar-item">
+<button aria-label="Color mode" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" data-bs-placement="bottom" data-bs-title="Color mode" data-bs-toggle="tooltip">
+<i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+<i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+<i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+</button></div>
+<div class="navbar-item"><ul aria-label="Icon Links" class="navbar-icon-links">
+<li class="nav-item">
+<a class="nav-link pst-navbar-icon" data-bs-placement="bottom" data-bs-toggle="tooltip" href="https://github.com/pyxem/pyxem" rel="noopener" target="_blank" title="GitHub"><i aria-hidden="true" class="fa-brands fa-square-github fa-lg"></i>
+<span class="sr-only">GitHub</span></a>
+</li>
+</ul></div>
+</div>
+</div>
+<div class="navbar-persistent--mobile">
+<button aria-label="Search" class="btn search-button-field search-button__button pst-js-only" data-bs-placement="bottom" data-bs-toggle="tooltip" title="Search">
+<i class="fa-solid fa-magnifying-glass"></i>
+<span class="search-button__default-text">Search</span>
+<span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+</div>
+<button aria-label="On this page" class="pst-navbar-icon sidebar-toggle secondary-toggle">
+<span class="fa-solid fa-outdent"></span>
+</button>
+</div>
+</header>
+<div class="bd-container">
+<div class="bd-container__inner bd-page-width">
+<dialog id="pst-primary-sidebar-modal"></dialog>
+<div class="bd-sidebar-primary bd-sidebar" id="pst-primary-sidebar">
+<div class="sidebar-header-items sidebar-primary__section">
+<div class="sidebar-header-items__center">
+<div class="navbar-item">
+<nav>
+<ul class="bd-navbar-elements navbar-nav">
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../intro.html">
+    Introduction
+  </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../user_guide/index.html">
+    User Guide
+  </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../examples/index.html">
+    Examples
+  </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../tutorials/index.html">
+    Tutorials
+  </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../reference/index.html">
+    Reference
+  </a>
+</li>
+<li class="nav-item current active">
+<a class="nav-link nav-internal" href="index.html">
+    Dev Guide
+  </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../changelog.html">
+    Changelog
+  </a>
+</li>
+</ul>
+</nav></div>
+</div>
+<div class="sidebar-header-items__end">
+<div class="navbar-item">
+<button aria-label="Color mode" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" data-bs-placement="bottom" data-bs-title="Color mode" data-bs-toggle="tooltip">
+<i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+<i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+<i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+</button></div>
+<div class="navbar-item"><ul aria-label="Icon Links" class="navbar-icon-links">
+<li class="nav-item">
+<a class="nav-link pst-navbar-icon" data-bs-placement="bottom" data-bs-toggle="tooltip" href="https://github.com/pyxem/pyxem" rel="noopener" target="_blank" title="GitHub"><i aria-hidden="true" class="fa-brands fa-square-github fa-lg"></i>
+<span class="sr-only">GitHub</span></a>
+</li>
+</ul></div>
+</div>
+</div>
+<div class="sidebar-primary-items__start sidebar-primary__section">
+<div class="sidebar-primary-item">
+<nav aria-label="Section Navigation" class="bd-docs-nav bd-links">
+<p aria-level="1" class="bd-links__title" role="heading">Section Navigation</p>
+<div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Contributing Guide</a></li>
+</ul>
+</div>
+</nav></div>
+</div>
+<div class="sidebar-primary-items__end sidebar-primary__section">
+<div class="sidebar-primary-item">
+<div class="flat" data-ea-manual="true" data-ea-publisher="readthedocs" data-ea-type="readthedocs-sidebar" id="ethical-ad-placement">
+</div></div>
+</div>
+</div>
+<main class="bd-main" id="main-content" role="main">
+<div class="bd-content">
+<div class="bd-article-container">
+<div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+<div class="header-article-items__start">
+<div class="header-article-item">
+<nav aria-label="Breadcrumb" class="d-print-none">
+<ul class="bd-breadcrumbs">
+<li class="breadcrumb-item breadcrumb-home">
+<a aria-label="Home" class="nav-link" href="../index.html">
+<i class="fa-solid fa-home"></i>
+</a>
+</li>
+<li class="breadcrumb-item"><a class="nav-link" href="index.html">Contribute</a></li>
+<li aria-current="page" class="breadcrumb-item active"><span class="ellipsis">Contributing</span></li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+</div>
+<div id="searchbox"></div>
+<article class="bd-article">
+<section id="contributing">
+<span id="id1"></span><h1>Contributing<a class="headerlink" href="#contributing" title="Link to this heading">#</a></h1>
+<p>pyxem is a community maintained project. We welcome contributions in the form of bug
+reports, documentation, code, feature requests, and more. These guidelines provide
+resources on how best to contribute.</p>
+<p>For new users, checking out the <a class="reference external" href="https://guides.github.com">GitHub guides</a> are
+recommended.</p>
+<section id="questions-comments-and-feedback">
+<h2>Questions, comments, and feedback<a class="headerlink" href="#questions-comments-and-feedback" title="Link to this heading">#</a></h2>
+<p>Have any questions, comments, suggestions for improvements, or any other
+inquiries regarding the project? Feel free to
+<a class="reference external" href="https://github.com/pyxem/pyxem/discussions">ask a question</a>,
+<a class="reference external" href="https://github.com/pyxem/pyxem/issues">open an issue</a> or
+<a class="reference external" href="https://github.com/pyxem/pyxem/pulls">make a pull request</a> in our GitHub
+repository.</p>
+</section>
+<section id="first-time-contributing">
+<span id="setting-up-a-development-installation"></span><h2>First Time Contributing<a class="headerlink" href="#first-time-contributing" title="Link to this heading">#</a></h2>
+<p>One of the best things that first time contributors can do is help to improve our
+documentation, our <a class="reference external" href="https://github.com/pyxem/pyxem-demos">demos</a> or report a bug.</p>
+<p>If you have a workflow that you don’t see covered in the demos feel free to submit an
+<a class="reference external" href="https://github.com/pyxem/pyxem-demos/issues">issue</a> and someone can help you with the
+process of adding to the demos.</p>
+</section>
+<section id="id2">
+<h2>Setting up a development installation<a class="headerlink" href="#id2" title="Link to this heading">#</a></h2>
+<p>You need a <a class="reference external" href="https://docs.github.com/en/get-started/quickstart/contributing-to-projects#about-forking">fork</a> of the
+<a class="reference external" href="https://github.com/pyxem/pyxem">repository</a> in order to make changes to pyxem.</p>
+<p>Make a local copy of your forked repository and change directories:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">your</span><span class="o">-</span><span class="n">username</span><span class="o">/</span><span class="n">pyxem</span><span class="o">.</span><span class="n">git</span>
+<span class="n">cd</span> <span class="n">pyxem</span>
+</pre></div>
+</div>
+<p>Set the <code class="docutils literal notranslate"><span class="pre">upstream</span></code> remote to the main pyxem repository:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">remote</span> <span class="n">add</span> <span class="n">upstream</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">pyxem</span><span class="o">/</span><span class="n">pyxem</span><span class="o">.</span><span class="n">git</span>
+</pre></div>
+</div>
+<p>We recommend installing in a <a class="reference external" href="https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html">conda environment</a>
+with the <a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html">Miniconda distribution</a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">create</span> <span class="o">--</span><span class="n">name</span> <span class="n">pyxem</span>
+<span class="n">conda</span> <span class="n">activate</span> <span class="n">pyxem</span>
+</pre></div>
+</div>
+<p>Then, install the required dependencies while making the development version available
+globally (in the <code class="docutils literal notranslate"><span class="pre">conda</span></code> environment):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">--</span><span class="n">editable</span> <span class="o">.</span><span class="p">[</span><span class="n">dev</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>This installs all necessary development dependencies, including those for running tests
+and building documentation.</p>
+</section>
+<section id="code-style">
+<h2>Code style<a class="headerlink" href="#code-style" title="Link to this heading">#</a></h2>
+<p>The code making up pyxem is formatted closely following the <a class="reference external" href="https://www.python.org/dev/peps/pep-0008/">Style Guide for Python Code</a> with <a class="reference external" href="https://black.readthedocs.io/en/stable/the_black_code_style/index.html">The Black Code style</a>. Note that
+<code class="docutils literal notranslate"><span class="pre">black</span></code> won’t format <a class="reference external" href="https://www.python.org/dev/peps/pep-0257/">docstrings</a>.</p>
+<p>Package imports should be structured into three blocks with blank lines between
+them (descending order): standard library (like <code class="docutils literal notranslate"><span class="pre">os</span></code> and <code class="docutils literal notranslate"><span class="pre">typing</span></code>), third
+party packages (like <code class="docutils literal notranslate"><span class="pre">numpy</span></code> and <code class="docutils literal notranslate"><span class="pre">hyperspy</span></code>) and finally pyxem imports.</p>
+</section>
+<section id="making-changes">
+<h2>Making changes<a class="headerlink" href="#making-changes" title="Link to this heading">#</a></h2>
+<p>Create a new feature branch:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">checkout</span> <span class="n">main</span> <span class="o">-</span><span class="n">b</span> <span class="n">your</span><span class="o">-</span><span class="n">awesome</span><span class="o">-</span><span class="n">feature</span><span class="o">-</span><span class="n">name</span>
+</pre></div>
+</div>
+<p>When you’ve made some changes you can view them with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">status</span>
+</pre></div>
+</div>
+<p>Add and commit your created, modified or deleted files:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">add</span> <span class="n">my</span><span class="o">-</span><span class="n">file</span><span class="o">-</span><span class="ow">or</span><span class="o">-</span><span class="n">directory</span>
+<span class="n">git</span> <span class="n">commit</span> <span class="o">-</span><span class="n">s</span> <span class="o">-</span><span class="n">m</span> <span class="s2">"An explanatory commit message"</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">-s</span></code> makes sure that you sign your commit with your <a class="reference external" href="https://github.com/settings/emails">GitHub-registered email</a> as the author. You can set this up following
+<a class="reference external" href="https://help.github.com/en/github/setting-up-and-managing-your-github-user-account/setting-your-commit-email-address">this GitHub guide</a>.</p>
+</section>
+<section id="keeping-your-branch-up-to-date">
+<h2>Keeping your branch up-to-date<a class="headerlink" href="#keeping-your-branch-up-to-date" title="Link to this heading">#</a></h2>
+<p>Switch to the <code class="docutils literal notranslate"><span class="pre">main</span></code> branch:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">checkout</span> <span class="n">main</span>
+</pre></div>
+</div>
+<p>Fetch changes and update <code class="docutils literal notranslate"><span class="pre">main</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">pull</span> <span class="n">upstream</span> <span class="n">main</span> <span class="o">--</span><span class="n">tags</span>
+</pre></div>
+</div>
+<p>Update your feature branch:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">checkout</span> <span class="n">your</span><span class="o">-</span><span class="n">awesome</span><span class="o">-</span><span class="n">feature</span><span class="o">-</span><span class="n">name</span>
+<span class="n">git</span> <span class="n">merge</span> <span class="n">main</span>
+</pre></div>
+</div>
+</section>
+<section id="sharing-your-changes">
+<h2>Sharing your changes<a class="headerlink" href="#sharing-your-changes" title="Link to this heading">#</a></h2>
+<p>Update your remote branch:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">push</span> <span class="o">-</span><span class="n">u</span> <span class="n">origin</span> <span class="n">your</span><span class="o">-</span><span class="n">awesome</span><span class="o">-</span><span class="n">feature</span><span class="o">-</span><span class="n">name</span>
+</pre></div>
+</div>
+<p>You can then make a <a class="reference external" href="https://guides.github.com/activities/forking/#making-a-pull-request">pull request</a> to pyxem’s
+<code class="docutils literal notranslate"><span class="pre">main</span></code> branch. Good job!</p>
+</section>
+<section id="deprecations">
+<h2>Deprecations<a class="headerlink" href="#deprecations" title="Link to this heading">#</a></h2>
+<p>We attempt to adhere to semantic versioning as best we can. This means that as little,
+ideally no, functionality should break between minor releases. Deprecation warnings
+are raised whenever possible and feasible for functions/methods/properties/arguments,
+so that users get a heads-up one (minor) release before something is removed or changes,
+with a possible alternative to be used.</p>
+<p>The decorator should be placed right above the object signature to be deprecated:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@deprecate</span><span class="p">(</span><span class="n">since</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">removal</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">alternative</span><span class="o">=</span><span class="s2">"bar"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">foo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span>
+
+<a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#property" title="property"><span class="nd">@property</span></a>
+<span class="nd">@deprecate</span><span class="p">(</span><span class="n">since</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">removal</span><span class="o">=</span><span class="mf">0.10</span><span class="p">,</span> <span class="n">alternative</span><span class="o">=</span><span class="s2">"another"</span><span class="p">,</span> <span class="n">is_function</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">this_property</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mi">2</span>
+</pre></div>
+</div>
+</section>
+<section id="running-and-writing-tests">
+<h2>Running and writing tests<a class="headerlink" href="#running-and-writing-tests" title="Link to this heading">#</a></h2>
+<p>All functionality in pyxem is tested via the <a class="reference external" href="https://docs.pytest.org">pytest</a>
+framework. The tests reside in a <code class="docutils literal notranslate"><span class="pre">test</span></code> directory within each module. Tests are short
+methods that call functions in pyxem and compare resulting output values with known
+answers. Install necessary dependencies to run the tests:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">--</span><span class="n">editable</span> <span class="o">.</span><span class="p">[</span><span class="n">tests</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>To run the tests:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pytest</span> <span class="o">--</span><span class="n">cov</span> <span class="o">--</span><span class="n">pyargs</span> <span class="n">pyxem</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">--cov</span></code> flag makes <a class="reference external" href="https://coverage.readthedocs.io/en/latest/">coverage.py</a>
+print a nice report in the terminal. For an even nicer presentation, you can use
+<code class="docutils literal notranslate"><span class="pre">coverage.py</span></code> directly:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">coverage</span> <span class="n">html</span>
+</pre></div>
+</div>
+<p>Then, you can open the created <code class="docutils literal notranslate"><span class="pre">htmlcov/index.html</span></code> in the browser and inspect
+the coverage in more detail.</p>
+<p>Docstring examples are tested
+<a class="reference external" href="https://docs.pytest.org/en/stable/doctest.html">with pytest</a> as well:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pytest</span> <span class="o">--</span><span class="n">doctest</span><span class="o">-</span><span class="n">modules</span> <span class="o">--</span><span class="n">ignore</span><span class="o">-</span><span class="n">glob</span><span class="o">=</span><span class="n">pyxem</span><span class="o">/*/</span><span class="n">tests</span>
+</pre></div>
+</div>
+</section>
+<section id="building-and-writing-documentation">
+<h2>Building and writing documentation<a class="headerlink" href="#building-and-writing-documentation" title="Link to this heading">#</a></h2>
+<p>We use <a class="reference external" href="https://www.sphinx-doc.org/en/master/">Sphinx</a> for documenting functionality.
+Install necessary dependencies to build the documentation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">--</span><span class="n">editable</span> <span class="o">.</span><span class="p">[</span><span class="n">doc</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>In addition, you will need to download the <code class="docutils literal notranslate"><span class="pre">pyxem-demos</span></code> repository and place it in the
+doc/tutorial directory. This is necessary to build the documentation.</p>
+<p>The easiest way to download the <code class="docutils literal notranslate"><span class="pre">pyxem-demos</span></code> repository is to use the <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">demos</span></code>
+command which will clone the repository into the correct location.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">doc</span>
+<span class="n">make</span> <span class="n">demos</span>
+</pre></div>
+</div>
+<p>Then build the documentation.</p>
+<blockquote>
+<div><p>make html</p>
+</div></blockquote>
+<p>If the build is successful, the documentation will be available in the
+<code class="docutils literal notranslate"><span class="pre">doc/_build/html</span></code> directory. You can open the created <code class="docutils literal notranslate"><span class="pre">index.html</span></code> in the browser
+and inspect the documentation in more detail.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you have already cloned the <code class="docutils literal notranslate"><span class="pre">pyxem-demos</span></code> repository, you can use the
+<code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">demos</span></code> command again to update the repository to the latest version.</p>
+</div>
+<p>The documentation’s HTML pages are built in the <code class="docutils literal notranslate"><span class="pre">doc/_build/html</span></code> directory from files
+in the <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html">reStructuredText (reST)</a> plaintext
+markup language. They should be accessible in the browser by typing
+<code class="docutils literal notranslate"><span class="pre">file:///your-absolute/path/to/pyxem/doc/_build/html/index.html</span></code> in the address bar.</p>
+<p>Tips for writing Jupyter notebooks that are meant to be converted to reST text files by
+<a class="reference external" href="https://nbsphinx.readthedocs.io/en/latest/">nbsphinx</a>:</p>
+<ul class="simple">
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">_</span> <span class="pre">=</span> <span class="pre">ax[0].imshow(...)</span></code> to disable Matplotlib output if a Matplotlib
+command is the last line in a cell.</p></li>
+<li><p>Refer to our API reference with this general markdown syntax:
+<code class="code docutils literal notranslate"><span class="pre">:meth:`~.signals.Diffraction2D.get_azimuthal_integral1d`</span></code> which will be
+displayed as <a class="reference internal" href="../reference/generated/pyxem.signals.Diffraction2D.get_azimuthal_integral1d.html#pyxem.signals.Diffraction2D.get_azimuthal_integral1d" title="pyxem.signals.Diffraction2D.get_azimuthal_integral1d"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_azimuthal_integral1d()</span></code></a> or
+<code class="code docutils literal notranslate"><span class="pre">:meth:`pyxem.signals.Diffraction2D.get_azimuthal_integral1d`</span></code> to have the full
+path: <a class="reference internal" href="../reference/generated/pyxem.signals.Diffraction2D.get_azimuthal_integral1d.html#pyxem.signals.Diffraction2D.get_azimuthal_integral1d" title="pyxem.signals.Diffraction2D.get_azimuthal_integral1d"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyxem.signals.Diffraction2D.get_azimuthal_integral1d()</span></code></a></p></li>
+<li><p>Reference external APIs via standard markdown like <code class="code docutils literal notranslate"><span class="pre">:class:`hyperspy.api.signals.Signal2D`</span></code>,
+which will be displayed as <a class="reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.signals/Signal2D.html#hyperspy.api.signals.Signal2D" title="(in HyperSpy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">hyperspy.api.signals.Signal2D</span></code></a>.</p></li>
+<li><p>The Sphinx gallery thumbnail used for a notebook is set by adding the
+<code class="docutils literal notranslate"><span class="pre">nbsphinx-thumbnail</span></code> tag to a code cell with an image output. The notebook
+must be added to the gallery in the README.rst to be included in the
+documentation pages.</p></li>
+</ul>
+<section id="switching-between-documentation-versions">
+<h3>Switching between Documentation Versions<a class="headerlink" href="#switching-between-documentation-versions" title="Link to this heading">#</a></h3>
+<p>To make switching between documentation versions easier, we have a version switcher
+in the documentation. This switcher is located in the <code class="docutils literal notranslate"><span class="pre">doc/_static/switcher.json</span></code> file
+or at <a class="reference external" href="https://pyxem.readthedocs.io/en/latest/_static/switcher.json">https://pyxem.readthedocs.io/en/latest/_static/switcher.json</a>.  Because the switcher
+points to the latest version of the documentation, any update to the documentation will
+be retroactively applied to all previous versions which have the switcher enabled.</p>
+<p>To update the switcher, you will need to update the <code class="docutils literal notranslate"><span class="pre">doc/_static/switcher.json</span></code> file
+with the new version number. This will ensure that the version switcher in the
+documentation is up to date.</p>
+</section>
+</section>
+<section id="continuous-integration-ci">
+<h2>Continuous integration (CI)<a class="headerlink" href="#continuous-integration-ci" title="Link to this heading">#</a></h2>
+<p>We use <a class="reference external" href="https://github.com/pyxem/pyxem/actions">GitHub Actions</a> to ensure that pyxem
+can be installed on Windows, macOS and Linux (Ubuntu). After a successful installation,
+the CI server runs the tests. After the tests return no errors, code coverage is
+reported to <a class="reference external" href="https://coveralls.io/github/pyxem/pyxem?branch=main">Coveralls</a>.</p>
+</section>
+<section id="making-a-release">
+<h2>Making a release<a class="headerlink" href="#making-a-release" title="Link to this heading">#</a></h2>
+<p>We use <a class="reference external" href="https://github.com/pyxem/pyxem/actions">GitHub Actions</a> to automatically
+create a new release. Each time a new tag is pushed to the repository, the CI server
+will:</p>
+<ol class="arabic simple">
+<li><p>Build the documentation.  Each tagged release will be added as a
+<a class="reference external" href="https://docs.readthedocs.io/en/stable/versions.html">stable</a> build
+to <a class="reference external" href="https://pyxem.readthedocs.io/en/latest/">Read the Docs</a>.</p></li>
+<li><p>Publish a new version of pyxem to <a class="reference external" href="https://pypi.org/project/pyxem/">PyPI</a>.</p></li>
+<li><p>Create a new <a class="reference external" href="https://github.com/pyxem/pyxem/releases">GitHub release</a>.</p></li>
+<li><p>Publish a new version of pyxem to <a class="reference external" href="https://zenodo.org/doi/10.5281/zenodo.2649351">Zenodo</a>.</p></li>
+</ol>
+<p>To make a new release, follow these steps:</p>
+<ol class="arabic simple">
+<li><p>Update the version number in <code class="docutils literal notranslate"><span class="pre">release_info.py</span></code>.</p></li>
+<li><p>Update the <code class="docutils literal notranslate"><span class="pre">CHANGELOG.rst</span></code> file with the date and new version number and a description of
+the changes.</p></li>
+<li><p>Update the list of contributors in both the <code class="docutils literal notranslate"><span class="pre">release_info.py</span></code> and <code class="docutils literal notranslate"><span class="pre">.zenodo.json</span></code>
+files. __ Make sure that the Zenodo file is valid JSON __.</p></li>
+<li><p>Commit the changes and push them to the repository.</p></li>
+<li><p>Create a new tag with the “v” + version number (e.g. “v0.16.0”) and make a new release on GitHub.</p></li>
+<li><p>Wait for the CI server to finish the release process.</p></li>
+</ol>
+<p>Then you can increase the version number in <code class="docutils literal notranslate"><span class="pre">release_info.py</span></code> to the next minor version
+and add a dev suffix (e.g. “0.17.dev0”).</p>
+<p>After the new version documentation is public. You should update the doc/_static/switcher.json
+file with the new version of the documentation. This will ensure that the version switcher in the
+documentation is up to date.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If any of the steps fail, you can restart the CI server by clicking on the “Re-run
+jobs” button on the GitHub Actions page. Sometimes the CI server fails because of
+connection issues to Zenodo or PyPI.</p>
+</div>
+</section>
+</section>
+</article>
+<footer class="prev-next-footer d-print-none">
+<div class="prev-next-area">
+<a class="left-prev" href="intro.html" title="previous page">
+<i class="fa-solid fa-angle-left"></i>
+<div class="prev-next-info">
+<p class="prev-next-subtitle">previous</p>
+<p class="prev-next-title">Contribute</p>
+</div>
+</a>
+<a class="right-next" href="../changelog.html" title="next page">
+<div class="prev-next-info">
+<p class="prev-next-subtitle">next</p>
+<p class="prev-next-title">Changelog</p>
+</div>
+<i class="fa-solid fa-angle-right"></i>
+</a>
+</div>
+</footer>
+</div>
+<dialog id="pst-secondary-sidebar-modal"></dialog>
+<div class="bd-sidebar-secondary bd-toc" id="pst-secondary-sidebar"><div class="sidebar-secondary-items sidebar-secondary__inner">
+<div class="sidebar-secondary-item">
+<div class="page-toc tocsection onthispage" id="pst-page-navigation-heading-2">
+<i class="fa-solid fa-list"></i> On this page
+  </div>
+<nav aria-labelledby="pst-page-navigation-heading-2" class="bd-toc-nav page-toc">
+<ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#questions-comments-and-feedback">Questions, comments, and feedback</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#first-time-contributing">First Time Contributing</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Setting up a development installation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#code-style">Code style</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#making-changes">Making changes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#keeping-your-branch-up-to-date">Keeping your branch up-to-date</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#sharing-your-changes">Sharing your changes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#deprecations">Deprecations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#running-and-writing-tests">Running and writing tests</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#building-and-writing-documentation">Building and writing documentation</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#switching-between-documentation-versions">Switching between Documentation Versions</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#continuous-integration-ci">Continuous integration (CI)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#making-a-release">Making a release</a></li>
+</ul>
+</nav></div>
+<div class="sidebar-secondary-item">
+<div class="tocsection editthispage">
+<a href="https://github.com/pyxem/pyxem/edit/main/doc/dev_guide/contributing.rst">
+<i class="fa-solid fa-pencil"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+</div>
+</div>
+<div class="sidebar-secondary-item">
+<div aria-label="source link" role="note">
+<h3>This Page</h3>
+<ul class="this-page-menu">
+<li><a href="../_sources/dev_guide/contributing.rst.txt" rel="nofollow">Show Source</a></li>
+</ul>
+</div></div>
+</div></div>
+</div>
+<footer class="bd-footer-content">
+</footer>
+</main>
+</div>
+</div>
+<!-- Scripts loaded after <body> so the DOM is not blocked -->
+<script defer="" src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer="" src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+<footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+<div class="footer-items__start">
+<div class="footer-item">
+<p class="copyright">
+    
+      © Copyright Copyright 2016-2025, The pyxem developers.
+      <br/>
+</p>
+</div>
+<div class="footer-item">
+<p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+</p>
+</div>
+</div>
+<div class="footer-items__end">
+<div class="footer-item">
+<p class="theme-version">
+<!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+</div>
+</div>
+</footer>
+</body>
+</html>

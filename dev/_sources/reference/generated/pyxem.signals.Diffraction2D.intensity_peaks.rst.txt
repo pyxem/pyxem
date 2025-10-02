@@ -1,0 +1,6 @@
+intensity\_peaks
+================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: Diffraction2D.intensity_peaks

@@ -1,0 +1,9 @@
+get\_single\_DisplacementGradientTensor
+=======================================
+
+.. currentmodule:: pyxem.generators
+
+.. autofunction:: get_single_DisplacementGradientTensor
+
+.. minigallery:: pyxem.generators.get_single_DisplacementGradientTensor
+    :add-heading: Examples using ``get_single_DisplacementGradientTensor``

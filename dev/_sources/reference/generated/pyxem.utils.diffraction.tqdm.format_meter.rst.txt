@@ -1,0 +1,6 @@
+format\_meter
+=============
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. automethod:: tqdm.format_meter

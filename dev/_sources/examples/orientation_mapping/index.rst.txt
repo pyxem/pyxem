@@ -1,0 +1,80 @@
+
+
+.. _sphx_glr_examples_orientation_mapping:
+
+Orientation Mapping
+===================
+Below is a gallery of examples on how to do orientation mapping in pyxem.
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="For more information on the orientation mapping process see pyxemorientationmapping2022">
+
+.. only:: html
+
+  .. image:: /examples/orientation_mapping/images/thumb/sphx_glr_single_phase_orientation_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_orientation_mapping_single_phase_orientation.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Single Phase Orientation Mapping</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="For more information on the orientation mapping process see pyxemorientationmapping2022">
+
+.. only:: html
+
+  .. image:: /examples/orientation_mapping/images/thumb/sphx_glr_multi_phase_orientation_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_orientation_mapping_multi_phase_orientation.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Multi Phase Orientation Mapping</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="For more information on the orientation mapping process see pyxemorientationmapping2022">
+
+.. only:: html
+
+  .. image:: /examples/orientation_mapping/images/thumb/sphx_glr_on_zone_orientation_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_orientation_mapping_on_zone_orientation.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">On Zone Orientation</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/orientation_mapping/single_phase_orientation
+   /examples/orientation_mapping/multi_phase_orientation
+   /examples/orientation_mapping/on_zone_orientation
+

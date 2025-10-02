@@ -1,0 +1,6 @@
+find\_dead\_pixels
+==================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: Diffraction2D.find_dead_pixels

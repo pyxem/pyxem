@@ -1,0 +1,9 @@
+zrnb\_precipitate
+=================
+
+.. currentmodule:: pyxem.data
+
+.. autofunction:: zrnb_precipitate
+
+.. minigallery:: pyxem.data.zrnb_precipitate
+    :add-heading: Examples using ``zrnb_precipitate``

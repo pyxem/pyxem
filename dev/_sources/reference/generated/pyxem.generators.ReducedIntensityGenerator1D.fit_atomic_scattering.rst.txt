@@ -1,0 +1,6 @@
+fit\_atomic\_scattering
+=======================
+
+.. currentmodule:: pyxem.generators
+
+.. automethod:: ReducedIntensityGenerator1D.fit_atomic_scattering

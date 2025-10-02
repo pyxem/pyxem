@@ -1,0 +1,9 @@
+is\_postrelease
+===============
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autoproperty:: Version.is_postrelease
+
+.. minigallery:: pyxem.utils.diffraction.Version.is_postrelease
+    :add-heading: Examples using ``Version.is_postrelease``

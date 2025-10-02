@@ -1,0 +1,9 @@
+pdcusi\_insitu
+==============
+
+.. currentmodule:: pyxem.data
+
+.. autofunction:: pdcusi_insitu
+
+.. minigallery:: pyxem.data.pdcusi_insitu
+    :add-heading: Examples using ``pdcusi_insitu``

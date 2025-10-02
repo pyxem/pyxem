@@ -1,0 +1,6 @@
+get\_virtual\_electron\_diffraction
+===================================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: VDFSegment.get_virtual_electron_diffraction

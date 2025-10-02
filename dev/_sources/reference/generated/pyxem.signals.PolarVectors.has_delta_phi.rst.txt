@@ -1,0 +1,9 @@
+has\_delta\_phi
+===============
+
+.. currentmodule:: pyxem.signals
+
+.. autoproperty:: PolarVectors.has_delta_phi
+
+.. minigallery:: pyxem.signals.PolarVectors.has_delta_phi
+    :add-heading: Examples using ``PolarVectors.has_delta_phi``

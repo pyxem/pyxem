@@ -1,0 +1,110 @@
+tqdm
+====
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autoclass:: tqdm
+
+    
+    
+    .. rubric:: Attributes
+
+    .. autosummary::
+        :toctree:
+        :template: custom-attribute-template.rst
+        
+        
+        tqdm.format_dict
+        
+        
+        tqdm.monitor
+        
+        
+        tqdm.monitor_interval
+        
+    
+    
+
+    
+    
+    .. rubric:: Methods
+
+    .. autosummary::
+        :toctree:
+        :template: custom-method-template.rst
+        
+        
+        
+        tqdm.clear
+        
+        
+        tqdm.close
+        
+        
+        tqdm.display
+        
+        
+        tqdm.external_write_mode
+        
+        
+        tqdm.format_interval
+        
+        
+        tqdm.format_meter
+        
+        
+        tqdm.format_num
+        
+        
+        tqdm.format_sizeof
+        
+        
+        tqdm.get_lock
+        
+        
+        tqdm.moveto
+        
+        
+        tqdm.pandas
+        
+        
+        tqdm.refresh
+        
+        
+        tqdm.reset
+        
+        
+        tqdm.set_description
+        
+        
+        tqdm.set_description_str
+        
+        
+        tqdm.set_lock
+        
+        
+        tqdm.set_postfix
+        
+        
+        tqdm.set_postfix_str
+        
+        
+        tqdm.status_printer
+        
+        
+        tqdm.unpause
+        
+        
+        tqdm.update
+        
+        
+        tqdm.wrapattr
+        
+        
+        tqdm.write
+        
+    
+    
+
+.. minigallery:: pyxem.utils.diffraction.tqdm
+    :add-heading: Examples using ``tqdm``

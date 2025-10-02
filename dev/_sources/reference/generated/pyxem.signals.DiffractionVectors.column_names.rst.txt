@@ -1,0 +1,9 @@
+column\_names
+=============
+
+.. currentmodule:: pyxem.signals
+
+.. autoproperty:: DiffractionVectors.column_names
+
+.. minigallery:: pyxem.signals.DiffractionVectors.column_names
+    :add-heading: Examples using ``DiffractionVectors.column_names``

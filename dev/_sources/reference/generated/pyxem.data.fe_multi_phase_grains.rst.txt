@@ -1,0 +1,9 @@
+fe\_multi\_phase\_grains
+========================
+
+.. currentmodule:: pyxem.data
+
+.. autofunction:: fe_multi_phase_grains
+
+.. minigallery:: pyxem.data.fe_multi_phase_grains
+    :add-heading: Examples using ``fe_multi_phase_grains``

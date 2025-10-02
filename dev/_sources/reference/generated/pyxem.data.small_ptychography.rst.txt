@@ -1,0 +1,9 @@
+small\_ptychography
+===================
+
+.. currentmodule:: pyxem.data
+
+.. autofunction:: small_ptychography
+
+.. minigallery:: pyxem.data.small_ptychography
+    :add-heading: Examples using ``small_ptychography``

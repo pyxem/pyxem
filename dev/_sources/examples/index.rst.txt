@@ -1,0 +1,773 @@
+:orphan:
+
+.. _examples-index:
+
+Gallery of Examples
+===================
+
+Below is a gallery of examples for different operations in pyxem.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+Amorphous Characterization
+==========================
+Below is a gallery of examples on how to characterize amorphous materials.
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="In this example we will focus on calculating V_\Omega (k) which is defined as,">
+
+.. only:: html
+
+  .. image:: /examples/amorphous_characterization/images/thumb/sphx_glr_FEM_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_amorphous_characterization_FEM.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Fluctuation Electron Microscopy</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+Differential Phase Contrast (DPC)
+=================================
+Below is a gallery of examples on how to do Differential Phase Contrast (DPC) in pyxem.
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows a basic workflow for doing magnetic DPC on a simple simulated test dataset. The dataset consists of alternating stripes of switching magnetic fields resulting in reversals of the direction of the magnetic field.">
+
+.. only:: html
+
+  .. image:: /examples/dpc/images/thumb/sphx_glr_magnetic_dpc_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_dpc_magnetic_dpc.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Magnetic DPC</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="When we measure a change in the position of the electron beam on the camera, we are directly measuring that the electron beam has been deflected from the optic axis. In other words, the momentum of the electron beam in the xy plane has changed. Since electrons are charged particles, we can relate the electron’s momentum change to an electric field using the Lorentz force equation.">
+
+.. only:: html
+
+  .. image:: /examples/dpc/images/thumb/sphx_glr_electric_field_dpc_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_dpc_electric_field_dpc.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Electric Field Mapping</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+Loading Data
+============
+Below is a gallery of examples on how to load and calibrate data using pyxem.
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This is a simple example of how to load MRC files using Pyxem. The MRC file format is a common format for electron microscopy data.  It is a binary format that is used for storing 3D data, such as electron tomography but because it is a fairly simple format, it has been adopted in some cases to store 4D STEM data as well.">
+
+.. only:: html
+
+  .. image:: /examples/loading_data/images/thumb/sphx_glr_loading_mrc_files_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_loading_data_loading_mrc_files.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Loading MRC files (and other binary files)</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="For the most part Rosettasciio will automatically get the scales and the metadata from the file. Sometimes, however, you may want to set the scales and metadata yourself.">
+
+.. only:: html
+
+  .. image:: /examples/loading_data/images/thumb/sphx_glr_setting_scales_and_metadata_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_loading_data_setting_scales_and_metadata.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Setting Scales and Metadata</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+Orientation Mapping
+===================
+Below is a gallery of examples on how to do orientation mapping in pyxem.
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="For more information on the orientation mapping process see pyxemorientationmapping2022">
+
+.. only:: html
+
+  .. image:: /examples/orientation_mapping/images/thumb/sphx_glr_single_phase_orientation_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_orientation_mapping_single_phase_orientation.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Single Phase Orientation Mapping</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="For more information on the orientation mapping process see pyxemorientationmapping2022">
+
+.. only:: html
+
+  .. image:: /examples/orientation_mapping/images/thumb/sphx_glr_multi_phase_orientation_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_orientation_mapping_multi_phase_orientation.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Multi Phase Orientation Mapping</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="For more information on the orientation mapping process see pyxemorientationmapping2022">
+
+.. only:: html
+
+  .. image:: /examples/orientation_mapping/images/thumb/sphx_glr_on_zone_orientation_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_orientation_mapping_on_zone_orientation.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">On Zone Orientation</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+Plotting
+========
+Below is a gallery of examples on how to plot data in pyxem.
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This is sometimes not as straightforward as it seems because you might have a zero beam that is too bright and regions of the diffraction pattern that are too dark.">
+
+.. only:: html
+
+  .. image:: /examples/plotting/images/thumb/sphx_glr_plotting_a_diffraction_pattern_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_plotting_plotting_a_diffraction_pattern.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Plotting a Diffraction Pattern</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Sometimes you might want to plot using different units, such as pixel coordinates, or mrad or nm^-1. Pyxem makes it easy to plot using different units.  This does require certain calibration information to be set, such as the beam energy and the pixel size.">
+
+.. only:: html
+
+  .. image:: /examples/plotting/images/thumb/sphx_glr_plotting_different_units_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_plotting_plotting_different_units.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Plotting using Different Units</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Sometimes you want to quickly plot a diffraction pattern but things seem slow, this mostly happens with &quot;large&quot; data that is loaded Lazily.">
+
+.. only:: html
+
+  .. image:: /examples/plotting/images/thumb/sphx_glr_fast_plotting_tricks_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_plotting_fast_plotting_tricks.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Fast Plotting Tricks</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Many times we want to measure the distance between two disks in a diffraction pattern.  A lot of times programming this is a bit of a pain.  With HyperSpy&#x27;s interactive tools we can fairly easily create a line profile that we can interactively adjust to measure the distance between two disks in a diffraction pattern.">
+
+.. only:: html
+
+  .. image:: /examples/plotting/images/thumb/sphx_glr_interactive_line_profile_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_plotting_interactive_line_profile.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Creating an Interactive Line Profile</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+Data Processing
+================
+Below is a gallery of examples on how to process 4-D STEM data in pyxem
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The Circular Hough Transform is a method to detect circular features in an image. It can be used to detect rings (or disks) in the diffraction pattern.  For strain mapping there is some evidence that the Circular Hough transform is more accurate than typical template matching and can provide subpixel accuracy.">
+
+.. only:: html
+
+  .. image:: /examples/processing/images/thumb/sphx_glr_circular_hough_transform_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_processing_circular_hough_transform.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Circular Hough Transform Peak Finding</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="If your diffraction data is noisy, you might want to subtract the background from the dataset. Pyxem offers some built-in functionality for this, with the subtract_diffraction_background class method. Custom filtering is also possible, an example is shown in the &#x27;Filtering Data&#x27;-example.">
+
+.. only:: html
+
+  .. image:: /examples/processing/images/thumb/sphx_glr_background_subtraction_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_processing_background_subtraction.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Background subtraction</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="If you have a low number of counts in your data, you may want to filter the data to remove noise. This can be done using the filter function which applies some function to the entire dataset and returns a filtered dataset of the same shape.">
+
+.. only:: html
+
+  .. image:: /examples/processing/images/thumb/sphx_glr_filtering_data_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_processing_filtering_data.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Filtering Data (Averaging Neighboring Patterns etc.)</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Centering the Zero Beam">
+
+.. only:: html
+
+  .. image:: /examples/processing/images/thumb/sphx_glr_centering_the_zero_beam_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_processing_centering_the_zero_beam.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Centering the Zero Beam</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Finding Diffraction Vectors">
+
+.. only:: html
+
+  .. image:: /examples/processing/images/thumb/sphx_glr_vector_finding_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_processing_vector_finding.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Finding Diffraction Vectors</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how the template matching is done in pyxem to find peaks in a diffraction pattern.">
+
+.. only:: html
+
+  .. image:: /examples/processing/images/thumb/sphx_glr_template_matching_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_processing_template_matching.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Template Matching</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="pyxem now includes built in azimuthal integration functionality. This is useful for extracting radial profiles from diffraction patterns in 1 or 2 dimensions.  The new method will split the pixels into radial bins and then sum the intensity in each bin resulting in a Diffraction1D or Polar2D signal.  In each case the total intensity of the diffraction pattern is preserved.">
+
+.. only:: html
+
+  .. image:: /examples/processing/images/thumb/sphx_glr_azimuthal_integration_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_processing_azimuthal_integration.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Azimuthal Integration (in Pyxem!)</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example demonstrates how to calibrate the scales in both reciprocal and real-space.  Ideally this should be done using a calibration standard with a known lattice spacing.">
+
+.. only:: html
+
+  .. image:: /examples/processing/images/thumb/sphx_glr_calibrating_recip_space_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_processing_calibrating_recip_space.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Calibrating Scales</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="- Orientation mapping - Angular Correlation (AC) - Fluctuation Electron Microscopy (FEM) - And many other 4-D STEM techniques">
+
+.. only:: html
+
+  .. image:: /examples/processing/images/thumb/sphx_glr_determining_ellipticity_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_processing_determining_ellipticity.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Determining Elliptic Distortion</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+Standards
+=========
+Below is a gallery of examples showing different standards in pyxem
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Pyxem is flexible in how it handles coordinates for a diffraction pattern.">
+
+.. only:: html
+
+  .. image:: /examples/standards/images/thumb/sphx_glr_pixel_coodinates_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_standards_pixel_coodinates.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Coordinates in Pyxem</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Let&#x27;s look at an example of this using the ZrNb Precipitate dataset.">
+
+.. only:: html
+
+  .. image:: /examples/standards/images/thumb/sphx_glr_flat_ewalds_sphere_assumption_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_standards_flat_ewalds_sphere_assumption.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Flat Ewald's Sphere Assumption</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+Strain Mapping
+==============
+Below is a gallery of examples showing how to perform strain mapping in pyxem.
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Strain mapping in pyxem is done by fitting a DisplacementGradientMap to the data. This can be thought of as image distortion around some central point.">
+
+.. only:: html
+
+  .. image:: /examples/strain_mapping/images/thumb/sphx_glr_strain_mapping_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_strain_mapping_strain_mapping.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Strain Mapping</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+Vectors
+=======
+Below is a gallery of examples for operations on vectors.
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to take a set of vectors and create a mask from a set of circles around each vector. Multiplying by the original signal will remove all the signal except for the circles around the vectors.">
+
+.. only:: html
+
+  .. image:: /examples/vectors/images/thumb/sphx_glr_masking_vectors_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_vectors_masking_vectors.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Diffraction Vectors to Mask</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to perform some basic operations slicing and selecting vectors. This is designed to be very flexible and powerful.  Many operations such as slicing with a boolean array are supported.">
+
+.. only:: html
+
+  .. image:: /examples/vectors/images/thumb/sphx_glr_slicing_vectors_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_vectors_slicing_vectors.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Operations on Vectors</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to identify symmetry (in a glassy system but this could be useful other places) by looking at the angles between 3 vectors in the diffraction pattern at some radial ring in k to identify groups of 3 vectors that are subtended by the same angle.">
+
+.. only:: html
+
+  .. image:: /examples/vectors/images/thumb/sphx_glr_glass_symmetry_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_vectors_glass_symmetry.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Glass Symmetry from Vectors</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This can be used to segment a 4-D STEM dataset into different clusters based on the diffraction pattern at each real space position.">
+
+.. only:: html
+
+  .. image:: /examples/vectors/images/thumb/sphx_glr_clustering_vectors_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_vectors_clustering_vectors.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Clustering Vectors</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+Virtual Imaging
+===============
+Below is a gallery of examples on how to make virtual images from 4-D STEM data in pyxem
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="We can create interactive virtual images by using the interactive method from hyperspy. Because this requires that we recalculate the virtual images every time we change the ROIs it works best with small datasets or datasets loaded completely into memory.">
+
+.. only:: html
+
+  .. image:: /examples/virtual_imaging/images/thumb/sphx_glr_interactive_virtual_images_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_virtual_imaging_interactive_virtual_images.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Creating Interactive Virtual Images</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="In this example we will show how to create virtual images from vectors. We will use the find_peaks method to find the vectors and then use the get_unique_vectors method to reduce the number of vectors to a unique set of vectors.">
+
+.. only:: html
+
+  .. image:: /examples/virtual_imaging/images/thumb/sphx_glr_creating_virtual_images_from_vectors_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_virtual_imaging_creating_virtual_images_from_vectors.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Creating Virtual Images from Vectors</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Other Virtual Imaging">
+
+.. only:: html
+
+  .. image:: /examples/virtual_imaging/images/thumb/sphx_glr_other_virtual_imaging_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_virtual_imaging_other_virtual_imaging.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Other Virtual Imaging</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="In this example we will show how to create virtual images for a segmented-like detector.">
+
+.. only:: html
+
+  .. image:: /examples/virtual_imaging/images/thumb/sphx_glr_creating_a_segmented_detector_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_virtual_imaging_creating_a_segmented_detector.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Creating a Segmented Detector</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+   :includehidden:
+
+
+   /examples/amorphous_characterization/index.rst
+   /examples/dpc/index.rst
+   /examples/loading_data/index.rst
+   /examples/orientation_mapping/index.rst
+   /examples/plotting/index.rst
+   /examples/processing/index.rst
+   /examples/standards/index.rst
+   /examples/strain_mapping/index.rst
+   /examples/vectors/index.rst
+   /examples/virtual_imaging/index.rst
+
+
+.. only:: html
+
+  .. container:: sphx-glr-footer sphx-glr-footer-gallery
+
+    .. container:: sphx-glr-download sphx-glr-download-python
+
+      :download:`Download all examples in Python source code: examples_python.zip </examples/examples_python.zip>`
+
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
+
+      :download:`Download all examples in Jupyter notebooks: examples_jupyter.zip </examples/examples_jupyter.zip>`
+
+
+.. only:: html
+
+ .. rst-class:: sphx-glr-signature
+
+    `Gallery generated by Sphinx-Gallery <https://sphinx-gallery.github.io>`_

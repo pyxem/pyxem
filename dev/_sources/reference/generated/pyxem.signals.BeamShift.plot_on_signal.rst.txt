@@ -1,0 +1,6 @@
+plot\_on\_signal
+================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: BeamShift.plot_on_signal

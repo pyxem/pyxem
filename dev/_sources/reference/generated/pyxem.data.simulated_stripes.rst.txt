@@ -1,0 +1,9 @@
+simulated\_stripes
+==================
+
+.. currentmodule:: pyxem.data
+
+.. autofunction:: simulated_stripes
+
+.. minigallery:: pyxem.data.simulated_stripes
+    :add-heading: Examples using ``simulated_stripes``

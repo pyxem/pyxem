@@ -1,0 +1,9 @@
+sample\_with\_g
+===============
+
+.. currentmodule:: pyxem.data
+
+.. autofunction:: sample_with_g
+
+.. minigallery:: pyxem.data.sample_with_g
+    :add-heading: Examples using ``sample_with_g``

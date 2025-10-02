@@ -1,0 +1,6 @@
+get\_integrated\_intensity
+==========================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: CommonDiffraction.get_integrated_intensity

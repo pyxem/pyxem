@@ -1,0 +1,6 @@
+fit\_thermal\_multiple\_scattering\_correction
+==============================================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: ReducedIntensity1D.fit_thermal_multiple_scattering_correction

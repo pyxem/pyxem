@@ -1,0 +1,244 @@
+Diffraction2D
+=============
+
+.. currentmodule:: pyxem.signals
+
+.. autoclass:: Diffraction2D
+
+    
+    
+    .. rubric:: Attributes
+
+    .. autosummary::
+        :toctree:
+        :template: custom-attribute-template.rst
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    
+    
+
+    
+    
+    .. rubric:: Methods
+
+    .. autosummary::
+        :toctree:
+        :template: custom-method-template.rst
+        
+        
+        
+        Diffraction2D.add_ellipse_array_as_markers
+        
+        
+        
+        Diffraction2D.add_interactive_line_profile
+        
+        
+        
+        
+        Diffraction2D.add_peak_array_as_markers
+        
+        
+        
+        
+        
+        Diffraction2D.angular_mask
+        
+        
+        Diffraction2D.apply_affine_transformation
+        
+        
+        
+        Diffraction2D.apply_gain_normalisation
+        
+        
+        
+        
+        
+        
+        
+        Diffraction2D.center_direct_beam
+        
+        
+        
+        
+        
+        Diffraction2D.correct_bad_pixels
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        Diffraction2D.filter
+        
+        
+        Diffraction2D.find_dead_pixels
+        
+        
+        Diffraction2D.find_hot_pixels
+        
+        
+        
+        Diffraction2D.flip_diffraction_x
+        
+        
+        Diffraction2D.flip_diffraction_y
+        
+        
+        
+        Diffraction2D.get_azimuthal_integral1d
+        
+        
+        Diffraction2D.get_azimuthal_integral2d
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        Diffraction2D.get_diffraction_vectors
+        
+        
+        
+        Diffraction2D.get_direct_beam_mask
+        
+        
+        Diffraction2D.get_direct_beam_position
+        
+        
+        
+        
+        
+        
+        Diffraction2D.get_variance
+        
+        
+        
+        
+        
+        
+        
+        
+        Diffraction2D.intensity_peaks
+        
+        
+        
+        Diffraction2D.make_probe_navigation
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        Diffraction2D.peak_position_refinement_com
+        
+        
+        Diffraction2D.plot
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        Diffraction2D.rotate_diffraction
+        
+        
+        
+        
+        
+        
+        Diffraction2D.shift_diffraction
+        
+        
+        
+        
+        
+        Diffraction2D.subtract_diffraction_background
+        
+        
+        
+        
+        Diffraction2D.template_match
+        
+        
+        Diffraction2D.template_match_disk
+        
+        
+        Diffraction2D.template_match_ring
+        
+        
+        Diffraction2D.template_match_with_binary_image
+        
+        
+        Diffraction2D.threshold_and_mask
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    
+    
+
+.. minigallery:: pyxem.signals.Diffraction2D
+    :add-heading: Examples using ``Diffraction2D``

@@ -1,0 +1,9 @@
+remove\_bad\_pixels
+===================
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autofunction:: remove_bad_pixels
+
+.. minigallery:: pyxem.utils.diffraction.remove_bad_pixels
+    :add-heading: Examples using ``remove_bad_pixels``

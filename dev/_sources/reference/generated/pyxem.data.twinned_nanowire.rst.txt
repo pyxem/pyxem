@@ -1,0 +1,9 @@
+twinned\_nanowire
+=================
+
+.. currentmodule:: pyxem.data
+
+.. autofunction:: twinned_nanowire
+
+.. minigallery:: pyxem.data.twinned_nanowire
+    :add-heading: Examples using ``twinned_nanowire``

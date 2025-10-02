@@ -1,0 +1,9 @@
+simulated\_constant\_shift\_magnitude
+=====================================
+
+.. currentmodule:: pyxem.data
+
+.. autofunction:: simulated_constant_shift_magnitude
+
+.. minigallery:: pyxem.data.simulated_constant_shift_magnitude
+    :add-heading: Examples using ``simulated_constant_shift_magnitude``

@@ -1,0 +1,9 @@
+dev
+===
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autoproperty:: Version.dev
+
+.. minigallery:: pyxem.utils.diffraction.Version.dev
+    :add-heading: Examples using ``Version.dev``

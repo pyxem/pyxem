@@ -1,0 +1,6 @@
+damp\_extrapolate\_to\_zero
+===========================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: ReducedIntensity1D.damp_extrapolate_to_zero

@@ -1,0 +1,6 @@
+to\_rotation
+============
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: OrientationMap.to_rotation

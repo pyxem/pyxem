@@ -1,0 +1,9 @@
+is\_cupy\_array
+===============
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autofunction:: is_cupy_array
+
+.. minigallery:: pyxem.utils.diffraction.is_cupy_array
+    :add-heading: Examples using ``is_cupy_array``

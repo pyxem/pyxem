@@ -1,0 +1,9 @@
+trait\_modified
+===============
+
+.. currentmodule:: pyxem.utils.calibration
+
+.. autoproperty:: UniformDataAxis.trait_modified
+
+.. minigallery:: pyxem.utils.calibration.UniformDataAxis.trait_modified
+    :add-heading: Examples using ``UniformDataAxis.trait_modified``

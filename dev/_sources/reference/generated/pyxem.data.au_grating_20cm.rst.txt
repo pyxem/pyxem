@@ -1,0 +1,9 @@
+au\_grating\_20cm
+=================
+
+.. currentmodule:: pyxem.data
+
+.. autofunction:: au_grating_20cm
+
+.. minigallery:: pyxem.data.au_grating_20cm
+    :add-heading: Examples using ``au_grating_20cm``

@@ -1,0 +1,6 @@
+correlate
+=========
+
+.. currentmodule:: pyxem.generators
+
+.. automethod:: AcceleratedIndexationGenerator.correlate

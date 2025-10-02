@@ -1,0 +1,6 @@
+reference\_xc
+=============
+
+.. currentmodule:: pyxem.generators
+
+.. automethod:: SubpixelrefinementGenerator.reference_xc

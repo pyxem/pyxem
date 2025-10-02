@@ -1,0 +1,6 @@
+get\_angular\_correlation
+=========================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: PolarDiffraction2D.get_angular_correlation

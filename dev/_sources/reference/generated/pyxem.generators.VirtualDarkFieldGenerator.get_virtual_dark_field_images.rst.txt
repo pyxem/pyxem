@@ -1,0 +1,6 @@
+get\_virtual\_dark\_field\_images
+=================================
+
+.. currentmodule:: pyxem.generators
+
+.. automethod:: VirtualDarkFieldGenerator.get_virtual_dark_field_images

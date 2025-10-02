@@ -1,0 +1,6 @@
+shift\_diffraction
+==================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: Diffraction2D.shift_diffraction

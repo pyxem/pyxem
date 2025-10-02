@@ -1,0 +1,34 @@
+LearningSegment
+===============
+
+.. currentmodule:: pyxem.signals
+
+.. autoclass:: LearningSegment
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Methods
+
+    .. autosummary::
+        :toctree:
+        :template: custom-method-template.rst
+        
+        
+        
+        LearningSegment.correlate_learning_segments
+        
+        
+        LearningSegment.get_ncc_matrix
+        
+        
+        LearningSegment.separate_learning_segments
+        
+    
+    
+
+.. minigallery:: pyxem.signals.LearningSegment
+    :add-heading: Examples using ``LearningSegment``

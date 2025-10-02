@@ -1,0 +1,9 @@
+diffraction\_calibration
+========================
+
+.. currentmodule:: pyxem.signals
+
+.. autoproperty:: ElectronDiffraction2D.diffraction_calibration
+
+.. minigallery:: pyxem.signals.ElectronDiffraction2D.diffraction_calibration
+    :add-heading: Examples using ``ElectronDiffraction2D.diffraction_calibration``

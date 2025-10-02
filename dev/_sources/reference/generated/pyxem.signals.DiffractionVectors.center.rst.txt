@@ -1,0 +1,9 @@
+center
+======
+
+.. currentmodule:: pyxem.signals
+
+.. autoproperty:: DiffractionVectors.center
+
+.. minigallery:: pyxem.signals.DiffractionVectors.center
+    :add-heading: Examples using ``DiffractionVectors.center``

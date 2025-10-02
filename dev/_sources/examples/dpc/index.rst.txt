@@ -1,0 +1,62 @@
+
+
+.. _sphx_glr_examples_dpc:
+
+Differential Phase Contrast (DPC)
+=================================
+Below is a gallery of examples on how to do Differential Phase Contrast (DPC) in pyxem.
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows a basic workflow for doing magnetic DPC on a simple simulated test dataset. The dataset consists of alternating stripes of switching magnetic fields resulting in reversals of the direction of the magnetic field.">
+
+.. only:: html
+
+  .. image:: /examples/dpc/images/thumb/sphx_glr_magnetic_dpc_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_dpc_magnetic_dpc.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Magnetic DPC</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="When we measure a change in the position of the electron beam on the camera, we are directly measuring that the electron beam has been deflected from the optic axis. In other words, the momentum of the electron beam in the xy plane has changed. Since electrons are charged particles, we can relate the electron’s momentum change to an electric field using the Lorentz force equation.">
+
+.. only:: html
+
+  .. image:: /examples/dpc/images/thumb/sphx_glr_electric_field_dpc_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_dpc_electric_field_dpc.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Electric Field Mapping</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/dpc/magnetic_dpc
+   /examples/dpc/electric_field_dpc
+

@@ -1,0 +1,6 @@
+damp\_low\_q\_region\_erfc
+==========================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: ReducedIntensity1D.damp_low_q_region_erfc

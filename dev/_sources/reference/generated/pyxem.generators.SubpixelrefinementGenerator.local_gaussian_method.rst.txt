@@ -1,0 +1,6 @@
+local\_gaussian\_method
+=======================
+
+.. currentmodule:: pyxem.generators
+
+.. automethod:: SubpixelrefinementGenerator.local_gaussian_method

@@ -1,0 +1,104 @@
+ReducedIntensityCorrectionComponent
+===================================
+
+.. currentmodule:: pyxem.components
+
+.. autoclass:: ReducedIntensityCorrectionComponent
+
+    
+    
+    .. rubric:: Attributes
+
+    .. autosummary::
+        :toctree:
+        :template: custom-attribute-template.rst
+        
+        
+        
+        
+        
+        
+        ReducedIntensityCorrectionComponent.trait_added
+        
+        
+        ReducedIntensityCorrectionComponent.trait_modified
+        
+    
+    
+
+    
+    
+    .. rubric:: Methods
+
+    .. autosummary::
+        :toctree:
+        :template: custom-method-template.rst
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        ReducedIntensityCorrectionComponent.function
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    
+    
+
+.. minigallery:: pyxem.components.ReducedIntensityCorrectionComponent
+    :add-heading: Examples using ``ReducedIntensityCorrectionComponent``

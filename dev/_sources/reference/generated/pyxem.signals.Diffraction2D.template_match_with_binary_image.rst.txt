@@ -1,0 +1,6 @@
+template\_match\_with\_binary\_image
+====================================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: Diffraction2D.template_match_with_binary_image

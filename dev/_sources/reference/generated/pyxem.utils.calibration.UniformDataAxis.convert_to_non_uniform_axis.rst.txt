@@ -1,0 +1,6 @@
+convert\_to\_non\_uniform\_axis
+===============================
+
+.. currentmodule:: pyxem.utils.calibration
+
+.. automethod:: UniformDataAxis.convert_to_non_uniform_axis

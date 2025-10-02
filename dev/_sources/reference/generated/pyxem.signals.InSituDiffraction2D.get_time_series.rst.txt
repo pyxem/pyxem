@@ -1,0 +1,6 @@
+get\_time\_series
+=================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: InSituDiffraction2D.get_time_series

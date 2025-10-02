@@ -1,0 +1,6 @@
+get\_unique\_vectors
+====================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: DiffractionVectors.get_unique_vectors

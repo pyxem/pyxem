@@ -1,0 +1,6 @@
+get\_g2\_2d\_kresolved
+======================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: InSituDiffraction2D.get_g2_2d_kresolved

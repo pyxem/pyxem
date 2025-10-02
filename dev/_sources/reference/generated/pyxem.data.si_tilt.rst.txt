@@ -1,0 +1,9 @@
+si\_tilt
+========
+
+.. currentmodule:: pyxem.data
+
+.. autofunction:: si_tilt
+
+.. minigallery:: pyxem.data.si_tilt
+    :add-heading: Examples using ``si_tilt``

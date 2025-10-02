@@ -1,0 +1,36 @@
+interp1d
+========
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autoclass:: interp1d
+
+    
+    
+    .. rubric:: Attributes
+
+    .. autosummary::
+        :toctree:
+        :template: custom-attribute-template.rst
+        
+        
+        
+        interp1d.fill_value
+        
+    
+    
+
+    
+    
+    .. rubric:: Methods
+
+    .. autosummary::
+        :toctree:
+        :template: custom-method-template.rst
+        
+        
+    
+    
+
+.. minigallery:: pyxem.utils.diffraction.interp1d
+    :add-heading: Examples using ``interp1d``

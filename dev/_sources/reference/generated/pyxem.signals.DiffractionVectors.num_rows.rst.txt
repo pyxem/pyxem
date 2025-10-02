@@ -1,0 +1,9 @@
+num\_rows
+=========
+
+.. currentmodule:: pyxem.signals
+
+.. autoproperty:: DiffractionVectors.num_rows
+
+.. minigallery:: pyxem.signals.DiffractionVectors.num_rows
+    :add-heading: Examples using ``DiffractionVectors.num_rows``

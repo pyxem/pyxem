@@ -1,0 +1,6 @@
+calculate\_cartesian\_coordinates
+=================================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: DiffractionVectors.calculate_cartesian_coordinates

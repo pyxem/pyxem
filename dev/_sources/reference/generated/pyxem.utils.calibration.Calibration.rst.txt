@@ -1,0 +1,95 @@
+Calibration
+===========
+
+.. currentmodule:: pyxem.utils.calibration
+
+.. autoclass:: Calibration
+
+    
+    
+    .. rubric:: Attributes
+
+    .. autosummary::
+        :toctree:
+        :template: custom-attribute-template.rst
+        
+        
+        Calibration.affine
+        
+        
+        Calibration.axes
+        
+        
+        Calibration.beam_energy
+        
+        
+        Calibration.camera_length
+        
+        
+        Calibration.center
+        
+        
+        Calibration.convergence_angle
+        
+        
+        Calibration.detector_gain
+        
+        
+        Calibration.flat_ewald
+        
+        
+        Calibration.mask
+        
+        
+        Calibration.physical_pixel_size
+        
+        
+        Calibration.pixel_extent
+        
+        
+        Calibration.scale
+        
+        
+        Calibration.shape
+        
+        
+        Calibration.units
+        
+        
+        Calibration.wavelength
+        
+    
+    
+
+    
+    
+    .. rubric:: Methods
+
+    .. autosummary::
+        :toctree:
+        :template: custom-method-template.rst
+        
+        
+        
+        Calibration.convert_signal_units
+        
+        
+        Calibration.detector
+        
+        
+        Calibration.get_slices1d
+        
+        
+        Calibration.get_slices2d
+        
+        
+        Calibration.set_camera_length_from_calibration
+        
+        
+        Calibration.set_mrad_scale_from_calibration
+        
+    
+    
+
+.. minigallery:: pyxem.utils.calibration.Calibration
+    :add-heading: Examples using ``Calibration``

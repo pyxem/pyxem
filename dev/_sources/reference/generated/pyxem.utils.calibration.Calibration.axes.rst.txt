@@ -1,0 +1,9 @@
+axes
+====
+
+.. currentmodule:: pyxem.utils.calibration
+
+.. autoproperty:: Calibration.axes
+
+.. minigallery:: pyxem.utils.calibration.Calibration.axes
+    :add-heading: Examples using ``Calibration.axes``

@@ -1,0 +1,6 @@
+filter\_detector\_edge
+======================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: DiffractionVectors2D.filter_detector_edge

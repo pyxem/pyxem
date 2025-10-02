@@ -1,0 +1,6 @@
+apply\_gain\_normalisation
+==========================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: Diffraction2D.apply_gain_normalisation

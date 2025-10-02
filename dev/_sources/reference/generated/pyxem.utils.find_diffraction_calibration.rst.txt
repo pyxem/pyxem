@@ -1,0 +1,9 @@
+find\_diffraction\_calibration
+==============================
+
+.. currentmodule:: pyxem.utils
+
+.. autofunction:: find_diffraction_calibration
+
+.. minigallery:: pyxem.utils.find_diffraction_calibration
+    :add-heading: Examples using ``find_diffraction_calibration``

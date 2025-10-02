@@ -1,0 +1,6 @@
+correct\_bad\_pixels
+====================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: Diffraction2D.correct_bad_pixels

@@ -1,0 +1,6 @@
+rotate\_scan\_dimensions
+========================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: BeamShift.rotate_scan_dimensions

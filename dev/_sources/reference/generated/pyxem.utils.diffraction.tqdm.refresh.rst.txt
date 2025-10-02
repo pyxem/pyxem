@@ -1,0 +1,6 @@
+refresh
+=======
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. automethod:: tqdm.refresh

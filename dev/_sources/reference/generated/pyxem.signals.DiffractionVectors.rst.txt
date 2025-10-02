@@ -1,0 +1,229 @@
+DiffractionVectors
+==================
+
+.. currentmodule:: pyxem.signals
+
+.. autoclass:: DiffractionVectors
+
+    
+    
+    .. rubric:: Attributes
+
+    .. autosummary::
+        :toctree:
+        :template: custom-attribute-template.rst
+        
+        
+        
+        DiffractionVectors.center
+        
+        
+        DiffractionVectors.column_names
+        
+        
+        
+        DiffractionVectors.detector_shape
+        
+        
+        DiffractionVectors.has_navigation_axis
+        
+        
+        
+        
+        
+        
+        
+        DiffractionVectors.num_columns
+        
+        
+        DiffractionVectors.num_rows
+        
+        
+        DiffractionVectors.offsets
+        
+        
+        
+        DiffractionVectors.pixel_calibration
+        
+        
+        DiffractionVectors.pixel_vectors
+        
+        
+        
+        DiffractionVectors.scales
+        
+        
+        DiffractionVectors.units
+        
+    
+    
+
+    
+    
+    .. rubric:: Methods
+
+    .. autosummary::
+        :toctree:
+        :template: custom-method-template.rst
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        DiffractionVectors.calculate_cartesian_coordinates
+        
+        
+        
+        DiffractionVectors.cluster
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        DiffractionVectors.filter_basis
+        
+        
+        DiffractionVectors.filter_detector_edge
+        
+        
+        DiffractionVectors.filter_magnitude
+        
+        
+        DiffractionVectors.flatten_diffraction_vectors
+        
+        
+        
+        DiffractionVectors.from_peaks
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        DiffractionVectors.get_diffracting_pixels_map
+        
+        
+        
+        
+        
+        DiffractionVectors.get_magnitude_histogram
+        
+        
+        DiffractionVectors.get_magnitudes
+        
+        
+        
+        DiffractionVectors.get_pixel_vectors
+        
+        
+        DiffractionVectors.get_strain_maps
+        
+        
+        DiffractionVectors.get_unique_vectors
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        DiffractionVectors.plot_diffraction_vectors
+        
+        
+        DiffractionVectors.plot_diffraction_vectors_on_signal
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        DiffractionVectors.subpixel_refine
+        
+        
+        
+        
+        
+        
+        DiffractionVectors.to_markers
+        
+        
+        DiffractionVectors.to_mask
+        
+        
+        DiffractionVectors.to_polar
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    
+    
+
+.. minigallery:: pyxem.signals.DiffractionVectors
+    :add-heading: Examples using ``DiffractionVectors``

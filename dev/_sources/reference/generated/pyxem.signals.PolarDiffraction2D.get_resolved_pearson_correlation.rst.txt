@@ -1,0 +1,6 @@
+get\_resolved\_pearson\_correlation
+===================================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: PolarDiffraction2D.get_resolved_pearson_correlation

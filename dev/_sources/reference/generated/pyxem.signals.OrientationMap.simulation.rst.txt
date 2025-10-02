@@ -1,0 +1,9 @@
+simulation
+==========
+
+.. currentmodule:: pyxem.signals
+
+.. autoproperty:: OrientationMap.simulation
+
+.. minigallery:: pyxem.signals.OrientationMap.simulation
+    :add-heading: Examples using ``OrientationMap.simulation``

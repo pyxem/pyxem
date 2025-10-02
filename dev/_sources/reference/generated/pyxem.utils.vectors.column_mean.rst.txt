@@ -1,0 +1,9 @@
+column\_mean
+============
+
+.. currentmodule:: pyxem.utils.vectors
+
+.. autofunction:: column_mean
+
+.. minigallery:: pyxem.utils.vectors.column_mean
+    :add-heading: Examples using ``column_mean``

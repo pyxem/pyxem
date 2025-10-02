@@ -1,0 +1,9 @@
+units
+=====
+
+.. currentmodule:: pyxem.signals
+
+.. autoproperty:: DiffractionVectors.units
+
+.. minigallery:: pyxem.signals.DiffractionVectors.units
+    :add-heading: Examples using ``DiffractionVectors.units``

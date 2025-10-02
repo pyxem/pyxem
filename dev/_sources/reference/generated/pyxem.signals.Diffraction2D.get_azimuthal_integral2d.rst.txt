@@ -1,0 +1,6 @@
+get\_azimuthal\_integral2d
+==========================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: Diffraction2D.get_azimuthal_integral2d

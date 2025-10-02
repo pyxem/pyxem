@@ -1,0 +1,9 @@
+feal\_stripes
+=============
+
+.. currentmodule:: pyxem.data
+
+.. autofunction:: feal_stripes
+
+.. minigallery:: pyxem.data.feal_stripes
+    :add-heading: Examples using ``feal_stripes``

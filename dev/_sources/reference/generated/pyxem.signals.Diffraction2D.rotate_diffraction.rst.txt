@@ -1,0 +1,6 @@
+rotate\_diffraction
+===================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: Diffraction2D.rotate_diffraction

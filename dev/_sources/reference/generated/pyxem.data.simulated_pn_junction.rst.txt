@@ -1,0 +1,9 @@
+simulated\_pn\_junction
+=======================
+
+.. currentmodule:: pyxem.data
+
+.. autofunction:: simulated_pn_junction
+
+.. minigallery:: pyxem.data.simulated_pn_junction
+    :add-heading: Examples using ``simulated_pn_junction``

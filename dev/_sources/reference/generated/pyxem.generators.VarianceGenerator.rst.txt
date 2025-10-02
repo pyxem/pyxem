@@ -1,0 +1,31 @@
+VarianceGenerator
+=================
+
+.. currentmodule:: pyxem.generators
+
+.. autoclass:: VarianceGenerator
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Methods
+
+    .. autosummary::
+        :toctree:
+        :template: custom-method-template.rst
+        
+        
+        
+        VarianceGenerator.get_diffraction_variance
+        
+        
+        VarianceGenerator.get_image_variance
+        
+    
+    
+
+.. minigallery:: pyxem.generators.VarianceGenerator
+    :add-heading: Examples using ``VarianceGenerator``

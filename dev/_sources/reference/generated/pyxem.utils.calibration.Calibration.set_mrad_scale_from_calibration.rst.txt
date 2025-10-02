@@ -1,0 +1,6 @@
+set\_mrad\_scale\_from\_calibration
+===================================
+
+.. currentmodule:: pyxem.utils.calibration
+
+.. automethod:: Calibration.set_mrad_scale_from_calibration

@@ -1,0 +1,6 @@
+map\_vectors
+============
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: LabeledDiffractionVectors2D.map_vectors

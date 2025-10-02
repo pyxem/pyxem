@@ -1,0 +1,9 @@
+micro
+=====
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autoproperty:: Version.micro
+
+.. minigallery:: pyxem.utils.diffraction.Version.micro
+    :add-heading: Examples using ``Version.micro``

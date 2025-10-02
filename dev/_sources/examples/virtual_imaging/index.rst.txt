@@ -1,0 +1,98 @@
+
+
+.. _sphx_glr_examples_virtual_imaging:
+
+Virtual Imaging
+===============
+Below is a gallery of examples on how to make virtual images from 4-D STEM data in pyxem
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="We can create interactive virtual images by using the interactive method from hyperspy. Because this requires that we recalculate the virtual images every time we change the ROIs it works best with small datasets or datasets loaded completely into memory.">
+
+.. only:: html
+
+  .. image:: /examples/virtual_imaging/images/thumb/sphx_glr_interactive_virtual_images_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_virtual_imaging_interactive_virtual_images.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Creating Interactive Virtual Images</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="In this example we will show how to create virtual images from vectors. We will use the find_peaks method to find the vectors and then use the get_unique_vectors method to reduce the number of vectors to a unique set of vectors.">
+
+.. only:: html
+
+  .. image:: /examples/virtual_imaging/images/thumb/sphx_glr_creating_virtual_images_from_vectors_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_virtual_imaging_creating_virtual_images_from_vectors.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Creating Virtual Images from Vectors</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Other Virtual Imaging">
+
+.. only:: html
+
+  .. image:: /examples/virtual_imaging/images/thumb/sphx_glr_other_virtual_imaging_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_virtual_imaging_other_virtual_imaging.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Other Virtual Imaging</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="In this example we will show how to create virtual images for a segmented-like detector.">
+
+.. only:: html
+
+  .. image:: /examples/virtual_imaging/images/thumb/sphx_glr_creating_a_segmented_detector_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_virtual_imaging_creating_a_segmented_detector.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Creating a Segmented Detector</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/virtual_imaging/interactive_virtual_images
+   /examples/virtual_imaging/creating_virtual_images_from_vectors
+   /examples/virtual_imaging/other_virtual_imaging
+   /examples/virtual_imaging/creating_a_segmented_detector
+

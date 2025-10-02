@@ -1,0 +1,6 @@
+get\_variance
+=============
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: Diffraction2D.get_variance

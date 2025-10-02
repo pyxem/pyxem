@@ -1,0 +1,6 @@
+conventional\_xc
+================
+
+.. currentmodule:: pyxem.generators
+
+.. automethod:: SubpixelrefinementGenerator.conventional_xc

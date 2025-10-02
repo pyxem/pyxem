@@ -1,0 +1,9 @@
+trait\_modified
+===============
+
+.. currentmodule:: pyxem.components
+
+.. autoproperty:: ScatteringFitComponentXTables.trait_modified
+
+.. minigallery:: pyxem.components.ScatteringFitComponentXTables.trait_modified
+    :add-heading: Examples using ``ScatteringFitComponentXTables.trait_modified``

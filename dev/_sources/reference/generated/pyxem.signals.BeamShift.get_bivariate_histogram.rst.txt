@@ -1,0 +1,6 @@
+get\_bivariate\_histogram
+=========================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: BeamShift.get_bivariate_histogram

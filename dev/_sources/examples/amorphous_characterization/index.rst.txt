@@ -1,0 +1,44 @@
+
+
+.. _sphx_glr_examples_amorphous_characterization:
+
+Amorphous Characterization
+==========================
+Below is a gallery of examples on how to characterize amorphous materials.
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="In this example we will focus on calculating V_\Omega (k) which is defined as,">
+
+.. only:: html
+
+  .. image:: /examples/amorphous_characterization/images/thumb/sphx_glr_FEM_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_amorphous_characterization_FEM.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Fluctuation Electron Microscopy</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/amorphous_characterization/FEM
+

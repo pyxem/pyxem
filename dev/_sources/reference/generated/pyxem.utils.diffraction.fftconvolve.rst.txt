@@ -1,0 +1,9 @@
+fftconvolve
+===========
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autofunction:: fftconvolve
+
+.. minigallery:: pyxem.utils.diffraction.fftconvolve
+    :add-heading: Examples using ``fftconvolve``

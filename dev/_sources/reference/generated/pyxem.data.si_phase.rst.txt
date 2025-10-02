@@ -1,0 +1,9 @@
+si\_phase
+=========
+
+.. currentmodule:: pyxem.data
+
+.. autofunction:: si_phase
+
+.. minigallery:: pyxem.data.si_phase
+    :add-heading: Examples using ``si_phase``

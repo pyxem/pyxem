@@ -1,0 +1,6 @@
+clear
+=====
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. automethod:: tqdm.clear

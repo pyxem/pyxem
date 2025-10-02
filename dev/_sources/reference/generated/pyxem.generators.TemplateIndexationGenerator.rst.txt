@@ -1,0 +1,25 @@
+TemplateIndexationGenerator
+===========================
+
+.. currentmodule:: pyxem.generators
+
+.. autoclass:: TemplateIndexationGenerator
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Methods
+
+    .. autosummary::
+        :toctree:
+        :template: custom-method-template.rst
+        
+        
+    
+    
+
+.. minigallery:: pyxem.generators.TemplateIndexationGenerator
+    :add-heading: Examples using ``TemplateIndexationGenerator``

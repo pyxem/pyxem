@@ -1,0 +1,98 @@
+
+
+.. _sphx_glr_examples_plotting:
+
+Plotting
+========
+Below is a gallery of examples on how to plot data in pyxem.
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This is sometimes not as straightforward as it seems because you might have a zero beam that is too bright and regions of the diffraction pattern that are too dark.">
+
+.. only:: html
+
+  .. image:: /examples/plotting/images/thumb/sphx_glr_plotting_a_diffraction_pattern_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_plotting_plotting_a_diffraction_pattern.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Plotting a Diffraction Pattern</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Sometimes you might want to plot using different units, such as pixel coordinates, or mrad or nm^-1. Pyxem makes it easy to plot using different units.  This does require certain calibration information to be set, such as the beam energy and the pixel size.">
+
+.. only:: html
+
+  .. image:: /examples/plotting/images/thumb/sphx_glr_plotting_different_units_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_plotting_plotting_different_units.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Plotting using Different Units</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Sometimes you want to quickly plot a diffraction pattern but things seem slow, this mostly happens with &quot;large&quot; data that is loaded Lazily.">
+
+.. only:: html
+
+  .. image:: /examples/plotting/images/thumb/sphx_glr_fast_plotting_tricks_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_plotting_fast_plotting_tricks.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Fast Plotting Tricks</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Many times we want to measure the distance between two disks in a diffraction pattern.  A lot of times programming this is a bit of a pain.  With HyperSpy&#x27;s interactive tools we can fairly easily create a line profile that we can interactively adjust to measure the distance between two disks in a diffraction pattern.">
+
+.. only:: html
+
+  .. image:: /examples/plotting/images/thumb/sphx_glr_interactive_line_profile_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_plotting_interactive_line_profile.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Creating an Interactive Line Profile</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/plotting/plotting_a_diffraction_pattern
+   /examples/plotting/plotting_different_units
+   /examples/plotting/fast_plotting_tricks
+   /examples/plotting/interactive_line_profile
+
