@@ -17,6 +17,12 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - name: Download built docs
+        uses: actions/download-artifact@v4
+        with:
+          name: doc_html
+          path: ./doc/_build/html
+
       - name: Build index redirect
         run: |
           VERSION=${{ github.event.inputs.version || github.ref_name }}
@@ -39,7 +45,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: _build/html/
+          publish_dir:  doc/_build/html
           destination_dir: ${{ github.event.inputs.version || github.ref_name }} # deploy to a folder matching the tag version
           force_orphan: false
 
