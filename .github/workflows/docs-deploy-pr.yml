@@ -16,7 +16,7 @@ jobs:
     concurrency: preview-${{ github.ref }}
     steps:
 
-      - name: Checkout deploy repo
+      - name: Checkout Initial repo # Need to checkout the PR head for proper git in deploy preview action
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
@@ -28,7 +28,7 @@ jobs:
           name: doc_html
           path: ./doc/_build/html
 
-      - name: Print doc files
+      - name: Print doc files # for debugging
         run: ls -l ./
 
       - name: Deploy PR preview
