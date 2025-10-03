@@ -1,0 +1,6 @@
+get\_crystallographic\_map
+==========================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: VectorMatchingResults.get_crystallographic_map

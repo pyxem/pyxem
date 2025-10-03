@@ -1,0 +1,6 @@
+correlate\_vdf\_segments
+========================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: VDFSegment.correlate_vdf_segments

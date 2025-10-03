@@ -1,0 +1,6 @@
+from\_peaks
+===========
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: DiffractionVectors2D.from_peaks

@@ -1,0 +1,9 @@
+offset\_as\_quantity
+====================
+
+.. currentmodule:: pyxem.utils.calibration
+
+.. autoproperty:: UniformDataAxis.offset_as_quantity
+
+.. minigallery:: pyxem.utils.calibration.UniformDataAxis.offset_as_quantity
+    :add-heading: Examples using ``UniformDataAxis.offset_as_quantity``

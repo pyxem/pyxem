@@ -1,0 +1,1766 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Index &#8212; pyxem 0.21.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d75fae25" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-codeautolink.css?v=b2176991" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="_static/documentation_options.js?v=88e4c0c0"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'genindex';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://pyxem.readthedocs.io/en/latest/_static/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.21';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="icon" href="_static/logo.ico"/>
+    <link rel="index" title="Index" href="#" />
+    <link rel="search" title="Search" href="search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.21.0" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+<aside class="bd-header-announcement" aria-label="Announcement">
+  <div class="bd-header-announcement__content">Check out the new <a href='https://pyxem.readthedocs.io/en/latest/examples/index.html'>Examples Gallery!</a> </div>
+</aside>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/logo.png" class="logo__image only-light" alt="pyxem 0.21.0 documentation - Home"/>
+    <img src="_static/logo.png" class="logo__image only-dark pst-js-only" alt="pyxem 0.21.0 documentation - Home"/>
+  
+  
+</a></div>
+    
+      <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="intro.html">
+    Introduction
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="user_guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tutorials/index.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="reference/index.html">
+    Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dev_guide/index.html">
+    Dev Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="changelog.html">
+    Changelog
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/pyxem/pyxem" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="intro.html">
+    Introduction
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="user_guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tutorials/index.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="reference/index.html">
+    Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dev_guide/index.html">
+    Dev Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="changelog.html">
+    Changelog
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/pyxem/pyxem" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none"></div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+
+<h1 id="index">Index</h1>
+
+<div class="genindex-jumpbox">
+ <a href="#_"><strong>_</strong></a>
+ | <a href="#A"><strong>A</strong></a>
+ | <a href="#B"><strong>B</strong></a>
+ | <a href="#C"><strong>C</strong></a>
+ | <a href="#D"><strong>D</strong></a>
+ | <a href="#E"><strong>E</strong></a>
+ | <a href="#F"><strong>F</strong></a>
+ | <a href="#G"><strong>G</strong></a>
+ | <a href="#H"><strong>H</strong></a>
+ | <a href="#I"><strong>I</strong></a>
+ | <a href="#K"><strong>K</strong></a>
+ | <a href="#L"><strong>L</strong></a>
+ | <a href="#M"><strong>M</strong></a>
+ | <a href="#N"><strong>N</strong></a>
+ | <a href="#O"><strong>O</strong></a>
+ | <a href="#P"><strong>P</strong></a>
+ | <a href="#R"><strong>R</strong></a>
+ | <a href="#S"><strong>S</strong></a>
+ | <a href="#T"><strong>T</strong></a>
+ | <a href="#U"><strong>U</strong></a>
+ | <a href="#V"><strong>V</strong></a>
+ | <a href="#W"><strong>W</strong></a>
+ | <a href="#Z"><strong>Z</strong></a>
+ 
+</div>
+<h2 id="_">_</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.utils.diffraction.interp1d.html#pyxem.utils.diffraction.interp1d.__call__">__call__() (pyxem.utils.diffraction.interp1d method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="A">A</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.generators.AcceleratedIndexationGenerator.html#pyxem.generators.AcceleratedIndexationGenerator">AcceleratedIndexationGenerator (class in pyxem.generators)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.calibration.DictionaryTreeBrowser.add_dictionary.html#pyxem.utils.calibration.DictionaryTreeBrowser.add_dictionary">add_dictionary() (pyxem.utils.calibration.DictionaryTreeBrowser method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.Diffraction2D.add_ellipse_array_as_markers.html#pyxem.signals.Diffraction2D.add_ellipse_array_as_markers">add_ellipse_array_as_markers() (pyxem.signals.Diffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.Diffraction2D.add_interactive_line_profile.html#pyxem.signals.Diffraction2D.add_interactive_line_profile">add_interactive_line_profile() (pyxem.signals.Diffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.CommonDiffraction.add_navigation_signal.html#pyxem.signals.CommonDiffraction.add_navigation_signal">add_navigation_signal() (pyxem.signals.CommonDiffraction method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.calibration.DictionaryTreeBrowser.add_node.html#pyxem.utils.calibration.DictionaryTreeBrowser.add_node">add_node() (pyxem.utils.calibration.DictionaryTreeBrowser method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.Diffraction2D.add_peak_array_as_markers.html#pyxem.signals.Diffraction2D.add_peak_array_as_markers">add_peak_array_as_markers() (pyxem.signals.Diffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.calibration.Calibration.affine.html#pyxem.utils.calibration.Calibration.affine">affine (pyxem.utils.calibration.Calibration property)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.signals.Diffraction2D.angular_mask.html#pyxem.signals.Diffraction2D.angular_mask">angular_mask() (pyxem.signals.Diffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.Diffraction2D.apply_affine_transformation.html#pyxem.signals.Diffraction2D.apply_affine_transformation">apply_affine_transformation() (pyxem.signals.Diffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.Diffraction2D.apply_gain_normalisation.html#pyxem.signals.Diffraction2D.apply_gain_normalisation">apply_gain_normalisation() (pyxem.signals.Diffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.apply_transformation.html#pyxem.utils.diffraction.apply_transformation">apply_transformation() (in module pyxem.utils.diffraction)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.calibration.DictionaryTreeBrowser.as_dictionary.html#pyxem.utils.calibration.DictionaryTreeBrowser.as_dictionary">as_dictionary() (pyxem.utils.calibration.DictionaryTreeBrowser method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.data.au_grating.html#pyxem.data.au_grating">au_grating() (in module pyxem.data)</a>
+</li>
+      <li><a href="reference/generated/pyxem.data.au_grating_20cm.html#pyxem.data.au_grating_20cm">au_grating_20cm() (in module pyxem.data)</a>
+</li>
+      <li><a href="reference/generated/pyxem.data.au_phase.html#pyxem.data.au_phase">au_phase() (in module pyxem.data)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.calibration.Calibration.axes.html#pyxem.utils.calibration.Calibration.axes">axes (pyxem.utils.calibration.Calibration property)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="B">B</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.utils.diffraction.Version.base_version.html#pyxem.utils.diffraction.Version.base_version">base_version (pyxem.utils.diffraction.Version property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.BeamShift.beam_energy.html#pyxem.signals.BeamShift.beam_energy">beam_energy (pyxem.signals.BeamShift property)</a>
+
+      <ul>
+        <li><a href="reference/generated/pyxem.signals.ElectronDiffraction2D.beam_energy.html#pyxem.signals.ElectronDiffraction2D.beam_energy">(pyxem.signals.ElectronDiffraction2D property)</a>
+</li>
+        <li><a href="reference/generated/pyxem.utils.calibration.Calibration.beam_energy.html#pyxem.utils.calibration.Calibration.beam_energy">(pyxem.utils.calibration.Calibration property)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.signals.BeamShift.html#pyxem.signals.BeamShift">BeamShift (class in pyxem.signals)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="C">C</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.signals.DiffractionVectors.calculate_cartesian_coordinates.html#pyxem.signals.DiffractionVectors.calculate_cartesian_coordinates">calculate_cartesian_coordinates() (pyxem.signals.DiffractionVectors method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.vectors.calculate_norms.html#pyxem.utils.vectors.calculate_norms">calculate_norms() (in module pyxem.utils.vectors)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.vectors.calculate_norms_ragged.html#pyxem.utils.vectors.calculate_norms_ragged">calculate_norms_ragged() (in module pyxem.utils.vectors)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.calibration.UniformDataAxis.calibrate.html#pyxem.utils.calibration.UniformDataAxis.calibrate">calibrate() (pyxem.utils.calibration.UniformDataAxis method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.BeamShift.calibrate_electric_shifts.html#pyxem.signals.BeamShift.calibrate_electric_shifts">calibrate_electric_shifts() (pyxem.signals.BeamShift method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.calibration.Calibration.html#pyxem.utils.calibration.Calibration">Calibration (class in pyxem.utils.calibration)</a>
+</li>
+      <li><a href="reference/generated/pyxem.libraries.CalibrationDataLibrary.html#pyxem.libraries.CalibrationDataLibrary">CalibrationDataLibrary (class in pyxem.libraries)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.CalibrationGenerator.html#pyxem.generators.CalibrationGenerator">CalibrationGenerator (class in pyxem.generators)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.ElectronDiffraction2D.camera_length.html#pyxem.signals.ElectronDiffraction2D.camera_length">camera_length (pyxem.signals.ElectronDiffraction2D property)</a>
+
+      <ul>
+        <li><a href="reference/generated/pyxem.utils.calibration.Calibration.camera_length.html#pyxem.utils.calibration.Calibration.camera_length">(pyxem.utils.calibration.Calibration property)</a>
+</li>
+      </ul></li>
+      <li><a href="reference/generated/pyxem.signals.DiffractionVectors.center.html#pyxem.signals.DiffractionVectors.center">center (pyxem.signals.DiffractionVectors property)</a>
+
+      <ul>
+        <li><a href="reference/generated/pyxem.utils.calibration.Calibration.center.html#pyxem.utils.calibration.Calibration.center">(pyxem.utils.calibration.Calibration property)</a>
+</li>
+      </ul></li>
+      <li><a href="reference/generated/pyxem.signals.Diffraction2D.center_direct_beam.html#pyxem.signals.Diffraction2D.center_direct_beam">center_direct_beam() (pyxem.signals.Diffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.center_of_mass_from_image.html#pyxem.utils.diffraction.center_of_mass_from_image">center_of_mass_from_image() (in module pyxem.utils.diffraction)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.SubpixelrefinementGenerator.center_of_mass_method.html#pyxem.generators.SubpixelrefinementGenerator.center_of_mass_method">center_of_mass_method() (pyxem.generators.SubpixelrefinementGenerator method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.circular_mask.html#pyxem.utils.diffraction.circular_mask">circular_mask() (in module pyxem.utils.diffraction)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.tqdm.clear.html#pyxem.utils.diffraction.tqdm.clear">clear() (pyxem.utils.diffraction.tqdm method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.tqdm.close.html#pyxem.utils.diffraction.tqdm.close">close() (pyxem.utils.diffraction.tqdm method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.DiffractionVectors.cluster.html#pyxem.signals.DiffractionVectors.cluster">cluster() (pyxem.signals.DiffractionVectors method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.LabeledDiffractionVectors2D.cluster_labeled_vectors.html#pyxem.signals.LabeledDiffractionVectors2D.cluster_labeled_vectors">cluster_labeled_vectors() (pyxem.signals.LabeledDiffractionVectors2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.vectors.column_mean.html#pyxem.utils.vectors.column_mean">column_mean() (in module pyxem.utils.vectors)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.signals.DiffractionVectors.column_names.html#pyxem.signals.DiffractionVectors.column_names">column_names (pyxem.signals.DiffractionVectors property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.CommonDiffraction.html#pyxem.signals.CommonDiffraction">CommonDiffraction (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.SubpixelrefinementGenerator.conventional_xc.html#pyxem.generators.SubpixelrefinementGenerator.conventional_xc">conventional_xc() (pyxem.generators.SubpixelrefinementGenerator method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.calibration.Calibration.convergence_angle.html#pyxem.utils.calibration.Calibration.convergence_angle">convergence_angle (pyxem.utils.calibration.Calibration property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.convert_affine_to_transform.html#pyxem.utils.diffraction.convert_affine_to_transform">convert_affine_to_transform() (in module pyxem.utils.diffraction)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.calibration.Calibration.convert_signal_units.html#pyxem.utils.calibration.Calibration.convert_signal_units">convert_signal_units() (pyxem.utils.calibration.Calibration method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.calibration.UniformDataAxis.convert_to_functional_data_axis.html#pyxem.utils.calibration.UniformDataAxis.convert_to_functional_data_axis">convert_to_functional_data_axis() (pyxem.utils.calibration.UniformDataAxis method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.vectors.convert_to_markers.html#pyxem.utils.vectors.convert_to_markers">convert_to_markers() (in module pyxem.utils.vectors)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.calibration.UniformDataAxis.convert_to_non_uniform_axis.html#pyxem.utils.calibration.UniformDataAxis.convert_to_non_uniform_axis">convert_to_non_uniform_axis() (pyxem.utils.calibration.UniformDataAxis method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.calibration.DictionaryTreeBrowser.copy.html#pyxem.utils.calibration.DictionaryTreeBrowser.copy">copy() (pyxem.utils.calibration.DictionaryTreeBrowser method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.Diffraction2D.correct_bad_pixels.html#pyxem.signals.Diffraction2D.correct_bad_pixels">correct_bad_pixels() (pyxem.signals.Diffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.InSituDiffraction2D.correct_real_space_drift.html#pyxem.signals.InSituDiffraction2D.correct_real_space_drift">correct_real_space_drift() (pyxem.signals.InSituDiffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.InSituDiffraction2D.correct_real_space_drift_fast.html#pyxem.signals.InSituDiffraction2D.correct_real_space_drift_fast">correct_real_space_drift_fast() (pyxem.signals.InSituDiffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.AcceleratedIndexationGenerator.correlate.html#pyxem.generators.AcceleratedIndexationGenerator.correlate">correlate() (pyxem.generators.AcceleratedIndexationGenerator method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.LearningSegment.correlate_learning_segments.html#pyxem.signals.LearningSegment.correlate_learning_segments">correlate_learning_segments() (pyxem.signals.LearningSegment method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.VDFSegment.correlate_vdf_segments.html#pyxem.signals.VDFSegment.correlate_vdf_segments">correlate_vdf_segments() (pyxem.signals.VDFSegment method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.Correlation1D.html#pyxem.signals.Correlation1D">Correlation1D (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.Correlation2D.html#pyxem.signals.Correlation2D">Correlation2D (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.calibration.UniformDataAxis.crop.html#pyxem.utils.calibration.UniformDataAxis.crop">crop() (pyxem.utils.calibration.UniformDataAxis method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.data.cuag_orientations.html#pyxem.data.cuag_orientations">cuag_orientations() (in module pyxem.data)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.ElectronDiffraction1D.curve_fit.html#pyxem.signals.ElectronDiffraction1D.curve_fit">curve_fit() (pyxem.signals.ElectronDiffraction1D method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="D">D</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.signals.ReducedIntensity1D.damp_exponential.html#pyxem.signals.ReducedIntensity1D.damp_exponential">damp_exponential() (pyxem.signals.ReducedIntensity1D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.ReducedIntensity1D.damp_extrapolate_to_zero.html#pyxem.signals.ReducedIntensity1D.damp_extrapolate_to_zero">damp_extrapolate_to_zero() (pyxem.signals.ReducedIntensity1D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.ReducedIntensity1D.damp_lorch.html#pyxem.signals.ReducedIntensity1D.damp_lorch">damp_lorch() (pyxem.signals.ReducedIntensity1D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.ReducedIntensity1D.damp_low_q_region_erfc.html#pyxem.signals.ReducedIntensity1D.damp_low_q_region_erfc">damp_low_q_region_erfc() (pyxem.signals.ReducedIntensity1D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.ReducedIntensity1D.damp_updated_lorch.html#pyxem.signals.ReducedIntensity1D.damp_updated_lorch">damp_updated_lorch() (pyxem.signals.ReducedIntensity1D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.OrientationMap.deepcopy.html#pyxem.signals.OrientationMap.deepcopy">deepcopy() (pyxem.signals.OrientationMap method)</a>
+
+      <ul>
+        <li><a href="reference/generated/pyxem.utils.calibration.DictionaryTreeBrowser.deepcopy.html#pyxem.utils.calibration.DictionaryTreeBrowser.deepcopy">(pyxem.utils.calibration.DictionaryTreeBrowser method)</a>
+</li>
+      </ul></li>
+      <li><a href="reference/generated/pyxem.utils.calibration.deprecated.html#pyxem.utils.calibration.deprecated">deprecated (class in pyxem.utils.calibration)</a>
+
+      <ul>
+        <li><a href="reference/generated/pyxem.utils.diffraction.deprecated.html#pyxem.utils.diffraction.deprecated">(class in pyxem.utils.diffraction)</a>
+</li>
+      </ul></li>
+      <li><a href="reference/generated/pyxem.utils.calibration.Calibration.detector.html#pyxem.utils.calibration.Calibration.detector">detector() (pyxem.utils.calibration.Calibration method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.calibration.Calibration.detector_gain.html#pyxem.utils.calibration.Calibration.detector_gain">detector_gain (pyxem.utils.calibration.Calibration property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.DiffractionVectors.detector_shape.html#pyxem.signals.DiffractionVectors.detector_shape">detector_shape (pyxem.signals.DiffractionVectors property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.vectors.detector_to_fourier.html#pyxem.utils.vectors.detector_to_fourier">detector_to_fourier() (in module pyxem.utils.vectors)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.determine_ellipse.html#pyxem.utils.determine_ellipse">determine_ellipse() (in module pyxem.utils)</a>
+
+      <ul>
+        <li><a href="reference/generated/pyxem.utils.ransac_ellipse_tools.determine_ellipse.html#pyxem.utils.ransac_ellipse_tools.determine_ellipse">(in module pyxem.utils.ransac_ellipse_tools)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.utils.diffraction.Version.dev.html#pyxem.utils.diffraction.Version.dev">dev (pyxem.utils.diffraction.Version property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.calibration.DictionaryTreeBrowser.html#pyxem.utils.calibration.DictionaryTreeBrowser">DictionaryTreeBrowser (class in pyxem.utils.calibration)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.Diffraction1D.html#pyxem.signals.Diffraction1D">Diffraction1D (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D">Diffraction2D (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.ElectronDiffraction2D.diffraction_calibration.html#pyxem.signals.ElectronDiffraction2D.diffraction_calibration">diffraction_calibration (pyxem.signals.ElectronDiffraction2D property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.DiffractionVariance1D.html#pyxem.signals.DiffractionVariance1D">DiffractionVariance1D (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.DiffractionVariance2D.html#pyxem.signals.DiffractionVariance2D">DiffractionVariance2D (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.DiffractionVectors.html#pyxem.signals.DiffractionVectors">DiffractionVectors (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.DiffractionVectors1D.html#pyxem.signals.DiffractionVectors1D">DiffractionVectors1D (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.DiffractionVectors2D.html#pyxem.signals.DiffractionVectors2D">DiffractionVectors2D (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.DisplacementGradientMap.html#pyxem.signals.DisplacementGradientMap">DisplacementGradientMap (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.tqdm.display.html#pyxem.utils.diffraction.tqdm.display">display() (pyxem.utils.diffraction.tqdm method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.DPCSignal1D.html#pyxem.signals.DPCSignal1D">DPCSignal1D (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.DPCSignal2D.html#pyxem.signals.DPCSignal2D">DPCSignal2D (class in pyxem.signals)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="E">E</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.signals.ElectronDiffraction1D.html#pyxem.signals.ElectronDiffraction1D">ElectronDiffraction1D (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.ElectronDiffraction2D.html#pyxem.signals.ElectronDiffraction2D">ElectronDiffraction2D (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.ellipse_perimeter.html#pyxem.utils.diffraction.ellipse_perimeter">ellipse_perimeter() (in module pyxem.utils.diffraction)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.ransac_ellipse_tools.ellipse_to_markers.html#pyxem.utils.ransac_ellipse_tools.ellipse_to_markers">ellipse_to_markers() (in module pyxem.utils.ransac_ellipse_tools)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.utils.diffraction.Version.epoch.html#pyxem.utils.diffraction.Version.epoch">epoch (pyxem.utils.diffraction.Version property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.calibration.DictionaryTreeBrowser.export.html#pyxem.utils.calibration.DictionaryTreeBrowser.export">export() (pyxem.utils.calibration.DictionaryTreeBrowser method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.tqdm.external_write_mode.html#pyxem.utils.diffraction.tqdm.external_write_mode">external_write_mode() (pyxem.utils.diffraction.tqdm class method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.IntegrationGenerator.extract_intensities.html#pyxem.generators.IntegrationGenerator.extract_intensities">extract_intensities() (pyxem.generators.IntegrationGenerator method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.IntegrationGenerator.extract_intensities_summation_method.html#pyxem.generators.IntegrationGenerator.extract_intensities_summation_method">extract_intensities_summation_method() (pyxem.generators.IntegrationGenerator method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="F">F</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.data.fe_bcc_phase.html#pyxem.data.fe_bcc_phase">fe_bcc_phase() (in module pyxem.data)</a>
+</li>
+      <li><a href="reference/generated/pyxem.data.fe_fcc_phase.html#pyxem.data.fe_fcc_phase">fe_fcc_phase() (in module pyxem.data)</a>
+</li>
+      <li><a href="reference/generated/pyxem.data.fe_multi_phase_grains.html#pyxem.data.fe_multi_phase_grains">fe_multi_phase_grains() (in module pyxem.data)</a>
+</li>
+      <li><a href="reference/generated/pyxem.data.feal_stripes.html#pyxem.data.feal_stripes">feal_stripes() (in module pyxem.data)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.fftconvolve.html#pyxem.utils.diffraction.fftconvolve">fftconvolve() (in module pyxem.utils.diffraction)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.interp1d.fill_value.html#pyxem.utils.diffraction.interp1d.fill_value">fill_value (pyxem.utils.diffraction.interp1d property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.Diffraction2D.filter.html#pyxem.signals.Diffraction2D.filter">filter() (pyxem.signals.Diffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.DiffractionVectors.filter_basis.html#pyxem.signals.DiffractionVectors.filter_basis">filter_basis() (pyxem.signals.DiffractionVectors method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.DiffractionVectors.filter_detector_edge.html#pyxem.signals.DiffractionVectors.filter_detector_edge">filter_detector_edge() (pyxem.signals.DiffractionVectors method)</a>
+
+      <ul>
+        <li><a href="reference/generated/pyxem.signals.DiffractionVectors2D.filter_detector_edge.html#pyxem.signals.DiffractionVectors2D.filter_detector_edge">(pyxem.signals.DiffractionVectors2D method)</a>
+</li>
+      </ul></li>
+      <li><a href="reference/generated/pyxem.signals.DiffractionVectors.filter_magnitude.html#pyxem.signals.DiffractionVectors.filter_magnitude">filter_magnitude() (pyxem.signals.DiffractionVectors method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.vectors.filter_vectors_edge_ragged.html#pyxem.utils.vectors.filter_vectors_edge_ragged">filter_vectors_edge_ragged() (in module pyxem.utils.vectors)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.vectors.filter_vectors_near_basis.html#pyxem.utils.vectors.filter_vectors_near_basis">filter_vectors_near_basis() (in module pyxem.utils.vectors)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.vectors.filter_vectors_ragged.html#pyxem.utils.vectors.filter_vectors_ragged">filter_vectors_ragged() (in module pyxem.utils.vectors)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.find_beam_center_blur.html#pyxem.utils.diffraction.find_beam_center_blur">find_beam_center_blur() (in module pyxem.utils.diffraction)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.find_beam_center_interpolate.html#pyxem.utils.diffraction.find_beam_center_interpolate">find_beam_center_interpolate() (in module pyxem.utils.diffraction)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.find_beam_offset_cross_correlation.html#pyxem.utils.diffraction.find_beam_offset_cross_correlation">find_beam_offset_cross_correlation() (in module pyxem.utils.diffraction)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.find_center_of_mass.html#pyxem.utils.diffraction.find_center_of_mass">find_center_of_mass() (in module pyxem.utils.diffraction)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.Diffraction2D.find_dead_pixels.html#pyxem.signals.Diffraction2D.find_dead_pixels">find_dead_pixels() (pyxem.signals.Diffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.find_diffraction_calibration.html#pyxem.utils.find_diffraction_calibration">find_diffraction_calibration() (in module pyxem.utils)</a>
+
+      <ul>
+        <li><a href="reference/generated/pyxem.utils.calibration.find_diffraction_calibration.html#pyxem.utils.calibration.find_diffraction_calibration">(in module pyxem.utils.calibration)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.utils.diffraction.find_hot_pixels.html#pyxem.utils.diffraction.find_hot_pixels">find_hot_pixels() (in module pyxem.utils.diffraction)</a>
+
+      <ul>
+        <li><a href="reference/generated/pyxem.signals.Diffraction2D.find_hot_pixels.html#pyxem.signals.Diffraction2D.find_hot_pixels">(pyxem.signals.Diffraction2D method)</a>
+</li>
+      </ul></li>
+      <li><a href="reference/generated/pyxem.generators.ReducedIntensityGenerator1D.fit_atomic_scattering.html#pyxem.generators.ReducedIntensityGenerator1D.fit_atomic_scattering">fit_atomic_scattering() (pyxem.generators.ReducedIntensityGenerator1D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.ReducedIntensity1D.fit_thermal_multiple_scattering_correction.html#pyxem.signals.ReducedIntensity1D.fit_thermal_multiple_scattering_correction">fit_thermal_multiple_scattering_correction() (pyxem.signals.ReducedIntensity1D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.calibration.Calibration.flat_ewald.html#pyxem.utils.calibration.Calibration.flat_ewald">flat_ewald (pyxem.utils.calibration.Calibration property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.DiffractionVectors.flatten_diffraction_vectors.html#pyxem.signals.DiffractionVectors.flatten_diffraction_vectors">flatten_diffraction_vectors() (pyxem.signals.DiffractionVectors method)</a>
+
+      <ul>
+        <li><a href="reference/generated/pyxem.signals.DiffractionVectors1D.flatten_diffraction_vectors.html#pyxem.signals.DiffractionVectors1D.flatten_diffraction_vectors">(pyxem.signals.DiffractionVectors1D method)</a>
+</li>
+      </ul></li>
+      <li><a href="reference/generated/pyxem.signals.Diffraction2D.flip_diffraction_x.html#pyxem.signals.Diffraction2D.flip_diffraction_x">flip_diffraction_x() (pyxem.signals.Diffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.Diffraction2D.flip_diffraction_y.html#pyxem.signals.Diffraction2D.flip_diffraction_y">flip_diffraction_y() (pyxem.signals.Diffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.tqdm.format_dict.html#pyxem.utils.diffraction.tqdm.format_dict">format_dict (pyxem.utils.diffraction.tqdm property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.tqdm.format_interval.html#pyxem.utils.diffraction.tqdm.format_interval">format_interval() (pyxem.utils.diffraction.tqdm static method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.tqdm.format_meter.html#pyxem.utils.diffraction.tqdm.format_meter">format_meter() (pyxem.utils.diffraction.tqdm static method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.tqdm.format_num.html#pyxem.utils.diffraction.tqdm.format_num">format_num() (pyxem.utils.diffraction.tqdm static method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.tqdm.format_sizeof.html#pyxem.utils.diffraction.tqdm.format_sizeof">format_sizeof() (pyxem.utils.diffraction.tqdm static method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.DiffractionVectors.from_peaks.html#pyxem.signals.DiffractionVectors.from_peaks">from_peaks() (pyxem.signals.DiffractionVectors class method)</a>
+
+      <ul>
+        <li><a href="reference/generated/pyxem.signals.DiffractionVectors2D.from_peaks.html#pyxem.signals.DiffractionVectors2D.from_peaks">(pyxem.signals.DiffractionVectors2D method)</a>
+</li>
+      </ul></li>
+      <li><a href="reference/generated/pyxem.components.ReducedIntensityCorrectionComponent.function.html#pyxem.components.ReducedIntensityCorrectionComponent.function">function() (pyxem.components.ReducedIntensityCorrectionComponent method)</a>
+
+      <ul>
+        <li><a href="reference/generated/pyxem.components.ScatteringFitComponentLobato.function.html#pyxem.components.ScatteringFitComponentLobato.function">(pyxem.components.ScatteringFitComponentLobato method)</a>
+</li>
+        <li><a href="reference/generated/pyxem.components.ScatteringFitComponentXTables.function.html#pyxem.components.ScatteringFitComponentXTables.function">(pyxem.components.ScatteringFitComponentXTables method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="G">G</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.utils.diffraction.gain_normalise.html#pyxem.utils.diffraction.gain_normalise">gain_normalise() (in module pyxem.utils.diffraction)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.vectors.get_angle_cartesian.html#pyxem.utils.vectors.get_angle_cartesian">get_angle_cartesian() (in module pyxem.utils.vectors)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.vectors.get_angle_cartesian_vec.html#pyxem.utils.vectors.get_angle_cartesian_vec">get_angle_cartesian_vec() (in module pyxem.utils.vectors)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.vectors.get_angles.html#pyxem.utils.vectors.get_angles">get_angles() (in module pyxem.utils.vectors)</a>
+
+      <ul>
+        <li><a href="reference/generated/pyxem.signals.PolarVectors.get_angles.html#pyxem.signals.PolarVectors.get_angles">(pyxem.signals.PolarVectors method)</a>
+</li>
+      </ul></li>
+      <li><a href="reference/generated/pyxem.signals.PolarDiffraction2D.get_angular_correlation.html#pyxem.signals.PolarDiffraction2D.get_angular_correlation">get_angular_correlation() (pyxem.signals.PolarDiffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.Correlation2D.get_angular_power.html#pyxem.signals.Correlation2D.get_angular_power">get_angular_power() (pyxem.signals.Correlation2D method)</a>
+
+      <ul>
+        <li><a href="reference/generated/pyxem.signals.PolarDiffraction2D.get_angular_power.html#pyxem.signals.PolarDiffraction2D.get_angular_power">(pyxem.signals.PolarDiffraction2D method)</a>
+</li>
+      </ul></li>
+      <li><a href="reference/generated/pyxem.utils.calibration.UniformDataAxis.get_axis_dictionary.html#pyxem.utils.calibration.UniformDataAxis.get_axis_dictionary">get_axis_dictionary() (pyxem.utils.calibration.UniformDataAxis method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.Diffraction2D.get_azimuthal_integral1d.html#pyxem.signals.Diffraction2D.get_azimuthal_integral1d">get_azimuthal_integral1d() (pyxem.signals.Diffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.Diffraction2D.get_azimuthal_integral2d.html#pyxem.signals.Diffraction2D.get_azimuthal_integral2d">get_azimuthal_integral2d() (pyxem.signals.Diffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.BeamShift.get_bivariate_histogram.html#pyxem.signals.BeamShift.get_bivariate_histogram">get_bivariate_histogram() (pyxem.signals.BeamShift method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.BeamShift.get_color_signal.html#pyxem.signals.BeamShift.get_color_signal">get_color_signal() (pyxem.signals.BeamShift method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.VirtualImageGenerator.get_concentric_virtual_images.html#pyxem.generators.VirtualImageGenerator.get_concentric_virtual_images">get_concentric_virtual_images() (pyxem.generators.VirtualImageGenerator method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.CalibrationGenerator.get_correction_matrix.html#pyxem.generators.CalibrationGenerator.get_correction_matrix">get_correction_matrix() (pyxem.generators.CalibrationGenerator method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.VectorMatchingResults.get_crystallographic_map.html#pyxem.signals.VectorMatchingResults.get_crystallographic_map">get_crystallographic_map() (pyxem.signals.VectorMatchingResults method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.DiffractionVectors.get_diffracting_pixels_map.html#pyxem.signals.DiffractionVectors.get_diffracting_pixels_map">get_diffracting_pixels_map() (pyxem.signals.DiffractionVectors method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.CalibrationGenerator.get_diffraction_calibration.html#pyxem.generators.CalibrationGenerator.get_diffraction_calibration">get_diffraction_calibration() (pyxem.generators.CalibrationGenerator method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.VarianceGenerator.get_diffraction_variance.html#pyxem.generators.VarianceGenerator.get_diffraction_variance">get_diffraction_variance() (pyxem.generators.VarianceGenerator method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.Diffraction2D.get_diffraction_vectors.html#pyxem.signals.Diffraction2D.get_diffraction_vectors">get_diffraction_vectors() (pyxem.signals.Diffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.Diffraction2D.get_direct_beam_mask.html#pyxem.signals.Diffraction2D.get_direct_beam_mask">get_direct_beam_mask() (pyxem.signals.Diffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.Diffraction2D.get_direct_beam_position.html#pyxem.signals.Diffraction2D.get_direct_beam_position">get_direct_beam_position() (pyxem.signals.Diffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.get_DisplacementGradientMap.html#pyxem.generators.get_DisplacementGradientMap">get_DisplacementGradientMap() (in module pyxem.generators)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.CalibrationGenerator.get_distortion_residuals.html#pyxem.generators.CalibrationGenerator.get_distortion_residuals">get_distortion_residuals() (pyxem.generators.CalibrationGenerator method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.InSituDiffraction2D.get_drift_vectors.html#pyxem.signals.InSituDiffraction2D.get_drift_vectors">get_drift_vectors() (pyxem.signals.InSituDiffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.calibration.get_electron_wavelength.html#pyxem.utils.calibration.get_electron_wavelength">get_electron_wavelength() (in module pyxem.utils.calibration)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.ransac_ellipse_tools.get_ellipse_model_ransac.html#pyxem.utils.ransac_ellipse_tools.get_ellipse_model_ransac">get_ellipse_model_ransac() (in module pyxem.utils.ransac_ellipse_tools)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.ransac_ellipse_tools.get_ellipse_model_ransac_single_frame.html#pyxem.utils.ransac_ellipse_tools.get_ellipse_model_ransac_single_frame">get_ellipse_model_ransac_single_frame() (in module pyxem.utils.ransac_ellipse_tools)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.CalibrationGenerator.get_elliptical_distortion.html#pyxem.generators.CalibrationGenerator.get_elliptical_distortion">get_elliptical_distortion() (pyxem.generators.CalibrationGenerator method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.vectors.get_filtered_combinations.html#pyxem.utils.vectors.get_filtered_combinations">get_filtered_combinations() (in module pyxem.utils.vectors)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.PolarDiffraction2D.get_full_pearson_correlation.html#pyxem.signals.PolarDiffraction2D.get_full_pearson_correlation">get_full_pearson_correlation() (pyxem.signals.PolarDiffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.InSituDiffraction2D.get_g2_2d_kresolved.html#pyxem.signals.InSituDiffraction2D.get_g2_2d_kresolved">get_g2_2d_kresolved() (pyxem.signals.InSituDiffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.VarianceGenerator.get_image_variance.html#pyxem.generators.VarianceGenerator.get_image_variance">get_image_variance() (pyxem.generators.VarianceGenerator method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.VectorMatchingResults.get_indexed_diffraction_vectors.html#pyxem.signals.VectorMatchingResults.get_indexed_diffraction_vectors">get_indexed_diffraction_vectors() (pyxem.signals.VectorMatchingResults method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.CommonDiffraction.get_integrated_intensity.html#pyxem.signals.CommonDiffraction.get_integrated_intensity">get_integrated_intensity() (pyxem.signals.CommonDiffraction method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.calibration.DictionaryTreeBrowser.get_item.html#pyxem.utils.calibration.DictionaryTreeBrowser.get_item">get_item() (pyxem.utils.calibration.DictionaryTreeBrowser method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.BeamShift.get_linear_plane.html#pyxem.signals.BeamShift.get_linear_plane">get_linear_plane() (pyxem.signals.BeamShift method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.tqdm.get_lock.html#pyxem.utils.diffraction.tqdm.get_lock">get_lock() (pyxem.utils.diffraction.tqdm class method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.signals.DiffractionVectors.get_magnitude_histogram.html#pyxem.signals.DiffractionVectors.get_magnitude_histogram">get_magnitude_histogram() (pyxem.signals.DiffractionVectors method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.BeamShift.get_magnitude_phase_signal.html#pyxem.signals.BeamShift.get_magnitude_phase_signal">get_magnitude_phase_signal() (pyxem.signals.BeamShift method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.BeamShift.get_magnitude_signal.html#pyxem.signals.BeamShift.get_magnitude_signal">get_magnitude_signal() (pyxem.signals.BeamShift method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.DiffractionVectors.get_magnitudes.html#pyxem.signals.DiffractionVectors.get_magnitudes">get_magnitudes() (pyxem.signals.DiffractionVectors method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.Power2D.get_map.html#pyxem.signals.Power2D.get_map">get_map() (pyxem.signals.Power2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.CalibrationGenerator.get_navigation_calibration.html#pyxem.generators.CalibrationGenerator.get_navigation_calibration">get_navigation_calibration() (pyxem.generators.CalibrationGenerator method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.LearningSegment.get_ncc_matrix.html#pyxem.signals.LearningSegment.get_ncc_matrix">get_ncc_matrix() (pyxem.signals.LearningSegment method)</a>
+
+      <ul>
+        <li><a href="reference/generated/pyxem.signals.VDFSegment.get_ncc_matrix.html#pyxem.signals.VDFSegment.get_ncc_matrix">(pyxem.signals.VDFSegment method)</a>
+</li>
+      </ul></li>
+      <li><a href="reference/generated/pyxem.utils.vectors.get_npeaks.html#pyxem.utils.vectors.get_npeaks">get_npeaks() (in module pyxem.utils.vectors)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.PolarDiffraction2D.get_orientation.html#pyxem.signals.PolarDiffraction2D.get_orientation">get_orientation() (pyxem.signals.PolarDiffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.PDFGenerator1D.get_pdf.html#pyxem.generators.PDFGenerator1D.get_pdf">get_pdf() (pyxem.generators.PDFGenerator1D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.PolarDiffraction2D.get_pearson_correlation.html#pyxem.signals.PolarDiffraction2D.get_pearson_correlation">get_pearson_correlation() (pyxem.signals.PolarDiffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.BeamShift.get_phase_signal.html#pyxem.signals.BeamShift.get_phase_signal">get_phase_signal() (pyxem.signals.BeamShift method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.DiffractionVectors.get_pixel_vectors.html#pyxem.signals.DiffractionVectors.get_pixel_vectors">get_pixel_vectors() (pyxem.signals.DiffractionVectors method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.ReducedIntensityGenerator1D.get_reduced_intensity.html#pyxem.generators.ReducedIntensityGenerator1D.get_reduced_intensity">get_reduced_intensity() (pyxem.generators.ReducedIntensityGenerator1D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.PolarDiffraction2D.get_resolved_pearson_correlation.html#pyxem.signals.PolarDiffraction2D.get_resolved_pearson_correlation">get_resolved_pearson_correlation() (pyxem.signals.PolarDiffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.CalibrationGenerator.get_rotation_calibration.html#pyxem.generators.CalibrationGenerator.get_rotation_calibration">get_rotation_calibration() (pyxem.generators.CalibrationGenerator method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.vectors.get_rotation_matrix_between_vectors.html#pyxem.utils.vectors.get_rotation_matrix_between_vectors">get_rotation_matrix_between_vectors() (in module pyxem.utils.vectors)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.OrientationMap.get_simulation_arrays.html#pyxem.signals.OrientationMap.get_simulation_arrays">get_simulation_arrays() (pyxem.signals.OrientationMap method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.get_single_DisplacementGradientTensor.html#pyxem.generators.get_single_DisplacementGradientTensor">get_single_DisplacementGradientTensor() (in module pyxem.generators)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.calibration.Calibration.get_slices1d.html#pyxem.utils.calibration.Calibration.get_slices1d">get_slices1d() (pyxem.utils.calibration.Calibration method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.calibration.Calibration.get_slices2d.html#pyxem.utils.calibration.Calibration.get_slices2d">get_slices2d() (pyxem.utils.calibration.Calibration method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.DiffractionVectors.get_strain_maps.html#pyxem.signals.DiffractionVectors.get_strain_maps">get_strain_maps() (pyxem.signals.DiffractionVectors method)</a>
+
+      <ul>
+        <li><a href="reference/generated/pyxem.signals.DisplacementGradientMap.get_strain_maps.html#pyxem.signals.DisplacementGradientMap.get_strain_maps">(pyxem.signals.DisplacementGradientMap method)</a>
+</li>
+      </ul></li>
+      <li><a href="reference/generated/pyxem.signals.Correlation2D.get_summed_angular_power.html#pyxem.signals.Correlation2D.get_summed_angular_power">get_summed_angular_power() (pyxem.signals.Correlation2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.Correlation1D.get_symmetry_coefficient.html#pyxem.signals.Correlation1D.get_symmetry_coefficient">get_symmetry_coefficient() (pyxem.signals.Correlation1D method)</a>
+
+      <ul>
+        <li><a href="reference/generated/pyxem.signals.Correlation2D.get_symmetry_coefficient.html#pyxem.signals.Correlation2D.get_symmetry_coefficient">(pyxem.signals.Correlation2D method)</a>
+</li>
+      </ul></li>
+      <li><a href="reference/generated/pyxem.utils.vectors.get_three_angles.html#pyxem.utils.vectors.get_three_angles">get_three_angles() (in module pyxem.utils.vectors)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.InSituDiffraction2D.get_time_series.html#pyxem.signals.InSituDiffraction2D.get_time_series">get_time_series() (pyxem.signals.InSituDiffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.DiffractionVectors.get_unique_vectors.html#pyxem.signals.DiffractionVectors.get_unique_vectors">get_unique_vectors() (pyxem.signals.DiffractionVectors method)</a>
+
+      <ul>
+        <li><a href="reference/generated/pyxem.signals.DiffractionVectors2D.get_unique_vectors.html#pyxem.signals.DiffractionVectors2D.get_unique_vectors">(pyxem.signals.DiffractionVectors2D method)</a>
+</li>
+      </ul></li>
+      <li><a href="reference/generated/pyxem.signals.Diffraction2D.get_variance.html#pyxem.signals.Diffraction2D.get_variance">get_variance() (pyxem.signals.Diffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.VirtualDarkFieldImage.get_vdf_segments.html#pyxem.signals.VirtualDarkFieldImage.get_vdf_segments">get_vdf_segments() (pyxem.signals.VirtualDarkFieldImage method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.vectors.get_vectors_mesh.html#pyxem.utils.vectors.get_vectors_mesh">get_vectors_mesh() (in module pyxem.utils.vectors)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.VirtualDarkFieldGenerator.get_virtual_dark_field_images.html#pyxem.generators.VirtualDarkFieldGenerator.get_virtual_dark_field_images">get_virtual_dark_field_images() (pyxem.generators.VirtualDarkFieldGenerator method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.VDFSegment.get_virtual_electron_diffraction.html#pyxem.signals.VDFSegment.get_virtual_electron_diffraction">get_virtual_electron_diffraction() (pyxem.signals.VDFSegment method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.CommonDiffraction.get_virtual_image.html#pyxem.signals.CommonDiffraction.get_virtual_image">get_virtual_image() (pyxem.signals.CommonDiffraction method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.VirtualImageGenerator.get_virtual_images_from_mesh.html#pyxem.generators.VirtualImageGenerator.get_virtual_images_from_mesh">get_virtual_images_from_mesh() (pyxem.generators.VirtualImageGenerator method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="H">H</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.signals.PolarVectors.has_delta_phi.html#pyxem.signals.PolarVectors.has_delta_phi">has_delta_phi (pyxem.signals.PolarVectors property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.calibration.DictionaryTreeBrowser.has_item.html#pyxem.utils.calibration.DictionaryTreeBrowser.has_item">has_item() (pyxem.utils.calibration.DictionaryTreeBrowser method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.signals.DiffractionVectors.has_navigation_axis.html#pyxem.signals.DiffractionVectors.has_navigation_axis">has_navigation_axis (pyxem.signals.DiffractionVectors property)</a>
+
+      <ul>
+        <li><a href="reference/generated/pyxem.signals.DiffractionVectors2D.has_navigation_axis.html#pyxem.signals.DiffractionVectors2D.has_navigation_axis">(pyxem.signals.DiffractionVectors2D property)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="I">I</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.signals.ImageVariance.html#pyxem.signals.ImageVariance">ImageVariance (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.calibration.index_dataset_with_template_rotation.html#pyxem.utils.calibration.index_dataset_with_template_rotation">index_dataset_with_template_rotation() (in module pyxem.utils.calibration)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.ProfileIndexationGenerator.index_peaks.html#pyxem.generators.ProfileIndexationGenerator.index_peaks">index_peaks() (pyxem.generators.ProfileIndexationGenerator method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.VectorIndexationGenerator.index_vectors.html#pyxem.generators.VectorIndexationGenerator.index_vectors">index_vectors() (pyxem.generators.VectorIndexationGenerator method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.IndexationGenerator.html#pyxem.generators.IndexationGenerator">IndexationGenerator (class in pyxem.generators)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.InSituDiffraction2D.html#pyxem.signals.InSituDiffraction2D">InSituDiffraction2D (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.IntegrationGenerator.html#pyxem.generators.IntegrationGenerator">IntegrationGenerator (class in pyxem.generators)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.Diffraction2D.intensity_peaks.html#pyxem.signals.Diffraction2D.intensity_peaks">intensity_peaks() (pyxem.signals.Diffraction2D method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.utils.diffraction.interp1d.html#pyxem.utils.diffraction.interp1d">interp1d (class in pyxem.utils.diffraction)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.investigate_dog_background_removal_interactive.html#pyxem.utils.diffraction.investigate_dog_background_removal_interactive">investigate_dog_background_removal_interactive() (in module pyxem.utils.diffraction)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.LabeledDiffractionVectors2D.is_clustered.html#pyxem.signals.LabeledDiffractionVectors2D.is_clustered">is_clustered (pyxem.signals.LabeledDiffractionVectors2D property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.is_cupy_array.html#pyxem.utils.diffraction.is_cupy_array">is_cupy_array() (in module pyxem.utils.diffraction)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.Version.is_devrelease.html#pyxem.utils.diffraction.Version.is_devrelease">is_devrelease (pyxem.utils.diffraction.Version property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.ransac_ellipse_tools.is_ellipse_good.html#pyxem.utils.ransac_ellipse_tools.is_ellipse_good">is_ellipse_good() (in module pyxem.utils.ransac_ellipse_tools)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.Version.is_postrelease.html#pyxem.utils.diffraction.Version.is_postrelease">is_postrelease (pyxem.utils.diffraction.Version property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.Version.is_prerelease.html#pyxem.utils.diffraction.Version.is_prerelease">is_prerelease (pyxem.utils.diffraction.Version property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.isiterable.html#pyxem.utils.diffraction.isiterable">isiterable() (in module pyxem.utils.diffraction)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="K">K</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.utils.calibration.DictionaryTreeBrowser.keys.html#pyxem.utils.calibration.DictionaryTreeBrowser.keys">keys() (pyxem.utils.calibration.DictionaryTreeBrowser method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="L">L</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.signals.LabeledDiffractionVectors2D.html#pyxem.signals.LabeledDiffractionVectors2D">LabeledDiffractionVectors2D (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.LazyBeamShift.html#pyxem.signals.LazyBeamShift">LazyBeamShift (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.LazyCorrelation1D.html#pyxem.signals.LazyCorrelation1D">LazyCorrelation1D (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.LazyCorrelation2D.html#pyxem.signals.LazyCorrelation2D">LazyCorrelation2D (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.LazyDiffraction1D.html#pyxem.signals.LazyDiffraction1D">LazyDiffraction1D (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.LazyDiffraction2D.html#pyxem.signals.LazyDiffraction2D">LazyDiffraction2D (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.LazyDPCSignal1D.html#pyxem.signals.LazyDPCSignal1D">LazyDPCSignal1D (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.LazyDPCSignal2D.html#pyxem.signals.LazyDPCSignal2D">LazyDPCSignal2D (class in pyxem.signals)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.signals.LazyElectronDiffraction1D.html#pyxem.signals.LazyElectronDiffraction1D">LazyElectronDiffraction1D (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.LazyElectronDiffraction2D.html#pyxem.signals.LazyElectronDiffraction2D">LazyElectronDiffraction2D (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.LazyPolarDiffraction2D.html#pyxem.signals.LazyPolarDiffraction2D">LazyPolarDiffraction2D (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.LazyPolarVectors.html#pyxem.signals.LazyPolarVectors">LazyPolarVectors (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.LazyPower2D.html#pyxem.signals.LazyPower2D">LazyPower2D (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.LearningSegment.html#pyxem.signals.LearningSegment">LearningSegment (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.Version.local.html#pyxem.utils.diffraction.Version.local">local (pyxem.utils.diffraction.Version property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.SubpixelrefinementGenerator.local_gaussian_method.html#pyxem.generators.SubpixelrefinementGenerator.local_gaussian_method">local_gaussian_method() (pyxem.generators.SubpixelrefinementGenerator method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="M">M</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.utils.diffraction.Version.major.html#pyxem.utils.diffraction.Version.major">major (pyxem.utils.diffraction.Version property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.ransac_ellipse_tools.make_ellipse_data_points.html#pyxem.utils.ransac_ellipse_tools.make_ellipse_data_points">make_ellipse_data_points() (in module pyxem.utils.ransac_ellipse_tools)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.BeamShift.make_linear_plane.html#pyxem.signals.BeamShift.make_linear_plane">make_linear_plane() (pyxem.signals.BeamShift method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.Diffraction2D.make_probe_navigation.html#pyxem.signals.Diffraction2D.make_probe_navigation">make_probe_navigation() (pyxem.signals.Diffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.LabeledDiffractionVectors2D.map_vectors.html#pyxem.signals.LabeledDiffractionVectors2D.map_vectors">map_vectors() (pyxem.signals.LabeledDiffractionVectors2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.calibration.Calibration.mask.html#pyxem.utils.calibration.Calibration.mask">mask (pyxem.utils.calibration.Calibration property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.ReducedIntensityGenerator1D.mask_from_bkgd_pattern.html#pyxem.generators.ReducedIntensityGenerator1D.mask_from_bkgd_pattern">mask_from_bkgd_pattern() (pyxem.generators.ReducedIntensityGenerator1D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.ReducedIntensityGenerator1D.mask_reduced_intensity.html#pyxem.generators.ReducedIntensityGenerator1D.mask_reduced_intensity">mask_reduced_intensity() (pyxem.generators.ReducedIntensityGenerator1D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.match_template.html#pyxem.utils.diffraction.match_template">match_template() (in module pyxem.utils.diffraction)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.match_template_dilate.html#pyxem.utils.diffraction.match_template_dilate">match_template_dilate() (in module pyxem.utils.diffraction)</a>
+</li>
+      <li><a href="reference/generated/pyxem.data.mgo_nanocrystals.html#pyxem.data.mgo_nanocrystals">mgo_nanocrystals() (in module pyxem.data)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.Version.micro.html#pyxem.utils.diffraction.Version.micro">micro (pyxem.utils.diffraction.Version property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.Version.minor.html#pyxem.utils.diffraction.Version.minor">minor (pyxem.utils.diffraction.Version property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.ElectronDiffraction1D.model2camera_length.html#pyxem.signals.ElectronDiffraction1D.model2camera_length">model2camera_length() (pyxem.signals.ElectronDiffraction1D method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.signals.ElectronDiffraction1D.model2theta_scale.html#pyxem.signals.ElectronDiffraction1D.model2theta_scale">model2theta_scale() (pyxem.signals.ElectronDiffraction1D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.ElectronDiffraction1D.model_simulation1d.html#pyxem.signals.ElectronDiffraction1D.model_simulation1d">model_simulation1d() (pyxem.signals.ElectronDiffraction1D method)</a>
+</li>
+      <li>
+    module
+
+      <ul>
+        <li><a href="reference/generated/pyxem.components.html#module-pyxem.components">pyxem.components</a>
+</li>
+        <li><a href="reference/generated/pyxem.data.html#module-pyxem.data">pyxem.data</a>
+</li>
+        <li><a href="reference/generated/pyxem.generators.html#module-pyxem.generators">pyxem.generators</a>
+</li>
+        <li><a href="reference/generated/pyxem.libraries.html#module-pyxem.libraries">pyxem.libraries</a>
+</li>
+        <li><a href="reference/generated/pyxem.signals.html#module-pyxem.signals">pyxem.signals</a>
+</li>
+        <li><a href="reference/generated/pyxem.utils.html#module-pyxem.utils">pyxem.utils</a>
+</li>
+        <li><a href="reference/generated/pyxem.utils.calibration.html#module-pyxem.utils.calibration">pyxem.utils.calibration</a>
+</li>
+        <li><a href="reference/generated/pyxem.utils.diffraction.html#module-pyxem.utils.diffraction">pyxem.utils.diffraction</a>
+</li>
+        <li><a href="reference/generated/pyxem.utils.plotting.html#module-pyxem.utils.plotting">pyxem.utils.plotting</a>
+</li>
+        <li><a href="reference/generated/pyxem.utils.ransac_ellipse_tools.html#module-pyxem.utils.ransac_ellipse_tools">pyxem.utils.ransac_ellipse_tools</a>
+</li>
+        <li><a href="reference/generated/pyxem.utils.vectors.html#module-pyxem.utils.vectors">pyxem.utils.vectors</a>
+</li>
+      </ul></li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.tqdm.moveto.html#pyxem.utils.diffraction.tqdm.moveto">moveto() (pyxem.utils.diffraction.tqdm method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="N">N</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.signals.PairDistributionFunction1D.normalise_signal.html#pyxem.signals.PairDistributionFunction1D.normalise_signal">normalise_signal() (pyxem.signals.PairDistributionFunction1D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.vectors.normalize_or_zero.html#pyxem.utils.vectors.normalize_or_zero">normalize_or_zero() (in module pyxem.utils.vectors)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.normalize_template_match.html#pyxem.utils.diffraction.normalize_template_match">normalize_template_match() (in module pyxem.utils.diffraction)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.signals.DiffractionVectors.num_columns.html#pyxem.signals.DiffractionVectors.num_columns">num_columns (pyxem.signals.DiffractionVectors property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.DiffractionVectors.num_rows.html#pyxem.signals.DiffractionVectors.num_rows">num_rows (pyxem.signals.DiffractionVectors property)</a>
+
+      <ul>
+        <li><a href="reference/generated/pyxem.signals.OrientationMap.num_rows.html#pyxem.signals.OrientationMap.num_rows">(pyxem.signals.OrientationMap property)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="O">O</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.utils.calibration.UniformDataAxis.offset_as_quantity.html#pyxem.utils.calibration.UniformDataAxis.offset_as_quantity">offset_as_quantity (pyxem.utils.calibration.UniformDataAxis property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.DiffractionVectors.offsets.html#pyxem.signals.DiffractionVectors.offsets">offsets (pyxem.signals.DiffractionVectors property)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.data.organic_semiconductor.html#pyxem.data.organic_semiconductor">organic_semiconductor() (in module pyxem.data)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.OrientationMap.html#pyxem.signals.OrientationMap">OrientationMap (class in pyxem.signals)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="P">P</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.signals.PairDistributionFunction1D.html#pyxem.signals.PairDistributionFunction1D">PairDistributionFunction1D (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.tqdm.pandas.html#pyxem.utils.diffraction.tqdm.pandas">pandas() (pyxem.utils.diffraction.tqdm class method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.data.pdcusi_insitu.html#pyxem.data.pdcusi_insitu">pdcusi_insitu() (in module pyxem.data)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.PDFGenerator1D.html#pyxem.generators.PDFGenerator1D">PDFGenerator1D (class in pyxem.generators)</a>
+</li>
+      <li><a href="reference/generated/pyxem.data.pdnip_glass.html#pyxem.data.pdnip_glass">pdnip_glass() (in module pyxem.data)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.Diffraction2D.peak_position_refinement_com.html#pyxem.signals.Diffraction2D.peak_position_refinement_com">peak_position_refinement_com() (pyxem.signals.Diffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.peaks_as_gvectors.html#pyxem.utils.diffraction.peaks_as_gvectors">peaks_as_gvectors() (in module pyxem.utils.diffraction)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.phase_cross_correlation.html#pyxem.utils.diffraction.phase_cross_correlation">phase_cross_correlation() (in module pyxem.utils.diffraction)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.BeamShift.phase_retrieval.html#pyxem.signals.BeamShift.phase_retrieval">phase_retrieval() (pyxem.signals.BeamShift method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.calibration.Calibration.physical_pixel_size.html#pyxem.utils.calibration.Calibration.physical_pixel_size">physical_pixel_size (pyxem.utils.calibration.Calibration property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.DiffractionVectors.pixel_calibration.html#pyxem.signals.DiffractionVectors.pixel_calibration">pixel_calibration (pyxem.signals.DiffractionVectors property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.calibration.Calibration.pixel_extent.html#pyxem.utils.calibration.Calibration.pixel_extent">pixel_extent (pyxem.utils.calibration.Calibration property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.DiffractionVectors.pixel_vectors.html#pyxem.signals.DiffractionVectors.pixel_vectors">pixel_vectors (pyxem.signals.DiffractionVectors property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.BeamShift.pixels_to_calibrated_units.html#pyxem.signals.BeamShift.pixels_to_calibrated_units">pixels_to_calibrated_units() (pyxem.signals.BeamShift method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.Diffraction2D.plot.html#pyxem.signals.Diffraction2D.plot">plot() (pyxem.signals.Diffraction2D method)</a>
+
+      <ul>
+        <li><a href="reference/generated/pyxem.signals.DiffractionVectors1D.plot.html#pyxem.signals.DiffractionVectors1D.plot">(pyxem.signals.DiffractionVectors1D method)</a>
+</li>
+        <li><a href="reference/generated/pyxem.signals.StrainMap.plot.html#pyxem.signals.StrainMap.plot">(pyxem.signals.StrainMap method)</a>
+</li>
+      </ul></li>
+      <li><a href="reference/generated/pyxem.generators.CalibrationGenerator.plot_calibrated_data.html#pyxem.generators.CalibrationGenerator.plot_calibrated_data">plot_calibrated_data() (pyxem.generators.CalibrationGenerator method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.libraries.CalibrationDataLibrary.plot_calibration_data.html#pyxem.libraries.CalibrationDataLibrary.plot_calibration_data">plot_calibration_data() (pyxem.libraries.CalibrationDataLibrary method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.LabeledDiffractionVectors2D.plot_clustered.html#pyxem.signals.LabeledDiffractionVectors2D.plot_clustered">plot_clustered() (pyxem.signals.LabeledDiffractionVectors2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.CalibrationGenerator.plot_corrected_diffraction_pattern.html#pyxem.generators.CalibrationGenerator.plot_corrected_diffraction_pattern">plot_corrected_diffraction_pattern() (pyxem.generators.CalibrationGenerator method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.DiffractionVectors.plot_diffraction_vectors.html#pyxem.signals.DiffractionVectors.plot_diffraction_vectors">plot_diffraction_vectors() (pyxem.signals.DiffractionVectors method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.DiffractionVectors.plot_diffraction_vectors_on_signal.html#pyxem.signals.DiffractionVectors.plot_diffraction_vectors_on_signal">plot_diffraction_vectors_on_signal() (pyxem.signals.DiffractionVectors method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.CommonDiffraction.plot_integrated_intensity.html#pyxem.signals.CommonDiffraction.plot_integrated_intensity">plot_integrated_intensity() (pyxem.signals.CommonDiffraction method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.BeamShift.plot_on_signal.html#pyxem.signals.BeamShift.plot_on_signal">plot_on_signal() (pyxem.signals.BeamShift method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.OrientationMap.plot_over_signal.html#pyxem.signals.OrientationMap.plot_over_signal">plot_over_signal() (pyxem.signals.OrientationMap method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.Power2D.plot_symmetries.html#pyxem.signals.Power2D.plot_symmetries">plot_symmetries() (pyxem.signals.Power2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.plot_template_over_pattern.html#pyxem.utils.plot_template_over_pattern">plot_template_over_pattern() (in module pyxem.utils)</a>
+
+      <ul>
+        <li><a href="reference/generated/pyxem.utils.plotting.plot_template_over_pattern.html#pyxem.utils.plotting.plot_template_over_pattern">(in module pyxem.utils.plotting)</a>
+</li>
+      </ul></li>
+      <li><a href="reference/generated/pyxem.utils.vectors.points_to_poly_collection.html#pyxem.utils.vectors.points_to_poly_collection">points_to_poly_collection() (in module pyxem.utils.vectors)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.vectors.points_to_polygon.html#pyxem.utils.vectors.points_to_polygon">points_to_polygon() (in module pyxem.utils.vectors)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.signals.DisplacementGradientMap.polar_decomposition.html#pyxem.signals.DisplacementGradientMap.polar_decomposition">polar_decomposition() (pyxem.signals.DisplacementGradientMap method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.vectors.polar_to_cartesian.html#pyxem.utils.vectors.polar_to_cartesian">polar_to_cartesian() (in module pyxem.utils.vectors)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.PolarDiffraction2D.html#pyxem.signals.PolarDiffraction2D">PolarDiffraction2D (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.PolarVectors.html#pyxem.signals.PolarVectors">PolarVectors (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.Version.post.html#pyxem.utils.diffraction.Version.post">post (pyxem.utils.diffraction.Version property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.Power2D.html#pyxem.signals.Power2D">Power2D (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.Version.pre.html#pyxem.utils.diffraction.Version.pre">pre (pyxem.utils.diffraction.Version property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.calibration.DictionaryTreeBrowser.process_lazy_attributes.html#pyxem.utils.calibration.DictionaryTreeBrowser.process_lazy_attributes">process_lazy_attributes() (pyxem.utils.calibration.DictionaryTreeBrowser method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.ProfileIndexationGenerator.html#pyxem.generators.ProfileIndexationGenerator">ProfileIndexationGenerator (class in pyxem.generators)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.Version.public.html#pyxem.utils.diffraction.Version.public">public (pyxem.utils.diffraction.Version property)</a>
+</li>
+      <li>
+    pyxem.components
+
+      <ul>
+        <li><a href="reference/generated/pyxem.components.html#module-pyxem.components">module</a>
+</li>
+      </ul></li>
+      <li>
+    pyxem.data
+
+      <ul>
+        <li><a href="reference/generated/pyxem.data.html#module-pyxem.data">module</a>
+</li>
+      </ul></li>
+      <li>
+    pyxem.generators
+
+      <ul>
+        <li><a href="reference/generated/pyxem.generators.html#module-pyxem.generators">module</a>
+</li>
+      </ul></li>
+      <li>
+    pyxem.libraries
+
+      <ul>
+        <li><a href="reference/generated/pyxem.libraries.html#module-pyxem.libraries">module</a>
+</li>
+      </ul></li>
+      <li>
+    pyxem.signals
+
+      <ul>
+        <li><a href="reference/generated/pyxem.signals.html#module-pyxem.signals">module</a>
+</li>
+      </ul></li>
+      <li>
+    pyxem.utils
+
+      <ul>
+        <li><a href="reference/generated/pyxem.utils.html#module-pyxem.utils">module</a>
+</li>
+      </ul></li>
+      <li>
+    pyxem.utils.calibration
+
+      <ul>
+        <li><a href="reference/generated/pyxem.utils.calibration.html#module-pyxem.utils.calibration">module</a>
+</li>
+      </ul></li>
+      <li>
+    pyxem.utils.diffraction
+
+      <ul>
+        <li><a href="reference/generated/pyxem.utils.diffraction.html#module-pyxem.utils.diffraction">module</a>
+</li>
+      </ul></li>
+      <li>
+    pyxem.utils.plotting
+
+      <ul>
+        <li><a href="reference/generated/pyxem.utils.plotting.html#module-pyxem.utils.plotting">module</a>
+</li>
+      </ul></li>
+      <li>
+    pyxem.utils.ransac_ellipse_tools
+
+      <ul>
+        <li><a href="reference/generated/pyxem.utils.ransac_ellipse_tools.html#module-pyxem.utils.ransac_ellipse_tools">module</a>
+</li>
+      </ul></li>
+      <li>
+    pyxem.utils.vectors
+
+      <ul>
+        <li><a href="reference/generated/pyxem.utils.vectors.html#module-pyxem.utils.vectors">module</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="R">R</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.signals.ReducedIntensity1D.html#pyxem.signals.ReducedIntensity1D">ReducedIntensity1D (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.components.ReducedIntensityCorrectionComponent.html#pyxem.components.ReducedIntensityCorrectionComponent">ReducedIntensityCorrectionComponent (class in pyxem.components)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.ReducedIntensityGenerator1D.html#pyxem.generators.ReducedIntensityGenerator1D">ReducedIntensityGenerator1D (class in pyxem.generators)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.reference_circle.html#pyxem.utils.diffraction.reference_circle">reference_circle() (in module pyxem.utils.diffraction)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.SubpixelrefinementGenerator.reference_xc.html#pyxem.generators.SubpixelrefinementGenerator.reference_xc">reference_xc() (pyxem.generators.SubpixelrefinementGenerator method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.VectorIndexationGenerator.refine_best_orientation.html#pyxem.generators.VectorIndexationGenerator.refine_best_orientation">refine_best_orientation() (pyxem.generators.VectorIndexationGenerator method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.VectorIndexationGenerator.refine_n_best_orientations.html#pyxem.generators.VectorIndexationGenerator.refine_n_best_orientations">refine_n_best_orientations() (pyxem.generators.VectorIndexationGenerator method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.tqdm.refresh.html#pyxem.utils.diffraction.tqdm.refresh">refresh() (pyxem.utils.diffraction.tqdm method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.regional_filter.html#pyxem.utils.diffraction.regional_filter">regional_filter() (in module pyxem.utils.diffraction)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.utils.diffraction.Version.release.html#pyxem.utils.diffraction.Version.release">release (pyxem.utils.diffraction.Version property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.remove_bad_pixels.html#pyxem.utils.diffraction.remove_bad_pixels">remove_bad_pixels() (in module pyxem.utils.diffraction)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.remove_dead.html#pyxem.utils.diffraction.remove_dead">remove_dead() (in module pyxem.utils.diffraction)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.tqdm.reset.html#pyxem.utils.diffraction.tqdm.reset">reset() (pyxem.utils.diffraction.tqdm method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.InSituDiffraction2D.roll_time_axis.html#pyxem.signals.InSituDiffraction2D.roll_time_axis">roll_time_axis() (pyxem.signals.InSituDiffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.BeamShift.rotate_beam_shifts.html#pyxem.signals.BeamShift.rotate_beam_shifts">rotate_beam_shifts() (pyxem.signals.BeamShift method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.Diffraction2D.rotate_diffraction.html#pyxem.signals.Diffraction2D.rotate_diffraction">rotate_diffraction() (pyxem.signals.Diffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.BeamShift.rotate_scan_dimensions.html#pyxem.signals.BeamShift.rotate_scan_dimensions">rotate_scan_dimensions() (pyxem.signals.BeamShift method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.StrainMap.rotate_strain_basis.html#pyxem.signals.StrainMap.rotate_strain_basis">rotate_strain_basis() (pyxem.signals.StrainMap method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="S">S</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.data.sample_with_g.html#pyxem.data.sample_with_g">sample_with_g() (in module pyxem.data)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.calibration.Calibration.scale.html#pyxem.utils.calibration.Calibration.scale">scale (pyxem.utils.calibration.Calibration property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.calibration.UniformDataAxis.scale_as_quantity.html#pyxem.utils.calibration.UniformDataAxis.scale_as_quantity">scale_as_quantity (pyxem.utils.calibration.UniformDataAxis property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.DiffractionVectors.scales.html#pyxem.signals.DiffractionVectors.scales">scales (pyxem.signals.DiffractionVectors property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.ElectronDiffraction2D.scan_calibration.html#pyxem.signals.ElectronDiffraction2D.scan_calibration">scan_calibration (pyxem.signals.ElectronDiffraction2D property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.components.ScatteringFitComponentLobato.html#pyxem.components.ScatteringFitComponentLobato">ScatteringFitComponentLobato (class in pyxem.components)</a>
+</li>
+      <li><a href="reference/generated/pyxem.components.ScatteringFitComponentXTables.html#pyxem.components.ScatteringFitComponentXTables">ScatteringFitComponentXTables (class in pyxem.components)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.LearningSegment.separate_learning_segments.html#pyxem.signals.LearningSegment.separate_learning_segments">separate_learning_segments() (pyxem.signals.LearningSegment method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.calibration.Calibration.set_camera_length_from_calibration.html#pyxem.utils.calibration.Calibration.set_camera_length_from_calibration">set_camera_length_from_calibration() (pyxem.utils.calibration.Calibration method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.tqdm.set_description.html#pyxem.utils.diffraction.tqdm.set_description">set_description() (pyxem.utils.diffraction.tqdm method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.tqdm.set_description_str.html#pyxem.utils.diffraction.tqdm.set_description_str">set_description_str() (pyxem.utils.diffraction.tqdm method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.ReducedIntensityGenerator1D.set_diffraction_calibration.html#pyxem.generators.ReducedIntensityGenerator1D.set_diffraction_calibration">set_diffraction_calibration() (pyxem.generators.ReducedIntensityGenerator1D method)</a>
+
+      <ul>
+        <li><a href="reference/generated/pyxem.signals.ElectronDiffraction1D.set_diffraction_calibration.html#pyxem.signals.ElectronDiffraction1D.set_diffraction_calibration">(pyxem.signals.ElectronDiffraction1D method)</a>
+</li>
+        <li><a href="reference/generated/pyxem.signals.ElectronDiffraction2D.set_diffraction_calibration.html#pyxem.signals.ElectronDiffraction2D.set_diffraction_calibration">(pyxem.signals.ElectronDiffraction2D method)</a>
+</li>
+      </ul></li>
+      <li><a href="reference/generated/pyxem.generators.ReducedIntensityGenerator1D.set_diffraction_offset.html#pyxem.generators.ReducedIntensityGenerator1D.set_diffraction_offset">set_diffraction_offset() (pyxem.generators.ReducedIntensityGenerator1D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.ElectronDiffraction1D.set_experimental_parameters.html#pyxem.signals.ElectronDiffraction1D.set_experimental_parameters">set_experimental_parameters() (pyxem.signals.ElectronDiffraction1D method)</a>
+
+      <ul>
+        <li><a href="reference/generated/pyxem.signals.ElectronDiffraction2D.set_experimental_parameters.html#pyxem.signals.ElectronDiffraction2D.set_experimental_parameters">(pyxem.signals.ElectronDiffraction2D method)</a>
+</li>
+      </ul></li>
+      <li><a href="reference/generated/pyxem.utils.calibration.DictionaryTreeBrowser.set_item.html#pyxem.utils.calibration.DictionaryTreeBrowser.set_item">set_item() (pyxem.utils.calibration.DictionaryTreeBrowser method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.tqdm.set_lock.html#pyxem.utils.diffraction.tqdm.set_lock">set_lock() (pyxem.utils.diffraction.tqdm class method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.calibration.Calibration.set_mrad_scale_from_calibration.html#pyxem.utils.calibration.Calibration.set_mrad_scale_from_calibration">set_mrad_scale_from_calibration() (pyxem.utils.calibration.Calibration method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.tqdm.set_postfix.html#pyxem.utils.diffraction.tqdm.set_postfix">set_postfix() (pyxem.utils.diffraction.tqdm method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.tqdm.set_postfix_str.html#pyxem.utils.diffraction.tqdm.set_postfix_str">set_postfix_str() (pyxem.utils.diffraction.tqdm method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.VirtualImageGenerator.set_ROI_mesh.html#pyxem.generators.VirtualImageGenerator.set_ROI_mesh">set_ROI_mesh() (pyxem.generators.VirtualImageGenerator method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.ReducedIntensityGenerator1D.set_s_cutoff.html#pyxem.generators.ReducedIntensityGenerator1D.set_s_cutoff">set_s_cutoff() (pyxem.generators.ReducedIntensityGenerator1D method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.signals.ElectronDiffraction1D.set_scan_calibration.html#pyxem.signals.ElectronDiffraction1D.set_scan_calibration">set_scan_calibration() (pyxem.signals.ElectronDiffraction1D method)</a>
+
+      <ul>
+        <li><a href="reference/generated/pyxem.signals.ElectronDiffraction2D.set_scan_calibration.html#pyxem.signals.ElectronDiffraction2D.set_scan_calibration">(pyxem.signals.ElectronDiffraction2D method)</a>
+</li>
+      </ul></li>
+      <li><a href="reference/generated/pyxem.utils.calibration.Calibration.shape.html#pyxem.utils.calibration.Calibration.shape">shape (pyxem.utils.calibration.Calibration property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.Diffraction2D.shift_diffraction.html#pyxem.signals.Diffraction2D.shift_diffraction">shift_diffraction() (pyxem.signals.Diffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.data.si_grains.html#pyxem.data.si_grains">si_grains() (in module pyxem.data)</a>
+</li>
+      <li><a href="reference/generated/pyxem.data.si_grains_simple.html#pyxem.data.si_grains_simple">si_grains_simple() (in module pyxem.data)</a>
+</li>
+      <li><a href="reference/generated/pyxem.data.si_phase.html#pyxem.data.si_phase">si_phase() (in module pyxem.data)</a>
+</li>
+      <li><a href="reference/generated/pyxem.data.si_rotations_line.html#pyxem.data.si_rotations_line">si_rotations_line() (in module pyxem.data)</a>
+</li>
+      <li><a href="reference/generated/pyxem.data.si_tilt.html#pyxem.data.si_tilt">si_tilt() (in module pyxem.data)</a>
+</li>
+      <li><a href="reference/generated/pyxem.data.simulated_constant_shift_magnitude.html#pyxem.data.simulated_constant_shift_magnitude">simulated_constant_shift_magnitude() (in module pyxem.data)</a>
+</li>
+      <li><a href="reference/generated/pyxem.data.simulated_overlap.html#pyxem.data.simulated_overlap">simulated_overlap() (in module pyxem.data)</a>
+</li>
+      <li><a href="reference/generated/pyxem.data.simulated_pn_junction.html#pyxem.data.simulated_pn_junction">simulated_pn_junction() (in module pyxem.data)</a>
+</li>
+      <li><a href="reference/generated/pyxem.data.simulated_strain.html#pyxem.data.simulated_strain">simulated_strain() (in module pyxem.data)</a>
+</li>
+      <li><a href="reference/generated/pyxem.data.simulated_stripes.html#pyxem.data.simulated_stripes">simulated_stripes() (in module pyxem.data)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.OrientationMap.simulation.html#pyxem.signals.OrientationMap.simulation">simulation (pyxem.signals.OrientationMap property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.data.small_ptychography.html#pyxem.data.small_ptychography">small_ptychography() (in module pyxem.data)</a>
+</li>
+      <li><a href="reference/generated/pyxem.data.sped_ag.html#pyxem.data.sped_ag">sped_ag() (in module pyxem.data)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.tqdm.status_printer.html#pyxem.utils.diffraction.tqdm.status_printer">status_printer() (pyxem.utils.diffraction.tqdm static method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.StrainMap.html#pyxem.signals.StrainMap">StrainMap (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.DiffractionVectors.subpixel_refine.html#pyxem.signals.DiffractionVectors.subpixel_refine">subpixel_refine() (pyxem.signals.DiffractionVectors method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.SubpixelrefinementGenerator.html#pyxem.generators.SubpixelrefinementGenerator">SubpixelrefinementGenerator (class in pyxem.generators)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.ReducedIntensityGenerator1D.subtract_bkgd_pattern.html#pyxem.generators.ReducedIntensityGenerator1D.subtract_bkgd_pattern">subtract_bkgd_pattern() (pyxem.generators.ReducedIntensityGenerator1D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.Diffraction2D.subtract_diffraction_background.html#pyxem.signals.Diffraction2D.subtract_diffraction_background">subtract_diffraction_background() (pyxem.signals.Diffraction2D method)</a>
+
+      <ul>
+        <li><a href="reference/generated/pyxem.signals.PolarDiffraction2D.subtract_diffraction_background.html#pyxem.signals.PolarDiffraction2D.subtract_diffraction_background">(pyxem.signals.PolarDiffraction2D method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="T">T</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.signals.Diffraction2D.template_match.html#pyxem.signals.Diffraction2D.template_match">template_match() (pyxem.signals.Diffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.Diffraction2D.template_match_disk.html#pyxem.signals.Diffraction2D.template_match_disk">template_match_disk() (pyxem.signals.Diffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.Diffraction2D.template_match_ring.html#pyxem.signals.Diffraction2D.template_match_ring">template_match_ring() (pyxem.signals.Diffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.Diffraction2D.template_match_with_binary_image.html#pyxem.signals.Diffraction2D.template_match_with_binary_image">template_match_with_binary_image() (pyxem.signals.Diffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.TemplateIndexationGenerator.html#pyxem.generators.TemplateIndexationGenerator">TemplateIndexationGenerator (class in pyxem.generators)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.Diffraction2D.threshold_and_mask.html#pyxem.signals.Diffraction2D.threshold_and_mask">threshold_and_mask() (pyxem.signals.Diffraction2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.data.tilt_boundary_data.html#pyxem.data.tilt_boundary_data">tilt_boundary_data() (in module pyxem.data)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.DPCSignal1D.to_beamshift.html#pyxem.signals.DPCSignal1D.to_beamshift">to_beamshift() (pyxem.signals.DPCSignal1D method)</a>
+
+      <ul>
+        <li><a href="reference/generated/pyxem.signals.DPCSignal2D.to_beamshift.html#pyxem.signals.DPCSignal2D.to_beamshift">(pyxem.signals.DPCSignal2D method)</a>
+</li>
+      </ul></li>
+      <li><a href="reference/generated/pyxem.utils.vectors.to_cart_three_angles.html#pyxem.utils.vectors.to_cart_three_angles">to_cart_three_angles() (in module pyxem.utils.vectors)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.PolarVectors.to_cartesian.html#pyxem.signals.PolarVectors.to_cartesian">to_cartesian() (pyxem.signals.PolarVectors method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.OrientationMap.to_crystal_map.html#pyxem.signals.OrientationMap.to_crystal_map">to_crystal_map() (pyxem.signals.OrientationMap method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.CommonDiffraction.to_device.html#pyxem.signals.CommonDiffraction.to_device">to_device() (pyxem.signals.CommonDiffraction method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.CommonDiffraction.to_host.html#pyxem.signals.CommonDiffraction.to_host">to_host() (pyxem.signals.CommonDiffraction method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.OrientationMap.to_ipf_colormap.html#pyxem.signals.OrientationMap.to_ipf_colormap">to_ipf_colormap() (pyxem.signals.OrientationMap method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.OrientationMap.to_ipf_correlation_heatmap_markers.html#pyxem.signals.OrientationMap.to_ipf_correlation_heatmap_markers">to_ipf_correlation_heatmap_markers() (pyxem.signals.OrientationMap method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.OrientationMap.to_ipf_markers.html#pyxem.signals.OrientationMap.to_ipf_markers">to_ipf_markers() (pyxem.signals.OrientationMap method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.signals.DiffractionVectors.to_markers.html#pyxem.signals.DiffractionVectors.to_markers">to_markers() (pyxem.signals.DiffractionVectors method)</a>
+
+      <ul>
+        <li><a href="reference/generated/pyxem.signals.LabeledDiffractionVectors2D.to_markers.html#pyxem.signals.LabeledDiffractionVectors2D.to_markers">(pyxem.signals.LabeledDiffractionVectors2D method)</a>
+</li>
+        <li><a href="reference/generated/pyxem.signals.OrientationMap.to_markers.html#pyxem.signals.OrientationMap.to_markers">(pyxem.signals.OrientationMap method)</a>
+</li>
+        <li><a href="reference/generated/pyxem.signals.PolarVectors.to_markers.html#pyxem.signals.PolarVectors.to_markers">(pyxem.signals.PolarVectors method)</a>
+</li>
+      </ul></li>
+      <li><a href="reference/generated/pyxem.signals.DiffractionVectors.to_mask.html#pyxem.signals.DiffractionVectors.to_mask">to_mask() (pyxem.signals.DiffractionVectors method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.OrientationMap.to_phase_index.html#pyxem.signals.OrientationMap.to_phase_index">to_phase_index() (pyxem.signals.OrientationMap method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.OrientationMap.to_phase_map.html#pyxem.signals.OrientationMap.to_phase_map">to_phase_map() (pyxem.signals.OrientationMap method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.DiffractionVectors.to_polar.html#pyxem.signals.DiffractionVectors.to_polar">to_polar() (pyxem.signals.DiffractionVectors method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.OrientationMap.to_polar_markers.html#pyxem.signals.OrientationMap.to_polar_markers">to_polar_markers() (pyxem.signals.OrientationMap method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.DiffractionVectors2D.to_roi.html#pyxem.signals.DiffractionVectors2D.to_roi">to_roi() (pyxem.signals.DiffractionVectors2D method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.OrientationMap.to_rotation.html#pyxem.signals.OrientationMap.to_rotation">to_rotation() (pyxem.signals.OrientationMap method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.OrientationMap.to_single_phase_orientations.html#pyxem.signals.OrientationMap.to_single_phase_orientations">to_single_phase_orientations() (pyxem.signals.OrientationMap method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.OrientationMap.to_single_phase_polar_markers.html#pyxem.signals.OrientationMap.to_single_phase_polar_markers">to_single_phase_polar_markers() (pyxem.signals.OrientationMap method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.OrientationMap.to_single_phase_vectors.html#pyxem.signals.OrientationMap.to_single_phase_vectors">to_single_phase_vectors() (pyxem.signals.OrientationMap method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.OrientationMap.to_vectors.html#pyxem.signals.OrientationMap.to_vectors">to_vectors() (pyxem.signals.OrientationMap method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.tqdm.html#pyxem.utils.diffraction.tqdm">tqdm (class in pyxem.utils.diffraction)</a>
+</li>
+      <li><a href="reference/generated/pyxem.data.twinned_nanowire.html#pyxem.data.twinned_nanowire">twinned_nanowire() (in module pyxem.data)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="U">U</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.utils.calibration.UniformDataAxis.html#pyxem.utils.calibration.UniformDataAxis">UniformDataAxis (class in pyxem.utils.calibration)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.CommonDiffraction.unit.html#pyxem.signals.CommonDiffraction.unit">unit (pyxem.signals.CommonDiffraction property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.DiffractionVectors.units.html#pyxem.signals.DiffractionVectors.units">units (pyxem.signals.DiffractionVectors property)</a>
+
+      <ul>
+        <li><a href="reference/generated/pyxem.utils.calibration.Calibration.units.html#pyxem.utils.calibration.Calibration.units">(pyxem.utils.calibration.Calibration property)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.utils.diffraction.tqdm.unpause.html#pyxem.utils.diffraction.tqdm.unpause">unpause() (pyxem.utils.diffraction.tqdm method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.tqdm.update.html#pyxem.utils.diffraction.tqdm.update">update() (pyxem.utils.diffraction.tqdm method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.calibration.UniformDataAxis.update_axis.html#pyxem.utils.calibration.UniformDataAxis.update_axis">update_axis() (pyxem.utils.calibration.UniformDataAxis method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.calibration.UniformDataAxis.update_from.html#pyxem.utils.calibration.UniformDataAxis.update_from">update_from() (pyxem.utils.calibration.UniformDataAxis method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="V">V</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.utils.calibration.UniformDataAxis.value2index.html#pyxem.utils.calibration.UniformDataAxis.value2index">value2index() (pyxem.utils.calibration.UniformDataAxis method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.calibration.value2node.html#pyxem.utils.calibration.value2node">value2node() (in module pyxem.utils.calibration)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.calibration.value2standard_units.html#pyxem.utils.calibration.value2standard_units">value2standard_units() (in module pyxem.utils.calibration)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.VarianceGenerator.html#pyxem.generators.VarianceGenerator">VarianceGenerator (class in pyxem.generators)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.VDFSegment.html#pyxem.signals.VDFSegment">VDFSegment (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.VectorIndexationGenerator.html#pyxem.generators.VectorIndexationGenerator">VectorIndexationGenerator (class in pyxem.generators)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.VectorMatchingResults.html#pyxem.signals.VectorMatchingResults">VectorMatchingResults (class in pyxem.signals)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.signals.VirtualDarkFieldImage.vectors.html#pyxem.signals.VirtualDarkFieldImage.vectors">vectors (pyxem.signals.VirtualDarkFieldImage property)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.vectors.vectors2image.html#pyxem.utils.vectors.vectors2image">vectors2image() (in module pyxem.utils.vectors)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.vectors.vectors_to_polar.html#pyxem.utils.vectors.vectors_to_polar">vectors_to_polar() (in module pyxem.utils.vectors)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.Version.html#pyxem.utils.diffraction.Version">Version (class in pyxem.utils.diffraction)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.VirtualDarkFieldGenerator.html#pyxem.generators.VirtualDarkFieldGenerator">VirtualDarkFieldGenerator (class in pyxem.generators)</a>
+</li>
+      <li><a href="reference/generated/pyxem.signals.VirtualDarkFieldImage.html#pyxem.signals.VirtualDarkFieldImage">VirtualDarkFieldImage (class in pyxem.signals)</a>
+</li>
+      <li><a href="reference/generated/pyxem.generators.VirtualImageGenerator.html#pyxem.generators.VirtualImageGenerator">VirtualImageGenerator (class in pyxem.generators)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="W">W</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.utils.calibration.Calibration.wavelength.html#pyxem.utils.calibration.Calibration.wavelength">wavelength (pyxem.utils.calibration.Calibration property)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.utils.diffraction.tqdm.wrapattr.html#pyxem.utils.diffraction.tqdm.wrapattr">wrapattr() (pyxem.utils.diffraction.tqdm class method)</a>
+</li>
+      <li><a href="reference/generated/pyxem.utils.diffraction.tqdm.write.html#pyxem.utils.diffraction.tqdm.write">write() (pyxem.utils.diffraction.tqdm class method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="Z">Z</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/pyxem.data.zrnb_precipitate.html#pyxem.data.zrnb_precipitate">zrnb_precipitate() (in module pyxem.data)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright Copyright 2016-2025, The pyxem developers.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,6 @@
+peak\_position\_refinement\_com
+===============================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: Diffraction2D.peak_position_refinement_com

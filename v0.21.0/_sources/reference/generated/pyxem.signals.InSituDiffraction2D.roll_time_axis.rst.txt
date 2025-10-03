@@ -1,0 +1,6 @@
+roll\_time\_axis
+================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: InSituDiffraction2D.roll_time_axis

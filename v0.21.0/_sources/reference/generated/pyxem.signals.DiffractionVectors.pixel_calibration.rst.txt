@@ -1,0 +1,9 @@
+pixel\_calibration
+==================
+
+.. currentmodule:: pyxem.signals
+
+.. autoproperty:: DiffractionVectors.pixel_calibration
+
+.. minigallery:: pyxem.signals.DiffractionVectors.pixel_calibration
+    :add-heading: Examples using ``DiffractionVectors.pixel_calibration``

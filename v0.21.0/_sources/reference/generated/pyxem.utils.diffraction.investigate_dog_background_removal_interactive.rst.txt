@@ -1,0 +1,9 @@
+investigate\_dog\_background\_removal\_interactive
+==================================================
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autofunction:: investigate_dog_background_removal_interactive
+
+.. minigallery:: pyxem.utils.diffraction.investigate_dog_background_removal_interactive
+    :add-heading: Examples using ``investigate_dog_background_removal_interactive``

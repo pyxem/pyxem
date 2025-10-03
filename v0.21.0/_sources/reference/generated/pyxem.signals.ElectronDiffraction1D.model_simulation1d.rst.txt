@@ -1,0 +1,6 @@
+model\_simulation1d
+===================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: ElectronDiffraction1D.model_simulation1d

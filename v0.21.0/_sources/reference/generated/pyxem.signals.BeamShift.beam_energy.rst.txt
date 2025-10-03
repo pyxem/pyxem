@@ -1,0 +1,9 @@
+beam\_energy
+============
+
+.. currentmodule:: pyxem.signals
+
+.. autoproperty:: BeamShift.beam_energy
+
+.. minigallery:: pyxem.signals.BeamShift.beam_energy
+    :add-heading: Examples using ``BeamShift.beam_energy``

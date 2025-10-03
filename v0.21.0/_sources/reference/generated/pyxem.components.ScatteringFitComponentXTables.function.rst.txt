@@ -1,0 +1,6 @@
+function
+========
+
+.. currentmodule:: pyxem.components
+
+.. automethod:: ScatteringFitComponentXTables.function

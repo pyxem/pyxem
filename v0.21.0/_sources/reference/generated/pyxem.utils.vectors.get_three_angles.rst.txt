@@ -1,0 +1,9 @@
+get\_three\_angles
+==================
+
+.. currentmodule:: pyxem.utils.vectors
+
+.. autofunction:: get_three_angles
+
+.. minigallery:: pyxem.utils.vectors.get_three_angles
+    :add-heading: Examples using ``get_three_angles``

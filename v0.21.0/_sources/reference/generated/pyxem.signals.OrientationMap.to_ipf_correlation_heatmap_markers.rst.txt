@@ -1,0 +1,6 @@
+to\_ipf\_correlation\_heatmap\_markers
+======================================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: OrientationMap.to_ipf_correlation_heatmap_markers

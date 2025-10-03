@@ -1,0 +1,9 @@
+tilt\_boundary\_data
+====================
+
+.. currentmodule:: pyxem.data
+
+.. autofunction:: tilt_boundary_data
+
+.. minigallery:: pyxem.data.tilt_boundary_data
+    :add-heading: Examples using ``tilt_boundary_data``

@@ -1,0 +1,9 @@
+to\_cart\_three\_angles
+=======================
+
+.. currentmodule:: pyxem.utils.vectors
+
+.. autofunction:: to_cart_three_angles
+
+.. minigallery:: pyxem.utils.vectors.to_cart_three_angles
+    :add-heading: Examples using ``to_cart_three_angles``

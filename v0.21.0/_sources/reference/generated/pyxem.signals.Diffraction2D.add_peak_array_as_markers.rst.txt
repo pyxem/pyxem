@@ -1,0 +1,6 @@
+add\_peak\_array\_as\_markers
+=============================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: Diffraction2D.add_peak_array_as_markers

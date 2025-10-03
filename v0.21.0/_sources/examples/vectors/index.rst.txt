@@ -1,0 +1,98 @@
+
+
+.. _sphx_glr_examples_vectors:
+
+Vectors
+=======
+Below is a gallery of examples for operations on vectors.
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to take a set of vectors and create a mask from a set of circles around each vector. Multiplying by the original signal will remove all the signal except for the circles around the vectors.">
+
+.. only:: html
+
+  .. image:: /examples/vectors/images/thumb/sphx_glr_masking_vectors_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_vectors_masking_vectors.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Diffraction Vectors to Mask</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to perform some basic operations slicing and selecting vectors. This is designed to be very flexible and powerful.  Many operations such as slicing with a boolean array are supported.">
+
+.. only:: html
+
+  .. image:: /examples/vectors/images/thumb/sphx_glr_slicing_vectors_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_vectors_slicing_vectors.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Operations on Vectors</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to identify symmetry (in a glassy system but this could be useful other places) by looking at the angles between 3 vectors in the diffraction pattern at some radial ring in k to identify groups of 3 vectors that are subtended by the same angle.">
+
+.. only:: html
+
+  .. image:: /examples/vectors/images/thumb/sphx_glr_glass_symmetry_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_vectors_glass_symmetry.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Glass Symmetry from Vectors</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This can be used to segment a 4-D STEM dataset into different clusters based on the diffraction pattern at each real space position.">
+
+.. only:: html
+
+  .. image:: /examples/vectors/images/thumb/sphx_glr_clustering_vectors_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_vectors_clustering_vectors.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Clustering Vectors</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/vectors/masking_vectors
+   /examples/vectors/slicing_vectors
+   /examples/vectors/glass_symmetry
+   /examples/vectors/clustering_vectors
+

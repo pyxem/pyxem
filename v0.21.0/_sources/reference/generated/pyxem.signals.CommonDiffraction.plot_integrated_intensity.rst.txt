@@ -1,0 +1,6 @@
+plot\_integrated\_intensity
+===========================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: CommonDiffraction.plot_integrated_intensity

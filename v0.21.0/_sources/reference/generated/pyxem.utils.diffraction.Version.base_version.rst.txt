@@ -1,0 +1,9 @@
+base\_version
+=============
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autoproperty:: Version.base_version
+
+.. minigallery:: pyxem.utils.diffraction.Version.base_version
+    :add-heading: Examples using ``Version.base_version``

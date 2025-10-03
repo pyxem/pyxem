@@ -1,0 +1,9 @@
+is\_clustered
+=============
+
+.. currentmodule:: pyxem.signals
+
+.. autoproperty:: LabeledDiffractionVectors2D.is_clustered
+
+.. minigallery:: pyxem.signals.LabeledDiffractionVectors2D.is_clustered
+    :add-heading: Examples using ``LabeledDiffractionVectors2D.is_clustered``

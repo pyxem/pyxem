@@ -1,0 +1,9 @@
+flat\_ewald
+===========
+
+.. currentmodule:: pyxem.utils.calibration
+
+.. autoproperty:: Calibration.flat_ewald
+
+.. minigallery:: pyxem.utils.calibration.Calibration.flat_ewald
+    :add-heading: Examples using ``Calibration.flat_ewald``

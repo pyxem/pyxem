@@ -1,0 +1,6 @@
+deepcopy
+========
+
+.. currentmodule:: pyxem.utils.calibration
+
+.. automethod:: DictionaryTreeBrowser.deepcopy

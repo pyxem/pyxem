@@ -1,0 +1,6 @@
+set\_experimental\_parameters
+=============================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: ElectronDiffraction1D.set_experimental_parameters

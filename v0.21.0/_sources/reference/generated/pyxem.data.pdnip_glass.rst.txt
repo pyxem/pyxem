@@ -1,0 +1,9 @@
+pdnip\_glass
+============
+
+.. currentmodule:: pyxem.data
+
+.. autofunction:: pdnip_glass
+
+.. minigallery:: pyxem.data.pdnip_glass
+    :add-heading: Examples using ``pdnip_glass``

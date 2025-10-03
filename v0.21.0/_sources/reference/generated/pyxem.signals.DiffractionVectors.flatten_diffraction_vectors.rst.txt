@@ -1,0 +1,6 @@
+flatten\_diffraction\_vectors
+=============================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: DiffractionVectors.flatten_diffraction_vectors

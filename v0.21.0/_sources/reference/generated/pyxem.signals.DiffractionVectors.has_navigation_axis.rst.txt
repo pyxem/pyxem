@@ -1,0 +1,9 @@
+has\_navigation\_axis
+=====================
+
+.. currentmodule:: pyxem.signals
+
+.. autoproperty:: DiffractionVectors.has_navigation_axis
+
+.. minigallery:: pyxem.signals.DiffractionVectors.has_navigation_axis
+    :add-heading: Examples using ``DiffractionVectors.has_navigation_axis``

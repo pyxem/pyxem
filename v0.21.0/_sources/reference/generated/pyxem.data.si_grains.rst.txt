@@ -1,0 +1,9 @@
+si\_grains
+==========
+
+.. currentmodule:: pyxem.data
+
+.. autofunction:: si_grains
+
+.. minigallery:: pyxem.data.si_grains
+    :add-heading: Examples using ``si_grains``

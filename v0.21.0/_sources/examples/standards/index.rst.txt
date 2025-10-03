@@ -1,0 +1,62 @@
+
+
+.. _sphx_glr_examples_standards:
+
+Standards
+=========
+Below is a gallery of examples showing different standards in pyxem
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Pyxem is flexible in how it handles coordinates for a diffraction pattern.">
+
+.. only:: html
+
+  .. image:: /examples/standards/images/thumb/sphx_glr_pixel_coodinates_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_standards_pixel_coodinates.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Coordinates in Pyxem</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Let&#x27;s look at an example of this using the ZrNb Precipitate dataset.">
+
+.. only:: html
+
+  .. image:: /examples/standards/images/thumb/sphx_glr_flat_ewalds_sphere_assumption_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_standards_flat_ewalds_sphere_assumption.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Flat Ewald's Sphere Assumption</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/standards/pixel_coodinates
+   /examples/standards/flat_ewalds_sphere_assumption
+

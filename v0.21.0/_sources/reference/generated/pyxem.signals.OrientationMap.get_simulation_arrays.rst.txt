@@ -1,0 +1,6 @@
+get\_simulation\_arrays
+=======================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: OrientationMap.get_simulation_arrays

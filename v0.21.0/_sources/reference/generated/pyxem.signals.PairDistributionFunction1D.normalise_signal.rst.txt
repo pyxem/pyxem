@@ -1,0 +1,6 @@
+normalise\_signal
+=================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: PairDistributionFunction1D.normalise_signal

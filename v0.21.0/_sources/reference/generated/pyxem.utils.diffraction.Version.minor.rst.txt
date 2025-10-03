@@ -1,0 +1,9 @@
+minor
+=====
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autoproperty:: Version.minor
+
+.. minigallery:: pyxem.utils.diffraction.Version.minor
+    :add-heading: Examples using ``Version.minor``

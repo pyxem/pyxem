@@ -1,0 +1,6 @@
+get\_magnitude\_histogram
+=========================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: DiffractionVectors.get_magnitude_histogram

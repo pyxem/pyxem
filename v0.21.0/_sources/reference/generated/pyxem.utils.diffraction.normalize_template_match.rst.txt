@@ -1,0 +1,9 @@
+normalize\_template\_match
+==========================
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autofunction:: normalize_template_match
+
+.. minigallery:: pyxem.utils.diffraction.normalize_template_match
+    :add-heading: Examples using ``normalize_template_match``

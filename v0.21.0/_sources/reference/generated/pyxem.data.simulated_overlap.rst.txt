@@ -1,0 +1,9 @@
+simulated\_overlap
+==================
+
+.. currentmodule:: pyxem.data
+
+.. autofunction:: simulated_overlap
+
+.. minigallery:: pyxem.data.simulated_overlap
+    :add-heading: Examples using ``simulated_overlap``

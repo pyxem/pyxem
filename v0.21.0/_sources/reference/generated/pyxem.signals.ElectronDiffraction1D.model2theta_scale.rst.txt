@@ -1,0 +1,6 @@
+model2theta\_scale
+==================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: ElectronDiffraction1D.model2theta_scale

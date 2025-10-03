@@ -1,0 +1,9 @@
+peaks\_as\_gvectors
+===================
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autofunction:: peaks_as_gvectors
+
+.. minigallery:: pyxem.utils.diffraction.peaks_as_gvectors
+    :add-heading: Examples using ``peaks_as_gvectors``

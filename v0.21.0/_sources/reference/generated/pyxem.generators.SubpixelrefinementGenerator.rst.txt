@@ -1,0 +1,37 @@
+SubpixelrefinementGenerator
+===========================
+
+.. currentmodule:: pyxem.generators
+
+.. autoclass:: SubpixelrefinementGenerator
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Methods
+
+    .. autosummary::
+        :toctree:
+        :template: custom-method-template.rst
+        
+        
+        
+        SubpixelrefinementGenerator.center_of_mass_method
+        
+        
+        SubpixelrefinementGenerator.conventional_xc
+        
+        
+        SubpixelrefinementGenerator.local_gaussian_method
+        
+        
+        SubpixelrefinementGenerator.reference_xc
+        
+    
+    
+
+.. minigallery:: pyxem.generators.SubpixelrefinementGenerator
+    :add-heading: Examples using ``SubpixelrefinementGenerator``

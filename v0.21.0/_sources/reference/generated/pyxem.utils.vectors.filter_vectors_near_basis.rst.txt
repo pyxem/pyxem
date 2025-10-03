@@ -1,0 +1,9 @@
+filter\_vectors\_near\_basis
+============================
+
+.. currentmodule:: pyxem.utils.vectors
+
+.. autofunction:: filter_vectors_near_basis
+
+.. minigallery:: pyxem.utils.vectors.filter_vectors_near_basis
+    :add-heading: Examples using ``filter_vectors_near_basis``

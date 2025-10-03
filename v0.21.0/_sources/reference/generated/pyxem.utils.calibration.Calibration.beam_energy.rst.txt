@@ -1,0 +1,9 @@
+beam\_energy
+============
+
+.. currentmodule:: pyxem.utils.calibration
+
+.. autoproperty:: Calibration.beam_energy
+
+.. minigallery:: pyxem.utils.calibration.Calibration.beam_energy
+    :add-heading: Examples using ``Calibration.beam_energy``

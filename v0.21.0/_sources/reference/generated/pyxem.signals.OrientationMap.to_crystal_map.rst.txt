@@ -1,0 +1,6 @@
+to\_crystal\_map
+================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: OrientationMap.to_crystal_map

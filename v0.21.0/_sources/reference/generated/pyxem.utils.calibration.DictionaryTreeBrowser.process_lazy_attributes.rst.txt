@@ -1,0 +1,6 @@
+process\_lazy\_attributes
+=========================
+
+.. currentmodule:: pyxem.utils.calibration
+
+.. automethod:: DictionaryTreeBrowser.process_lazy_attributes

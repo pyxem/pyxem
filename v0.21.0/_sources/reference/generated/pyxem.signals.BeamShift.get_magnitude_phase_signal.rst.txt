@@ -1,0 +1,6 @@
+get\_magnitude\_phase\_signal
+=============================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: BeamShift.get_magnitude_phase_signal

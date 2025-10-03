@@ -1,0 +1,9 @@
+is\_ellipse\_good
+=================
+
+.. currentmodule:: pyxem.utils.ransac_ellipse_tools
+
+.. autofunction:: is_ellipse_good
+
+.. minigallery:: pyxem.utils.ransac_ellipse_tools.is_ellipse_good
+    :add-heading: Examples using ``is_ellipse_good``

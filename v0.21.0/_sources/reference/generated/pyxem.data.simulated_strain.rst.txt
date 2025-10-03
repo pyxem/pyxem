@@ -1,0 +1,9 @@
+simulated\_strain
+=================
+
+.. currentmodule:: pyxem.data
+
+.. autofunction:: simulated_strain
+
+.. minigallery:: pyxem.data.simulated_strain
+    :add-heading: Examples using ``simulated_strain``

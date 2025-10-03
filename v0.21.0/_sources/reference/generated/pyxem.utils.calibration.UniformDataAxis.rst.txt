@@ -1,0 +1,126 @@
+UniformDataAxis
+===============
+
+.. currentmodule:: pyxem.utils.calibration
+
+.. autoclass:: UniformDataAxis
+
+    
+    
+    .. rubric:: Attributes
+
+    .. autosummary::
+        :toctree:
+        :template: custom-attribute-template.rst
+        
+        
+        
+        
+        
+        UniformDataAxis.offset_as_quantity
+        
+        
+        UniformDataAxis.scale_as_quantity
+        
+        
+        
+        
+        UniformDataAxis.trait_added
+        
+        
+        UniformDataAxis.trait_modified
+        
+    
+    
+
+    
+    
+    .. rubric:: Methods
+
+    .. autosummary::
+        :toctree:
+        :template: custom-method-template.rst
+        
+        
+        
+        
+        
+        
+        
+        
+        UniformDataAxis.calibrate
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        UniformDataAxis.convert_to_functional_data_axis
+        
+        
+        UniformDataAxis.convert_to_non_uniform_axis
+        
+        
+        
+        
+        
+        
+        
+        UniformDataAxis.crop
+        
+        
+        
+        
+        
+        UniformDataAxis.get_axis_dictionary
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        UniformDataAxis.update_axis
+        
+        
+        UniformDataAxis.update_from
+        
+        
+        
+        
+        UniformDataAxis.value2index
+        
+        
+        
+    
+    
+
+.. minigallery:: pyxem.utils.calibration.UniformDataAxis
+    :add-heading: Examples using ``UniformDataAxis``

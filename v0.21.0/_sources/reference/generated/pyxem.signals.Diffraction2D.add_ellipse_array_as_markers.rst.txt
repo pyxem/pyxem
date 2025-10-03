@@ -1,0 +1,6 @@
+add\_ellipse\_array\_as\_markers
+================================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: Diffraction2D.add_ellipse_array_as_markers

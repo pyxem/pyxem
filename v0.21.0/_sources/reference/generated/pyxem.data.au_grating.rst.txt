@@ -1,0 +1,9 @@
+au\_grating
+===========
+
+.. currentmodule:: pyxem.data
+
+.. autofunction:: au_grating
+
+.. minigallery:: pyxem.data.au_grating
+    :add-heading: Examples using ``au_grating``

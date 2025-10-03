@@ -1,0 +1,9 @@
+normalize\_or\_zero
+===================
+
+.. currentmodule:: pyxem.utils.vectors
+
+.. autofunction:: normalize_or_zero
+
+.. minigallery:: pyxem.utils.vectors.normalize_or_zero
+    :add-heading: Examples using ``normalize_or_zero``

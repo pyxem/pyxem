@@ -1,0 +1,74 @@
+Version
+=======
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autoclass:: Version
+
+    
+    
+    .. rubric:: Attributes
+
+    .. autosummary::
+        :toctree:
+        :template: custom-attribute-template.rst
+        
+        
+        Version.base_version
+        
+        
+        Version.dev
+        
+        
+        Version.epoch
+        
+        
+        Version.is_devrelease
+        
+        
+        Version.is_postrelease
+        
+        
+        Version.is_prerelease
+        
+        
+        Version.local
+        
+        
+        Version.major
+        
+        
+        Version.micro
+        
+        
+        Version.minor
+        
+        
+        Version.post
+        
+        
+        Version.pre
+        
+        
+        Version.public
+        
+        
+        Version.release
+        
+    
+    
+
+    
+    
+    .. rubric:: Methods
+
+    .. autosummary::
+        :toctree:
+        :template: custom-method-template.rst
+        
+        
+    
+    
+
+.. minigallery:: pyxem.utils.diffraction.Version
+    :add-heading: Examples using ``Version``

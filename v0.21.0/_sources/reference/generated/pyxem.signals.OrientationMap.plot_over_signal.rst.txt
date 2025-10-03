@@ -1,0 +1,6 @@
+plot\_over\_signal
+==================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: OrientationMap.plot_over_signal

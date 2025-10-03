@@ -1,0 +1,9 @@
+get\_rotation\_matrix\_between\_vectors
+=======================================
+
+.. currentmodule:: pyxem.utils.vectors
+
+.. autofunction:: get_rotation_matrix_between_vectors
+
+.. minigallery:: pyxem.utils.vectors.get_rotation_matrix_between_vectors
+    :add-heading: Examples using ``get_rotation_matrix_between_vectors``

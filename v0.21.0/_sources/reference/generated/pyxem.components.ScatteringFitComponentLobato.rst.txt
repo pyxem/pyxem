@@ -1,0 +1,104 @@
+ScatteringFitComponentLobato
+============================
+
+.. currentmodule:: pyxem.components
+
+.. autoclass:: ScatteringFitComponentLobato
+
+    
+    
+    .. rubric:: Attributes
+
+    .. autosummary::
+        :toctree:
+        :template: custom-attribute-template.rst
+        
+        
+        
+        
+        
+        
+        ScatteringFitComponentLobato.trait_added
+        
+        
+        ScatteringFitComponentLobato.trait_modified
+        
+    
+    
+
+    
+    
+    .. rubric:: Methods
+
+    .. autosummary::
+        :toctree:
+        :template: custom-method-template.rst
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        ScatteringFitComponentLobato.function
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    
+    
+
+.. minigallery:: pyxem.components.ScatteringFitComponentLobato
+    :add-heading: Examples using ``ScatteringFitComponentLobato``

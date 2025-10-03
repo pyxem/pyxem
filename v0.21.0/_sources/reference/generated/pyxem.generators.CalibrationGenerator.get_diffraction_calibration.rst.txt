@@ -1,0 +1,6 @@
+get\_diffraction\_calibration
+=============================
+
+.. currentmodule:: pyxem.generators
+
+.. automethod:: CalibrationGenerator.get_diffraction_calibration

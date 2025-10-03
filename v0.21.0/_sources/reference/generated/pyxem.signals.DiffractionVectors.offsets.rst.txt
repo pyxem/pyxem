@@ -1,0 +1,9 @@
+offsets
+=======
+
+.. currentmodule:: pyxem.signals
+
+.. autoproperty:: DiffractionVectors.offsets
+
+.. minigallery:: pyxem.signals.DiffractionVectors.offsets
+    :add-heading: Examples using ``DiffractionVectors.offsets``

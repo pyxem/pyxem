@@ -1,0 +1,9 @@
+pixel\_extent
+=============
+
+.. currentmodule:: pyxem.utils.calibration
+
+.. autoproperty:: Calibration.pixel_extent
+
+.. minigallery:: pyxem.utils.calibration.Calibration.pixel_extent
+    :add-heading: Examples using ``Calibration.pixel_extent``

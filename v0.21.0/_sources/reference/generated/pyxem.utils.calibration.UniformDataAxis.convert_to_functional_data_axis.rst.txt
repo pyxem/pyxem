@@ -1,0 +1,6 @@
+convert\_to\_functional\_data\_axis
+===================================
+
+.. currentmodule:: pyxem.utils.calibration
+
+.. automethod:: UniformDataAxis.convert_to_functional_data_axis

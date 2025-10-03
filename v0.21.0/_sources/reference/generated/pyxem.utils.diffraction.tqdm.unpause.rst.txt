@@ -1,0 +1,6 @@
+unpause
+=======
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. automethod:: tqdm.unpause

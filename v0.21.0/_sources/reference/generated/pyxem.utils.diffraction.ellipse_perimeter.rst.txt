@@ -1,0 +1,9 @@
+ellipse\_perimeter
+==================
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autofunction:: ellipse_perimeter
+
+.. minigallery:: pyxem.utils.diffraction.ellipse_perimeter
+    :add-heading: Examples using ``ellipse_perimeter``

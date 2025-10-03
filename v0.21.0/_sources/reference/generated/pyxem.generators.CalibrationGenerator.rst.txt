@@ -1,0 +1,49 @@
+CalibrationGenerator
+====================
+
+.. currentmodule:: pyxem.generators
+
+.. autoclass:: CalibrationGenerator
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Methods
+
+    .. autosummary::
+        :toctree:
+        :template: custom-method-template.rst
+        
+        
+        
+        CalibrationGenerator.get_correction_matrix
+        
+        
+        CalibrationGenerator.get_diffraction_calibration
+        
+        
+        CalibrationGenerator.get_distortion_residuals
+        
+        
+        CalibrationGenerator.get_elliptical_distortion
+        
+        
+        CalibrationGenerator.get_navigation_calibration
+        
+        
+        CalibrationGenerator.get_rotation_calibration
+        
+        
+        CalibrationGenerator.plot_calibrated_data
+        
+        
+        CalibrationGenerator.plot_corrected_diffraction_pattern
+        
+    
+    
+
+.. minigallery:: pyxem.generators.CalibrationGenerator
+    :add-heading: Examples using ``CalibrationGenerator``

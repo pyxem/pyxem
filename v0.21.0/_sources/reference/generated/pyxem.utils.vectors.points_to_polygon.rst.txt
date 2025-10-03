@@ -1,0 +1,9 @@
+points\_to\_polygon
+===================
+
+.. currentmodule:: pyxem.utils.vectors
+
+.. autofunction:: points_to_polygon
+
+.. minigallery:: pyxem.utils.vectors.points_to_polygon
+    :add-heading: Examples using ``points_to_polygon``

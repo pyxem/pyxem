@@ -1,0 +1,9 @@
+trait\_modified
+===============
+
+.. currentmodule:: pyxem.components
+
+.. autoproperty:: ReducedIntensityCorrectionComponent.trait_modified
+
+.. minigallery:: pyxem.components.ReducedIntensityCorrectionComponent.trait_modified
+    :add-heading: Examples using ``ReducedIntensityCorrectionComponent.trait_modified``

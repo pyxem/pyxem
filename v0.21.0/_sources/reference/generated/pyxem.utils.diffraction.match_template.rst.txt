@@ -1,0 +1,9 @@
+match\_template
+===============
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autofunction:: match_template
+
+.. minigallery:: pyxem.utils.diffraction.match_template
+    :add-heading: Examples using ``match_template``

@@ -1,0 +1,9 @@
+mask
+====
+
+.. currentmodule:: pyxem.utils.calibration
+
+.. autoproperty:: Calibration.mask
+
+.. minigallery:: pyxem.utils.calibration.Calibration.mask
+    :add-heading: Examples using ``Calibration.mask``

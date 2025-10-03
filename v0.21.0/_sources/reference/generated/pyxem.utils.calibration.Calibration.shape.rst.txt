@@ -1,0 +1,9 @@
+shape
+=====
+
+.. currentmodule:: pyxem.utils.calibration
+
+.. autoproperty:: Calibration.shape
+
+.. minigallery:: pyxem.utils.calibration.Calibration.shape
+    :add-heading: Examples using ``Calibration.shape``

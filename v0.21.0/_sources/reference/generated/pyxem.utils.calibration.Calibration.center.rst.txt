@@ -1,0 +1,9 @@
+center
+======
+
+.. currentmodule:: pyxem.utils.calibration
+
+.. autoproperty:: Calibration.center
+
+.. minigallery:: pyxem.utils.calibration.Calibration.center
+    :add-heading: Examples using ``Calibration.center``

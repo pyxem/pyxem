@@ -1,0 +1,6 @@
+pixels\_to\_calibrated\_units
+=============================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: BeamShift.pixels_to_calibrated_units

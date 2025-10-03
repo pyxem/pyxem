@@ -1,0 +1,6 @@
+update\_from
+============
+
+.. currentmodule:: pyxem.utils.calibration
+
+.. automethod:: UniformDataAxis.update_from

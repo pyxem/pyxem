@@ -1,0 +1,173 @@
+PolarDiffraction2D
+==================
+
+.. currentmodule:: pyxem.signals
+
+.. autoclass:: PolarDiffraction2D
+
+    
+    
+    .. rubric:: Attributes
+
+    .. autosummary::
+        :toctree:
+        :template: custom-attribute-template.rst
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    
+    
+
+    
+    
+    .. rubric:: Methods
+
+    .. autosummary::
+        :toctree:
+        :template: custom-method-template.rst
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        PolarDiffraction2D.get_angular_correlation
+        
+        
+        PolarDiffraction2D.get_angular_power
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        PolarDiffraction2D.get_full_pearson_correlation
+        
+        
+        
+        
+        
+        PolarDiffraction2D.get_orientation
+        
+        
+        PolarDiffraction2D.get_pearson_correlation
+        
+        
+        PolarDiffraction2D.get_resolved_pearson_correlation
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        PolarDiffraction2D.subtract_diffraction_background
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    
+    
+
+.. minigallery:: pyxem.signals.PolarDiffraction2D
+    :add-heading: Examples using ``PolarDiffraction2D``

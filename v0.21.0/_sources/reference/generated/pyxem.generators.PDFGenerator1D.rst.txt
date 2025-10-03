@@ -1,0 +1,28 @@
+PDFGenerator1D
+==============
+
+.. currentmodule:: pyxem.generators
+
+.. autoclass:: PDFGenerator1D
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Methods
+
+    .. autosummary::
+        :toctree:
+        :template: custom-method-template.rst
+        
+        
+        
+        PDFGenerator1D.get_pdf
+        
+    
+    
+
+.. minigallery:: pyxem.generators.PDFGenerator1D
+    :add-heading: Examples using ``PDFGenerator1D``

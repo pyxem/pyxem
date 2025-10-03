@@ -1,0 +1,6 @@
+get\_navigation\_calibration
+============================
+
+.. currentmodule:: pyxem.generators
+
+.. automethod:: CalibrationGenerator.get_navigation_calibration

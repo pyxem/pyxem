@@ -1,0 +1,6 @@
+get\_map
+========
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: Power2D.get_map

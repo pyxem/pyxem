@@ -1,0 +1,9 @@
+wavelength
+==========
+
+.. currentmodule:: pyxem.utils.calibration
+
+.. autoproperty:: Calibration.wavelength
+
+.. minigallery:: pyxem.utils.calibration.Calibration.wavelength
+    :add-heading: Examples using ``Calibration.wavelength``

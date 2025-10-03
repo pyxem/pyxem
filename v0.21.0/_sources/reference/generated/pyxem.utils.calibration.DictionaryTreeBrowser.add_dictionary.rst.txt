@@ -1,0 +1,6 @@
+add\_dictionary
+===============
+
+.. currentmodule:: pyxem.utils.calibration
+
+.. automethod:: DictionaryTreeBrowser.add_dictionary

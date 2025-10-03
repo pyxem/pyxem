@@ -1,0 +1,6 @@
+correct\_real\_space\_drift\_fast
+=================================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: InSituDiffraction2D.correct_real_space_drift_fast

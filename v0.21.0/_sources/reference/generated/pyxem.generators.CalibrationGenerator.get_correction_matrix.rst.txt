@@ -1,0 +1,6 @@
+get\_correction\_matrix
+=======================
+
+.. currentmodule:: pyxem.generators
+
+.. automethod:: CalibrationGenerator.get_correction_matrix

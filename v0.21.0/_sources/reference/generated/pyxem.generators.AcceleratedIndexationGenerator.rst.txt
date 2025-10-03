@@ -1,0 +1,28 @@
+AcceleratedIndexationGenerator
+==============================
+
+.. currentmodule:: pyxem.generators
+
+.. autoclass:: AcceleratedIndexationGenerator
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Methods
+
+    .. autosummary::
+        :toctree:
+        :template: custom-method-template.rst
+        
+        
+        
+        AcceleratedIndexationGenerator.correlate
+        
+    
+    
+
+.. minigallery:: pyxem.generators.AcceleratedIndexationGenerator
+    :add-heading: Examples using ``AcceleratedIndexationGenerator``

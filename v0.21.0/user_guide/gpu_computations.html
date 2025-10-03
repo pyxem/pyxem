@@ -1,0 +1,940 @@
+
+<!DOCTYPE html>
+
+<html data-content_root="../" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>GPU Computing — pyxem 0.21.0 documentation</title>
+<script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+<!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+<noscript>
+<style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+</noscript>
+<!-- Loaded before other Sphinx assets -->
+<link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet"/>
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet"/>
+<link href="../_static/pygments.css?v=d75fae25" rel="stylesheet" type="text/css"/>
+<link href="../_static/graphviz.css?v=4ae1632d" rel="stylesheet" type="text/css"/>
+<link href="../_static/sphinx-codeautolink.css?v=b2176991" rel="stylesheet" type="text/css"/>
+<link href="../_static/copybutton.css?v=76b2166b" rel="stylesheet" type="text/css"/>
+<link href="../_static/sg_gallery.css?v=d2d258e8" rel="stylesheet" type="text/css"/>
+<link href="../_static/sg_gallery-binder.css?v=f4aeca0c" rel="stylesheet" type="text/css"/>
+<link href="../_static/sg_gallery-dataframe.css?v=2082cf3c" rel="stylesheet" type="text/css"/>
+<link href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" rel="stylesheet" type="text/css"/>
+<link href="../_static/sphinx-design.min.css?v=95c83b7e" rel="stylesheet" type="text/css"/>
+<!-- So that users can add custom icons -->
+<script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+<!-- Pre-loaded scripts that we'll load fully later -->
+<link as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" rel="preload"/>
+<link as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" rel="preload"/>
+<script src="../_static/documentation_options.js?v=88e4c0c0"></script>
+<script src="../_static/doctools.js?v=9bcbadda"></script>
+<script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+<script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+<script src="../_static/copybutton.js?v=f281be69"></script>
+<script src="../_static/design-tabs.js?v=f930bc37"></script>
+<script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+<script>DOCUMENTATION_OPTIONS.pagename = 'user_guide/gpu_computations';</script>
+<script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://pyxem.readthedocs.io/en/latest/_static/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.21';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+<link href="../_static/logo.ico" rel="icon"/>
+<link href="../genindex.html" rel="index" title="Index"/>
+<link href="../search.html" rel="search" title="Search"/>
+<link href="../tutorials/index.html" rel="next" title="Tutorials"/>
+<link href="distributed_big_data.html" rel="prev" title="Big Data"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="en" name="docsearch:language"/>
+<meta content="0.21.0" name="docsearch:version"/>
+</head>
+<body data-bs-root-margin="0px 0px -60%" data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-default-mode="" data-offset="180">
+<div class="skip-link d-print-none" id="pst-skip-link"><a href="#main-content">Skip to main content</a></div>
+<div id="pst-scroll-pixel-helper"></div>
+<button class="btn rounded-pill" id="pst-back-to-top" type="button">
+<i class="fa-solid fa-arrow-up"></i>Back to top</button>
+<dialog id="pst-search-dialog">
+<form action="../search.html" class="bd-search d-flex align-items-center" method="get">
+<i class="fa-solid fa-magnifying-glass"></i>
+<input aria-label="Search the docs ..." autocapitalize="off" autocomplete="off" autocorrect="off" class="form-control" name="q" placeholder="Search the docs ..." spellcheck="false" type="search"/>
+<span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+</dialog>
+<div class="pst-async-banner-revealer d-none">
+<aside aria-label="Version warning" class="d-none d-print-none" id="bd-header-version-warning"></aside>
+</div>
+<aside aria-label="Announcement" class="bd-header-announcement">
+<div class="bd-header-announcement__content">Check out the new <a href="https://pyxem.readthedocs.io/en/latest/examples/index.html">Examples Gallery!</a> </div>
+</aside>
+<header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+<button aria-label="Site navigation" class="pst-navbar-icon sidebar-toggle primary-toggle">
+<span class="fa-solid fa-bars"></span>
+</button>
+<div class="col-lg-3 navbar-header-items__start">
+<div class="navbar-item">
+<a class="navbar-brand logo" href="../index.html">
+<img alt="pyxem 0.21.0 documentation - Home" class="logo__image only-light" src="../_static/logo.png"/>
+<img alt="pyxem 0.21.0 documentation - Home" class="logo__image only-dark pst-js-only" src="../_static/logo.png"/>
+</a></div>
+<div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+<button aria-controls="pst-version-switcher-list-2" aria-haspopup="listbox" aria-label="Version switcher list" class="version-switcher__button btn btn-sm dropdown-toggle" data-bs-toggle="dropdown" id="pst-version-switcher-button-2" type="button">
+    Choose version  <!-- this text may get changed later by javascript -->
+<span class="caret"></span>
+</button>
+<div aria-labelledby="pst-version-switcher-button-2" class="version-switcher__menu dropdown-menu list-group-flush py-0" id="pst-version-switcher-list-2" role="listbox">
+<!-- dropdown will be populated by javascript on page load -->
+</div>
+</div></div>
+</div>
+<div class="col-lg-9 navbar-header-items">
+<div class="me-auto navbar-header-items__center">
+<div class="navbar-item">
+<nav>
+<ul class="bd-navbar-elements navbar-nav">
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../intro.html">
+    Introduction
+  </a>
+</li>
+<li class="nav-item current active">
+<a class="nav-link nav-internal" href="index.html">
+    User Guide
+  </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../examples/index.html">
+    Examples
+  </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../tutorials/index.html">
+    Tutorials
+  </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../reference/index.html">
+    Reference
+  </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../dev_guide/index.html">
+    Dev Guide
+  </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../changelog.html">
+    Changelog
+  </a>
+</li>
+</ul>
+</nav></div>
+</div>
+<div class="navbar-header-items__end">
+<div class="navbar-item navbar-persistent--container">
+<button aria-label="Search" class="btn search-button-field search-button__button pst-js-only" data-bs-placement="bottom" data-bs-toggle="tooltip" title="Search">
+<i class="fa-solid fa-magnifying-glass"></i>
+<span class="search-button__default-text">Search</span>
+<span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+</div>
+<div class="navbar-item">
+<button aria-label="Color mode" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" data-bs-placement="bottom" data-bs-title="Color mode" data-bs-toggle="tooltip">
+<i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+<i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+<i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+</button></div>
+<div class="navbar-item"><ul aria-label="Icon Links" class="navbar-icon-links">
+<li class="nav-item">
+<a class="nav-link pst-navbar-icon" data-bs-placement="bottom" data-bs-toggle="tooltip" href="https://github.com/pyxem/pyxem" rel="noopener" target="_blank" title="GitHub"><i aria-hidden="true" class="fa-brands fa-square-github fa-lg"></i>
+<span class="sr-only">GitHub</span></a>
+</li>
+</ul></div>
+</div>
+</div>
+<div class="navbar-persistent--mobile">
+<button aria-label="Search" class="btn search-button-field search-button__button pst-js-only" data-bs-placement="bottom" data-bs-toggle="tooltip" title="Search">
+<i class="fa-solid fa-magnifying-glass"></i>
+<span class="search-button__default-text">Search</span>
+<span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+</div>
+<button aria-label="On this page" class="pst-navbar-icon sidebar-toggle secondary-toggle">
+<span class="fa-solid fa-outdent"></span>
+</button>
+</div>
+</header>
+<div class="bd-container">
+<div class="bd-container__inner bd-page-width">
+<dialog id="pst-primary-sidebar-modal"></dialog>
+<div class="bd-sidebar-primary bd-sidebar" id="pst-primary-sidebar">
+<div class="sidebar-header-items sidebar-primary__section">
+<div class="sidebar-header-items__center">
+<div class="navbar-item">
+<nav>
+<ul class="bd-navbar-elements navbar-nav">
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../intro.html">
+    Introduction
+  </a>
+</li>
+<li class="nav-item current active">
+<a class="nav-link nav-internal" href="index.html">
+    User Guide
+  </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../examples/index.html">
+    Examples
+  </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../tutorials/index.html">
+    Tutorials
+  </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../reference/index.html">
+    Reference
+  </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../dev_guide/index.html">
+    Dev Guide
+  </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../changelog.html">
+    Changelog
+  </a>
+</li>
+</ul>
+</nav></div>
+</div>
+<div class="sidebar-header-items__end">
+<div class="navbar-item">
+<button aria-label="Color mode" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" data-bs-placement="bottom" data-bs-title="Color mode" data-bs-toggle="tooltip">
+<i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+<i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+<i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+</button></div>
+<div class="navbar-item"><ul aria-label="Icon Links" class="navbar-icon-links">
+<li class="nav-item">
+<a class="nav-link pst-navbar-icon" data-bs-placement="bottom" data-bs-toggle="tooltip" href="https://github.com/pyxem/pyxem" rel="noopener" target="_blank" title="GitHub"><i aria-hidden="true" class="fa-brands fa-square-github fa-lg"></i>
+<span class="sr-only">GitHub</span></a>
+</li>
+</ul></div>
+</div>
+</div>
+<div class="sidebar-primary-items__start sidebar-primary__section">
+<div class="sidebar-primary-item">
+<nav aria-label="Section Navigation" class="bd-docs-nav bd-links">
+<p aria-level="1" class="bd-links__title" role="heading">Section Navigation</p>
+<div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="installing.html">Installing pyxem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="using_a_jupyter_notebook.html">Using Jupyter Lab</a></li>
+<li class="toctree-l1"><a class="reference internal" href="loading_data.html">Loading Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="distributed_big_data.html">Big Data</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">GPU Computing</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Usage</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../tutorials/index.html">Tutorials</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="simple">
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Gallery of Examples</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Resources</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../reference/index.html">API reference</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/generated/pyxem.data.html">data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.data.au_grating.html">au_grating</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.data.pdnip_glass.html">pdnip_glass</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.data.zrnb_precipitate.html">zrnb_precipitate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.data.twinned_nanowire.html">twinned_nanowire</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.data.sample_with_g.html">sample_with_g</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.data.mgo_nanocrystals.html">mgo_nanocrystals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.data.tilt_boundary_data.html">tilt_boundary_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.data.si_phase.html">si_phase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.data.si_tilt.html">si_tilt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.data.si_grains.html">si_grains</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.data.si_grains_simple.html">si_grains_simple</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.data.si_rotations_line.html">si_rotations_line</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.data.simulated_stripes.html">simulated_stripes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.data.fe_multi_phase_grains.html">fe_multi_phase_grains</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.data.fe_fcc_phase.html">fe_fcc_phase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.data.fe_bcc_phase.html">fe_bcc_phase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.data.cuag_orientations.html">cuag_orientations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.data.organic_semiconductor.html">organic_semiconductor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.data.feal_stripes.html">feal_stripes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.data.sped_ag.html">sped_ag</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.data.pdcusi_insitu.html">pdcusi_insitu</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.data.simulated_constant_shift_magnitude.html">simulated_constant_shift_magnitude</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.data.au_grating_20cm.html">au_grating_20cm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.data.small_ptychography.html">small_ptychography</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.data.au_phase.html">au_phase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.data.simulated_overlap.html">simulated_overlap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.data.simulated_strain.html">simulated_strain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.data.simulated_pn_junction.html">simulated_pn_junction</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/generated/pyxem.components.html">components</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.components.ReducedIntensityCorrectionComponent.html">ReducedIntensityCorrectionComponent</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.components.ReducedIntensityCorrectionComponent.trait_added.html">trait_added</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.components.ReducedIntensityCorrectionComponent.trait_modified.html">trait_modified</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.components.ReducedIntensityCorrectionComponent.function.html">function</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.components.ScatteringFitComponentLobato.html">ScatteringFitComponentLobato</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.components.ScatteringFitComponentLobato.trait_added.html">trait_added</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.components.ScatteringFitComponentLobato.trait_modified.html">trait_modified</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.components.ScatteringFitComponentLobato.function.html">function</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.components.ScatteringFitComponentXTables.html">ScatteringFitComponentXTables</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.components.ScatteringFitComponentXTables.trait_added.html">trait_added</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.components.ScatteringFitComponentXTables.trait_modified.html">trait_modified</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.components.ScatteringFitComponentXTables.function.html">function</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/generated/pyxem.generators.html">generators</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.generators.get_DisplacementGradientMap.html">get_DisplacementGradientMap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.generators.get_single_DisplacementGradientTensor.html">get_single_DisplacementGradientTensor</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.generators.CalibrationGenerator.html">CalibrationGenerator</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.generators.CalibrationGenerator.get_correction_matrix.html">get_correction_matrix</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.generators.CalibrationGenerator.get_diffraction_calibration.html">get_diffraction_calibration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.generators.CalibrationGenerator.get_distortion_residuals.html">get_distortion_residuals</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.generators.CalibrationGenerator.get_elliptical_distortion.html">get_elliptical_distortion</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.generators.CalibrationGenerator.get_navigation_calibration.html">get_navigation_calibration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.generators.CalibrationGenerator.get_rotation_calibration.html">get_rotation_calibration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.generators.CalibrationGenerator.plot_calibrated_data.html">plot_calibrated_data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.generators.CalibrationGenerator.plot_corrected_diffraction_pattern.html">plot_corrected_diffraction_pattern</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.generators.IndexationGenerator.html">IndexationGenerator</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.generators.VectorIndexationGenerator.html">VectorIndexationGenerator</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.generators.VectorIndexationGenerator.index_vectors.html">index_vectors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.generators.VectorIndexationGenerator.refine_best_orientation.html">refine_best_orientation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.generators.VectorIndexationGenerator.refine_n_best_orientations.html">refine_n_best_orientations</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.generators.TemplateIndexationGenerator.html">TemplateIndexationGenerator</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.generators.ProfileIndexationGenerator.html">ProfileIndexationGenerator</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.generators.ProfileIndexationGenerator.index_peaks.html">index_peaks</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.generators.AcceleratedIndexationGenerator.html">AcceleratedIndexationGenerator</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.generators.AcceleratedIndexationGenerator.correlate.html">correlate</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.generators.IntegrationGenerator.html">IntegrationGenerator</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.generators.IntegrationGenerator.extract_intensities.html">extract_intensities</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.generators.IntegrationGenerator.extract_intensities_summation_method.html">extract_intensities_summation_method</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.generators.PDFGenerator1D.html">PDFGenerator1D</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.generators.PDFGenerator1D.get_pdf.html">get_pdf</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.generators.ReducedIntensityGenerator1D.html">ReducedIntensityGenerator1D</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.generators.ReducedIntensityGenerator1D.fit_atomic_scattering.html">fit_atomic_scattering</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.generators.ReducedIntensityGenerator1D.get_reduced_intensity.html">get_reduced_intensity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.generators.ReducedIntensityGenerator1D.mask_from_bkgd_pattern.html">mask_from_bkgd_pattern</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.generators.ReducedIntensityGenerator1D.mask_reduced_intensity.html">mask_reduced_intensity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.generators.ReducedIntensityGenerator1D.set_diffraction_calibration.html">set_diffraction_calibration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.generators.ReducedIntensityGenerator1D.set_diffraction_offset.html">set_diffraction_offset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.generators.ReducedIntensityGenerator1D.set_s_cutoff.html">set_s_cutoff</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.generators.ReducedIntensityGenerator1D.subtract_bkgd_pattern.html">subtract_bkgd_pattern</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.generators.SubpixelrefinementGenerator.html">SubpixelrefinementGenerator</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.generators.SubpixelrefinementGenerator.center_of_mass_method.html">center_of_mass_method</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.generators.SubpixelrefinementGenerator.conventional_xc.html">conventional_xc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.generators.SubpixelrefinementGenerator.local_gaussian_method.html">local_gaussian_method</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.generators.SubpixelrefinementGenerator.reference_xc.html">reference_xc</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.generators.VarianceGenerator.html">VarianceGenerator</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.generators.VarianceGenerator.get_diffraction_variance.html">get_diffraction_variance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.generators.VarianceGenerator.get_image_variance.html">get_image_variance</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.generators.VirtualImageGenerator.html">VirtualImageGenerator</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.generators.VirtualImageGenerator.get_concentric_virtual_images.html">get_concentric_virtual_images</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.generators.VirtualImageGenerator.get_virtual_images_from_mesh.html">get_virtual_images_from_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.generators.VirtualImageGenerator.set_ROI_mesh.html">set_ROI_mesh</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.generators.VirtualDarkFieldGenerator.html">VirtualDarkFieldGenerator</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.generators.VirtualDarkFieldGenerator.get_virtual_dark_field_images.html">get_virtual_dark_field_images</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/generated/pyxem.libraries.html">libraries</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.libraries.CalibrationDataLibrary.html">CalibrationDataLibrary</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.libraries.CalibrationDataLibrary.plot_calibration_data.html">plot_calibration_data</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/generated/pyxem.signals.html">signals</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.signals.CommonDiffraction.html">CommonDiffraction</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.CommonDiffraction.unit.html">unit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.CommonDiffraction.add_navigation_signal.html">add_navigation_signal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.CommonDiffraction.get_integrated_intensity.html">get_integrated_intensity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.CommonDiffraction.get_virtual_image.html">get_virtual_image</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.CommonDiffraction.plot_integrated_intensity.html">plot_integrated_intensity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.CommonDiffraction.to_device.html">to_device</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.CommonDiffraction.to_host.html">to_host</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.signals.Correlation2D.html">Correlation2D</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Correlation2D.get_angular_power.html">get_angular_power</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Correlation2D.get_summed_angular_power.html">get_summed_angular_power</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Correlation2D.get_symmetry_coefficient.html">get_symmetry_coefficient</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.signals.LazyCorrelation2D.html">LazyCorrelation2D</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.signals.BeamShift.html">BeamShift</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.BeamShift.beam_energy.html">beam_energy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.BeamShift.calibrate_electric_shifts.html">calibrate_electric_shifts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.BeamShift.get_bivariate_histogram.html">get_bivariate_histogram</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.BeamShift.get_color_signal.html">get_color_signal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.BeamShift.get_linear_plane.html">get_linear_plane</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.BeamShift.get_magnitude_phase_signal.html">get_magnitude_phase_signal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.BeamShift.get_magnitude_signal.html">get_magnitude_signal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.BeamShift.get_phase_signal.html">get_phase_signal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.BeamShift.make_linear_plane.html">make_linear_plane</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.BeamShift.phase_retrieval.html">phase_retrieval</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.BeamShift.pixels_to_calibrated_units.html">pixels_to_calibrated_units</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.BeamShift.plot_on_signal.html">plot_on_signal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.BeamShift.rotate_beam_shifts.html">rotate_beam_shifts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.BeamShift.rotate_scan_dimensions.html">rotate_scan_dimensions</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.signals.LazyBeamShift.html">LazyBeamShift</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.signals.DPCSignal1D.html">DPCSignal1D</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DPCSignal1D.to_beamshift.html">to_beamshift</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.signals.DPCSignal2D.html">DPCSignal2D</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DPCSignal2D.to_beamshift.html">to_beamshift</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.signals.LazyDPCSignal1D.html">LazyDPCSignal1D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.signals.LazyDPCSignal2D.html">LazyDPCSignal2D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVariance1D.html">DiffractionVariance1D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVariance2D.html">DiffractionVariance2D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.signals.ImageVariance.html">ImageVariance</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors.html">DiffractionVectors</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors.center.html">center</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors.column_names.html">column_names</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors.detector_shape.html">detector_shape</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors.has_navigation_axis.html">has_navigation_axis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors.num_columns.html">num_columns</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors.num_rows.html">num_rows</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors.offsets.html">offsets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors.pixel_calibration.html">pixel_calibration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors.pixel_vectors.html">pixel_vectors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors.scales.html">scales</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors.units.html">units</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors.calculate_cartesian_coordinates.html">calculate_cartesian_coordinates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors.cluster.html">cluster</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors.filter_basis.html">filter_basis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors.filter_detector_edge.html">filter_detector_edge</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors.filter_magnitude.html">filter_magnitude</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors.flatten_diffraction_vectors.html">flatten_diffraction_vectors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors.from_peaks.html">from_peaks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors.get_diffracting_pixels_map.html">get_diffracting_pixels_map</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors.get_magnitude_histogram.html">get_magnitude_histogram</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors.get_magnitudes.html">get_magnitudes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors.get_pixel_vectors.html">get_pixel_vectors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors.get_strain_maps.html">get_strain_maps</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors.get_unique_vectors.html">get_unique_vectors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors.plot_diffraction_vectors.html">plot_diffraction_vectors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors.plot_diffraction_vectors_on_signal.html">plot_diffraction_vectors_on_signal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors.subpixel_refine.html">subpixel_refine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors.to_markers.html">to_markers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors.to_mask.html">to_mask</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors.to_polar.html">to_polar</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors1D.html">DiffractionVectors1D</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors1D.flatten_diffraction_vectors.html">flatten_diffraction_vectors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors1D.plot.html">plot</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors2D.html">DiffractionVectors2D</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors2D.has_navigation_axis.html">has_navigation_axis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors2D.filter_detector_edge.html">filter_detector_edge</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors2D.from_peaks.html">from_peaks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors2D.get_unique_vectors.html">get_unique_vectors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DiffractionVectors2D.to_roi.html">to_roi</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.signals.Diffraction1D.html">Diffraction1D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.signals.LazyDiffraction1D.html">LazyDiffraction1D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.signals.LazyDiffraction2D.html">LazyDiffraction2D</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.signals.Diffraction2D.html">Diffraction2D</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Diffraction2D.add_ellipse_array_as_markers.html">add_ellipse_array_as_markers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Diffraction2D.add_interactive_line_profile.html">add_interactive_line_profile</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Diffraction2D.add_peak_array_as_markers.html">add_peak_array_as_markers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Diffraction2D.angular_mask.html">angular_mask</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Diffraction2D.apply_affine_transformation.html">apply_affine_transformation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Diffraction2D.apply_gain_normalisation.html">apply_gain_normalisation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Diffraction2D.center_direct_beam.html">center_direct_beam</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Diffraction2D.correct_bad_pixels.html">correct_bad_pixels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Diffraction2D.filter.html">filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Diffraction2D.find_dead_pixels.html">find_dead_pixels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Diffraction2D.find_hot_pixels.html">find_hot_pixels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Diffraction2D.flip_diffraction_x.html">flip_diffraction_x</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Diffraction2D.flip_diffraction_y.html">flip_diffraction_y</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Diffraction2D.get_azimuthal_integral1d.html">get_azimuthal_integral1d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Diffraction2D.get_azimuthal_integral2d.html">get_azimuthal_integral2d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Diffraction2D.get_diffraction_vectors.html">get_diffraction_vectors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Diffraction2D.get_direct_beam_mask.html">get_direct_beam_mask</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Diffraction2D.get_direct_beam_position.html">get_direct_beam_position</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Diffraction2D.get_variance.html">get_variance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Diffraction2D.intensity_peaks.html">intensity_peaks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Diffraction2D.make_probe_navigation.html">make_probe_navigation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Diffraction2D.peak_position_refinement_com.html">peak_position_refinement_com</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Diffraction2D.plot.html">plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Diffraction2D.rotate_diffraction.html">rotate_diffraction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Diffraction2D.shift_diffraction.html">shift_diffraction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Diffraction2D.subtract_diffraction_background.html">subtract_diffraction_background</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Diffraction2D.template_match.html">template_match</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Diffraction2D.template_match_disk.html">template_match_disk</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Diffraction2D.template_match_ring.html">template_match_ring</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Diffraction2D.template_match_with_binary_image.html">template_match_with_binary_image</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Diffraction2D.threshold_and_mask.html">threshold_and_mask</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.signals.ElectronDiffraction1D.html">ElectronDiffraction1D</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.ElectronDiffraction1D.curve_fit.html">curve_fit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.ElectronDiffraction1D.model2camera_length.html">model2camera_length</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.ElectronDiffraction1D.model2theta_scale.html">model2theta_scale</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.ElectronDiffraction1D.model_simulation1d.html">model_simulation1d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.ElectronDiffraction1D.set_diffraction_calibration.html">set_diffraction_calibration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.ElectronDiffraction1D.set_experimental_parameters.html">set_experimental_parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.ElectronDiffraction1D.set_scan_calibration.html">set_scan_calibration</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.signals.LazyElectronDiffraction1D.html">LazyElectronDiffraction1D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.signals.LazyElectronDiffraction2D.html">LazyElectronDiffraction2D</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.signals.ElectronDiffraction2D.html">ElectronDiffraction2D</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.ElectronDiffraction2D.beam_energy.html">beam_energy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.ElectronDiffraction2D.camera_length.html">camera_length</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.ElectronDiffraction2D.diffraction_calibration.html">diffraction_calibration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.ElectronDiffraction2D.scan_calibration.html">scan_calibration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.ElectronDiffraction2D.set_diffraction_calibration.html">set_diffraction_calibration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.ElectronDiffraction2D.set_experimental_parameters.html">set_experimental_parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.ElectronDiffraction2D.set_scan_calibration.html">set_scan_calibration</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.signals.VectorMatchingResults.html">VectorMatchingResults</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.VectorMatchingResults.get_crystallographic_map.html">get_crystallographic_map</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.VectorMatchingResults.get_indexed_diffraction_vectors.html">get_indexed_diffraction_vectors</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.signals.PairDistributionFunction1D.html">PairDistributionFunction1D</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.PairDistributionFunction1D.normalise_signal.html">normalise_signal</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.signals.PolarDiffraction2D.html">PolarDiffraction2D</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.PolarDiffraction2D.get_angular_correlation.html">get_angular_correlation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.PolarDiffraction2D.get_angular_power.html">get_angular_power</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.PolarDiffraction2D.get_full_pearson_correlation.html">get_full_pearson_correlation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.PolarDiffraction2D.get_orientation.html">get_orientation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.PolarDiffraction2D.get_pearson_correlation.html">get_pearson_correlation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.PolarDiffraction2D.get_resolved_pearson_correlation.html">get_resolved_pearson_correlation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.PolarDiffraction2D.subtract_diffraction_background.html">subtract_diffraction_background</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.signals.LazyPolarDiffraction2D.html">LazyPolarDiffraction2D</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.signals.PolarVectors.html">PolarVectors</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.PolarVectors.has_delta_phi.html">has_delta_phi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.PolarVectors.get_angles.html">get_angles</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.PolarVectors.to_cartesian.html">to_cartesian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.PolarVectors.to_markers.html">to_markers</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.signals.LazyPolarVectors.html">LazyPolarVectors</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.signals.Power2D.html">Power2D</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Power2D.get_map.html">get_map</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Power2D.plot_symmetries.html">plot_symmetries</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.signals.LazyPower2D.html">LazyPower2D</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.signals.ReducedIntensity1D.html">ReducedIntensity1D</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.ReducedIntensity1D.damp_exponential.html">damp_exponential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.ReducedIntensity1D.damp_extrapolate_to_zero.html">damp_extrapolate_to_zero</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.ReducedIntensity1D.damp_lorch.html">damp_lorch</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.ReducedIntensity1D.damp_low_q_region_erfc.html">damp_low_q_region_erfc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.ReducedIntensity1D.damp_updated_lorch.html">damp_updated_lorch</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.ReducedIntensity1D.fit_thermal_multiple_scattering_correction.html">fit_thermal_multiple_scattering_correction</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.signals.LearningSegment.html">LearningSegment</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.LearningSegment.correlate_learning_segments.html">correlate_learning_segments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.LearningSegment.get_ncc_matrix.html">get_ncc_matrix</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.LearningSegment.separate_learning_segments.html">separate_learning_segments</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.signals.VDFSegment.html">VDFSegment</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.VDFSegment.correlate_vdf_segments.html">correlate_vdf_segments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.VDFSegment.get_ncc_matrix.html">get_ncc_matrix</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.VDFSegment.get_virtual_electron_diffraction.html">get_virtual_electron_diffraction</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.signals.StrainMap.html">StrainMap</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.StrainMap.plot.html">plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.StrainMap.rotate_strain_basis.html">rotate_strain_basis</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.signals.Correlation1D.html">Correlation1D</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.Correlation1D.get_symmetry_coefficient.html">get_symmetry_coefficient</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.signals.LazyCorrelation1D.html">LazyCorrelation1D</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.signals.DisplacementGradientMap.html">DisplacementGradientMap</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DisplacementGradientMap.get_strain_maps.html">get_strain_maps</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.DisplacementGradientMap.polar_decomposition.html">polar_decomposition</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.signals.VirtualDarkFieldImage.html">VirtualDarkFieldImage</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.VirtualDarkFieldImage.vectors.html">vectors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.VirtualDarkFieldImage.get_vdf_segments.html">get_vdf_segments</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.signals.InSituDiffraction2D.html">InSituDiffraction2D</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.InSituDiffraction2D.correct_real_space_drift.html">correct_real_space_drift</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.InSituDiffraction2D.correct_real_space_drift_fast.html">correct_real_space_drift_fast</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.InSituDiffraction2D.get_drift_vectors.html">get_drift_vectors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.InSituDiffraction2D.get_g2_2d_kresolved.html">get_g2_2d_kresolved</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.InSituDiffraction2D.get_time_series.html">get_time_series</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.InSituDiffraction2D.roll_time_axis.html">roll_time_axis</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.signals.LabeledDiffractionVectors2D.html">LabeledDiffractionVectors2D</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.LabeledDiffractionVectors2D.is_clustered.html">is_clustered</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.LabeledDiffractionVectors2D.cluster_labeled_vectors.html">cluster_labeled_vectors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.LabeledDiffractionVectors2D.map_vectors.html">map_vectors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.LabeledDiffractionVectors2D.plot_clustered.html">plot_clustered</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.LabeledDiffractionVectors2D.to_markers.html">to_markers</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.signals.OrientationMap.html">OrientationMap</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.OrientationMap.num_rows.html">num_rows</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.OrientationMap.simulation.html">simulation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.OrientationMap.deepcopy.html">deepcopy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.OrientationMap.get_simulation_arrays.html">get_simulation_arrays</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.OrientationMap.plot_over_signal.html">plot_over_signal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.OrientationMap.to_crystal_map.html">to_crystal_map</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.OrientationMap.to_ipf_colormap.html">to_ipf_colormap</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.OrientationMap.to_ipf_correlation_heatmap_markers.html">to_ipf_correlation_heatmap_markers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.OrientationMap.to_ipf_markers.html">to_ipf_markers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.OrientationMap.to_markers.html">to_markers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.OrientationMap.to_phase_index.html">to_phase_index</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.OrientationMap.to_phase_map.html">to_phase_map</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.OrientationMap.to_polar_markers.html">to_polar_markers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.OrientationMap.to_rotation.html">to_rotation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.OrientationMap.to_single_phase_orientations.html">to_single_phase_orientations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.OrientationMap.to_single_phase_polar_markers.html">to_single_phase_polar_markers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.OrientationMap.to_single_phase_vectors.html">to_single_phase_vectors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.signals.OrientationMap.to_vectors.html">to_vectors</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/generated/pyxem.utils.html">utils</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.utils.plotting.html">plotting</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.plotting.plot_template_over_pattern.html">plot_template_over_pattern</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.utils.ransac_ellipse_tools.html">ransac_ellipse_tools</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.ransac_ellipse_tools.is_ellipse_good.html">is_ellipse_good</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.ransac_ellipse_tools.make_ellipse_data_points.html">make_ellipse_data_points</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.ransac_ellipse_tools.ellipse_to_markers.html">ellipse_to_markers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.ransac_ellipse_tools.get_ellipse_model_ransac.html">get_ellipse_model_ransac</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.ransac_ellipse_tools.get_ellipse_model_ransac_single_frame.html">get_ellipse_model_ransac_single_frame</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.ransac_ellipse_tools.determine_ellipse.html">determine_ellipse</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.utils.vectors.html">vectors</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.vectors.detector_to_fourier.html">detector_to_fourier</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.vectors.calculate_norms.html">calculate_norms</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.vectors.calculate_norms_ragged.html">calculate_norms_ragged</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.vectors.filter_vectors_ragged.html">filter_vectors_ragged</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.vectors.filter_vectors_edge_ragged.html">filter_vectors_edge_ragged</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.vectors.normalize_or_zero.html">normalize_or_zero</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.vectors.get_rotation_matrix_between_vectors.html">get_rotation_matrix_between_vectors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.vectors.get_npeaks.html">get_npeaks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.vectors.get_angle_cartesian_vec.html">get_angle_cartesian_vec</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.vectors.get_angle_cartesian.html">get_angle_cartesian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.vectors.filter_vectors_near_basis.html">filter_vectors_near_basis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.vectors.vectors_to_polar.html">vectors_to_polar</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.vectors.to_cart_three_angles.html">to_cart_three_angles</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.vectors.polar_to_cartesian.html">polar_to_cartesian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.vectors.get_vectors_mesh.html">get_vectors_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.vectors.get_angles.html">get_angles</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.vectors.get_filtered_combinations.html">get_filtered_combinations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.vectors.convert_to_markers.html">convert_to_markers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.vectors.points_to_polygon.html">points_to_polygon</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.vectors.points_to_poly_collection.html">points_to_poly_collection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.vectors.column_mean.html">column_mean</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.vectors.vectors2image.html">vectors2image</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.vectors.get_three_angles.html">get_three_angles</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.utils.diffraction.html">diffraction</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.diffraction.apply_transformation.html">apply_transformation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.diffraction.center_of_mass_from_image.html">center_of_mass_from_image</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.diffraction.circular_mask.html">circular_mask</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.diffraction.convert_affine_to_transform.html">convert_affine_to_transform</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.diffraction.ellipse_perimeter.html">ellipse_perimeter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.diffraction.fftconvolve.html">fftconvolve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.diffraction.find_beam_center_blur.html">find_beam_center_blur</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.diffraction.find_beam_center_interpolate.html">find_beam_center_interpolate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.diffraction.find_beam_offset_cross_correlation.html">find_beam_offset_cross_correlation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.diffraction.find_center_of_mass.html">find_center_of_mass</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.diffraction.find_hot_pixels.html">find_hot_pixels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.diffraction.gain_normalise.html">gain_normalise</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.diffraction.investigate_dog_background_removal_interactive.html">investigate_dog_background_removal_interactive</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.diffraction.is_cupy_array.html">is_cupy_array</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.diffraction.isiterable.html">isiterable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.diffraction.match_template.html">match_template</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.diffraction.match_template_dilate.html">match_template_dilate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.diffraction.normalize_template_match.html">normalize_template_match</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.diffraction.peaks_as_gvectors.html">peaks_as_gvectors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.diffraction.phase_cross_correlation.html">phase_cross_correlation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.diffraction.reference_circle.html">reference_circle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.diffraction.regional_filter.html">regional_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.diffraction.remove_bad_pixels.html">remove_bad_pixels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.diffraction.remove_dead.html">remove_dead</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.diffraction.Version.html">Version</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.diffraction.deprecated.html">deprecated</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.diffraction.interp1d.html">interp1d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.diffraction.tqdm.html">tqdm</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/generated/pyxem.utils.calibration.html">calibration</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.calibration.find_diffraction_calibration.html">find_diffraction_calibration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.calibration.get_electron_wavelength.html">get_electron_wavelength</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.calibration.index_dataset_with_template_rotation.html">index_dataset_with_template_rotation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.calibration.value2node.html">value2node</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.calibration.value2standard_units.html">value2standard_units</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.calibration.Calibration.html">Calibration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.calibration.DictionaryTreeBrowser.html">DictionaryTreeBrowser</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.calibration.UniformDataAxis.html">UniformDataAxis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/generated/pyxem.utils.calibration.deprecated.html">deprecated</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.utils.find_diffraction_calibration.html">find_diffraction_calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.utils.plot_template_over_pattern.html">plot_template_over_pattern</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/pyxem.utils.determine_ellipse.html">determine_ellipse</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cite.html">Citing pyxem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="related_projects.html">Related projects</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/pyxem/pyxem/main/develop/LICENSE">License</a></li>
+</ul>
+</div>
+</nav></div>
+</div>
+<div class="sidebar-primary-items__end sidebar-primary__section">
+<div class="sidebar-primary-item">
+<div class="flat" data-ea-manual="true" data-ea-publisher="readthedocs" data-ea-type="readthedocs-sidebar" id="ethical-ad-placement">
+</div></div>
+</div>
+</div>
+<main class="bd-main" id="main-content" role="main">
+<div class="bd-content">
+<div class="bd-article-container">
+<div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+<div class="header-article-items__start">
+<div class="header-article-item">
+<nav aria-label="Breadcrumb" class="d-print-none">
+<ul class="bd-breadcrumbs">
+<li class="breadcrumb-item breadcrumb-home">
+<a aria-label="Home" class="nav-link" href="../index.html">
+<i class="fa-solid fa-home"></i>
+</a>
+</li>
+<li class="breadcrumb-item"><a class="nav-link" href="index.html">Where do I start?</a></li>
+<li aria-current="page" class="breadcrumb-item active"><span class="ellipsis">GPU Computing</span></li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+</div>
+<div id="searchbox"></div>
+<article class="bd-article">
+<section id="gpu-computing">
+<h1>GPU Computing<a class="headerlink" href="#gpu-computing" title="Link to this heading">#</a></h1>
+<p>The GPU is a powerful tool for accelerating many types of computations.  The GPU is particularly well-suited
+to problems that can be expressed as data-parallel computations additionally GPU’s often have higher memory
+bandwidth than CPU’s.  This means that they can offer much faster processing.</p>
+<p>GPU support in pyxem/hyperspy is a point of active development.  Currently, the GPU support is limited and
+remains in the <cite>beta</cite> stage. This means that the API is not yet stable and may change as development continues
+to occur.  We are actively seeking feedback from users to help guide the development of the GPU support!</p>
+<p>The GPU support is currently limited to NVIDIA GPUs and requires the <a class="reference external" href="https://cupy.dev">cupy</a> package to be installed.
+If you are interested in increasing GPU support to other vendors, please let us know!</p>
+<p>Just a note that cuda can be a bit difficult to install depending on your hardware etc.  If you are having
+trouble, please let us know by raising an issue and we will try to help you out.</p>
+<section id="supported-operations">
+<h2>Supported Operations<a class="headerlink" href="#supported-operations" title="Link to this heading">#</a></h2>
+<p>Operations that are supported on the GPU:</p>
+<ul class="simple">
+<li><p>Generic Operations</p></li>
+<li><p>2D Azimuthal Integration</p></li>
+<li><p>Template Matching</p></li>
+</ul>
+</section>
+<section id="transfer-data-to-and-from-the-gpu">
+<h2>Transfer Data To and From the GPU<a class="headerlink" href="#transfer-data-to-and-from-the-gpu" title="Link to this heading">#</a></h2>
+<p>You can transfer data to the GPU using the <a class="reference internal" href="../reference/generated/pyxem.signals.CommonDiffraction.to_device.html#pyxem.signals.CommonDiffraction.to_device" title="pyxem.signals.CommonDiffraction.to_device"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_device()</span></code></a> method.  This method
+will transfer the data to the GPU or use dask to perform the operation in parallel.  You can transfer the data
+back to the CPU using the <a class="reference internal" href="../reference/generated/pyxem.signals.CommonDiffraction.to_host.html#pyxem.signals.CommonDiffraction.to_host" title="pyxem.signals.CommonDiffraction.to_host"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_host()</span></code></a> method.</p>
+<p>Note that this will be limited by the number of GPU’s you have available.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pyxem</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pxm</span>
+<span class="n">s</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="../reference/generated/pyxem.data.pdnip_glass.html#pyxem.data.pdnip_glass" title="pyxem.data.pdnip_glass"><span class="n">pxm</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pdnip_glass</span></a><span class="p">(</span><span class="n">lazy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">s</span><span class="o">.</span><span class="n">to_device</span><span class="p">()</span> <span class="c1"># Creates a plan to transfer the data to GPU</span>
+<span class="n">az</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">get_azimuthal_integral2d</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="c1"># automatically uses GPU method</span>
+<span class="n">az</span><span class="o">.</span><span class="n">to_host</span><span class="p">()</span> <span class="c1"># Creates a plan to transfer the data back to the CPU</span>
+</pre></div>
+</div>
+</section>
+<section id="working-with-multiple-gpus">
+<h2>Working with Multiple GPUs<a class="headerlink" href="#working-with-multiple-gpus" title="Link to this heading">#</a></h2>
+<p>Maybe more useful is the <a class="reference external" href="https://docs.rapids.ai/api/dask-cuda/stable">dask-cuda</a> (linux only) package
+which allows you to use multiple GPU’s or will handle the scheduling of the GPU operations for you without the
+context managing shown above.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dask_cuda</span><span class="w"> </span><span class="kn">import</span> <span class="n">LocalCUDACluster</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dask.distributed</span><span class="w"> </span><span class="kn">import</span> <span class="n">Client</span>
+
+<span class="n">cluster</span> <span class="o">=</span> <span class="n">LocalCUDACluster</span><span class="p">()</span>
+<span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="n">cluster</span><span class="p">)</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pyxem</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pxm</span>
+<span class="n">s</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="../reference/generated/pyxem.data.pdnip_glass.html#pyxem.data.pdnip_glass" title="pyxem.data.pdnip_glass"><span class="n">pxm</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pdnip_glass</span></a><span class="p">(</span><span class="n">lazy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">s</span><span class="o">.</span><span class="n">to_device</span><span class="p">()</span> <span class="c1"># Creates a plan to transfer the data to GPU</span>
+<span class="n">az</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">get_azimuthal_integral2d</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="c1"># automatically uses GPU method</span>
+<span class="n">az</span><span class="o">.</span><span class="n">to_host</span><span class="p">()</span> <span class="c1"># Creates a plan to transfer the data back to the CPU</span>
+<span class="n">az</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span> <span class="c1"># This will 1 transfer the data to the GPU in blocks operate and then transfer the data back to CPU</span>
+</pre></div>
+</div>
+</section>
+</section>
+</article>
+<footer class="prev-next-footer d-print-none">
+<div class="prev-next-area">
+<a class="left-prev" href="distributed_big_data.html" title="previous page">
+<i class="fa-solid fa-angle-left"></i>
+<div class="prev-next-info">
+<p class="prev-next-subtitle">previous</p>
+<p class="prev-next-title">Big Data</p>
+</div>
+</a>
+<a class="right-next" href="../tutorials/index.html" title="next page">
+<div class="prev-next-info">
+<p class="prev-next-subtitle">next</p>
+<p class="prev-next-title">Tutorials</p>
+</div>
+<i class="fa-solid fa-angle-right"></i>
+</a>
+</div>
+</footer>
+</div>
+<dialog id="pst-secondary-sidebar-modal"></dialog>
+<div class="bd-sidebar-secondary bd-toc" id="pst-secondary-sidebar"><div class="sidebar-secondary-items sidebar-secondary__inner">
+<div class="sidebar-secondary-item">
+<div class="page-toc tocsection onthispage" id="pst-page-navigation-heading-2">
+<i class="fa-solid fa-list"></i> On this page
+  </div>
+<nav aria-labelledby="pst-page-navigation-heading-2" class="bd-toc-nav page-toc">
+<ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#supported-operations">Supported Operations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#transfer-data-to-and-from-the-gpu">Transfer Data To and From the GPU</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#working-with-multiple-gpus">Working with Multiple GPUs</a></li>
+</ul>
+</nav></div>
+<div class="sidebar-secondary-item">
+<div class="tocsection editthispage">
+<a href="https://github.com/pyxem/pyxem/edit/main/doc/user_guide/gpu_computations.rst">
+<i class="fa-solid fa-pencil"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+</div>
+</div>
+<div class="sidebar-secondary-item">
+<div aria-label="source link" role="note">
+<h3>This Page</h3>
+<ul class="this-page-menu">
+<li><a href="../_sources/user_guide/gpu_computations.rst.txt" rel="nofollow">Show Source</a></li>
+</ul>
+</div></div>
+</div></div>
+</div>
+<footer class="bd-footer-content">
+</footer>
+</main>
+</div>
+</div>
+<!-- Scripts loaded after <body> so the DOM is not blocked -->
+<script defer="" src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer="" src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+<footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+<div class="footer-items__start">
+<div class="footer-item">
+<p class="copyright">
+    
+      © Copyright Copyright 2016-2025, The pyxem developers.
+      <br/>
+</p>
+</div>
+<div class="footer-item">
+<p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+</p>
+</div>
+</div>
+<div class="footer-items__end">
+<div class="footer-item">
+<p class="theme-version">
+<!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+</div>
+</div>
+</footer>
+</body>
+</html>

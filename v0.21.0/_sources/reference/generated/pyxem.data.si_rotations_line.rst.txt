@@ -1,0 +1,9 @@
+si\_rotations\_line
+===================
+
+.. currentmodule:: pyxem.data
+
+.. autofunction:: si_rotations_line
+
+.. minigallery:: pyxem.data.si_rotations_line
+    :add-heading: Examples using ``si_rotations_line``

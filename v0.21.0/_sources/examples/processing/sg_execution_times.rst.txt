@@ -1,0 +1,61 @@
+
+:orphan:
+
+.. _sphx_glr_examples_processing_sg_execution_times:
+
+
+Computation times
+=================
+**02:26.433** total execution time for 9 files **from examples/processing**:
+
+.. container::
+
+  .. raw:: html
+
+    <style scoped>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+    </style>
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script type="text/javascript" class="init">
+    $(document).ready( function () {
+        $('table.sg-datatable').DataTable({order: [[1, 'desc']]});
+    } );
+    </script>
+
+  .. list-table::
+   :header-rows: 1
+   :class: table table-striped sg-datatable
+
+   * - Example
+     - Time
+     - Mem (MB)
+   * - :ref:`sphx_glr_examples_processing_azimuthal_integration.py` (``azimuthal_integration.py``)
+     - 00:57.184
+     - 0.0
+   * - :ref:`sphx_glr_examples_processing_calibrating_recip_space.py` (``calibrating_recip_space.py``)
+     - 00:27.297
+     - 0.0
+   * - :ref:`sphx_glr_examples_processing_vector_finding.py` (``vector_finding.py``)
+     - 00:18.066
+     - 0.0
+   * - :ref:`sphx_glr_examples_processing_background_subtraction.py` (``background_subtraction.py``)
+     - 00:14.606
+     - 0.0
+   * - :ref:`sphx_glr_examples_processing_determining_ellipticity.py` (``determining_ellipticity.py``)
+     - 00:12.829
+     - 0.0
+   * - :ref:`sphx_glr_examples_processing_template_matching.py` (``template_matching.py``)
+     - 00:09.296
+     - 0.0
+   * - :ref:`sphx_glr_examples_processing_circular_hough_transform.py` (``circular_hough_transform.py``)
+     - 00:02.970
+     - 0.0
+   * - :ref:`sphx_glr_examples_processing_centering_the_zero_beam.py` (``centering_the_zero_beam.py``)
+     - 00:02.776
+     - 0.0
+   * - :ref:`sphx_glr_examples_processing_filtering_data.py` (``filtering_data.py``)
+     - 00:01.409
+     - 0.0

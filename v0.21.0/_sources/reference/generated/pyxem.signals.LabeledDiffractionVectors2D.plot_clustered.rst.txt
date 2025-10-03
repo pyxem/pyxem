@@ -1,0 +1,6 @@
+plot\_clustered
+===============
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: LabeledDiffractionVectors2D.plot_clustered

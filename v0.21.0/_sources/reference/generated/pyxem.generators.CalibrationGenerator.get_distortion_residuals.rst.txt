@@ -1,0 +1,6 @@
+get\_distortion\_residuals
+==========================
+
+.. currentmodule:: pyxem.generators
+
+.. automethod:: CalibrationGenerator.get_distortion_residuals

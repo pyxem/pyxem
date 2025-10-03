@@ -1,0 +1,6 @@
+get\_color\_signal
+==================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: BeamShift.get_color_signal

@@ -1,0 +1,6 @@
+template\_match
+===============
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: Diffraction2D.template_match

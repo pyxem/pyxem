@@ -1,0 +1,9 @@
+value2standard\_units
+=====================
+
+.. currentmodule:: pyxem.utils.calibration
+
+.. autofunction:: value2standard_units
+
+.. minigallery:: pyxem.utils.calibration.value2standard_units
+    :add-heading: Examples using ``value2standard_units``

@@ -1,0 +1,9 @@
+determine\_ellipse
+==================
+
+.. currentmodule:: pyxem.utils.ransac_ellipse_tools
+
+.. autofunction:: determine_ellipse
+
+.. minigallery:: pyxem.utils.ransac_ellipse_tools.determine_ellipse
+    :add-heading: Examples using ``determine_ellipse``

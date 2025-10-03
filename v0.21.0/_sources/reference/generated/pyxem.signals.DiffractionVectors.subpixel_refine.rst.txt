@@ -1,0 +1,6 @@
+subpixel\_refine
+================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: DiffractionVectors.subpixel_refine

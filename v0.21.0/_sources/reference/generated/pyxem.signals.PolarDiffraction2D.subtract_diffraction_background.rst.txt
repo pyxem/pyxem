@@ -1,0 +1,6 @@
+subtract\_diffraction\_background
+=================================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: PolarDiffraction2D.subtract_diffraction_background

@@ -1,0 +1,9 @@
+num\_columns
+============
+
+.. currentmodule:: pyxem.signals
+
+.. autoproperty:: DiffractionVectors.num_columns
+
+.. minigallery:: pyxem.signals.DiffractionVectors.num_columns
+    :add-heading: Examples using ``DiffractionVectors.num_columns``

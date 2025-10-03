@@ -1,0 +1,46 @@
+calibration
+===========
+
+.. automodule:: pyxem.utils.calibration
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Functions
+
+    .. autosummary::
+        :toctree:
+        :template: custom-function-template.rst
+        
+        find_diffraction_calibration
+        get_electron_wavelength
+        index_dataset_with_template_rotation
+        value2node
+        value2standard_units
+    
+    
+
+    
+    
+    .. rubric:: Classes
+
+    .. autosummary::
+        :toctree:
+        :template: custom-class-template.rst
+        
+        Calibration
+        DictionaryTreeBrowser
+        UniformDataAxis
+        deprecated
+    
+    
+
+    
+    
+    
+
+
+

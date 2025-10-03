@@ -1,0 +1,9 @@
+detector\_gain
+==============
+
+.. currentmodule:: pyxem.utils.calibration
+
+.. autoproperty:: Calibration.detector_gain
+
+.. minigallery:: pyxem.utils.calibration.Calibration.detector_gain
+    :add-heading: Examples using ``Calibration.detector_gain``

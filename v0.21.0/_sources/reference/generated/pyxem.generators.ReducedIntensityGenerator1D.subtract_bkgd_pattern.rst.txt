@@ -1,0 +1,6 @@
+subtract\_bkgd\_pattern
+=======================
+
+.. currentmodule:: pyxem.generators
+
+.. automethod:: ReducedIntensityGenerator1D.subtract_bkgd_pattern

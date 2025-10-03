@@ -1,0 +1,9 @@
+units
+=====
+
+.. currentmodule:: pyxem.utils.calibration
+
+.. autoproperty:: Calibration.units
+
+.. minigallery:: pyxem.utils.calibration.Calibration.units
+    :add-heading: Examples using ``Calibration.units``

@@ -1,0 +1,9 @@
+get\_DisplacementGradientMap
+============================
+
+.. currentmodule:: pyxem.generators
+
+.. autofunction:: get_DisplacementGradientMap
+
+.. minigallery:: pyxem.generators.get_DisplacementGradientMap
+    :add-heading: Examples using ``get_DisplacementGradientMap``

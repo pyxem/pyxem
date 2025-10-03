@@ -1,0 +1,9 @@
+make\_ellipse\_data\_points
+===========================
+
+.. currentmodule:: pyxem.utils.ransac_ellipse_tools
+
+.. autofunction:: make_ellipse_data_points
+
+.. minigallery:: pyxem.utils.ransac_ellipse_tools.make_ellipse_data_points
+    :add-heading: Examples using ``make_ellipse_data_points``

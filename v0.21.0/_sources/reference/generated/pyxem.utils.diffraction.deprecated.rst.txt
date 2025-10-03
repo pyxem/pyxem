@@ -1,0 +1,25 @@
+deprecated
+==========
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autoclass:: deprecated
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Methods
+
+    .. autosummary::
+        :toctree:
+        :template: custom-method-template.rst
+        
+        
+    
+    
+
+.. minigallery:: pyxem.utils.diffraction.deprecated
+    :add-heading: Examples using ``deprecated``

@@ -1,0 +1,34 @@
+VectorIndexationGenerator
+=========================
+
+.. currentmodule:: pyxem.generators
+
+.. autoclass:: VectorIndexationGenerator
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Methods
+
+    .. autosummary::
+        :toctree:
+        :template: custom-method-template.rst
+        
+        
+        
+        VectorIndexationGenerator.index_vectors
+        
+        
+        VectorIndexationGenerator.refine_best_orientation
+        
+        
+        VectorIndexationGenerator.refine_n_best_orientations
+        
+    
+    
+
+.. minigallery:: pyxem.generators.VectorIndexationGenerator
+    :add-heading: Examples using ``VectorIndexationGenerator``

@@ -1,0 +1,6 @@
+get\_item
+=========
+
+.. currentmodule:: pyxem.utils.calibration
+
+.. automethod:: DictionaryTreeBrowser.get_item

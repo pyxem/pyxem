@@ -1,0 +1,130 @@
+
+:orphan:
+
+.. _sphx_glr_sg_execution_times:
+
+
+Computation times
+=================
+**00:00.000** total execution time for 32 files **from all galleries**:
+
+.. container::
+
+  .. raw:: html
+
+    <style scoped>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+    </style>
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script type="text/javascript" class="init">
+    $(document).ready( function () {
+        $('table.sg-datatable').DataTable({order: [[1, 'desc']]});
+    } );
+    </script>
+
+  .. list-table::
+   :header-rows: 1
+   :class: table table-striped sg-datatable
+
+   * - Example
+     - Time
+     - Mem (MB)
+   * - :ref:`sphx_glr_examples_amorphous_characterization_FEM.py` (``../examples/amorphous_characterization/FEM.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_dpc_electric_field_dpc.py` (``../examples/dpc/electric_field_dpc.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_dpc_magnetic_dpc.py` (``../examples/dpc/magnetic_dpc.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_loading_data_loading_mrc_files.py` (``../examples/loading_data/loading_mrc_files.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_loading_data_setting_scales_and_metadata.py` (``../examples/loading_data/setting_scales_and_metadata.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_orientation_mapping_multi_phase_orientation.py` (``../examples/orientation_mapping/multi_phase_orientation.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_orientation_mapping_on_zone_orientation.py` (``../examples/orientation_mapping/on_zone_orientation.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_orientation_mapping_single_phase_orientation.py` (``../examples/orientation_mapping/single_phase_orientation.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_plotting_fast_plotting_tricks.py` (``../examples/plotting/fast_plotting_tricks.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_plotting_interactive_line_profile.py` (``../examples/plotting/interactive_line_profile.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_plotting_plotting_a_diffraction_pattern.py` (``../examples/plotting/plotting_a_diffraction_pattern.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_plotting_plotting_different_units.py` (``../examples/plotting/plotting_different_units.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_processing_azimuthal_integration.py` (``../examples/processing/azimuthal_integration.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_processing_background_subtraction.py` (``../examples/processing/background_subtraction.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_processing_calibrating_recip_space.py` (``../examples/processing/calibrating_recip_space.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_processing_centering_the_zero_beam.py` (``../examples/processing/centering_the_zero_beam.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_processing_circular_hough_transform.py` (``../examples/processing/circular_hough_transform.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_processing_determining_ellipticity.py` (``../examples/processing/determining_ellipticity.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_processing_filtering_data.py` (``../examples/processing/filtering_data.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_processing_template_matching.py` (``../examples/processing/template_matching.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_processing_vector_finding.py` (``../examples/processing/vector_finding.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_standards_flat_ewalds_sphere_assumption.py` (``../examples/standards/flat_ewalds_sphere_assumption.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_standards_pixel_coodinates.py` (``../examples/standards/pixel_coodinates.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_strain_mapping_strain_mapping.py` (``../examples/strain_mapping/strain_mapping.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_vectors_clustering_vectors.py` (``../examples/vectors/clustering_vectors.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_vectors_glass_symmetry.py` (``../examples/vectors/glass_symmetry.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_vectors_masking_vectors.py` (``../examples/vectors/masking_vectors.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_vectors_slicing_vectors.py` (``../examples/vectors/slicing_vectors.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_virtual_imaging_creating_a_segmented_detector.py` (``../examples/virtual_imaging/creating_a_segmented_detector.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_virtual_imaging_creating_virtual_images_from_vectors.py` (``../examples/virtual_imaging/creating_virtual_images_from_vectors.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_virtual_imaging_interactive_virtual_images.py` (``../examples/virtual_imaging/interactive_virtual_images.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_virtual_imaging_other_virtual_imaging.py` (``../examples/virtual_imaging/other_virtual_imaging.py``)
+     - 00:00.000
+     - 0.0

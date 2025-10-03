@@ -1,0 +1,9 @@
+filter\_vectors\_ragged
+=======================
+
+.. currentmodule:: pyxem.utils.vectors
+
+.. autofunction:: filter_vectors_ragged
+
+.. minigallery:: pyxem.utils.vectors.filter_vectors_ragged
+    :add-heading: Examples using ``filter_vectors_ragged``

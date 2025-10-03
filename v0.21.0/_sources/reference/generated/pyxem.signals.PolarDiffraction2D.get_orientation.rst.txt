@@ -1,0 +1,6 @@
+get\_orientation
+================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: PolarDiffraction2D.get_orientation

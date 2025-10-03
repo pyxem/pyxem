@@ -1,0 +1,9 @@
+remove\_dead
+============
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autofunction:: remove_dead
+
+.. minigallery:: pyxem.utils.diffraction.remove_dead
+    :add-heading: Examples using ``remove_dead``

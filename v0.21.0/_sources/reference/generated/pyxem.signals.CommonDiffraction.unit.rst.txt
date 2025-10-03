@@ -1,0 +1,9 @@
+unit
+====
+
+.. currentmodule:: pyxem.signals
+
+.. autoproperty:: CommonDiffraction.unit
+
+.. minigallery:: pyxem.signals.CommonDiffraction.unit
+    :add-heading: Examples using ``CommonDiffraction.unit``

@@ -1,0 +1,6 @@
+get\_direct\_beam\_position
+===========================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: Diffraction2D.get_direct_beam_position

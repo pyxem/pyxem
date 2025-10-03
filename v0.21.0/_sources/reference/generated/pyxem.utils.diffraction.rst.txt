@@ -1,0 +1,65 @@
+diffraction
+===========
+
+.. automodule:: pyxem.utils.diffraction
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Functions
+
+    .. autosummary::
+        :toctree:
+        :template: custom-function-template.rst
+        
+        apply_transformation
+        center_of_mass_from_image
+        circular_mask
+        convert_affine_to_transform
+        ellipse_perimeter
+        fftconvolve
+        find_beam_center_blur
+        find_beam_center_interpolate
+        find_beam_offset_cross_correlation
+        find_center_of_mass
+        find_hot_pixels
+        gain_normalise
+        investigate_dog_background_removal_interactive
+        is_cupy_array
+        isiterable
+        match_template
+        match_template_dilate
+        normalize_template_match
+        peaks_as_gvectors
+        phase_cross_correlation
+        reference_circle
+        regional_filter
+        remove_bad_pixels
+        remove_dead
+    
+    
+
+    
+    
+    .. rubric:: Classes
+
+    .. autosummary::
+        :toctree:
+        :template: custom-class-template.rst
+        
+        Version
+        deprecated
+        interp1d
+        tqdm
+    
+    
+
+    
+    
+    
+
+
+

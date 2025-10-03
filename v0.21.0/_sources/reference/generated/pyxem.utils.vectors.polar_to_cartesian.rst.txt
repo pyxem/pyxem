@@ -1,0 +1,9 @@
+polar\_to\_cartesian
+====================
+
+.. currentmodule:: pyxem.utils.vectors
+
+.. autofunction:: polar_to_cartesian
+
+.. minigallery:: pyxem.utils.vectors.polar_to_cartesian
+    :add-heading: Examples using ``polar_to_cartesian``

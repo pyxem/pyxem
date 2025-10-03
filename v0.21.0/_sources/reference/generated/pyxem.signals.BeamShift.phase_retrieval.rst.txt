@@ -1,0 +1,6 @@
+phase\_retrieval
+================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: BeamShift.phase_retrieval

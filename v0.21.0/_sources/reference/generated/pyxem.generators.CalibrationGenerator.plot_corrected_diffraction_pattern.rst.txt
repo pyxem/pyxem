@@ -1,0 +1,6 @@
+plot\_corrected\_diffraction\_pattern
+=====================================
+
+.. currentmodule:: pyxem.generators
+
+.. automethod:: CalibrationGenerator.plot_corrected_diffraction_pattern

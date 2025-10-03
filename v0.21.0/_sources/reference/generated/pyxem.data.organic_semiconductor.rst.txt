@@ -1,0 +1,9 @@
+organic\_semiconductor
+======================
+
+.. currentmodule:: pyxem.data
+
+.. autofunction:: organic_semiconductor
+
+.. minigallery:: pyxem.data.organic_semiconductor
+    :add-heading: Examples using ``organic_semiconductor``

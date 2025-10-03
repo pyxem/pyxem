@@ -1,0 +1,203 @@
+ElectronDiffraction2D
+=====================
+
+.. currentmodule:: pyxem.signals
+
+.. autoclass:: ElectronDiffraction2D
+
+    
+    
+    .. rubric:: Attributes
+
+    .. autosummary::
+        :toctree:
+        :template: custom-attribute-template.rst
+        
+        
+        
+        ElectronDiffraction2D.beam_energy
+        
+        
+        ElectronDiffraction2D.camera_length
+        
+        
+        
+        ElectronDiffraction2D.diffraction_calibration
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        ElectronDiffraction2D.scan_calibration
+        
+        
+    
+    
+
+    
+    
+    .. rubric:: Methods
+
+    .. autosummary::
+        :toctree:
+        :template: custom-method-template.rst
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        ElectronDiffraction2D.set_diffraction_calibration
+        
+        
+        ElectronDiffraction2D.set_experimental_parameters
+        
+        
+        
+        ElectronDiffraction2D.set_scan_calibration
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    
+    
+
+.. minigallery:: pyxem.signals.ElectronDiffraction2D
+    :add-heading: Examples using ``ElectronDiffraction2D``

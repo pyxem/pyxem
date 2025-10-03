@@ -1,0 +1,9 @@
+gain\_normalise
+===============
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autofunction:: gain_normalise
+
+.. minigallery:: pyxem.utils.diffraction.gain_normalise
+    :add-heading: Examples using ``gain_normalise``

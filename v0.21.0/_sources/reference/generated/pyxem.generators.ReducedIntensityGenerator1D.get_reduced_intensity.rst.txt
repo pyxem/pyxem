@@ -1,0 +1,6 @@
+get\_reduced\_intensity
+=======================
+
+.. currentmodule:: pyxem.generators
+
+.. automethod:: ReducedIntensityGenerator1D.get_reduced_intensity

@@ -1,0 +1,6 @@
+refine\_n\_best\_orientations
+=============================
+
+.. currentmodule:: pyxem.generators
+
+.. automethod:: VectorIndexationGenerator.refine_n_best_orientations

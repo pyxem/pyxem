@@ -1,0 +1,6 @@
+set\_description
+================
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. automethod:: tqdm.set_description

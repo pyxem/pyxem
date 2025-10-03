@@ -1,0 +1,49 @@
+ReducedIntensityGenerator1D
+===========================
+
+.. currentmodule:: pyxem.generators
+
+.. autoclass:: ReducedIntensityGenerator1D
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Methods
+
+    .. autosummary::
+        :toctree:
+        :template: custom-method-template.rst
+        
+        
+        
+        ReducedIntensityGenerator1D.fit_atomic_scattering
+        
+        
+        ReducedIntensityGenerator1D.get_reduced_intensity
+        
+        
+        ReducedIntensityGenerator1D.mask_from_bkgd_pattern
+        
+        
+        ReducedIntensityGenerator1D.mask_reduced_intensity
+        
+        
+        ReducedIntensityGenerator1D.set_diffraction_calibration
+        
+        
+        ReducedIntensityGenerator1D.set_diffraction_offset
+        
+        
+        ReducedIntensityGenerator1D.set_s_cutoff
+        
+        
+        ReducedIntensityGenerator1D.subtract_bkgd_pattern
+        
+    
+    
+
+.. minigallery:: pyxem.generators.ReducedIntensityGenerator1D
+    :add-heading: Examples using ``ReducedIntensityGenerator1D``

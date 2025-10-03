@@ -1,0 +1,9 @@
+scale\_as\_quantity
+===================
+
+.. currentmodule:: pyxem.utils.calibration
+
+.. autoproperty:: UniformDataAxis.scale_as_quantity
+
+.. minigallery:: pyxem.utils.calibration.UniformDataAxis.scale_as_quantity
+    :add-heading: Examples using ``UniformDataAxis.scale_as_quantity``

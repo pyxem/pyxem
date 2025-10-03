@@ -1,0 +1,9 @@
+local
+=====
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autoproperty:: Version.local
+
+.. minigallery:: pyxem.utils.diffraction.Version.local
+    :add-heading: Examples using ``Version.local``

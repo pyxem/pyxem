@@ -1,0 +1,9 @@
+num\_rows
+=========
+
+.. currentmodule:: pyxem.signals
+
+.. autoproperty:: OrientationMap.num_rows
+
+.. minigallery:: pyxem.signals.OrientationMap.num_rows
+    :add-heading: Examples using ``OrientationMap.num_rows``

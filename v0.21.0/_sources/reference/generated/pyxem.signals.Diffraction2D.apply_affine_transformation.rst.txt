@@ -1,0 +1,6 @@
+apply\_affine\_transformation
+=============================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: Diffraction2D.apply_affine_transformation

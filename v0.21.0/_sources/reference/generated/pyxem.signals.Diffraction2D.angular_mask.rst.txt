@@ -1,0 +1,6 @@
+angular\_mask
+=============
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: Diffraction2D.angular_mask

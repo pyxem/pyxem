@@ -1,0 +1,9 @@
+beam\_energy
+============
+
+.. currentmodule:: pyxem.signals
+
+.. autoproperty:: ElectronDiffraction2D.beam_energy
+
+.. minigallery:: pyxem.signals.ElectronDiffraction2D.beam_energy
+    :add-heading: Examples using ``ElectronDiffraction2D.beam_energy``

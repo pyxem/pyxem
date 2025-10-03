@@ -1,0 +1,9 @@
+regional\_filter
+================
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autofunction:: regional_filter
+
+.. minigallery:: pyxem.utils.diffraction.regional_filter
+    :add-heading: Examples using ``regional_filter``

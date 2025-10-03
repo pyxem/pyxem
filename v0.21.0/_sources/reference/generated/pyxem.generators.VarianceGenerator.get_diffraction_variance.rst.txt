@@ -1,0 +1,6 @@
+get\_diffraction\_variance
+==========================
+
+.. currentmodule:: pyxem.generators
+
+.. automethod:: VarianceGenerator.get_diffraction_variance

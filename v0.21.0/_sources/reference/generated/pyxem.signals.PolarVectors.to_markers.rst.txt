@@ -1,0 +1,6 @@
+to\_markers
+===========
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: PolarVectors.to_markers

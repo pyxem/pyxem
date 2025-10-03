@@ -1,0 +1,6 @@
+get\_pixel\_vectors
+===================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: DiffractionVectors.get_pixel_vectors

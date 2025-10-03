@@ -1,0 +1,9 @@
+fe\_bcc\_phase
+==============
+
+.. currentmodule:: pyxem.data
+
+.. autofunction:: fe_bcc_phase
+
+.. minigallery:: pyxem.data.fe_bcc_phase
+    :add-heading: Examples using ``fe_bcc_phase``

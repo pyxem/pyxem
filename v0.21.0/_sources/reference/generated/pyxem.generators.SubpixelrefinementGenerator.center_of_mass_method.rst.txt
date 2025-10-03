@@ -1,0 +1,6 @@
+center\_of\_mass\_method
+========================
+
+.. currentmodule:: pyxem.generators
+
+.. automethod:: SubpixelrefinementGenerator.center_of_mass_method

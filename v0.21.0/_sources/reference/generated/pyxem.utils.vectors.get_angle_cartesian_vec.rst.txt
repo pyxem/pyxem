@@ -1,0 +1,9 @@
+get\_angle\_cartesian\_vec
+==========================
+
+.. currentmodule:: pyxem.utils.vectors
+
+.. autofunction:: get_angle_cartesian_vec
+
+.. minigallery:: pyxem.utils.vectors.get_angle_cartesian_vec
+    :add-heading: Examples using ``get_angle_cartesian_vec``

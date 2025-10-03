@@ -1,0 +1,9 @@
+vectors
+=======
+
+.. currentmodule:: pyxem.signals
+
+.. autoproperty:: VirtualDarkFieldImage.vectors
+
+.. minigallery:: pyxem.signals.VirtualDarkFieldImage.vectors
+    :add-heading: Examples using ``VirtualDarkFieldImage.vectors``

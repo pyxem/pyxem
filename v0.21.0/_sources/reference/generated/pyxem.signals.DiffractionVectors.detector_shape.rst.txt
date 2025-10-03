@@ -1,0 +1,9 @@
+detector\_shape
+===============
+
+.. currentmodule:: pyxem.signals
+
+.. autoproperty:: DiffractionVectors.detector_shape
+
+.. minigallery:: pyxem.signals.DiffractionVectors.detector_shape
+    :add-heading: Examples using ``DiffractionVectors.detector_shape``

@@ -1,0 +1,6 @@
+get\_linear\_plane
+==================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: BeamShift.get_linear_plane

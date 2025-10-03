@@ -1,0 +1,9 @@
+public
+======
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autoproperty:: Version.public
+
+.. minigallery:: pyxem.utils.diffraction.Version.public
+    :add-heading: Examples using ``Version.public``

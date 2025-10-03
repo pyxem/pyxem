@@ -1,0 +1,9 @@
+get\_angles
+===========
+
+.. currentmodule:: pyxem.utils.vectors
+
+.. autofunction:: get_angles
+
+.. minigallery:: pyxem.utils.vectors.get_angles
+    :add-heading: Examples using ``get_angles``

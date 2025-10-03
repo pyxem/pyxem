@@ -1,0 +1,9 @@
+pre
+===
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autoproperty:: Version.pre
+
+.. minigallery:: pyxem.utils.diffraction.Version.pre
+    :add-heading: Examples using ``Version.pre``

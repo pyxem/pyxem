@@ -1,0 +1,9 @@
+calculate\_norms\_ragged
+========================
+
+.. currentmodule:: pyxem.utils.vectors
+
+.. autofunction:: calculate_norms_ragged
+
+.. minigallery:: pyxem.utils.vectors.calculate_norms_ragged
+    :add-heading: Examples using ``calculate_norms_ragged``

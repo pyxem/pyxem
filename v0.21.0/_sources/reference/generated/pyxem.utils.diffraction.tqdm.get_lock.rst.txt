@@ -1,0 +1,6 @@
+get\_lock
+=========
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. automethod:: tqdm.get_lock

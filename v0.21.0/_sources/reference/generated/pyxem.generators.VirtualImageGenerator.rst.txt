@@ -1,0 +1,34 @@
+VirtualImageGenerator
+=====================
+
+.. currentmodule:: pyxem.generators
+
+.. autoclass:: VirtualImageGenerator
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Methods
+
+    .. autosummary::
+        :toctree:
+        :template: custom-method-template.rst
+        
+        
+        
+        VirtualImageGenerator.get_concentric_virtual_images
+        
+        
+        VirtualImageGenerator.get_virtual_images_from_mesh
+        
+        
+        VirtualImageGenerator.set_ROI_mesh
+        
+    
+    
+
+.. minigallery:: pyxem.generators.VirtualImageGenerator
+    :add-heading: Examples using ``VirtualImageGenerator``

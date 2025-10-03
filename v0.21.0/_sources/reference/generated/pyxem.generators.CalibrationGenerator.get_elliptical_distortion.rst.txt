@@ -1,0 +1,6 @@
+get\_elliptical\_distortion
+===========================
+
+.. currentmodule:: pyxem.generators
+
+.. automethod:: CalibrationGenerator.get_elliptical_distortion

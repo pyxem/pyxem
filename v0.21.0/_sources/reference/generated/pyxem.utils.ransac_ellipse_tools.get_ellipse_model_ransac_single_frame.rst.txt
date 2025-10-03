@@ -1,0 +1,9 @@
+get\_ellipse\_model\_ransac\_single\_frame
+==========================================
+
+.. currentmodule:: pyxem.utils.ransac_ellipse_tools
+
+.. autofunction:: get_ellipse_model_ransac_single_frame
+
+.. minigallery:: pyxem.utils.ransac_ellipse_tools.get_ellipse_model_ransac_single_frame
+    :add-heading: Examples using ``get_ellipse_model_ransac_single_frame``

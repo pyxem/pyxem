@@ -1,0 +1,6 @@
+write
+=====
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. automethod:: tqdm.write

@@ -1,0 +1,6 @@
+to\_single\_phase\_orientations
+===============================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: OrientationMap.to_single_phase_orientations

@@ -1,0 +1,6 @@
+get\_slices2d
+=============
+
+.. currentmodule:: pyxem.utils.calibration
+
+.. automethod:: Calibration.get_slices2d

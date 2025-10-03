@@ -1,0 +1,9 @@
+convert\_to\_markers
+====================
+
+.. currentmodule:: pyxem.utils.vectors
+
+.. autofunction:: convert_to_markers
+
+.. minigallery:: pyxem.utils.vectors.convert_to_markers
+    :add-heading: Examples using ``convert_to_markers``

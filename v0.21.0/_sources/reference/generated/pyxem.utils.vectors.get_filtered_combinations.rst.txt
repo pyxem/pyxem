@@ -1,0 +1,9 @@
+get\_filtered\_combinations
+===========================
+
+.. currentmodule:: pyxem.utils.vectors
+
+.. autofunction:: get_filtered_combinations
+
+.. minigallery:: pyxem.utils.vectors.get_filtered_combinations
+    :add-heading: Examples using ``get_filtered_combinations``

@@ -1,0 +1,6 @@
+get\_indexed\_diffraction\_vectors
+==================================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: VectorMatchingResults.get_indexed_diffraction_vectors

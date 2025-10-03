@@ -1,0 +1,9 @@
+fe\_fcc\_phase
+==============
+
+.. currentmodule:: pyxem.data
+
+.. autofunction:: fe_fcc_phase
+
+.. minigallery:: pyxem.data.fe_fcc_phase
+    :add-heading: Examples using ``fe_fcc_phase``

@@ -1,0 +1,6 @@
+get\_virtual\_image
+===================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: CommonDiffraction.get_virtual_image

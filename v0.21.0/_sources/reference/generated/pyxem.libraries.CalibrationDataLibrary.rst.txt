@@ -1,0 +1,39 @@
+CalibrationDataLibrary
+======================
+
+.. currentmodule:: pyxem.libraries
+
+.. autoclass:: CalibrationDataLibrary
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Methods
+
+    .. autosummary::
+        :toctree:
+        :template: custom-method-template.rst
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        CalibrationDataLibrary.plot_calibration_data
+        
+        
+        
+        
+        
+        
+    
+    
+
+.. minigallery:: pyxem.libraries.CalibrationDataLibrary
+    :add-heading: Examples using ``CalibrationDataLibrary``

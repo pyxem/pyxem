@@ -1,0 +1,31 @@
+VirtualDarkFieldGenerator
+=========================
+
+.. currentmodule:: pyxem.generators
+
+.. autoclass:: VirtualDarkFieldGenerator
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Methods
+
+    .. autosummary::
+        :toctree:
+        :template: custom-method-template.rst
+        
+        
+        
+        
+        VirtualDarkFieldGenerator.get_virtual_dark_field_images
+        
+        
+        
+    
+    
+
+.. minigallery:: pyxem.generators.VirtualDarkFieldGenerator
+    :add-heading: Examples using ``VirtualDarkFieldGenerator``

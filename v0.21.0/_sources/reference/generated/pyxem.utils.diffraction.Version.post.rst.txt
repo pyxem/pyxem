@@ -1,0 +1,9 @@
+post
+====
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autoproperty:: Version.post
+
+.. minigallery:: pyxem.utils.diffraction.Version.post
+    :add-heading: Examples using ``Version.post``

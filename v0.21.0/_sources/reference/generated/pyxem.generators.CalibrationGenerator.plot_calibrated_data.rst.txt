@@ -1,0 +1,6 @@
+plot\_calibrated\_data
+======================
+
+.. currentmodule:: pyxem.generators
+
+.. automethod:: CalibrationGenerator.plot_calibrated_data

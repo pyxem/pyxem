@@ -1,0 +1,104 @@
+ScatteringFitComponentXTables
+=============================
+
+.. currentmodule:: pyxem.components
+
+.. autoclass:: ScatteringFitComponentXTables
+
+    
+    
+    .. rubric:: Attributes
+
+    .. autosummary::
+        :toctree:
+        :template: custom-attribute-template.rst
+        
+        
+        
+        
+        
+        
+        ScatteringFitComponentXTables.trait_added
+        
+        
+        ScatteringFitComponentXTables.trait_modified
+        
+    
+    
+
+    
+    
+    .. rubric:: Methods
+
+    .. autosummary::
+        :toctree:
+        :template: custom-method-template.rst
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        ScatteringFitComponentXTables.function
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    
+    
+
+.. minigallery:: pyxem.components.ScatteringFitComponentXTables
+    :add-heading: Examples using ``ScatteringFitComponentXTables``

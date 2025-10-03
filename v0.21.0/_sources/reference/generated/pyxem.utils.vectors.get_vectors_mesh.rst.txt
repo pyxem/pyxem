@@ -1,0 +1,9 @@
+get\_vectors\_mesh
+==================
+
+.. currentmodule:: pyxem.utils.vectors
+
+.. autofunction:: get_vectors_mesh
+
+.. minigallery:: pyxem.utils.vectors.get_vectors_mesh
+    :add-heading: Examples using ``get_vectors_mesh``

@@ -1,0 +1,6 @@
+get\_virtual\_images\_from\_mesh
+================================
+
+.. currentmodule:: pyxem.generators
+
+.. automethod:: VirtualImageGenerator.get_virtual_images_from_mesh

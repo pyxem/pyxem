@@ -1,0 +1,53 @@
+CommonDiffraction
+=================
+
+.. currentmodule:: pyxem.signals
+
+.. autoclass:: CommonDiffraction
+
+    
+    
+    .. rubric:: Attributes
+
+    .. autosummary::
+        :toctree:
+        :template: custom-attribute-template.rst
+        
+        
+        CommonDiffraction.unit
+        
+    
+    
+
+    
+    
+    .. rubric:: Methods
+
+    .. autosummary::
+        :toctree:
+        :template: custom-method-template.rst
+        
+        
+        
+        CommonDiffraction.add_navigation_signal
+        
+        
+        CommonDiffraction.get_integrated_intensity
+        
+        
+        CommonDiffraction.get_virtual_image
+        
+        
+        CommonDiffraction.plot_integrated_intensity
+        
+        
+        CommonDiffraction.to_device
+        
+        
+        CommonDiffraction.to_host
+        
+    
+    
+
+.. minigallery:: pyxem.signals.CommonDiffraction
+    :add-heading: Examples using ``CommonDiffraction``

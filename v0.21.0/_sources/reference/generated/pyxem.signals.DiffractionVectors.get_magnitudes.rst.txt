@@ -1,0 +1,6 @@
+get\_magnitudes
+===============
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: DiffractionVectors.get_magnitudes

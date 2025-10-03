@@ -1,0 +1,9 @@
+value2node
+==========
+
+.. currentmodule:: pyxem.utils.calibration
+
+.. autofunction:: value2node
+
+.. minigallery:: pyxem.utils.calibration.value2node
+    :add-heading: Examples using ``value2node``

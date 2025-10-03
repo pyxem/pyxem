@@ -1,0 +1,6 @@
+filter
+======
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: Diffraction2D.filter

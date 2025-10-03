@@ -1,0 +1,9 @@
+phase\_cross\_correlation
+=========================
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autofunction:: phase_cross_correlation
+
+.. minigallery:: pyxem.utils.diffraction.phase_cross_correlation
+    :add-heading: Examples using ``phase_cross_correlation``

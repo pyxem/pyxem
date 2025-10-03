@@ -1,0 +1,6 @@
+get\_angular\_power
+===================
+
+.. currentmodule:: pyxem.signals
+
+.. automethod:: Correlation2D.get_angular_power

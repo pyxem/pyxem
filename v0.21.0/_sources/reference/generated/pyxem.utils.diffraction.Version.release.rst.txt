@@ -1,0 +1,9 @@
+release
+=======
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. autoproperty:: Version.release
+
+.. minigallery:: pyxem.utils.diffraction.Version.release
+    :add-heading: Examples using ``Version.release``
