@@ -3,12 +3,13 @@ name: Docs Dev Deploy
 on:
   push:
     branches: [ main ]
-    if: github.repository == 'pyxem/pyxem'
 jobs:
   build:
+    if: github.repository == 'pyxem/pyxem'
     uses: ./.github/workflows/docs-build.yml
 
   deploy:
+    if: github.repository == 'pyxem/pyxem'
     needs: build
     runs-on: ubuntu-latest
     steps:
