@@ -3,6 +3,7 @@ name: Docs PR Preview # STOP: Any changes here should be carefully reviewed befo
 on:
   pull_request_target: # use pull_request_target to have access to secrets for forks. Will run on the base branch
     types: [opened, reopened, synchronize, closed] # On closed we will remove the preview
+    if: github.event.pull_request.head.repo.fork == true
 
 jobs:
   build:
@@ -18,10 +19,18 @@ jobs:
         with:
           name: doc_html
           path: ./doc/_build/html
-      - name: Deploy PR preview
-        uses: rossjrw/pr-preview-action@9f77b1d057b494e662c50b8ca40ecc63f21e0887 # uses a full len SHA per https://docs.github.com/en/actions/how-tos/write-workflows/choose-and-customize-actions#using-shas
+
+      - name: Checkout deploy repo
+        uses: actions/checkout@v4
         with:
-          source-dir:  doc/_build/html
+          repository: CSSFrancis/pyxem-docs-staging
+          token: ${{ secrets.PREVIEW_DEPLOY_KEY }}
+          path: deploy-repo
+
+      - name: Deploy PR preview
+        uses: rossjrw/pr-preview-action@9f77b1d057b494e662c50b8ca40ecc63f21e0887
+        with:
+          source-dir: doc/_build/html
           deploy-repository: CSSFrancis/pyxem-docs-staging
-          token: ${{ secrets.PREVIEW_DEPLOY_KEY }} # PAT with permissions to edit Content in CSSFrancis/pyxem-docs-staging
-          comment: true # Add a comment to the PR with the preview link
+          token: ${{ secrets.PREVIEW_DEPLOY_KEY }}
+          comment: true
