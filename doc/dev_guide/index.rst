@@ -7,5 +7,6 @@
 
   Introduction <intro>
   Contributing Guide <contributing>
+  Documentation Guide <docs>
 
 .. include:: intro.rst
