@@ -11,10 +11,45 @@ env:
   artifact_name: doc_html
 
 jobs:
+  # build a redirect index.html to the stable version on tag builds
+  # always run this job (even when it is not needed) to be able to
+  # depend on it in the deploy job
+  redirect-stable:
+    if: >
+      github.repository == 'pyxem/pyxem' &&
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build index redirect
+        if: github.ref_type == 'tag' 
+        env:
+          VERSION: ${{ github.ref_name }}
+        run: |
+          mkdir -p redirect
+          cat <<EOF > redirect/index.html
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta http-equiv="refresh" content="0; url=${VERSION}/">
+              <script>window.location.href='${VERSION}/';</script>
+            </head>
+            <body>
+              <p>Redirecting to the <a href="${VERSION}/">documentation (stable)</a>...</p>
+            </body>
+          </html>
+          EOF
+
+      - uses: actions/upload-artifact@v4
+        if: github.ref_type == 'tag' 
+        with:
+          path: redirect
+          name: redirect
+
   deploy:
     if: >
       github.repository == 'pyxem/pyxem' &&
       github.event.workflow_run.conclusion == 'success'
+    needs: redirect-stable
     runs-on: ubuntu-latest
     permissions:
       # needs write permission to push the docs
@@ -58,3 +93,22 @@ jobs:
           publish_branch: gh-pages
           publish_dir:  ${{ env.html_folder }}
           destination_dir: ${{ github.ref_name }} # deploy to a folder matching the tag version
+
+      - name: Download redirect files
+        # run on tag only
+        if: github.ref_type == 'tag'
+        uses: actions/download-artifact@v4
+        with:
+          name: redirect
+          path: redirect
+
+      - name: Deploy redirect to versioned docs
+        # run on tag only
+        if: github.ref_type == 'tag'
+        uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir:  redirect
+          destination_dir: . # deploy the redirect to the root folder
+          keep_files: true
