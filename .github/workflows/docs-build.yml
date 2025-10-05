@@ -1,7 +1,6 @@
-name: Docs Build
+name: Docs build
 
-on:
-  workflow_call:
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
   Build:

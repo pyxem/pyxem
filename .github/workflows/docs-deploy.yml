@@ -1,0 +1,60 @@
+name: Docs deploy
+concurrency: docs-deploy-${{ github.ref }}
+on:
+  workflow_run:
+    workflows: ["Docs build"]
+    types:
+      - completed
+
+env:
+  html_folder: ./doc/_build/html
+  artifact_name: doc_html
+
+jobs:
+  deploy:
+    if: >
+      github.repository == 'pyxem/pyxem' &&
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      # needs write permission to push the docs
+      contents: write
+    steps:
+      - name: Download built docs
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.artifact_name }}
+          path: ${{ env.html_folder }}
+
+      - name: Print doc files
+        run: ls -l ${{ env.html_folder }}
+
+      - name: Deploy dev
+        # run on main branch only
+        if: github.event.workflow_run.head_branch == 'main' 
+        uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ${{ env.html_folder }}
+          destination_dir: dev
+
+      - name: Deploy PR preview
+        # run on pull request only
+        if: github.event_name == 'pull_request'
+        uses: rossjrw/pr-preview-action@9f77b1d057b494e662c50b8ca40ecc63f21e0887
+        with:
+          source-dir: ${{ env.html_folder }}
+          deploy-repository: CSSFrancis/pyxem-docs-staging
+          token: ${{ secrets.PREVIEW_DEPLOY_KEY }}
+          comment: true
+
+      - name: Deploy versioned docs
+        # run on tag only
+        if: github.ref_type == 'tag'
+        uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir:  ${{ env.html_folder }}
+          destination_dir: ${{ github.ref_name }} # deploy to a folder matching the tag version
