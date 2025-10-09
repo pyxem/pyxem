@@ -1,0 +1,55 @@
+name: Remove PR Preview
+
+on:
+  pull_request_target:
+    types: [closed]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create empty deploy folder
+        run: mkdir -p empty
+
+      - name: Remove PR Preview folder using GitHub Pages Deploy Action
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: ./empty
+          target-folder: pr-preview/pr-${{ github.event.pull_request.number }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          clean: true
+
+      - name: Deploy PR preview
+        # run on pull request only
+        # until rossjrw/pr-preview-action suppports passing the PR number as input,
+        # use the github-pages-deploy-action directly
+        if: inputs.pr_number != ''
+        uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e
+        with:
+          personal_token: ${{ secrets.PREVIEW_DEPLOY_KEY }}
+          publish_dir:  ${{ env.html_folder }}
+          destination_dir: pr-preview/${{ inputs.pr_number }}
+          external_repository: CSSFrancis/pyxem-docs-staging
+
+      - name: Get timestamp (UTC)
+        id: timestamp
+        run: echo "utc=$(date -u '+%Y-%m-%d %H:%M UTC')" >> "$GITHUB_OUTPUT"
+
+      - name: Post removal sticky PR comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          number: ${{ github.event.pull_request.number }}
+          header: pr-preview
+          message: |
+            **PR Preview**
+            :---:
+            Preview removed because the pull request was closed.
+            ${{ steps.timestamp.outputs.utc }}
