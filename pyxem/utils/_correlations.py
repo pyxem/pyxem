@@ -282,7 +282,8 @@ def _get_interpolation_matrix(angles, angular_range, num_points, method="average
 
 
 def _symmetry_stem(signal, interpolation, method="average"):
-    """Returns the "average" "max" or "first" value for some given signal and an interpolation matrix.
+    """
+    Returns the "average" "max" or "first" value for some given signal and an interpolation matrix.
 
     The interpolation matrix is defined by the  `_get_interpolation_matrix` function which creates a
     matrix which when matrix multiplied by the signal returns the "average", "max" or "first" value for

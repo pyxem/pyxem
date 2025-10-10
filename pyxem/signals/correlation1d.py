@@ -46,7 +46,8 @@ class Correlation1D(Signal1D):
         include_duplicates=False,
         normalize=True,
     ):
-        """Return symmetry coefficient from pearson correlation function at all real
+        """
+        Return symmetry coefficient from pearson correlation function at all real
         space positions (n from 2 to 10).
 
         Parameters
@@ -64,7 +65,7 @@ class Correlation1D(Signal1D):
 
         Returns
         -------
-        sn: Signal1D
+        signals: Signal1D
             Symmetry coefficient
         """
         angles = [set(frac(j, i) for j in range(1, i)) for i in symmetries]

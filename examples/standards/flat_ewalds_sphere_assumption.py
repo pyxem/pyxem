@@ -28,7 +28,7 @@ g.plot()
 
 # %%
 # Changing back to nm\ :sup:`-1`
-# =============================
+# ==============================
 # We can change back to nm\ :sup:`-1`, now that the camera length is (accurately) set, and the
 # new scale will be automatically calculated.
 

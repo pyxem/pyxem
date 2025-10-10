@@ -28,7 +28,7 @@ s_shifts.plot_on_signal(s)
 
 # %%
 # Getting a Linear Plane
-# ---------------------
+# ----------------------
 # In many instances the zero beam position will vary systematically with the scan position.
 # This can be corrected by fitting a linear plane to the zero beam position using the
 # :meth:`get_linear_plane` method.
