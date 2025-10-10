@@ -32,7 +32,7 @@
     cite.rst
     open_datasets_workflows.rst
     related_projects.rst
-    License <https://github.com/pyxem/pyxem/main/develop/LICENSE>
+    License <https://github.com/pyxem/pyxem/blob/main/LICENSE>
 
 .. include::
     intro.rst
