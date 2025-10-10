@@ -110,11 +110,13 @@ class Correlation2D(Signal2D, CommonDiffraction):
         normalize=True,
         **kwargs
     ):
-        """This function is for finding and extracting information about clusters
+        """
+        This function is for finding and extracting information about clusters
         based on the angular symmetries. This a pretty catch all method which has
         a couple of different operating principles.
         If k_range=None the function uses a 3 dimensional version of blob finding and attempts to
         find blobs in the 3 dimensional space, x,y,k for each symmetry.
+
         Parameters
         ------------
         symmetries: list
@@ -123,7 +125,11 @@ class Correlation2D(Signal2D, CommonDiffraction):
             One of max or average
         include_duplicates: bool
             Include duplicates like 2 and 4
-        :return:
+
+        Returns
+        -------
+        signals: Signal1D
+            Symmetry coefficient
         """
         angles = [set(frac(j, i) for j in range(0, i)) for i in symmetries]
         if not include_duplicates:

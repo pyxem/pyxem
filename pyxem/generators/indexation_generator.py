@@ -40,10 +40,11 @@ from pyxem.utils._signals import (
 
 
 class IndexationGenerator:
-    """Generates an indexer for data using a number of methods.
+    """
+    Generates an indexer for data using a number of methods.
 
     .. deprecated:: 0.14.0
-    `IndexationGenerator` will be removed in pyxem 0.15.0
+        ``IndexationGenerator`` will be removed in pyxem 0.15.0
 
     Parameters
     ----------
@@ -52,22 +53,24 @@ class IndexationGenerator:
     diffraction_library : DiffractionLibrary
         The library of simulated diffraction patterns for indexation.
 
-    Returns
-    -------
-    ValueError : "use AcceleratedIndexationGenerator or VectorIndexationGenerator"
+    Raises
+    ------
+    ValueError
+        "Use AcceleratedIndexationGenerator or VectorIndexationGenerator"
     """
 
     def __init__(self, signal, diffraction_library):
         raise ValueError(
-            "use AcceleratedIndexationGenerator or VectorIndexationGenerator"
+            "Use AcceleratedIndexationGenerator or VectorIndexationGenerator"
         )
 
 
 class TemplateIndexationGenerator:
-    """Generates an indexer for data using a number of methods.
+    """
+    Generates an indexer for data using a number of methods.
 
     .. deprecated:: 0.14.0
-    `TemplateIndexationGenerator` will be removed in pyxem 0.15.0
+        ``TemplateIndexationGenerator`` will be removed in pyxem 0.15.0
 
     Parameters
     ----------
@@ -76,10 +79,10 @@ class TemplateIndexationGenerator:
     diffraction_library : DiffractionLibrary
         The library of simulated diffraction patterns for indexation.
 
-    Returns
-    -------
-    ValueError : "use AcceleratedIndexationGenerator or VectorIndexationGenerator"
-
+    Raises
+    ------
+    ValueError
+        "Use AcceleratedIndexationGenerator or VectorIndexationGenerator"
 
     """
 

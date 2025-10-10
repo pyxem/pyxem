@@ -121,9 +121,9 @@ class Calibration:
     and the mask to apply to the data for something like a beam stop.
 
     There are 2 ways to set the calibration:
+
     1. You can set the calibration with a known reciprocal space pixel size.  This will assume
        a flat ewald sphere.
-
     2. You can set the calibration directly with a known real pixel size, beam energy/wavelength,
        and detector distance. This is the most accurate method but requires detailed calibration
        information that is not trivial to acquire.  In most cases option 1 is sufficient.
@@ -575,7 +575,9 @@ class Calibration:
 
     @property
     def pixel_extent(self):
-        """Return an array with axes [x/y, left/right, pixel_extent], as follows:
+        """
+        Return an array with axes [x/y, left/right, pixel_extent], as follows:
+
         [
             # x axis
             [
