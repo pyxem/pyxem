@@ -1,7 +1,10 @@
-name: Docs Build
+name: Docs build
 
 on:
-  workflow_call:
+  pull_request:
+    types: [opened, closed, synchronize]
+  push:
+  workflow_dispatch:
 
 jobs:
   Build:
@@ -15,3 +18,56 @@ jobs:
       ORGANISATION: 'pyxem'
       CACHE_GALLERY_EXAMPLES: './doc/examples' # cache sphinx-gallery examples for faster builds
       CACHE_POOCH: 'pyxem' # cache pooch downloads for pyxem data
+
+  Redirect-stable:
+    # build a redirect index.html to the stable version on tag builds
+    if: github.repository == 'pyxem/pyxem'
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build index redirect
+        if: github.ref_type == 'tag' 
+        env:
+          VERSION: ${{ github.ref_name }}
+        run: |
+          mkdir -p redirect
+          cat <<EOF > redirect/index.html
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta http-equiv="refresh" content="0; url=${VERSION}/">
+              <script>window.location.href='${VERSION}/';</script>
+            </head>
+            <body>
+              <p>Redirecting to the <a href="${VERSION}/">documentation (stable)</a>...</p>
+            </body>
+          </html>
+          EOF
+
+      - uses: actions/upload-artifact@v4
+        if: github.ref_type == 'tag'
+        with:
+          path: redirect
+          name: redirect
+
+  Deploy:
+    needs: [Build, Redirect-stable]
+    permissions:
+      contents: write # to be able to push to gh-pages
+      pull-requests: write # to be able to post PR comments with the preview link
+      actions: write # to be able to create workflow dispatch event
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - run: |
+          gh workflow run docs-deploy.yml \
+            -f workflow_run_id=${{ github.run_id }} \
+            -f pr_number=${{ github.event.pull_request.number }} \
+            -f ref_type=${{ github.ref_type }} \
+            -f ref_name=${{ github.ref_name }} \
+            -f pull_request_action=${{ github.event.action }}
+        env:
+          GH_TOKEN: ${{ github.token }}

@@ -1,0 +1,147 @@
+name: Docs deploy
+
+on:
+  workflow_dispatch:
+    # This is not expected to be run directly from the GitHub web interface and
+    # this is used in favour of the `workflow_run` to be able pass inputs parameters
+    # To deploy the docs manually, use the `docs-build` workflow instead
+    inputs:
+      workflow_run_id:
+        description: 'The run id of the workflow building the docs'
+        required: true
+      ref_type:
+        # need to pass ref_type to know if we are on a tag or branch
+        description: 'The git ref type of the workflow building the docs'
+        required: true
+      ref_name:
+        # need to pass ref_name to know the tag or branch name of the workflow building the docs
+        description: 'The git ref name of the workflow building the docs'
+        required: true
+      pr_number:
+        description: 'The pull request number for deploying a PR preview, if applicable'
+        default: ''
+        required: false
+      pull_request_action:
+        description: 'The pull request event action that triggered the workflow building the docs (e.g. opened, closed, synchronize)'
+        default: ''
+        required: false
+
+env:
+  html_folder: ./doc/_build/html
+  artifact_name: doc_html
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download built docs
+        uses: actions/download-artifact@v5
+        with:
+          name: ${{ env.artifact_name }}
+          path: ${{ env.html_folder }}
+          # need to specify the run id to get the artifact from the correct workflow run
+          # and set the github-token to access the actions scope
+          # https://github.com/actions/download-artifact?tab=readme-ov-file#download-artifacts-from-other-workflow-runs-or-repositories
+          run-id: ${{ inputs.workflow_run_id }}
+          github-token: ${{ github.token }}
+
+      - name: Print doc files
+        run: ls -l ${{ env.html_folder }}
+
+      - name: Deploy dev docs
+        # run on main branch only
+        if: inputs.ref_name == 'main'
+        uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ${{ env.html_folder }}
+          destination_dir: dev
+
+      - name: Deploy PR preview
+        # run on pull request only
+        # until rossjrw/pr-preview-action suppports passing the PR number as input,
+        # use the peaceiris/actions-gh-pages and implement cleanup on PR closed
+        if: inputs.pr_number != '' && inputs.pull_request_action != 'closed'
+        uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e
+        with:
+          personal_token: ${{ secrets.PREVIEW_DEPLOY_KEY }}
+          publish_dir:  ${{ env.html_folder }}
+          destination_dir: pr-preview/${{ inputs.pr_number }}
+          external_repository: CSSFrancis/pyxem-docs-staging
+
+      - name: Get timestamp (UTC)
+        if: inputs.pr_number != ''
+        id: timestamp
+        run: |
+          echo "utc=$(date -u '+%Y-%m-%d %H:%M UTC')" >> "$GITHUB_OUTPUT"
+
+      - name: Post preview link as sticky PR comment
+        if: inputs.pr_number != '' && inputs.pull_request_action != 'closed'
+        uses: marocchino/sticky-pull-request-comment@773744901bac0e8cbb5a0dc842800d45e9b2b405
+        with:
+          number: ${{ inputs.pr_number }}
+          header: pr-preview
+          message: |
+            **PR Preview**
+            :---:
+            :rocket: View PR Preview at https://cssfrancis.github.io/pyxem-docs-staging/pr-preview/pr-${{ inputs.pr_number }}.
+            If you see a 404 error, please wait a few seconds for the deployment to complete and refresh the page.
+            ${{ steps.timestamp.outputs.utc }}
+
+      - name: Create empty deploy folder
+        if: inputs.pr_number != '' && inputs.pull_request_action == 'closed'
+        run: |
+          mkdir -p empty
+
+      - name: Remove PR preview
+        if: inputs.pr_number != '' && inputs.pull_request_action == 'closed'
+        uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e
+        with:
+          personal_token: ${{ secrets.PREVIEW_DEPLOY_KEY }}
+          publish_dir:  ./empty
+          destination_dir: pr-preview/${{ inputs.pr_number }}
+          external_repository: CSSFrancis/pyxem-docs-staging
+
+      - name: Update sticky PR comment
+        if: inputs.pr_number != '' && inputs.pull_request_action == 'closed'
+        uses: marocchino/sticky-pull-request-comment@773744901bac0e8cbb5a0dc842800d45e9b2b405
+        with:
+          number: ${{ inputs.pr_number }}
+          header: pr-preview
+          message: |
+            **PR Preview**
+            :---:
+            Preview removed because the pull request was closed.
+            ${{ steps.timestamp.outputs.utc }}
+
+      - name: Deploy versioned docs
+        # run on tag only
+        if: inputs.ref_type == 'tag'
+        uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir:  ${{ env.html_folder }}
+          destination_dir: ${{ inputs.ref_name }} # deploy to a folder matching the tag version
+
+      - name: Download redirect files
+        # run on tag only
+        if: inputs.ref_type == 'tag'
+        uses: actions/download-artifact@v5
+        with:
+          name: redirect
+          path: redirect
+          # need to specify the run id to get the artifact from the correct workflow run
+          # and set the github-token to access the actions scope
+          # https://github.com/actions/download-artifact?tab=readme-ov-file#download-artifacts-from-other-workflow-runs-or-repositories
+          run-id: ${{ inputs.workflow_run_id }}
+          github-token: ${{ github.token }}
+
+      - name: Deploy redirect to versioned docs
+        # run on tag only
+        if: inputs.ref_type == 'tag'
+        uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir:  redirect
+          destination_dir: . # deploy the redirect to the root folder
+          keep_files: true
