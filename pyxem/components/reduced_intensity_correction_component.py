@@ -34,10 +34,6 @@ class ReducedIntensityCorrectionComponent(Component):
         a, b, c, and d are the coefficients of the 1st, 2nd, 3rd, and 4th
         order terms respectively of the returned polynomial.
 
-    Returns
-    -------
-    p : polynomial of the form ax + bx^2 + cx^3 + dx^4
-
     """
 
     def __init__(self, a=0.0, b=0.0, c=0.0, d=0.0):
