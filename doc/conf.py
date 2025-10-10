@@ -166,8 +166,11 @@ bibtex_bibfiles = ["bibliography.bib"]
 sphinx_gallery_conf = {
     "backreferences_dir": "reference/generated",
     "doc_module": ("pyxem",),
-    "examples_dirs": "../examples",  # path to your example scripts
-    "gallery_dirs": "examples",  # path to where to save gallery generated output
+    "examples_dirs": ["../examples", "../tutorials"],  # path to your example scripts
+    "gallery_dirs": [
+        "examples",
+        "tutorials",
+    ],  # path to where to save gallery generated output
     "filename_pattern": "^((?!sgskip).)*$",  # pattern to define which will be executed
     "ignore_pattern": "_sgskip.py",  # pattern to define which will not be executed
     "reference_url": {"pyxem": None},
