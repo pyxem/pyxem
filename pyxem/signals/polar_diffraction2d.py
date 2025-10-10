@@ -216,7 +216,8 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
     def get_resolved_pearson_correlation(
         self, mask=None, krange=None, inplace=False, **kwargs
     ):
-        """Calculate the pearson rotational correlation with k resolution in
+        """
+        Calculate the pearson rotational correlation with k resolution in
         the form of a Signal2D class.
 
         Parameters
@@ -230,15 +231,15 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
             value is in corresponding unit.
             If None (default), use the entire pattern .
         inplace: bool
-            From :meth:`~hyperspy.signal.BaseSignal.map` inplace=True means the signal is
+            From :meth:`~hyperspy.signals.BaseSignal.map` inplace=True means the signal is
             overwritten.
         kwargs: dict
-            Any additional options for the :meth:`~hyperspy.signal.BaseSignal.map` function
+            Any additional options for the :meth:`~hyperspy.signals.BaseSignal.map` function
 
 
         Returns
         -------
-        correlation: Signal2D,
+        correlation: hyperspy.signals.Signal2D
             The pearson rotational correlation when inplace is False, otherwise
             return None
         """
@@ -289,16 +290,15 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
     def subtract_diffraction_background(
         self, method="radial median", inplace=False, **kwargs
     ):
-        """Background subtraction of the diffraction data.
+        """
+        Background subtraction of the diffraction data.
 
         Parameters
         ----------
         method : str, optional
             'radial median', 'radial percentile'
             Default 'radial median'.
-
             For 'radial median' no extra parameters are necessary.
-
             For 'radial percentile' the 'percentile' argument decides
             which percentile to substract.
         **kwargs :
@@ -306,7 +306,7 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
 
         Returns
         -------
-        s : PolarDiffraction2D or LazyPolarDiffraction2D signal
+        s : pyxem.signals.PolarDiffraction2D, pyxem.signals.LazyPolarDiffraction2D
 
         """
         method_dict = {
@@ -339,12 +339,14 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
         normalize_templates=True,
         **kwargs,
     ):
-        """Match the orientation with some simulated diffraction patterns using
+        """
+        Match the orientation with some simulated diffraction patterns using
         an accelerated orientation mapping algorithm.
         The details of the algorithm are described in the paper:
         "Free, flexible and fast: Orientation mapping using the multi-core and
-         GPU-accelerated template matching capabilities in the python-based open
-         source 4D-STEM analysis toolbox Pyxem"
+        GPU-accelerated template matching capabilities in the python-based open
+        source 4D-STEM analysis toolbox Pyxem"
+
         Parameters
         ----------
         simulation : DiffractionSimulation
@@ -357,9 +359,10 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
             The number of best matching orientations to return. If n_best == -1 all of the
             orientations and correlations are returned.
         normalize_templates : bool
-            Normalize the templates to the same intensity..
+            Normalize the templates to the same intensity.
         kwargs : dict
-            Any additional options for the :meth:`~hyperspy.signal.BaseSignal.map` function.
+            Any additional options for the :meth:`~hyperspy.signals.BaseSignal.map` function.
+
         Returns
         -------
         orientation : BaseSignal
