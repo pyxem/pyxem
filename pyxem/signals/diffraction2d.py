@@ -18,7 +18,7 @@
 from copy import deepcopy
 
 import numpy as np
-from scipy.ndimage import rotate
+import scipy.ndimage as ndi
 from skimage import morphology
 import dask.array as da
 from dask.diagnostics import ProgressBar
@@ -144,9 +144,9 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         inplace : bool
             If True (default), this signal is overwritten. Otherwise, returns a
             new signal.
-        *args:
+        *args :
             Arguments to be passed to :meth:`hyperspy.api.signals.BaseSignal.map`.
-        **kwargs:
+        **kwargs : dict
             Keyword arguments to be passed to :meth:`hyperspy.api.signals.BaseSignal.map`.
 
         Returns
@@ -287,7 +287,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         if not inplace:
             return s_shift
 
-    def rotate_diffraction(self, angle, show_progressbar=True):
+    def rotate_diffraction(self, angle, show_progressbar=True, **kwargs):
         """
         Rotate the diffraction dimensions.
 
@@ -297,6 +297,8 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             Clockwise rotation in degrees.
         show_progressbar : bool
             Default True
+        **kwargs : dict
+            Keyword arguments to be passed to :meth:`hyperspy.api.signals.BaseSignal.map`.
 
         Returns
         -------
@@ -308,19 +310,17 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         >>> s_rot = s.rotate_diffraction(30, show_progressbar=False)
 
         """
-        s_rotated = self.map(
-            rotate,
+        kwargs.setdefault("output_dtype", self.data.dtype)
+        return self.map(
+            ndi.rotate,
             ragged=False,
             angle=-angle,
             reshape=False,
             inplace=False,
             show_progressbar=show_progressbar,
-            output_dtype=self.data.dtype,
             output_signal_size=self.axes_manager.signal_shape[::-1],
+            **kwargs,
         )
-        if self._lazy:
-            s_rotated.compute(show_progressbar=show_progressbar)
-        return s_rotated
 
     def flip_diffraction_x(self):
         """Flip the dataset along the diffraction x-axis.
