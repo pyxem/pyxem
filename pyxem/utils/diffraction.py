@@ -661,6 +661,11 @@ def find_hot_pixels(z, threshold_multiplier=500, mask=None):
         (i.e. ignored). Must have the same shape as the two
         last dimensions in dask_array.
 
+    Returns
+    -------
+    hot_pixels : numpy.ndarray or dask.array.Array
+        A boolean array with the same shape as `z` where True values
+        correspond to hot pixels.
     """
     # find the gradient of the image.
     footprint = [[1, 1, 1], [1, 0, 1], [1, 1, 1]]
@@ -684,7 +689,8 @@ def remove_bad_pixels(z, bad_pixels):
 
     Returns
     -------
-    data_output : Dask array
+    data_output : numpy.ndarray or dask.array.Array
+        A single frame with bad pixels replaced by the mean of their neighbors.
 
     Examples
     --------
