@@ -20,6 +20,7 @@ jobs:
       CACHE_POOCH: 'pyxem' # cache pooch downloads for pyxem data
 
   Redirect-stable:
+    # build a redirect index.html to the stable version on tag builds
     if: github.repository == 'pyxem/pyxem'
     permissions:
       contents: read
@@ -52,9 +53,8 @@ jobs:
   Deploy:
     needs: [Build, Redirect-stable]
     permissions:
-      contents: write
-      pull-requests: write
-      actions: write
+      contents: write # to be able to push to gh-pages
+      pull-requests: write # to be able to post PR comments with the preview link
     runs-on: ubuntu-latest
     steps:
       - name: Write deploy info to file
@@ -70,7 +70,7 @@ jobs:
           }
           EOF
 
-      - name: Upload deploy info artifact
+      - name: Upload deploy info artifact # For the follow up deploy job
         uses: actions/upload-artifact@v4
         with:
           name: deploy-info
