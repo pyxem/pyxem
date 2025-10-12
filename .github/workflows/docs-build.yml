@@ -20,7 +20,6 @@ jobs:
       CACHE_POOCH: 'pyxem' # cache pooch downloads for pyxem data
 
   Redirect-stable:
-    # build a redirect index.html to the stable version on tag builds
     if: github.repository == 'pyxem/pyxem'
     permissions:
       contents: read
@@ -44,7 +43,6 @@ jobs:
             </body>
           </html>
           EOF
-
       - uses: actions/upload-artifact@v4
         if: github.ref_type == 'tag'
         with:
@@ -54,20 +52,26 @@ jobs:
   Deploy:
     needs: [Build, Redirect-stable]
     permissions:
-      contents: write # to be able to push to gh-pages
-      pull-requests: write # to be able to post PR comments with the preview link
-      actions: write # to be able to create workflow dispatch event
+      contents: write
+      pull-requests: write
+      actions: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - name: Write deploy info to file
+        run: |
+          mkdir -p deploy_info
+          cat <<EOF > deploy_info/info.json
+          {
+            "workflow_run_id": "${{ github.run_id }}",
+            "pr_number": "${{ github.event.pull_request.number || '' }}",
+            "ref_type": "${{ github.ref_type }}",
+            "ref_name": "${{ github.ref_name }}",
+            "pull_request_action": "${{ github.event.action || '' }}"
+          }
+          EOF
+
+      - name: Upload deploy info artifact
+        uses: actions/upload-artifact@v4
         with:
-          fetch-depth: 0
-      - run: |
-          gh workflow run docs-deploy.yml \
-            -f workflow_run_id=${{ github.run_id }} \
-            -f pr_number=${{ github.event.pull_request.number }} \
-            -f ref_type=${{ github.ref_type }} \
-            -f ref_name=${{ github.ref_name }} \
-            -f pull_request_action=${{ github.event.action }}
-        env:
-          GH_TOKEN: ${{ github.token }}
+          name: deploy-info
+          path: deploy_info/info.json
