@@ -21,13 +21,12 @@ jobs:
 
   Redirect-stable:
     # build a redirect index.html to the stable version on tag builds
-    if: github.repository == 'pyxem/pyxem'
+    if: github.ref_type == 'tag' 
     permissions:
       contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Build index redirect
-        if: github.ref_type == 'tag' 
         env:
           VERSION: ${{ github.ref_name }}
         run: |
@@ -51,10 +50,6 @@ jobs:
           name: redirect
 
   Deploy:
-    needs: [Build, Redirect-stable]
-    permissions:
-      contents: write # to be able to push to gh-pages
-      pull-requests: write # to be able to post PR comments with the preview link
     runs-on: ubuntu-latest
     steps:
       - name: Write deploy info to file
