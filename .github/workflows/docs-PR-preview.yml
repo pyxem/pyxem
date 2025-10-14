@@ -1,4 +1,4 @@
-name: Docs deploy
+name: Docs PR-preview
 
 on:
   workflow_run:
@@ -31,10 +31,9 @@ jobs:
           echo "Parsing deploy_info/info.json:"
           cat deploy_info/info.json
           echo "workflow_run_id=$(jq -r '.workflow_run_id' deploy_info/info.json)" >> $GITHUB_OUTPUT # to get the run id of the workflow that built the docs
-          echo "ref_type=$(jq -r '.ref_type' deploy_info/info.json)" >> $GITHUB_OUTPUT # to check if tag or branch
-          echo "ref_name=$(jq -r '.ref_name' deploy_info/info.json)" >> $GITHUB_OUTPUT # to get the tag or branch name
           echo "pr_number=$(jq -r '.pr_number' deploy_info/info.json)" >> $GITHUB_OUTPUT # empty if not a PR
           echo "pull_request_action=$(jq -r '.pull_request_action' deploy_info/info.json)" >> $GITHUB_OUTPUT # 'The pull request event action that triggered the workflow building the docs (e.g. opened, closed, synchronize)'
+      
       # need to specify the run id to get the artifact from the correct workflow run
       # and set the github-token to access the actions scope
       # https://github.com/actions/download-artifact?tab=readme-ov-file#download-artifacts-from-other-workflow-runs-or-repositories
@@ -48,15 +47,6 @@ jobs:
 
       - name: Print doc files
         run: ls -l ${{ env.html_folder }}
-
-      - name: Deploy dev docs
-        # run on main branch only
-        if: ${{ steps.info.outputs.ref_name == 'main' }}
-        uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ${{ env.html_folder }}
-          destination_dir: dev
 
       - name: Deploy PR preview
        # run on pull request only
@@ -85,7 +75,7 @@ jobs:
           message: |
             **PR Preview**
             :---:
-            :rocket: View PR Preview at https://cssfrancis.github.io/pyxem-docs-staging/pr-preview/pr-${{ steps.info.outputs.pr_number }}.
+            :rocket: View PR Preview at https://cssfrancis.github.io/pyxem-docs-staging/pr-preview/${{ steps.info.outputs.pr_number }}.
             If you see a 404 error, please wait a few seconds for the deployment to complete and refresh the page.
             ${{ steps.timestamp.outputs.utc }}
 
@@ -113,35 +103,3 @@ jobs:
             :---:
             Preview removed because the pull request was closed.
             ${{ steps.timestamp.outputs.utc }}
-
-      - name: Deploy versioned docs
-        if: ${{ steps.info.outputs.ref_type == 'tag' }}
-        uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ${{ env.html_folder }}
-          destination_dir: ${{ steps.info.outputs.ref_name }}
-
-      - name: Download redirect files
-        # run on tag only
-        if: ${{ steps.info.outputs.ref_type == 'tag' }}
-        uses: actions/download-artifact@v5
-        with:
-          name: redirect
-          path: redirect
-          # need to specify the run id to get the artifact from the correct workflow run
-          # and set the github-token to access the actions scope
-          # https://github.com/actions/download-artifact?tab=readme-ov-file#download-artifacts-from-other-workflow-runs-or-repositories
-          run-id: ${{ steps.info.outputs.workflow_run_id }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Deploy redirect to versioned docs
-        # run on tag only
-        if: ${{ steps.info.outputs.ref_type == 'tag' }}
-        uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: redirect
-          destination_dir: . # deploy the redirect to the root folder
-          keep_files: true
-
