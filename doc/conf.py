@@ -56,7 +56,6 @@ extensions = [
     "sphinx_codeautolink",
     "sphinx_gallery.gen_gallery",
     "sphinx_copybutton",
-    "nbsphinx",
 ]
 
 # Create links to references within pyxem's documentation to these packages.
