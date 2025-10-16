@@ -9,7 +9,7 @@ permissions:
   pull-requests: write
 
 env:
-  html_folder: ./doc/_build/html
+  html_folder: ./empty
 
 jobs:
   cleanup:
@@ -19,7 +19,8 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Create empty deploy folder
-        run: mkdir -p empty
+        run: |
+          mkdir -p ${{ env.html_folder }}
 
       - name: Deploy PR preview
         # run on pull request only

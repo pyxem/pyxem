@@ -2,7 +2,9 @@ name: Docs build
 
 on:
   pull_request:
-    types: [opened, closed, synchronize]
+    # on closed, the docs-PR-preview-cleanup.yml workflow will remove the preview
+    # and update the sticky comment accordingly
+    types: [opened, synchronize]
   push:
   workflow_dispatch:
 
@@ -52,7 +54,6 @@ jobs:
           {
             "workflow_run_id": "${{ github.run_id }}",
             "pr_number": "${{ github.event.pull_request.number }}",
-            "pull_request_action": "${{ github.event.action }}"
           }
           EOF
 
