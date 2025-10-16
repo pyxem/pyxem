@@ -23,7 +23,10 @@ jobs:
 
   Push-dev:
     needs: [Build]
-    if: github.event_name != 'pull_request' && github.ref_name == 'main'
+    if: >
+      github.repository_owner == 'pyxem' && 
+      github.event_name != 'pull_request' && 
+      github.ref_name == 'main'
     permissions:
       # needs write permission to push the docs to gh-pages
       contents: write
@@ -33,7 +36,10 @@ jobs:
 
   Push-tag:
     needs: [Build]
-    if: github.event_name != 'pull_request' && github.ref_type == 'tag'
+    if: >
+      github.repository_owner == 'pyxem' &&
+      github.event_name != 'pull_request' &&
+      github.ref_type == 'tag'
     permissions:
       # needs write permission to push the docs to gh-pages
       contents: write
@@ -44,7 +50,9 @@ jobs:
       redirect_to_version: ${{ github.ref_name }}
 
   Upload-PR_preview:
-    if: github.event_name == 'pull_request'
+    if: >
+      github.repository_owner == 'pyxem' && 
+      github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Write deploy info to file
