@@ -46,8 +46,9 @@ jobs:
     uses: hyperspy/.github/.github/workflows/push_doc.yml@main
     with:
       output_path: ${{ github.ref_name }}
-      # Add a redirect index.html in the root folder pointing to the tag version
-      redirect_to_version: ${{ github.ref_name }}
+      create_redirect: true
+      create_stable_copy: true
+      persistent_name: stable
 
   Upload-PR_preview:
     if: >
