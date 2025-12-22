@@ -44,7 +44,6 @@ def mock_simulation():
     return mock_sim
 
 
-@skip_cupy
 @pytest.fixture()
 def mock_simulation_gpu():
     mock_sim = Mock()
