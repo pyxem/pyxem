@@ -31,7 +31,7 @@ from pyxem.utils.polar_transform_utils import (
 from pyxem.utils.diffraction import find_beam_center_blur
 import pyxem.utils._beam_shift_tools as bst
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
-from scipy.ndimage import gaussian_filter
+import scipy
 
 __all__ = [
     "plot_template_over_pattern",
@@ -294,7 +294,7 @@ def make_color_wheel_marker(rotation=None, offsets=None, scale=0.2, only_phase=F
         np.ma.masked_where((2.0 < r) | (r < 1.05), r) - 1.0
     ).mask  # slightly larger...
     alpha = np.invert(mask).astype(np.float32)
-    alpha = gaussian_filter(alpha, sigma=1.5)  # Smooth the alpha channel
+    alpha = scipy.ndimage.gaussian_filter(alpha, sigma=1.5)  # Smooth the alpha channel
     rgb_array = np.dstack((rgb_array, alpha))  # Create RGBA array
 
     coords = np.stack([x, y], axis=-1)

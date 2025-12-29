@@ -20,19 +20,7 @@
 
 import numpy as np
 from pyxem.utils.diffraction import find_beam_center_blur
-from scipy import ndimage
-from pyxem.utils.cuda_utils import get_array_module
-
-
-try:
-    import cupy as cp
-    import cupyx.scipy.ndimage as ndigpu
-
-    CUPY_INSTALLED = True
-except ImportError:
-    CUPY_INSTALLED = False
-    cp = None
-    ndigpu = None
+import scipy
 
 
 """ These are designed to be fast and used for indexation, for data correction, see radial_utils"""
@@ -223,7 +211,12 @@ def get_polar_pattern_shape(image_shape, delta_r, delta_theta, max_r=None):
 
 
 def _get_map_function(dispatcher):
-    return ndimage.map_coordinates if dispatcher == np else ndigpu.map_coordinates
+    if dispatcher == np:
+        return scipy.ndimage.map_coordinates
+    else:
+        import cupyx.scipy.ndimage as ndigpu
+
+        return ndigpu.map_coordinates
 
 
 def _warp_polar_custom(
@@ -262,6 +255,8 @@ def _warp_polar_custom(
     was achieved: from 180 ms to 400 microseconds. However, this does not
     count the time to transfer data from the CPU to the GPU and back.
     """
+    from pyxem.utils.cuda_utils import get_array_module
+
     dispatcher = get_array_module(image)
     cy, cx = center
     H = output_shape[0]
@@ -367,6 +362,8 @@ def _chunk_to_polar(
         diffraction patterns in polar coordinates. Returns a cuda or numpy array depending
         on the device
     """
+    from pyxem.utils.cuda_utils import get_array_module
+
     dispatcher = get_array_module(images)
     polar_chunk = dispatcher.empty(
         (images.shape[0], images.shape[1], output_shape[0], output_shape[1]),

@@ -51,12 +51,9 @@ __status__ = release_info.status
 def __getattr__(name):
     if name in __all__:  # pragma: no cover
         if name == "CUPY_INSTALLED":
-            try:
-                import cupy as cp
+            cupy_specs = importlib.util.find_spec("cupy")
+            CUPY_INSTALLED = True if cupy_specs is not None else False
 
-                CUPY_INSTALLED = True
-            except ImportError:
-                CUPY_INSTALLED = False
             return CUPY_INSTALLED
         # We can't get this block covered in the test suite because it is
         # already imported, when running the test suite.

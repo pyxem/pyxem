@@ -22,33 +22,16 @@ patterns.
 """
 
 import numpy as np
-import scipy.ndimage as ndi
-import pyxem as pxm  # for ElectronDiffraction2D
+import scipy
 
-from scipy.interpolate import interp1d
-from scipy.signal import fftconvolve
-from skimage import transform as tf
-from skimage.feature import match_template
-from skimage import morphology, filters
-from skimage.draw import ellipse_perimeter
-from skimage.registration import phase_cross_correlation
+import skimage
 from tqdm import tqdm
-from packaging.version import Version
-from hyperspy.misc.utils import isiterable
 
-from pyxem.utils.cuda_utils import is_cupy_array
+from pyxem import signals
+from pyxem.utils import cuda_utils
 from pyxem.utils._deprecated import deprecated
 import pyxem.utils._pixelated_stem_tools as pst
 
-try:
-    import cupy as cp
-    import cupyx.scipy.ndimage as ndigpu
-
-    CUPY_INSTALLED = True
-except ImportError:
-    CUPY_INSTALLED = False
-    cp = None
-    ndigpu = None
 
 new_float_type = {
     # preserved types
@@ -195,11 +178,11 @@ def convert_affine_to_transform(D, shape):
     shift_x = (shape[1] - 1) / 2
     shift_y = (shape[0] - 1) / 2
 
-    tf_shift = tf.SimilarityTransform(translation=[-shift_x, -shift_y])
-    tf_shift_inv = tf.SimilarityTransform(translation=[shift_x, shift_y])
+    tf_shift = skimage.transform.SimilarityTransform(translation=[-shift_x, -shift_y])
+    tf_shift_inv = skimage.transform.SimilarityTransform(translation=[shift_x, shift_y])
 
     # This defines the transform you want to perform
-    distortion = tf.AffineTransform(matrix=D)
+    distortion = skimage.transform.AffineTransform(matrix=D)
 
     # skimage transforms can be added like this, does matrix multiplication,
     # hence the need for the brackets. (Note tf.warp takes the inverse)
@@ -241,9 +224,9 @@ def apply_transformation(z, transformation, keep_dtype, order=1, *args, **kwargs
     """
 
     if keep_dtype is False:
-        trans = tf.warp(z, transformation, order=order, *args, **kwargs)
+        trans = skimage.transform.warp(z, transformation, order=order, *args, **kwargs)
     if keep_dtype is True:
-        trans = tf.warp(
+        trans = skimage.transform.warp(
             z, transformation, order=order, preserve_range=True, *args, **kwargs
         )
         trans = trans.astype(z.dtype)
@@ -266,7 +249,7 @@ def regional_filter(z, h):
     seed = np.copy(z)
     seed = z - h
     mask = z
-    dilated = morphology.reconstruction(seed, mask, method="dilation")
+    dilated = skimage.morphology.reconstruction(seed, mask, method="dilation")
 
     return z - dilated
 
@@ -319,7 +302,9 @@ def reference_circle(coords, dimX, dimY, radius):
     img = np.zeros((dimX, dimY))
 
     for n in range(np.size(coords, 0)):
-        rr, cc = ellipse_perimeter(coords[n, 0], coords[n, 1], radius, radius)
+        rr, cc = skimage.draw.ellipse_perimeter(
+            coords[n, 0], coords[n, 1], radius, radius
+        )
         img[rr, cc] = 1
 
     return img
@@ -349,7 +334,7 @@ def _find_peak_max(arr, sigma, upsample_factor=1.0, kind="nearest"):
     center: float
         Pixel position of the maximum
     """
-    y1 = ndi.gaussian_filter1d(arr, sigma)
+    y1 = scipy.ndimage.gaussian_filter1d(arr, sigma)
     c1 = np.argmax(y1)  # initial guess for beam center
 
     m = upsample_factor
@@ -358,7 +343,7 @@ def _find_peak_max(arr, sigma, upsample_factor=1.0, kind="nearest"):
 
     try:
         r1 = np.linspace(c1 - window, c1 + window, win_len)
-        f = interp1d(r1, y1[c1 - window : c1 + window + 1], kind=kind)
+        f = scipy.interpolate.interp1d(r1, y1[c1 - window : c1 + window + 1], kind=kind)
         r2 = np.linspace(
             c1 - window, c1 + window, win_len * m
         )  # extrapolate for subpixel accuracy
@@ -431,13 +416,16 @@ def find_beam_center_blur(z, sigma, upsample_factor=1.0, order=1, **kwargs):
     center : numpy.ndarray
         numpy.ndarray [x, y] containing indices of estimated direct beam positon.
     """
-    if is_cupy_array(z):  # pragma: no cover
+    if cuda_utils.is_cupy_array(z):  # pragma: no cover
+        import cupy as cp
+        import cupyx.scipy.ndimage as ndigpu
+
         gaus = ndigpu.gaussian_filter
         zoom_ = ndigpu.zoom
         dispatcher = cp
     else:
-        gaus = ndi.gaussian_filter
-        zoom_ = ndi.zoom
+        gaus = scipy.ndimage.gaussian_filter
+        zoom_ = scipy.ndimage.zoom
         dispatcher = np
     blurred = gaus(z, sigma, mode="constant")
     if upsample_factor > 1.0:
@@ -498,7 +486,7 @@ def center_of_mass_from_image(z, mask=None, threshold=None):
         z = z * mask
     if threshold is not None:
         z[z < (np.mean(z) * threshold)] = 0
-    center = np.array(ndi.center_of_mass(z))[::-1]
+    center = np.array(scipy.ndimage.center_of_mass(z))[::-1]
     return center
 
 
@@ -541,7 +529,7 @@ def find_beam_offset_cross_correlation(z, radius_start, radius_finish, **kwargs)
         hann2d = np.sqrt(np.outer(h0, h1))
         ref = hann2d * ref
         im = hann2d * z
-        shift, error, diffphase = phase_cross_correlation(
+        shift, error, diffphase = skimage.registration.phase_cross_correlation(
             ref, im, upsample_factor=10, **kwargs
         )
         errRecord[ind] = error
@@ -555,7 +543,7 @@ def find_beam_offset_cross_correlation(z, radius_start, radius_finish, **kwargs)
     hann2d = np.sqrt(np.outer(h0, h1))
     ref = hann2d * ref
     im = hann2d * z
-    shift, error, diffphase = phase_cross_correlation(
+    shift, error, diffphase = skimage.registration.phase_cross_correlation(
         ref, im, upsample_factor=100, **kwargs
     )
 
@@ -626,7 +614,7 @@ def investigate_dog_background_removal_interactive(
                 max_sigma=std_dev_max,
                 show_progressbar=False,
             )
-    dp_gaussian = pxm.signals.ElectronDiffraction2D(gauss_processed)
+    dp_gaussian = signals.ElectronDiffraction2D(gauss_processed)
     dp_gaussian.metadata.General.title = "Gaussian preprocessed"
     dp_gaussian.axes_manager.navigation_axes[0].name = r"$\sigma_{\mathrm{min}}$"
     dp_gaussian.axes_manager.navigation_axes[1].name = r"$\sigma_{\mathrm{max}}$"
@@ -664,7 +652,7 @@ def find_hot_pixels(z, threshold_multiplier=500, mask=None):
     """
     # find the gradient of the image.
     footprint = [[1, 1, 1], [1, 0, 1], [1, 1, 1]]
-    median = ndi.median_filter(z, footprint=footprint)
+    median = scipy.ndimage.median_filter(z, footprint=footprint)
     hot_pixels = (z - median) > threshold_multiplier
     if mask is not None:
         hot_pixels[mask] = False
@@ -724,7 +712,9 @@ def normalize_template_match(z, template, subtract_min=True, pad_input=True, **k
     if kwargs.pop("circular_background", False):
         template_match = match_template_dilate(z, template, **kwargs)
     else:
-        template_match = match_template(z, template, pad_input=pad_input, **kwargs)
+        template_match = skimage.feature.match_template(
+            z, template, pad_input=pad_input, **kwargs
+        )
     if subtract_min:
         template_match = template_match - np.min(template_match)
     return template_match
@@ -811,15 +801,15 @@ def match_template_dilate(
     else:
         image = np.pad(image, pad_width=pad_width, mode=mode)
 
-    dilated_template = morphology.dilation(
-        template, footprint=morphology.disk(template_dilation)
+    dilated_template = skimage.morphology.dilation(
+        template, footprint=skimage.morphology.disk(template_dilation)
     )
     # Use special case for 2-D images for much better performance in
     # computation of integral images
-    image_window_sum = fftconvolve(image, dilated_template[::-1, ::-1], mode="valid")[
-        1:-1, 1:-1
-    ]
-    image_window_sum2 = fftconvolve(
+    image_window_sum = scipy.signal.fftconvolve(
+        image, dilated_template[::-1, ::-1], mode="valid"
+    )[1:-1, 1:-1]
+    image_window_sum2 = scipy.signal.fftconvolve(
         image**2, dilated_template[::-1, ::-1], mode="valid"
     )[1:-1, 1:-1]
 
@@ -829,7 +819,9 @@ def match_template_dilate(
     template_volume = np.sum(dilated_template)
     template_ssd = np.sum((template - template_mean) ** 2)
 
-    xcorr = fftconvolve(image, template[::-1, ::-1], mode="valid")[1:-1, 1:-1]
+    xcorr = scipy.signal.fftconvolve(image, template[::-1, ::-1], mode="valid")[
+        1:-1, 1:-1
+    ]
     numerator = xcorr - image_window_sum * template_mean
 
     denominator = image_window_sum2
