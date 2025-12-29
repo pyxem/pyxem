@@ -25,7 +25,12 @@ import hyperspy.api as hs
 
 from traits.trait_base import Undefined
 from pyxem import CUPY_INSTALLED
-from hyperspy.misc.utils import _get_block_pattern, add_scalar_axis
+
+try:
+    from hyperspy.misc.dask_utils import _get_block_pattern
+except ImportError:
+    from hyperspy.misc.utils import _get_block_pattern
+from hyperspy.misc.utils import add_scalar_axis
 from tlz import concat
 
 if CUPY_INSTALLED:

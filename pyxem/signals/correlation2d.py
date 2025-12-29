@@ -20,8 +20,7 @@
 from fractions import Fraction as frac
 import numpy as np
 
-from hyperspy.signals import Signal2D
-from hyperspy._signals.lazy import LazySignal
+from hyperspy.signals import Signal2D, LazySignal
 
 from pyxem.utils._correlations import (
     _get_interpolation_matrix,
