@@ -17,24 +17,20 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import numpy as np
-import dask.array as da
 
-from hyperspy.api import interactive
-from hyperspy.misc.utils import isiterable
+from hyperspy.misc import utils as hs_utils
 import hyperspy.api as hs
 
 from traits.trait_base import Undefined
 from pyxem import CUPY_INSTALLED
 
 try:
-    from hyperspy.misc.dask_utils import _get_block_pattern
+    import hyperspy.misc.dask_utils as hs_dask_utils
 except ImportError:
-    from hyperspy.misc.utils import _get_block_pattern
+    import hyperspy.misc.utils as hs_dask_utils
 from hyperspy.misc.utils import add_scalar_axis
 from tlz import concat
 
-if CUPY_INSTALLED:
-    import cupy as cp
 from pyxem.utils.virtual_images_utils import normalize_virtual_images
 
 
@@ -59,6 +55,9 @@ class CommonDiffraction:
                 "The cupy package is required to use this method. "
                 "Please install it using `conda install cupy`."
             )
+
+        import cupy as cp
+
         if not self._gpu:
             if self._lazy:
                 self.data = self.data.map_blocks(
@@ -79,7 +78,10 @@ class CommonDiffraction:
                 "The cupy package is required to use this method. "
                 "Please install it using `conda install cupy`."
             )
+        import cupy as cp
+
         if self._gpu:
+
             if self._lazy:
                 self.data = self.data.map_blocks(cp.asnumpy)
             else:
@@ -90,6 +92,8 @@ class CommonDiffraction:
         if not CUPY_INSTALLED:
             return False
         else:
+            import cupy as cp
+
             if self._lazy:
                 return isinstance(self.data._meta, cp.ndarray)
             else:
@@ -180,7 +184,7 @@ class CommonDiffraction:
         out.metadata.General.title = "Integrated intensity"
 
         # Create the interactive signal
-        interactive(
+        hs.interactive(
             sliced_signal.nansum,
             axis=sliced_signal.axes_manager.signal_axes,
             event=roi.events.changed,
@@ -204,7 +208,7 @@ class CommonDiffraction:
         normalize : bool, optional
             If True, the virtual images are normalized to the maximum value.
         """
-        if not isiterable(rois):
+        if not hs_utils.isiterable(rois):
             rois = [
                 rois,
             ]
@@ -358,6 +362,8 @@ class CommonDiffraction:
         Diffraction2D
             The signal with the function applied to each block.
         """
+        import dask.array as da
+
         if dtype is None:
             dtype = self.data.dtype
         if signal_shape is None:
@@ -371,8 +377,8 @@ class CommonDiffraction:
         if meta is None:
             meta = old_sig.data._meta
 
-        arg_pairs, adjust_chunks, new_axis, output_pattern = _get_block_pattern(
-            (old_sig.data,), new_shape
+        arg_pairs, adjust_chunks, new_axis, output_pattern = (
+            hs_dask_utils._get_block_pattern((old_sig.data,), new_shape)
         )
         axes_changed = len(new_axis) != 0 or len(adjust_chunks) != 0
 
