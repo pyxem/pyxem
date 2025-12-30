@@ -23,8 +23,7 @@ from copy import deepcopy
 import math
 
 import numpy as np
-from scipy.spatial.distance import cdist
-from scipy.spatial import ConvexHull
+import scipy
 from transforms3d.axangles import axangle2mat
 
 __all__ = [
@@ -377,7 +376,7 @@ def filter_vectors_near_basis(vectors, basis, columns=[0, 1], distance=None):
         new_vectors = np.empty(end_shape)
         new_vectors[:, :] = np.nan
         return new_vectors
-    distance_mat = cdist(new_vectors, basis)
+    distance_mat = scipy.spatial.distance.cdist(new_vectors, basis)
     closest_index = np.argmin(distance_mat, axis=0)
     min_distance = distance_mat[closest_index, np.arange(len(basis), dtype=int)]
     closest_vectors = vectors[closest_index]
@@ -819,7 +818,7 @@ def points_to_poly_collection(points, hull_index=(0, 1)):
         means that the first two columns of the points are used to create the polygon.
     """
     try:
-        hull = ConvexHull(points[:, hull_index][:, ::-1])
+        hull = scipy.spatial.ConvexHull(points[:, hull_index][:, ::-1])
     except:
         return np.array([[0, 0], [0, 0], [0, 0]])
     return hull.points[hull.vertices]

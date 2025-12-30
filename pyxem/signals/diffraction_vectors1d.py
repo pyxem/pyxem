@@ -15,9 +15,11 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+
+import hyperspy.api as hs
 from hyperspy.signals import Signal1D
+
 from pyxem.signals import DiffractionVectors
-from hyperspy.utils.plot import plot_images
 
 
 class DiffractionVectors1D(DiffractionVectors, Signal1D):
@@ -69,7 +71,7 @@ class DiffractionVectors1D(DiffractionVectors, Signal1D):
 
         if "suptitle" not in kwargs:
             kwargs["label"] = [c if c is not None else "" for c in self.column_names]
-        axes_list = plot_images(
+        axes_list = hs.plot.plot_images(
             vectors,
             tight_layout=tight_layout,
             **kwargs,

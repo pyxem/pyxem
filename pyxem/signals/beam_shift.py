@@ -18,8 +18,8 @@
 
 
 import numpy as np
-from scipy.ndimage import rotate
-from hyperspy._signals.lazy import LazySignal
+import scipy
+from hyperspy.signals import LazySignal
 from hyperspy.axes import UniformDataAxis
 import hyperspy.api as hs
 
@@ -757,7 +757,7 @@ class BeamShift(DiffractionVectors1D):
         """
         s_temp = self.T
         s_temp2 = s_temp.map(
-            rotate,
+            scipy.ndimage.rotate,
             show_progressbar=False,
             inplace=False,
             reshape=reshape,

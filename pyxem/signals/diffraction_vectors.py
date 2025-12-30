@@ -20,14 +20,10 @@ from functools import cached_property, partial
 from warnings import warn
 
 import numpy as np
-import matplotlib
-import matplotlib.pyplot as plt
-from scipy.spatial import distance_matrix
-import dask.array as da
+import scipy
 
-from hyperspy.signals import BaseSignal, Signal1D
-from hyperspy._signals.lazy import LazySignal
-from hyperspy.drawing._markers.points import Points
+import hyperspy.api as hs
+from hyperspy.signals import BaseSignal, Signal1D, LazySignal
 from hyperspy.misc.utils import isiterable
 
 from pyxem.utils._signals import (
@@ -43,16 +39,7 @@ from pyxem.utils.vectors import (
     cluster,
     vectors_to_polar,
 )
-
 from pyxem.utils._slicers import Slicer
-
-from pyxem.utils._subpixel_finding import (
-    _conventional_xc_map,
-    _center_of_mass_map,
-    _get_simulated_disc,
-    _wrap_columns,
-)
-
 from pyxem.utils._deprecated import deprecated
 
 """
@@ -320,6 +307,13 @@ class DiffractionVectors(BaseSignal):
         refined_vectors : DiffractionVectors
             The refined vectors.
         """
+        from pyxem.utils._subpixel_finding import (
+            _conventional_xc_map,
+            _center_of_mass_map,
+            _get_simulated_disc,
+            _wrap_columns,
+        )
+
         if columns is None:
             columns = [0, 1]
         method_dict = {
@@ -431,6 +425,8 @@ class DiffractionVectors(BaseSignal):
     @cached_property
     def num_columns(self):
         if self._is_object_dtype:
+            import dask.array as da
+
             if isinstance(self.data, da.Array):
                 shape = self.data[self.data.ndim * (0,)].compute().shape
             else:
@@ -838,6 +834,9 @@ class DiffractionVectors(BaseSignal):
             The plot as a matplotlib figure.
 
         """
+        import matplotlib
+        import matplotlib.pyplot as plt
+
         fig = plt.figure()
         ax = fig.add_subplot(111)
         offset, scale = 0.0, 1.0
@@ -881,7 +880,7 @@ class DiffractionVectors(BaseSignal):
                 # Find the labels of each of the peaks to plot by referring back
                 # to the list of labels for the original vectors.
                 for n, peak in zip(np.arange(peaks_all_len), peaks):
-                    index = distance_matrix([peak.data], cores).argmin()
+                    index = scipy.spatial.distance_matrix([peak.data], cores).argmin()
                     peaks_to_plot[n] = cores[index]
                     labels_to_plot[n] = labs[index]
                 # Assign a color value to each label, and shuffle these so that
@@ -922,7 +921,7 @@ class DiffractionVectors(BaseSignal):
             ragged=True,
             silence_warnings=True,
         )
-        return Points(offsets=new.data.T, **kwargs)
+        return hs.plot.markers.Points(offsets=new.data.T, **kwargs)
 
     @deprecated(
         since="0.17.0",

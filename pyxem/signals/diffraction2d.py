@@ -16,21 +16,18 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 from copy import deepcopy
+from importlib import import_module
 
 import numpy as np
-import scipy.ndimage as ndi
-from skimage import morphology
-import dask.array as da
-from dask.diagnostics import ProgressBar
-from tqdm import tqdm
+import scipy
+import skimage
+
 from traits.api import Undefined
 import warnings
 
 import hyperspy.api as hs
-from hyperspy.signals import Signal2D, BaseSignal
-from hyperspy._signals.lazy import LazySignal
+from hyperspy.signals import Signal2D, BaseSignal, LazySignal
 from hyperspy.misc.utils import isiterable
-from importlib import import_module
 from hyperspy.axes import UniformDataAxis
 
 from pyxem.signals import (
@@ -50,22 +47,12 @@ from pyxem.utils.diffraction import (
     find_center_of_mass,
     find_hot_pixels,
 )
-from pyxem.utils._azimuthal_integrations import (
-    _slice_radial_integrate,
-    _slice_radial_integrate1d,
-)
-from pyxem.utils._dask import (
-    _get_dask_array,
-    _get_signal_dimension_host_chunk_slice,
-    _align_single_frame,
-)
 from pyxem.utils._signals import (
     _select_method_from_method_dict,
     _to_hyperspy_index,
 )
 import pyxem.utils._pixelated_stem_tools as pst
 import pyxem.utils._dask as dt
-import pyxem.utils.ransac_ellipse_tools as ret
 from pyxem.utils._deprecated import deprecated, deprecated_argument
 
 from pyxem.utils._background_subtraction import (
@@ -74,12 +61,8 @@ from pyxem.utils._background_subtraction import (
     _subtract_hdome,
     _subtract_radial_median,
 )
-from pyxem.utils.calibration import Calibration
 
 from pyxem import CUPY_INSTALLED
-
-if CUPY_INSTALLED:
-    import cupy as cp
 
 
 class Diffraction2D(CommonDiffraction, Signal2D):
@@ -109,6 +92,8 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         **kwargs :
             Passed to the __init__ of Signal2D
         """
+        from pyxem.utils.calibration import Calibration
+
         super().__init__(*args, **kwargs)
         self.calibration = Calibration(self)
         # setting some sensible defaults for the axes
@@ -278,7 +263,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         kwargs["order"] = order
 
         s_shift = self.map(
-            _align_single_frame,
+            dt._align_single_frame,
             shifts=shifts,
             inplace=inplace,
             lazy_output=lazy_output,
@@ -313,7 +298,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         """
         s_rotated = self.map(
-            ndi.rotate,
+            scipy.ndimage.rotate,
             ragged=False,
             angle=-angle,
             reshape=False,
@@ -829,7 +814,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
                 gaussian_function = gaussian_filter
             else:
-                gaussian_function = ndi.gaussian_filter
+                gaussian_function = scipy.ndimage.gaussian_filter
 
             signal.filter(
                 gaussian_function, sigma=prefilter_sigma, inplace=True, mode="nearest"
@@ -1012,7 +997,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         align_kwargs.setdefault("order", 1 if subpixel else 0)
         aligned = self.map(
-            _align_single_frame,
+            dt._align_single_frame,
             shifts=shifts,
             inplace=inplace,
             lazy_output=lazy_output,
@@ -1128,7 +1113,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         pyxem.utils.diffraction.normalize_template_match
 
         """
-        disk = morphology.disk(disk_r, self.data.dtype)
+        disk = skimage.morphology.disk(disk_r, self.data.dtype)
         return self.map(
             normalize_template_match, template=disk, inplace=inplace, **kwargs
         )
@@ -1182,8 +1167,8 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         edge = r_outer - r_inner
         edge_slice = np.s_[edge:-edge, edge:-edge]
 
-        ring_inner = morphology.disk(r_inner, dtype=bool)
-        ring = morphology.disk(r_outer, dtype=bool)
+        ring_inner = skimage.morphology.disk(r_inner, dtype=bool)
+        ring = skimage.morphology.disk(r_outer, dtype=bool)
         ring[edge_slice] = ring[edge_slice] ^ ring_inner
         return self.map(
             normalize_template_match, template=ring, inplace=inplace, **kwargs
@@ -1409,11 +1394,13 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         >>> s.plot()
 
         """
+        import dask.array as da
+
         if square_size % 2 != 0:  # If odd number, raise error
             raise ValueError(
                 "square_size must be even number, not {0}".format(square_size)
             )
-        dask_array = _get_dask_array(self)
+        dask_array = dt._get_dask_array(self)
 
         chunks_peak = dask_array.chunks[:-2]
         if hasattr(peak_array, "chunks"):
@@ -1427,6 +1414,8 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         if not lazy_result:
             if show_progressbar:
+                from dask.diagnostics import ProgressBar
+
                 pbar = ProgressBar()
                 pbar.register()
             output_array = output_array.compute()
@@ -1468,7 +1457,9 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         >>> intensity_array_computed = intensity_array.compute()
 
         """
-        dask_array = _get_dask_array(self)
+        import dask.array as da
+
+        dask_array = dt._get_dask_array(self)
 
         chunks_peak = dask_array.chunks[:-2]
         if hasattr(peak_array, "chunks"):
@@ -1480,6 +1471,8 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         if not lazy_result:
             if show_progressbar:
+                from dask.diagnostics import ProgressBar
+
                 pbar = ProgressBar()
                 pbar.register()
             output_array = output_array.compute()
@@ -1500,7 +1493,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             x = round(self.axes_manager.signal_shape[0] / 2)
             y = round(self.axes_manager.signal_shape[1] / 2)
             if self._lazy:
-                isig_slice = _get_signal_dimension_host_chunk_slice(
+                isig_slice = dt._get_signal_dimension_host_chunk_slice(
                     x, y, self.data.chunks
                 )
             else:
@@ -1667,10 +1660,12 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
 
         """
+        from pyxem.utils.ransac_ellipse_tools import ellipse_to_markers
+
         if len(self.data.shape) != 4:
             raise ValueError("Signal must be 4 dims to use this function")
 
-        markers = ret.ellipse_to_markers(
+        markers = ellipse_to_markers(
             ellipse_array, inlier=inlier_array, points=peak_array
         )
 
@@ -1906,6 +1901,10 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         --------
         pyxem.signals.Diffraction2D.get_azimuthal_integral2d
         """
+        from pyxem.utils._azimuthal_integrations import (
+            _slice_radial_integrate1d,
+        )
+
         # get_slices1d should be sped up in the future by
         # getting rid of shapely and using numba on the for loop
         indexes, facts, factor_slices, radial_range = self.calibration.get_slices1d(
@@ -2030,6 +2029,8 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             azimuthal_range=azimuth_range,
         )
         if self._gpu and CUPY_INSTALLED:  # pragma: no cover
+            import cupy as cp
+
             from pyxem.utils._azimuthal_integrations import (
                 _slice_radial_integrate_cupy,
             )
@@ -2051,6 +2052,10 @@ class Diffraction2D(CommonDiffraction, Signal2D):
                 **kwargs,
             )
         else:
+            from pyxem.utils._azimuthal_integrations import (
+                _slice_radial_integrate,
+            )
+
             if mask is None:
                 mask = self.calibration.mask
             integration = self.map(

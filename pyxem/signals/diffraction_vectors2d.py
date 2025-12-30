@@ -16,18 +16,14 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import numpy as np
 from warnings import warn
 
-from scipy.spatial import distance_matrix
-from sklearn.cluster import DBSCAN
-
-from hyperspy.signals import Signal2D
-from hyperspy._signals.lazy import LazySignal
-from hyperspy.roi import CircleROI
-from pyxem.signals.diffraction_vectors import DiffractionVectors, LazyDiffractionVectors
+import scipy
 import hyperspy.api as hs
+from hyperspy.signals import Signal2D, LazySignal
+
+from pyxem.signals import DiffractionVectors
 
 
 class DiffractionVectors2D(DiffractionVectors, Signal2D):
@@ -117,7 +113,9 @@ class DiffractionVectors2D(DiffractionVectors, Signal2D):
 
             while unique_vectors.shape[0] > 0:
                 unique_vector = unique_vectors[0]
-                distances = distance_matrix(np.array([unique_vector]), unique_vectors)
+                distances = scipy.spatial.distance_matrix(
+                    np.array([unique_vector]), unique_vectors
+                )
                 indices = np.where(distances < distance_threshold)[1]
 
                 new_count = indices.size
@@ -139,6 +137,8 @@ class DiffractionVectors2D(DiffractionVectors, Signal2D):
             unique_peaks = np.delete(unique_peaks, [0], axis=0)
 
         elif method == "DBSCAN":
+            from sklearn.cluster import DBSCAN
+
             # All peaks are clustered by DBSCAN so that peaks within
             # one cluster are separated by distance_threshold or less.
             unique_vectors, unique_vectors_counts = np.unique(
@@ -257,7 +257,7 @@ class DiffractionVectors2D(DiffractionVectors, Signal2D):
             columns = [0, 1]
 
         rois = [
-            CircleROI(vector[columns[1]], vector[columns[0]], r=radius)
+            hs.roi.CircleROI(vector[columns[1]], vector[columns[0]], r=radius)
             for vector in self.data
         ]
         if include_labels:
