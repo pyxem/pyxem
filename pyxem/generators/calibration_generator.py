@@ -19,16 +19,10 @@
 """Electron diffraction pattern calibration operations."""
 
 from math import sin, cos
-import matplotlib.pyplot as plt
 import numpy as np
 import scipy
 
 import hyperspy.api as hs
-from diffsims.utils.ring_pattern_utils import (
-    call_ring_pattern,
-    calc_radius_with_distortion,
-    generate_ring_pattern,
-)
 
 from pyxem.utils._deprecated import deprecated
 from pyxem import signals
@@ -146,6 +140,11 @@ class CalibrationGenerator:
             pyxem.utils.calibration_utils.call_ring_pattern
 
         """
+        from diffsims.utils.ring_pattern_utils import (
+            call_ring_pattern,
+            calc_radius_with_distortion,
+        )
+
         # Check that necessary calibration data is provided
         if self.diffraction_pattern is None:
             raise ValueError(
@@ -207,6 +206,7 @@ class CalibrationGenerator:
             Difference between distortion corrected data and simulated symmetric
             ring pattern.
         """
+        from diffsims.utils.ring_pattern_utils import generate_ring_pattern
 
         # Check all required parameters are defined as attributes
         if self.diffraction_pattern is None:
@@ -489,6 +489,8 @@ class CalibrationGenerator:
         **kwargs : keyword arguments
             Keyword arguments to be passed to the plot method.
         """
+        import matplotlib.pyplot as plt
+
         # Construct object containing user defined data to plot and set the
         # calibration checking that it is defined.
         if data_to_plot == "au_x_grating_dp":

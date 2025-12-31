@@ -22,15 +22,10 @@ import numpy as np
 import lmfit
 from transforms3d.euler import mat2euler, euler2mat
 
-from diffsims.utils.sim_utils import get_electron_wavelength
-
-from pyxem.signals import VectorMatchingResults
+from pyxem import signals
 from pyxem.utils import indexation
 from pyxem.utils.vectors import detector_to_fourier
-from pyxem.utils._signals import (
-    _select_method_from_method_dict,
-    _transfer_navigation_axes,
-)
+from pyxem.utils._signals import _transfer_navigation_axes
 
 
 class IndexationGenerator:
@@ -375,6 +370,7 @@ def _refine_orientation(
     result : OrientationResult
         Container for the orientation refinement results
     """
+    from diffsims.utils.sim_utils import get_electron_wavelength
 
     # prepare reciprocal_lattice
     structure = structure_library.structures[solution.phase_index]
@@ -552,7 +548,7 @@ class VectorIndexationGenerator:
         indexation = matched.isig[0]
         rhkls = matched.isig[1].data
 
-        indexation_results = VectorMatchingResults(indexation)
+        indexation_results = signals.VectorMatchingResults(indexation)
         indexation_results.vectors = vectors
         indexation_results.hkls = rhkls
         indexation_results = _transfer_navigation_axes(
@@ -688,7 +684,7 @@ class VectorIndexationGenerator:
         indexation = matched.isig[0]
         rhkls = matched.isig[1].data
 
-        indexation_results = VectorMatchingResults(indexation)
+        indexation_results = signals.VectorMatchingResults(indexation)
         indexation_results.vectors = vectors
         indexation_results.hkls = rhkls
         indexation_results = _transfer_navigation_axes(

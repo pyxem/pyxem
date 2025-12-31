@@ -20,7 +20,7 @@
 
 import numpy as np
 
-from pyxem.signals import PairDistributionFunction1D
+from pyxem import signals
 from pyxem.utils._signals import _transfer_navigation_axes
 from pyxem.utils._deprecated import deprecated
 
@@ -93,7 +93,7 @@ class PDFGenerator1D:
 
         pdf_sine = np.sin(2 * np.pi * np.matmul(s_values, r_values))
         # creates a vector of the pdf
-        rpdf = PairDistributionFunction1D(
+        rpdf = signals.PairDistributionFunction1D(
             8 * np.pi * s_scale * np.matmul(limited_red_int, pdf_sine)
         )
 

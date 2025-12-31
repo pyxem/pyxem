@@ -19,7 +19,6 @@
 """Generating DisplacementGradientMaps from diffraction vectors."""
 
 import numpy as np
-from pyxem.signals.tensor_field import DisplacementGradientMap
 
 
 def get_DisplacementGradientMap(

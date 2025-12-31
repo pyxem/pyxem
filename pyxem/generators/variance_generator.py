@@ -20,9 +20,9 @@
 
 import numpy as np
 from hyperspy.signals import Signal2D
-from hyperspy.api import stack
+import hyperspy.api as hs
 
-from pyxem.signals import DiffractionVariance2D, ImageVariance
+from pyxem import signals
 from pyxem.utils._signals import (
     _transfer_navigation_axes_to_signal_axes,
     _transfer_signal_axes,
@@ -94,11 +94,11 @@ class VarianceGenerator:
         corr_var_array[np.isinf(corr_var_array)] = 0
         corr_var_array[np.isnan(corr_var_array)] = 0
         corr_var = Signal2D(corr_var_array)
-        vardps = stack((mean_dp, meansq_dp, var_dp, corr_var))
+        vardps = hs.stack((mean_dp, meansq_dp, var_dp, corr_var))
         sig_x = vardps.data.shape[1]
         sig_y = vardps.data.shape[2]
 
-        dv = DiffractionVariance2D(vardps.data.reshape((2, 2, sig_x, sig_y)))
+        dv = signals.DiffractionVariance2D(vardps.data.reshape((2, 2, sig_x, sig_y)))
 
         dv = _transfer_signal_axes(dv, self.signal)
 
@@ -140,11 +140,11 @@ class VarianceGenerator:
         corr_var_array = normvar - (np.divide(dqe, mean_im.data))
         corr_var_array[np.invert(np.isfinite(corr_var_array))] = 0
         corr_var = Signal2D(corr_var_array)
-        varims = stack((mean_im, meansq_im, var_im, corr_var))
+        varims = hs.stack((mean_im, meansq_im, var_im, corr_var))
 
         sig_x = varims.data.shape[1]
         sig_y = varims.data.shape[2]
-        iv = ImageVariance(varims.data.reshape((2, 2, sig_x, sig_y)))
+        iv = signals.ImageVariance(varims.data.reshape((2, 2, sig_x, sig_y)))
         iv = _transfer_navigation_axes_to_signal_axes(iv, self.signal)
 
         return iv

@@ -18,20 +18,18 @@
 
 """Generating subpixel resolution on diffraction vectors."""
 
-import numpy as np
-from skimage import morphology
-from skimage.measure import label
-from scipy import ndimage as ndi
-from scipy.ndimage import center_of_mass
-
-from hyperspy.signals import BaseSignal
-
 import logging
+
+import numpy as np
+import scipy
+import skimage
+
+import hyperspy.api as hs
 
 _logger = logging.getLogger(__name__)
 
 from pyxem.generators.subpixelrefinement_generator import _get_pixel_vectors
-from pyxem.signals import DiffractionVectors
+from pyxem import signals
 
 
 def _get_intensities(z, vectors, radius=1):
@@ -54,8 +52,8 @@ def _get_intensities(z, vectors, radius=1):
     i, j = np.array(vectors.data).astype(int).T
 
     if radius > 1:
-        footprint = morphology.disk(radius)
-        filtered = ndi.maximum_filter(z, footprint=footprint)
+        footprint = skimage.morphology.disk(radius)
+        filtered = scipy.ndimage.maximum_filter(z, footprint=footprint)
         intensities = filtered[j, i].reshape(-1, 1)  # note that the indices are flipped
     else:
         intensities = z[j, i].reshape(-1, 1)  # note that the indices are flipped
@@ -70,7 +68,7 @@ def _take_ragged(z, indices, _axis=None, out=None, mode="raise"):
 
 def _get_largest_connected_region(segmentation):
     """Take a binary segmentation image and return the largest connected area."""
-    labels = label(segmentation)
+    labels = skimage.measure.label(segmentation)
     largest = np.argmax(np.bincount(labels.flat, weights=segmentation.flat))
     return (labels == largest).astype(int)
 
@@ -158,7 +156,7 @@ def _get_intensities_summation_method(
         sigma = inty / snr
 
         # calculate center of mass
-        com_X, com_Y = center_of_mass(box, labels=signal_mask, index=1)
+        com_X, com_Y = scipy.ndimage.center_of_mass(box, labels=signal_mask, index=1)
         dX = com_X - box_inner
         dY = com_Y - box_inner
 
@@ -237,7 +235,7 @@ class IntegrationGenerator:
             _get_intensities, vectors=self.vector_pixels, radius=radius, inplace=False
         )
 
-        intensities = BaseSignal(intensities)
+        intensities = hs.signals.BaseSignal(intensities)
         intensities = intensities.transpose(0)
 
         return intensities
@@ -310,7 +308,7 @@ class IntegrationGenerator:
         )
         sigma = result.map(_take_ragged, indices=3, _axis=1, inplace=False, ragged=True)
 
-        vectors = DiffractionVectors.from_peaks(
+        vectors = signals.DiffractionVectors.from_peaks(
             peaks, calibration=self.calibration, center=self.center
         )
         vectors.intensities = intensities

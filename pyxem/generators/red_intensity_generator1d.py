@@ -19,13 +19,7 @@
 """Reduced intensity generator and associated tools."""
 import numpy as np
 
-from pyxem.components import ScatteringFitComponentXTables, ScatteringFitComponentLobato
-from pyxem.utils.ri_utils import subtract_pattern, mask_from_pattern
-
-scattering_factor_dictionary = {
-    "lobato": ScatteringFitComponentLobato,
-    "xtables": ScatteringFitComponentXTables,
-}
+from pyxem import components
 
 
 class ReducedIntensityGenerator1D:
@@ -135,9 +129,15 @@ class ReducedIntensityGenerator1D:
         """
 
         fit_model = self.signal.create_model()
-        background = scattering_factor_dictionary[scattering_factor](
-            elements, fracs, N, C
-        )
+
+        if scattering_factor == "lobato":
+            component_name = "ScatteringFitComponentLobato"
+        elif scattering_factor == "xtables":
+            component_name = "ScatteringFitComponentXTables"
+        else:
+            raise ValueError(f"Scattering factor must be `lobato` or `xtables`.")
+
+        background = getattr(components, component_name)(elements, fracs, N, C)
 
         fit_model.append(background)
         fit_model.set_signal_range(self.cutoff)
@@ -176,6 +176,8 @@ class ReducedIntensityGenerator1D:
         **kwargs:
             Keyword arguments to be passed to map().
         """
+        from pyxem.utils.ri_utils import subtract_pattern
+
         return self.signal.map(
             subtract_pattern, pattern=bkgd_pattern, inplace=inplace, *args, **kwargs
         )
@@ -204,6 +206,7 @@ class ReducedIntensityGenerator1D:
         **kwargs:
             Keyword arguments to be passed to map().
         """
+        from pyxem.utils.ri_utils import mask_from_pattern
 
         mask_array = mask_pattern < mask_threshold
 
@@ -239,6 +242,7 @@ class ReducedIntensityGenerator1D:
             Keyword arguments to be passed to map().
 
         """
+        from pyxem.utils.ri_utils import mask_from_pattern
 
         mask_array = mask_pattern.astype(np.uint8)
         if np.max(mask_array) != 1 or np.min(mask_array) != 0:

@@ -19,11 +19,10 @@
 """Generating subpixel resolution on diffraction vectors."""
 
 import numpy as np
-from skimage.registration import phase_cross_correlation
-from skimage import draw
+import skimage
 from pyxem.utils._deprecated import deprecated
 
-from pyxem.signals import DiffractionVectors
+from pyxem import signals
 
 
 def get_experimental_square(z, vector, square_size):
@@ -75,7 +74,7 @@ def get_simulated_disc(square_size, disc_radius):
 
     ss = int(square_size)
     arr = np.zeros((ss, ss))
-    rr, cc = draw.disk(
+    rr, cc = skimage.draw.disk(
         (int(ss / 2), int(ss / 2)), radius=disc_radius, shape=arr.shape
     )  # is the thin disc a good idea
     arr[rr, cc] = 1
@@ -108,7 +107,7 @@ def _get_pixel_vectors(dp, vectors, calibration, center):
             vectors = vectors[0]
         return np.floor((vectors.astype(np.float64) / calibration) + center).astype(int)
 
-    if isinstance(vectors, DiffractionVectors):
+    if isinstance(vectors, signals.DiffractionVectors):
         if vectors.axes_manager.navigation_shape != dp.axes_manager.navigation_shape:
             raise ValueError(
                 "Vectors with shape {} must have the same navigation shape "
@@ -124,7 +123,7 @@ def _get_pixel_vectors(dp, vectors, calibration, center):
         vector_pixels = _floor(vectors, calibration, center)
 
     dp_max_size = np.max(dp.data.shape) - 1
-    if isinstance(vector_pixels, DiffractionVectors):
+    if isinstance(vector_pixels, signals.DiffractionVectors):
         min_value, max_value = 100, -100
         for index in np.ndindex(dp.axes_manager.navigation_shape):
             islice = np.s_[index]
@@ -179,7 +178,7 @@ def _conventional_xc(exp_disc, sim_disc, upsample_factor):
 
     """
 
-    shifts, error, _ = phase_cross_correlation(
+    shifts, error, _ = skimage.registration.phase_cross_correlation(
         exp_disc, sim_disc, upsample_factor=upsample_factor
     )
     shifts = np.flip(shifts)  # to comply with hyperspy conventions - see issue#490
@@ -415,7 +414,7 @@ class SubpixelrefinementGenerator:
             ragged=True,
         )
         self.vectors_out.set_signal_type("diffraction_vectors")
-        if not isinstance(self.vectors_init, DiffractionVectors):
+        if not isinstance(self.vectors_init, signals.DiffractionVectors):
             self.vectors_out.scales = 1
             self.vectors_out.offsets = 0
         else:

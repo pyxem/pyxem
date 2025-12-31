@@ -18,24 +18,7 @@
 
 """Classes to help with generating some more complicated analysis/workflow"""
 
-from .calibration_generator import CalibrationGenerator
-from .displacement_gradient_tensor_generator import (
-    get_DisplacementGradientMap,
-    get_single_DisplacementGradientTensor,
-)
-from .indexation_generator import (
-    IndexationGenerator,
-    VectorIndexationGenerator,
-    TemplateIndexationGenerator,
-    ProfileIndexationGenerator,
-    AcceleratedIndexationGenerator,
-)
-from .integration_generator import IntegrationGenerator
-from .pdf_generator1d import PDFGenerator1D
-from .red_intensity_generator1d import ReducedIntensityGenerator1D
-from .subpixelrefinement_generator import SubpixelrefinementGenerator
-from .variance_generator import VarianceGenerator
-from .virtual_image_generator import VirtualImageGenerator, VirtualDarkFieldGenerator
+import importlib
 
 
 __all__ = [
@@ -55,3 +38,33 @@ __all__ = [
     "VirtualImageGenerator",
     "VirtualDarkFieldGenerator",
 ]
+
+
+def __dir__():
+    return sorted(__all__)
+
+
+_import_mapping = {
+    "CalibrationGenerator": "calibration_generator",
+    "get_DisplacementGradientMap": "displacement_gradient_tensor_generator",
+    "get_single_DisplacementGradientTensor": "displacement_gradient_tensor_generator",
+    "IndexationGenerator": "indexation_generator",
+    "VectorIndexationGenerator": "indexation_generator",
+    "TemplateIndexationGenerator": "indexation_generator",
+    "ProfileIndexationGenerator": "indexation_generator",
+    "AcceleratedIndexationGenerator": "indexation_generator",
+    "IntegrationGenerator": "integration_generator",
+    "PDFGenerator1D": "pdf_generator1d",
+    "ReducedIntensityGenerator1D": "red_intensity_generator1d",
+    "SubpixelrefinementGenerator": "subpixelrefinement_generator",
+    "VarianceGenerator": "variance_generator",
+    "VirtualImageGenerator": "virtual_image_generator",
+    "VirtualDarkFieldGenerator": "virtual_image_generator",
+}
+
+
+def __getattr__(name):
+    if name in __all__:
+        import_path = "pyxem.generators." + _import_mapping.get(name)
+        return getattr(importlib.import_module(import_path), name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
