@@ -16,15 +16,15 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-import numpy as np
-from scipy.linalg import polar
 import math
 
-from hyperspy.signals import Signal2D
-from hyperspy.utils import stack
+import numpy as np
+import scipy
+
+import hyperspy.api as hs
+from hyperspy.signals import Signal2D, LazySignal
 
 from pyxem.signals import StrainMap
-from hyperspy._signals.lazy import LazySignal
 
 
 def _polar_decomposition(image, side):
@@ -43,7 +43,7 @@ def _polar_decomposition(image, side):
         Stretch and rotation matrices obtained by polar decomposition.
 
     """
-    return np.array(polar(image, side=side))
+    return np.array(scipy.linalg.polar(image, side=side))
 
 
 def _get_rotation_angle(matrix):
@@ -108,7 +108,7 @@ class DisplacementGradientMap(Signal2D):
         e22 = np.reciprocal(U.isig[1, 1].T) - 1
         theta = R.map(_get_rotation_angle, inplace=False, silence_warnings=True)
         theta = theta.transpose(2)
-        strain_results = stack([e11, e22, e12, theta])
+        strain_results = hs.stack([e11, e22, e12, theta])
         strain_map = StrainMap(strain_results)
         if len(strain_map.axes_manager.signal_axes) == 2:
             strain_map.axes_manager.signal_axes[0].name = (

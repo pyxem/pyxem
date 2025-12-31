@@ -17,9 +17,8 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import numpy as np
-from scipy.optimize import curve_fit
+import scipy
 
-from hyperspy._signals.lazy import LazySignal
 import hyperspy.api as hs
 
 from pyxem.signals.diffraction1d import Diffraction1D
@@ -37,8 +36,6 @@ class ElectronDiffraction1D(Diffraction1D):
     """
 
     _signal_type = "electron_diffraction"
-
-    from scipy.optimize import curve_fit
 
     def model_simulation1d(
         self,
@@ -137,7 +134,7 @@ class ElectronDiffraction1D(Diffraction1D):
         )
         wavelength = get_electron_wavelength(beam_energy)
         angles = np.arctan2(np.sort(simulation.reciprocal_spacing), 1 / wavelength)
-        m, pcov = curve_fit(f, np.sort(centers), angles)
+        m, pcov = scipy.optimize.curve_fit(f, np.sort(centers), angles)
         scale = m[0]
         return scale
 
@@ -265,5 +262,5 @@ class ElectronDiffraction1D(Diffraction1D):
         y.units = "nm"
 
 
-class LazyElectronDiffraction1D(LazySignal, ElectronDiffraction1D):
+class LazyElectronDiffraction1D(hs.signals.LazySignal, ElectronDiffraction1D):
     pass

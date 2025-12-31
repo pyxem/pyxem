@@ -17,20 +17,12 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from hyperspy.signals import Signal2D
-from hyperspy._signals.lazy import LazySignal
+from hyperspy.signals import Signal2D, LazySignal
 from numpy import rad2deg
 
-from pyxem.signals.common_diffraction import CommonDiffraction
+from pyxem.signals import CommonDiffraction
 from pyxem.utils._correlations import _correlation, _power, _pearson_correlation
 from pyxem.utils._deprecated import deprecated
-from pyxem.utils.indexation_utils import (
-    _mixed_matching_lib_to_polar,
-    _get_integrated_polar_templates,
-    _norm_rows,
-    _get_max_n,
-)
-
 from pyxem.utils._background_subtraction import (
     _polar_subtract_radial_median,
     _polar_subtract_radial_percentile,
@@ -388,6 +380,13 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
             .. bibliography::
 
         """
+        from pyxem.utils._indexation_utils import (
+            _mixed_matching_lib_to_polar,
+            _get_integrated_polar_templates,
+            _norm_rows,
+            _get_max_n,
+        )
+
         (
             r_templates,
             theta_templates,
@@ -402,7 +401,6 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
         )
         if normalize_templates:
             intensities_templates = _norm_rows(intensities_templates)
-
         if n_best == -1:
             n_best = r_templates.shape[0]
 

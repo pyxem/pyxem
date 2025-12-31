@@ -24,11 +24,10 @@ from hyperspy.axes import UniformDataAxis
 import hyperspy.api as hs
 
 import pyxem.utils._beam_shift_tools as bst
-from pyxem.utils.plotting import make_color_wheel_marker
+from pyxem.utils import plotting
 from pyxem.signals import DiffractionVectors1D
 from pyxem.utils._deprecated import deprecated
-from diffsims.utils.sim_utils import get_electron_wavelength
-from scipy.constants import c, e, m_e
+import scipy
 
 
 class BeamShift(DiffractionVectors1D):
@@ -225,6 +224,8 @@ class BeamShift(DiffractionVectors1D):
 
     @beam_energy.setter
     def beam_energy(self, beam_energy):
+        from diffsims.utils.sim_utils import get_electron_wavelength
+
         self.metadata.set_item("Acquisition_instrument.TEM.beam_energy", beam_energy)
         self.metadata.set_item(
             "Acquisition_instrument.TEM.wavelength",
@@ -256,6 +257,10 @@ class BeamShift(DiffractionVectors1D):
                 "The beam energy must be set in the metadata to calibrate to electric field."
                 "Please set the beam energy using `beam_energy` property."
             )
+
+        c = scipy.constants.c
+        e = scipy.constants.e
+        m_e = scipy.constants.m_e
         thickness = thickness * 1e-9  # Convert thickness from nm to m
         volts = self.beam_energy * 1000
         velocity = c * np.sqrt(1 - (1 / (1 + (volts * e / (m_e * c**2))) ** 2))  # m/s
@@ -608,7 +613,7 @@ class BeamShift(DiffractionVectors1D):
         s_rgb.change_dtype("rgb16")
         if add_color_wheel_marker:
             # Add a color wheel marker to the signal
-            color_wheel_marker = make_color_wheel_marker(
+            color_wheel_marker = plotting.make_color_wheel_marker(
                 rotation=rotation, only_phase=True
             )
             s_rgb.add_marker(color_wheel_marker, permanent=True)
@@ -700,7 +705,7 @@ class BeamShift(DiffractionVectors1D):
 
         if add_color_wheel_marker:
             # Add a color wheel marker to the signal
-            color_wheel_marker = make_color_wheel_marker(rotation=rotation)
+            color_wheel_marker = plotting.make_color_wheel_marker(rotation=rotation)
             s_rgb.add_marker(color_wheel_marker, permanent=True, plot_marker=False)
         return s_rgb
 

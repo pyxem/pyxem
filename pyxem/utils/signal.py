@@ -21,7 +21,6 @@
 # This code is not used internally and so can safely be deleted at the end of the deprecation period
 
 from pyxem.utils._deprecated import deprecated
-import dask.array as da
 
 
 @deprecated(since="0.18.0", removal="0.19.0")
@@ -179,6 +178,8 @@ def compute_markers(markers):
     markers : list
         List of markers now computed
     """
+    import dask.array as da
+
     to_compute = []
     for m in markers:
         for k, i in m.kwargs.items():

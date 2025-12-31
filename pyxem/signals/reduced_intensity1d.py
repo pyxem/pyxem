@@ -16,12 +16,12 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+import scipy
 
 from hyperspy.signals import Signal1D
 import numpy as np
 
-from pyxem.components import ReducedIntensityCorrectionComponent
-from scipy import special
+from pyxem import components
 
 
 class ReducedIntensity1D(Signal1D):
@@ -248,7 +248,7 @@ class ReducedIntensity1D(Signal1D):
 
         # scattering_axis = s_scale * np.arange(s_size,dtype='float64')
         fit_model = self.create_model()
-        fit_model.append(ReducedIntensityCorrectionComponent())
+        fit_model.append(components.ReducedIntensityCorrectionComponent())
         fit_model.set_signal_range([0, s_max])
         fit_model.multifit()
         fit_value = fit_model.as_signal()
@@ -411,5 +411,5 @@ def _damp_ri_low_q_region_erfc(
 
     scattering_axis = s_scale * np.arange(s_size, dtype="float64") + s_offset
 
-    damping_term = (special.erf(scattering_axis * scale - offset) + 1) / 2
+    damping_term = (scipy.special.erf(scattering_axis * scale - offset) + 1) / 2
     return z * damping_term

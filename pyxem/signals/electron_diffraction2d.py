@@ -19,8 +19,7 @@
 
 import numpy as np
 
-from pyxem.signals.diffraction2d import Diffraction2D, LazyDiffraction2D
-from diffsims.utils.sim_utils import get_electron_wavelength
+from pyxem.signals import Diffraction2D, LazyDiffraction2D
 
 
 class ElectronDiffraction2D(Diffraction2D):

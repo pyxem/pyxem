@@ -16,15 +16,10 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-from hyperspy.signals import Signal1D
-from pyxem.signals import Diffraction2D
-from hyperspy._signals.lazy import LazySignal
-
 import numpy as np
-from hyperspy.roi import RectangularROI
 
-import dask.array as da
-from dask.graph_manipulation import clone
+from hyperspy.signals import Signal1D, LazySignal
+from pyxem.signals import Diffraction2D
 
 from pyxem.utils._dask import _get_dask_array, _get_chunking
 from pyxem.utils._insitu import (
@@ -73,7 +68,7 @@ class InSituDiffraction2D(Diffraction2D):
         out_axes.remove(time_axis)
 
         if roi is None:
-            roi = RectangularROI(
+            roi = hs.roi.RectangularROI(
                 self.axes_manager.signal_extent[0],
                 self.axes_manager.signal_extent[2],
                 self.axes_manager.signal_extent[1],
@@ -145,6 +140,9 @@ class InSituDiffraction2D(Diffraction2D):
         registered_data: InSituDiffraction2D
             Real space drift corrected version of the original dataset
         """
+        import dask.array as da
+        from dask.graph_manipulation import clone
+
         if shifts is None:
             shifts = self.get_drift_vectors(time_axis=time_axis)
 

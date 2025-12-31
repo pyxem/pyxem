@@ -19,10 +19,9 @@ import warnings
 
 import numpy as np
 
-from hyperspy.signals import Signal2D
-from hyperspy._signals.lazy import LazySignal
+from hyperspy.signals import Signal2D, LazySignal
 
-from pyxem.signals import DiffractionVectors, VDFSegment
+from pyxem import signals
 from pyxem.utils._signals import _transfer_signal_axes
 from pyxem.utils.segment_utils import separate_watershed
 
@@ -157,8 +156,10 @@ class VirtualDarkFieldImage(Signal2D):
         # if TraitError is raised, it is likely no segments were found
         segments = Signal2D(segments).transpose(navigation_axes=[0], signal_axes=[2, 1])
         # Create VDFSegment and transfer axes calibrations
-        vdfsegs = VDFSegment(
-            segments, DiffractionVectors(vectors_of_segments), segment_intensities
+        vdfsegs = signals.VDFSegment(
+            segments,
+            signals.DiffractionVectors(vectors_of_segments),
+            segment_intensities,
         )
         vdfsegs.segments = _transfer_signal_axes(vdfsegs.segments, vdfs)
         n = vdfsegs.segments.axes_manager.navigation_axes[0]

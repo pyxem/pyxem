@@ -17,7 +17,7 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from pyxem.utils import indexation_utils as iutls
+from pyxem.utils import _indexation_utils as iutls
 from pyxem.utils import polar_transform_utils as ptutls
 import numpy as np
 import pytest

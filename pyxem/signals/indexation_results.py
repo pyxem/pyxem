@@ -20,30 +20,22 @@ from warnings import warn
 from typing import Sequence, Iterator
 from traits.api import Undefined
 
-from hyperspy._signals.lazy import LazySignal
-from hyperspy.signal import BaseSignal
+from hyperspy.signals import BaseSignal, LazySignal
 from hyperspy.axes import BaseDataAxis
-from orix.crystal_map import CrystalMap, Phase, PhaseList
-from orix.quaternion import Rotation, Orientation
 
 from transforms3d.euler import mat2euler
-from diffsims.crystallography._diffracting_vector import DiffractingVector
 
-from orix.vector import Vector3d
-from orix.projections import StereographicProjection
-from orix.plot.inverse_pole_figure_plot import _get_ipf_axes_labels
-from orix.vector.fundamental_sector import _closed_edges_in_hemisphere
-from orix.plot import IPFColorKeyTSL, DirectionColorKeyTSL
+from orix import crystal_map, projections, quaternion, vector
 
 from matplotlib.collections import QuadMesh
 from matplotlib.colors import Normalize
-from scipy.spatial import Delaunay
+import scipy
 
 import numpy as np
 import hyperspy.api as hs
 
-from pyxem.utils.indexation_utils import get_nth_best_solution, dict2phase, phase2dict
-from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
+from pyxem.utils import indexation_utils
+from pyxem.signals import DiffractionVectors2D
 from pyxem.utils._signals import _transfer_navigation_axes
 from pyxem.utils.signal import compute_markers
 from pyxem.utils._deprecated import deprecated
@@ -75,7 +67,7 @@ def crystal_from_vector_matching(z_matches):
     results_array = np.empty(3, dtype="object")
 
     # get best matching phase
-    best_match = get_nth_best_solution(
+    best_match = indexation_utilsget_nth_best_solution(
         z_matches, "vector", key="total_error", descending=False
     )
     results_array[0] = best_match.phase_index
@@ -168,7 +160,7 @@ def _get_second_best_phase(z):
 
 
 def get_ipf_outline(
-    phase: Phase,
+    phase: crystal_map.Phase,
     include_labels: bool = True,
     offset_x: float = 0.85,
     offset_y: float = 0.85,
@@ -199,10 +191,12 @@ def get_ipf_outline(
     mins : np.ndarray
         The minimum values for the axes
     """
+    from orix.vector.fundamental_sector import _closed_edges_in_hemisphere
+
     offset = np.array([offset_x, offset_y])
     # Creating Lines around QuadMesh
     sector = phase.point_group.fundamental_sector
-    s = StereographicProjection()
+    s = projections.StereographicProjection()
 
     edges = _closed_edges_in_hemisphere(sector.edges, sector)
     ex, ey = s.vector2xy(edges)
@@ -219,6 +213,8 @@ def get_ipf_outline(
         facecolor="none",
     )
     if include_labels:
+        from orix.plot.inverse_pole_figure_plot import _get_ipf_axes_labels
+
         labels = _get_ipf_axes_labels(sector.vertices, symmetry=phase.point_group)
         tx, ty = s.vector2xy(sector.vertices)
         texts_offset = np.vstack((tx, ty)).T
@@ -236,7 +232,9 @@ def get_ipf_outline(
         return polygon_sector, texts, maxes, mins
 
 
-def get_ipf_annotation_markers(phase: Phase, offset: float = 0.85, scale: float = 0.2):
+def get_ipf_annotation_markers(
+    phase: crystal_map.Phase, offset: float = 0.85, scale: float = 0.2
+):
     """Get the outline of the IPF for the orientation map as a marker in the
     upper right hand corner including labels if desired. As well as the color
     mesh for the IPF.
@@ -257,6 +255,7 @@ def get_ipf_annotation_markers(phase: Phase, offset: float = 0.85, scale: float 
     mesh : hs.plot.markers.Markers
         The color mesh for the IPF (using :class:`matplotlib.collections.QuadMesh`)
     """
+    from orix.plot import DirectionColorKeyTSL
 
     polygon_sector, texts, _, _ = get_ipf_outline(
         phase, offset_x=offset, offset_y=offset, scale=scale
@@ -294,8 +293,8 @@ def get_ipf_annotation_markers(phase: Phase, offset: float = 0.85, scale: float 
 
 
 def vectors_to_single_phase_ipf_markers(
-    vectors: Vector3d,
-    phase: Phase,
+    vectors: vector.Vector3d,
+    phase: crystal_map.Phase,
     normalized_correlation: np.ndarray,
     offset_x: float = 0.85,
     offset_y: float = 0.85,
@@ -332,7 +331,7 @@ def vectors_to_single_phase_ipf_markers(
     markers.append(polygon_sector)
     markers.append(texts)
 
-    s = StereographicProjection()
+    s = projections.StereographicProjection()
     x, y = s.vector2xy(vectors)
     x = x.reshape(vectors.shape)
     y = y.reshape(vectors.shape)
@@ -420,13 +419,13 @@ def rotation_from_orientation_map(result, rots):
     index = index.astype(int)
     ori = rots[index]
     euler = (
-        Orientation(ori).to_euler(
+        quaternion.Orientation(ori).to_euler(
             degrees=True,
         )
         * mirror[..., np.newaxis]
     )
     euler[:, 0] = rotation
-    ori = Orientation.from_euler(euler, degrees=True).data
+    ori = quaternion.Orientation.from_euler(euler, degrees=True).data
     return ori
 
 
@@ -473,6 +472,8 @@ def vectors_from_orientation_map(
         If True, return a DiffractingVector object, otherwise return a numpy array with a stack of
         [x, y, z, intensity, h, k, l]
     """
+    from diffsims.crystallography._diffracting_vector import DiffractingVector
+
     index, _, rotation, mirror = result[n_best_index, :].T
     index = index.astype(int)
     if vectors.ndim == 0:
@@ -484,13 +485,13 @@ def vectors_from_orientation_map(
         phase = phases[phase_index[index]]
         intensities = intensities[index]
         hkl = hkl[index]
-    phase = dict2phase(**phase)
+    phase = indexation_utils.dict2phase(**phase)
     # Copy manually, as deepcopy adds a lot of overhead with the phase
     vectors = DiffractingVector(phase, xyz=data.copy())
     # Flip y, as discussed in https://github.com/pyxem/pyxem/issues/925
     vectors.y = -vectors.y
 
-    rotation = Rotation.from_euler(
+    rotation = quaternion.Rotation.from_euler(
         (mirror * rotation, 0, 0), degrees=True, direction="crystal2lab"
     )
     coordinate_format = vectors.coordinate_format
@@ -592,7 +593,7 @@ class OrientationMap(DiffractionVectors2D):
             )
         if isinstance(self.simulation.rotations, (list, np.ndarray)):
             quats = np.vstack([r.data for r in self.simulation.rotations])
-            all_rotations = Rotation(data=quats)
+            all_rotations = quaternion.Rotation(data=quats)
         else:
             all_rotations = self.simulation.rotations
         rotations = self.map(
@@ -605,7 +606,7 @@ class OrientationMap(DiffractionVectors2D):
             silence_warnings=True,
         )
 
-        rots = Rotation(rotations)
+        rots = quaternion.Rotation(rotations)
         if flatten:
             shape1 = np.prod(rots.shape[:-1])
             rots = rots.reshape((shape1, rots.shape[-1]))
@@ -637,7 +638,7 @@ class OrientationMap(DiffractionVectors2D):
         else:
             return None
 
-    def to_single_phase_orientations(self, **kwargs) -> Orientation:
+    def to_single_phase_orientations(self, **kwargs) -> quaternion.Orientation:
         """Convert the orientation map to an `Orientation`-object,
         given a single-phase simulation.
 
@@ -655,7 +656,7 @@ class OrientationMap(DiffractionVectors2D):
         # i.e. unique rotations for each navigation position
         rotations = hs.signals.Signal2D(self.simulation.rotations.data)
 
-        return Orientation(
+        return quaternion.Orientation(
             self.map(
                 rotation_from_orientation_map,
                 rots=rotations,
@@ -700,7 +701,7 @@ class OrientationMap(DiffractionVectors2D):
 
         data, intensities, phases, phase_indices, hkl = self.get_simulation_arrays()
 
-        phases_dicts = [phase2dict(p) for p in phases]
+        phases_dicts = [indexation_utils.phase2dict(p) for p in phases]
         v = self.map(
             vectors_from_orientation_map,
             vectors=data,
@@ -742,7 +743,7 @@ class OrientationMap(DiffractionVectors2D):
             phase_indices = np.zeros(self.simulation.rotations.size, dtype=int)
         return data, intensities, phases, phase_indices, hkl
 
-    def to_crystal_map(self) -> CrystalMap:
+    def to_crystal_map(self) -> crystal_map.CrystalMap:
         """Convert the orientation map to an :class:`orix.crystal_map.CrystalMap` object
 
         Returns
@@ -765,16 +766,16 @@ class OrientationMap(DiffractionVectors2D):
         phase_index = self.to_phase_index()
 
         if self.simulation.has_multiple_phases:
-            phases = PhaseList(list(self.simulation.phases))
+            phases = crystal_map.PhaseList(list(self.simulation.phases))
             if phase_index.ndim == 3:
                 phase_index = phase_index[..., 0]
             phase_index = phase_index.flatten()
         else:
-            phases = PhaseList(self.simulation.phases)
+            phases = crystal_map.PhaseList(self.simulation.phases)
         if scan_unit is Undefined:
             scan_unit = "px"
 
-        return CrystalMap(
+        return crystal_map.CrystalMap(
             rotations=rotations,
             x=xx.flatten(),
             phase_id=phase_index,
@@ -813,7 +814,7 @@ class OrientationMap(DiffractionVectors2D):
         Use `to_ipf_correlation_heatmap_markers` instead.
         """
         rots = self.to_rotation()
-        vecs = rots * Vector3d.zvector()
+        vecs = rots * vector.Vector3d.zvector()
         # Normalize the correlation scores
         cors = self.data[..., 1] / np.max(self.data[..., 1], axis=-1)[..., np.newaxis]
         if not self.simulation.has_multiple_phases:
@@ -890,7 +891,7 @@ class OrientationMap(DiffractionVectors2D):
             rotations = [rotations]
             phase_idx_signal = 0
 
-        s = StereographicProjection()
+        s = projections.StereographicProjection()
         rotation_sizes = np.cumsum([0] + [r.size for r in rotations])
 
         markers = []
@@ -904,7 +905,7 @@ class OrientationMap(DiffractionVectors2D):
             # But we mask out the <n_best rotations.
             # Fetch all possible zone axes for the phase to speed up calculations
             rots = rotations[phase_idx]
-            vecs = rots * Vector3d.zvector()
+            vecs = rots * vector.Vector3d.zvector()
 
             x, y = s.vector2xy(vecs)
             xy = np.vstack((x, y)).T
@@ -921,7 +922,7 @@ class OrientationMap(DiffractionVectors2D):
             # are always the same, and since we use linear interpolation,
             # we can pre-calculate the barycentric weights for Delaunay triangles
             # https://stackoverflow.com/a/20930910
-            tri = Delaunay(xy, incremental=False)
+            tri = scipy.spatial.Delaunay(xy, incremental=False)
             simplex = tri.find_simplex(new_xy)
 
             # points outside the convex hull gets assigned the index -1.
@@ -1202,7 +1203,7 @@ class OrientationMap(DiffractionVectors2D):
 
     def to_ipf_colormap(
         self,
-        direction: Vector3d = Vector3d.zvector(),
+        direction: vector.Vector3d = vector.Vector3d.zvector(),
         add_markers: bool = True,
     ):
         """Create a colored navigator and a legend (in the form of a marker) which can be passed as the
@@ -1219,6 +1220,8 @@ class OrientationMap(DiffractionVectors2D):
         -------
         hs.signals.BaseSignal
         """
+        from orix.plot import IPFColorKeyTSL
+
         oris = self.to_single_phase_orientations()[:, :, 0]
         ipfcolorkey = IPFColorKeyTSL(oris.symmetry, direction)
 
@@ -1353,7 +1356,7 @@ class GenericMatchingResults:
 
         """ Tidies up so we can put these things into CrystalMap """
         euler = np.deg2rad(np.vstack((alpha, beta, gamma)).T)
-        rotations = Rotation.from_euler(
+        rotations = quaternion.Rotation.from_euler(
             euler, convention="bunge", direction="crystal2lab"
         )
 
@@ -1374,7 +1377,7 @@ class GenericMatchingResults:
             "second_phase": second_phase,
         }
 
-        return CrystalMap(
+        return crystal_map.CrystalMap(
             rotations=rotations, phase_id=phase_id, x=x, y=y, prop=properties
         )
 
