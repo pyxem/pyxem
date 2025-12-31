@@ -18,13 +18,12 @@
 
 """Electron diffraction pattern calibration operations."""
 
-import numpy as np
-from scipy.optimize import curve_fit
 from math import sin, cos
 import matplotlib.pyplot as plt
+import numpy as np
+import scipy
 
-from hyperspy.roi import CircleROI, Line2DROI
-from hyperspy.misc.utils import stack as stack_method
+import hyperspy.api as hs
 from diffsims.utils.ring_pattern_utils import (
     call_ring_pattern,
     calc_radius_with_distortion,
@@ -32,7 +31,7 @@ from diffsims.utils.ring_pattern_utils import (
 )
 
 from pyxem.utils._deprecated import deprecated
-from pyxem.signals import ElectronDiffraction2D
+from pyxem import signals
 
 
 class CalibrationGenerator:
@@ -168,7 +167,9 @@ class CalibrationGenerator:
         # Set initial parameters for fitting
         x0 = [scale, amplitude, spread, direct_beam_amplitude, asymmetry, rotation]
         # Fit ring pattern to experimental data
-        xf, cov = curve_fit(call_ring_pattern(center[0], center[1]), pts, ref, p0=x0)
+        xf, cov = scipy.optimize.curve_fit(
+            call_ring_pattern(center[0], center[1]), pts, ref, p0=x0
+        )
         # Set ring fitting parameters to attribute
         self.ring_params = xf
         # Calculate affine transform parameters from fit parameters
@@ -236,17 +237,17 @@ class CalibrationGenerator:
             rotation=ringP[5],
         )
         # Apply distortion corrections to experimental data
-        dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
-        dpegs = ElectronDiffraction2D(dpegs.data.reshape((2, 2, size, size)))
+        dpegs = hs.stack([dpeg, dpeg, dpeg, dpeg])
+        dpegs = signals.ElectronDiffraction2D(dpegs.data.reshape((2, 2, size, size)))
         dpegs.apply_affine_transformation(
             self.affine_matrix, preserve_range=True, inplace=True
         )
         # Calculate residuals to be returned
-        diff_init = ElectronDiffraction2D(dpeg.data - dpref.data)
-        diff_end = ElectronDiffraction2D(dpegs.inav[0, 0].data - dpref.data)
-        residuals = stack_method([diff_init, diff_end])
+        diff_init = signals.ElectronDiffraction2D(dpeg.data - dpref.data)
+        diff_end = signals.ElectronDiffraction2D(dpegs.inav[0, 0].data - dpref.data)
+        residuals = hs.stack([diff_init, diff_end])
 
-        return ElectronDiffraction2D(residuals)
+        return signals.ElectronDiffraction2D(residuals)
 
     def plot_corrected_diffraction_pattern(
         self, reference_circle=True, *args, **kwargs
@@ -281,8 +282,8 @@ class CalibrationGenerator:
         dpeg = self.diffraction_pattern
         # Apply distortion corrections to experimental data
         size = dpeg.data.shape[0]
-        dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
-        dpegs = ElectronDiffraction2D(dpegs.data.reshape((2, 2, size, size)))
+        dpegs = hs.stack([dpeg, dpeg, dpeg, dpeg])
+        dpegs = signals.ElectronDiffraction2D(dpegs.data.reshape((2, 2, size, size)))
         dpegs.apply_affine_transformation(
             self.affine_matrix, preserve_range=True, inplace=True
         )
@@ -291,7 +292,7 @@ class CalibrationGenerator:
         dpegm.plot(*args, **kwargs)
         # add reference circle if specified
         if reference_circle is True:
-            circ = CircleROI(cx=size / 2, cy=size / 2, r=size / 5, r_inner=0)
+            circ = hs.roi.CircleROI(cx=size / 2, cy=size / 2, r=size / 5, r_inner=0)
             circ.add_widget(dpegm)
 
     def get_diffraction_calibration(self, mask_length, linewidth):
@@ -328,14 +329,16 @@ class CalibrationGenerator:
             )
         dpeg = self.diffraction_pattern
         size = dpeg.data.shape[0]
-        dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
-        dpegs = ElectronDiffraction2D(dpegs.data.reshape((2, 2, size, size)))
+        dpegs = hs.stack([dpeg, dpeg, dpeg, dpeg])
+        dpegs = signals.ElectronDiffraction2D(dpegs.data.reshape((2, 2, size, size)))
         dpegs.apply_affine_transformation(
             self.affine_matrix, preserve_range=True, inplace=True
         )
         dpegm = dpegs.mean((0, 1))
         # Define line roi along which to take trace for calibration
-        line = Line2DROI(x1=5, y1=5, x2=size - 6, y2=size - 6, linewidth=linewidth)
+        line = hs.roi.Line2DROI(
+            x1=5, y1=5, x2=size - 6, y2=size - 6, linewidth=linewidth
+        )
         # Obtain line trace
         trace = line(dpegm)
         trace = trace.as_signal1D(0)
@@ -493,8 +496,10 @@ class CalibrationGenerator:
             size = dpeg.data.shape[0]
             if self.correction_matrix is None:
                 self.get_correction_matrix()
-            dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
-            dpegs = ElectronDiffraction2D(dpegs.data.reshape((2, 2, size, size)))
+            dpegs = hs.stack([dpeg, dpeg, dpeg, dpeg])
+            dpegs = signals.ElectronDiffraction2D(
+                dpegs.data.reshape((2, 2, size, size))
+            )
             dpegs.apply_affine_transformation(
                 self.correction_matrix, preserve_range=True, inplace=True
             )
@@ -511,8 +516,10 @@ class CalibrationGenerator:
             size = dpeg.data.shape[0]
             if self.correction_matrix is None:
                 self.get_correction_matrix()
-            dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
-            dpegs = ElectronDiffraction2D(dpegs.data.reshape((2, 2, size, size)))
+            dpegs = hs.stack([dpeg, dpeg, dpeg, dpeg])
+            dpegs = signals.ElectronDiffraction2D(
+                dpegs.data.reshape((2, 2, size, size))
+            )
             dpegs.apply_affine_transformation(
                 self.correction_matrix, preserve_range=True, inplace=True
             )
@@ -529,8 +536,10 @@ class CalibrationGenerator:
             size = dpeg.data.shape[0]
             if self.correction_matrix is None:
                 self.get_correction_matrix()
-            dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
-            dpegs = ElectronDiffraction2D(dpegs.data.reshape((2, 2, size, size)))
+            dpegs = hs.stack([dpeg, dpeg, dpeg, dpeg])
+            dpegs = signals.ElectronDiffraction2D(
+                dpegs.data.reshape((2, 2, size, size))
+            )
             dpegs.apply_affine_transformation(
                 self.correction_matrix, preserve_range=True, inplace=True
             )

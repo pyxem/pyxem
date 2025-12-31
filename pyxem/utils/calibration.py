@@ -22,13 +22,13 @@ import numpy as np
 import pint
 
 from diffsims.utils.sim_utils import get_electron_wavelength
-import hyperspy.api as hs
 from hyperspy.axes import UniformDataAxis
-from hyperspy.misc.utils import DictionaryTreeBrowser
 
 from pyxem.utils._azimuthal_integrations import _get_control_points, _get_factors
 from pyxem.utils._deprecated import deprecated
 from typing import Union
+
+from hyperspy.misc.utils import DictionaryTreeBrowser
 
 Number = Union[int, float]
 

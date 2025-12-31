@@ -21,7 +21,7 @@
 import numpy as np
 import scipy
 import skimage
-from hyperspy.misc.utils import isiterable
+import hyperspy.misc.utils as hs_utils
 
 
 def _align_single_frame(image, shifts, **kwargs):
@@ -138,7 +138,7 @@ def _get_chunking(signal, chunk_shape=None, chunk_bytes=None):
     nav_dim = signal.axes_manager.navigation_dimension
     sig_dim = signal.axes_manager.signal_dimension
     if chunk_shape is not None:
-        if not isiterable(chunk_shape):
+        if not hs_utils.isiterable(chunk_shape):
             chunk_shape = [chunk_shape] * nav_dim
 
     chunks_dict = {}

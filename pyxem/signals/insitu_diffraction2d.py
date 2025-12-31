@@ -18,6 +18,7 @@
 
 import numpy as np
 
+import hyperspy.api as hs
 from hyperspy.signals import Signal1D, LazySignal
 from pyxem.signals import Diffraction2D
 

@@ -19,9 +19,9 @@
 """Utils for Clustering."""
 
 import numpy as np
-from sklearn import cluster
-from hyperspy.misc.utils import isiterable
+
 import hyperspy.api as hs
+import hyperspy.misc.utils as hs_utils
 
 
 def _find_nearest(array, value):
@@ -172,9 +172,9 @@ def _filter_peak_array_radius(peak_array, xc, yc, r_min=None, r_max=None):
     _filter_peak_list_radius
 
     """
-    if not isiterable(xc):
+    if not hs_utils.isiterable(xc):
         xc = np.ones(peak_array.shape[:2]) * xc
-    if not isiterable(yc):
+    if not hs_utils.isiterable(yc):
         yc = np.ones(peak_array.shape[:2]) * yc
     peak_array_filtered = np.empty(shape=peak_array.shape[:2], dtype=object)
     for iy, ix in np.ndindex(peak_array.shape[:2]):
@@ -267,7 +267,9 @@ def _get_cluster_dict(peak_array, eps=30, min_samples=2):
     >>> cluster0 = cluster_dict[0]
 
     """
-    dbscan = cluster.DBSCAN(eps=eps, min_samples=min_samples)
+    from sklearn.cluster import DBSCAN
+
+    dbscan = DBSCAN(eps=eps, min_samples=min_samples)
     dbscan.fit(peak_array)
     label_list = dbscan.labels_
 

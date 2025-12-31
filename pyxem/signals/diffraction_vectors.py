@@ -24,7 +24,7 @@ import scipy
 
 import hyperspy.api as hs
 from hyperspy.signals import BaseSignal, Signal1D, LazySignal
-from hyperspy.misc.utils import isiterable
+import hyperspy.misc.utils as hs_utils
 
 from pyxem.utils._signals import (
     _transfer_navigation_axes_to_signal_axes,
@@ -223,7 +223,7 @@ class DiffractionVectors(BaseSignal):
         else:
             units = ["", ""]
 
-        if not isiterable(calibration):
+        if not hs_utils.isiterable(calibration):
             calibration = [
                 calibration,
                 calibration,
@@ -454,13 +454,13 @@ class DiffractionVectors(BaseSignal):
         if isinstance(value, str) and self.num_columns == 1:
             value = [value]
         if (
-            isiterable(value)
+            hs_utils.isiterable(value)
             and len(value) == self.num_columns
             and not isinstance(value, str)
         ):
             self.metadata.VectorMetadata["units"] = value
 
-        elif isiterable(value) and len(value) != self.num_columns:
+        elif hs_utils.isiterable(value) and len(value) != self.num_columns:
             raise ValueError(
                 "The len of the units parameter must equal the number of"
                 " columns in the underlying vector data."
@@ -476,9 +476,9 @@ class DiffractionVectors(BaseSignal):
 
     @scales.setter
     def scales(self, value):
-        if isiterable(value) and len(value) == self.num_columns:
+        if hs_utils.isiterable(value) and len(value) == self.num_columns:
             self.metadata.VectorMetadata["scales"] = value
-        elif isiterable(value) and len(value) != self.num_columns:
+        elif hs_utils.isiterable(value) and len(value) != self.num_columns:
             raise ValueError(
                 "The len of the scales parameter must equal the number of"
                 " columns in the underlying vector data."
@@ -518,10 +518,10 @@ class DiffractionVectors(BaseSignal):
 
     @offsets.setter
     def offsets(self, value):
-        if isiterable(value) and len(value) == self.num_columns:
+        if hs_utils.isiterable(value) and len(value) == self.num_columns:
             self.metadata.VectorMetadata["offsets"] = np.array(value)
 
-        elif isiterable(value) and len(value) != self.num_columns:
+        elif hs_utils.isiterable(value) and len(value) != self.num_columns:
             raise ValueError(
                 "The len of the scales parameter must equal the number of"
                 "columns in the underlying vector data."

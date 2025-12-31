@@ -23,7 +23,7 @@ from scipy.signal import convolve2d
 from skimage import morphology
 import dask.array as da
 
-from hyperspy.misc.utils import isiterable
+import hyperspy.misc.utils as hs_utils
 
 from pyxem.signals import Diffraction2D, LazyDiffraction2D
 import pyxem.utils.ransac_ellipse_tools as ret
@@ -757,47 +757,47 @@ def generate_4d_data(
         plot_disk = False
     else:
         plot_disk = True
-        if not isiterable(disk_x):
+        if not hs_utils.isiterable(disk_x):
             disk_x = np.ones((probe_size_y, probe_size_x)) * disk_x
-    if not isiterable(disk_y):
+    if not hs_utils.isiterable(disk_y):
         disk_y = np.ones((probe_size_y, probe_size_x)) * disk_y
-    if not isiterable(disk_r):
+    if not hs_utils.isiterable(disk_r):
         disk_r = np.ones((probe_size_y, probe_size_x)) * disk_r
-    if not isiterable(disk_I):
+    if not hs_utils.isiterable(disk_I):
         disk_I = np.ones((probe_size_y, probe_size_x)) * disk_I
 
     if ring_x is None:
         plot_ring = False
     else:
         plot_ring = True
-        if not isiterable(ring_x):
+        if not hs_utils.isiterable(ring_x):
             ring_x = np.ones((probe_size_y, probe_size_x)) * ring_x
-    if not isiterable(ring_y):
+    if not hs_utils.isiterable(ring_y):
         ring_y = np.ones((probe_size_y, probe_size_x)) * ring_y
-    if not isiterable(ring_r):
+    if not hs_utils.isiterable(ring_r):
         ring_r = np.ones((probe_size_y, probe_size_x)) * ring_r
-    if not isiterable(ring_I):
+    if not hs_utils.isiterable(ring_I):
         ring_I = np.ones((probe_size_y, probe_size_x)) * ring_I
-    if not isiterable(ring_lw):
+    if not hs_utils.isiterable(ring_lw):
         ring_lw = np.ones((probe_size_y, probe_size_x)) * ring_lw
 
     if ring_e_x is None:
         plot_ring_e = False
     else:
         plot_ring_e = True
-        if not isiterable(ring_e_x):
+        if not hs_utils.isiterable(ring_e_x):
             ring_e_x = np.ones((probe_size_y, probe_size_x)) * ring_e_x
-    if not isiterable(ring_e_y):
+    if not hs_utils.isiterable(ring_e_y):
         ring_e_y = np.ones((probe_size_y, probe_size_x)) * ring_e_y
-    if not isiterable(ring_e_semi_len0):
+    if not hs_utils.isiterable(ring_e_semi_len0):
         ring_e_semi_len0 = np.ones((probe_size_y, probe_size_x)) * ring_e_semi_len0
-    if not isiterable(ring_e_semi_len1):
+    if not hs_utils.isiterable(ring_e_semi_len1):
         ring_e_semi_len1 = np.ones((probe_size_y, probe_size_x)) * ring_e_semi_len1
-    if not isiterable(ring_e_I):
+    if not hs_utils.isiterable(ring_e_I):
         ring_e_I = np.ones((probe_size_y, probe_size_x)) * ring_e_I
-    if not isiterable(ring_e_lw):
+    if not hs_utils.isiterable(ring_e_lw):
         ring_e_lw = np.ones((probe_size_y, probe_size_x)) * ring_e_lw
-    if not isiterable(ring_e_r):
+    if not hs_utils.isiterable(ring_e_r):
         ring_e_r = np.ones((probe_size_y, probe_size_x)) * ring_e_r
 
     signal_shape = (probe_size_y, probe_size_x, image_size_y, image_size_x)

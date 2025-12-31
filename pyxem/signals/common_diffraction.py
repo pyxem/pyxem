@@ -24,10 +24,7 @@ import hyperspy.api as hs
 from traits.trait_base import Undefined
 from pyxem import CUPY_INSTALLED
 
-try:
-    import hyperspy.misc.dask_utils as hs_dask_utils
-except ImportError:
-    import hyperspy.misc.utils as hs_dask_utils
+import hyperspy.misc.dask_utils as hs_dask_utils
 from hyperspy.misc.utils import add_scalar_axis
 from tlz import concat
 

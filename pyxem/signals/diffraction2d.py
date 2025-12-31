@@ -27,7 +27,7 @@ import warnings
 
 import hyperspy.api as hs
 from hyperspy.signals import Signal2D, BaseSignal, LazySignal
-from hyperspy.misc.utils import isiterable
+import hyperspy.misc.utils as hs_utils
 from hyperspy.axes import UniformDataAxis
 
 from pyxem.signals import (
@@ -248,7 +248,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         if shift_x is not None and shift_y is not None:
             shifts = [-shift_x, -shift_y]
-            if isiterable(shift_x) or isiterable(shift_y):
+            if hs_utils.isiterable(shift_x) or hs_utils.isiterable(shift_y):
                 # shifts depend on navigation position
                 shifts = BaseSignal(np.stack(shifts)).transpose(signal_axes=(-1,))
 
@@ -802,7 +802,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
                 self.add_marker(marker)
 
         if prefilter_sigma is not None:
-            if not isiterable(prefilter_sigma):
+            if not hs_utils.isiterable(prefilter_sigma):
                 # Prefilter in navigation space only
                 prefilter_sigma = (
                     prefilter_sigma,

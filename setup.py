@@ -99,6 +99,7 @@ setup(
         "psutil",
         "scikit-image   >= 0.19.0, !=0.21.0",  # regression in ellipse fitting"
         "scikit-learn   >= 1.0",
+        "scikit-learn   >= 1.1.0",
         "shapely        > 2.0.0",  # major changes
         "scipy",
         "tqdm",

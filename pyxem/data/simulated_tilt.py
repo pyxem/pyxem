@@ -1,7 +1,7 @@
 import numpy as np
 from pyxem.data.dummy_data import make_diffraction_test_data as mdtd
 import hyperspy.api as hs
-from hyperspy.misc.utils import isiterable
+import hyperspy.misc.utils as hs_utils
 
 
 def tilt_boundary_data(correct_pivot_point=True, spacing=20, spot_radius=7):
@@ -24,7 +24,7 @@ def tilt_boundary_data(correct_pivot_point=True, spacing=20, spot_radius=7):
     ElectronDiffraction2D
         A signal of diffraction patterns across a grain boundary.
     """
-    if not isiterable(spacing):
+    if not hs_utils.isiterable(spacing):
         spacing = (spacing, spacing)
 
     di = mdtd.DiffractionTestImage(disk_r=spot_radius, intensity_noise=False)
