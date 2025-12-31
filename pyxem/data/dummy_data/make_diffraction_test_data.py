@@ -17,15 +17,13 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import numpy as np
+import scipy
+import skimage
 from tqdm import tqdm
-from scipy.ndimage import rotate, gaussian_filter
-from scipy.signal import convolve2d
-from skimage import morphology
-import dask.array as da
 
 import hyperspy.misc.utils as hs_utils
 
-from pyxem.signals import Diffraction2D, LazyDiffraction2D
+from pyxem import signals
 import pyxem.utils.ransac_ellipse_tools as ret
 
 
@@ -566,12 +564,14 @@ class MakeTestData:
 
     def blur(self):
         if self.blur_on:
-            self.z_blurred = gaussian_filter(self.z_downscaled, sigma=self.blur_sigma)
+            self.z_blurred = scipy.ndimage.gaussian_filter(
+                self.z_downscaled, sigma=self.blur_sigma
+            )
         else:
             self.z_blurred = self.z_downscaled
 
     def to_signal(self):
-        self.signal = Diffraction2D(self.z_blurred)
+        self.signal = signals.Diffraction2D(self.z_blurred)
         self.signal.axes_manager[0].scale = self.scale
         self.signal.axes_manager[1].scale = self.scale
 
@@ -801,7 +801,7 @@ def generate_4d_data(
         ring_e_r = np.ones((probe_size_y, probe_size_x)) * ring_e_r
 
     signal_shape = (probe_size_y, probe_size_x, image_size_y, image_size_x)
-    s = Diffraction2D(np.zeros(shape=signal_shape))
+    s = signals.Diffraction2D(np.zeros(shape=signal_shape))
     for i in tqdm(s, desc="Make test data", disable=not show_progressbar):
         index = s.axes_manager.indices[::-1]
         test_data = MakeTestData(
@@ -840,10 +840,12 @@ def generate_4d_data(
             )
     s.axes_manager.indices = [0] * s.axes_manager.navigation_dimension
     if lazy:
+        import dask.array as da
+
         if lazy_chunks is None:
             lazy_chunks = 10, 10, 10, 10
         data_lazy = da.from_array(s.data, lazy_chunks)
-        s = LazyDiffraction2D(data_lazy)
+        s = signals.LazyDiffraction2D(data_lazy)
     return s
 
 
@@ -1059,12 +1061,12 @@ class DiffractionTestImage:
                 dr = np.hypot(x - cx, y - cy)
                 i = self._get_diff_intensity_reduction(dr, i)
             image[y, x] = i
-        disk = morphology.disk(self.disk_r, dtype=dtype)
-        image = convolve2d(image, disk, mode="same")
+        disk = skimage.morphology.disk(self.disk_r, dtype=dtype)
+        image = scipy.signal.convolve2d(image, disk, mode="same")
         if self.rotation != 0:
-            image = rotate(image, self.rotation, reshape=False)
+            image = scipy.ndimage.rotate(image, self.rotation, reshape=False)
         if self.blur != 0:
-            image = gaussian_filter(image, self.blur)
+            image = scipy.ndimage.gaussian_filter(image, self.blur)
         if self._background_lorentz_width is not False:
             image += self._get_background_lorentz()
         if self.intensity_noise is not False:
@@ -1073,7 +1075,7 @@ class DiffractionTestImage:
         return image
 
     def get_signal(self):
-        s = Diffraction2D(self.get_diffraction_test_image())
+        s = signals.Diffraction2D(self.get_diffraction_test_image())
         return s
 
     def plot(self):
@@ -1157,7 +1159,7 @@ class DiffractionTestDataset:
                     self.data[ix, iy, :, :] += image_noise * self.noise
 
     def get_signal(self):
-        s = Diffraction2D(self.data)
+        s = signals.Diffraction2D(self.data)
         return s
 
     def plot(self):

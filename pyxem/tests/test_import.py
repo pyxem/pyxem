@@ -43,3 +43,17 @@ def test_import_utils():
 
     for obj_name in pyxem.utils.__all__:
         getattr(pyxem.utils, obj_name)
+
+
+def test_import_data():
+    import pyxem.data
+
+    for obj_name in pyxem.data.__all__:
+        getattr(pyxem.data, obj_name)
+
+
+def test_import_generators():
+    import pyxem.generators
+
+    for obj_name in pyxem.generators.__all__:
+        getattr(pyxem.generators, obj_name)

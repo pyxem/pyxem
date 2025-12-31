@@ -1,6 +1,6 @@
 from pyxem.data.dummy_data import CrystalSTEMSimulation
-from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
-from pyxem.data.simulated_fe import fe_fcc_phase
+from pyxem import signals
+from pyxem.data._simulated_fe import fe_fcc_phase
 
 
 def simulated_overlap(
@@ -31,7 +31,7 @@ def simulated_overlap(
     arr = sim.make_4d_stem(
         num_electrons=num_electrons, noise_level=noise_level, radius=radius
     )
-    signal = ElectronDiffraction2D(arr)
+    signal = signals.ElectronDiffraction2D(arr)
     signal.axes_manager.signal_axes[1].scale = k_range / (recip_space_pixels / 2)
     signal.axes_manager.signal_axes[0].scale = k_range / (recip_space_pixels / 2)
     signal.calibration.center = None

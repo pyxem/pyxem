@@ -1,15 +1,15 @@
 import numpy as np
-from orix.quaternion import Rotation
-from diffsims.generators.simulation_generator import SimulationGenerator
-from pyxem.signals import Diffraction2D
-from pyxem.data import si_phase
-from skimage.draw import ellipse, disk
-from scipy.ndimage import gaussian_filter
+import scipy
+import skimage
+
 import numpy.typing as npt
+
+from pyxem.data import si_phase
+from pyxem import signals
 
 
 def create_diffraction_pattern(
-    simulation: SimulationGenerator,
+    simulation,
     shape: tuple = (512, 512),
     direct_beam_position: tuple = None,
     radius: int = 20,
@@ -78,7 +78,7 @@ def create_diffraction_pattern(
         return pattern
     else:
         for cord, inten in zip(spot_coords, spot_intens):
-            rr, cc = disk(cord[:2], radius, shape=shape)
+            rr, cc = skimage.draw.disk(cord[:2], radius, shape=shape)
             pattern[rr, cc] = inten
     if num_electrons is not None:
         total = np.sum(spot_intens) * radius**2 * np.pi
@@ -119,6 +119,9 @@ def simulated_strain(
     Diffraction2D
         A simulated diffraction pattern with applied strain.
     """
+    from diffsims.generators.simulation_generator import SimulationGenerator
+    from orix.quaternion import Rotation
+
     if strain_matrix is None:
         strain_matrix = np.array([[0.1, 0.05, 0], [0.15, 0.2, 0], [0, 0, 1]])
     p = si_phase()
@@ -138,10 +141,10 @@ def simulated_strain(
     c = navigation_shape[1] // 2
     r_rad = int(np.round(r * 0.5))
     c_rad = int(np.round(c * 0.7))
-    rr, cc = ellipse(r, c, r_radius=r_rad, c_radius=c_rad)
+    rr, cc = skimage.draw.ellipse(r, c, r_radius=r_rad, c_radius=c_rad)
     precip[rr, cc] = 1
 
-    gaussian_filter(precip, sigma=3, output=precip)
+    scipy.ndimage.gaussian_filter(precip, sigma=3, output=precip)
 
     data = np.empty(precip.shape + signal_shape)
 
@@ -155,7 +158,7 @@ def simulated_strain(
             transformation_matrix=t,
         )
 
-    strained = Diffraction2D(data)
+    strained = signals.Diffraction2D(data)
 
     strained.axes_manager.signal_axes.set(
         name=("kx", "ky"), units=r"$\AA^{-1}$", scale=0.01

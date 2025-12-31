@@ -24,7 +24,7 @@ from pytest import approx
 import numpy as np
 
 from pyxem.common import VisibleDeprecationWarning
-import pyxem.data.dummy_data.dummy_data as dd
+import pyxem.data.dummy_data as dd
 from pyxem.signals import BeamShift, LazyBeamShift, Diffraction2D
 
 

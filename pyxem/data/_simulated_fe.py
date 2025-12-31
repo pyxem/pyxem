@@ -1,9 +1,7 @@
 import numpy as np
-from orix.crystal_map import Phase
-from orix.quaternion import Rotation
 from diffpy.structure import Atom, Lattice, Structure
 from diffsims.generators.simulation_generator import SimulationGenerator
-from pyxem.signals import Diffraction2D
+from pyxem import signals
 import skimage
 
 
@@ -12,6 +10,8 @@ def fe_fcc_phase():
     a lattice parameter of 3.571 Å.
 
     """
+    from orix.crystal_map import Phase
+
     a = 3.571
     latt = Lattice(a, a, a, 90, 90, 90)
     atom_list = []
@@ -28,6 +28,8 @@ def fe_bcc_phase():
     a lattice parameter of 2.866 Å.
 
     """
+    from orix.crystal_map import Phase
+
     a = 2.866
     latt = Lattice(a, a, a, 90, 90, 90)
     atom_list = []
@@ -40,6 +42,8 @@ def fe_bcc_phase():
 
 
 def fe_multi_phase_grains(num_grains=2, seed=2, size=20, recip_pixels=128):
+    from orix.quaternion import Rotation
+
     bcc = fe_bcc_phase()
     fcc = fe_fcc_phase()
     gen = SimulationGenerator()
@@ -81,7 +85,7 @@ def fe_multi_phase_grains(num_grains=2, seed=2, size=20, recip_pixels=128):
             grain_data[navigator == i + 1] = dps_bcc[i][np.newaxis]
         else:
             grain_data[navigator == i + 1] = dps_fcc[i % num_grains][np.newaxis]
-    grains = Diffraction2D(grain_data)
+    grains = signals.Diffraction2D(grain_data)
     grains.axes_manager.signal_axes[0].name = "kx"
     grains.axes_manager.signal_axes[1].name = "kx"
     grains.axes_manager.signal_axes[0].units = r"$\AA^{-1}$"

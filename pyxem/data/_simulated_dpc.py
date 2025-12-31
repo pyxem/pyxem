@@ -1,7 +1,8 @@
-import pyxem as pxm
-from skimage.draw import disk
 import numpy as np
-from scipy.ndimage import gaussian_filter
+import scipy
+import skimage
+
+import pyxem as pxm
 
 
 def simulated_stripes(beam_shifts=None):
@@ -21,7 +22,7 @@ def simulated_stripes(beam_shifts=None):
     if beam_shifts is None:
         beam_shifts = np.array([[3, 3], [-3, 3]])
     data = np.zeros((60, 60, 64, 64))
-    rr, cc = disk(center=(32, 32), radius=16)
+    rr, cc = skimage.draw.disk(center=(32, 32), radius=16)
     data[:, :, rr, cc] = 1
     s = pxm.signals.ElectronDiffraction2D(data)
     shifts = np.zeros((60, 60, 2))
@@ -101,13 +102,13 @@ def simulated_pn_junction(beam_shifts=None):
     if beam_shifts is None:
         beam_shifts = np.array([[4, 3]])
     data = np.zeros((30, 30, 256, 256))
-    rr, cc = disk(center=(128, 128), radius=72)
+    rr, cc = skimage.draw.disk(center=(128, 128), radius=72)
     data[:, :, rr, cc] = 100
     data = np.random.poisson(data)  # Add Poisson noise
     s = pxm.signals.ElectronDiffraction2D(data)
     shifts = np.zeros((30, 30, 2))
     shifts[:, 12:18] = beam_shifts
-    shifts = gaussian_filter(shifts, sigma=1.0)  # Smooth the shifts
+    shifts = scipy.ndimage.gaussian_filter(shifts, sigma=1.0)  # Smooth the shifts
     bs = pxm.signals.BeamShift(shifts)
 
     s.center_direct_beam(shifts=bs)  # Shift the direct beam

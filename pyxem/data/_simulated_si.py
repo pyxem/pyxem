@@ -1,11 +1,12 @@
 import numpy as np
+import skimage
+
 from orix.crystal_map import Phase
 from orix.quaternion import Rotation, Orientation
 from diffpy.structure import Atom, Lattice, Structure
 from diffsims.generators.simulation_generator import SimulationGenerator
-from scipy.ndimage import gaussian_filter1d
-from pyxem.signals import Diffraction1D, Diffraction2D
-import skimage
+
+from pyxem import signals
 
 
 def si_phase():
@@ -51,7 +52,7 @@ def si_tilt():
         (4, 2, 1, 1),
     )
     total = np.hstack((top, bottom))
-    tilt = Diffraction2D(total)
+    tilt = signals.Diffraction2D(total)
     tilt.axes_manager.signal_axes[0].name = "kx"
     tilt.axes_manager.signal_axes[1].name = "kx"
     tilt.axes_manager.signal_axes[0].units = r"$\AA^{-1}$"
@@ -89,7 +90,7 @@ def si_grains_from_orientations(
     grain_data = np.empty((size, size, recip_pixels, recip_pixels))
     for i in range(num_grains):
         grain_data[navigator == i + 1] = dps[i][np.newaxis]
-    grains = Diffraction2D(grain_data)
+    grains = signals.Diffraction2D(grain_data)
     grains.axes_manager.signal_axes[0].name = "kx"
     grains.axes_manager.signal_axes[1].name = "kx"
     grains.axes_manager.signal_axes[0].units = r"$\AA^{-1}$"
@@ -149,7 +150,7 @@ def si_rotations_line():
     for i in range(rotations.size):
         dp = np.flipud(sim.irot[i].get_diffraction_pattern(sigma=5, shape=(256, 256)))
         dps.append(dp)
-    line = Diffraction2D(np.array(dps))
+    line = signals.Diffraction2D(np.array(dps))
     line.axes_manager.signal_axes[0].name = "kx"
     line.axes_manager.signal_axes[1].name = "kx"
     line.axes_manager.signal_axes[0].units = r"$\AA^{-1}$"
@@ -176,7 +177,7 @@ def simulated1dsi(
     ).astype(int)
     x[int_points] = sim.intensities
     x = gaussian_filter1d(x, sigma)
-    s = Diffraction1D(x)
+    s = signals.Diffraction1D(x)
     s.axes_manager[0].name = "k"
     s.axes_manager[0].units = r"$\AA^{-1}$"
     s.axes_manager[0].scale = reciporical_radius / num_points
