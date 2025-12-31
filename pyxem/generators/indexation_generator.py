@@ -25,13 +25,7 @@ from transforms3d.euler import mat2euler, euler2mat
 from diffsims.utils.sim_utils import get_electron_wavelength
 
 from pyxem.signals import VectorMatchingResults
-from pyxem.utils.indexation_utils import (
-    index_magnitudes,
-    match_vectors,
-    OrientationResult,
-    get_nth_best_solution,
-    index_dataset_with_template_rotation,
-)
+from pyxem.utils import indexation_utils
 from pyxem.utils.vectors import detector_to_fourier
 from pyxem.utils._signals import (
     _select_method_from_method_dict,
@@ -187,7 +181,7 @@ class AcceleratedIndexationGenerator:
         Internally, this code is compiled to LLVM machine code, so stack traces are often hard to follow on failure. As such it is
         important to be careful with your parameters selection.
         """
-        result = index_dataset_with_template_rotation(
+        result = indexation_utils.index_dataset_with_template_rotation(
             self.signal, self.library, phases=include_phases, n_best=n_largest, **kwargs
         )
         return result
@@ -232,7 +226,9 @@ class ProfileIndexationGenerator:
         matching_results : ProfileIndexation
 
         """
-        return index_magnitudes(np.array(self.magnitudes), self.simulation, tolerance)
+        return indexation_utils.index_magnitudes(
+            np.array(self.magnitudes), self.simulation, tolerance
+        )
 
 
 def _refine_best_orientations(
@@ -305,7 +301,9 @@ def _refine_best_orientations(
         if verbose:  # pragma: no cover
             print(f"# {i}/{n_best} ({n_matches})")
 
-        solution = get_nth_best_solution(single_match_result, "vector", rank=i)
+        solution = indexation_utils.get_nth_best_solution(
+            single_match_result, "vector", rank=i
+        )
 
         result = _refine_orientation(
             solution,
@@ -540,7 +538,7 @@ class VectorIndexationGenerator:
         library = self.library
 
         matched = vectors.cartesian.map(
-            match_vectors,
+            indexation_utils.match_vectors,
             library=library,
             mag_tol=mag_tol,
             angle_tol=np.deg2rad(angle_tol),
