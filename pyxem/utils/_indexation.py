@@ -530,6 +530,8 @@ def _match_polar_to_polar_library_gpu(
     N is the number of templates and R the number of spots in the template
     with the maximum number of spots
     """
+    import cupy as cp
+
     correlation = cp.empty(
         (r_templates.shape[0], polar_image.shape[0]), dtype=cp.float32
     )
@@ -716,6 +718,8 @@ def _prepare_image_and_templates(
     theta[condition] = 0
     intensities[condition] = 0.0
     if is_cupy_array(polar_image):
+        import cupy as cp
+
         # send data to GPU
         r = cp.asarray(r)
         theta = cp.asarray(theta)
@@ -890,6 +894,8 @@ def _index_chunk(
 
 
 def _index_chunk_gpu(images, *args, **kwargs):
+    import cupy as cp
+
     gpu_im = cp.asarray(images)
     indexed_chunk = _index_chunk(gpu_im, *args, **kwargs)
     return cp.asnumpy(indexed_chunk)
@@ -960,6 +966,8 @@ def get_in_plane_rotation_correlation(
         max_r=polar_image.shape[1],
     )
     if is_cupy_array(polar_image):
+        import cupy as cp
+
         dispatcher = cp
         r = cp.asarray(r)
         theta = cp.asarray(theta)
@@ -1459,6 +1467,8 @@ def index_dataset_with_template_rotation(
             raise ValueError(
                 "There must be a CUDA enabled GPU and cupy must be installed."
             )
+        import cupy as cp
+
         dispatcher = cp
     else:
         dispatcher = np

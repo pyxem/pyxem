@@ -27,8 +27,6 @@ from transforms3d.euler import mat2euler
 
 from orix import crystal_map, projections, quaternion, vector
 
-from matplotlib.collections import QuadMesh
-from matplotlib.colors import Normalize
 import scipy
 
 import numpy as np
@@ -255,6 +253,7 @@ def get_ipf_annotation_markers(
     mesh : hs.plot.markers.Markers
         The color mesh for the IPF (using :class:`matplotlib.collections.QuadMesh`)
     """
+    from matplotlib.collections import QuadMesh
     from orix.plot import DirectionColorKeyTSL
 
     polygon_sector, texts, _, _ = get_ipf_outline(
@@ -320,6 +319,8 @@ def vectors_to_single_phase_ipf_markers(
     scale : float
         The scale (as a fraction of the axis) for the markers.
     """
+    from matplotlib.colors import Normalize
+
     offset = np.array([offset_x, offset_y])
 
     markers = []
@@ -883,6 +884,9 @@ class OrientationMap(DiffractionVectors2D):
         multiple different regions in the IPF.
 
         """
+        from matplotlib.collections import QuadMesh
+        from matplotlib.colors import Normalize
+
         phase_idx_signal = hs.signals.Signal1D(self.to_phase_index())
         phases = self.simulation.phases
         rotations = self.simulation.rotations
