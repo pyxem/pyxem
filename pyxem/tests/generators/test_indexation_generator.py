@@ -39,7 +39,7 @@ from pyxem.signals import (
     ElectronDiffraction2D,
     DiffractionVectors,
 )
-from pyxem.utils.indexation_utils import OrientationResult
+from pyxem.utils.indexation import OrientationResult
 from unittest.mock import Mock
 import sys
 

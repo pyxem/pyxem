@@ -30,7 +30,7 @@ from orix.crystal_map import CrystalMap
 from orix.vector import Vector3d
 
 from pyxem.signals import VectorMatchingResults, DiffractionVectors, OrientationMap
-from pyxem.utils.indexation_utils import OrientationResult, phase2dict
+from pyxem.utils.indexation import OrientationResult, phase2dict
 from pyxem.data import (
     si_grains,
     si_phase,

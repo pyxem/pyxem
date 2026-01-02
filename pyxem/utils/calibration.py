@@ -837,7 +837,7 @@ def find_diffraction_calibration(
     max_excitation_error : float
         Maximum exacitation error.  Default is 0.01.
     kwargs
-        Keyword arguments passed to :meth:`pyxem.utils.indexation_utils.index_dataset_with_template_rotation``.
+        Keyword arguments passed to :meth:`pyxem.utils.indexation.index_dataset_with_template_rotation``.
 
     Returns
     -------
@@ -946,7 +946,7 @@ def _calibration_iteration(
     max_excitation_error : float
         Maximum exacitation error.  Default is 0.01.
     kwargs
-        Keyword arguments passed to :meth:`pyxem.utils.indexation_utils.index_dataset_with_template_rotation`.
+        Keyword arguments passed to :meth:`pyxem.utils.indexation.index_dataset_with_template_rotation`.
 
     Returns
     -------
@@ -1005,14 +1005,14 @@ def _create_check_diflib(
     max_excitation_error : float
         Maximum exacitation error.  Default is 0.01.
     kwargs
-        Keyword arguments passed to :meth:`pyxem.utils.indexation_utils.index_dataset_with_template_rotation`.
+        Keyword arguments passed to :meth:`pyxem.utils.indexation.index_dataset_with_template_rotation`.
 
     Returns
     -------
     correlations : numpy.ndarray
     """
     # lazily import index_dataset_with_template_rotation
-    from pyxem.utils.indexation_utils import index_dataset_with_template_rotation
+    from pyxem.utils.indexation import index_dataset_with_template_rotation
 
     half_shape = (images.data.shape[-2] // 2, images.data.shape[-1] // 2)
     reciprocal_r = np.sqrt(half_shape[0] ** 2 + half_shape[1] ** 2) * calibration_guess

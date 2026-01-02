@@ -25,7 +25,7 @@ from transforms3d.euler import mat2euler, euler2mat
 from diffsims.utils.sim_utils import get_electron_wavelength
 
 from pyxem.signals import VectorMatchingResults
-from pyxem.utils import indexation_utils
+from pyxem.utils import indexation
 from pyxem.utils.vectors import detector_to_fourier
 from pyxem.utils._signals import (
     _select_method_from_method_dict,
@@ -181,7 +181,7 @@ class AcceleratedIndexationGenerator:
         Internally, this code is compiled to LLVM machine code, so stack traces are often hard to follow on failure. As such it is
         important to be careful with your parameters selection.
         """
-        result = indexation_utils.index_dataset_with_template_rotation(
+        result = indexation.index_dataset_with_template_rotation(
             self.signal, self.library, phases=include_phases, n_best=n_largest, **kwargs
         )
         return result
@@ -226,7 +226,7 @@ class ProfileIndexationGenerator:
         matching_results : ProfileIndexation
 
         """
-        return indexation_utils.index_magnitudes(
+        return indexation.index_magnitudes(
             np.array(self.magnitudes), self.simulation, tolerance
         )
 
@@ -301,7 +301,7 @@ def _refine_best_orientations(
         if verbose:  # pragma: no cover
             print(f"# {i}/{n_best} ({n_matches})")
 
-        solution = indexation_utils.get_nth_best_solution(
+        solution = indexation.get_nth_best_solution(
             single_match_result, "vector", rank=i
         )
 
@@ -538,7 +538,7 @@ class VectorIndexationGenerator:
         library = self.library
 
         matched = vectors.cartesian.map(
-            indexation_utils.match_vectors,
+            indexation.match_vectors,
             library=library,
             mag_tol=mag_tol,
             angle_tol=np.deg2rad(angle_tol),

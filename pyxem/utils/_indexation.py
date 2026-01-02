@@ -31,6 +31,7 @@ from orix.quaternion import Rotation
 import psutil
 import scipy
 
+from pyxem import CUPY_INSTALLED
 from pyxem.utils.diffraction import _cart2polar
 from pyxem.utils.vectors import get_rotation_matrix_between_vectors
 from pyxem.utils.vectors import get_angle_cartesian
@@ -50,14 +51,6 @@ from pyxem.utils.polar_transform_utils import (
 )
 from diffpy.structure import Atom, Structure, Lattice
 from orix.crystal_map import Phase
-
-try:
-    import cupy as cp
-
-    CUPY_INSTALLED = True
-    import cupyx.scipy as spgpu
-except ImportError:
-    CUPY_INSTALLED = False
 
 
 # container for OrientationResults
@@ -609,6 +602,8 @@ def _get_integrated_polar_templates(
     rows = dispatcher.arange(r_templates.shape[0]).repeat(r_templates.shape[1])
     out_shape = (r_templates.shape[0], r_max)
     if is_cupy_array(intensities_templates):
+        import cupyx.scipy as spgpu
+
         integrated_templates = spgpu.sparse.coo_matrix(
             (data, (rows, columns)), shape=out_shape
         ).toarray()

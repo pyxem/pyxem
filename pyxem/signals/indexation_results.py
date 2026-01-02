@@ -17,7 +17,7 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 from warnings import warn
-from typing import Sequence, Iterator
+from typing import Sequence, Iterator, Optional
 from traits.api import Undefined
 
 from hyperspy.signals import BaseSignal, LazySignal
@@ -34,7 +34,7 @@ import scipy
 import numpy as np
 import hyperspy.api as hs
 
-from pyxem.utils import indexation_utils
+from pyxem.utils import indexation
 from pyxem.signals import DiffractionVectors2D
 from pyxem.utils._signals import _transfer_navigation_axes
 from pyxem.utils.signal import compute_markers
@@ -67,7 +67,7 @@ def crystal_from_vector_matching(z_matches):
     results_array = np.empty(3, dtype="object")
 
     # get best matching phase
-    best_match = indexation_utilsget_nth_best_solution(
+    best_match = indexation.get_nth_best_solution(
         z_matches, "vector", key="total_error", descending=False
     )
     results_array[0] = best_match.phase_index
@@ -160,7 +160,7 @@ def _get_second_best_phase(z):
 
 
 def get_ipf_outline(
-    phase: crystal_map.Phase,
+    phase: "crystal_map.Phase",
     include_labels: bool = True,
     offset_x: float = 0.85,
     offset_y: float = 0.85,
@@ -233,7 +233,7 @@ def get_ipf_outline(
 
 
 def get_ipf_annotation_markers(
-    phase: crystal_map.Phase, offset: float = 0.85, scale: float = 0.2
+    phase: "crystal_map.Phase", offset: float = 0.85, scale: float = 0.2
 ):
     """Get the outline of the IPF for the orientation map as a marker in the
     upper right hand corner including labels if desired. As well as the color
@@ -293,8 +293,8 @@ def get_ipf_annotation_markers(
 
 
 def vectors_to_single_phase_ipf_markers(
-    vectors: vector.Vector3d,
-    phase: crystal_map.Phase,
+    vectors: "vector.Vector3d",
+    phase: "crystal_map.Phase",
     normalized_correlation: np.ndarray,
     offset_x: float = 0.85,
     offset_y: float = 0.85,
@@ -485,7 +485,7 @@ def vectors_from_orientation_map(
         phase = phases[phase_index[index]]
         intensities = intensities[index]
         hkl = hkl[index]
-    phase = indexation_utils.dict2phase(**phase)
+    phase = indexation.dict2phase(**phase)
     # Copy manually, as deepcopy adds a lot of overhead with the phase
     vectors = DiffractingVector(phase, xyz=data.copy())
     # Flip y, as discussed in https://github.com/pyxem/pyxem/issues/925
@@ -638,7 +638,7 @@ class OrientationMap(DiffractionVectors2D):
         else:
             return None
 
-    def to_single_phase_orientations(self, **kwargs) -> quaternion.Orientation:
+    def to_single_phase_orientations(self, **kwargs) -> "quaternion.Orientation":
         """Convert the orientation map to an `Orientation`-object,
         given a single-phase simulation.
 
@@ -701,7 +701,7 @@ class OrientationMap(DiffractionVectors2D):
 
         data, intensities, phases, phase_indices, hkl = self.get_simulation_arrays()
 
-        phases_dicts = [indexation_utils.phase2dict(p) for p in phases]
+        phases_dicts = [indexation.phase2dict(p) for p in phases]
         v = self.map(
             vectors_from_orientation_map,
             vectors=data,
@@ -743,7 +743,7 @@ class OrientationMap(DiffractionVectors2D):
             phase_indices = np.zeros(self.simulation.rotations.size, dtype=int)
         return data, intensities, phases, phase_indices, hkl
 
-    def to_crystal_map(self) -> crystal_map.CrystalMap:
+    def to_crystal_map(self) -> "crystal_map.CrystalMap":
         """Convert the orientation map to an :class:`orix.crystal_map.CrystalMap` object
 
         Returns
@@ -1000,7 +1000,7 @@ class OrientationMap(DiffractionVectors2D):
         intensity_scale: float = 1,
         fast: bool = True,
         **kwargs,
-    ) -> Sequence[hs.plot.markers.Markers]:
+    ) -> Sequence["hs.plot.markers.Markers"]:
         """Convert the orientation map to a set of markers for plotting.
 
         Parameters
@@ -1116,7 +1116,7 @@ class OrientationMap(DiffractionVectors2D):
         marker_colors: str = ("red", "blue", "green", "orange", "purple"),
         lazy_output: bool = None,
         **kwargs,
-    ) -> Iterator[hs.plot.markers.Markers]:
+    ) -> Iterator["hs.plot.markers.Markers"]:
         return self.to_polar_markers(
             n_best=n_best,
             marker_colors=marker_colors,
@@ -1130,7 +1130,7 @@ class OrientationMap(DiffractionVectors2D):
         marker_colors: str = ("red", "blue", "green", "orange", "purple"),
         lazy_output: bool = None,
         **kwargs,
-    ) -> Iterator[hs.plot.markers.Markers]:
+    ) -> Iterator["hs.plot.markers.Markers"]:
         """
         Convert the orientation map to a set of markers for plotting in polar coordinates.
 
@@ -1203,7 +1203,7 @@ class OrientationMap(DiffractionVectors2D):
 
     def to_ipf_colormap(
         self,
-        direction: vector.Vector3d = vector.Vector3d.zvector(),
+        direction: Optional["vector.Vector3d"] = None,
         add_markers: bool = True,
     ):
         """Create a colored navigator and a legend (in the form of a marker) which can be passed as the
@@ -1211,8 +1211,8 @@ class OrientationMap(DiffractionVectors2D):
 
         Parameters
         ----------
-        direction : Vector3d
-            The direction to plot the IPF in
+        direction : "orix.vector.Vector3d", optional
+            The direction to plot the IPF in. If None, the z-direction will be used.
         add_markers : bool
             If True, the markers for the IPF will be added to the navigator as permanent markers.
 
@@ -1221,6 +1221,9 @@ class OrientationMap(DiffractionVectors2D):
         hs.signals.BaseSignal
         """
         from orix.plot import IPFColorKeyTSL
+
+        if direction is None:
+            direction = vector.Vector3d.zvector()
 
         oris = self.to_single_phase_orientations()[:, :, 0]
         ipfcolorkey = IPFColorKeyTSL(oris.symmetry, direction)

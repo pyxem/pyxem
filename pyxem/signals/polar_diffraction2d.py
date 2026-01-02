@@ -380,7 +380,7 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
             .. bibliography::
 
         """
-        from pyxem.utils._indexation_utils import (
+        from pyxem.utils._indexation import (
             _mixed_matching_lib_to_polar,
             _get_integrated_polar_templates,
             _norm_rows,

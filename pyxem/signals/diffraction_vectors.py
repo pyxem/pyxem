@@ -675,7 +675,7 @@ class DiffractionVectors(BaseSignal):
             If the navigation dimension should be flattened based on the pixel position
             or the real value as determined by the scale and offset.
         """
-        from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
+        from pyxem.signals import DiffractionVectors2D
 
         if self.axes_manager._navigation_shape_in_array == ():
             return self

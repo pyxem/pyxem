@@ -17,7 +17,8 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from pyxem.utils import _indexation_utils as iutls
+from pyxem.utils import _indexation as iutls
+from pyxem.utils import indexation
 from pyxem.utils import polar_transform_utils as ptutls
 import numpy as np
 import pytest
@@ -98,7 +99,7 @@ def test_match_image_to_template(mock_sim, rot, dr, dt, nim, nt):
     y = 40 - y
     tim[np.rint(y).astype(np.int32), np.rint(x).astype(np.int32)] = 1.0
     # compare image and template and retrieve the same angle
-    a, c = iutls.get_in_plane_rotation_correlation(
+    a, c = indexation.get_in_plane_rotation_correlation(
         tim,
         mock_sim,
         find_direct_beam=False,
@@ -130,7 +131,7 @@ def test_match_image_to_template_gpu(mock_sim, rot, dr, dt, nim, nt):
     y = 40 - y
     tim[np.rint(y).astype(np.int32), np.rint(x).astype(np.int32)] = 1.0
     # compare image and template and retrieve the same angle
-    a, c = iutls.get_in_plane_rotation_correlation(
+    a, c = indexation.get_in_plane_rotation_correlation(
         tim,
         mock_sim,
         find_direct_beam=False,
@@ -190,7 +191,7 @@ def test_match_polar_to_polar_template_gpu():
 def test_get_in_plane_rotation_correlation(simulations, itf, norim, nortemp):
     image = np.ones((123, 50))
     simulation = simulations[0]
-    ang, cor = iutls.get_in_plane_rotation_correlation(
+    ang, cor = indexation.get_in_plane_rotation_correlation(
         image,
         simulation,
         intensity_transform_function=itf,
@@ -214,7 +215,7 @@ def test_get_in_plane_rotation_correlation(simulations, itf, norim, nortemp):
 def test_get_in_plane_rotation_correlation_gpu(simulations, itf, norim, nortemp):
     image = cp.ones((123, 50))
     simulation = simulations[0]
-    ang, cor = iutls.get_in_plane_rotation_correlation(
+    ang, cor = indexation.get_in_plane_rotation_correlation(
         image,
         simulation,
         intensity_transform_function=itf,
@@ -280,7 +281,7 @@ def test_match_polar_to_polar_library(dtype):
 )
 def test_correlate_library_to_pattern(simulations, norim, nortemp):
     image = np.ones((123, 50))
-    index, ang, cor, ang_m, cor_m = iutls.correlate_library_to_pattern(
+    index, ang, cor, ang_m, cor_m = indexation.correlate_library_to_pattern(
         image,
         simulations,
         delta_r=2.6,
@@ -338,7 +339,7 @@ def test_match_library_to_polar_fast():
 )
 def test_correlate_library_to_pattern_fast(simulations, norim, nortemp):
     image = np.ones((123, 50))
-    cor = iutls.correlate_library_to_pattern_fast(
+    cor = indexation.correlate_library_to_pattern_fast(
         image,
         simulations,
         delta_r=2.6,
@@ -359,7 +360,7 @@ def test_correlate_library_to_pattern_fast(simulations, norim, nortemp):
 @skip_cupy
 def test_correlate_library_to_pattern_fast_gpu(simulations, norim, nortemp):
     image = cp.ones((123, 50))
-    cor = iutls.correlate_library_to_pattern_fast(
+    cor = indexation.correlate_library_to_pattern_fast(
         image,
         simulations,
         delta_r=2.6,
@@ -467,7 +468,7 @@ def test_mixed_matching_lib_to_polar(nbest):
 @pytest.mark.slow
 def test_get_n_best_matches(simulations, nbest, frk, norim, nortemp):
     image = np.ones((123, 50))
-    indx, angs, cor, signs = iutls.get_n_best_matches(
+    indx, angs, cor, signs = indexation.get_n_best_matches(
         image,
         simulations,
         n_best=nbest,
@@ -491,7 +492,7 @@ def test_get_n_best_matches(simulations, nbest, frk, norim, nortemp):
 @pytest.mark.slow
 def test_get_n_best_matches_gpu(simulations, nbest, frk, norim, nortemp):
     image = cp.ones((123, 50))
-    indx, angs, cor, signs = iutls.get_n_best_matches(
+    indx, angs, cor, signs = indexation.get_n_best_matches(
         image,
         simulations,
         n_best=nbest,
@@ -556,7 +557,7 @@ def test_index_dataset_with_template_rotation(
     library, sigdim, n_best, frac_keep, norim, nort, chu
 ):
     signal = create_dataset(sigdim)
-    result = iutls.index_dataset_with_template_rotation(
+    result = indexation.index_dataset_with_template_rotation(
         signal,
         library,
         n_best=n_best,
@@ -576,7 +577,7 @@ def test_index_dataset_with_template_rotation(
 def test_fail_index_dataset_with_template_rot(library):
     signal = create_dataset((3, 2, 4, 1, 2))
     with pytest.raises(ValueError):
-        result = iutls.index_dataset_with_template_rotation(
+        result = indexation.index_dataset_with_template_rotation(
             signal,
             library,
         )
@@ -612,7 +613,7 @@ def test_index_dataset_with_template_rotation_gpu(
     library, sigdim, maxr, n_best, frac_keep, norim, nort, chu
 ):
     signal = create_dataset(sigdim)
-    result, dicto = iutls.index_dataset_with_template_rotation(
+    result, dicto = indexation.index_dataset_with_template_rotation(
         signal,
         library,
         n_best=n_best,
