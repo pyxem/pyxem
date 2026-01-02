@@ -340,7 +340,7 @@ class BeamShift(DiffractionVectors1D):
         --------
         >>> import pyxem as pxm
         >>> s = pxm.data.tilt_boundary_data(correct_pivot_point=False)
-        >>> shifts = s.get_beam_shift_signal(method="blur", sigma=5)
+        >>> shifts = s.get_direct_beam_position(method="blur", sigma=5)
         >>> shifts.plot_on_signal(s)
 
         """
@@ -723,12 +723,12 @@ class BeamShift(DiffractionVectors1D):
 
         Example
         -------
-
         Rotate beam shifts by 10 degrees clockwise
 
         >>> s = pxm.data.dummy_data.get_simple_beam_shift_signal()
         >>> s_new = s.rotate_beam_shifts(10)
         >>> s_new.plot()
+        [<Axes: >, <Axes: >]
 
         """
         angle_rad = np.deg2rad(angle)
@@ -758,6 +758,7 @@ class BeamShift(DiffractionVectors1D):
         >>> s = pxm.data.dummy_data.get_simple_beam_shift_signal()
         >>> s_rot = s.rotate_scan_dimensions(10)
         >>> s_rot.plot()
+        [<Axes: >, <Axes: >]
 
         """
         s_temp = self.T

@@ -673,14 +673,6 @@ def remove_bad_pixels(z, bad_pixels):
     Returns
     -------
     data_output : Dask array
-
-    Examples
-    --------
-    >>> import pyxem.utils.dask_tools as dt
-    >>> s = pxm.data.dummy_data.dummy_data.get_dead_pixel_signal(lazy=True)
-    >>> dead_pixels = dt._find_dead_pixels(s.data)
-    >>> data_output = dt._remove_bad_pixels(s.data, dead_pixels)
-
     """
     z[bad_pixels] = 0
     bad_pixels_ind = np.transpose(np.array(np.where(bad_pixels)))

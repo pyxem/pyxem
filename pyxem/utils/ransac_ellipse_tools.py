@@ -89,9 +89,10 @@ def is_ellipse_good(
 
     Examples
     --------
+    >>> import skimage
     >>> import pyxem.utils.ransac_ellipse_tools as ret
     >>> params = ret._make_ellipse_model_params_focus(30, 50, 30, 20, 0)
-    >>> model = ret.EllipseModel(*params)
+    >>> model = skimage.measure.EllipseModel(*params)
     >>> is_good = ret.is_ellipse_good(
     ...         ellipse_model=model, data=None, xf=30, yf=50, rf_lim=5)
 
@@ -334,7 +335,8 @@ def get_ellipse_model_ransac_single_frame(
     Examples
     --------
     >>> import pyxem.utils.ransac_ellipse_tools as ret
-    >>> data = ret.EllipseModel((128, 130), (50, 60), 0.2).predict_xy(
+    >>> import skimage
+    >>> data = skimage.measure.EllipseModel((128, 130), (50, 60), 0.2).predict_xy(
     ...        np.arange(0, 2*np.pi, 0.5))
     >>> ellipse_model, inliers = ret.get_ellipse_model_ransac_single_frame(
     ...        data, xf=128, yf=128, rf_lim=5, semi_len_min=45,
