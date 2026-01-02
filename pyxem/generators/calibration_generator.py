@@ -137,7 +137,7 @@ class CalibrationGenerator:
 
         See Also
         --------
-            pyxem.utils.calibration_utils.call_ring_pattern
+            pyxem.utils.calibration.call_ring_pattern
 
         """
         from diffsims.utils.ring_pattern_utils import (

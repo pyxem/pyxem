@@ -47,7 +47,7 @@ extra_feature_requirements = {
         "coverage   >= 7.0",
     ],
     "dev": ["black ~= 24.1", "pre-commit >=1.16"],
-    "gpu": ["cupy >= 9.0.0"],
+    "gpu": ["cupy >= 9.0.0", "numba-cuda"],
     "dask": ["dask-image", "distributed"],
 }
 

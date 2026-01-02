@@ -18,15 +18,17 @@
 
 """Utilities for indexing electron diffraction spot patterns."""
 
-import cupy as cp
 import numpy as np
 
-
+import pyxem
 from pyxem.utils.cuda_utils import (
     _correlate_polar_image_to_library_gpu,
     TPB,
 )
 from pyxem.utils._indexation import _index_chunk
+
+if pyxem.CUPY_INSTALLED:
+    import cupy as cp
 
 
 def _match_polar_to_polar_library_gpu(
