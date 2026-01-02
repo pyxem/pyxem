@@ -19,7 +19,7 @@
 """Utils for slicing on vectors signals."""
 
 import numpy as np
-from hyperspy.signal import BaseSignal
+from hyperspy import signals
 
 
 def slice_signal(arr, col_slice, row_slice):
@@ -58,7 +58,10 @@ class Slicer:
         if self.signal.ragged:
             kwargs = dict(output_signal_size=(), output_dtype=object)
             if not isinstance(row_slice, slice):
-                if not isinstance(row_slice, BaseSignal) or not row_slice.ragged:
+                if (
+                    not isinstance(row_slice, signals.BaseSignal)
+                    or not row_slice.ragged
+                ):
                     raise ValueError(
                         "Only ragged boolean indexing is currently supported for ragged signals"
                     )

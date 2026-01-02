@@ -18,7 +18,7 @@
 import pytest
 
 import numpy as np
-from hyperspy._signals.lazy import LazySignal
+from hyperspy.signals import LazySignal
 
 from pyxem.signals.polar_vectors import PolarVectors, LazyPolarVectors
 

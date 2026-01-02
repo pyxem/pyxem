@@ -17,8 +17,7 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from hyperspy.signals import Signal1D
-from hyperspy._signals.lazy import LazySignal
+from hyperspy.signals import Signal1D, LazySignal
 
 import numpy as np
 from fractions import Fraction as frac

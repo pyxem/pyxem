@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-from hyperspy._signals.lazy import LazySignal
+from hyperspy.signals import LazySignal
 
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.utils.vectors import (

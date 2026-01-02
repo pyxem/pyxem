@@ -17,8 +17,7 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import warnings
-from hyperspy.signals import Signal1D, Signal2D
-from hyperspy._signals.lazy import LazySignal
+from hyperspy.signals import Signal1D, Signal2D, LazySignal
 from pyxem.utils._deprecated import deprecated
 
 
