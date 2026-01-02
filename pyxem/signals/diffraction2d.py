@@ -2028,7 +2028,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             radial_range=radial_range,
             azimuthal_range=azimuth_range,
         )
-        if self._gpu and CUPY_INSTALLED:  # pragma: no cover
+        if self._gpu:  # pragma: no cover
             import cupy as cp
 
             from pyxem.utils._azimuthal_integrations import (

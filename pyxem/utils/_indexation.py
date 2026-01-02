@@ -23,24 +23,16 @@ from itertools import combinations
 from operator import attrgetter
 import warnings
 
-from dask.diagnostics import ProgressBar
 from numba import njit, prange
 import numpy as np
-from orix.crystal_map import CrystalMap, PhaseList
-from orix.quaternion import Rotation
+from orix import crystal_map, quaternion
 import psutil
 import scipy
 
 from pyxem import CUPY_INSTALLED
 from pyxem.utils.diffraction import _cart2polar
-from pyxem.utils.vectors import get_rotation_matrix_between_vectors
-from pyxem.utils.vectors import get_angle_cartesian
-from pyxem.utils.cuda_utils import (
-    is_cupy_array,
-    get_array_module,
-    _correlate_polar_image_to_library_gpu,
-    TPB,
-)
+from pyxem.utils.vectors import get_rotation_matrix_between_vectors, get_angle_cartesian
+from pyxem.utils.cuda_utils import is_cupy_array, get_array_module
 from pyxem.utils._dask import _get_dask_array
 from pyxem.utils.polar_transform_utils import (
     _cartesian_positions_to_polar,
@@ -50,7 +42,6 @@ from pyxem.utils.polar_transform_utils import (
     _warp_polar_custom,
 )
 from diffpy.structure import Atom, Structure, Lattice
-from orix.crystal_map import Phase
 
 
 # container for OrientationResults
@@ -493,74 +484,6 @@ def _match_polar_to_polar_library_cpu(
     )
 
 
-def _match_polar_to_polar_library_gpu(
-    polar_image,
-    r_templates,
-    theta_templates,
-    intensities_templates,
-):
-    """
-    Correlates a polar pattern to all polar templates on GPU
-
-    Parameters
-    ----------
-    polar_image : 2D cupy.ndarray
-        The image converted to polar coordinates
-    r_templates : 2D cupy.ndarray
-        r-coordinates of diffraction spots in templates.
-    theta_templates : 2D cupy ndarray
-        theta-coordinates of diffraction spots in templates.
-    intensities_templates : 2D cupy.ndarray
-        intensities of the spots in each template
-
-    Returns
-    -------
-    best_in_plane_shift : (N) 1D cupy.ndarray
-        Shift for all templates that yields best correlation
-    best_in_plane_corr : (N) 1D cupy.ndarray
-        Correlation at best match for each template
-    best_in_plane_shift_m : (N) 1D cupy.ndarray
-        Shift for all mirrored templates that yields best correlation
-    best_in_plane_corr_m : (N) 1D cupy.ndarray
-        Correlation at best match for each mirrored template
-
-    Notes
-    -----
-    The dimensions of r_templates and theta_templates should be (N, R) where
-    N is the number of templates and R the number of spots in the template
-    with the maximum number of spots
-    """
-    import cupy as cp
-
-    correlation = cp.empty(
-        (r_templates.shape[0], polar_image.shape[0]), dtype=cp.float32
-    )
-    correlation_m = cp.empty(
-        (r_templates.shape[0], polar_image.shape[0]), dtype=cp.float32
-    )
-    threadsperblock = (1, TPB)
-    blockspergrid = (r_templates.shape[0], int(np.ceil(polar_image.shape[0] / TPB)))
-    _correlate_polar_image_to_library_gpu[blockspergrid, threadsperblock](
-        polar_image,
-        r_templates,
-        theta_templates,
-        intensities_templates,
-        correlation,
-        correlation_m,
-    )
-    best_in_plane_shift = cp.argmax(correlation, axis=1).astype(np.int32)
-    best_in_plane_shift_m = cp.argmax(correlation_m, axis=1).astype(np.int32)
-    rows = cp.arange(correlation.shape[0], dtype=np.int32)
-    best_in_plane_corr = correlation[rows, best_in_plane_shift]
-    best_in_plane_corr_m = correlation_m[rows, best_in_plane_shift_m]
-    return (
-        best_in_plane_shift,
-        best_in_plane_corr,
-        best_in_plane_shift_m,
-        best_in_plane_corr_m,
-    )
-
-
 def _get_row_norms(array):
     """Get the norm of all rows in a 2D array"""
     norms = ((array**2).sum(axis=1)) ** 0.5
@@ -718,12 +641,10 @@ def _prepare_image_and_templates(
     theta[condition] = 0
     intensities[condition] = 0.0
     if is_cupy_array(polar_image):
-        import cupy as cp
-
         # send data to GPU
-        r = cp.asarray(r)
-        theta = cp.asarray(theta)
-        intensities = cp.asarray(intensities)
+        r = dispatcher.asarray(r)
+        theta = dispatcher.asarray(theta)
+        intensities = dispatcher.asarray(intensities)
     if intensity_transform_function is not None:
         intensities = intensity_transform_function(intensities)
         polar_image = intensity_transform_function(polar_image)
@@ -893,14 +814,6 @@ def _index_chunk(
     return indexation_result_chunk
 
 
-def _index_chunk_gpu(images, *args, **kwargs):
-    import cupy as cp
-
-    gpu_im = cp.asarray(images)
-    indexed_chunk = _index_chunk(gpu_im, *args, **kwargs)
-    return cp.asnumpy(indexed_chunk)
-
-
 def get_in_plane_rotation_correlation(
     image,
     simulation,
@@ -966,12 +879,10 @@ def get_in_plane_rotation_correlation(
         max_r=polar_image.shape[1],
     )
     if is_cupy_array(polar_image):
-        import cupy as cp
-
-        dispatcher = cp
-        r = cp.asarray(r)
-        theta = cp.asarray(theta)
-        intensity = cp.asarray(intensity)
+        dispatcher = get_array_module(polar_image)
+        r = dispatcher.asarray(r)
+        theta = dispatcher.asarray(theta)
+        intensity = dispatcher.asarray(intensity)
     else:
         dispatcher = np
     if intensity_transform_function is not None:
@@ -1153,6 +1064,8 @@ def _get_full_correlations(
 ):
     # get a full match on the filtered data - we must branch for CPU/GPU
     if is_cupy_array(polar_image):
+        from pyxem.utils._indexation_cuda import _match_polar_to_polar_library_gpu
+
         f = _match_polar_to_polar_library_gpu
     else:
         f = _match_polar_to_polar_library_cpu
@@ -1579,10 +1492,12 @@ def index_dataset_with_template_rotation(
 
     # copy relevant data to GPU memory if necessary
     if target == "gpu":
-        integrated_templates = cp.asarray(integrated_templates)
-        r = cp.asarray(r)
-        theta = cp.asarray(theta)
-        intensities = cp.asarray(intensities)
+        from pyxem.utils._indexation_cuda import _index_chunk_gpu
+
+        integrated_templates = dispatcher.asarray(integrated_templates)
+        r = dispatcher.asarray(r)
+        theta = dispatcher.asarray(theta)
+        intensities = dispatcher.asarray(intensities)
         indexation_function = _index_chunk_gpu
     else:
         indexation_function = _index_chunk
@@ -1606,6 +1521,7 @@ def index_dataset_with_template_rotation(
         chunks=(data.chunks[0], data.chunks[1], n_best, 4),
         new_axis=(2, 3),
     )
+    from dask.diagnostics import ProgressBar
 
     # calculate number of workers
     if parallel_workers == "auto":
@@ -1740,7 +1656,7 @@ def results_dict_to_crystal_map(
         structures = diffraction_library.structures
     else:
         structures = None
-    phase_list = PhaseList(names=phase_key_dict, structures=structures)
+    phase_list = crystal_map.PhaseList(names=phase_key_dict, structures=structures)
 
     euler = np.deg2rad(results["orientation"].reshape((n_points, n_best, 3)))
     if index is None and n_phases > 1:
@@ -1748,7 +1664,7 @@ def results_dict_to_crystal_map(
     elif index is not None:
         euler = euler[:, index]  # Desired match only
     euler = euler.squeeze()  # Remove singleton dimensions
-    rotations = Rotation.from_euler(euler)
+    rotations = quaternion.Rotation.from_euler(euler)
 
     props = {}
     for key in ("correlation", "mirrored_template", "template_index"):
@@ -1766,7 +1682,7 @@ def results_dict_to_crystal_map(
             prop = prop.reshape((n_points, n_best))  # All
         props[key] = prop.squeeze()  # Remove singleton dimensions
 
-    return CrystalMap(
+    return crystal_map.CrystalMap(
         rotations=rotations,
         phase_id=phase_id,
         x=x,
@@ -1811,6 +1727,8 @@ def phase2dict(phase):
 
 
 def dict2phase(name, space_group, point_group, color, structure):
+    from orix.crystal_map import Phase
+
     struct = dict2structure(**structure)
     return Phase(
         name=name,
