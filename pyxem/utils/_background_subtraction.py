@@ -94,9 +94,15 @@ def _subtract_median(frame, footprint=19):
 def _subtract_hdome(frame, **kwargs):
     """Background removal using h-dome filter."""
     max_value = np.max(frame)
+    try:
+        footprint = skimage.morphology.footprint_rectangle((3, 3))
+    except AttributeError:
+        # deprecated in skimage 0.25.0
+        footprint = skimage.morphology.square(3)
+
     bg_subtracted = skimage.filters.rank.mean(
         regional_filter(frame / max_value, **kwargs),
-        footprint=skimage.morphology.square(3),
+        footprint=footprint,
     )
     bg_subtracted = bg_subtracted / np.max(bg_subtracted)
     return bg_subtracted
