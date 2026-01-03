@@ -62,8 +62,6 @@ from pyxem.utils._background_subtraction import (
     _subtract_radial_median,
 )
 
-from pyxem import CUPY_INSTALLED
-
 
 class Diffraction2D(CommonDiffraction, Signal2D):
     """Signal class for two-dimensional diffraction data in Cartesian coordinates.

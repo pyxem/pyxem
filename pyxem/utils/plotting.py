@@ -18,21 +18,6 @@
 
 """Utils for plotting 2D Diffraction Patterns."""
 
-import importlib
+import lazy_loader
 
-
-__all__ = [
-    "plot_template_over_pattern",
-    "plot_beam_shift_color",
-    "make_color_wheel_marker",
-]
-
-
-def __dir__():
-    return sorted(__all__)
-
-
-def __getattr__(name):
-    if name in __all__:
-        return getattr(importlib.import_module("pyxem.utils._plotting"), name)
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+__getattr__, __dir__, __all__ = lazy_loader.attach_stub("pyxem.utils", __file__)

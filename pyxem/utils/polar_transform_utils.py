@@ -19,9 +19,10 @@
 """Utils for polar 2D Diffraction Pattern transformations."""
 
 import numpy as np
-from pyxem.utils.diffraction import find_beam_center_blur
 import scipy
 
+from pyxem.utils.cuda import get_array_module
+from pyxem.utils.diffraction import find_beam_center_blur
 
 """ These are designed to be fast and used for indexation, for data correction, see radial_utils"""
 
@@ -255,8 +256,6 @@ def _warp_polar_custom(
     was achieved: from 180 ms to 400 microseconds. However, this does not
     count the time to transfer data from the CPU to the GPU and back.
     """
-    from pyxem.utils.cuda_utils import get_array_module
-
     dispatcher = get_array_module(image)
     cy, cx = center
     H = output_shape[0]
@@ -362,8 +361,6 @@ def _chunk_to_polar(
         diffraction patterns in polar coordinates. Returns a cuda or numpy array depending
         on the device
     """
-    from pyxem.utils.cuda_utils import get_array_module
-
     dispatcher = get_array_module(images)
     polar_chunk = dispatcher.empty(
         (images.shape[0], images.shape[1], output_shape[0], output_shape[1]),

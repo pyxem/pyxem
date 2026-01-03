@@ -18,19 +18,16 @@
 
 from warnings import warn
 from typing import Sequence, Iterator, Optional
+
+import numpy as np
+import scipy
 from traits.api import Undefined
+from transforms3d.euler import mat2euler
 
 from hyperspy.signals import BaseSignal, LazySignal
 from hyperspy.axes import BaseDataAxis
-
-from transforms3d.euler import mat2euler
-
-from orix import crystal_map, projections, quaternion, vector
-
-import scipy
-
-import numpy as np
 import hyperspy.api as hs
+from orix import crystal_map, projections, quaternion, vector
 
 from pyxem.utils import indexation
 from pyxem.signals import DiffractionVectors2D

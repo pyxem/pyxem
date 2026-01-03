@@ -36,11 +36,11 @@ def __dir__():
 
 
 _import_mapping = {
-    "dask_array_to_gpu": "._cuda_utils",
-    "dask_array_from_gpu": "._cuda_utils",
-    "to_numpy": "._cuda_utils",
-    "is_cupy_array": "._cuda_utils",
-    "get_array_module": "._cuda_utils",
+    "dask_array_to_gpu": "._cuda",
+    "dask_array_from_gpu": "._cuda",
+    "to_numpy": "._cuda",
+    "is_cupy_array": "._cuda",
+    "get_array_module": "._cuda",
     "_correlate_polar_image_to_library_gpu": "._cuda_kernels",
     "TPB": "._cuda_kernels",
 }

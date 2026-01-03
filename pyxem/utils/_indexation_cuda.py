@@ -21,7 +21,7 @@
 import numpy as np
 
 import pyxem
-from pyxem.utils.cuda_utils import (
+from pyxem.utils.cuda import (
     _correlate_polar_image_to_library_gpu,
     TPB,
 )

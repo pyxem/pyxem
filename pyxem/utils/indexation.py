@@ -17,32 +17,7 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 """Utilities for indexing electron diffraction spot patterns."""
-import importlib
 
+import lazy_loader
 
-__all__ = [
-    "get_nth_best_solution",
-    "index_magnitudes",
-    "match_vectors",
-    "get_in_plane_rotation_correlation",
-    "correlate_library_to_pattern_fast",
-    "correlate_library_to_pattern",
-    "get_n_best_matches",
-    "index_dataset_with_template_rotation",
-    "results_dict_to_crystal_map",
-    "structure2dict",
-    "dict2structure",
-    "phase2dict",
-    "dict2phase",
-    "OrientationResult",
-]
-
-
-def __dir__():
-    return sorted(__all__)
-
-
-def __getattr__(name):
-    if name in __all__:
-        return getattr(importlib.import_module("pyxem.utils._indexation"), name)
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+__getattr__, __dir__, __all__ = lazy_loader.attach_stub("pyxem.utils", __file__)

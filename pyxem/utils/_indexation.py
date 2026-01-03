@@ -23,7 +23,6 @@ from itertools import combinations
 from operator import attrgetter
 import warnings
 
-from numba import njit, prange
 import numpy as np
 from orix import crystal_map, quaternion
 import psutil
@@ -32,7 +31,7 @@ import scipy
 from pyxem import CUPY_INSTALLED
 from pyxem.utils.diffraction import _cart2polar
 from pyxem.utils.vectors import get_rotation_matrix_between_vectors, get_angle_cartesian
-from pyxem.utils.cuda_utils import is_cupy_array, get_array_module
+from pyxem.utils.cuda import is_cupy_array, get_array_module
 from pyxem.utils._dask import _get_dask_array
 from pyxem.utils.polar_transform_utils import (
     _cartesian_positions_to_polar,
@@ -405,83 +404,6 @@ def _match_polar_to_polar_template(
     extr = sli[rows, column_indices].astype(intensities.dtype)
     correlation = dispatcher.dot(extr, intensities)
     return correlation
-
-
-@njit(parallel=True, nogil=True)
-def _match_polar_to_polar_library_cpu(
-    polar_image,
-    r_templates,
-    theta_templates,
-    intensities_templates,
-):
-    """
-    Correlates a polar pattern to all polar templates on CPU
-
-    Parameters
-    ----------
-    polar_image : 2D numpy.ndarray
-        The image converted to polar coordinates
-    r_templates : 2D numpy.ndarray
-        r-coordinates of diffraction spots in templates.
-    theta_templates : 2D numpy ndarray
-        theta-coordinates of diffraction spots in templates.
-    intensities_templates : 2D numpy.ndarray
-        intensities of the spots in each template
-
-    Returns
-    -------
-    best_in_plane_shift : (N) 1D numpy.ndarray
-        Shift for all templates that yields best correlation
-    best_in_plane_corr : (N) 1D numpy.ndarray
-        Correlation at best match for each template
-    best_in_plane_shift_m : (N) 1D numpy.ndarray
-        Shift for all mirrored templates that yields best correlation
-    best_in_plane_corr_m : (N) 1D numpy.ndarray
-        Correlation at best match for each mirrored template
-
-    Notes
-    -----
-    The dimensions of r_templates and theta_templates should be (N, R) where
-    N is the number of templates and R the number of spots in the template
-    with the maximum number of spots
-    """
-    N = r_templates.shape[0]
-    R = r_templates.shape[1]
-    n_shifts = polar_image.shape[0]
-    best_in_plane_shift = np.empty(N, dtype=np.int32)
-    best_in_plane_shift_m = np.empty(N, dtype=np.int32)
-    best_in_plane_corr = np.empty(N, dtype=polar_image.dtype)
-    best_in_plane_corr_m = np.empty(N, dtype=polar_image.dtype)
-
-    for template in prange(N):
-        inplane_cor = np.zeros(n_shifts)
-        inplane_cor_m = np.zeros(n_shifts)
-        for spot in range(R):
-            rsp = r_templates[template, spot]
-            if rsp == 0:
-                break
-            tsp = theta_templates[template, spot]
-            isp = intensities_templates[template, spot]
-            split = n_shifts - tsp
-            column = polar_image[:, rsp] * isp
-            inplane_cor[:split] += column[tsp:]
-            inplane_cor[split:] += column[:tsp]
-            inplane_cor_m[:tsp] += column[split:]
-            inplane_cor_m[tsp:] += column[:split]
-
-        best_shift = np.argmax(inplane_cor)
-        best_shift_m = np.argmax(inplane_cor_m)
-        best_in_plane_shift[template] = best_shift
-        best_in_plane_shift_m[template] = best_shift_m
-        best_in_plane_corr[template] = inplane_cor[best_shift]
-        best_in_plane_corr_m[template] = inplane_cor_m[best_shift_m]
-
-    return (
-        best_in_plane_shift,
-        best_in_plane_corr,
-        best_in_plane_shift_m,
-        best_in_plane_corr_m,
-    )
 
 
 def _get_row_norms(array):
@@ -1068,6 +990,8 @@ def _get_full_correlations(
 
         f = _match_polar_to_polar_library_gpu
     else:
+        from pyxem.utils._indexation_jit import _match_polar_to_polar_library_cpu
+
         f = _match_polar_to_polar_library_cpu
     return f(polar_image, r, theta, intensities)
 

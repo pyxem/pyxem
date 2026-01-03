@@ -28,9 +28,29 @@ import skimage
 from tqdm import tqdm
 
 from pyxem import signals
-from pyxem.utils import cuda_utils
+from pyxem.utils.cuda import is_cupy_array
 from pyxem.utils._deprecated import deprecated
 import pyxem.utils._pixelated_stem_tools as pst
+
+
+__all__ = [
+    "gain_normalise",
+    "remove_dead",
+    "convert_affine_to_transform",
+    "apply_transformation",
+    "regional_filter",
+    "circular_mask",
+    "reference_circle",
+    "find_beam_center_interpolate",
+    "find_beam_center_blur",
+    "find_center_of_mass",
+    "center_of_mass_from_image",
+    "find_beam_offset_cross_correlation",
+    "peaks_as_gvectors",
+    "investigate_dog_background_removal_interactive",
+    "find_hot_pixels",
+    "remove_bad_pixels",
+]
 
 
 new_float_type = {
@@ -416,7 +436,7 @@ def find_beam_center_blur(z, sigma, upsample_factor=1.0, order=1, **kwargs):
     center : numpy.ndarray
         numpy.ndarray [x, y] containing indices of estimated direct beam positon.
     """
-    if cuda_utils.is_cupy_array(z):  # pragma: no cover
+    if is_cupy_array(z):  # pragma: no cover
         import cupy as cp
         import cupyx.scipy.ndimage as ndigpu
 

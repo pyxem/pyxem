@@ -18,53 +18,6 @@
 
 """Classes to help with generating some more complicated analysis/workflow"""
 
-import importlib
+import lazy_loader
 
-
-__all__ = [
-    "CalibrationGenerator",
-    "get_DisplacementGradientMap",
-    "get_single_DisplacementGradientTensor",
-    "IndexationGenerator",
-    "VectorIndexationGenerator",
-    "TemplateIndexationGenerator",
-    "ProfileIndexationGenerator",
-    "AcceleratedIndexationGenerator",
-    "IntegrationGenerator",
-    "PDFGenerator1D",
-    "ReducedIntensityGenerator1D",
-    "SubpixelrefinementGenerator",
-    "VarianceGenerator",
-    "VirtualImageGenerator",
-    "VirtualDarkFieldGenerator",
-]
-
-
-def __dir__():
-    return sorted(__all__)
-
-
-_import_mapping = {
-    "CalibrationGenerator": "calibration_generator",
-    "get_DisplacementGradientMap": "displacement_gradient_tensor_generator",
-    "get_single_DisplacementGradientTensor": "displacement_gradient_tensor_generator",
-    "IndexationGenerator": "indexation_generator",
-    "VectorIndexationGenerator": "indexation_generator",
-    "TemplateIndexationGenerator": "indexation_generator",
-    "ProfileIndexationGenerator": "indexation_generator",
-    "AcceleratedIndexationGenerator": "indexation_generator",
-    "IntegrationGenerator": "integration_generator",
-    "PDFGenerator1D": "pdf_generator1d",
-    "ReducedIntensityGenerator1D": "red_intensity_generator1d",
-    "SubpixelrefinementGenerator": "subpixelrefinement_generator",
-    "VarianceGenerator": "variance_generator",
-    "VirtualImageGenerator": "virtual_image_generator",
-    "VirtualDarkFieldGenerator": "virtual_image_generator",
-}
-
-
-def __getattr__(name):
-    if name in __all__:
-        import_path = "pyxem.generators." + _import_mapping.get(name)
-        return getattr(importlib.import_module(import_path), name)
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+__getattr__, __dir__, __all__ = lazy_loader.attach_stub(__name__, __file__)

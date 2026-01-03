@@ -17,6 +17,7 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 """Utils for calibrating Diffraction Patterns."""
+from typing import Union
 
 import numpy as np
 import pint
@@ -26,9 +27,13 @@ from hyperspy.axes import UniformDataAxis
 
 from pyxem.utils._azimuthal_integrations import _get_control_points, _get_factors
 from pyxem.utils._deprecated import deprecated
-from typing import Union
 
-from hyperspy.misc.utils import DictionaryTreeBrowser
+from hyperspy.misc import utils as hs_utils
+
+
+__all__ = [
+    "Calibration",
+]
 
 Number = Union[int, float]
 
@@ -84,7 +89,7 @@ def value2standard_units(
 
 def value2node(
     value: Union[str, pint.Quantity, Number],
-    metadata: DictionaryTreeBrowser,
+    metadata: "hs_utils.DictionaryTreeBrowser",
     metadata_key: str,
     standard_unit: Union[str, pint.Unit] = None,
 ) -> pint.Quantity:

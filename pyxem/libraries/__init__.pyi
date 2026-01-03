@@ -16,24 +16,9 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-import dask.array as da
-import pytest
+"""Library of data for crystallography in pyxem.
+"""
 
-from pyxem import CUPY_INSTALLED
-from pyxem.utils.cuda import dask_array_to_gpu, dask_array_from_gpu
+from .calibration_library import CalibrationDataLibrary
 
-if CUPY_INSTALLED:
-    import cupy as cp
-
-
-skip_cupy = pytest.mark.skipif(not CUPY_INSTALLED, reason="cupy is required")
-
-
-@skip_cupy
-def test_dask_array_to_gpu():
-    dask_array_to_gpu(da.array([1, 2, 3, 4]))
-
-
-@skip_cupy
-def test_dask_array_from_gpu():
-    dask_array_from_gpu(da.array(cp.array([1, 2, 3, 4])))
+__all__ = ["CalibrationDataLibrary"]
