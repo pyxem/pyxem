@@ -16,10 +16,13 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+import importlib
+import warnings
 import numpy as np
 
 import hyperspy.api as hs
-from hyperspy.signals import Signal1D, LazySignal
+from hyperspy.signals import Signal1D
+from pyxem.common import VisibleDeprecationWarning
 from pyxem.signals import Diffraction2D
 
 from pyxem.utils._dask import _get_dask_array, _get_chunking
@@ -283,7 +286,7 @@ class InSituDiffraction2D(Diffraction2D):
             shift2=ys,
             order=order,
             inplace=False,
-            **kwargs
+            **kwargs,
         )
 
         registered_data_t = registered_data.transpose(navigation_axes=[-2, -1, -3])
@@ -376,5 +379,27 @@ class InSituDiffraction2D(Diffraction2D):
         return g2kt
 
 
-class LazyInSituDiffraction2D(LazySignal, InSituDiffraction2D):
-    pass
+# ruff: noqa: F822
+
+__all__ = [
+    "InSituDiffraction2D",
+    "LazyInSituDiffraction2D",
+]
+
+
+def __dir__():
+    return sorted(__all__)
+
+
+def __getattr__(name):
+    if "Lazy" in name:
+        warnings.warn(
+            f"Importing `{name}` from `{__name__}` is deprecated and will be "
+            "removed in pyXem 1.0.0. Import it from "
+            "`pyxem.signals` instead.",
+            VisibleDeprecationWarning,
+        )
+        return getattr(importlib.import_module("pyxem.signals"), name)
+    if name in __all__:
+        return globals()[name]
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

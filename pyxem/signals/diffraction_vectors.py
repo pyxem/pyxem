@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+import importlib
+import warnings
 from functools import cached_property, partial
 from warnings import warn
 
@@ -23,9 +25,10 @@ import numpy as np
 import scipy
 
 import hyperspy.api as hs
-from hyperspy.signals import BaseSignal, Signal1D, LazySignal
+from hyperspy.signals import BaseSignal, Signal1D
 import hyperspy.misc.utils as hs_utils
 
+from pyxem.common import VisibleDeprecationWarning
 from pyxem.utils._signals import (
     _transfer_navigation_axes_to_signal_axes,
 )
@@ -186,6 +189,8 @@ class DiffractionVectors(BaseSignal):
         vectors : :class:`pyxem.signals.diffraction_vectors.DiffractionVectors`
             List of diffraction vectors
         """
+        from hyperspy.signals import LazySignal
+
         if center is None and peaks.metadata.has_item("Peaks.signal_axes"):
             center = [
                 ax.offset / ax.scale for ax in peaks.metadata.Peaks.signal_axes[::-1]
@@ -1472,5 +1477,28 @@ class DiffractionVectors(BaseSignal):
         )
 
 
-class LazyDiffractionVectors(LazySignal, DiffractionVectors):
-    pass
+# ruff: noqa: F822
+
+__all__ = [
+    "DiffractionVectors",
+    "LazyDiffractionVectors",
+]
+
+
+def __dir__():
+    return sorted(__all__)
+
+
+def __getattr__(name):
+    if "Lazy" in name:
+        warnings.warn(
+            f"Importing `{name}` from `{__name__}` is deprecated and will be "
+            "removed in pyXem 1.0.0. Import it from "
+            "`pyxem.signals` instead.",
+            VisibleDeprecationWarning,
+        )
+        return getattr(importlib.import_module("pyxem.signals"), name)
+    if name in __all__:
+        return globals()[name]
+
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

@@ -16,14 +16,16 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+import importlib
+import warnings
 
 import numpy as np
 import scipy
-from hyperspy.signals import LazySignal
 from hyperspy.axes import UniformDataAxis
 import hyperspy.api as hs
 
 import pyxem.utils._beam_shift_tools as bst
+from pyxem.common import VisibleDeprecationWarning
 from pyxem.utils import plotting
 from pyxem.signals import DiffractionVectors1D
 from pyxem.utils._deprecated import deprecated
@@ -316,7 +318,7 @@ class BeamShift(DiffractionVectors1D):
             frame_center=frame_centers,
             inplace=inplace,
             show_progressbar=False,
-            **kwargs
+            **kwargs,
         )
         cal_com.units = [s.units for s in signal_axes]
         return cal_com
@@ -773,7 +775,28 @@ class BeamShift(DiffractionVectors1D):
         return s_new
 
 
-class LazyBeamShift(BeamShift, LazySignal):
-    _signal_type = "beam_shift"
+# ruff: noqa: F822
 
-    pass
+__all__ = [
+    "BeamShift",
+    "LazyBeamShift",
+]
+
+
+def __dir__():
+    return sorted(__all__)
+
+
+def __getattr__(name):
+    if "Lazy" in name:
+        warnings.warn(
+            f"Importing `{name}` from `{__name__}` is deprecated and will be "
+            "removed in pyXem 1.0.0. Import it from "
+            "`pyxem.signals` instead.",
+            VisibleDeprecationWarning,
+        )
+        return getattr(importlib.import_module("pyxem.signals"), name)
+    if name in __all__:
+        return globals()[name]
+
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

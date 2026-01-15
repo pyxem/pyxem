@@ -16,11 +16,13 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-
-from hyperspy.signals import Signal1D, LazySignal
+import importlib
+import warnings
+from hyperspy.signals import Signal1D
 
 import numpy as np
 from fractions import Fraction as frac
+from pyxem.common import VisibleDeprecationWarning
 from pyxem.utils._correlations import _get_interpolation_matrix, _symmetry_stem
 
 
@@ -108,5 +110,27 @@ class Correlation1D(Signal1D):
         return signals
 
 
-class LazyCorrelation1D(LazySignal, Correlation1D):
-    pass
+# ruff: noqa: F822
+
+__all__ = [
+    "Correlation1D",
+    "LazyCorrelation1D",
+]
+
+
+def __dir__():
+    return sorted(__all__)
+
+
+def __getattr__(name):
+    if "Lazy" in name:
+        warnings.warn(
+            f"Importing `{name}` from `{__name__}` is deprecated and will be "
+            "removed in pyXem 1.0.0. Import it from "
+            "`pyxem.signals` instead.",
+            VisibleDeprecationWarning,
+        )
+        return getattr(importlib.import_module("pyxem.signals"), name)
+    if name in __all__:
+        return globals()[name]
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

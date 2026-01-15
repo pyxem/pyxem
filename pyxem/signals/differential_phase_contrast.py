@@ -16,8 +16,10 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+import importlib
 import warnings
-from hyperspy.signals import Signal1D, Signal2D, LazySignal
+from hyperspy.signals import Signal1D, Signal2D
+from pyxem.common import VisibleDeprecationWarning
 from pyxem.utils._deprecated import deprecated
 
 
@@ -109,27 +111,31 @@ class DPCSignal2D(Signal2D):
         return s_beam_shift
 
 
-class LazyDPCSignal1D(LazySignal, DPCSignal1D):
-    _lazy = True
+# ruff: noqa: F822
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+__all__ = [
+    "DPCBaseSignal",
+    "DPCSignal1D",
+    "DPCSignal2D",
+    "LazyDPCBaseSignal",
+    "LazyDPCSignal1D",
+    "LazyDPCSignal2D",
+]
+
+
+def __dir__():
+    return sorted(__all__)
+
+
+def __getattr__(name):
+    if "Lazy" in name:
         warnings.warn(
-            "DPCSignal2D is deprecated. The functionality has been moved to the "
-            "BeamShift class. Use the `to_beamshift()` function to convert to "
-            "the BeamShift class.",
-            DeprecationWarning,
+            f"Importing `{name}` from `{__name__}` is deprecated and will be "
+            "removed in pyXem 1.0.0. Import it from "
+            "`pyxem.signals` instead.",
+            VisibleDeprecationWarning,
         )
-
-
-class LazyDPCSignal2D(LazySignal, DPCSignal2D):
-    _lazy = True
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        warnings.warn(
-            "DPCSignal2D is deprecated. The functionality has been moved to the "
-            "BeamShift class. Use the `to_beamshift()` function to convert to "
-            "the BeamShift class.",
-            DeprecationWarning,
-        )
+        return getattr(importlib.import_module("pyxem.signals"), name)
+    if name in __all__:
+        return globals()[name]
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

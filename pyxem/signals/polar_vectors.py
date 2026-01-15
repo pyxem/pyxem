@@ -15,8 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-from hyperspy.signals import LazySignal
+import importlib
+import warnings
 
+from pyxem.common import VisibleDeprecationWarning
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.utils.vectors import (
     to_cart_three_angles,
@@ -41,7 +43,7 @@ class PolarVectors(DiffractionVectors):
         accept_threshold=0.05,
         min_k=0.05,
         min_angle=None,
-        **kwargs
+        **kwargs,
     ):
         """Calculate the angles between pairs of 3 diffraction vectors.
 
@@ -165,5 +167,28 @@ class PolarVectors(DiffractionVectors):
         return vectors.to_markers(**kwargs)
 
 
-class LazyPolarVectors(LazySignal, PolarVectors):
-    pass
+# ruff: noqa: F822
+
+__all__ = [
+    "PolarVectors",
+    "LazyPolarVectors",
+]
+
+
+def __dir__():
+    return sorted(__all__)
+
+
+def __getattr__(name):
+    if "Lazy" in name:
+        warnings.warn(
+            f"Importing `{name}` from `{__name__}` is deprecated and will be "
+            "removed in pyXem 1.0.0. Import it from "
+            "`pyxem.signals` instead.",
+            VisibleDeprecationWarning,
+        )
+        return getattr(importlib.import_module("pyxem.signals"), name)
+    if name in __all__:
+        return globals()[name]
+
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

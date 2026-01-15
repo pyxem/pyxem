@@ -16,11 +16,13 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-
-from hyperspy.signals import Signal2D, LazySignal
+import importlib
+import warnings
+from hyperspy.signals import Signal2D
 
 import numpy as np
 from hyperspy.drawing.utils import plot_images
+from pyxem.common import VisibleDeprecationWarning
 
 
 class Power2D(Signal2D):
@@ -97,5 +99,27 @@ class Power2D(Signal2D):
         plot_images(images=maps, label=labels, *args, **kwargs)
 
 
-class LazyPower2D(LazySignal, Power2D):
-    pass
+# ruff: noqa: F822
+
+__all__ = [
+    "Power2D",
+    "LazyPower2D",
+]
+
+
+def __dir__():
+    return sorted(__all__)
+
+
+def __getattr__(name):
+    if "Lazy" in name:
+        warnings.warn(
+            f"Importing `{name}` from `{__name__}` is deprecated and will be "
+            "removed in pyXem 1.0.0. Import it from "
+            "`pyxem.signals` instead.",
+            VisibleDeprecationWarning,
+        )
+        return getattr(importlib.import_module("pyxem.signals"), name)
+    if name in __all__:
+        return globals()[name]
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

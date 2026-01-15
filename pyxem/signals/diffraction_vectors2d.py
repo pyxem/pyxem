@@ -16,13 +16,17 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+import importlib
+import warnings
+
 import numpy as np
 from warnings import warn
 
 import scipy
 import hyperspy.api as hs
-from hyperspy.signals import Signal2D, LazySignal
+from hyperspy.signals import Signal2D
 
+from pyxem.common import VisibleDeprecationWarning
 from pyxem.signals import DiffractionVectors
 
 
@@ -269,5 +273,28 @@ class DiffractionVectors2D(DiffractionVectors, Signal2D):
             return rois
 
 
-class LazyDiffractionVectors2D(LazySignal, DiffractionVectors2D):
-    pass
+# ruff: noqa: F822
+
+__all__ = [
+    "DiffractionVectors2D",
+    "LazyDiffractionVectors2D",
+]
+
+
+def __dir__():
+    return sorted(__all__)
+
+
+def __getattr__(name):
+    if "Lazy" in name:
+        warnings.warn(
+            f"Importing `{name}` from `{__name__}` is deprecated and will be "
+            "removed in pyXem 1.0.0. Import it from "
+            "`pyxem.signals` instead.",
+            VisibleDeprecationWarning,
+        )
+        return getattr(importlib.import_module("pyxem.signals"), name)
+    if name in __all__:
+        return globals()[name]
+
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

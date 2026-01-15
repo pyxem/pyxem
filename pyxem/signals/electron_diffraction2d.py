@@ -16,10 +16,13 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+import importlib
+import warnings
 
 import numpy as np
 
-from pyxem.signals import Diffraction2D, LazyDiffraction2D
+from pyxem.common import VisibleDeprecationWarning
+from pyxem.signals import Diffraction2D
 
 
 class ElectronDiffraction2D(Diffraction2D):
@@ -204,5 +207,28 @@ class ElectronDiffraction2D(Diffraction2D):
         y.units = "nm"
 
 
-class LazyElectronDiffraction2D(LazyDiffraction2D, ElectronDiffraction2D):
-    pass
+# ruff: noqa: F822
+
+__all__ = [
+    "ElectronDiffraction2D",
+    "LazyElectronDiffraction2D",
+]
+
+
+def __dir__():
+    return sorted(__all__)
+
+
+def __getattr__(name):
+    if "Lazy" in name:
+        warnings.warn(
+            f"Importing `{name}` from `{__name__}` is deprecated and will be "
+            "removed in pyXem 1.0.0. Import it from "
+            "`pyxem.signals` instead.",
+            VisibleDeprecationWarning,
+        )
+        return getattr(importlib.import_module("pyxem.signals"), name)
+    if name in __all__:
+        return globals()[name]
+
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
