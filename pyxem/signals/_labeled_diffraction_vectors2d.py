@@ -17,7 +17,7 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
+from pyxem.signals._diffraction_vectors2d import DiffractionVectors2D
 import numpy as np
 import matplotlib.pyplot as plt
 

@@ -19,8 +19,8 @@
 
 from hyperspy.signals import LazySignal
 
-from pyxem.signals.virtual_dark_field_image import VirtualDarkFieldImage
+from pyxem.signals._diffraction_vectors2d import DiffractionVectors2D
 
 
-class LazyVirtualDarkFieldImage(LazySignal, VirtualDarkFieldImage):
+class LazyDiffractionVectors2D(LazySignal, DiffractionVectors2D):
     pass

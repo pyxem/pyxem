@@ -19,8 +19,8 @@
 
 from hyperspy.signals import LazySignal
 
-from pyxem.signals.power2d import Power2D
+from pyxem.signals._correlation1d import Correlation1D
 
 
-class LazyPower2D(LazySignal, Power2D):
+class LazyCorrelation1D(LazySignal, Correlation1D):
     pass

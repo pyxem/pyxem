@@ -17,10 +17,9 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from hyperspy.signals import LazySignal
+from pyxem.signals._lazy_diffraction2d import LazyDiffraction2D
+from pyxem.signals._electron_diffraction2d import ElectronDiffraction2D
 
-from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
 
-
-class LazyDiffractionVectors2D(LazySignal, DiffractionVectors2D):
+class LazyElectronDiffraction2D(LazyDiffraction2D, ElectronDiffraction2D):
     pass

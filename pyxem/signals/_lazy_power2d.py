@@ -16,9 +16,11 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Library of data for crystallography in pyxem.
-"""
 
-from ._calibration_library import CalibrationDataLibrary
+from hyperspy.signals import LazySignal
 
-__all__ = ["CalibrationDataLibrary"]
+from pyxem.signals._power2d import Power2D
+
+
+class LazyPower2D(LazySignal, Power2D):
+    pass

@@ -28,7 +28,7 @@ import hyperspy.api as hs
 
 _logger = logging.getLogger(__name__)
 
-from pyxem.generators.subpixelrefinement_generator import _get_pixel_vectors
+from pyxem.generators._subpixelrefinement_generator import _get_pixel_vectors
 from pyxem import signals
 
 

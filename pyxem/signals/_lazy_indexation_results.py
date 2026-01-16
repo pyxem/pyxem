@@ -17,10 +17,10 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import hyperspy.api as hs
+from hyperspy.signals import LazySignal
 
-from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
+from pyxem.signals._indexation_results import OrientationMap
 
 
-class LazyElectronDiffraction1D(hs.signals.LazySignal, ElectronDiffraction1D):
+class LazyOrientationMap(OrientationMap, LazySignal):
     pass

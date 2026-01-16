@@ -19,8 +19,8 @@
 
 from hyperspy.signals import LazySignal
 
-from pyxem.signals.correlation1d import Correlation1D
+from pyxem.signals._diffraction2d import Diffraction2D
 
 
-class LazyCorrelation1D(LazySignal, Correlation1D):
+class LazyDiffraction2D(LazySignal, Diffraction2D):
     pass

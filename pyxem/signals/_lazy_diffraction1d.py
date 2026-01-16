@@ -19,10 +19,8 @@
 
 from hyperspy.signals import LazySignal
 
-from pyxem.signals.tensor_field import DisplacementGradientMap
+from pyxem.signals._diffraction1d import Diffraction1D
 
 
-class LazyDisplacementGradientMap(LazySignal, DisplacementGradientMap):
-    """Lazy signal class for Tensor Fields."""
-
+class LazyDiffraction1D(LazySignal, Diffraction1D):
     pass

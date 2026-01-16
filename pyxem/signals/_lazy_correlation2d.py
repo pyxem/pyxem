@@ -19,8 +19,11 @@
 
 from hyperspy.signals import LazySignal
 
-from pyxem.signals.polar_vectors import PolarVectors
+from pyxem.signals._correlation2d import Correlation2D
 
 
-class LazyPolarVectors(LazySignal, PolarVectors):
-    pass
+class LazyCorrelation2D(LazySignal, Correlation2D):
+    _lazy = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)

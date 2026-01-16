@@ -17,9 +17,10 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from pyxem.signals.lazy_diffraction2d import LazyDiffraction2D
-from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
+import hyperspy.api as hs
+
+from pyxem.signals._electron_diffraction1d import ElectronDiffraction1D
 
 
-class LazyElectronDiffraction2D(LazyDiffraction2D, ElectronDiffraction2D):
+class LazyElectronDiffraction1D(hs.signals.LazySignal, ElectronDiffraction1D):
     pass

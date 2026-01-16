@@ -19,7 +19,7 @@ import importlib
 import warnings
 
 from pyxem.common import VisibleDeprecationWarning
-from pyxem.signals.diffraction_vectors import DiffractionVectors
+from pyxem.signals._diffraction_vectors import DiffractionVectors
 from pyxem.utils.vectors import (
     to_cart_three_angles,
     polar_to_cartesian,

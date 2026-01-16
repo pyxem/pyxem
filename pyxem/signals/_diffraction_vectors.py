@@ -1193,11 +1193,10 @@ class DiffractionVectors(BaseSignal):
         strain_map : Signal2D
             The strain map.
         """
-        # TODO: remove this import when the function is moved to a utility module
+        from hyperspy.signals import LazySignal
 
-        from pyxem.generators.displacement_gradient_tensor_generator import (
-            get_DisplacementGradientMap,
-        )
+        # TODO: remove this import when the function is moved to a utility module
+        from pyxem.generators import get_DisplacementGradientMap
 
         if isinstance(unstrained_vectors, LazySignal):
             unstrained_vectors.compute()
@@ -1256,6 +1255,8 @@ class DiffractionVectors(BaseSignal):
             DiffractionVectors class will be returned otherwise an instance
             of the DiffractionVectors2D class will be returned.
         """
+        from hyperspy.signals import LazySignal
+
         if isinstance(basis, BaseSignal) and (
             basis.axes_manager.navigation_shape == self.axes_manager.navigation_shape
         ):

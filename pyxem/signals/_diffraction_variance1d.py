@@ -17,10 +17,20 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from hyperspy.signals import LazySignal
-
-from pyxem.signals.indexation_results import OrientationMap
+from pyxem.signals._diffraction1d import Diffraction1D
 
 
-class LazyOrientationMap(OrientationMap, LazySignal):
+class DiffractionVariance1D(Diffraction1D):
+    """Signal class for one-dimensional diffraction variance.
+
+    Parameters
+    ----------
+    *args
+        See :class:`hyperspy.api.signals.Signal1D`.
+    **kwargs
+        See :class:`hyperspy.api.signals.Signal1D`
+    """
+
+    _signal_type = "diffraction_variance"
+
     pass

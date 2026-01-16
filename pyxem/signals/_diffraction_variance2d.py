@@ -17,20 +17,28 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from pyxem.signals.diffraction1d import Diffraction1D
+from hyperspy.signals import Signal2D
+
+from pyxem.signals._diffraction2d import Diffraction2D
 
 
-class DiffractionVariance1D(Diffraction1D):
-    """Signal class for one-dimensional diffraction variance.
+class DiffractionVariance2D(Diffraction2D):
+    """Signal class for two-dimensional diffraction variance.
 
     Parameters
     ----------
     *args
-        See :class:`hyperspy.api.signals.Signal1D`.
+        See :class:`hyperspy.api.signals.Signal2D`.
     **kwargs
-        See :class:`hyperspy.api.signals.Signal1D`
+        See :class:`hyperspy.api.signals.Signal2D`
     """
 
     _signal_type = "diffraction_variance"
 
+    pass
+
+
+class ImageVariance(Signal2D):
+    _signal_type = "image_variance"
+    """Signal class for image diffraction variance."""
     pass

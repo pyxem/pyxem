@@ -17,28 +17,10 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from hyperspy.signals import Signal2D
+from hyperspy.signals import LazySignal
 
-from pyxem.signals.diffraction2d import Diffraction2D
-
-
-class DiffractionVariance2D(Diffraction2D):
-    """Signal class for two-dimensional diffraction variance.
-
-    Parameters
-    ----------
-    *args
-        See :class:`hyperspy.api.signals.Signal2D`.
-    **kwargs
-        See :class:`hyperspy.api.signals.Signal2D`
-    """
-
-    _signal_type = "diffraction_variance"
-
-    pass
+from pyxem.signals._virtual_dark_field_image import VirtualDarkFieldImage
 
 
-class ImageVariance(Signal2D):
-    _signal_type = "image_variance"
-    """Signal class for image diffraction variance."""
+class LazyVirtualDarkFieldImage(LazySignal, VirtualDarkFieldImage):
     pass

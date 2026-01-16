@@ -19,8 +19,10 @@
 
 from hyperspy.signals import LazySignal
 
-from pyxem.signals.diffraction2d import Diffraction2D
+from pyxem.signals._beam_shift import BeamShift
 
 
-class LazyDiffraction2D(LazySignal, Diffraction2D):
+class LazyBeamShift(BeamShift, LazySignal):
+    _signal_type = "beam_shift"
+
     pass

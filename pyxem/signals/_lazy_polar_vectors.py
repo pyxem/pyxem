@@ -19,10 +19,8 @@
 
 from hyperspy.signals import LazySignal
 
-from pyxem.signals.beam_shift import BeamShift
+from pyxem.signals._polar_vectors import PolarVectors
 
 
-class LazyBeamShift(BeamShift, LazySignal):
-    _signal_type = "beam_shift"
-
+class LazyPolarVectors(LazySignal, PolarVectors):
     pass

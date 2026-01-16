@@ -19,7 +19,7 @@
 
 from hyperspy.signals import LazySignal
 
-from pyxem.signals.polar_diffraction2d import PolarDiffraction2D
+from pyxem.signals._polar_diffraction2d import PolarDiffraction2D
 
 
 class LazyPolarDiffraction2D(LazySignal, PolarDiffraction2D):

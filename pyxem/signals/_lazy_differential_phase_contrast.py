@@ -16,14 +16,34 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+import warnings
 
 from hyperspy.signals import LazySignal
 
-from pyxem.signals.correlation2d import Correlation2D
+from pyxem.signals._differential_phase_contrast import DPCSignal1D, DPCSignal2D
 
 
-class LazyCorrelation2D(LazySignal, Correlation2D):
+class LazyDPCSignal1D(LazySignal, DPCSignal1D):
     _lazy = True
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        warnings.warn(
+            "DPCSignal2D is deprecated. The functionality has been moved to the "
+            "BeamShift class. Use the `to_beamshift()` function to convert to "
+            "the BeamShift class.",
+            DeprecationWarning,
+        )
+
+
+class LazyDPCSignal2D(LazySignal, DPCSignal2D):
+    _lazy = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        warnings.warn(
+            "DPCSignal2D is deprecated. The functionality has been moved to the "
+            "BeamShift class. Use the `to_beamshift()` function to convert to "
+            "the BeamShift class.",
+            DeprecationWarning,
+        )

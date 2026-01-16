@@ -22,7 +22,7 @@
 
 
 from pyxem.utils._deprecated import deprecated
-from pyxem.signals.reduced_intensity1d import (
+from pyxem.signals._reduced_intensity1d import (
     _damp_ri_exponential,
     _damp_ri_extrapolate_to_zero,
     _damp_ri_lorch,

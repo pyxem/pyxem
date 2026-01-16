@@ -41,7 +41,7 @@ from pyxem.data import (
     fe_fcc_phase,
 )
 
-from pyxem.signals.indexation_results import vectors_from_orientation_map
+from pyxem.signals._indexation_results import vectors_from_orientation_map
 import hyperspy.api as hs
 
 

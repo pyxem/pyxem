@@ -19,55 +19,55 @@
 """Signal classes for diffraction data.
 """
 
-from .common_diffraction import CommonDiffraction
-from .correlation2d import Correlation2D
-from .lazy_correlation2d import LazyCorrelation2D
-from .diffraction_variance1d import DiffractionVariance1D
-from .diffraction_variance2d import DiffractionVariance2D, ImageVariance
-from .diffraction_vectors import DiffractionVectors
-from .diffraction_vectors2d import DiffractionVectors2D
-from .diffraction_vectors1d import DiffractionVectors1D
-from .beam_shift import BeamShift
-from .lazy_beam_shift import LazyBeamShift
-from .differential_phase_contrast import (
+from ._common_diffraction import CommonDiffraction
+from ._correlation2d import Correlation2D
+from ._lazy_correlation2d import LazyCorrelation2D
+from ._diffraction_variance1d import DiffractionVariance1D
+from ._diffraction_variance2d import DiffractionVariance2D, ImageVariance
+from ._diffraction_vectors import DiffractionVectors
+from ._diffraction_vectors2d import DiffractionVectors2D
+from ._diffraction_vectors1d import DiffractionVectors1D
+from ._beam_shift import BeamShift
+from ._lazy_beam_shift import LazyBeamShift
+from ._differential_phase_contrast import (
     DPCSignal1D,
     DPCSignal2D,
 )
-from .lazy_differential_phase_contrast import (
+from ._lazy_differential_phase_contrast import (
     LazyDPCSignal1D,
     LazyDPCSignal2D,
 )
-from .diffraction1d import Diffraction1D
-from .lazy_diffraction1d import LazyDiffraction1D
-from .diffraction2d import Diffraction2D
-from .lazy_diffraction2d import LazyDiffraction2D
-from .polar_vectors import PolarVectors
-from .lazy_polar_vectors import LazyPolarVectors
-from .electron_diffraction1d import ElectronDiffraction1D
-from .lazy_electron_diffraction1d import LazyElectronDiffraction1D
-from .electron_diffraction2d import ElectronDiffraction2D
-from .lazy_electron_diffraction2d import LazyElectronDiffraction2D
-from .indexation_results import VectorMatchingResults, OrientationMap
-from .lazy_indexation_results import LazyOrientationMap
-from .pair_distribution_function1d import PairDistributionFunction1D
-from .polar_diffraction2d import PolarDiffraction2D
-from .lazy_polar_diffraction2d import LazyPolarDiffraction2D
-from .power2d import Power2D
-from .lazy_power2d import LazyPower2D
-from .reduced_intensity1d import ReducedIntensity1D
-from .segments import LearningSegment, VDFSegment
-from .strain_map import StrainMap
-from .correlation1d import Correlation1D
-from .lazy_correlation1d import LazyCorrelation1D
-from .tensor_field import DisplacementGradientMap
-from .lazy_tensor_field import LazyDisplacementGradientMap
-from .virtual_dark_field_image import VirtualDarkFieldImage
-from .lazy_virtual_dark_field_image import LazyVirtualDarkFieldImage
-from .insitu_diffraction2d import InSituDiffraction2D
-from .lazy_insitu_diffraction2d import LazyInSituDiffraction2D
-from .labeled_diffraction_vectors2d import LabeledDiffractionVectors2D
-from .lazy_diffraction_vectors import LazyDiffractionVectors
-from .lazy_diffraction_vectors2d import LazyDiffractionVectors2D
+from ._diffraction1d import Diffraction1D
+from ._lazy_diffraction1d import LazyDiffraction1D
+from ._diffraction2d import Diffraction2D
+from ._lazy_diffraction2d import LazyDiffraction2D
+from ._polar_vectors import PolarVectors
+from ._lazy_polar_vectors import LazyPolarVectors
+from ._electron_diffraction1d import ElectronDiffraction1D
+from ._lazy_electron_diffraction1d import LazyElectronDiffraction1D
+from ._electron_diffraction2d import ElectronDiffraction2D
+from ._lazy_electron_diffraction2d import LazyElectronDiffraction2D
+from ._indexation_results import VectorMatchingResults, OrientationMap
+from ._lazy_indexation_results import LazyOrientationMap
+from ._pair_distribution_function1d import PairDistributionFunction1D
+from ._polar_diffraction2d import PolarDiffraction2D
+from ._lazy_polar_diffraction2d import LazyPolarDiffraction2D
+from ._power2d import Power2D
+from ._lazy_power2d import LazyPower2D
+from ._reduced_intensity1d import ReducedIntensity1D
+from ._segments import LearningSegment, VDFSegment
+from ._strain_map import StrainMap
+from ._correlation1d import Correlation1D
+from ._lazy_correlation1d import LazyCorrelation1D
+from ._tensor_field import DisplacementGradientMap
+from ._lazy_tensor_field import LazyDisplacementGradientMap
+from ._virtual_dark_field_image import VirtualDarkFieldImage
+from ._lazy_virtual_dark_field_image import LazyVirtualDarkFieldImage
+from ._insitu_diffraction2d import InSituDiffraction2D
+from ._lazy_insitu_diffraction2d import LazyInSituDiffraction2D
+from ._labeled_diffraction_vectors2d import LabeledDiffractionVectors2D
+from ._lazy_diffraction_vectors import LazyDiffractionVectors
+from ._lazy_diffraction_vectors2d import LazyDiffractionVectors2D
 
 __all__ = [
     "CommonDiffraction",

@@ -29,7 +29,7 @@ from pyxem.utils._correlations import (
     _symmetry_stem,
     _corr_to_power,
 )
-from pyxem.signals.common_diffraction import CommonDiffraction
+from pyxem.signals._common_diffraction import CommonDiffraction
 
 
 class Correlation2D(Signal2D, CommonDiffraction):

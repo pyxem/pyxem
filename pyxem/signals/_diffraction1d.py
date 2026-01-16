@@ -22,7 +22,7 @@ import warnings
 from hyperspy.signals import Signal1D
 
 from pyxem.common import VisibleDeprecationWarning
-from pyxem.signals.common_diffraction import CommonDiffraction
+from pyxem.signals._common_diffraction import CommonDiffraction
 
 
 class Diffraction1D(CommonDiffraction, Signal1D):

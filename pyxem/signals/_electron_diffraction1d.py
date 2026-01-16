@@ -25,7 +25,7 @@ import scipy
 import hyperspy.api as hs
 
 from pyxem.common import VisibleDeprecationWarning
-from pyxem.signals.diffraction1d import Diffraction1D
+from pyxem.signals._diffraction1d import Diffraction1D
 
 
 class ElectronDiffraction1D(Diffraction1D):

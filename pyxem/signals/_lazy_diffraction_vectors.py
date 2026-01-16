@@ -19,8 +19,8 @@
 
 from hyperspy.signals import LazySignal
 
-from pyxem.signals.insitu_diffraction2d import InSituDiffraction2D
+from pyxem.signals._diffraction_vectors import DiffractionVectors
 
 
-class LazyInSituDiffraction2D(LazySignal, InSituDiffraction2D):
+class LazyDiffractionVectors(LazySignal, DiffractionVectors):
     pass

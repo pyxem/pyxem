@@ -21,7 +21,7 @@ import numpy as np
 
 import hyperspy.api as hs
 
-from pyxem.signals.common_diffraction import OUT_SIGNAL_AXES_DOCSTRING
+from pyxem.signals._common_diffraction import OUT_SIGNAL_AXES_DOCSTRING
 from pyxem.utils.virtual_images_utils import normalize_virtual_images, get_vectors_mesh
 from pyxem.utils._deprecated import deprecated
 from warnings import warn

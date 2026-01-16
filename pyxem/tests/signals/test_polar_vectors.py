@@ -20,7 +20,8 @@ import pytest
 import numpy as np
 from hyperspy.signals import LazySignal
 
-from pyxem.signals.polar_vectors import PolarVectors, LazyPolarVectors
+from pyxem.signals._polar_vectors import PolarVectors
+from pyxem.signals._lazy_polar_vectors import LazyPolarVectors
 
 
 class TestDiffractionVectors:
