@@ -22,7 +22,7 @@ from hyperspy.misc import utils as hs_utils
 import hyperspy.api as hs
 
 from traits.trait_base import Undefined
-from pyxem import CUPY_INSTALLED
+from pyxem.common import CUPY_INSTALLED
 
 import hyperspy.misc.dask_utils as hs_dask_utils
 from hyperspy.misc.utils import add_scalar_axis

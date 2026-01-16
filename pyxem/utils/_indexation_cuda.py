@@ -20,14 +20,14 @@
 
 import numpy as np
 
-import pyxem
+from pyxem.common import CUPY_INSTALLED
 from pyxem.utils.cuda import (
     _correlate_polar_image_to_library_gpu,
     TPB,
 )
 from pyxem.utils._indexation import _index_chunk
 
-if pyxem.CUPY_INSTALLED:
+if CUPY_INSTALLED:
     import cupy as cp
 
 

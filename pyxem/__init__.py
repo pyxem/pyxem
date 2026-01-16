@@ -26,7 +26,6 @@ __all__ = [
     "generators",
     "signals",
     "data",
-    "CUPY_INSTALLED",
 ]
 
 

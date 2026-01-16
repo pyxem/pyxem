@@ -28,7 +28,7 @@ from orix import crystal_map, quaternion
 import psutil
 import scipy
 
-from pyxem import CUPY_INSTALLED
+from pyxem.common import CUPY_INSTALLED
 from pyxem.utils.diffraction import _cart2polar
 from pyxem.utils.vectors import get_rotation_matrix_between_vectors, get_angle_cartesian
 from pyxem.utils.cuda import is_cupy_array, get_array_module

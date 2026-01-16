@@ -19,7 +19,7 @@
 import dask.array as da
 import pytest
 
-from pyxem import CUPY_INSTALLED
+from pyxem.common import CUPY_INSTALLED
 from pyxem.utils.cuda import dask_array_to_gpu, dask_array_from_gpu
 
 if CUPY_INSTALLED:

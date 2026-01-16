@@ -20,14 +20,14 @@
 
 import numpy as np
 
-import pyxem
+from pyxem.common import CUPY_INSTALLED
 
 
 def dask_array_to_gpu(dask_array):
     """
     Copy a dask array to the GPU chunk by chunk
     """
-    if not pyxem.CUPY_INSTALLED:
+    if not CUPY_INSTALLED:
         raise BaseException("cupy is required")
 
     import cupy as cp
@@ -39,7 +39,7 @@ def dask_array_from_gpu(dask_array):
     """
     Copy a dask array from the GPU chunk by chunk
     """
-    if not pyxem.CUPY_INSTALLED:
+    if not CUPY_INSTALLED:
         raise BaseException("cupy is required")
 
     import cupy as cp
@@ -77,7 +77,7 @@ def get_array_module(array):
     module : module
     """
     module = np
-    if pyxem.CUPY_INSTALLED:
+    if CUPY_INSTALLED:
         import cupy as cp
 
         if is_cupy_array(array):
@@ -99,7 +99,7 @@ def is_cupy_array(array):
     bool
         True if it is cupy array, False otherwise.
     """
-    if pyxem.CUPY_INSTALLED:
+    if CUPY_INSTALLED:
         import cupy as cp
 
         return isinstance(array, cp.ndarray)

@@ -16,13 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-from . import components, data, generators, signals
-from .common import CUPY_INSTALLED
+from . import components, data, generators, signals, utils
 
-__all__ = [
-    "components",
-    "generators",
-    "signals",
-    "data",
-    "CUPY_INSTALLED",
-]
+__all__ = ["components", "data", "generators", "signals", "utils"]
