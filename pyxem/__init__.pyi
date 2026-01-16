@@ -16,10 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-import importlib
-
-from . import release_info
-
+from . import components, data, generators, signals
+from .common import CUPY_INSTALLED
 
 __all__ = [
     "components",
@@ -28,21 +26,3 @@ __all__ = [
     "data",
     "CUPY_INSTALLED",
 ]
-
-
-def __dir__():
-    return sorted(__all__)
-
-
-__version__ = release_info.version
-__author__ = release_info.author
-__copyright__ = release_info.copyright
-__credits__ = release_info.credits
-__license__ = release_info.license
-__maintainer__ = release_info.maintainer
-__email__ = release_info.email
-__status__ = release_info.status
-
-import lazy_loader as _lazy
-
-__getattr__, __dir__, __all__ = _lazy.attach_stub(__name__, __file__)
