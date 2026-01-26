@@ -88,7 +88,7 @@ setup(
     install_requires=[
         "dask",
         "diffsims       >= 0.7.0",  # ensure we use the latest version
-        "hyperspy       >= 2.2.0",  # Use axes_manager set/get functionality
+        "hyperspy       >= 2.4.0",  # improved lazy import
         "h5py",
         "lazy-loader",
         "lmfit          >= 1.0.0",  # support for recent version of numpy
