@@ -73,13 +73,15 @@ def is_ellipse_good(
     Examples
     --------
     >>> import pyxem.utils.ransac_ellipse_tools as ret
-    >>> model = ret.EllipseModel()
-    >>> model.params = ret._make_ellipse_model_params_focus(30, 50, 30, 20, 0)
+    >>> params = ret._make_ellipse_model_params_focus(30, 50, 30, 20, 0)
+    >>> model = ret.EllipseModel(*params)
     >>> is_good = ret.is_ellipse_good(
     ...         ellipse_model=model, data=None, xf=30, yf=50, rf_lim=5)
 
     """
-    xc, yc, a, b, r = ellipse_model.params
+    xc, yc = ellipse_model.center
+    a, b = ellipse_model.axis_lengths
+    r = ellipse_model.theta
     x, y = _get_closest_focus(xf, yf, xc, yc, a, b, r)
     rf = math.hypot(x - xf, y - yf)
     if rf > rf_lim:
@@ -102,7 +104,7 @@ def is_ellipse_good(
 
 
 def _ellipse_centre_to_focus(x, y, a, b, r):
-    """Get focus for an ellipse from EllipseModel.params
+    """Get focus for an ellipse from EllipseModel parameters
 
     Parameters
     ----------
@@ -204,9 +206,9 @@ def make_ellipse_data_points(x, y, a, b, r, nt=20, use_focus=True):
     if use_focus:
         params = _make_ellipse_model_params_focus(x, y, a, b, r)
     else:
-        params = (x, y, a, b, r)
+        params = (x, y), (a, b), r
     theta_array = np.arange(0, 2 * np.pi, 2 * np.pi / nt)
-    data = EllipseModel().predict_xy(theta_array, params=params)
+    data = EllipseModel(*params).predict_xy(theta_array)
     return data
 
 
@@ -233,7 +235,7 @@ def _ellipse_model_centre_to_focus(xc, yc, a, b, r, x, y):
 
     """
     xf, yf = _get_closest_focus(x, y, xc, yc, a, b, r)
-    params = (xf, yf, a, b, r)
+    params = (xf, yf), (a, b), r
     return params
 
 
@@ -251,7 +253,7 @@ def _make_ellipse_model_params_focus(xf, yf, a, b, r):
     Returns
     -------
     params : tuple
-        (xc, yc, a, b, r)
+        (xc, yc), (a, b), r
 
     """
     if a < b:
@@ -260,8 +262,7 @@ def _make_ellipse_model_params_focus(xf, yf, a, b, r):
     c = math.sqrt(math.pow(a, 2) - math.pow(b, 2))
     xc = xf - c * math.cos(r)
     yc = yf - c * math.sin(r)
-    params = (xc, yc, a, b, r)
-    return params
+    return (xc, yc), (a, b), r
 
 
 def get_ellipse_model_ransac_single_frame(
@@ -308,14 +309,14 @@ def get_ellipse_model_ransac_single_frame(
     Returns
     -------
     model_ransac, inliers
-        Model data is accessed in model_ransac.params:
-        [x, y, semi_len0, semi_len1, rotation]
+        Model data is accessed in model_ransac.center,
+        model_ransac.axis_lengths, model_ransac.theta.
 
     Examples
     --------
     >>> import pyxem.utils.ransac_ellipse_tools as ret
-    >>> data = ret.EllipseModel().predict_xy(
-    ...        np.arange(0, 2*np.pi, 0.5), params=(128, 130, 50, 60, 0.2))
+    >>> data = ret.EllipseModel((128, 130), (50, 60), 0.2).predict_xy(
+    ...        np.arange(0, 2*np.pi, 0.5))
     >>> ellipse_model, inliers = ret.get_ellipse_model_ransac_single_frame(
     ...        data, xf=128, yf=128, rf_lim=5, semi_len_min=45,
     ...        semi_len_max=65, semi_len_ratio_lim=1.4, max_trials=1000)
@@ -438,7 +439,11 @@ def get_ellipse_model_ransac(
             max_trials=max_trials,
         )
         if ellipse_model is not None:
-            params = ellipse_model.params
+            params = (
+                *ellipse_model.center,
+                *ellipse_model.axis_lengths,
+                ellipse_model.theta,
+            )
         else:
             params = None
         ellipse_array[iy, ix] = params
@@ -674,16 +679,14 @@ def determine_ellipse(
         else:
             el, inlier = get_ellipse_model_ransac_single_frame(pos, **kwargs)
     else:
-        e = EllipseModel()
-        converge = e.estimate(data=pos)
-        el = e
+        el = EllipseModel.from_estimate(data=pos)
     if el is not None:
-        affine = _ellipse_to_affine(el.params[3], el.params[2], el.params[4])
-        center = (el.params[0], el.params[1])
+        affine = _ellipse_to_affine(el.axis_lengths[1], el.axis_lengths[0], el.theta)
+        center = (el.center[0], el.center[1])
         if return_params and use_ransac:
-            return center, affine, el.params, pos, inlier
+            return center, affine, *el.center, *el.axis_lengths, el.theta, pos, inlier
         elif return_params:
-            return center, affine, el.params, pos
+            return center, affine, *el.center, *el.axis_lengths, el.theta, pos
         else:
             return center, affine
     else:  # pragma: no cover
