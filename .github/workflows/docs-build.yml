@@ -2,7 +2,9 @@ name: Docs build
 
 on:
   pull_request:
-    types: [opened, closed, synchronize]
+    # on closed, the docs-PR-preview-cleanup.yml workflow will remove the preview
+    # and update the sticky comment accordingly
+    types: [opened, synchronize]
   push:
   workflow_dispatch:
 
@@ -21,7 +23,10 @@ jobs:
 
   Push-dev:
     needs: [Build]
-    if: github.event_name != 'pull_request' && github.ref_name == 'main'
+    if: >
+      github.repository_owner == 'pyxem' && 
+      github.event_name != 'pull_request' && 
+      github.ref_name == 'main'
     permissions:
       # needs write permission to push the docs to gh-pages
       contents: write
@@ -31,18 +36,24 @@ jobs:
 
   Push-tag:
     needs: [Build]
-    if: github.event_name != 'pull_request' && github.ref_type == 'tag'
+    if: >
+      github.repository_owner == 'pyxem' &&
+      github.event_name != 'pull_request' &&
+      github.ref_type == 'tag'
     permissions:
       # needs write permission to push the docs to gh-pages
       contents: write
     uses: hyperspy/.github/.github/workflows/push_doc.yml@main
     with:
       output_path: ${{ github.ref_name }}
-      # Add a redirect index.html in the root folder pointing to the tag version
-      redirect_to_version: ${{ github.ref_name }}
+      create_redirect: true
+      create_stable_copy: true
+      persistent_name: stable
 
   Upload-PR_preview:
-    if: github.event_name == 'pull_request'
+    if: >
+      github.repository_owner == 'pyxem' && 
+      github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Write deploy info to file
@@ -52,7 +63,6 @@ jobs:
           {
             "workflow_run_id": "${{ github.run_id }}",
             "pr_number": "${{ github.event.pull_request.number }}",
-            "pull_request_action": "${{ github.event.action }}"
           }
           EOF
 
