@@ -47,14 +47,12 @@
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../_static/documentation_options.js?v=88e4c0c0"></script>
-    <script src="../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../_static/copybutton.js?v=f281be69"></script>
     <script src="../../_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'examples/processing/index';</script>
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
@@ -996,31 +994,31 @@
 <span id="sphx-glr-examples-processing"></span><h1>Data Processing<a class="headerlink" href="#data-processing" title="Link to this heading">#</a></h1>
 <p>Below is a gallery of examples on how to process 4-D STEM data in pyxem</p>
 <div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="The Circular Hough Transform is a method to detect circular features in an image. It can be used to detect rings (or disks) in the diffraction pattern.  For strain mapping there is some evidence that the Circular Hough transform is more accurate than typical template matching and can provide subpixel accuracy."><img alt="" src="../../_images/sphx_glr_circular_hough_transform_thumb.png" />
-<p><a class="reference internal" href="circular_hough_transform.html#sphx-glr-examples-processing-circular-hough-transform-py"><span class="std std-ref">Circular Hough Transform Peak Finding</span></a></p>
+<p><a class="reference internal" href="circular_hough_transform.html"><span class="doc">Circular Hough Transform Peak Finding</span></a></p>
   <div class="sphx-glr-thumbnail-title">Circular Hough Transform Peak Finding</div>
 </div><div class="sphx-glr-thumbcontainer" tooltip="If your diffraction data is noisy, you might want to subtract the background from the dataset. Pyxem offers some built-in functionality for this, with the subtract_diffraction_background class method. Custom filtering is also possible, an example is shown in the &#x27;Filtering Data&#x27;-example."><img alt="" src="../../_images/sphx_glr_background_subtraction_thumb.png" />
-<p><a class="reference internal" href="background_subtraction.html#sphx-glr-examples-processing-background-subtraction-py"><span class="std std-ref">Background subtraction</span></a></p>
+<p><a class="reference internal" href="background_subtraction.html"><span class="doc">Background subtraction</span></a></p>
   <div class="sphx-glr-thumbnail-title">Background subtraction</div>
 </div><div class="sphx-glr-thumbcontainer" tooltip="If you have a low number of counts in your data, you may want to filter the data to remove noise. This can be done using the filter function which applies some function to the entire dataset and returns a filtered dataset of the same shape."><img alt="" src="../../_images/sphx_glr_filtering_data_thumb.png" />
-<p><a class="reference internal" href="filtering_data.html#sphx-glr-examples-processing-filtering-data-py"><span class="std std-ref">Filtering Data (Averaging Neighboring Patterns etc.)</span></a></p>
+<p><a class="reference internal" href="filtering_data.html"><span class="doc">Filtering Data (Averaging Neighboring Patterns etc.)</span></a></p>
   <div class="sphx-glr-thumbnail-title">Filtering Data (Averaging Neighboring Patterns etc.)</div>
 </div><div class="sphx-glr-thumbcontainer" tooltip="Centering the Zero Beam"><img alt="" src="../../_images/sphx_glr_centering_the_zero_beam_thumb.png" />
-<p><a class="reference internal" href="centering_the_zero_beam.html#sphx-glr-examples-processing-centering-the-zero-beam-py"><span class="std std-ref">Centering the Zero Beam</span></a></p>
+<p><a class="reference internal" href="centering_the_zero_beam.html"><span class="doc">Centering the Zero Beam</span></a></p>
   <div class="sphx-glr-thumbnail-title">Centering the Zero Beam</div>
 </div><div class="sphx-glr-thumbcontainer" tooltip="Finding Diffraction Vectors"><img alt="" src="../../_images/sphx_glr_vector_finding_thumb.png" />
-<p><a class="reference internal" href="vector_finding.html#sphx-glr-examples-processing-vector-finding-py"><span class="std std-ref">Finding Diffraction Vectors</span></a></p>
+<p><a class="reference internal" href="vector_finding.html"><span class="doc">Finding Diffraction Vectors</span></a></p>
   <div class="sphx-glr-thumbnail-title">Finding Diffraction Vectors</div>
 </div><div class="sphx-glr-thumbcontainer" tooltip="This example shows how the template matching is done in pyxem to find peaks in a diffraction pattern."><img alt="" src="../../_images/sphx_glr_template_matching_thumb.png" />
-<p><a class="reference internal" href="template_matching.html#sphx-glr-examples-processing-template-matching-py"><span class="std std-ref">Template Matching</span></a></p>
+<p><a class="reference internal" href="template_matching.html"><span class="doc">Template Matching</span></a></p>
   <div class="sphx-glr-thumbnail-title">Template Matching</div>
 </div><div class="sphx-glr-thumbcontainer" tooltip="pyxem now includes built in azimuthal integration functionality. This is useful for extracting radial profiles from diffraction patterns in 1 or 2 dimensions.  The new method will split the pixels into radial bins and then sum the intensity in each bin resulting in a Diffraction1D or Polar2D signal.  In each case the total intensity of the diffraction pattern is preserved."><img alt="" src="../../_images/sphx_glr_azimuthal_integration_thumb.png" />
-<p><a class="reference internal" href="azimuthal_integration.html#sphx-glr-examples-processing-azimuthal-integration-py"><span class="std std-ref">Azimuthal Integration (in Pyxem!)</span></a></p>
+<p><a class="reference internal" href="azimuthal_integration.html"><span class="doc">Azimuthal Integration (in Pyxem!)</span></a></p>
   <div class="sphx-glr-thumbnail-title">Azimuthal Integration (in Pyxem!)</div>
 </div><div class="sphx-glr-thumbcontainer" tooltip="This example demonstrates how to calibrate the scales in both reciprocal and real-space.  Ideally this should be done using a calibration standard with a known lattice spacing."><img alt="" src="../../_images/sphx_glr_calibrating_recip_space_thumb.png" />
-<p><a class="reference internal" href="calibrating_recip_space.html#sphx-glr-examples-processing-calibrating-recip-space-py"><span class="std std-ref">Calibrating Scales</span></a></p>
+<p><a class="reference internal" href="calibrating_recip_space.html"><span class="doc">Calibrating Scales</span></a></p>
   <div class="sphx-glr-thumbnail-title">Calibrating Scales</div>
 </div><div class="sphx-glr-thumbcontainer" tooltip="- Orientation mapping - Angular Correlation (AC) - Fluctuation Electron Microscopy (FEM) - And many other 4-D STEM techniques"><img alt="" src="../../_images/sphx_glr_determining_ellipticity_thumb.png" />
-<p><a class="reference internal" href="determining_ellipticity.html#sphx-glr-examples-processing-determining-ellipticity-py"><span class="std std-ref">Determining Elliptic Distortion</span></a></p>
+<p><a class="reference internal" href="determining_ellipticity.html"><span class="doc">Determining Elliptic Distortion</span></a></p>
   <div class="sphx-glr-thumbnail-title">Determining Elliptic Distortion</div>
 </div></div><div class="toctree-wrapper compound">
 </div>
@@ -1124,7 +1122,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
     <br/>
   </p>
 </div>

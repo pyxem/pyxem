@@ -138,7 +138,7 @@ Now if we do integrate this dataset it will choose the appropriate center based 
 
  .. code-block:: none
 
-      0%|          | 0/2 [00:00<?, ?it/s]     50%|█████     | 1/2 [00:02<00:02,  2.66s/it]    100%|██████████| 2/2 [00:02<00:00,  1.33s/it]
+      0%|          | 0/2 [00:00<?, ?it/s]     50%|█████     | 1/2 [00:02<00:02,  2.81s/it]    100%|██████████| 2/2 [00:02<00:00,  1.40s/it]
 
 
 
@@ -190,7 +190,7 @@ but things are streatched based on the effects of the Ewald Sphere.
  .. code-block:: none
 
     [np.int64(10), np.int64(10)]
-      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 1491.84it/s]
+      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 1738.93it/s]
 
 
 
@@ -202,7 +202,7 @@ sphinx_gallery_thumbnail_number = 4
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 7.773 seconds)
+   **Total running time of the script:** (0 minutes 8.200 seconds)
 
 
 .. _sphx_glr_download_examples_standards_pixel_coodinates.py:

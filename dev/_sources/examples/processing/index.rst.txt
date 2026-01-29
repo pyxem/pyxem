@@ -22,7 +22,7 @@ Below is a gallery of examples on how to process 4-D STEM data in pyxem
   .. image:: /examples/processing/images/thumb/sphx_glr_circular_hough_transform_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_processing_circular_hough_transform.py`
+  :doc:`/examples/processing/circular_hough_transform`
 
 .. raw:: html
 
@@ -39,7 +39,7 @@ Below is a gallery of examples on how to process 4-D STEM data in pyxem
   .. image:: /examples/processing/images/thumb/sphx_glr_background_subtraction_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_processing_background_subtraction.py`
+  :doc:`/examples/processing/background_subtraction`
 
 .. raw:: html
 
@@ -56,7 +56,7 @@ Below is a gallery of examples on how to process 4-D STEM data in pyxem
   .. image:: /examples/processing/images/thumb/sphx_glr_filtering_data_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_processing_filtering_data.py`
+  :doc:`/examples/processing/filtering_data`
 
 .. raw:: html
 
@@ -73,7 +73,7 @@ Below is a gallery of examples on how to process 4-D STEM data in pyxem
   .. image:: /examples/processing/images/thumb/sphx_glr_centering_the_zero_beam_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_processing_centering_the_zero_beam.py`
+  :doc:`/examples/processing/centering_the_zero_beam`
 
 .. raw:: html
 
@@ -90,7 +90,7 @@ Below is a gallery of examples on how to process 4-D STEM data in pyxem
   .. image:: /examples/processing/images/thumb/sphx_glr_vector_finding_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_processing_vector_finding.py`
+  :doc:`/examples/processing/vector_finding`
 
 .. raw:: html
 
@@ -107,7 +107,7 @@ Below is a gallery of examples on how to process 4-D STEM data in pyxem
   .. image:: /examples/processing/images/thumb/sphx_glr_template_matching_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_processing_template_matching.py`
+  :doc:`/examples/processing/template_matching`
 
 .. raw:: html
 
@@ -124,7 +124,7 @@ Below is a gallery of examples on how to process 4-D STEM data in pyxem
   .. image:: /examples/processing/images/thumb/sphx_glr_azimuthal_integration_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_processing_azimuthal_integration.py`
+  :doc:`/examples/processing/azimuthal_integration`
 
 .. raw:: html
 
@@ -141,7 +141,7 @@ Below is a gallery of examples on how to process 4-D STEM data in pyxem
   .. image:: /examples/processing/images/thumb/sphx_glr_calibrating_recip_space_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_processing_calibrating_recip_space.py`
+  :doc:`/examples/processing/calibrating_recip_space`
 
 .. raw:: html
 
@@ -158,7 +158,7 @@ Below is a gallery of examples on how to process 4-D STEM data in pyxem
   .. image:: /examples/processing/images/thumb/sphx_glr_determining_ellipticity_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_processing_determining_ellipticity.py`
+  :doc:`/examples/processing/determining_ellipticity`
 
 .. raw:: html
 

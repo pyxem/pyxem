@@ -233,7 +233,7 @@ Note: that any of the plots are interactive if you add:
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 1.879 seconds)
+   **Total running time of the script:** (0 minutes 1.940 seconds)
 
 
 .. _sphx_glr_download_examples_plotting_plotting_a_diffraction_pattern.py:

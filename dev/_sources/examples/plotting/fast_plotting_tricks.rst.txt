@@ -74,7 +74,7 @@ which will compute the navigator and store it in the signal. This will make plot
 
  .. code-block:: none
 
-      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 579.20it/s]
+      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 535.67it/s]
     <Diffraction2D, title: , dimensions: (|20, 20)>
 
 
@@ -248,9 +248,9 @@ This will make loading the data faster which will in turn make plotting faster!
 
  .. code-block:: none
 
-    /opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/rsciio/zspy/_api.py:235: FutureWarning: The NestedDirectoryStore is deprecated and will be removed in a Zarr-Python version 3, see https://github.com/zarr-developers/zarr-python/issues/1274 for more information.
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/rsciio/zspy/_api.py:235: FutureWarning: The NestedDirectoryStore is deprecated and will be removed in a Zarr-Python version 3, see https://github.com/zarr-developers/zarr-python/issues/1274 for more information.
       store = zarr.storage.NestedDirectoryStore(filename)
-    [                                        ] | 0% Completed | 155.74 us    [                                        ] | 0% Completed | 100.27 ms    [########################################] | 100% Completed | 200.52 ms
+    [                                        ] | 0% Completed | 201.46 us    [                                        ] | 0% Completed | 100.33 ms    [########################################] | 100% Completed | 200.60 ms
 
 
 
@@ -258,7 +258,7 @@ This will make loading the data faster which will in turn make plotting faster!
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 1.607 seconds)
+   **Total running time of the script:** (0 minutes 1.931 seconds)
 
 
 .. _sphx_glr_download_examples_plotting_fast_plotting_tricks.py:

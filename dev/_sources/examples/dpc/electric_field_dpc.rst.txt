@@ -80,7 +80,7 @@ Electric Field Mapping.
 
  .. code-block:: none
 
-      0%|          | 0/31 [00:00<?, ?it/s]     29%|██▉       | 9/31 [00:00<00:00, 32.03it/s]     68%|██████▊   | 21/31 [00:00<00:00, 37.89it/s]     81%|████████  | 25/31 [00:00<00:00, 37.79it/s]     94%|█████████▎| 29/31 [00:00<00:00, 37.38it/s]    100%|██████████| 31/31 [00:00<00:00, 35.44it/s]
+      0%|          | 0/31 [00:00<?, ?it/s]     29%|██▉       | 9/31 [00:00<00:00, 28.71it/s]     68%|██████▊   | 21/31 [00:00<00:00, 36.23it/s]     87%|████████▋ | 27/31 [00:00<00:00, 40.66it/s]    100%|██████████| 31/31 [00:00<00:00, 37.07it/s]
 
     [<Axes: title={'center': 'x-shift'}, xlabel='x axis (nm)', ylabel='y axis (nm)'>, <Axes: title={'center': 'y-shift'}, xlabel='x axis (nm)', ylabel='y axis (nm)'>]
 
@@ -199,7 +199,7 @@ hyperspy's interactive tools.
  .. code-block:: none
 
 
-    <hyperspy.drawing._widgets.line2d.Line2DWidget object at 0x7fdab0870440>
+    <hyperspy.drawing._widgets.line2d.Line2DWidget object at 0x7f3d98a08620>
 
 
 
@@ -210,7 +210,7 @@ sphinx_gallery_thumbnail_number = 5
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 4.102 seconds)
+   **Total running time of the script:** (0 minutes 4.226 seconds)
 
 
 .. _sphx_glr_download_examples_dpc_electric_field_dpc.py:

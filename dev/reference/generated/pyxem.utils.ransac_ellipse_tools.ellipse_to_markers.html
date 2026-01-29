@@ -47,8 +47,8 @@
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../_static/documentation_options.js?v=88e4c0c0"></script>
-    <script src="../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../_static/copybutton.js?v=f281be69"></script>
     <script src="../../_static/design-tabs.js?v=f930bc37"></script>
@@ -1001,7 +1001,7 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="pyxem.utils.ransac_ellipse_tools.ellipse_to_markers">
 <span class="sig-prename descclassname"><span class="pre">pyxem.utils.ransac_ellipse_tools.</span></span><span class="sig-name descname"><span class="pre">ellipse_to_markers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ellipse_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/pyxem/pyxem/blob/v0.21.0/pyxem/utils/ransac_ellipse_tools.py#L527-L594"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxem.utils.ransac_ellipse_tools.ellipse_to_markers" title="Link to this definition">#</a></dt>
-<dd><p>Convert an ellipse array to a <a class="reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.plot/markers.html#hyperspy.api.plot.markers.Ellipses" title="(in HyperSpy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">hyperspy.api.plot.markers.Ellipses</span></code></a> object. If points and
+<dd><p>Convert an ellipse array to a <a class="reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.plot/markers.html#hyperspy.api.plot.markers.Ellipses" title="(in HyperSpy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">hyperspy.api.plot.markers.Ellipses</span></code></a> object. If points and
 inlier are provided, then the points are also plotted. The inlier points are plotted in green
 and the outlier points are plotted in red.</p>
 <dl class="field-list simple">
@@ -1015,6 +1015,15 @@ and the outlier points are plotted in red.</p>
 </dl>
 </dd></dl>
 
+<section id="examples-using-ellipse-to-markers">
+<h2>Examples using <code class="docutils literal notranslate"><span class="pre">ellipse_to_markers</span></code><a class="headerlink" href="#examples-using-ellipse-to-markers" title="Link to this heading">#</a></h2>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="In this example we will focus on calculating V_\Omega (k) which is defined as,"><img alt="" src="../../_images/sphx_glr_FEM_thumb.png" />
+<p><a class="reference internal" href="../../examples/amorphous_characterization/FEM.html"><span class="doc">Fluctuation Electron Microscopy</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Fluctuation Electron Microscopy</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="- Orientation mapping - Angular Correlation (AC) - Fluctuation Electron Microscopy (FEM) - And many other 4-D STEM techniques"><img alt="" src="../../_images/sphx_glr_determining_ellipticity_thumb.png" />
+<p><a class="reference internal" href="../../examples/processing/determining_ellipticity.html"><span class="doc">Determining Elliptic Distortion</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Determining Elliptic Distortion</div>
+</div></div></section>
 </section>
 
 
@@ -1065,6 +1074,7 @@ and the outlier points are plotted in red.</p>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyxem.utils.ransac_ellipse_tools.ellipse_to_markers"><code class="docutils literal notranslate"><span class="pre">ellipse_to_markers()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#examples-using-ellipse-to-markers">Examples using <code class="docutils literal notranslate"><span class="pre">ellipse_to_markers</span></code></a></li>
 </ul>
   </nav></div>
 
@@ -1127,7 +1137,7 @@ and the outlier points are plotted in red.</p>
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
     <br/>
   </p>
 </div>

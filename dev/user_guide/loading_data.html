@@ -37,8 +37,8 @@
 <link as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" rel="preload"/>
 <link as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" rel="preload"/>
 <script src="../_static/documentation_options.js?v=88e4c0c0"></script>
-<script src="../_static/doctools.js?v=9bcbadda"></script>
-<script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+<script src="../_static/doctools.js?v=fd6eb6e6"></script>
+<script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
 <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
 <script src="../_static/copybutton.js?v=f281be69"></script>
 <script src="../_static/design-tabs.js?v=f930bc37"></script>
@@ -803,10 +803,10 @@ on the rosettasciio GitHub page and we will do our best to work with you to add 
 <p>We are also looking to add support for faster loading of data from detectors that we already
 support.  This means adding support for distributed file loading, which allows for operating
 on data using multiple computers connected over a network.</p>
-<p>To load data from a file, we use the <a class="reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.html#hyperspy.api.load" title="(in HyperSpy v2.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">hyperspy.api.load()</span></code></a> function.  The
-<a class="reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.html#hyperspy.api.load" title="(in HyperSpy v2.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">hyperspy.api.load()</span></code></a> function will return different type of object depending what
+<p>To load data from a file, we use the <a class="reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.html#hyperspy.api.load" title="(in HyperSpy v2.4)"><code class="xref py py-func docutils literal notranslate"><span class="pre">hyperspy.api.load()</span></code></a> function.  The
+<a class="reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.html#hyperspy.api.load" title="(in HyperSpy v2.4)"><code class="xref py py-func docutils literal notranslate"><span class="pre">hyperspy.api.load()</span></code></a> function will return different type of object depending what
 file is being loaded. For example, it can return HyperSpy generic signal object
-(e. g. <a class="reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.signals/Signal2D.html#hyperspy.api.signals.Signal2D" title="(in HyperSpy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">hyperspy.api.signals.Signal2D</span></code></a>) or domain specific signal object
+(e. g. <a class="reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.signals/Signal2D.html#hyperspy.api.signals.Signal2D" title="(in HyperSpy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">hyperspy.api.signals.Signal2D</span></code></a>) or domain specific signal object
 (e. g. <a class="reference internal" href="../reference/generated/pyxem.signals.ElectronDiffraction2D.html#pyxem.signals.ElectronDiffraction2D" title="pyxem.signals.ElectronDiffraction2D"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyxem.signals.ElectronDiffraction2D</span></code></a>).</p>
 <p>With some file formats, it is possible to assign the data to a suitable signal type when loading the file
 and when possible it is done automatically. For example, loading:external+rsciio:<cite>.blo&lt;blockfile-format&gt;</cite> will
@@ -897,7 +897,7 @@ the signal type.  For example,</p>
 </div>
 <div class="footer-item">
 <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
     <br/>
 </p>
 </div>

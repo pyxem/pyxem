@@ -22,7 +22,7 @@ Below is a gallery of examples on how to do Differential Phase Contrast (DPC) in
   .. image:: /examples/dpc/images/thumb/sphx_glr_magnetic_dpc_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_dpc_magnetic_dpc.py`
+  :doc:`/examples/dpc/magnetic_dpc`
 
 .. raw:: html
 
@@ -39,7 +39,7 @@ Below is a gallery of examples on how to do Differential Phase Contrast (DPC) in
   .. image:: /examples/dpc/images/thumb/sphx_glr_electric_field_dpc_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_dpc_electric_field_dpc.py`
+  :doc:`/examples/dpc/electric_field_dpc`
 
 .. raw:: html
 

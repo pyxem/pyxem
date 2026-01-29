@@ -67,7 +67,7 @@ Other Virtual Imaging
 
  .. code-block:: none
 
-    /opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/pyxem/utils/virtual_images_utils.py:47: VisibleDeprecationWarning: Function `get_vectors_mesh()` is deprecated and will be removed in version 1.0.0. Use `utils.vectors.get_vector_mesh()` instead.
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/virtual_images_utils.py:47: VisibleDeprecationWarning: Function `get_vectors_mesh()` is deprecated and will be removed in version 1.0.0. Use `utils.vectors.get_vector_mesh()` instead.
       since="0.18.0", removal="1.0.0", alternative="utils.vectors.get_vector_mesh"
 
 
@@ -167,7 +167,7 @@ We can also use multiple different ROIs and combine them into a virtual image.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 5.921 seconds)
+   **Total running time of the script:** (0 minutes 6.091 seconds)
 
 
 .. _sphx_glr_download_examples_virtual_imaging_other_virtual_imaging.py:

@@ -46,6 +46,13 @@ for a first look at the data.
 
 
 
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/hyperspy/misc/utils.py:72: VisibleDeprecationWarning: `_get_block_pattern` has moved to `hyperspy.misc.dask_utils`. It is for internal use only and may be removed in the future.
+      warnings.warn(
+
 
 
 
@@ -131,7 +138,7 @@ Visualizing the virtual detector
 
  .. code-block:: none
 
-      0%|          | 0/51 [00:00<?, ?it/s]      2%|▏         | 1/51 [00:02<02:18,  2.78s/it]    100%|██████████| 51/51 [00:02<00:00, 18.29it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]      2%|▏         | 1/51 [00:03<02:32,  3.05s/it]    100%|██████████| 51/51 [00:03<00:00, 16.64it/s]
 
 
 
@@ -144,7 +151,7 @@ sphinx_gallery_thumbnail_number = 2
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 3.894 seconds)
+   **Total running time of the script:** (0 minutes 7.960 seconds)
 
 
 .. _sphx_glr_download_examples_virtual_imaging_creating_a_segmented_detector.py:

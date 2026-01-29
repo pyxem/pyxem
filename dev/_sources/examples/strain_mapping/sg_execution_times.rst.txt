@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:32.235** total execution time for 1 file **from examples/strain_mapping**:
+**00:33.768** total execution time for 1 file **from examples/strain_mapping**:
 
 .. container::
 
@@ -33,5 +33,5 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_examples_strain_mapping_strain_mapping.py` (``strain_mapping.py``)
-     - 00:32.235
+     - 00:33.768
      - 0.0

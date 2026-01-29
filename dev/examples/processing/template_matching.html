@@ -1,254 +1,414 @@
 
 <!DOCTYPE html>
 
-<html data-content_root="../../" lang="en">
-<head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>Template Matching — pyxem 0.21.0 documentation</title>
-<script data-cfasync="false">
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Template Matching &#8212; pyxem 0.21.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-<!--
+  <!--
     this give us a css class that will be invisible only if js is disabled
   -->
-<noscript>
-<style>
+  <noscript>
+    <style>
       .pst-js-only { display: none !important; }
 
     </style>
-</noscript>
-<!-- Loaded before other Sphinx assets -->
-<link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet"/>
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet"/>
-<link href="../../_static/pygments.css?v=d75fae25" rel="stylesheet" type="text/css"/>
-<link href="../../_static/graphviz.css?v=4ae1632d" rel="stylesheet" type="text/css"/>
-<link href="../../_static/sphinx-codeautolink.css?v=b2176991" rel="stylesheet" type="text/css"/>
-<link href="../../_static/copybutton.css?v=76b2166b" rel="stylesheet" type="text/css"/>
-<link href="../../_static/sg_gallery.css?v=d2d258e8" rel="stylesheet" type="text/css"/>
-<link href="../../_static/sg_gallery-binder.css?v=f4aeca0c" rel="stylesheet" type="text/css"/>
-<link href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" rel="stylesheet" type="text/css"/>
-<link href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" rel="stylesheet" type="text/css"/>
-<link href="../../_static/sphinx-design.min.css?v=95c83b7e" rel="stylesheet" type="text/css"/>
-<!-- So that users can add custom icons -->
-<script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
-<!-- Pre-loaded scripts that we'll load fully later -->
-<link as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" rel="preload"/>
-<link as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" rel="preload"/>
-<script src="../../_static/documentation_options.js?v=88e4c0c0"></script>
-<script src="../../_static/doctools.js?v=9bcbadda"></script>
-<script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
-<script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
-<script src="../../_static/copybutton.js?v=f281be69"></script>
-<script src="../../_static/design-tabs.js?v=f930bc37"></script>
-<script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-<script>DOCUMENTATION_OPTIONS.pagename = 'examples/processing/template_matching';</script>
-<script>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d75fae25" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-codeautolink.css?v=b2176991" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=88e4c0c0"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'examples/processing/template_matching';</script>
+    <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://pyxem.readthedocs.io/en/latest/_static/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.21';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
             false;
         </script>
-<link href="../../_static/logo.ico" rel="icon"/>
-<link href="../../genindex.html" rel="index" title="Index"/>
-<link href="../../search.html" rel="search" title="Search"/>
-<link href="azimuthal_integration.html" rel="next" title="Azimuthal Integration (in Pyxem!)"/>
-<link href="vector_finding.html" rel="prev" title="Finding Diffraction Vectors"/>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
-<meta content="en" name="docsearch:language"/>
-<meta content="0.21.0" name="docsearch:version"/>
-</head>
-<body data-bs-root-margin="0px 0px -60%" data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-default-mode="" data-offset="180">
-<div class="skip-link d-print-none" id="pst-skip-link"><a href="#main-content">Skip to main content</a></div>
-<div id="pst-scroll-pixel-helper"></div>
-<button class="btn rounded-pill" id="pst-back-to-top" type="button">
-<i class="fa-solid fa-arrow-up"></i>Back to top</button>
-<dialog id="pst-search-dialog">
-<form action="../../search.html" class="bd-search d-flex align-items-center" method="get">
-<i class="fa-solid fa-magnifying-glass"></i>
-<input aria-label="Search the docs ..." autocapitalize="off" autocomplete="off" autocorrect="off" class="form-control" name="q" placeholder="Search the docs ..." spellcheck="false" type="search"/>
-<span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+    <link rel="icon" href="../../_static/logo.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Azimuthal Integration (in Pyxem!)" href="azimuthal_integration.html" />
+    <link rel="prev" title="Finding Diffraction Vectors" href="vector_finding.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.21.0" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
 </form>
-</dialog>
-<div class="pst-async-banner-revealer d-none">
-<aside aria-label="Version warning" class="d-none d-print-none" id="bd-header-version-warning"></aside>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
 </div>
-<aside aria-label="Announcement" class="bd-header-announcement">
-<div class="bd-header-announcement__content">Check out the new <a href="https://pyxem.readthedocs.io/en/latest/examples/index.html">Examples Gallery!</a> </div>
+<aside class="bd-header-announcement" aria-label="Announcement">
+  <div class="bd-header-announcement__content">Check out the new <a href='https://pyxem.readthedocs.io/en/latest/examples/index.html'>Examples Gallery!</a> </div>
 </aside>
-<header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-<button aria-label="Site navigation" class="pst-navbar-icon sidebar-toggle primary-toggle">
-<span class="fa-solid fa-bars"></span>
-</button>
-<div class="col-lg-3 navbar-header-items__start">
-<div class="navbar-item">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
 <a class="navbar-brand logo" href="../../index.html">
-<img alt="pyxem 0.21.0 documentation - Home" class="logo__image only-light" src="../../_static/logo.png"/>
-<img alt="pyxem 0.21.0 documentation - Home" class="logo__image only-dark pst-js-only" src="../../_static/logo.png"/>
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/logo.png" class="logo__image only-light" alt="pyxem 0.21.0 documentation - Home"/>
+    <img src="../../_static/logo.png" class="logo__image only-dark pst-js-only" alt="pyxem 0.21.0 documentation - Home"/>
+  
+  
 </a></div>
-<div class="navbar-item">
+    
+      <div class="navbar-item">
 <div class="version-switcher__container dropdown pst-js-only">
-<button aria-controls="pst-version-switcher-list-2" aria-haspopup="listbox" aria-label="Version switcher list" class="version-switcher__button btn btn-sm dropdown-toggle" data-bs-toggle="dropdown" id="pst-version-switcher-button-2" type="button">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
     Choose version  <!-- this text may get changed later by javascript -->
-<span class="caret"></span>
-</button>
-<div aria-labelledby="pst-version-switcher-button-2" class="version-switcher__menu dropdown-menu list-group-flush py-0" id="pst-version-switcher-list-2" role="listbox">
-<!-- dropdown will be populated by javascript on page load -->
-</div>
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
 </div></div>
-</div>
-<div class="col-lg-9 navbar-header-items">
-<div class="me-auto navbar-header-items__center">
-<div class="navbar-item">
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
 <nav>
-<ul class="bd-navbar-elements navbar-nav">
-<li class="nav-item">
-<a class="nav-link nav-internal" href="../../intro.html">
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../intro.html">
     Introduction
   </a>
 </li>
+
+
 <li class="nav-item current active">
-<a class="nav-link nav-internal" href="../../user_guide/index.html">
+  <a class="nav-link nav-internal" href="../../user_guide/index.html">
     User Guide
   </a>
 </li>
-<li class="nav-item">
-<a class="nav-link nav-internal" href="../index.html">
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../index.html">
     Examples
   </a>
 </li>
-<li class="nav-item">
-<a class="nav-link nav-internal" href="../../tutorials/index.html">
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../tutorials/index.html">
     Tutorials
   </a>
 </li>
-<li class="nav-item">
-<a class="nav-link nav-internal" href="../../reference/index.html">
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../reference/index.html">
     Reference
   </a>
 </li>
-<li class="nav-item">
-<a class="nav-link nav-internal" href="../../dev_guide/index.html">
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../dev_guide/index.html">
     Dev Guide
   </a>
 </li>
-<li class="nav-item">
-<a class="nav-link nav-internal" href="../../changelog.html">
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../changelog.html">
     Changelog
   </a>
 </li>
-</ul>
+
+  </ul>
 </nav></div>
-</div>
-<div class="navbar-header-items__end">
-<div class="navbar-item navbar-persistent--container">
-<button aria-label="Search" class="btn search-button-field search-button__button pst-js-only" data-bs-placement="bottom" data-bs-toggle="tooltip" title="Search">
-<i class="fa-solid fa-magnifying-glass"></i>
-<span class="search-button__default-text">Search</span>
-<span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
 </button>
-</div>
-<div class="navbar-item">
-<button aria-label="Color mode" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" data-bs-placement="bottom" data-bs-title="Color mode" data-bs-toggle="tooltip">
-<i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
-<i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
-<i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
 </button></div>
-<div class="navbar-item"><ul aria-label="Icon Links" class="navbar-icon-links">
-<li class="nav-item">
-<a class="nav-link pst-navbar-icon" data-bs-placement="bottom" data-bs-toggle="tooltip" href="https://github.com/pyxem/pyxem" rel="noopener" target="_blank" title="GitHub"><i aria-hidden="true" class="fa-brands fa-square-github fa-lg"></i>
-<span class="sr-only">GitHub</span></a>
-</li>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/pyxem/pyxem" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
 </ul></div>
-</div>
-</div>
-<div class="navbar-persistent--mobile">
-<button aria-label="Search" class="btn search-button-field search-button__button pst-js-only" data-bs-placement="bottom" data-bs-toggle="tooltip" title="Search">
-<i class="fa-solid fa-magnifying-glass"></i>
-<span class="search-button__default-text">Search</span>
-<span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
 </button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
 </div>
-<button aria-label="On this page" class="pst-navbar-icon sidebar-toggle secondary-toggle">
-<span class="fa-solid fa-outdent"></span>
-</button>
-</div>
-</header>
-<div class="bd-container">
-<div class="bd-container__inner bd-page-width">
-<dialog id="pst-primary-sidebar-modal"></dialog>
-<div class="bd-sidebar-primary bd-sidebar" id="pst-primary-sidebar">
-<div class="sidebar-header-items sidebar-primary__section">
-<div class="sidebar-header-items__center">
-<div class="navbar-item">
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
 <nav>
-<ul class="bd-navbar-elements navbar-nav">
-<li class="nav-item">
-<a class="nav-link nav-internal" href="../../intro.html">
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../intro.html">
     Introduction
   </a>
 </li>
+
+
 <li class="nav-item current active">
-<a class="nav-link nav-internal" href="../../user_guide/index.html">
+  <a class="nav-link nav-internal" href="../../user_guide/index.html">
     User Guide
   </a>
 </li>
-<li class="nav-item">
-<a class="nav-link nav-internal" href="../index.html">
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../index.html">
     Examples
   </a>
 </li>
-<li class="nav-item">
-<a class="nav-link nav-internal" href="../../tutorials/index.html">
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../tutorials/index.html">
     Tutorials
   </a>
 </li>
-<li class="nav-item">
-<a class="nav-link nav-internal" href="../../reference/index.html">
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../reference/index.html">
     Reference
   </a>
 </li>
-<li class="nav-item">
-<a class="nav-link nav-internal" href="../../dev_guide/index.html">
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../dev_guide/index.html">
     Dev Guide
   </a>
 </li>
-<li class="nav-item">
-<a class="nav-link nav-internal" href="../../changelog.html">
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../changelog.html">
     Changelog
   </a>
 </li>
-</ul>
+
+  </ul>
 </nav></div>
-</div>
-<div class="sidebar-header-items__end">
-<div class="navbar-item">
-<button aria-label="Color mode" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" data-bs-placement="bottom" data-bs-title="Color mode" data-bs-toggle="tooltip">
-<i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
-<i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
-<i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
 </button></div>
-<div class="navbar-item"><ul aria-label="Icon Links" class="navbar-icon-links">
-<li class="nav-item">
-<a class="nav-link pst-navbar-icon" data-bs-placement="bottom" data-bs-toggle="tooltip" href="https://github.com/pyxem/pyxem" rel="noopener" target="_blank" title="GitHub"><i aria-hidden="true" class="fa-brands fa-square-github fa-lg"></i>
-<span class="sr-only">GitHub</span></a>
-</li>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/pyxem/pyxem" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
 </ul></div>
-</div>
-</div>
-<div class="sidebar-primary-items__start sidebar-primary__section">
-<div class="sidebar-primary-item">
-<nav aria-label="Section Navigation" class="bd-docs-nav bd-links">
-<p aria-level="1" class="bd-links__title" role="heading">Section Navigation</p>
-<div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../../user_guide/installing.html">Installing pyxem</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../user_guide/using_a_jupyter_notebook.html">Using Jupyter Lab</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../user_guide/loading_data.html">Loading Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../user_guide/distributed_big_data.html">Big Data</a></li>
+
+
 <li class="toctree-l1"><a class="reference internal" href="../../user_guide/gpu_computations.html">GPU Computing</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Usage</span></p>
@@ -257,6 +417,16 @@
 </ul>
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Gallery of Examples</a></li>
+
+
+
+
+
+
+
+
+
+
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Resources</span></p>
 <ul class="nav bd-sidenav">
@@ -760,40 +930,70 @@
 </ul>
 </div>
 </nav></div>
-</div>
-<div class="sidebar-primary-items__end sidebar-primary__section">
-<div class="sidebar-primary-item">
-<div class="flat" data-ea-manual="true" data-ea-publisher="readthedocs" data-ea-type="readthedocs-sidebar" id="ethical-ad-placement">
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
 </div></div>
-</div>
-</div>
-<main class="bd-main" id="main-content" role="main">
-<div class="bd-content">
-<div class="bd-article-container">
-<div class="bd-header-article d-print-none">
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
 <div class="header-article-items header-article__inner">
-<div class="header-article-items__start">
-<div class="header-article-item">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
 <nav aria-label="Breadcrumb" class="d-print-none">
-<ul class="bd-breadcrumbs">
-<li class="breadcrumb-item breadcrumb-home">
-<a aria-label="Home" class="nav-link" href="../../index.html">
-<i class="fa-solid fa-home"></i>
-</a>
-</li>
-<li class="breadcrumb-item"><a class="nav-link" href="../../user_guide/index.html">Where do I start?</a></li>
-<li class="breadcrumb-item"><a class="nav-link" href="../index.html">Gallery of Examples</a></li>
-<li class="breadcrumb-item"><a class="nav-link" href="index.html">Data Processing</a></li>
-<li aria-current="page" class="breadcrumb-item active"><span class="ellipsis">Template Matching</span></li>
-</ul>
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../user_guide/index.html" class="nav-link">Where do I start?</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Gallery of Examples</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Data Processing</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Template Matching</span></li>
+  </ul>
 </nav>
 </div>
+      
+    </div>
+  
+  
 </div>
 </div>
-</div>
+              
+              
+              
+                
 <div id="searchbox"></div>
-<article class="bd-article">
-<div class="sphx-glr-download-link-note admonition note">
+                <article class="bd-article">
+                  
+  <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#sphx-glr-download-examples-processing-template-matching-py"><span class="std std-ref">Go to the end</span></a>
 to download the full example code.</p>
@@ -801,16 +1001,20 @@ to download the full example code.</p>
 <section class="sphx-glr-example-title" id="template-matching">
 <span id="sphx-glr-examples-processing-template-matching-py"></span><h1>Template Matching<a class="headerlink" href="#template-matching" title="Link to this heading">#</a></h1>
 <p>This example shows how the template matching is done in pyxem to find peaks in a diffraction pattern.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/index.html#module-numpy" title="numpy"><span class="nn">numpy</span></a><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><a class="sphinx-codeautolink-a" href="https://hyperspy.org/hyperspy-doc/current/reference/api.html#module-hyperspy.api" title="hyperspy.api"><span class="nn">hyperspy.api</span></a><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">hs</span>
-<span class="kn">import</span><span class="w"> </span><a class="sphinx-codeautolink-a" href="https://matplotlib.org/stable/api/pyplot_summary.html#module-matplotlib.pyplot" title="matplotlib.pyplot"><span class="nn">matplotlib.pyplot</span></a><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
-<span class="kn">from</span><span class="w"> </span><a class="sphinx-codeautolink-a" href="https://scikit-image.org/docs/stable/api/skimage.morphology.html#module-skimage.morphology" title="skimage.morphology"><span class="nn">skimage.morphology</span></a><span class="w"> </span><span class="kn">import</span> <a class="sphinx-codeautolink-a" href="https://scikit-image.org/docs/stable/api/skimage.morphology.html#skimage.morphology.disk" title="skimage.morphology.disk"><a href="https://scikit-image.org/docs/stable/api/skimage.morphology.html#skimage.morphology.disk" title="skimage.morphology.disk" class="sphx-glr-backref-module-skimage-morphology sphx-glr-backref-type-py-function"><span class="n">disk</span></a></a>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">hyperspy.api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">hs</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">skimage.morphology</span><span class="w"> </span><span class="kn">import</span> <a href="https://scikit-image.org/docs/stable/api/skimage.morphology.html#skimage.morphology.disk" title="skimage.morphology.disk" class="sphx-glr-backref-module-skimage-morphology sphx-glr-backref-type-py-function"><span class="n">disk</span></a>
 
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">pyxem</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pxm</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pyxem.data.dummy_data.make_diffraction_test_data</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mdtd</span>
 
-<a href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">s</span></a> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="../../reference/generated/pyxem.data.tilt_boundary_data.html#pyxem.data.tilt_boundary_data" title="pyxem.data.tilt_boundary_data"><a href="../../reference/generated/pyxem.data.tilt_boundary_data.html#pyxem.data.tilt_boundary_data" title="pyxem.data.tilt_boundary_data" class="sphx-glr-backref-module-pyxem-data sphx-glr-backref-type-py-function"><span class="n">pxm</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">tilt_boundary_data</span></a></a><span class="p">()</span>
+<a href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">s</span></a> <span class="o">=</span> <a href="../../reference/generated/pyxem.data.tilt_boundary_data.html#pyxem.data.tilt_boundary_data" title="pyxem.data.tilt_boundary_data" class="sphx-glr-backref-module-pyxem-data sphx-glr-backref-type-py-function"><span class="n">pxm</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">tilt_boundary_data</span></a><span class="p">()</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/hyperspy/misc/utils.py:72: VisibleDeprecationWarning: `_get_block_pattern` has moved to `hyperspy.misc.dask_utils`. It is for internal use only and may be removed in the future.
+  warnings.warn(
 </pre></div>
 </div>
 </section>
@@ -837,32 +1041,31 @@ wrong shape, the behavior can be unexpected.</p>
         <a href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">template_padded</span></a><span class="o">.</span><span class="n">inav</span><span class="p">[</span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ind</span></a><span class="p">],</span>
         <a href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">template_padded_large</span></a><span class="o">.</span><span class="n">inav</span><span class="p">[</span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ind</span></a><span class="p">],</span>
     <span class="p">],</span>
-    <span class="n">label</span><span class="o">=</span><span class="p">[</span><span class="s2">"Signal"</span><span class="p">,</span> <span class="s2">"Normal Window"</span><span class="p">,</span> <span class="s2">"Large Window"</span><span class="p">,</span> <span class="s2">"Very Large Window"</span><span class="p">],</span>
+    <span class="n">label</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Signal&quot;</span><span class="p">,</span> <span class="s2">&quot;Normal Window&quot;</span><span class="p">,</span> <span class="s2">&quot;Large Window&quot;</span><span class="p">,</span> <span class="s2">&quot;Very Large Window&quot;</span><span class="p">],</span>
     <span class="n">tight_layout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">per_row</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>
-<img alt="Signal, Normal Window, Large Window, Very Large Window" class="sphx-glr-single-img" src="../../_images/sphx_glr_template_matching_001.png" srcset="../../_images/sphx_glr_template_matching_001.png"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/51 [00:00&lt;?, ?it/s]
- 22%|██▏       | 11/51 [00:00&lt;00:00, 107.21it/s]
- 57%|█████▋    | 29/51 [00:00&lt;00:00, 148.76it/s]
- 92%|█████████▏| 47/51 [00:00&lt;00:00, 162.04it/s]
-100%|██████████| 51/51 [00:00&lt;00:00, 162.40it/s]
+<img src="../../_images/sphx_glr_template_matching_001.png" srcset="../../_images/sphx_glr_template_matching_001.png" alt="Signal, Normal Window, Large Window, Very Large Window" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/51 [00:00&lt;?, ?it/s]
+ 18%|█▊        | 9/51 [00:00&lt;00:00, 82.38it/s]
+ 49%|████▉     | 25/51 [00:00&lt;00:00, 119.24it/s]
+ 76%|███████▋  | 39/51 [00:00&lt;00:00, 127.41it/s]
+100%|██████████| 51/51 [00:00&lt;00:00, 133.29it/s]
 
   0%|          | 0/51 [00:00&lt;?, ?it/s]
- 18%|█▊        | 9/51 [00:00&lt;00:00, 86.39it/s]
- 49%|████▉     | 25/51 [00:00&lt;00:00, 126.17it/s]
- 80%|████████  | 41/51 [00:00&lt;00:00, 140.14it/s]
-100%|██████████| 51/51 [00:00&lt;00:00, 149.02it/s]
+ 18%|█▊        | 9/51 [00:00&lt;00:00, 89.37it/s]
+ 49%|████▉     | 25/51 [00:00&lt;00:00, 129.71it/s]
+ 80%|████████  | 41/51 [00:00&lt;00:00, 137.75it/s]
+100%|██████████| 51/51 [00:00&lt;00:00, 148.04it/s]
 
   0%|          | 0/51 [00:00&lt;?, ?it/s]
- 18%|█▊        | 9/51 [00:00&lt;00:00, 63.48it/s]
- 45%|████▌     | 23/51 [00:00&lt;00:00, 98.90it/s]
- 67%|██████▋   | 34/51 [00:00&lt;00:00, 100.07it/s]
- 96%|█████████▌| 49/51 [00:00&lt;00:00, 114.98it/s]
-100%|██████████| 51/51 [00:00&lt;00:00, 109.07it/s]
+ 18%|█▊        | 9/51 [00:00&lt;00:00, 65.66it/s]
+ 49%|████▉     | 25/51 [00:00&lt;00:00, 95.78it/s]
+ 75%|███████▍  | 38/51 [00:00&lt;00:00, 108.45it/s]
+100%|██████████| 51/51 [00:00&lt;00:00, 110.58it/s]
 
-[&lt;Axes: title={'center': 'Signal'}, xlabel='kx axis (px)', ylabel='ky axis (px)'&gt;, &lt;Axes: title={'center': 'Normal Window'}, xlabel='kx axis (px)', ylabel='ky axis (px)'&gt;, &lt;Axes: title={'center': 'Large Window'}, xlabel='kx axis (px)', ylabel='ky axis (px)'&gt;, &lt;Axes: title={'center': 'Very Large Window'}, xlabel='kx axis (px)', ylabel='ky axis (px)'&gt;]
+[&lt;Axes: title={&#39;center&#39;: &#39;Signal&#39;}, xlabel=&#39;kx axis (px)&#39;, ylabel=&#39;ky axis (px)&#39;&gt;, &lt;Axes: title={&#39;center&#39;: &#39;Normal Window&#39;}, xlabel=&#39;kx axis (px)&#39;, ylabel=&#39;ky axis (px)&#39;&gt;, &lt;Axes: title={&#39;center&#39;: &#39;Large Window&#39;}, xlabel=&#39;kx axis (px)&#39;, ylabel=&#39;ky axis (px)&#39;&gt;, &lt;Axes: title={&#39;center&#39;: &#39;Very Large Window&#39;}, xlabel=&#39;kx axis (px)&#39;, ylabel=&#39;ky axis (px)&#39;&gt;]
 </pre></div>
 </div>
 <p>In the very large window case you can see that in the middle the strong zero beam is __included__ in the window
@@ -907,7 +1110,7 @@ effect of the imposed square window. This can be seen in the intensity of the di
 <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ind</span></a> <span class="o">=</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
 <a href="https://hyperspy.org/hyperspy-doc/current/reference/api.plot/index.html#hyperspy.api.plot.plot_images" title="hyperspy.api.plot.plot_images" class="sphx-glr-backref-module-hyperspy-api-plot sphx-glr-backref-type-py-function"><span class="n">hs</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_images</span></a><span class="p">(</span>
     <span class="p">[</span><a href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">amorphous_data</span></a><span class="o">.</span><span class="n">inav</span><span class="p">[</span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ind</span></a><span class="p">],</span> <a href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">template_normal</span></a><span class="o">.</span><span class="n">inav</span><span class="p">[</span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ind</span></a><span class="p">],</span> <a href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">template_circular</span></a><span class="o">.</span><span class="n">inav</span><span class="p">[</span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ind</span></a><span class="p">]],</span>
-    <span class="n">label</span><span class="o">=</span><span class="p">[</span><span class="s2">"Signal"</span><span class="p">,</span> <span class="s2">"Square Window"</span><span class="p">,</span> <span class="s2">"Circular Window"</span><span class="p">],</span>
+    <span class="n">label</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Signal&quot;</span><span class="p">,</span> <span class="s2">&quot;Square Window&quot;</span><span class="p">,</span> <span class="s2">&quot;Circular Window&quot;</span><span class="p">],</span>
     <span class="n">tight_layout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">per_row</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
     <span class="n">vmin</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">],</span>
@@ -915,76 +1118,76 @@ effect of the imposed square window. This can be seen in the intensity of the di
 <span class="p">)</span>
 </pre></div>
 </div>
-<img alt="Signal, Square Window, Circular Window" class="sphx-glr-single-img" src="../../_images/sphx_glr_template_matching_002.png" srcset="../../_images/sphx_glr_template_matching_002.png"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Make test data:   0%|          | 0/100 [00:00&lt;?, ?it/s]
-Make test data:   2%|▏         | 2/100 [00:00&lt;00:05, 18.63it/s]
-Make test data:   4%|▍         | 4/100 [00:00&lt;00:05, 18.55it/s]
-Make test data:   6%|▌         | 6/100 [00:00&lt;00:05, 18.65it/s]
-Make test data:   8%|▊         | 8/100 [00:00&lt;00:05, 18.19it/s]
-Make test data:  10%|█         | 10/100 [00:00&lt;00:04, 18.25it/s]
-Make test data:  12%|█▏        | 12/100 [00:00&lt;00:04, 18.16it/s]
-Make test data:  14%|█▍        | 14/100 [00:00&lt;00:04, 18.23it/s]
-Make test data:  16%|█▌        | 16/100 [00:00&lt;00:04, 18.25it/s]
-Make test data:  18%|█▊        | 18/100 [00:00&lt;00:04, 18.10it/s]
-Make test data:  20%|██        | 20/100 [00:01&lt;00:04, 18.14it/s]
-Make test data:  22%|██▏       | 22/100 [00:01&lt;00:04, 18.07it/s]
-Make test data:  24%|██▍       | 24/100 [00:01&lt;00:04, 18.15it/s]
-Make test data:  26%|██▌       | 26/100 [00:01&lt;00:04, 18.04it/s]
-Make test data:  28%|██▊       | 28/100 [00:01&lt;00:03, 18.10it/s]
-Make test data:  30%|███       | 30/100 [00:01&lt;00:03, 18.03it/s]
-Make test data:  32%|███▏      | 32/100 [00:01&lt;00:03, 18.14it/s]
-Make test data:  34%|███▍      | 34/100 [00:01&lt;00:03, 18.08it/s]
-Make test data:  36%|███▌      | 36/100 [00:01&lt;00:03, 18.12it/s]
-Make test data:  38%|███▊      | 38/100 [00:02&lt;00:03, 17.89it/s]
-Make test data:  40%|████      | 40/100 [00:02&lt;00:03, 18.00it/s]
-Make test data:  42%|████▏     | 42/100 [00:02&lt;00:03, 17.90it/s]
-Make test data:  44%|████▍     | 44/100 [00:02&lt;00:03, 18.06it/s]
-Make test data:  46%|████▌     | 46/100 [00:02&lt;00:03, 18.00it/s]
-Make test data:  48%|████▊     | 48/100 [00:02&lt;00:02, 18.05it/s]
-Make test data:  50%|█████     | 50/100 [00:02&lt;00:02, 18.01it/s]
-Make test data:  52%|█████▏    | 52/100 [00:02&lt;00:02, 18.06it/s]
-Make test data:  54%|█████▍    | 54/100 [00:02&lt;00:02, 18.03it/s]
-Make test data:  56%|█████▌    | 56/100 [00:03&lt;00:02, 18.09it/s]
-Make test data:  58%|█████▊    | 58/100 [00:03&lt;00:02, 18.09it/s]
-Make test data:  60%|██████    | 60/100 [00:03&lt;00:02, 18.20it/s]
-Make test data:  62%|██████▏   | 62/100 [00:03&lt;00:02, 18.14it/s]
-Make test data:  64%|██████▍   | 64/100 [00:03&lt;00:01, 18.19it/s]
-Make test data:  66%|██████▌   | 66/100 [00:03&lt;00:01, 18.07it/s]
-Make test data:  68%|██████▊   | 68/100 [00:03&lt;00:01, 18.09it/s]
-Make test data:  70%|███████   | 70/100 [00:03&lt;00:01, 18.17it/s]
-Make test data:  72%|███████▏  | 72/100 [00:03&lt;00:01, 18.01it/s]
-Make test data:  74%|███████▍  | 74/100 [00:04&lt;00:01, 18.08it/s]
-Make test data:  76%|███████▌  | 76/100 [00:04&lt;00:01, 17.98it/s]
-Make test data:  78%|███████▊  | 78/100 [00:04&lt;00:01, 18.10it/s]
-Make test data:  80%|████████  | 80/100 [00:04&lt;00:01, 18.09it/s]
-Make test data:  82%|████████▏ | 82/100 [00:04&lt;00:00, 18.15it/s]
-Make test data:  84%|████████▍ | 84/100 [00:04&lt;00:00, 18.02it/s]
-Make test data:  86%|████████▌ | 86/100 [00:04&lt;00:00, 18.11it/s]
-Make test data:  88%|████████▊ | 88/100 [00:04&lt;00:00, 18.03it/s]
-Make test data:  90%|█████████ | 90/100 [00:04&lt;00:00, 17.98it/s]
-Make test data:  92%|█████████▏| 92/100 [00:05&lt;00:00, 17.80it/s]
-Make test data:  94%|█████████▍| 94/100 [00:05&lt;00:00, 17.97it/s]
-Make test data:  96%|█████████▌| 96/100 [00:05&lt;00:00, 17.90it/s]
-Make test data:  98%|█████████▊| 98/100 [00:05&lt;00:00, 18.07it/s]
-Make test data: 100%|██████████| 100/100 [00:05&lt;00:00, 17.98it/s]
-Make test data: 100%|██████████| 100/100 [00:05&lt;00:00, 18.08it/s]
+<img src="../../_images/sphx_glr_template_matching_002.png" srcset="../../_images/sphx_glr_template_matching_002.png" alt="Signal, Square Window, Circular Window" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Make test data:   0%|          | 0/100 [00:00&lt;?, ?it/s]
+Make test data:   2%|▏         | 2/100 [00:00&lt;00:06, 14.55it/s]
+Make test data:   4%|▍         | 4/100 [00:00&lt;00:05, 16.39it/s]
+Make test data:   6%|▌         | 6/100 [00:00&lt;00:05, 16.81it/s]
+Make test data:   8%|▊         | 8/100 [00:00&lt;00:05, 17.38it/s]
+Make test data:  10%|█         | 10/100 [00:00&lt;00:05, 17.37it/s]
+Make test data:  12%|█▏        | 12/100 [00:00&lt;00:04, 17.62it/s]
+Make test data:  14%|█▍        | 14/100 [00:00&lt;00:04, 17.55it/s]
+Make test data:  16%|█▌        | 16/100 [00:00&lt;00:04, 17.72it/s]
+Make test data:  18%|█▊        | 18/100 [00:01&lt;00:04, 17.76it/s]
+Make test data:  20%|██        | 20/100 [00:01&lt;00:06, 11.79it/s]
+Make test data:  22%|██▏       | 22/100 [00:01&lt;00:05, 13.05it/s]
+Make test data:  24%|██▍       | 24/100 [00:01&lt;00:05, 14.16it/s]
+Make test data:  26%|██▌       | 26/100 [00:01&lt;00:04, 15.09it/s]
+Make test data:  28%|██▊       | 28/100 [00:01&lt;00:04, 15.69it/s]
+Make test data:  30%|███       | 30/100 [00:01&lt;00:04, 16.26it/s]
+Make test data:  32%|███▏      | 32/100 [00:02&lt;00:04, 16.59it/s]
+Make test data:  34%|███▍      | 34/100 [00:02&lt;00:03, 16.96it/s]
+Make test data:  36%|███▌      | 36/100 [00:02&lt;00:03, 17.11it/s]
+Make test data:  38%|███▊      | 38/100 [00:02&lt;00:03, 17.32it/s]
+Make test data:  40%|████      | 40/100 [00:02&lt;00:03, 17.35it/s]
+Make test data:  42%|████▏     | 42/100 [00:02&lt;00:03, 17.52it/s]
+Make test data:  44%|████▍     | 44/100 [00:02&lt;00:03, 17.41it/s]
+Make test data:  46%|████▌     | 46/100 [00:02&lt;00:03, 17.59it/s]
+Make test data:  48%|████▊     | 48/100 [00:02&lt;00:02, 17.53it/s]
+Make test data:  50%|█████     | 50/100 [00:03&lt;00:02, 17.69it/s]
+Make test data:  52%|█████▏    | 52/100 [00:03&lt;00:02, 17.62it/s]
+Make test data:  54%|█████▍    | 54/100 [00:03&lt;00:02, 17.72it/s]
+Make test data:  56%|█████▌    | 56/100 [00:03&lt;00:02, 17.68it/s]
+Make test data:  58%|█████▊    | 58/100 [00:03&lt;00:02, 17.87it/s]
+Make test data:  60%|██████    | 60/100 [00:03&lt;00:02, 17.76it/s]
+Make test data:  62%|██████▏   | 62/100 [00:03&lt;00:02, 17.81it/s]
+Make test data:  64%|██████▍   | 64/100 [00:03&lt;00:02, 17.69it/s]
+Make test data:  66%|██████▌   | 66/100 [00:03&lt;00:01, 17.81it/s]
+Make test data:  68%|██████▊   | 68/100 [00:04&lt;00:01, 17.70it/s]
+Make test data:  70%|███████   | 70/100 [00:04&lt;00:01, 17.67it/s]
+Make test data:  72%|███████▏  | 72/100 [00:04&lt;00:01, 17.69it/s]
+Make test data:  74%|███████▍  | 74/100 [00:04&lt;00:01, 17.80it/s]
+Make test data:  76%|███████▌  | 76/100 [00:04&lt;00:01, 17.95it/s]
+Make test data:  78%|███████▊  | 78/100 [00:04&lt;00:01, 17.86it/s]
+Make test data:  80%|████████  | 80/100 [00:04&lt;00:01, 17.86it/s]
+Make test data:  82%|████████▏ | 82/100 [00:04&lt;00:01, 17.77it/s]
+Make test data:  84%|████████▍ | 84/100 [00:04&lt;00:00, 17.86it/s]
+Make test data:  86%|████████▌ | 86/100 [00:05&lt;00:00, 17.73it/s]
+Make test data:  88%|████████▊ | 88/100 [00:05&lt;00:00, 17.89it/s]
+Make test data:  90%|█████████ | 90/100 [00:05&lt;00:00, 17.83it/s]
+Make test data:  92%|█████████▏| 92/100 [00:05&lt;00:00, 17.87it/s]
+Make test data:  94%|█████████▍| 94/100 [00:05&lt;00:00, 17.74it/s]
+Make test data:  96%|█████████▌| 96/100 [00:05&lt;00:00, 17.89it/s]
+Make test data:  98%|█████████▊| 98/100 [00:05&lt;00:00, 17.87it/s]
+Make test data: 100%|██████████| 100/100 [00:05&lt;00:00, 17.99it/s]
+Make test data: 100%|██████████| 100/100 [00:05&lt;00:00, 17.12it/s]
 
   0%|          | 0/51 [00:00&lt;?, ?it/s]
- 22%|██▏       | 11/51 [00:00&lt;00:00, 108.02it/s]
- 57%|█████▋    | 29/51 [00:00&lt;00:00, 144.69it/s]
- 92%|█████████▏| 47/51 [00:00&lt;00:00, 158.74it/s]
-100%|██████████| 51/51 [00:00&lt;00:00, 154.74it/s]
+ 22%|██▏       | 11/51 [00:00&lt;00:00, 105.18it/s]
+ 57%|█████▋    | 29/51 [00:00&lt;00:00, 141.37it/s]
+ 88%|████████▊ | 45/51 [00:00&lt;00:00, 145.23it/s]
+100%|██████████| 51/51 [00:00&lt;00:00, 149.50it/s]
 
   0%|          | 0/51 [00:00&lt;?, ?it/s]
- 18%|█▊        | 9/51 [00:00&lt;00:00, 68.09it/s]
- 41%|████      | 21/51 [00:00&lt;00:00, 92.86it/s]
- 65%|██████▍   | 33/51 [00:00&lt;00:00, 94.07it/s]
- 88%|████████▊ | 45/51 [00:00&lt;00:00, 102.58it/s]
-100%|██████████| 51/51 [00:00&lt;00:00, 102.81it/s]
+ 18%|█▊        | 9/51 [00:00&lt;00:00, 60.23it/s]
+ 47%|████▋     | 24/51 [00:00&lt;00:00, 103.60it/s]
+ 71%|███████   | 36/51 [00:00&lt;00:00, 98.58it/s]
+ 92%|█████████▏| 47/51 [00:00&lt;00:00, 101.92it/s]
+100%|██████████| 51/51 [00:00&lt;00:00, 101.05it/s]
 
-[&lt;Axes: title={'center': 'Signal'}, xlabel='kx axis (px)', ylabel='ky axis (px)'&gt;, &lt;Axes: title={'center': 'Square Window'}, xlabel='kx axis (px)', ylabel='ky axis (px)'&gt;, &lt;Axes: title={'center': 'Circular Window'}, xlabel='kx axis (px)', ylabel='ky axis (px)'&gt;]
+[&lt;Axes: title={&#39;center&#39;: &#39;Signal&#39;}, xlabel=&#39;kx axis (px)&#39;, ylabel=&#39;ky axis (px)&#39;&gt;, &lt;Axes: title={&#39;center&#39;: &#39;Square Window&#39;}, xlabel=&#39;kx axis (px)&#39;, ylabel=&#39;ky axis (px)&#39;&gt;, &lt;Axes: title={&#39;center&#39;: &#39;Circular Window&#39;}, xlabel=&#39;kx axis (px)&#39;, ylabel=&#39;ky axis (px)&#39;&gt;]
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 9.296 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 13.925 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-processing-template-matching-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/f13c95209c33a1e21e494c1045badd42/template_matching.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">template_matching.ipynb</span></code></a></p>
@@ -998,43 +1201,67 @@ Make test data: 100%|██████████| 100/100 [00:05&lt;00:00, 18
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
 </section>
-</article>
-<footer class="prev-next-footer d-print-none">
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
 <div class="prev-next-area">
-<a class="left-prev" href="vector_finding.html" title="previous page">
-<i class="fa-solid fa-angle-left"></i>
-<div class="prev-next-info">
-<p class="prev-next-subtitle">previous</p>
-<p class="prev-next-title">Finding Diffraction Vectors</p>
+    <a class="left-prev"
+       href="vector_finding.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Finding Diffraction Vectors</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="azimuthal_integration.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Azimuthal Integration (in Pyxem!)</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
 </div>
-</a>
-<a class="right-next" href="azimuthal_integration.html" title="next page">
-<div class="prev-next-info">
-<p class="prev-next-subtitle">next</p>
-<p class="prev-next-title">Azimuthal Integration (in Pyxem!)</p>
-</div>
-<i class="fa-solid fa-angle-right"></i>
-</a>
-</div>
-</footer>
-</div>
-<dialog id="pst-secondary-sidebar-modal"></dialog>
-<div class="bd-sidebar-secondary bd-toc" id="pst-secondary-sidebar"><div class="sidebar-secondary-items sidebar-secondary__inner">
-<div class="sidebar-secondary-item">
-<div class="page-toc tocsection onthispage" id="pst-page-navigation-heading-2">
-<i class="fa-solid fa-list"></i> On this page
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
   </div>
-<nav aria-labelledby="pst-page-navigation-heading-2" class="bd-toc-nav page-toc">
-<ul class="visible nav section-nav flex-column">
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Template Matching</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#how-template-matching-works">How Template Matching Works</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#template-matching-with-an-amorphous-halo">Template Matching with an Amorphous Halo</a></li>
 </ul>
-</nav></div>
-<div class="sidebar-secondary-item">
-<div class="tocsection editthispage">
-<a href="https://github.com/pyxem/pyxem/edit/main/doc/examples/processing/template_matching.rst">
-<i class="fa-solid fa-pencil"></i>
+
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  
+  <div class="tocsection editthispage">
+    <a href="https://github.com/pyxem/pyxem/edit/main/doc/examples/processing/template_matching.rst">
+      <i class="fa-solid fa-pencil"></i>
       
       
         
@@ -1042,50 +1269,73 @@ Make test data: 100%|██████████| 100/100 [00:05&lt;00:00, 18
         
       
     </a>
+  </div>
 </div>
-</div>
-<div class="sidebar-secondary-item">
-<div aria-label="source link" role="note">
-<h3>This Page</h3>
-<ul class="this-page-menu">
-<li><a href="../../_sources/examples/processing/template_matching.rst.txt" rel="nofollow">Show Source</a></li>
-</ul>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/examples/processing/template_matching.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
 </div></div>
-</div></div>
-</div>
-<footer class="bd-footer-content">
-</footer>
-</main>
-</div>
-</div>
-<!-- Scripts loaded after <body> so the DOM is not blocked -->
-<script defer="" src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer="" src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
-<footer class="bd-footer">
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
-<div class="footer-items__start">
-<div class="footer-item">
-<p class="copyright">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
     
       © Copyright Copyright 2016-2025, The pyxem developers.
       <br/>
-</p>
+    
+  </p>
 </div>
-<div class="footer-item">
-<p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
     <br/>
-</p>
+  </p>
 </div>
-</div>
-<div class="footer-items__end">
-<div class="footer-item">
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
 <p class="theme-version">
-<!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
   Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
+      
+    </div>
+  
 </div>
-</div>
-</footer>
-</body>
+
+  </footer>
+  </body>
 </html>

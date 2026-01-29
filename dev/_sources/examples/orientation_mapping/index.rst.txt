@@ -22,7 +22,7 @@ Below is a gallery of examples on how to do orientation mapping in pyxem.
   .. image:: /examples/orientation_mapping/images/thumb/sphx_glr_single_phase_orientation_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_orientation_mapping_single_phase_orientation.py`
+  :doc:`/examples/orientation_mapping/single_phase_orientation`
 
 .. raw:: html
 
@@ -39,7 +39,7 @@ Below is a gallery of examples on how to do orientation mapping in pyxem.
   .. image:: /examples/orientation_mapping/images/thumb/sphx_glr_multi_phase_orientation_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_orientation_mapping_multi_phase_orientation.py`
+  :doc:`/examples/orientation_mapping/multi_phase_orientation`
 
 .. raw:: html
 
@@ -56,7 +56,7 @@ Below is a gallery of examples on how to do orientation mapping in pyxem.
   .. image:: /examples/orientation_mapping/images/thumb/sphx_glr_on_zone_orientation_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_orientation_mapping_on_zone_orientation.py`
+  :doc:`/examples/orientation_mapping/on_zone_orientation`
 
 .. raw:: html
 

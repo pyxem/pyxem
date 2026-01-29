@@ -65,6 +65,13 @@ First, we import the necessary packages and make a single test diffraction patte
    :class: sphx-glr-single-img
 
 
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/hyperspy/misc/utils.py:72: VisibleDeprecationWarning: `_get_block_pattern` has moved to `hyperspy.misc.dask_utils`. It is for internal use only and may be removed in the future.
+      warnings.warn(
+
 
 
 
@@ -104,6 +111,121 @@ mask parameter.
    :srcset: /examples/processing/images/sphx_glr_determining_ellipticity_002.png
    :class: sphx-glr-single-img
 
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:681: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      affine = _ellipse_to_affine(el.params[3], el.params[2], el.params[4])
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:682: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      center = (el.params[0], el.params[1])
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:684: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      return center, affine, el.params, pos, inlier
 
 
 
@@ -148,6 +270,21 @@ can force the ellipse to fit the first ring by masking the zero beam.
    :class: sphx-glr-single-img
 
 
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:677: FutureWarning: Calling ``EllipseModel()`` (without arguments) has been deprecated since version 0.26 and will be removed in version 2.2; see help for ``EllipseModel``.
+      e = EllipseModel()
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:678: FutureWarning: `estimate` is deprecated since version 0.26 and will be removed in version 2.2. Please use `EllipseModel.from_estimate` class constructor instead.
+      converge = e.estimate(data=pos)
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:681: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      affine = _ellipse_to_affine(el.params[3], el.params[2], el.params[4])
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:682: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      center = (el.params[0], el.params[1])
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:686: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      return center, affine, el.params, pos
+
 
 
 
@@ -181,8 +318,8 @@ can force the ellipse to fit the first ring by masking the zero beam.
 
  .. code-block:: none
 
-      0%|          | 0/2 [00:00<?, ?it/s]     50%|█████     | 1/2 [00:02<00:02,  2.90s/it]    100%|██████████| 2/2 [00:02<00:00,  1.45s/it]
-      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 1432.73it/s]
+      0%|          | 0/2 [00:00<?, ?it/s]     50%|█████     | 1/2 [00:03<00:03,  3.04s/it]    100%|██████████| 2/2 [00:03<00:00,  1.52s/it]
+      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 1737.13it/s]
 
     [<Axes: title={'center': 'azimuthal unwrapped'}, xlabel='Radians axis (Rad)', ylabel='Radius axis (k_nm^-1)'>, <Axes: title={'center': 'corrected'}, xlabel='kx axis (k_nm^-1)', ylabel='ky axis (k_nm^-1)'>]
 
@@ -215,6 +352,15 @@ making a test elliptical diffraction pattern
 
 
 
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:209: FutureWarning: Calling ``EllipseModel()`` (without arguments) has been deprecated since version 0.26 and will be removed in version 2.2; see help for ``EllipseModel``.
+      data = EllipseModel().predict_xy(theta_array, params=params)
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:209: FutureWarning: Parameter `params` is deprecated since version 0.26 and will be removed in 2.2 (or later). To avoid this warning, please do not use the parameter `params`. For more details, see the documentation of `EllipseModel.predict_xy`.
+      data = EllipseModel().predict_xy(theta_array, params=params)
 
 
 
@@ -297,10 +443,46 @@ Finding the peaks
 
  .. code-block:: none
 
-      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 147.80it/s]
-      0%|          | 0/2 [00:00<?, ?it/s]     50%|█████     | 1/2 [00:00<00:00,  2.81it/s]    100%|██████████| 2/2 [00:00<00:00,  5.61it/s]
-      0%|          | 0/6 [00:00<?, ?it/s]    100%|██████████| 6/6 [00:00<00:00, 486.20it/s]
-      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 413.07it/s]
+      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 149.82it/s]
+      0%|          | 0/2 [00:00<?, ?it/s]     50%|█████     | 1/2 [00:00<00:00,  2.95it/s]    100%|██████████| 2/2 [00:00<00:00,  5.89it/s]
+      0%|          | 0/6 [00:00<?, ?it/s]/opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:441: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      params = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:441: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      params = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:441: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      params = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:441: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      params = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:441: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      params = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:82: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      xc, yc, a, b, r = ellipse_model.params
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pyxem/utils/ransac_ellipse_tools.py:441: FutureWarning: `params` is deprecated since version 0.26 and will be removed in version 2.2. `params` attribute deprecated; use `center, axis_lengths, theta` attributes instead.
+      params = ellipse_model.params
+    100%|██████████| 6/6 [00:00<00:00, 402.20it/s]
+      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 434.51it/s]
 
 
 
@@ -308,7 +490,7 @@ Finding the peaks
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 12.829 seconds)
+   **Total running time of the script:** (0 minutes 16.862 seconds)
 
 
 .. _sphx_glr_download_examples_processing_determining_ellipticity.py:

@@ -81,9 +81,9 @@ for each ROI for use plotting on the signal.
 
  .. code-block:: none
 
-      0%|          | 0/51 [00:00<?, ?it/s]     65%|██████▍   | 33/51 [00:00<00:00, 319.79it/s]    100%|██████████| 51/51 [00:00<00:00, 364.90it/s]
-      0%|          | 0/51 [00:00<?, ?it/s]     67%|██████▋   | 34/51 [00:00<00:00, 330.48it/s]    100%|██████████| 51/51 [00:00<00:00, 385.13it/s]
-      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 5096.97it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]     65%|██████▍   | 33/51 [00:00<00:00, 321.63it/s]    100%|██████████| 51/51 [00:00<00:00, 364.85it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]     69%|██████▊   | 35/51 [00:00<00:00, 342.88it/s]    100%|██████████| 51/51 [00:00<00:00, 384.63it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 6779.37it/s]
 
 
 
@@ -125,7 +125,7 @@ sphinx_gallery_thumbnail_number = 2
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 2.423 seconds)
+   **Total running time of the script:** (0 minutes 2.454 seconds)
 
 
 .. _sphx_glr_download_examples_virtual_imaging_creating_virtual_images_from_vectors.py:

@@ -47,8 +47,8 @@
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="_static/documentation_options.js?v=88e4c0c0"></script>
-    <script src="_static/doctools.js?v=9bcbadda"></script>
-    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="_static/copybutton.js?v=f281be69"></script>
     <script src="_static/design-tabs.js?v=f930bc37"></script>
@@ -486,14 +486,14 @@ and this project adheres to <a class="reference external" href="https://semver.o
 <h3>Fixed<a class="headerlink" href="#fixed" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Add explicit support for python 3.12 and 3.13 and update test matrix. (#1147)</p></li>
-<li><p>Silence axes warning in functions using <a class="reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.signals/BaseSignal.html#hyperspy.api.signals.BaseSignal.map" title="(in HyperSpy v2.3)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">map()</span></code></a>. (#1168)</p></li>
+<li><p>Silence axes warning in functions using <a class="reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.signals/BaseSignal.html#hyperspy.api.signals.BaseSignal.map" title="(in HyperSpy v2.4)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">map()</span></code></a>. (#1168)</p></li>
 </ul>
 </section>
 <section id="deprecated">
 <h3>Deprecated<a class="headerlink" href="#deprecated" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>The <code class="docutils literal notranslate"><span class="pre">shift_x</span></code> and <code class="docutils literal notranslate"><span class="pre">shift_y</span></code> arguments in <a class="reference internal" href="reference/generated/pyxem.signals.Diffraction2D.shift_diffraction.html#pyxem.signals.Diffraction2D.shift_diffraction" title="pyxem.signals.Diffraction2D.shift_diffraction"><code class="xref py py-meth docutils literal notranslate"><span class="pre">shift_diffraction()</span></code></a> are deprecated in favor of the <code class="docutils literal notranslate"><span class="pre">shifts</span></code> argument. (#1144)</p></li>
-<li><p>The <code class="docutils literal notranslate"><span class="pre">interpolation_order</span></code> argument in <a class="reference internal" href="reference/generated/pyxem.signals.Diffraction2D.shift_diffraction.html#pyxem.signals.Diffraction2D.shift_diffraction" title="pyxem.signals.Diffraction2D.shift_diffraction"><code class="xref py py-meth docutils literal notranslate"><span class="pre">shift_diffraction()</span></code></a> have been renamed to <code class="docutils literal notranslate"><span class="pre">order</span></code> to be consistent with the signature of <a class="reference internal" href="reference/generated/pyxem.signals.Diffraction2D.center_direct_beam.html#pyxem.signals.Diffraction2D.center_direct_beam" title="pyxem.signals.Diffraction2D.center_direct_beam"><code class="xref py py-meth docutils literal notranslate"><span class="pre">center_direct_beam()</span></code></a> and <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.shift.html#scipy.ndimage.shift" title="(in SciPy v1.16.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.ndimage.shift()</span></code></a>. (#1144)</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">interpolation_order</span></code> argument in <a class="reference internal" href="reference/generated/pyxem.signals.Diffraction2D.shift_diffraction.html#pyxem.signals.Diffraction2D.shift_diffraction" title="pyxem.signals.Diffraction2D.shift_diffraction"><code class="xref py py-meth docutils literal notranslate"><span class="pre">shift_diffraction()</span></code></a> have been renamed to <code class="docutils literal notranslate"><span class="pre">order</span></code> to be consistent with the signature of <a class="reference internal" href="reference/generated/pyxem.signals.Diffraction2D.center_direct_beam.html#pyxem.signals.Diffraction2D.center_direct_beam" title="pyxem.signals.Diffraction2D.center_direct_beam"><code class="xref py py-meth docutils literal notranslate"><span class="pre">center_direct_beam()</span></code></a> and <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.shift.html#scipy.ndimage.shift" title="(in SciPy v1.17.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.ndimage.shift()</span></code></a>. (#1144)</p></li>
 </ul>
 </section>
 </section>
@@ -1156,7 +1156,7 @@ recreated to fix an error with the Zenodo files.</p>
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
     <br/>
   </p>
 </div>

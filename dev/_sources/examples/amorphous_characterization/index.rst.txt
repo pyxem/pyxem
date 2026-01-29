@@ -22,7 +22,7 @@ Below is a gallery of examples on how to characterize amorphous materials.
   .. image:: /examples/amorphous_characterization/images/thumb/sphx_glr_FEM_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_amorphous_characterization_FEM.py`
+  :doc:`/examples/amorphous_characterization/FEM`
 
 .. raw:: html
 

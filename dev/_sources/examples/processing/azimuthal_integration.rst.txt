@@ -59,7 +59,7 @@ pattern is preserved.
 
  .. code-block:: none
 
-      0%|          | 0/26 [00:00<?, ?it/s]      4%|▍         | 1/26 [00:00<00:06,  4.12it/s]    100%|██████████| 26/26 [00:00<00:00, 77.57it/s]
+      0%|          | 0/26 [00:00<?, ?it/s]      4%|▍         | 1/26 [00:00<00:10,  2.41it/s]     96%|█████████▌| 25/26 [00:00<00:00, 62.96it/s]    100%|██████████| 26/26 [00:00<00:00, 50.25it/s]
 
 
 
@@ -137,7 +137,7 @@ Similarly, the `get_azimuthal_integral2d` method will return a `Polar2D` signal.
 
  .. code-block:: none
 
-      0%|          | 0/26 [00:00<?, ?it/s]     50%|█████     | 13/26 [00:00<00:00, 124.76it/s]    100%|██████████| 26/26 [00:00<00:00, 141.67it/s]
+      0%|          | 0/26 [00:00<?, ?it/s]      4%|▍         | 1/26 [00:03<01:17,  3.11s/it]     62%|██████▏   | 16/26 [00:03<00:01,  6.87it/s]    100%|██████████| 26/26 [00:03<00:00,  7.93it/s]
 
 
 
@@ -200,8 +200,8 @@ We only show the 1D case here, but the same applies for the 2D case as well!
 
  .. code-block:: none
 
-      0%|          | 0/26 [00:00<?, ?it/s]    100%|██████████| 26/26 [00:00<00:00, 265.59it/s]
-      0%|          | 0/26 [00:00<?, ?it/s]    100%|██████████| 26/26 [00:00<00:00, 266.68it/s]
+      0%|          | 0/26 [00:00<?, ?it/s]     96%|█████████▌| 25/26 [00:00<00:00, 246.19it/s]    100%|██████████| 26/26 [00:00<00:00, 253.92it/s]
+      0%|          | 0/26 [00:00<?, ?it/s]     88%|████████▊ | 23/26 [00:00<00:00, 222.15it/s]    100%|██████████| 26/26 [00:00<00:00, 240.37it/s]
 
     <Axes: xlabel='Radius (k_A^-1)', ylabel='Intensity'>
 
@@ -241,7 +241,7 @@ Here we just show a random affine transformation for illustration.
 
  .. code-block:: none
 
-      0%|          | 0/26 [00:00<?, ?it/s]      4%|▍         | 1/26 [00:03<01:15,  3.04s/it]     92%|█████████▏| 24/26 [00:03<00:00, 10.65it/s]    100%|██████████| 26/26 [00:03<00:00,  8.28it/s]
+      0%|          | 0/26 [00:00<?, ?it/s]      4%|▍         | 1/26 [00:03<01:18,  3.15s/it]    100%|██████████| 26/26 [00:03<00:00, 11.13it/s]    100%|██████████| 26/26 [00:03<00:00,  7.99it/s]
 
 
 
@@ -284,10 +284,10 @@ The range can be increasing, decreasing, and does not need to be a multiple of p
 
  .. code-block:: none
 
-      0%|          | 0/26 [00:00<?, ?it/s]     81%|████████  | 21/26 [00:00<00:00, 204.14it/s]    100%|██████████| 26/26 [00:00<00:00, 222.87it/s]
-      0%|          | 0/26 [00:00<?, ?it/s]     85%|████████▍ | 22/26 [00:00<00:00, 217.93it/s]    100%|██████████| 26/26 [00:00<00:00, 239.47it/s]
-      0%|          | 0/26 [00:00<?, ?it/s]     54%|█████▍    | 14/26 [00:00<00:00, 137.38it/s]    100%|██████████| 26/26 [00:00<00:00, 147.49it/s]
-      0%|          | 0/26 [00:00<?, ?it/s]    100%|██████████| 26/26 [00:00<00:00, 311.34it/s]
+      0%|          | 0/26 [00:00<?, ?it/s]     88%|████████▊ | 23/26 [00:00<00:00, 211.09it/s]    100%|██████████| 26/26 [00:00<00:00, 221.54it/s]
+      0%|          | 0/26 [00:00<?, ?it/s]     88%|████████▊ | 23/26 [00:00<00:00, 224.70it/s]    100%|██████████| 26/26 [00:00<00:00, 232.25it/s]
+      0%|          | 0/26 [00:00<?, ?it/s]     54%|█████▍    | 14/26 [00:00<00:00, 133.80it/s]    100%|██████████| 26/26 [00:00<00:00, 144.19it/s]
+      0%|          | 0/26 [00:00<?, ?it/s]    100%|██████████| 26/26 [00:00<00:00, 300.88it/s]
 
     [<Axes: title={'center': '(-pi, pi) default'}, xlabel='Radians axis (Rad)', ylabel='Radius axis (k_A^-1)'>, <Axes: title={'center': '(0, 1)'}, xlabel='Radians axis (Rad)', ylabel='Radius axis (k_A^-1)'>, <Axes: title={'center': '(0, 4pi)'}, xlabel='Radians axis (Rad)', ylabel='Radius axis (k_A^-1)'>, <Axes: title={'center': '(pi, 0)'}, xlabel='Radians axis (Rad)', ylabel='Radius axis (k_A^-1)'>]
 
@@ -296,7 +296,7 @@ The range can be increasing, decreasing, and does not need to be a multiple of p
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 57.184 seconds)
+   **Total running time of the script:** (1 minutes 2.180 seconds)
 
 
 .. _sphx_glr_download_examples_processing_azimuthal_integration.py:

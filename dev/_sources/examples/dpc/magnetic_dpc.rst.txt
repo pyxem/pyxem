@@ -49,7 +49,9 @@ the longer Demo Notebooks.
 
  .. code-block:: none
 
-      0%|          | 0/76 [00:00<?, ?it/s]     43%|████▎     | 33/76 [00:00<00:00, 309.98it/s]     84%|████████▍ | 64/76 [00:00<00:00, 290.80it/s]    100%|██████████| 76/76 [00:00<00:00, 289.22it/s]
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/hyperspy/misc/utils.py:72: VisibleDeprecationWarning: `_get_block_pattern` has moved to `hyperspy.misc.dask_utils`. It is for internal use only and may be removed in the future.
+      warnings.warn(
+      0%|          | 0/76 [00:00<?, ?it/s]     36%|███▌      | 27/76 [00:00<00:00, 220.00it/s]     66%|██████▌   | 50/76 [00:00<00:00, 220.99it/s]     96%|█████████▌| 73/76 [00:00<00:00, 214.14it/s]    100%|██████████| 76/76 [00:00<00:00, 220.88it/s]
 
 
 
@@ -154,7 +156,7 @@ Since each probe position is a vector, we can plot the magnitude and phase (dire
 
  .. code-block:: none
 
-      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 2854.87it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 2877.18it/s]
 
 
 
@@ -265,7 +267,7 @@ using matplotlib. This is useful for creating publication-ready figures.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 7.036 seconds)
+   **Total running time of the script:** (0 minutes 6.951 seconds)
 
 
 .. _sphx_glr_download_examples_dpc_magnetic_dpc.py:

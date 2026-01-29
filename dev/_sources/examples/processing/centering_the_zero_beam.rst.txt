@@ -42,7 +42,9 @@ Making a Dummy Dataset with a Zero Beam that systematically deviates from the ce
 
  .. code-block:: none
 
-      0%|          | 0/76 [00:00<?, ?it/s]    100%|██████████| 76/76 [00:00<00:00, 786.10it/s]
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/hyperspy/misc/utils.py:72: VisibleDeprecationWarning: `_get_block_pattern` has moved to `hyperspy.misc.dask_utils`. It is for internal use only and may be removed in the future.
+      warnings.warn(
+      0%|          | 0/76 [00:00<?, ?it/s]    100%|██████████| 76/76 [00:00<00:00, 787.62it/s]
 
 
 
@@ -75,7 +77,7 @@ The zero beam position can be obtained using the :meth:`get_direct_beam_position
 
  .. code-block:: none
 
-      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 535.84it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 537.18it/s]
 
     [<Axes: title={'center': 'x-shift'}, xlabel='x axis (px)', ylabel='y axis (px)'>, <Axes: title={'center': 'y-shift'}, xlabel='x axis (px)', ylabel='y axis (px)'>]
 
@@ -119,7 +121,7 @@ To visualize the zero beam position, we can plot the beam position on the origin
 
  .. code-block:: none
 
-      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 6125.88it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 3976.38it/s]
 
 
 
@@ -189,7 +191,7 @@ and the non-centered one, to compare them.
 
  .. code-block:: none
 
-      0%|          | 0/76 [00:00<?, ?it/s]    100%|██████████| 76/76 [00:00<00:00, 799.66it/s]
+      0%|          | 0/76 [00:00<?, ?it/s]    100%|██████████| 76/76 [00:00<00:00, 758.62it/s]    100%|██████████| 76/76 [00:00<00:00, 756.66it/s]
 
     [<Axes: title={'center': 'Original'}, xlabel='kx axis (px)', ylabel='ky axis (px)'>, <Axes: title={'center': 'Centered'}, xlabel='kx axis (px)', ylabel='ky axis (px)'>]
 
@@ -227,7 +229,7 @@ domains for good performance.
 
  .. code-block:: none
 
-      0%|          | 0/76 [00:00<?, ?it/s]    100%|██████████| 76/76 [00:00<00:00, 769.91it/s]
+      0%|          | 0/76 [00:00<?, ?it/s]     97%|█████████▋| 74/76 [00:00<00:00, 736.23it/s]    100%|██████████| 76/76 [00:00<00:00, 727.20it/s]
 
 
 
@@ -274,7 +276,7 @@ we can center the direct beam as normal.
 
  .. code-block:: none
 
-      0%|          | 0/76 [00:00<?, ?it/s]     99%|█████████▊| 75/76 [00:00<00:00, 744.65it/s]    100%|██████████| 76/76 [00:00<00:00, 748.97it/s]
+      0%|          | 0/76 [00:00<?, ?it/s]     99%|█████████▊| 75/76 [00:00<00:00, 747.52it/s]    100%|██████████| 76/76 [00:00<00:00, 752.20it/s]
 
 
 
@@ -314,7 +316,7 @@ from the original shifts.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 2.776 seconds)
+   **Total running time of the script:** (0 minutes 6.868 seconds)
 
 
 .. _sphx_glr_download_examples_processing_centering_the_zero_beam.py:

@@ -47,8 +47,8 @@
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../_static/documentation_options.js?v=88e4c0c0"></script>
-    <script src="../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../_static/copybutton.js?v=f281be69"></script>
     <script src="../../_static/design-tabs.js?v=f930bc37"></script>
@@ -997,11 +997,11 @@
 <h1>VirtualDarkFieldImage<a class="headerlink" href="#virtualdarkfieldimage" title="Link to this heading">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="pyxem.signals.VirtualDarkFieldImage">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyxem.signals.</span></span><span class="sig-name descname"><span class="pre">VirtualDarkFieldImage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/pyxem/pyxem/blob/v0.21.0/pyxem/signals/virtual_dark_field_image.py#L30-L167"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxem.signals.VirtualDarkFieldImage" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.signals/Signal2D.html#hyperspy.api.signals.Signal2D" title="(in HyperSpy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Signal2D</span></code></a></p>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pyxem.signals.</span></span><span class="sig-name descname"><span class="pre">VirtualDarkFieldImage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/pyxem/pyxem/blob/v0.21.0/pyxem/signals/virtual_dark_field_image.py#L30-L167"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxem.signals.VirtualDarkFieldImage" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.signals/Signal2D.html#hyperspy.api.signals.Signal2D" title="(in HyperSpy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Signal2D</span></code></a></p>
 <p>Signal class for virtual diffraction contrast images.</p>
 <p class="rubric">Attributes</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="pyxem.signals.VirtualDarkFieldImage.vectors.html#pyxem.signals.VirtualDarkFieldImage.vectors" title="pyxem.signals.VirtualDarkFieldImage.vectors"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VirtualDarkFieldImage.vectors</span></code></a></p></td>
 <td><p></p></td>
@@ -1010,7 +1010,7 @@
 </table>
 </div>
 <p class="rubric">Methods</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="pyxem.signals.VirtualDarkFieldImage.get_vdf_segments.html#pyxem.signals.VirtualDarkFieldImage.get_vdf_segments" title="pyxem.signals.VirtualDarkFieldImage.get_vdf_segments"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VirtualDarkFieldImage.get_vdf_segments</span></code></a>([...])</p></td>
 <td><p>Separate segments from each of the virtual dark field (VDF) images using edge-detection by the Sobel transform and the watershed segmentation method implemented in scikit-image [1,2].</p></td>
@@ -1020,6 +1020,15 @@
 </div>
 </dd></dl>
 
+<section id="examples-using-virtualdarkfieldimage">
+<h2>Examples using <code class="docutils literal notranslate"><span class="pre">VirtualDarkFieldImage</span></code><a class="headerlink" href="#examples-using-virtualdarkfieldimage" title="Link to this heading">#</a></h2>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="In this example we will show how to create virtual images from vectors. We will use the find_peaks method to find the vectors and then use the get_unique_vectors method to reduce the number of vectors to a unique set of vectors."><img alt="" src="../../_images/sphx_glr_creating_virtual_images_from_vectors_thumb.png" />
+<p><a class="reference internal" href="../../examples/virtual_imaging/creating_virtual_images_from_vectors.html"><span class="doc">Creating Virtual Images from Vectors</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Creating Virtual Images from Vectors</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Other Virtual Imaging"><img alt="" src="../../_images/sphx_glr_other_virtual_imaging_thumb.png" />
+<p><a class="reference internal" href="../../examples/virtual_imaging/other_virtual_imaging.html"><span class="doc">Other Virtual Imaging</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Other Virtual Imaging</div>
+</div></div></section>
 </section>
 
 
@@ -1070,6 +1079,7 @@
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyxem.signals.VirtualDarkFieldImage"><code class="docutils literal notranslate"><span class="pre">VirtualDarkFieldImage</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#examples-using-virtualdarkfieldimage">Examples using <code class="docutils literal notranslate"><span class="pre">VirtualDarkFieldImage</span></code></a></li>
 </ul>
   </nav></div>
 
@@ -1132,7 +1142,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
     <br/>
   </p>
 </div>

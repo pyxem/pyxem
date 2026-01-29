@@ -55,11 +55,11 @@ pattern at each real space position.
 
  .. code-block:: none
 
-    /opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/diffsims/generators/sphere_mesh_generators.py:523: RuntimeWarning: invalid value encountered in divide
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/diffsims/generators/sphere_mesh_generators.py:523: RuntimeWarning: invalid value encountered in divide
       phi2 = sign * np.nan_to_num(np.arccos(x_comp / norm_proj))
-      0%|          | 0/9 [00:00<?, ?it/s]     11%|█         | 1/9 [00:08<01:08,  8.54s/it]     33%|███▎      | 3/9 [00:08<00:13,  2.25s/it]     56%|█████▌    | 5/9 [00:17<00:13,  3.30s/it]    100%|██████████| 9/9 [00:17<00:00,  1.92s/it]
-      0%|          | 0/17 [00:00<?, ?it/s]      6%|▌         | 1/17 [00:07<02:00,  7.53s/it]     18%|█▊        | 3/17 [00:07<00:28,  2.02s/it]     29%|██▉       | 5/17 [00:08<00:12,  1.06s/it]     41%|████      | 7/17 [00:08<00:07,  1.38it/s]     53%|█████▎    | 9/17 [00:14<00:12,  1.58s/it]     65%|██████▍   | 11/17 [00:15<00:06,  1.16s/it]     76%|███████▋  | 13/17 [00:15<00:03,  1.26it/s]    100%|██████████| 17/17 [00:15<00:00,  1.09it/s]
-      0%|          | 0/51 [00:00<?, ?it/s]     73%|███████▎  | 37/51 [00:00<00:00, 366.34it/s]    100%|██████████| 51/51 [00:00<00:00, 416.01it/s]
+      0%|          | 0/9 [00:00<?, ?it/s]     11%|█         | 1/9 [00:08<01:09,  8.64s/it]     56%|█████▌    | 5/9 [00:17<00:12,  3.12s/it]    100%|██████████| 9/9 [00:17<00:00,  1.92s/it]
+      0%|          | 0/17 [00:00<?, ?it/s]      6%|▌         | 1/17 [00:07<01:53,  7.08s/it]     29%|██▉       | 5/17 [00:08<00:15,  1.29s/it]     41%|████      | 7/17 [00:08<00:08,  1.18it/s]     53%|█████▎    | 9/17 [00:14<00:12,  1.62s/it]     65%|██████▍   | 11/17 [00:14<00:06,  1.12s/it]     82%|████████▏ | 14/17 [00:14<00:01,  1.50it/s]    100%|██████████| 17/17 [00:14<00:00,  1.14it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]     69%|██████▊   | 35/51 [00:00<00:00, 346.38it/s]    100%|██████████| 51/51 [00:00<00:00, 415.57it/s]
 
 
 
@@ -113,7 +113,7 @@ reciprocal space based on the units for the vectors.
 
  .. code-block:: none
 
-      0%|          | 0/2 [00:00<?, ?it/s]     50%|█████     | 1/2 [00:00<00:00,  1.20it/s]    100%|██████████| 2/2 [00:00<00:00,  2.39it/s]
+      0%|          | 0/2 [00:00<?, ?it/s]     50%|█████     | 1/2 [00:00<00:00,  1.32it/s]    100%|██████████| 2/2 [00:00<00:00,  2.64it/s]
 
 
 
@@ -146,12 +146,12 @@ reciprocal space based on the units for the vectors.
 
  .. code-block:: none
 
-    /opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/numpy/_core/fromnumeric.py:3860: RuntimeWarning: Mean of empty slice.
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/numpy/_core/fromnumeric.py:3860: RuntimeWarning: Mean of empty slice.
       return _methods._mean(a, axis=axis, dtype=dtype,
-    /opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/numpy/_core/_methods.py:136: RuntimeWarning: invalid value encountered in divide
+    /opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/numpy/_core/_methods.py:136: RuntimeWarning: invalid value encountered in divide
       ret = um.true_divide(
 
-    <matplotlib.collections.PathCollection object at 0x7fc79c2999a0>
+    <matplotlib.collections.PathCollection object at 0x7f34f7f3ce00>
 
 
 
@@ -173,7 +173,7 @@ reciprocal space based on the units for the vectors.
 
  .. code-block:: none
 
-    39 : Clusters Found!
+    37 : Clusters Found!
 
 
 
@@ -226,7 +226,7 @@ to see regions where the clustering doesn't work quite as well!
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 54.327 seconds)
+   **Total running time of the script:** (0 minutes 53.053 seconds)
 
 
 .. _sphx_glr_download_examples_vectors_clustering_vectors.py:

@@ -117,7 +117,7 @@ Also we can do the same with a 1D signal
 
  .. code-block:: none
 
-      0%|          | 0/51 [00:00<?, ?it/s]      2%|▏         | 1/51 [00:00<00:13,  3.64it/s]    100%|██████████| 51/51 [00:00<00:00, 156.65it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]      2%|▏         | 1/51 [00:00<00:18,  2.67it/s]    100%|██████████| 51/51 [00:00<00:00, 120.86it/s]
 
 
 
@@ -125,7 +125,7 @@ Also we can do the same with a 1D signal
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 4.844 seconds)
+   **Total running time of the script:** (0 minutes 4.881 seconds)
 
 
 .. _sphx_glr_download_examples_virtual_imaging_interactive_virtual_images.py:

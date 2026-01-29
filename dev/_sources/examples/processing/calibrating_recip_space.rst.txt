@@ -57,10 +57,8 @@ any questions.
 
  .. code-block:: none
 
-    Downloading file 'au_xgrating_20cm.tif' from 'https://zenodo.org/records/15490547/files/au_xgrating_20cm.tif' to '/home/runner/.cache/pyxem/0.21.0'.
-      0%|                                               | 0.00/263k [00:00<?, ?B/s]      4%|█▎                                    | 9.22k/263k [00:00<00:03, 68.0kB/s]     15%|█████▉                                 | 39.9k/263k [00:00<00:01, 147kB/s]     36%|██████████████▏                        | 95.2k/263k [00:00<00:00, 241kB/s]     77%|██████████████████████████████▋         | 202k/263k [00:00<00:00, 414kB/s]      0%|                                               | 0.00/263k [00:00<?, ?B/s]    100%|███████████████████████████████████████| 263k/263k [00:00<00:00, 2.07GB/s]
-    Downloading file 'au.cif' from 'https://zenodo.org/records/15490547/files/au.cif' to '/home/runner/.cache/pyxem/0.21.0'.
-      0%|                                              | 0.00/4.58k [00:00<?, ?B/s]      0%|                                              | 0.00/4.58k [00:00<?, ?B/s]    100%|█████████████████████████████████████| 4.58k/4.58k [00:00<00:00, 46.1MB/s]
+      0%|                                               | 0.00/263k [00:00<?, ?B/s]      0%|▏                                     | 1.02k/263k [00:00<00:34, 7.54kB/s]     15%|█████▉                                 | 39.9k/263k [00:00<00:01, 152kB/s]     35%|█████████████▊                         | 93.2k/263k [00:00<00:00, 211kB/s]     79%|███████████████████████████████▌        | 207k/263k [00:00<00:00, 428kB/s]      0%|                                               | 0.00/263k [00:00<?, ?B/s]    100%|███████████████████████████████████████| 263k/263k [00:00<00:00, 1.29GB/s]
+      0%|                                              | 0.00/4.58k [00:00<?, ?B/s]      0%|                                              | 0.00/4.58k [00:00<?, ?B/s]    100%|█████████████████████████████████████| 4.58k/4.58k [00:00<00:00, 26.5MB/s]
 
 
 
@@ -135,20 +133,7 @@ scale or the camera length.
 
  .. code-block:: none
 
-      0%|          | 0/2 [00:00<?, ?it/s]     50%|█████     | 1/2 [00:00<00:00,  4.44it/s]    100%|██████████| 2/2 [00:00<00:00,  8.87it/s]
-    WARNING | Hyperspy | Numexpr is not installed, falling back to numpy, which is slower to calculate model. (hyperspy._components.expression:186)
-    WARNING | Hyperspy | Numexpr is not installed, falling back to numpy, which is slower to calculate model. (hyperspy._components.expression:186)
-    WARNING | Hyperspy | Numexpr is not installed, falling back to numpy, which is slower to calculate model. (hyperspy._components.expression:186)
-    WARNING | Hyperspy | Numexpr is not installed, falling back to numpy, which is slower to calculate model. (hyperspy._components.expression:186)
-    WARNING | Hyperspy | Numexpr is not installed, falling back to numpy, which is slower to calculate model. (hyperspy._components.expression:186)
-    WARNING | Hyperspy | Numexpr is not installed, falling back to numpy, which is slower to calculate model. (hyperspy._components.expression:186)
-    WARNING | Hyperspy | Numexpr is not installed, falling back to numpy, which is slower to calculate model. (hyperspy._components.expression:186)
-    WARNING | Hyperspy | Numexpr is not installed, falling back to numpy, which is slower to calculate model. (hyperspy._components.expression:186)
-    WARNING | Hyperspy | Numexpr is not installed, falling back to numpy, which is slower to calculate model. (hyperspy._components.expression:186)
-    WARNING | Hyperspy | Numexpr is not installed, falling back to numpy, which is slower to calculate model. (hyperspy._components.expression:186)
-    WARNING | Hyperspy | Numexpr is not installed, falling back to numpy, which is slower to calculate model. (hyperspy._components.expression:186)
-    WARNING | Hyperspy | Numexpr is not installed, falling back to numpy, which is slower to calculate model. (hyperspy._components.expression:186)
-    WARNING | Hyperspy | Numexpr is not installed, falling back to numpy, which is slower to calculate model. (hyperspy._components.expression:186)
+      0%|          | 0/2 [00:00<?, ?it/s]     50%|█████     | 1/2 [00:00<00:00,  4.15it/s]    100%|██████████| 2/2 [00:00<00:00,  8.29it/s]
     Theta Scale:  0.0002545342464699758  Rad
     Camera Length:  21.608093832164734  cm
 
@@ -310,7 +295,7 @@ accounts for the ewald sphere now and uses the non uniform axes.
 
  .. code-block:: none
 
-      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 964.21it/s]
+      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 855.46it/s]
 
 
 
@@ -318,7 +303,7 @@ accounts for the ewald sphere now and uses the non uniform axes.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 27.297 seconds)
+   **Total running time of the script:** (0 minutes 28.752 seconds)
 
 
 .. _sphx_glr_download_examples_processing_calibrating_recip_space.py:

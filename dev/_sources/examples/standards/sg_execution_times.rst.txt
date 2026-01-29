@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:33.484** total execution time for 2 files **from examples/standards**:
+**04:14.351** total execution time for 2 files **from examples/standards**:
 
 .. container::
 
@@ -33,8 +33,8 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_examples_standards_flat_ewalds_sphere_assumption.py` (``flat_ewalds_sphere_assumption.py``)
-     - 00:25.711
+     - 04:06.151
      - 0.0
    * - :ref:`sphx_glr_examples_standards_pixel_coodinates.py` (``pixel_coodinates.py``)
-     - 00:07.773
+     - 00:08.200
      - 0.0

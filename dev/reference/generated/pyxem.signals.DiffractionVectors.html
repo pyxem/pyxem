@@ -47,8 +47,8 @@
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../_static/documentation_options.js?v=88e4c0c0"></script>
-    <script src="../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../_static/copybutton.js?v=f281be69"></script>
     <script src="../../_static/design-tabs.js?v=f930bc37"></script>
@@ -997,8 +997,8 @@
 <h1>DiffractionVectors<a class="headerlink" href="#diffractionvectors" title="Link to this heading">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="pyxem.signals.DiffractionVectors">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyxem.signals.</span></span><span class="sig-name descname"><span class="pre">DiffractionVectors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/pyxem/pyxem/blob/v0.21.0/pyxem/signals/diffraction_vectors.py#L72-L1473"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxem.signals.DiffractionVectors" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.signals/BaseSignal.html#hyperspy.api.signals.BaseSignal" title="(in HyperSpy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSignal</span></code></a></p>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pyxem.signals.</span></span><span class="sig-name descname"><span class="pre">DiffractionVectors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/pyxem/pyxem/blob/v0.21.0/pyxem/signals/diffraction_vectors.py#L72-L1473"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxem.signals.DiffractionVectors" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.signals/BaseSignal.html#hyperspy.api.signals.BaseSignal" title="(in HyperSpy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSignal</span></code></a></p>
 <p>Class for diffraction vectors in reciprocal space.</p>
 <p>Diffraction vectors are defined as the vectors from the center of the
 diffraction pattern to the diffraction peaks. Note the DiffractionVectors
@@ -1014,7 +1014,7 @@ following indexation.</p></li>
 </dd>
 </dl>
 <p class="rubric">Attributes</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="pyxem.signals.DiffractionVectors.center.html#pyxem.signals.DiffractionVectors.center" title="pyxem.signals.DiffractionVectors.center"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DiffractionVectors.center</span></code></a></p></td>
 <td><p>The center of the diffraction pattern in pixels.</p></td>
@@ -1053,7 +1053,7 @@ following indexation.</p></li>
 </table>
 </div>
 <p class="rubric">Methods</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="pyxem.signals.DiffractionVectors.calculate_cartesian_coordinates.html#pyxem.signals.DiffractionVectors.calculate_cartesian_coordinates" title="pyxem.signals.DiffractionVectors.calculate_cartesian_coordinates"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DiffractionVectors.calculate_cartesian_coordinates</span></code></a>(...)</p></td>
 <td><p>Get cartesian coordinates of the diffraction vectors.</p></td>
@@ -1117,6 +1117,36 @@ following indexation.</p></li>
 </div>
 </dd></dl>
 
+<section id="examples-using-diffractionvectors">
+<h2>Examples using <code class="docutils literal notranslate"><span class="pre">DiffractionVectors</span></code><a class="headerlink" href="#examples-using-diffractionvectors" title="Link to this heading">#</a></h2>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="The Circular Hough Transform is a method to detect circular features in an image. It can be used to detect rings (or disks) in the diffraction pattern.  For strain mapping there is some evidence that the Circular Hough transform is more accurate than typical template matching and can provide subpixel accuracy."><img alt="" src="../../_images/sphx_glr_circular_hough_transform_thumb.png" />
+<p><a class="reference internal" href="../../examples/processing/circular_hough_transform.html"><span class="doc">Circular Hough Transform Peak Finding</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Circular Hough Transform Peak Finding</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Finding Diffraction Vectors"><img alt="" src="../../_images/sphx_glr_vector_finding_thumb.png" />
+<p><a class="reference internal" href="../../examples/processing/vector_finding.html"><span class="doc">Finding Diffraction Vectors</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Finding Diffraction Vectors</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Strain mapping in pyxem is done by fitting a DisplacementGradientMap to the data. This can be thought of as image distortion around some central point."><img alt="" src="../../_images/sphx_glr_strain_mapping_thumb.png" />
+<p><a class="reference internal" href="../../examples/strain_mapping/strain_mapping.html"><span class="doc">Strain Mapping</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Strain Mapping</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This can be used to segment a 4-D STEM dataset into different clusters based on the diffraction pattern at each real space position."><img alt="" src="../../_images/sphx_glr_clustering_vectors_thumb.png" />
+<p><a class="reference internal" href="../../examples/vectors/clustering_vectors.html"><span class="doc">Clustering Vectors</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Clustering Vectors</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This example shows how to identify symmetry (in a glassy system but this could be useful other places) by looking at the angles between 3 vectors in the diffraction pattern at some radial ring in k to identify groups of 3 vectors that are subtended by the same angle."><img alt="" src="../../_images/sphx_glr_glass_symmetry_thumb.png" />
+<p><a class="reference internal" href="../../examples/vectors/glass_symmetry.html"><span class="doc">Glass Symmetry from Vectors</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Glass Symmetry from Vectors</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This example shows how to take a set of vectors and create a mask from a set of circles around each vector. Multiplying by the original signal will remove all the signal except for the circles around the vectors."><img alt="" src="../../_images/sphx_glr_masking_vectors_thumb.png" />
+<p><a class="reference internal" href="../../examples/vectors/masking_vectors.html"><span class="doc">Diffraction Vectors to Mask</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Diffraction Vectors to Mask</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This example shows how to perform some basic operations slicing and selecting vectors. This is designed to be very flexible and powerful.  Many operations such as slicing with a boolean array are supported."><img alt="" src="../../_images/sphx_glr_slicing_vectors_thumb.png" />
+<p><a class="reference internal" href="../../examples/vectors/slicing_vectors.html"><span class="doc">Operations on Vectors</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Operations on Vectors</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="In this example we will show how to create virtual images from vectors. We will use the find_peaks method to find the vectors and then use the get_unique_vectors method to reduce the number of vectors to a unique set of vectors."><img alt="" src="../../_images/sphx_glr_creating_virtual_images_from_vectors_thumb.png" />
+<p><a class="reference internal" href="../../examples/virtual_imaging/creating_virtual_images_from_vectors.html"><span class="doc">Creating Virtual Images from Vectors</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Creating Virtual Images from Vectors</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Other Virtual Imaging"><img alt="" src="../../_images/sphx_glr_other_virtual_imaging_thumb.png" />
+<p><a class="reference internal" href="../../examples/virtual_imaging/other_virtual_imaging.html"><span class="doc">Other Virtual Imaging</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Other Virtual Imaging</div>
+</div></div></section>
 </section>
 
 
@@ -1167,6 +1197,7 @@ following indexation.</p></li>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyxem.signals.DiffractionVectors"><code class="docutils literal notranslate"><span class="pre">DiffractionVectors</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#examples-using-diffractionvectors">Examples using <code class="docutils literal notranslate"><span class="pre">DiffractionVectors</span></code></a></li>
 </ul>
   </nav></div>
 
@@ -1229,7 +1260,7 @@ following indexation.</p></li>
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
     <br/>
   </p>
 </div>

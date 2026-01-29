@@ -91,7 +91,7 @@ this makes the high k values more visible
 
  .. code-block:: none
 
-      0%|          | 0/2 [00:00<?, ?it/s]     50%|█████     | 1/2 [00:00<00:00,  4.88it/s]    100%|██████████| 2/2 [00:00<00:00,  9.75it/s]
+      0%|          | 0/2 [00:00<?, ?it/s]     50%|█████     | 1/2 [00:00<00:00,  7.67it/s]    100%|██████████| 2/2 [00:00<00:00, 15.29it/s]
 
 
 
@@ -155,10 +155,10 @@ this makes the high k values more visible
 
  .. code-block:: none
 
-      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 47.11it/s]
-      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 329.56it/s]
-      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 220.39it/s]
-      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 138.04it/s]
+      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 232.24it/s]
+      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 2845.53it/s]
+      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 370.60it/s]
+      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 527.02it/s]
 
 
 
@@ -166,7 +166,7 @@ this makes the high k values more visible
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 7.337 seconds)
+   **Total running time of the script:** (0 minutes 7.678 seconds)
 
 
 .. _sphx_glr_download_examples_orientation_mapping_on_zone_orientation.py:

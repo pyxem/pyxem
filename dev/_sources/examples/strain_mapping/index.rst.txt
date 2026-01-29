@@ -22,7 +22,7 @@ Below is a gallery of examples showing how to perform strain mapping in pyxem.
   .. image:: /examples/strain_mapping/images/thumb/sphx_glr_strain_mapping_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_strain_mapping_strain_mapping.py`
+  :doc:`/examples/strain_mapping/strain_mapping`
 
 .. raw:: html
 

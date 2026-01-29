@@ -133,7 +133,7 @@ calibration object for convenience. For example:
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 9.342 seconds)
+   **Total running time of the script:** (0 minutes 9.880 seconds)
 
 
 .. _sphx_glr_download_examples_loading_data_setting_scales_and_metadata.py:

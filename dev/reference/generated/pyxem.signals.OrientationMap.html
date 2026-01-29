@@ -47,8 +47,8 @@
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../_static/documentation_options.js?v=88e4c0c0"></script>
-    <script src="../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../_static/copybutton.js?v=f281be69"></script>
     <script src="../../_static/design-tabs.js?v=f930bc37"></script>
@@ -997,7 +997,7 @@
 <h1>OrientationMap<a class="headerlink" href="#orientationmap" title="Link to this heading">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="pyxem.signals.OrientationMap">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyxem.signals.</span></span><span class="sig-name descname"><span class="pre">OrientationMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/pyxem/pyxem/blob/v0.21.0/pyxem/signals/indexation_results.py#L528-L1319"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxem.signals.OrientationMap" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pyxem.signals.</span></span><span class="sig-name descname"><span class="pre">OrientationMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/pyxem/pyxem/blob/v0.21.0/pyxem/signals/indexation_results.py#L528-L1319"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxem.signals.OrientationMap" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="pyxem.signals.DiffractionVectors2D.html#pyxem.signals.DiffractionVectors2D" title="pyxem.signals.diffraction_vectors2d.DiffractionVectors2D"><code class="xref py py-class docutils literal notranslate"><span class="pre">DiffractionVectors2D</span></code></a></p>
 <p>Signal class for orientation maps.  Note that this is a special case where
 for each navigation position, the signal contains the top n best matches in the form
@@ -1006,13 +1006,13 @@ of a nx4 array with columns [index,correlation, in-plane rotation, mirror(factor
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> – See <a class="reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.signals/Signal2D.html#hyperspy.api.signals.Signal2D" title="(in HyperSpy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Signal2D</span></code></a>.</p></li>
-<li><p><strong>**kwargs</strong> – See <a class="reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.signals/Signal2D.html#hyperspy.api.signals.Signal2D" title="(in HyperSpy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Signal2D</span></code></a></p></li>
+<li><p><strong>*args</strong> – See <a class="reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.signals/Signal2D.html#hyperspy.api.signals.Signal2D" title="(in HyperSpy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Signal2D</span></code></a>.</p></li>
+<li><p><strong>**kwargs</strong> – See <a class="reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.signals/Signal2D.html#hyperspy.api.signals.Signal2D" title="(in HyperSpy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Signal2D</span></code></a></p></li>
 </ul>
 </dd>
 </dl>
 <p class="rubric">Attributes</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="pyxem.signals.OrientationMap.num_rows.html#pyxem.signals.OrientationMap.num_rows" title="pyxem.signals.OrientationMap.num_rows"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OrientationMap.num_rows</span></code></a></p></td>
 <td><p></p></td>
@@ -1024,7 +1024,7 @@ of a nx4 array with columns [index,correlation, in-plane rotation, mirror(factor
 </table>
 </div>
 <p class="rubric">Methods</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="pyxem.signals.OrientationMap.deepcopy.html#pyxem.signals.OrientationMap.deepcopy" title="pyxem.signals.OrientationMap.deepcopy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OrientationMap.deepcopy</span></code></a>([deepcopy_simulation])</p></td>
 <td><p>Deepcopy the signal.</p></td>
@@ -1038,7 +1038,7 @@ of a nx4 array with columns [index,correlation, in-plane rotation, mirror(factor
 <tr class="row-even"><td><p><a class="reference internal" href="pyxem.signals.OrientationMap.to_crystal_map.html#pyxem.signals.OrientationMap.to_crystal_map" title="pyxem.signals.OrientationMap.to_crystal_map"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OrientationMap.to_crystal_map</span></code></a>()</p></td>
 <td><p>Convert the orientation map to an <a class="reference external" href="https://orix.readthedocs.io/en/stable/reference/generated/orix.crystal_map.CrystalMap.html#orix.crystal_map.CrystalMap" title="(in orix)"><code class="xref py py-class docutils literal notranslate"><span class="pre">orix.crystal_map.CrystalMap</span></code></a> object</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyxem.signals.OrientationMap.to_ipf_colormap.html#pyxem.signals.OrientationMap.to_ipf_colormap" title="pyxem.signals.OrientationMap.to_ipf_colormap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OrientationMap.to_ipf_colormap</span></code></a>([direction, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyxem.signals.OrientationMap.to_ipf_colormap.html#pyxem.signals.OrientationMap.to_ipf_colormap" title="pyxem.signals.OrientationMap.to_ipf_colormap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OrientationMap.to_ipf_colormap</span></code></a>(direction, ...)</p></td>
 <td><p>Create a colored navigator and a legend (in the form of a marker) which can be passed as the navigator argument to the <cite>plot</cite> method of some signal.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="pyxem.signals.OrientationMap.to_ipf_correlation_heatmap_markers.html#pyxem.signals.OrientationMap.to_ipf_correlation_heatmap_markers" title="pyxem.signals.OrientationMap.to_ipf_correlation_heatmap_markers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OrientationMap.to_ipf_correlation_heatmap_markers</span></code></a>([...])</p></td>
@@ -1079,6 +1079,18 @@ of a nx4 array with columns [index,correlation, in-plane rotation, mirror(factor
 </div>
 </dd></dl>
 
+<section id="examples-using-orientationmap">
+<h2>Examples using <code class="docutils literal notranslate"><span class="pre">OrientationMap</span></code><a class="headerlink" href="#examples-using-orientationmap" title="Link to this heading">#</a></h2>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="For more information on the orientation mapping process see pyxemorientationmapping2022"><img alt="" src="../../_images/sphx_glr_multi_phase_orientation_thumb.png" />
+<p><a class="reference internal" href="../../examples/orientation_mapping/multi_phase_orientation.html"><span class="doc">Multi Phase Orientation Mapping</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Multi Phase Orientation Mapping</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="For more information on the orientation mapping process see pyxemorientationmapping2022"><img alt="" src="../../_images/sphx_glr_on_zone_orientation_thumb.png" />
+<p><a class="reference internal" href="../../examples/orientation_mapping/on_zone_orientation.html"><span class="doc">On Zone Orientation</span></a></p>
+  <div class="sphx-glr-thumbnail-title">On Zone Orientation</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="For more information on the orientation mapping process see pyxemorientationmapping2022"><img alt="" src="../../_images/sphx_glr_single_phase_orientation_thumb.png" />
+<p><a class="reference internal" href="../../examples/orientation_mapping/single_phase_orientation.html"><span class="doc">Single Phase Orientation Mapping</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Single Phase Orientation Mapping</div>
+</div></div></section>
 </section>
 
 
@@ -1129,6 +1141,7 @@ of a nx4 array with columns [index,correlation, in-plane rotation, mirror(factor
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyxem.signals.OrientationMap"><code class="docutils literal notranslate"><span class="pre">OrientationMap</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#examples-using-orientationmap">Examples using <code class="docutils literal notranslate"><span class="pre">OrientationMap</span></code></a></li>
 </ul>
   </nav></div>
 
@@ -1191,7 +1204,7 @@ of a nx4 array with columns [index,correlation, in-plane rotation, mirror(factor
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
     <br/>
   </p>
 </div>
