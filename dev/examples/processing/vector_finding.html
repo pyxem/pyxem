@@ -1,414 +1,254 @@
 
 <!DOCTYPE html>
 
-
-<html lang="en" data-content_root="../../" >
-
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
-
-    <title>Finding Diffraction Vectors &#8212; pyxem 0.21.0 documentation</title>
-  
-  
-  
-  <script data-cfasync="false">
+<html data-content_root="../../" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Finding Diffraction Vectors — pyxem 0.21.0 documentation</title>
+<script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!--
+<!--
     this give us a css class that will be invisible only if js is disabled
   -->
-  <noscript>
-    <style>
+<noscript>
+<style>
       .pst-js-only { display: none !important; }
 
     </style>
-  </noscript>
-  
-  <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d75fae25" />
-    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
-    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-codeautolink.css?v=b2176991" />
-    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
-    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
-    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
-    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
-    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
-  
-  <!-- So that users can add custom icons -->
-  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
-  <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
-
-    <script src="../../_static/documentation_options.js?v=88e4c0c0"></script>
-    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
-    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
-    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
-    <script src="../../_static/copybutton.js?v=f281be69"></script>
-    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
-    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'examples/processing/vector_finding';</script>
-    <script>
+</noscript>
+<!-- Loaded before other Sphinx assets -->
+<link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet"/>
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet"/>
+<link href="../../_static/pygments.css?v=d75fae25" rel="stylesheet" type="text/css"/>
+<link href="../../_static/graphviz.css?v=4ae1632d" rel="stylesheet" type="text/css"/>
+<link href="../../_static/sphinx-codeautolink.css?v=b2176991" rel="stylesheet" type="text/css"/>
+<link href="../../_static/copybutton.css?v=76b2166b" rel="stylesheet" type="text/css"/>
+<link href="../../_static/sg_gallery.css?v=d2d258e8" rel="stylesheet" type="text/css"/>
+<link href="../../_static/sg_gallery-binder.css?v=f4aeca0c" rel="stylesheet" type="text/css"/>
+<link href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" rel="stylesheet" type="text/css"/>
+<link href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" rel="stylesheet" type="text/css"/>
+<link href="../../_static/sphinx-design.min.css?v=95c83b7e" rel="stylesheet" type="text/css"/>
+<!-- So that users can add custom icons -->
+<script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+<!-- Pre-loaded scripts that we'll load fully later -->
+<link as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" rel="preload"/>
+<link as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" rel="preload"/>
+<script src="../../_static/documentation_options.js?v=88e4c0c0"></script>
+<script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+<script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+<script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+<script src="../../_static/copybutton.js?v=f281be69"></script>
+<script src="../../_static/design-tabs.js?v=f930bc37"></script>
+<script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+<script>DOCUMENTATION_OPTIONS.pagename = 'examples/processing/vector_finding';</script>
+<script>
         DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://pyxem.readthedocs.io/en/latest/_static/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.21';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
             false;
         </script>
-    <link rel="icon" href="../../_static/logo.ico"/>
-    <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Template Matching" href="template_matching.html" />
-    <link rel="prev" title="Centering the Zero Beam" href="centering_the_zero_beam.html" />
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.21.0" />
-  </head>
-  
-  
-  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
-
-  
-  
-  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
-  
-  <div id="pst-scroll-pixel-helper"></div>
-  
-  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
-    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-
-  
-  <dialog id="pst-search-dialog">
-    
-<form class="bd-search d-flex align-items-center"
-      action="../../search.html"
-      method="get">
-  <i class="fa-solid fa-magnifying-glass"></i>
-  <input type="search"
-         class="form-control"
-         name="q"
-         placeholder="Search the docs ..."
-         aria-label="Search the docs ..."
-         autocomplete="off"
-         autocorrect="off"
-         autocapitalize="off"
-         spellcheck="false"/>
-  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+<link href="../../_static/logo.ico" rel="icon"/>
+<link href="../../genindex.html" rel="index" title="Index"/>
+<link href="../../search.html" rel="search" title="Search"/>
+<link href="template_matching.html" rel="next" title="Template Matching"/>
+<link href="centering_the_zero_beam.html" rel="prev" title="Centering the Zero Beam"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="en" name="docsearch:language"/>
+<meta content="0.21.0" name="docsearch:version"/>
+</head>
+<body data-bs-root-margin="0px 0px -60%" data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-default-mode="" data-offset="180">
+<div class="skip-link d-print-none" id="pst-skip-link"><a href="#main-content">Skip to main content</a></div>
+<div id="pst-scroll-pixel-helper"></div>
+<button class="btn rounded-pill" id="pst-back-to-top" type="button">
+<i class="fa-solid fa-arrow-up"></i>Back to top</button>
+<dialog id="pst-search-dialog">
+<form action="../../search.html" class="bd-search d-flex align-items-center" method="get">
+<i class="fa-solid fa-magnifying-glass"></i>
+<input aria-label="Search the docs ..." autocapitalize="off" autocomplete="off" autocorrect="off" class="form-control" name="q" placeholder="Search the docs ..." spellcheck="false" type="search"/>
+<span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
 </form>
-  </dialog>
-
-  <div class="pst-async-banner-revealer d-none">
-  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</dialog>
+<div class="pst-async-banner-revealer d-none">
+<aside aria-label="Version warning" class="d-none d-print-none" id="bd-header-version-warning"></aside>
 </div>
-<aside class="bd-header-announcement" aria-label="Announcement">
-  <div class="bd-header-announcement__content">Check out the new <a href='https://pyxem.readthedocs.io/en/latest/examples/index.html'>Examples Gallery!</a> </div>
+<aside aria-label="Announcement" class="bd-header-announcement">
+<div class="bd-header-announcement__content">Check out the new <a href="https://pyxem.readthedocs.io/en/latest/examples/index.html">Examples Gallery!</a> </div>
 </aside>
-
-  
-    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
-    <span class="fa-solid fa-bars"></span>
-  </button>
-  
-  
-  <div class="col-lg-3 navbar-header-items__start">
-    
-      <div class="navbar-item">
-
-  
-    
-  
-
+<button aria-label="Site navigation" class="pst-navbar-icon sidebar-toggle primary-toggle">
+<span class="fa-solid fa-bars"></span>
+</button>
+<div class="col-lg-3 navbar-header-items__start">
+<div class="navbar-item">
 <a class="navbar-brand logo" href="../../index.html">
-  
-  
-  
-  
-  
-    
-    
-      
-    
-    
-    <img src="../../_static/logo.png" class="logo__image only-light" alt="pyxem 0.21.0 documentation - Home"/>
-    <img src="../../_static/logo.png" class="logo__image only-dark pst-js-only" alt="pyxem 0.21.0 documentation - Home"/>
-  
-  
+<img alt="pyxem 0.21.0 documentation - Home" class="logo__image only-light" src="../../_static/logo.png"/>
+<img alt="pyxem 0.21.0 documentation - Home" class="logo__image only-dark pst-js-only" src="../../_static/logo.png"/>
 </a></div>
-    
-      <div class="navbar-item">
+<div class="navbar-item">
 <div class="version-switcher__container dropdown pst-js-only">
-  <button id="pst-version-switcher-button-2"
-    type="button"
-    class="version-switcher__button btn btn-sm dropdown-toggle"
-    data-bs-toggle="dropdown"
-    aria-haspopup="listbox"
-    aria-controls="pst-version-switcher-list-2"
-    aria-label="Version switcher list"
-  >
+<button aria-controls="pst-version-switcher-list-2" aria-haspopup="listbox" aria-label="Version switcher list" class="version-switcher__button btn btn-sm dropdown-toggle" data-bs-toggle="dropdown" id="pst-version-switcher-button-2" type="button">
     Choose version  <!-- this text may get changed later by javascript -->
-    <span class="caret"></span>
-  </button>
-  <div id="pst-version-switcher-list-2"
-    class="version-switcher__menu dropdown-menu list-group-flush py-0"
-    role="listbox" aria-labelledby="pst-version-switcher-button-2">
-    <!-- dropdown will be populated by javascript on page load -->
-  </div>
-</div></div>
-    
-  </div>
-  
-  <div class="col-lg-9 navbar-header-items">
-    
-    <div class="me-auto navbar-header-items__center">
-      
-        <div class="navbar-item">
-<nav>
-  <ul class="bd-navbar-elements navbar-nav">
-    
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../intro.html">
-    Introduction
-  </a>
-</li>
-
-
-<li class="nav-item current active">
-  <a class="nav-link nav-internal" href="../../user_guide/index.html">
-    User Guide
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../index.html">
-    Examples
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../tutorials/index.html">
-    Tutorials
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../reference/index.html">
-    Reference
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../dev_guide/index.html">
-    Dev Guide
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../changelog.html">
-    Changelog
-  </a>
-</li>
-
-  </ul>
-</nav></div>
-      
-    </div>
-    
-    
-    <div class="navbar-header-items__end">
-      
-        <div class="navbar-item navbar-persistent--container">
-          
-
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+<span class="caret"></span>
 </button>
-        </div>
-      
-      
-        <div class="navbar-item">
-
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
-      
-        <div class="navbar-item"><ul class="navbar-icon-links"
-    aria-label="Icon Links">
-        <li class="nav-item">
-          
-          
-          
-          
-          
-          
-          
-          
-          <a href="https://github.com/pyxem/pyxem" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
-        </li>
-</ul></div>
-      
-    </div>
-    
-  </div>
-  
-  
-    <div class="navbar-persistent--mobile">
-
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
-    </div>
-  
-
-  
-    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
-      <span class="fa-solid fa-outdent"></span>
-    </button>
-  
+<div aria-labelledby="pst-version-switcher-button-2" class="version-switcher__menu dropdown-menu list-group-flush py-0" id="pst-version-switcher-list-2" role="listbox">
+<!-- dropdown will be populated by javascript on page load -->
 </div>
-
-    </header>
-  
-
-  <div class="bd-container">
-    <div class="bd-container__inner bd-page-width">
-      
-      
-      
-      <dialog id="pst-primary-sidebar-modal"></dialog>
-      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
-        
-
-  
-  <div class="sidebar-header-items sidebar-primary__section">
-    
-    
-      <div class="sidebar-header-items__center">
-        
-          
-          
-            <div class="navbar-item">
+</div></div>
+</div>
+<div class="col-lg-9 navbar-header-items">
+<div class="me-auto navbar-header-items__center">
+<div class="navbar-item">
 <nav>
-  <ul class="bd-navbar-elements navbar-nav">
-    
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../intro.html">
+<ul class="bd-navbar-elements navbar-nav">
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../../intro.html">
     Introduction
   </a>
 </li>
-
-
 <li class="nav-item current active">
-  <a class="nav-link nav-internal" href="../../user_guide/index.html">
+<a class="nav-link nav-internal" href="../../user_guide/index.html">
     User Guide
   </a>
 </li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../index.html">
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../index.html">
     Examples
   </a>
 </li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../tutorials/index.html">
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../../tutorials/index.html">
     Tutorials
   </a>
 </li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../reference/index.html">
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../../reference/index.html">
     Reference
   </a>
 </li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../dev_guide/index.html">
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../../dev_guide/index.html">
     Dev Guide
   </a>
 </li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../changelog.html">
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../../changelog.html">
     Changelog
   </a>
 </li>
-
-  </ul>
+</ul>
 </nav></div>
-          
-        
-      </div>
-    
-    
-    
-      <div class="sidebar-header-items__end">
-        
-          <div class="navbar-item">
-
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</div>
+<div class="navbar-header-items__end">
+<div class="navbar-item navbar-persistent--container">
+<button aria-label="Search" class="btn search-button-field search-button__button pst-js-only" data-bs-placement="bottom" data-bs-toggle="tooltip" title="Search">
+<i class="fa-solid fa-magnifying-glass"></i>
+<span class="search-button__default-text">Search</span>
+<span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+</div>
+<div class="navbar-item">
+<button aria-label="Color mode" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" data-bs-placement="bottom" data-bs-title="Color mode" data-bs-toggle="tooltip">
+<i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+<i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+<i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
 </button></div>
-        
-          <div class="navbar-item"><ul class="navbar-icon-links"
-    aria-label="Icon Links">
-        <li class="nav-item">
-          
-          
-          
-          
-          
-          
-          
-          
-          <a href="https://github.com/pyxem/pyxem" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
-        </li>
+<div class="navbar-item"><ul aria-label="Icon Links" class="navbar-icon-links">
+<li class="nav-item">
+<a class="nav-link pst-navbar-icon" data-bs-placement="bottom" data-bs-toggle="tooltip" href="https://github.com/pyxem/pyxem" rel="noopener" target="_blank" title="GitHub"><i aria-hidden="true" class="fa-brands fa-square-github fa-lg"></i>
+<span class="sr-only">GitHub</span></a>
+</li>
 </ul></div>
-        
-      </div>
-    
-  </div>
-  
-    <div class="sidebar-primary-items__start sidebar-primary__section">
-        <div class="sidebar-primary-item">
-<nav class="bd-docs-nav bd-links"
-     aria-label="Section Navigation">
-  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
-  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+</div>
+</div>
+<div class="navbar-persistent--mobile">
+<button aria-label="Search" class="btn search-button-field search-button__button pst-js-only" data-bs-placement="bottom" data-bs-toggle="tooltip" title="Search">
+<i class="fa-solid fa-magnifying-glass"></i>
+<span class="search-button__default-text">Search</span>
+<span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+</div>
+<button aria-label="On this page" class="pst-navbar-icon sidebar-toggle secondary-toggle">
+<span class="fa-solid fa-outdent"></span>
+</button>
+</div>
+</header>
+<div class="bd-container">
+<div class="bd-container__inner bd-page-width">
+<dialog id="pst-primary-sidebar-modal"></dialog>
+<div class="bd-sidebar-primary bd-sidebar" id="pst-primary-sidebar">
+<div class="sidebar-header-items sidebar-primary__section">
+<div class="sidebar-header-items__center">
+<div class="navbar-item">
+<nav>
+<ul class="bd-navbar-elements navbar-nav">
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../../intro.html">
+    Introduction
+  </a>
+</li>
+<li class="nav-item current active">
+<a class="nav-link nav-internal" href="../../user_guide/index.html">
+    User Guide
+  </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../index.html">
+    Examples
+  </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../../tutorials/index.html">
+    Tutorials
+  </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../../reference/index.html">
+    Reference
+  </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../../dev_guide/index.html">
+    Dev Guide
+  </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../../changelog.html">
+    Changelog
+  </a>
+</li>
+</ul>
+</nav></div>
+</div>
+<div class="sidebar-header-items__end">
+<div class="navbar-item">
+<button aria-label="Color mode" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" data-bs-placement="bottom" data-bs-title="Color mode" data-bs-toggle="tooltip">
+<i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+<i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+<i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+</button></div>
+<div class="navbar-item"><ul aria-label="Icon Links" class="navbar-icon-links">
+<li class="nav-item">
+<a class="nav-link pst-navbar-icon" data-bs-placement="bottom" data-bs-toggle="tooltip" href="https://github.com/pyxem/pyxem" rel="noopener" target="_blank" title="GitHub"><i aria-hidden="true" class="fa-brands fa-square-github fa-lg"></i>
+<span class="sr-only">GitHub</span></a>
+</li>
+</ul></div>
+</div>
+</div>
+<div class="sidebar-primary-items__start sidebar-primary__section">
+<div class="sidebar-primary-item">
+<nav aria-label="Section Navigation" class="bd-docs-nav bd-links">
+<p aria-level="1" class="bd-links__title" role="heading">Section Navigation</p>
+<div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../../user_guide/installing.html">Installing pyxem</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../user_guide/using_a_jupyter_notebook.html">Using Jupyter Lab</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../user_guide/loading_data.html">Loading Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../user_guide/distributed_big_data.html">Big Data</a></li>
-
-
 <li class="toctree-l1"><a class="reference internal" href="../../user_guide/gpu_computations.html">GPU Computing</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Usage</span></p>
@@ -417,16 +257,6 @@
 </ul>
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Gallery of Examples</a></li>
-
-
-
-
-
-
-
-
-
-
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Resources</span></p>
 <ul class="nav bd-sidenav">
@@ -930,70 +760,40 @@
 </ul>
 </div>
 </nav></div>
-    </div>
-  
-  
-  <div class="sidebar-primary-items__end sidebar-primary__section">
-      <div class="sidebar-primary-item">
-<div id="ethical-ad-placement"
-      class="flat"
-      data-ea-publisher="readthedocs"
-      data-ea-type="readthedocs-sidebar"
-      data-ea-manual="true">
+</div>
+<div class="sidebar-primary-items__end sidebar-primary__section">
+<div class="sidebar-primary-item">
+<div class="flat" data-ea-manual="true" data-ea-publisher="readthedocs" data-ea-type="readthedocs-sidebar" id="ethical-ad-placement">
 </div></div>
-  </div>
-
-
-      </div>
-      
-      <main id="main-content" class="bd-main" role="main">
-        
-        
-          <div class="bd-content">
-            <div class="bd-article-container">
-              
-              <div class="bd-header-article d-print-none">
+</div>
+</div>
+<main class="bd-main" id="main-content" role="main">
+<div class="bd-content">
+<div class="bd-article-container">
+<div class="bd-header-article d-print-none">
 <div class="header-article-items header-article__inner">
-  
-    <div class="header-article-items__start">
-      
-        <div class="header-article-item">
-
+<div class="header-article-items__start">
+<div class="header-article-item">
 <nav aria-label="Breadcrumb" class="d-print-none">
-  <ul class="bd-breadcrumbs">
-    
-    <li class="breadcrumb-item breadcrumb-home">
-      <a href="../../index.html" class="nav-link" aria-label="Home">
-        <i class="fa-solid fa-home"></i>
-      </a>
-    </li>
-    
-    <li class="breadcrumb-item"><a href="../../user_guide/index.html" class="nav-link">Where do I start?</a></li>
-    
-    
-    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Gallery of Examples</a></li>
-    
-    
-    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Data Processing</a></li>
-    
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Finding Diffraction Vectors</span></li>
-  </ul>
+<ul class="bd-breadcrumbs">
+<li class="breadcrumb-item breadcrumb-home">
+<a aria-label="Home" class="nav-link" href="../../index.html">
+<i class="fa-solid fa-home"></i>
+</a>
+</li>
+<li class="breadcrumb-item"><a class="nav-link" href="../../user_guide/index.html">Where do I start?</a></li>
+<li class="breadcrumb-item"><a class="nav-link" href="../index.html">Gallery of Examples</a></li>
+<li class="breadcrumb-item"><a class="nav-link" href="index.html">Data Processing</a></li>
+<li aria-current="page" class="breadcrumb-item active"><span class="ellipsis">Finding Diffraction Vectors</span></li>
+</ul>
 </nav>
 </div>
-      
-    </div>
-  
-  
 </div>
 </div>
-              
-              
-              
-                
+</div>
 <div id="searchbox"></div>
-                <article class="bd-article">
-                  
-  <div class="sphx-glr-download-link-note admonition note">
+<article class="bd-article">
+<div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#sphx-glr-download-examples-processing-vector-finding-py"><span class="std std-ref">Go to the end</span></a>
 to download the full example code.</p>
@@ -1003,24 +803,24 @@ to download the full example code.</p>
 <p>This example shows how to find the diffraction vectors for a given
 signal and then plot them using hyperspy’s markers.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pyxem</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pxm</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">hyperspy.api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">hs</span>
+<span class="kn">import</span><span class="w"> </span><a class="sphinx-codeautolink-a" href="https://hyperspy.org/hyperspy-doc/current/reference/api.html#module-hyperspy.api" title="hyperspy.api"><span class="nn">hyperspy.api</span></a><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">hs</span>
 
-<a href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">s</span></a> <span class="o">=</span> <a href="../../reference/generated/pyxem.data.tilt_boundary_data.html#pyxem.data.tilt_boundary_data" title="pyxem.data.tilt_boundary_data" class="sphx-glr-backref-module-pyxem-data sphx-glr-backref-type-py-function"><span class="n">pxm</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">tilt_boundary_data</span></a><span class="p">()</span>
+<a href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">s</span></a> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="../../reference/generated/pyxem.data.tilt_boundary_data.html#pyxem.data.tilt_boundary_data" title="pyxem.data.tilt_boundary_data"><a href="../../reference/generated/pyxem.data.tilt_boundary_data.html#pyxem.data.tilt_boundary_data" title="pyxem.data.tilt_boundary_data" class="sphx-glr-backref-module-pyxem-data sphx-glr-backref-type-py-function"><span class="n">pxm</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">tilt_boundary_data</span></a></a><span class="p">()</span>
 </pre></div>
 </div>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">s</span></a><span class="o">.</span><span class="n">find_peaks</span><span class="p">(</span><span class="n">interactive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># find the peaks using the interactive peak finder</span>
 </pre></div>
 </div>
 <ul class="sphx-glr-horizontal">
-<li><img src="../../_images/sphx_glr_vector_finding_001.png" srcset="../../_images/sphx_glr_vector_finding_001.png" alt="vector finding" class = "sphx-glr-multi-img"/></li>
-<li><img src="../../_images/sphx_glr_vector_finding_002.png" srcset="../../_images/sphx_glr_vector_finding_002.png" alt="Signal" class = "sphx-glr-multi-img"/></li>
+<li><img alt="vector finding" class="sphx-glr-multi-img" src="../../_images/sphx_glr_vector_finding_001.png" srcset="../../_images/sphx_glr_vector_finding_001.png"/></li>
+<li><img alt="Signal" class="sphx-glr-multi-img" src="../../_images/sphx_glr_vector_finding_002.png" srcset="../../_images/sphx_glr_vector_finding_002.png"/></li>
 </ul>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>VBox(children=(Accordion(children=(VBox(children=(HBox(children=(Label(value=&#39;x&#39;, layout=Layout(width=&#39;15%&#39;)), IntSlider(value=0, description=&#39;index&#39;, max=9), BoundedFloatText(value=0.0, continuous_update=True, description=&#39;value&#39;, max=9.0, step=1.0), Label(value=&#39;px&#39;, layout=Layout(width=&#39;5%&#39;)))), HBox(children=(Label(value=&#39;y&#39;, layout=Layout(width=&#39;15%&#39;)), IntSlider(value=0, description=&#39;index&#39;, max=9), BoundedFloatText(value=0.0, continuous_update=True, description=&#39;value&#39;, max=9.0, step=1.0), Label(value=&#39;px&#39;, layout=Layout(width=&#39;5%&#39;)))), Button(description=&#39;Set random navigation position.&#39;, layout=Layout(width=&#39;auto&#39;), style=ButtonStyle(), tooltip=&#39;Set random navigation position, useful to check the method parameters.&#39;), Checkbox(value=True, description=&#39;Continuous update&#39;))),), titles=(&#39;Navigation sliders&#39;,)), Accordion(children=(VBox(children=(HBox(children=(Label(value=&#39;Method&#39;, layout=Layout(width=&#39;auto&#39;)), Dropdown(options=(&#39;Local max&#39;, &#39;Max&#39;, &#39;Minmax&#39;, &#39;Zaefferer&#39;, &#39;Stat&#39;, &#39;Laplacian of Gaussian&#39;, &#39;Difference of Gaussian&#39;, &#39;Template matching&#39;), value=&#39;Local max&#39;)), layout=Layout(display=&#39;flex&#39;, flex_flow=&#39;row&#39;, justify_content=&#39;space-between&#39;)), VBox(children=(HBox(children=(Label(value=&#39;Distance&#39;, layout=Layout(width=&#39;auto&#39;)), IntSlider(value=3, max=20, min=1)), layout=Layout(display=&#39;flex&#39;, flex_flow=&#39;row&#39;, justify_content=&#39;space-between&#39;)), HBox(children=(Label(value=&#39;Threshold&#39;, layout=Layout(width=&#39;auto&#39;)), FloatSlider(value=10.0, max=20.0)), layout=Layout(display=&#39;flex&#39;, flex_flow=&#39;row&#39;, justify_content=&#39;space-between&#39;))), layout=Layout(display=&#39;&#39;)), VBox(children=(HBox(children=(Label(value=&#39;Alpha&#39;, layout=Layout(width=&#39;auto&#39;)), FloatSlider(value=3.0, max=6.0)), layout=Layout(display=&#39;flex&#39;, flex_flow=&#39;row&#39;, justify_content=&#39;space-between&#39;)), HBox(children=(Label(value=&#39;Distance&#39;, layout=Layout(width=&#39;auto&#39;)), IntSlider(value=10, max=20, min=1)), layout=Layout(display=&#39;flex&#39;, flex_flow=&#39;row&#39;, justify_content=&#39;space-between&#39;))), layout=Layout(display=&#39;none&#39;)), VBox(children=(HBox(children=(Label(value=&#39;Distance&#39;, layout=Layout(width=&#39;auto&#39;)), FloatSlider(value=3.0, max=6.0)), layout=Layout(display=&#39;flex&#39;, flex_flow=&#39;row&#39;, justify_content=&#39;space-between&#39;)), HBox(children=(Label(value=&#39;Threshold&#39;, layout=Layout(width=&#39;auto&#39;)), FloatSlider(value=10.0, max=20.0)), layout=Layout(display=&#39;flex&#39;, flex_flow=&#39;row&#39;, justify_content=&#39;space-between&#39;))), layout=Layout(display=&#39;none&#39;)), VBox(children=(HBox(children=(Label(value=&#39;Gradient threshold&#39;, layout=Layout(width=&#39;auto&#39;)), FloatSlider(value=0.1, max=0.2, step=0.020000000000000004)), layout=Layout(display=&#39;flex&#39;, flex_flow=&#39;row&#39;, justify_content=&#39;space-between&#39;)), HBox(children=(Label(value=&#39;Window size&#39;, layout=Layout(width=&#39;auto&#39;)), IntSlider(value=40, max=80, min=2)), layout=Layout(display=&#39;flex&#39;, flex_flow=&#39;row&#39;, justify_content=&#39;space-between&#39;)), HBox(children=(Label(value=&#39;Distance cutoff&#39;, layout=Layout(width=&#39;auto&#39;)), FloatSlider(value=50.0)), layout=Layout(display=&#39;flex&#39;, flex_flow=&#39;row&#39;, justify_content=&#39;space-between&#39;))), layout=Layout(display=&#39;none&#39;)), VBox(children=(HBox(children=(Label(value=&#39;Alpha&#39;, layout=Layout(width=&#39;auto&#39;)), FloatSlider(value=1.0, max=2.0)), layout=Layout(display=&#39;flex&#39;, flex_flow=&#39;row&#39;, justify_content=&#39;space-between&#39;)), HBox(children=(Label(value=&#39;Radius&#39;, layout=Layout(width=&#39;auto&#39;)), IntSlider(value=10, max=20, min=5)), layout=Layout(display=&#39;flex&#39;, flex_flow=&#39;row&#39;, justify_content=&#39;space-between&#39;)), HBox(children=(Label(value=&#39;Convergence ratio&#39;, layout=Layout(width=&#39;auto&#39;)), FloatSlider(value=0.05, max=0.1)), layout=Layout(display=&#39;flex&#39;, flex_flow=&#39;row&#39;, justify_content=&#39;space-between&#39;))), layout=Layout(display=&#39;none&#39;)), VBox(children=(HBox(children=(Label(value=&#39;Min sigma&#39;, layout=Layout(width=&#39;auto&#39;)), FloatSlider(value=1.0, max=2.0)), layout=Layout(display=&#39;flex&#39;, flex_flow=&#39;row&#39;, justify_content=&#39;space-between&#39;)), HBox(children=(Label(value=&#39;Max sigma&#39;, layout=Layout(width=&#39;auto&#39;)), FloatSlider(value=50.0)), layout=Layout(display=&#39;flex&#39;, flex_flow=&#39;row&#39;, justify_content=&#39;space-between&#39;)), HBox(children=(Label(value=&#39;Num sigma&#39;, layout=Layout(width=&#39;auto&#39;)), FloatSlider(value=10.0, max=20.0)), layout=Layout(display=&#39;flex&#39;, flex_flow=&#39;row&#39;, justify_content=&#39;space-between&#39;)), HBox(children=(Label(value=&#39;Threshold&#39;, layout=Layout(width=&#39;auto&#39;)), FloatSlider(value=0.2, max=0.4)), layout=Layout(display=&#39;flex&#39;, flex_flow=&#39;row&#39;, justify_content=&#39;space-between&#39;)), HBox(children=(Label(value=&#39;Overlap&#39;, layout=Layout(width=&#39;auto&#39;)), FloatSlider(value=0.5, max=1.0)), layout=Layout(display=&#39;flex&#39;, flex_flow=&#39;row&#39;, justify_content=&#39;space-between&#39;)), HBox(children=(Label(value=&#39;Log scale&#39;, layout=Layout(width=&#39;auto&#39;)), Checkbox(value=False)), layout=Layout(display=&#39;flex&#39;, flex_flow=&#39;row&#39;, justify_content=&#39;space-between&#39;))), layout=Layout(display=&#39;none&#39;)), VBox(children=(HBox(children=(Label(value=&#39;Min sigma&#39;, layout=Layout(width=&#39;auto&#39;)), FloatSlider(value=1.0, max=2.0)), layout=Layout(display=&#39;flex&#39;, flex_flow=&#39;row&#39;, justify_content=&#39;space-between&#39;)), HBox(children=(Label(value=&#39;Max sigma&#39;, layout=Layout(width=&#39;auto&#39;)), FloatSlider(value=50.0)), layout=Layout(display=&#39;flex&#39;, flex_flow=&#39;row&#39;, justify_content=&#39;space-between&#39;)), HBox(children=(Label(value=&#39;Sigma ratio&#39;, layout=Layout(width=&#39;auto&#39;)), FloatSlider(value=1.6, max=3.2)), layout=Layout(display=&#39;flex&#39;, flex_flow=&#39;row&#39;, justify_content=&#39;space-between&#39;)), HBox(children=(Label(value=&#39;Threshold&#39;, layout=Layout(width=&#39;auto&#39;)), FloatSlider(value=0.2, max=0.4)), layout=Layout(display=&#39;flex&#39;, flex_flow=&#39;row&#39;, justify_content=&#39;space-between&#39;)), HBox(children=(Label(value=&#39;Overlap&#39;, layout=Layout(width=&#39;auto&#39;)), FloatSlider(value=0.5, max=1.0)), layout=Layout(display=&#39;flex&#39;, flex_flow=&#39;row&#39;, justify_content=&#39;space-between&#39;))), layout=Layout(display=&#39;none&#39;)), VBox(children=(HBox(children=(Label(value=&#39;Distance&#39;, layout=Layout(width=&#39;auto&#39;)), FloatSlider(value=5.0, max=10.0)), layout=Layout(display=&#39;flex&#39;, flex_flow=&#39;row&#39;, justify_content=&#39;space-between&#39;)), HBox(children=(Label(value=&#39;Threshold&#39;, layout=Layout(width=&#39;auto&#39;)), FloatSlider(value=0.5, max=2.0)), layout=Layout(display=&#39;flex&#39;, flex_flow=&#39;row&#39;, justify_content=&#39;space-between&#39;))), layout=Layout(display=&#39;none&#39;)))),), titles=(&#39;Method parameters&#39;,)), HBox(children=(Button(description=&#39;Compute over navigation axes.&#39;, style=ButtonStyle(), tooltip=&#39;Find the peaks by iterating over the navigation axes.&#39;), Button(description=&#39;Close&#39;, style=ButtonStyle(), tooltip=&#39;Close widget and close figure.&#39;)))))
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>VBox(children=(Accordion(children=(VBox(children=(HBox(children=(Label(value='x', layout=Layout(width='15%')), IntSlider(value=0, description='index', max=9), BoundedFloatText(value=0.0, continuous_update=True, description='value', max=9.0, step=1.0), Label(value='px', layout=Layout(width='5%')))), HBox(children=(Label(value='y', layout=Layout(width='15%')), IntSlider(value=0, description='index', max=9), BoundedFloatText(value=0.0, continuous_update=True, description='value', max=9.0, step=1.0), Label(value='px', layout=Layout(width='5%')))), Button(description='Set random navigation position.', layout=Layout(width='auto'), style=ButtonStyle(), tooltip='Set random navigation position, useful to check the method parameters.'), Checkbox(value=True, description='Continuous update'))),), titles=('Navigation sliders',)), Accordion(children=(VBox(children=(HBox(children=(Label(value='Method', layout=Layout(width='auto')), Dropdown(options=('Local max', 'Max', 'Minmax', 'Zaefferer', 'Stat', 'Laplacian of Gaussian', 'Difference of Gaussian', 'Template matching'), value='Local max')), layout=Layout(display='flex', flex_flow='row', justify_content='space-between')), VBox(children=(HBox(children=(Label(value='Distance', layout=Layout(width='auto')), IntSlider(value=3, max=20, min=1)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between')), HBox(children=(Label(value='Threshold', layout=Layout(width='auto')), FloatSlider(value=10.0, max=20.0)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between'))), layout=Layout(display='')), VBox(children=(HBox(children=(Label(value='Alpha', layout=Layout(width='auto')), FloatSlider(value=3.0, max=6.0)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between')), HBox(children=(Label(value='Distance', layout=Layout(width='auto')), IntSlider(value=10, max=20, min=1)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between'))), layout=Layout(display='none')), VBox(children=(HBox(children=(Label(value='Distance', layout=Layout(width='auto')), FloatSlider(value=3.0, max=6.0)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between')), HBox(children=(Label(value='Threshold', layout=Layout(width='auto')), FloatSlider(value=10.0, max=20.0)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between'))), layout=Layout(display='none')), VBox(children=(HBox(children=(Label(value='Gradient threshold', layout=Layout(width='auto')), FloatSlider(value=0.1, max=0.2, step=0.020000000000000004)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between')), HBox(children=(Label(value='Window size', layout=Layout(width='auto')), IntSlider(value=40, max=80, min=2)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between')), HBox(children=(Label(value='Distance cutoff', layout=Layout(width='auto')), FloatSlider(value=50.0)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between'))), layout=Layout(display='none')), VBox(children=(HBox(children=(Label(value='Alpha', layout=Layout(width='auto')), FloatSlider(value=1.0, max=2.0)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between')), HBox(children=(Label(value='Radius', layout=Layout(width='auto')), IntSlider(value=10, max=20, min=5)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between')), HBox(children=(Label(value='Convergence ratio', layout=Layout(width='auto')), FloatSlider(value=0.05, max=0.1)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between'))), layout=Layout(display='none')), VBox(children=(HBox(children=(Label(value='Min sigma', layout=Layout(width='auto')), FloatSlider(value=1.0, max=2.0)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between')), HBox(children=(Label(value='Max sigma', layout=Layout(width='auto')), FloatSlider(value=50.0)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between')), HBox(children=(Label(value='Num sigma', layout=Layout(width='auto')), FloatSlider(value=10.0, max=20.0)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between')), HBox(children=(Label(value='Threshold', layout=Layout(width='auto')), FloatSlider(value=0.2, max=0.4)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between')), HBox(children=(Label(value='Overlap', layout=Layout(width='auto')), FloatSlider(value=0.5, max=1.0)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between')), HBox(children=(Label(value='Log scale', layout=Layout(width='auto')), Checkbox(value=False)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between'))), layout=Layout(display='none')), VBox(children=(HBox(children=(Label(value='Min sigma', layout=Layout(width='auto')), FloatSlider(value=1.0, max=2.0)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between')), HBox(children=(Label(value='Max sigma', layout=Layout(width='auto')), FloatSlider(value=50.0)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between')), HBox(children=(Label(value='Sigma ratio', layout=Layout(width='auto')), FloatSlider(value=1.6, max=3.2)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between')), HBox(children=(Label(value='Threshold', layout=Layout(width='auto')), FloatSlider(value=0.2, max=0.4)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between')), HBox(children=(Label(value='Overlap', layout=Layout(width='auto')), FloatSlider(value=0.5, max=1.0)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between'))), layout=Layout(display='none')), VBox(children=(HBox(children=(Label(value='Distance', layout=Layout(width='auto')), FloatSlider(value=5.0, max=10.0)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between')), HBox(children=(Label(value='Threshold', layout=Layout(width='auto')), FloatSlider(value=0.5, max=2.0)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between'))), layout=Layout(display='none')))),), titles=('Method parameters',)), HBox(children=(Button(description='Compute over navigation axes.', style=ButtonStyle(), tooltip='Find the peaks by iterating over the navigation axes.'), Button(description='Close', style=ButtonStyle(), tooltip='Close widget and close figure.')))))
 
 &lt;BaseSignal, title: , dimensions: (10, 10|)&gt;
 </pre></div>
 </div>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="sd">"""</span>
 <span class="sd">Template Matching</span>
 <span class="sd">=================</span>
 
@@ -1029,7 +829,7 @@ signal and then plot them using hyperspy’s markers.</p>
 <span class="sd">as the diffraction spots.  The template matching is done using the :meth:`template_match_disk` method.</span>
 
 <span class="sd">This can also be done lazy, including the plotting of the markers!</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <a href="https://hyperspy.org/hyperspy-doc/current/reference/base_classes/axes.html#hyperspy.axes.AxesManager" title="hyperspy.axes.AxesManager" class="sphx-glr-backref-module-hyperspy-axes sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">s</span><span class="o">.</span><span class="n">axes_manager</span></a><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="mf">0.3</span>
 
 
@@ -1039,13 +839,13 @@ signal and then plot them using hyperspy’s markers.</p>
 <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ind</span></a> <span class="o">=</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
 <a href="https://hyperspy.org/hyperspy-doc/current/reference/api.plot/index.html#hyperspy.api.plot.plot_images" title="hyperspy.api.plot.plot_images" class="sphx-glr-backref-module-hyperspy-api-plot sphx-glr-backref-type-py-function"><span class="n">hs</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_images</span></a><span class="p">(</span>
     <span class="p">[</span><a href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">temp_small</span></a><span class="o">.</span><span class="n">inav</span><span class="p">[</span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ind</span></a><span class="p">],</span> <a href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">temp</span></a><span class="o">.</span><span class="n">inav</span><span class="p">[</span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ind</span></a><span class="p">],</span> <a href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">temp_large</span></a><span class="o">.</span><span class="n">inav</span><span class="p">[</span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ind</span></a><span class="p">]],</span>
-    <span class="n">label</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Too Small&quot;</span><span class="p">,</span> <span class="s2">&quot;Just Right&quot;</span><span class="p">,</span> <span class="s2">&quot;Too Large&quot;</span><span class="p">],</span>
+    <span class="n">label</span><span class="o">=</span><span class="p">[</span><span class="s2">"Too Small"</span><span class="p">,</span> <span class="s2">"Just Right"</span><span class="p">,</span> <span class="s2">"Too Large"</span><span class="p">],</span>
 <span class="p">)</span>
 
 <a href="../../reference/generated/pyxem.signals.DiffractionVectors.html#pyxem.signals.DiffractionVectors" title="pyxem.signals.DiffractionVectors" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">vectors</span></a> <span class="o">=</span> <a href="../../reference/generated/pyxem.signals.Diffraction2D.get_diffraction_vectors.html#pyxem.signals.Diffraction2D.get_diffraction_vectors" title="pyxem.signals.Diffraction2D.get_diffraction_vectors" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method"><span class="n">temp</span><span class="o">.</span><span class="n">get_diffraction_vectors</span></a><span class="p">(</span><span class="n">threshold_abs</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">min_distance</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_vector_finding_003.png" srcset="../../_images/sphx_glr_vector_finding_003.png" alt="Too Small, Just Right, Too Large" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/51 [00:00&lt;?, ?it/s]
+<img alt="Too Small, Just Right, Too Large" class="sphx-glr-single-img" src="../../_images/sphx_glr_vector_finding_003.png" srcset="../../_images/sphx_glr_vector_finding_003.png"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/51 [00:00&lt;?, ?it/s]
  33%|███▎      | 17/51 [00:00&lt;00:00, 143.11it/s]
  80%|████████  | 41/51 [00:00&lt;00:00, 177.41it/s]
 100%|██████████| 51/51 [00:00&lt;00:00, 195.75it/s]
@@ -1075,12 +875,12 @@ signal and then plot them using hyperspy’s markers.</p>
 <h1>Plotting Peaks<a class="headerlink" href="#plotting-peaks" title="Link to this heading">#</a></h1>
 <p>We can plot the peaks using hyperSpy’s markers and DiffractionVectors.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="../../reference/generated/pyxem.signals.Diffraction2D.plot.html#pyxem.signals.Diffraction2D.plot" title="pyxem.signals.Diffraction2D.plot" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method"><span class="n">s</span><span class="o">.</span><span class="n">plot</span></a><span class="p">()</span>
-<a href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">s</span></a><span class="o">.</span><span class="n">add_marker</span><span class="p">(</span><a href="../../reference/generated/pyxem.signals.DiffractionVectors.to_markers.html#pyxem.signals.DiffractionVectors.to_markers" title="pyxem.signals.DiffractionVectors.to_markers" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method"><span class="n">vectors</span><span class="o">.</span><span class="n">to_markers</span></a><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">sizes</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">))</span>
+<a href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">s</span></a><span class="o">.</span><span class="n">add_marker</span><span class="p">(</span><a href="../../reference/generated/pyxem.signals.DiffractionVectors.to_markers.html#pyxem.signals.DiffractionVectors.to_markers" title="pyxem.signals.DiffractionVectors.to_markers" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method"><span class="n">vectors</span><span class="o">.</span><span class="n">to_markers</span></a><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">"red"</span><span class="p">,</span> <span class="n">sizes</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">))</span>
 </pre></div>
 </div>
 <ul class="sphx-glr-horizontal">
-<li><img src="../../_images/sphx_glr_vector_finding_004.png" srcset="../../_images/sphx_glr_vector_finding_004.png" alt="vector finding" class = "sphx-glr-multi-img"/></li>
-<li><img src="../../_images/sphx_glr_vector_finding_005.png" srcset="../../_images/sphx_glr_vector_finding_005.png" alt="Signal" class = "sphx-glr-multi-img"/></li>
+<li><img alt="vector finding" class="sphx-glr-multi-img" src="../../_images/sphx_glr_vector_finding_004.png" srcset="../../_images/sphx_glr_vector_finding_004.png"/></li>
+<li><img alt="Signal" class="sphx-glr-multi-img" src="../../_images/sphx_glr_vector_finding_005.png" srcset="../../_images/sphx_glr_vector_finding_005.png"/></li>
 </ul>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/51 [00:00&lt;?, ?it/s]
 100%|██████████| 51/51 [00:00&lt;00:00, 7565.32it/s]
@@ -1094,24 +894,24 @@ can be up-sampled using the <a class="reference internal" href="../../reference/
 <cite>DiffractionSignal2D</cite> object and uses that to refine the peak positions.</p>
 <p>This only really works up to up-sampling of 2-4. There is little improvement with increased up-sampling while
 it greatly increases the computation time.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="../../reference/generated/pyxem.signals.DiffractionVectors.html#pyxem.signals.DiffractionVectors" title="pyxem.signals.DiffractionVectors" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">refined_peaks_com</span></a> <span class="o">=</span> <a href="../../reference/generated/pyxem.signals.DiffractionVectors.subpixel_refine.html#pyxem.signals.DiffractionVectors.subpixel_refine" title="pyxem.signals.DiffractionVectors.subpixel_refine" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method"><span class="n">vectors</span><span class="o">.</span><span class="n">subpixel_refine</span></a><span class="p">(</span><a href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">s</span></a><span class="p">,</span> <span class="s2">&quot;center-of-mass&quot;</span><span class="p">,</span> <span class="n">square_size</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="../../reference/generated/pyxem.signals.DiffractionVectors.html#pyxem.signals.DiffractionVectors" title="pyxem.signals.DiffractionVectors" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">refined_peaks_com</span></a> <span class="o">=</span> <a href="../../reference/generated/pyxem.signals.DiffractionVectors.subpixel_refine.html#pyxem.signals.DiffractionVectors.subpixel_refine" title="pyxem.signals.DiffractionVectors.subpixel_refine" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method"><span class="n">vectors</span><span class="o">.</span><span class="n">subpixel_refine</span></a><span class="p">(</span><a href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">s</span></a><span class="p">,</span> <span class="s2">"center-of-mass"</span><span class="p">,</span> <span class="n">square_size</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 <a href="../../reference/generated/pyxem.signals.DiffractionVectors.html#pyxem.signals.DiffractionVectors" title="pyxem.signals.DiffractionVectors" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">refined_peaks_xc</span></a> <span class="o">=</span> <a href="../../reference/generated/pyxem.signals.DiffractionVectors.subpixel_refine.html#pyxem.signals.DiffractionVectors.subpixel_refine" title="pyxem.signals.DiffractionVectors.subpixel_refine" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method"><span class="n">vectors</span><span class="o">.</span><span class="n">subpixel_refine</span></a><span class="p">(</span>
-    <a href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">s</span></a><span class="p">,</span> <span class="s2">&quot;cross-correlation&quot;</span><span class="p">,</span> <span class="n">square_size</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">upsample_factor</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">disk_r</span><span class="o">=</span><span class="mi">5</span>
+    <a href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">s</span></a><span class="p">,</span> <span class="s2">"cross-correlation"</span><span class="p">,</span> <span class="n">square_size</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">upsample_factor</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">disk_r</span><span class="o">=</span><span class="mi">5</span>
 <span class="p">)</span>
 
-<a href="https://hyperspy.org/hyperspy-doc/current/reference/api.plot/markers.html#hyperspy.api.plot.markers.Points" title="hyperspy.drawing._markers.points.Points" class="sphx-glr-backref-module-hyperspy-drawing-_markers-points sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">markers2</span></a> <span class="o">=</span> <a href="../../reference/generated/pyxem.signals.DiffractionVectors.to_markers.html#pyxem.signals.DiffractionVectors.to_markers" title="pyxem.signals.DiffractionVectors.to_markers" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method"><span class="n">refined_peaks_com</span><span class="o">.</span><span class="n">to_markers</span></a><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="n">sizes</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
-<a href="https://hyperspy.org/hyperspy-doc/current/reference/api.plot/markers.html#hyperspy.api.plot.markers.Points" title="hyperspy.drawing._markers.points.Points" class="sphx-glr-backref-module-hyperspy-drawing-_markers-points sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">markers3</span></a> <span class="o">=</span> <a href="../../reference/generated/pyxem.signals.DiffractionVectors.to_markers.html#pyxem.signals.DiffractionVectors.to_markers" title="pyxem.signals.DiffractionVectors.to_markers" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method"><span class="n">refined_peaks_xc</span><span class="o">.</span><span class="n">to_markers</span></a><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;green&quot;</span><span class="p">,</span> <span class="n">sizes</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
+<a href="https://hyperspy.org/hyperspy-doc/current/reference/api.plot/markers.html#hyperspy.api.plot.markers.Points" title="hyperspy.drawing._markers.points.Points" class="sphx-glr-backref-module-hyperspy-drawing-_markers-points sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">markers2</span></a> <span class="o">=</span> <a href="../../reference/generated/pyxem.signals.DiffractionVectors.to_markers.html#pyxem.signals.DiffractionVectors.to_markers" title="pyxem.signals.DiffractionVectors.to_markers" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method"><span class="n">refined_peaks_com</span><span class="o">.</span><span class="n">to_markers</span></a><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">"blue"</span><span class="p">,</span> <span class="n">sizes</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
+<a href="https://hyperspy.org/hyperspy-doc/current/reference/api.plot/markers.html#hyperspy.api.plot.markers.Points" title="hyperspy.drawing._markers.points.Points" class="sphx-glr-backref-module-hyperspy-drawing-_markers-points sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">markers3</span></a> <span class="o">=</span> <a href="../../reference/generated/pyxem.signals.DiffractionVectors.to_markers.html#pyxem.signals.DiffractionVectors.to_markers" title="pyxem.signals.DiffractionVectors.to_markers" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method"><span class="n">refined_peaks_xc</span><span class="o">.</span><span class="n">to_markers</span></a><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">"green"</span><span class="p">,</span> <span class="n">sizes</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
 
 
 <a href="../../reference/generated/pyxem.signals.Diffraction2D.plot.html#pyxem.signals.Diffraction2D.plot" title="pyxem.signals.Diffraction2D.plot" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method"><span class="n">s</span><span class="o">.</span><span class="n">plot</span></a><span class="p">()</span>
-<a href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">s</span></a><span class="o">.</span><span class="n">add_marker</span><span class="p">(</span><a href="../../reference/generated/pyxem.signals.DiffractionVectors.to_markers.html#pyxem.signals.DiffractionVectors.to_markers" title="pyxem.signals.DiffractionVectors.to_markers" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method"><span class="n">vectors</span><span class="o">.</span><span class="n">to_markers</span></a><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">sizes</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">))</span>
+<a href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">s</span></a><span class="o">.</span><span class="n">add_marker</span><span class="p">(</span><a href="../../reference/generated/pyxem.signals.DiffractionVectors.to_markers.html#pyxem.signals.DiffractionVectors.to_markers" title="pyxem.signals.DiffractionVectors.to_markers" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method"><span class="n">vectors</span><span class="o">.</span><span class="n">to_markers</span></a><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">"red"</span><span class="p">,</span> <span class="n">sizes</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">))</span>
 <a href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">s</span></a><span class="o">.</span><span class="n">add_marker</span><span class="p">(</span><a href="https://hyperspy.org/hyperspy-doc/current/reference/api.plot/markers.html#hyperspy.api.plot.markers.Points" title="hyperspy.drawing._markers.points.Points" class="sphx-glr-backref-module-hyperspy-drawing-_markers-points sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">markers2</span></a><span class="p">)</span>
 <a href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">s</span></a><span class="o">.</span><span class="n">add_marker</span><span class="p">(</span><a href="https://hyperspy.org/hyperspy-doc/current/reference/api.plot/markers.html#hyperspy.api.plot.markers.Points" title="hyperspy.drawing._markers.points.Points" class="sphx-glr-backref-module-hyperspy-drawing-_markers-points sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">markers3</span></a><span class="p">)</span>
 </pre></div>
 </div>
 <ul class="sphx-glr-horizontal">
-<li><img src="../../_images/sphx_glr_vector_finding_006.png" srcset="../../_images/sphx_glr_vector_finding_006.png" alt="vector finding" class = "sphx-glr-multi-img"/></li>
-<li><img src="../../_images/sphx_glr_vector_finding_007.png" srcset="../../_images/sphx_glr_vector_finding_007.png" alt="Signal" class = "sphx-glr-multi-img"/></li>
+<li><img alt="vector finding" class="sphx-glr-multi-img" src="../../_images/sphx_glr_vector_finding_006.png" srcset="../../_images/sphx_glr_vector_finding_006.png"/></li>
+<li><img alt="Signal" class="sphx-glr-multi-img" src="../../_images/sphx_glr_vector_finding_007.png" srcset="../../_images/sphx_glr_vector_finding_007.png"/></li>
 </ul>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/51 [00:00&lt;?, ?it/s]
 100%|██████████| 51/51 [00:00&lt;00:00, 1647.03it/s]
@@ -1170,67 +970,43 @@ it greatly increases the computation time.</p>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
 </section>
-
-
-                </article>
-              
-              
-              
-              
-              
-                <footer class="prev-next-footer d-print-none">
-                  
+</article>
+<footer class="prev-next-footer d-print-none">
 <div class="prev-next-area">
-    <a class="left-prev"
-       href="centering_the_zero_beam.html"
-       title="previous page">
-      <i class="fa-solid fa-angle-left"></i>
-      <div class="prev-next-info">
-        <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Centering the Zero Beam</p>
-      </div>
-    </a>
-    <a class="right-next"
-       href="template_matching.html"
-       title="next page">
-      <div class="prev-next-info">
-        <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Template Matching</p>
-      </div>
-      <i class="fa-solid fa-angle-right"></i>
-    </a>
+<a class="left-prev" href="centering_the_zero_beam.html" title="previous page">
+<i class="fa-solid fa-angle-left"></i>
+<div class="prev-next-info">
+<p class="prev-next-subtitle">previous</p>
+<p class="prev-next-title">Centering the Zero Beam</p>
 </div>
-                </footer>
-              
-            </div>
-            
-            
-              
-                <dialog id="pst-secondary-sidebar-modal"></dialog>
-                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
-
-
-  <div class="sidebar-secondary-item">
-<div
-    id="pst-page-navigation-heading-2"
-    class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> On this page
+</a>
+<a class="right-next" href="template_matching.html" title="next page">
+<div class="prev-next-info">
+<p class="prev-next-subtitle">next</p>
+<p class="prev-next-title">Template Matching</p>
+</div>
+<i class="fa-solid fa-angle-right"></i>
+</a>
+</div>
+</footer>
+</div>
+<dialog id="pst-secondary-sidebar-modal"></dialog>
+<div class="bd-sidebar-secondary bd-toc" id="pst-secondary-sidebar"><div class="sidebar-secondary-items sidebar-secondary__inner">
+<div class="sidebar-secondary-item">
+<div class="page-toc tocsection onthispage" id="pst-page-navigation-heading-2">
+<i class="fa-solid fa-list"></i> On this page
   </div>
-  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
-    <ul class="visible nav section-nav flex-column">
+<nav aria-labelledby="pst-page-navigation-heading-2" class="bd-toc-nav page-toc">
+<ul class="visible nav section-nav flex-column">
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Finding Diffraction Vectors</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#plotting-peaks">Plotting Peaks</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#subpixel-peak-fitting">Subpixel Peak Fitting</a></li>
 </ul>
-
-  </nav></div>
-
-  <div class="sidebar-secondary-item">
-
-  
-  <div class="tocsection editthispage">
-    <a href="https://github.com/pyxem/pyxem/edit/main/doc/examples/processing/vector_finding.rst">
-      <i class="fa-solid fa-pencil"></i>
+</nav></div>
+<div class="sidebar-secondary-item">
+<div class="tocsection editthispage">
+<a href="https://github.com/pyxem/pyxem/edit/main/doc/examples/processing/vector_finding.rst">
+<i class="fa-solid fa-pencil"></i>
       
       
         
@@ -1238,73 +1014,50 @@ it greatly increases the computation time.</p>
         
       
     </a>
-  </div>
 </div>
-
-  <div class="sidebar-secondary-item">
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="../../_sources/examples/processing/vector_finding.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div></div>
-
+</div>
+<div class="sidebar-secondary-item">
+<div aria-label="source link" role="note">
+<h3>This Page</h3>
+<ul class="this-page-menu">
+<li><a href="../../_sources/examples/processing/vector_finding.rst.txt" rel="nofollow">Show Source</a></li>
+</ul>
 </div></div>
-              
-            
-          </div>
-          <footer class="bd-footer-content">
-            
-          </footer>
-        
-      </main>
-    </div>
-  </div>
-  
-  <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
-
-  <footer class="bd-footer">
+</div></div>
+</div>
+<footer class="bd-footer-content">
+</footer>
+</main>
+</div>
+</div>
+<!-- Scripts loaded after <body> so the DOM is not blocked -->
+<script defer="" src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer="" src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+<footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
-  
-    <div class="footer-items__start">
-      
-        <div class="footer-item">
-
-  <p class="copyright">
+<div class="footer-items__start">
+<div class="footer-item">
+<p class="copyright">
     
       © Copyright Copyright 2016-2025, The pyxem developers.
       <br/>
-    
-  </p>
+</p>
 </div>
-      
-        <div class="footer-item">
-
-  <p class="sphinx-version">
+<div class="footer-item">
+<p class="sphinx-version">
     Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
     <br/>
-  </p>
+</p>
 </div>
-      
-    </div>
-  
-  
-  
-    <div class="footer-items__end">
-      
-        <div class="footer-item">
+</div>
+<div class="footer-items__end">
+<div class="footer-item">
 <p class="theme-version">
-  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+<!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
   Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
-      
-    </div>
-  
 </div>
-
-  </footer>
-  </body>
+</div>
+</footer>
+</body>
 </html>

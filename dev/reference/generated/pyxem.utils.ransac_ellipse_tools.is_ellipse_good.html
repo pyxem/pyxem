@@ -1000,38 +1000,8 @@
 <h1>is_ellipse_good<a class="headerlink" href="#is-ellipse-good" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="pyxem.utils.ransac_ellipse_tools.is_ellipse_good">
-<span class="sig-prename descclassname"><span class="pre">pyxem.utils.ransac_ellipse_tools.</span></span><span class="sig-name descname"><span class="pre">is_ellipse_good</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ellipse_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rf_lim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">semi_len_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">semi_len_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">semi_len_ratio_lim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/pyxem/pyxem/blob/v0.21.0/pyxem/utils/ransac_ellipse_tools.py#L41-L101"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxem.utils.ransac_ellipse_tools.is_ellipse_good" title="Link to this definition">#</a></dt>
-<dd><p>Check if an ellipse model is within parameters.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>ellipse_model</strong> (<em>skimage EllipseModel</em>)</p></li>
-<li><p><strong>data</strong> (<em>Not used</em>)</p></li>
-<li><p><strong>xf, yf</strong> (<em>scalar</em>) – Focus of the ellipse</p></li>
-<li><p><strong>rf_lim</strong> (<em>scalar</em>) – If the distance from (xf, yf) and the centre of the
-ellipse is larger than rf_lim, False is returned.</p></li>
-<li><p><strong>semi_len_min, semi_len_max</strong> (<em>scalar</em>) – Minimum and maximum semi length values for the ellipse, if any
-of the two semi lengths are outside this range, False is returned.</p></li>
-<li><p><strong>semi_len_ratio_lim</strong> (<em>scalar</em>) – If the ratio between the largest and smallest semi length is larger
-than semi_len_ratio_lim, False is returned</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>is_good</strong></p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pyxem.utils.ransac_ellipse_tools</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ret</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">ret</span><span class="o">.</span><span class="n">EllipseModel</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">ret</span><span class="o">.</span><span class="n">_make_ellipse_model_params_focus</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">is_good</span> <span class="o">=</span> <span class="n">ret</span><span class="o">.</span><span class="n">is_ellipse_good</span><span class="p">(</span>
-<span class="gp">... </span>        <span class="n">ellipse_model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xf</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">yf</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">rf_lim</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
+<span class="sig-prename descclassname"><span class="pre">pyxem.utils.ransac_ellipse_tools.</span></span><span class="sig-name descname"><span class="pre">is_ellipse_good</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/pyxem/pyxem/blob/v0.21.0/pyxem/utils/ransac_ellipse_tools.py#L48-L53"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxem.utils.ransac_ellipse_tools.is_ellipse_good" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
 
 </section>
 

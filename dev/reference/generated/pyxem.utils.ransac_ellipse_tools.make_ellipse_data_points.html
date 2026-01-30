@@ -1000,44 +1000,9 @@
 <h1>make_ellipse_data_points<a class="headerlink" href="#make-ellipse-data-points" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="pyxem.utils.ransac_ellipse_tools.make_ellipse_data_points">
-<span class="sig-prename descclassname"><span class="pre">pyxem.utils.ransac_ellipse_tools.</span></span><span class="sig-name descname"><span class="pre">make_ellipse_data_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_focus</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/pyxem/pyxem/blob/v0.21.0/pyxem/utils/ransac_ellipse_tools.py#L171-L210"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxem.utils.ransac_ellipse_tools.make_ellipse_data_points" title="Link to this definition">#</a></dt>
-<dd><p>Get an ellipse position list.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>x, y</strong> (<em>scalars</em>) – Centre position of the ellipse.</p></li>
-<li><p><strong>a, b</strong> (<em>scalars</em>) – Semi lengths</p></li>
-<li><p><strong>r</strong> (<em>scalar</em>) – Rotation, in theta</p></li>
-<li><p><strong>nt</strong> (<em>int, optional</em>) – Number of data positions, default 20</p></li>
-<li><p><strong>use_focus</strong> (<em>bool</em>) – If True, (x, y) will be the focus. If False,
-(x, y) will be centre of the ellipse.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>data</strong> – [[x0, y0], [x1, y1], …]</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)">numpy.ndarray</a></p>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pyxem.utils.ransac_ellipse_tools</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ret</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">ret</span><span class="o">.</span><span class="n">make_ellipse_data_points</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>Using all the arguments</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">ret</span><span class="o">.</span><span class="n">make_ellipse_data_points</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">nt</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
-<span class="gp">... </span>                                    <span class="n">use_focus</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
+<span class="sig-prename descclassname"><span class="pre">pyxem.utils.ransac_ellipse_tools.</span></span><span class="sig-name descname"><span class="pre">make_ellipse_data_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/pyxem/pyxem/blob/v0.21.0/pyxem/utils/ransac_ellipse_tools.py#L48-L53"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxem.utils.ransac_ellipse_tools.make_ellipse_data_points" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
 
-<section id="examples-using-make-ellipse-data-points">
-<h2>Examples using <code class="docutils literal notranslate"><span class="pre">make_ellipse_data_points</span></code><a class="headerlink" href="#examples-using-make-ellipse-data-points" title="Link to this heading">#</a></h2>
-<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="- Orientation mapping - Angular Correlation (AC) - Fluctuation Electron Microscopy (FEM) - And many other 4-D STEM techniques"><img alt="" src="../../_images/sphx_glr_determining_ellipticity_thumb.png" />
-<p><a class="reference internal" href="../../examples/processing/determining_ellipticity.html"><span class="doc">Determining Elliptic Distortion</span></a></p>
-  <div class="sphx-glr-thumbnail-title">Determining Elliptic Distortion</div>
-</div></div></section>
 </section>
 
 
@@ -1088,7 +1053,6 @@
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyxem.utils.ransac_ellipse_tools.make_ellipse_data_points"><code class="docutils literal notranslate"><span class="pre">make_ellipse_data_points()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#examples-using-make-ellipse-data-points">Examples using <code class="docutils literal notranslate"><span class="pre">make_ellipse_data_points</span></code></a></li>
 </ul>
   </nav></div>
 

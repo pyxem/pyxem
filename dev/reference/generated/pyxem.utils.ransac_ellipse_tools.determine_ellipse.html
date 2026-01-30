@@ -1000,49 +1000,8 @@
 <h1>determine_ellipse<a class="headerlink" href="#determine-ellipse" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="pyxem.utils.ransac_ellipse_tools.determine_ellipse">
-<span class="sig-prename descclassname"><span class="pre">pyxem.utils.ransac_ellipse_tools.</span></span><span class="sig-name descname"><span class="pre">determine_ellipse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">signal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_ransac</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">guess_starting_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/pyxem/pyxem/blob/v0.21.0/pyxem/utils/ransac_ellipse_tools.py#L597-L691"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxem.utils.ransac_ellipse_tools.determine_ellipse" title="Link to this definition">#</a></dt>
-<dd><p>This method starts by taking some number of points which are the most intense
-in the signal or those points can be directly passed.  It then takes those points
-and guesses some starting parameters for the <cite>get_ellipse_model_ransac_single_frame</cite>
-function. From there it will try to determine the ellipse parameters.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>signal</strong> (<em>Signal2D</em>) – The signal of interest.</p></li>
-<li><p><strong>pos</strong> (<em>np.ndarray</em>) – The positions of the points to be used to determine the ellipse.</p></li>
-<li><p><strong>mask</strong> (<em>Array-like</em>) – The mask to be applied to the data.  The True values are ignored.</p></li>
-<li><p><strong>num_points</strong> (<em>int</em>) – The number of points to consider.</p></li>
-<li><p><strong>use_ransac</strong> (<em>bool</em>) – If Ransac should be used to determine the ellipse. False is faster but less.
-robust with respect to noise.</p></li>
-<li><p><strong>guess_starting_params</strong> (<em>bool</em>) – If True then the starting parameters will be guessed based on the points determined.</p></li>
-<li><p><strong>return_params</strong> (<em>bool</em>) – If the ellipse parameters should be returned as well.</p></li>
-<li><p><strong>**kwargs</strong> – Any other keywords for <code class="docutils literal notranslate"><span class="pre">get_ellipse_model_ransac_single_frame</span></code>.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><strong>center</strong> (<em>(x,y)</em>) – The center of the diffraction pattern.</p></li>
-<li><p><em>affine</em> – The affine transformation to make the diffraction pattern circular.</p></li>
-</ul>
-</p>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pyxem.utils.ransac_ellipse_tools</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ret</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pyxem.data.dummy_data.make_diffraction_test_data</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mdtd</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">test_data</span> <span class="o">=</span> <span class="n">mdtd</span><span class="o">.</span><span class="n">MakeTestData</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">test_data</span><span class="o">.</span><span class="n">add_disk</span><span class="p">(</span><span class="n">x0</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">y0</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">intensity</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">test_data</span><span class="o">.</span><span class="n">add_ring_ellipse</span><span class="p">(</span><span class="n">x0</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">y0</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">semi_len0</span><span class="o">=</span><span class="mi">63</span><span class="p">,</span> <span class="n">semi_len1</span><span class="o">=</span><span class="mi">70</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">45</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">test_data</span><span class="o">.</span><span class="n">signal</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">set_signal_type</span><span class="p">(</span><span class="s2">&quot;electron_diffraction&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">mask</span><span class="p">[</span><span class="mi">100</span> <span class="o">-</span> <span class="mi">20</span><span class="p">:</span><span class="mi">100</span> <span class="o">+</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">100</span> <span class="o">-</span> <span class="mi">20</span><span class="p">:</span><span class="mi">100</span> <span class="o">+</span> <span class="mi">20</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span> <span class="c1"># mask beamstop</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">center</span><span class="p">,</span> <span class="n">affine</span> <span class="o">=</span> <span class="n">ret</span><span class="o">.</span><span class="n">determine_ellipse</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span> <span class="n">use_ransac</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">s_corr</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">apply_affine_transformation</span><span class="p">(</span><span class="n">affine</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
+<span class="sig-prename descclassname"><span class="pre">pyxem.utils.ransac_ellipse_tools.</span></span><span class="sig-name descname"><span class="pre">determine_ellipse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/pyxem/pyxem/blob/v0.21.0/pyxem/utils/ransac_ellipse_tools.py#L48-L53"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxem.utils.ransac_ellipse_tools.determine_ellipse" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
 
 </section>
 

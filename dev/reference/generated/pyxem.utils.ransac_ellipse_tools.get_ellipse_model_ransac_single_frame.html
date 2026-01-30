@@ -1000,45 +1000,8 @@
 <h1>get_ellipse_model_ransac_single_frame<a class="headerlink" href="#get-ellipse-model-ransac-single-frame" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="pyxem.utils.ransac_ellipse_tools.get_ellipse_model_ransac_single_frame">
-<span class="sig-prename descclassname"><span class="pre">pyxem.utils.ransac_ellipse_tools.</span></span><span class="sig-name descname"><span class="pre">get_ellipse_model_ransac_single_frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">128</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">128</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rf_lim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">semi_len_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">semi_len_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">90</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">semi_len_ratio_lim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">residual_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_trials</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/pyxem/pyxem/blob/v0.21.0/pyxem/utils/ransac_ellipse_tools.py#L267-L356"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxem.utils.ransac_ellipse_tools.get_ellipse_model_ransac_single_frame" title="Link to this definition">#</a></dt>
-<dd><p>Pick a random number of data points to fit an ellipse to.</p>
-<p>The ellipse’s constraints can be specified.</p>
-<p>See skimage.measure.ransac for more information.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<em>numpy.ndarray</em>) – In the form [[x0, y0], [x1, y1], …]</p></li>
-<li><p><strong>xf, yf</strong> (<em>scalar, optional</em>) – Default 128</p></li>
-<li><p><strong>rf_lim</strong> (<em>scalar, optional</em>) – How far the ellipse centre can be from (xf, yf)</p></li>
-<li><p><strong>semi_len_min, semi_len_max</strong> (<em>scalar, optional</em>) – Limits of the semi lengths</p></li>
-<li><p><strong>semi_len_ratio_lim</strong> (<em>scalar, optional</em>) – Limit of the ratio of the semi length, must be equal or larger
-than 1. This ratio is calculated by taking the largest semi length
-divided by the smallest semi length:
-max(semi0, semi1)/min(semi0, semi1). So for a perfect circle this
-ratio will be 1.</p></li>
-<li><p><strong>min_samples</strong> (<em>scalar, optional</em>) – Minimum number of data points to fit the ellipse model to.</p></li>
-<li><p><strong>residual_threshold</strong> (<em>scalar, optional</em>) – Maximum distance for a data point to be considered an inlier.</p></li>
-<li><p><strong>max_trials</strong> (<em>scalar, optional</em>) – Maximum number of tries for the ransac algorithm.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Model data is accessed in model_ransac.params:
-[x, y, semi_len0, semi_len1, rotation]</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>model_ransac, inliers</p>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pyxem.utils.ransac_ellipse_tools</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ret</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">ret</span><span class="o">.</span><span class="n">EllipseModel</span><span class="p">()</span><span class="o">.</span><span class="n">predict_xy</span><span class="p">(</span>
-<span class="gp">... </span>       <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span> <span class="n">params</span><span class="o">=</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">130</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ellipse_model</span><span class="p">,</span> <span class="n">inliers</span> <span class="o">=</span> <span class="n">ret</span><span class="o">.</span><span class="n">get_ellipse_model_ransac_single_frame</span><span class="p">(</span>
-<span class="gp">... </span>       <span class="n">data</span><span class="p">,</span> <span class="n">xf</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">yf</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">rf_lim</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">semi_len_min</span><span class="o">=</span><span class="mi">45</span><span class="p">,</span>
-<span class="gp">... </span>       <span class="n">semi_len_max</span><span class="o">=</span><span class="mi">65</span><span class="p">,</span> <span class="n">semi_len_ratio_lim</span><span class="o">=</span><span class="mf">1.4</span><span class="p">,</span> <span class="n">max_trials</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
+<span class="sig-prename descclassname"><span class="pre">pyxem.utils.ransac_ellipse_tools.</span></span><span class="sig-name descname"><span class="pre">get_ellipse_model_ransac_single_frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/pyxem/pyxem/blob/v0.21.0/pyxem/utils/ransac_ellipse_tools.py#L48-L53"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxem.utils.ransac_ellipse_tools.get_ellipse_model_ransac_single_frame" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
 
 </section>
 
