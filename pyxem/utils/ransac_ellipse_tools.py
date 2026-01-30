@@ -21,12 +21,16 @@
 from tqdm import tqdm
 import math
 from functools import partial
+from packaging.version import Version
+
 import numpy as np
+import skimage
 from skimage.measure import EllipseModel, ransac
 import warnings
 from hyperspy.signals import BaseSignal
 from hyperspy.misc.utils import isiterable
 import hyperspy.api as hs
+
 
 __all__ = [
     "is_ellipse_good",
@@ -38,6 +42,20 @@ __all__ = [
 ]
 
 
+def _requires_scikit_image_026(func):
+    """Decorator that checks if scikit-image >= 0.26.0 is installed."""
+
+    def wrapper(*args, **kwargs):
+        if Version(skimage.__version__) < Version("0.26.0"):
+            raise ImportError(
+                "scikit-image >=0.26.0 is required for this functionality."
+            )
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+@_requires_scikit_image_026
 def is_ellipse_good(
     ellipse_model,
     data,
@@ -170,6 +188,7 @@ def _get_closest_focus(x, y, xc, yc, a, b, r):
     return (xf, yf)
 
 
+@_requires_scikit_image_026
 def make_ellipse_data_points(x, y, a, b, r, nt=20, use_focus=True):
     """Get an ellipse position list.
 
@@ -265,6 +284,7 @@ def _make_ellipse_model_params_focus(xf, yf, a, b, r):
     return (xc, yc), (a, b), r
 
 
+@_requires_scikit_image_026
 def get_ellipse_model_ransac_single_frame(
     data,
     xf=128,
@@ -599,6 +619,7 @@ def ellipse_to_markers(ellipse_array, points=None, inlier=None):
         return el
 
 
+@_requires_scikit_image_026
 def determine_ellipse(
     signal=None,
     pos=None,

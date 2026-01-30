@@ -20,7 +20,7 @@ from pytest import approx, mark
 import math
 
 import numpy as np
-from numpy.testing import assert_allclose
+import pytest
 from scipy.signal import convolve2d
 from skimage.measure import EllipseModel
 from skimage import morphology
@@ -29,6 +29,9 @@ from hyperspy.signals import Signal2D
 from pyxem.data.dummy_data import make_diffraction_test_data as mdtd
 from pyxem.signals import Diffraction2D
 import pyxem.utils.ransac_ellipse_tools as ret
+
+
+pytest.importorskip("skimage", minversion="0.26", reason="API changes in EllipseModel")
 
 
 class TestIsEllipseGood:

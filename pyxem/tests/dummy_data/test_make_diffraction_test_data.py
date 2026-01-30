@@ -20,6 +20,8 @@
 import pytest
 from pytest import approx
 import numpy as np
+import skimage
+from packaging.version import Version
 from hyperspy.signals import Signal2D
 from pyxem.data.dummy_data import make_diffraction_test_data as mdtd
 
@@ -754,6 +756,10 @@ class TestGetEllipticalMask:
         assert not ellipse_image.any()
 
 
+@pytest.mark.skipif(
+    Version(skimage.__version__) < Version("0.26.0"),
+    reason="scikit-image >=0.26.0 is required for this functionality.",
+)
 class TestMake4dPeakArrayTestData:
     def test_simple(self):
         xf, yf = np.ones((2, 3)), np.ones((2, 3))

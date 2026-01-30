@@ -30,6 +30,8 @@ from pyxem.signals import Diffraction2D, LazyDiffraction2D
 import pyxem.utils.ransac_ellipse_tools as ret
 from pyxem.data.dummy_data import make_diffraction_test_data as mdtd
 import pyxem.data.dummy_data as dd
+import skimage
+from packaging.version import Version
 
 
 @pytest.mark.slow
@@ -166,6 +168,10 @@ class TestAddPeakArrayAsMarkers:
         assert marker.kwargs["offsets"].dtype != object
 
 
+@pytest.mark.skipif(
+    Version(skimage.__version__) < Version("0.26.0"),
+    reason="scikit-image >=0.26.0 is required for this functionality.",
+)
 class TestAddEllipseArrayAsMarkers:
     def test_simple(self):
         s, parray = dd.get_simple_ellipse_signal_peak_array(seed=15)

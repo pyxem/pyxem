@@ -17,6 +17,8 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import pytest
+import skimage
+from packaging.version import Version
 import pyxem.data.dummy_data as dd
 
 
@@ -100,6 +102,10 @@ class TestDummyDataModule:
         assert s.axes_manager.shape == (2, 3, 20, 25)
         assert hasattr(s, "plot")
 
+    @pytest.mark.skipif(
+        Version(skimage.__version__) < Version("0.26.0"),
+        reason="scikit-image >=0.26.0 is required for this functionality.",
+    )
     def test_get_simple_ellipse_signal_peak_array(self):
         s, peak_array = dd.get_simple_ellipse_signal_peak_array()
         s.add_peak_array_as_markers(peak_array=peak_array)
