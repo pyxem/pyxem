@@ -42,6 +42,8 @@ class TestLoadData:
         s = zrnb_precipitate(allow_download=True)
         assert s.axes_manager.signal_shape == (256, 256)
 
+    # Zenodo might block too many requests in under 30 seconds
+    @pytest.mark.flaky(reruns=3, reruns_delay=35)
     def test_load_au_grating(self):
         s = au_grating(allow_download=True)
         assert s.axes_manager.signal_shape == (254, 254)
