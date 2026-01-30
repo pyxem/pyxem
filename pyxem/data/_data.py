@@ -35,17 +35,22 @@ kipper = pooch.create(
     urls=_urls,
 )
 
+PARAMETER_DOCSTRING = """Parameters
+    ----------
+    allow_download: bool
+        If True, the file will be downloaded from the repository to the local cache.
+    **kwargs
+        Keyword arguments passed to :func:`~hyperspy.api.load`.
+    """
+
 
 def au_grating(allow_download=False, **kwargs):
-    """An au_grating 4-D STEM dataset used to show calibration.
+    """
+    An au_grating 4-D STEM dataset used to show calibration.
 
     Data can be acessed from https://zenodo.org/records/11284654
 
-
-    Parameters
-    ----------
-    **kwargs
-        Keyword arguments passed to :func:`~hyperspy.api.load`.
+    %s
 
     Examples
     --------
@@ -60,6 +65,9 @@ def au_grating(allow_download=False, **kwargs):
     return hs.load(file_path, **kwargs)
 
 
+au_grating.__doc__ %= (PARAMETER_DOCSTRING,)
+
+
 def pdnip_glass(allow_download=False, **kwargs):  # pragma: no cover
     """A small PdNiP glass 4-D STEM dataset.
 
@@ -67,10 +75,7 @@ def pdnip_glass(allow_download=False, **kwargs):  # pragma: no cover
 
     Data liscenced under CC BY 4.0
 
-    Parameters
-    ----------
-    **kwargs
-        Keyword arguments passed to :func:`~hyperspy.api.load`.
+    %s
 
     Examples
     --------
@@ -88,6 +93,9 @@ def pdnip_glass(allow_download=False, **kwargs):  # pragma: no cover
     return hs.load(store, **kwargs)
 
 
+pdnip_glass.__doc__ %= PARAMETER_DOCSTRING
+
+
 def zrnb_precipitate(allow_download=False, **kwargs):  # pragma: no cover
     """A small 4-D STEM dataset of a ZrNb precipitate for strain mapping.
 
@@ -95,10 +103,7 @@ def zrnb_precipitate(allow_download=False, **kwargs):  # pragma: no cover
 
     Data can be acessed from https://zenodo.org/records/11284654
 
-    Parameters
-    ----------
-    **kwargs
-        Keyword arguments passed to :func:`~hyperspy.api.load`.
+    %s
 
     Examples
     --------
@@ -116,15 +121,15 @@ def zrnb_precipitate(allow_download=False, **kwargs):  # pragma: no cover
     return hs.load(store, **kwargs)
 
 
+zrnb_precipitate.__doc__ %= PARAMETER_DOCSTRING
+
+
 def twinned_nanowire(allow_download=False, **kwargs):  # pragma: no cover
     """A small 4-D STEM dataset of a twinned nanowire for orientation mapping.
 
     Data can be acessed from https://zenodo.org/records/11284654
 
-    Parameters
-    ----------
-    **kwargs
-        Keyword arguments passed to :func:`~hyperspy.api.load`.
+    %s
 
     Examples
     --------
@@ -139,6 +144,9 @@ def twinned_nanowire(allow_download=False, **kwargs):  # pragma: no cover
     return hs.load(file_path, **kwargs, reader="hspy")
 
 
+twinned_nanowire.__doc__ %= PARAMETER_DOCSTRING
+
+
 def sample_with_g(allow_download=False, **kwargs):  # pragma: no cover
     """A small 4-D STEM dataset for orientation mapping with mulitple overlapping grains.
 
@@ -146,10 +154,7 @@ def sample_with_g(allow_download=False, **kwargs):  # pragma: no cover
 
     Data can be acessed from https://zenodo.org/records/11284654
 
-    Parameters
-    ----------
-    **kwargs
-        Keyword arguments passed to :func:`~hyperspy.api.load`.
+    %s
 
     Examples
     --------
@@ -167,6 +172,9 @@ def sample_with_g(allow_download=False, **kwargs):  # pragma: no cover
     return hs.load(store, **kwargs)
 
 
+sample_with_g.__doc__ %= PARAMETER_DOCSTRING
+
+
 def cuag_orientations(allow_download=False, **kwargs):  # pragma: no cover
     """A small 4-D STEM dataset of CuAg with multiple orientations of the Cu FCC phase
      for orientation mapping.
@@ -175,12 +183,8 @@ def cuag_orientations(allow_download=False, **kwargs):  # pragma: no cover
 
     Data can be acessed from https://zenodo.org/records/11284654
 
-    Parameters
-    ----------
-    allow_download: bool
-        If True, the file will be downloaded from the repository to the local cache.
-    **kwargs
-        Keyword arguments passed to :func:`~hyperspy.api.load`.
+    %s
+
     Examples
     --------
     >>> import pyxem as pxm
@@ -195,6 +199,9 @@ def cuag_orientations(allow_download=False, **kwargs):  # pragma: no cover
     return hs.load(store, **kwargs)
 
 
+cuag_orientations.__doc__ %= PARAMETER_DOCSTRING
+
+
 def organic_semiconductor(allow_download=False, **kwargs):  # pragma: no cover
     """A small 4-D STEM dataset of an organic semiconductor for orientation mapping.
 
@@ -202,12 +209,8 @@ def organic_semiconductor(allow_download=False, **kwargs):  # pragma: no cover
 
     Data can be acessed from https://zenodo.org/records/11284654
 
-    Parameters
-    ----------
-    allow_download: bool
-        If True, the file will be downloaded from the repository to the local cache.
-    **kwargs
-        Keyword arguments passed to :func:`~hyperspy.api.load`.
+    %s
+
     Examples
     --------
     >>> import pyxem as pxm
@@ -222,6 +225,9 @@ def organic_semiconductor(allow_download=False, **kwargs):  # pragma: no cover
     return hs.load(store, **kwargs)
 
 
+organic_semiconductor.__doc__ %= PARAMETER_DOCSTRING
+
+
 def pdcusi_insitu(allow_download=False, **kwargs):  # pragma: no cover
     """A decently sized 5D STEM dataset of a PdCuSi alloy held at 390C. This
     dataset is sliced from a larger dataset and is used to demonstrate how to operate
@@ -232,12 +238,7 @@ def pdcusi_insitu(allow_download=False, **kwargs):  # pragma: no cover
 
     Data can be acessed from https://zenodo.org/records/11284654
 
-    Parameters
-    ----------
-    allow_download: bool
-        If True, the file will be downloaded from the repository to the local cache.
-    **kwargs
-        Keyword arguments passed to :func:`~hyperspy.api.load`.
+    %s
 
     Examples
     --------
@@ -254,17 +255,15 @@ def pdcusi_insitu(allow_download=False, **kwargs):  # pragma: no cover
     return hs.load(store, **kwargs)
 
 
+pdcusi_insitu.__doc__ %= PARAMETER_DOCSTRING
+
+
 def feal_stripes(allow_download=False, **kwargs):  # pragma: no cover
     """A small 4-D STEM dataset for doing DPC on a set of magnetic FeAl stripes
 
     Data can be acessed from https://zenodo.org/records/11284654
 
-    Parameters
-    ----------
-    allow_download: bool
-        If True, the file will be downloaded from the repository to the local cache.
-    **kwargs
-        Keyword arguments passed to :func:`~hyperspy.api.load`.
+    %s
 
     Examples
     --------
@@ -280,18 +279,16 @@ def feal_stripes(allow_download=False, **kwargs):  # pragma: no cover
     return hs.load(store, **kwargs)
 
 
+feal_stripes.__doc__ %= PARAMETER_DOCSTRING
+
+
 def sped_ag(allow_download=False, **kwargs):  # pragma: no cover
     """A small 4-D STEM dataset of a Ag sample which is good for demonstrating the
     ML capabilities of pyxem.
 
     Data can be acessed from https://zenodo.org/records/11284654
 
-    Parameters
-    ----------
-    allow_download: bool
-        If True, the file will be downloaded from the repository to the local cache.
-    **kwargs
-        Keyword arguments passed to :func:`~hyperspy.api.load`.
+    %s
 
     Examples
     --------
@@ -308,15 +305,16 @@ def sped_ag(allow_download=False, **kwargs):  # pragma: no cover
     return hs.load(store, **kwargs)
 
 
+sped_ag.__doc__ %= PARAMETER_DOCSTRING
+
+
 def mgo_nanocrystals(allow_download=False, **kwargs):  # pragma: no cover
-    """A small 4-D STEM dataset of overlapping MgO nanocrystals
+    """
+    A small 4-D STEM dataset of overlapping MgO nanocrystals
 
     Data can be acessed from https://zenodo.org/records/11284654
 
-    Parameters
-    ----------
-    **kwargs
-        Keyword arguments passed to :func:`~hyperspy.api.load`.
+    %s
 
     Examples
     --------
@@ -334,18 +332,16 @@ def mgo_nanocrystals(allow_download=False, **kwargs):  # pragma: no cover
     return hs.load(store, **kwargs)
 
 
+mgo_nanocrystals.__doc__ %= PARAMETER_DOCSTRING
+
+
 def au_grating_20cm(allow_download=False, **kwargs):  # pragma: no cover
     """A PACBED image of Gold grating with 20cm camera length
     for demonstrating the calibration of the camera length.
 
     Data can be acessed from https://zenodo.org/records/14113591
 
-    Parameters
-    ----------
-    allow_download: bool
-        If True, the file will be downloaded from the repository to the local cache.
-    **kwargs
-        Keyword arguments passed to :func:`~hyperspy.api.load`.
+    %s
 
     Examples
     --------
@@ -359,21 +355,21 @@ def au_grating_20cm(allow_download=False, **kwargs):  # pragma: no cover
     return hs.load(file_path, **kwargs)
 
 
+au_grating_20cm.__doc__ %= PARAMETER_DOCSTRING
+
+
 def au_phase(allow_download=False, **kwargs):  # pragma: no cover
-    """A gold phase object for use in orix.
+    """
+    A gold phase object for use in orix.
 
     Data can be acessed from https://zenodo.org/records/14113591
-    Parameters
-    ----------
-    allow_download: bool
-        If True, the file will be downloaded from the repository to the local cache.
-    **kwargs
-        Keyword arguments passed to :func:`~orix.crystal_map.Phase.from_cif`.
+
+    %s
+
     Examples
     --------
     >>> import pyxem as pxm
     >>> s = pxm.data.au_phase()
-
     """
 
     sample = Dataset("au.cif")
@@ -381,18 +377,33 @@ def au_phase(allow_download=False, **kwargs):  # pragma: no cover
     return orix.crystal_map.Phase.from_cif(file_path, **kwargs)
 
 
+au_phase.__doc__ %= PARAMETER_DOCSTRING
+
+
 def small_ptychography(allow_download=False, **kwargs):  # pragma: no cover
-    """A small 4-D STEM dataset of a bilayer WS2. Each Diffraction pattern is only
+    """
+    A small 4-D STEM dataset of a bilayer WS2. Each Diffraction pattern is only
     8x8 pixels so the dataset is quite small although for simple non iterative
     ptychography 8x8 pixels should be sufficient.
+
+    %s
+
     """
     ptychography = Dataset("smallPtychography.hspy")
     file_path = ptychography.fetch_file_path(allow_download=allow_download)
     return hs.load(file_path, **kwargs)
 
 
+small_ptychography.__doc__ %= PARAMETER_DOCSTRING
+
+
 def zrcual_1(allow_download=False, **kwargs):  # pragma: no cover
-    """A small 4-D STEM dataset of a ZrCuAl metallic glass for FEM analysis."""
+    """
+    A small 4-D STEM dataset of a ZrCuAl metallic glass for FEM analysis.
+
+    %s
+
+    """
     import zarr
 
     sample = Dataset("pos1-1.zspy")
@@ -401,8 +412,15 @@ def zrcual_1(allow_download=False, **kwargs):  # pragma: no cover
     return hs.load(store, **kwargs)
 
 
+zrcual_1.__doc__ %= PARAMETER_DOCSTRING
+
+
 def zrcual_2(allow_download=False, **kwargs):  # pragma: no cover
-    """A small 4-D STEM dataset of a ZrCuAl metallic glass for FEM analysis."""
+    """
+    A small 4-D STEM dataset of a ZrCuAl metallic glass for FEM analysis.
+
+    %s
+    """
     import zarr
 
     sample = Dataset("pos5-1.zspy")
@@ -411,14 +429,25 @@ def zrcual_2(allow_download=False, **kwargs):  # pragma: no cover
     return hs.load(store, **kwargs)
 
 
+zrcual_2.__doc__ %= PARAMETER_DOCSTRING
+
+
 def zrcual_3(allow_download=False, **kwargs):  # pragma: no cover
-    """A small 4-D STEM dataset of a ZrCuAl metallic glass for FEM analysis."""
+    """
+    A small 4-D STEM dataset of a ZrCuAl metallic glass for FEM analysis.
+
+    %s
+
+    """
     import zarr
 
     sample = Dataset("pos6-1.zspy")
     file_path = sample.fetch_file_path(allow_download=allow_download)
     store = zarr.ZipStore(file_path)  # for loading from zip
     return hs.load(store, **kwargs)
+
+
+zrcual_3.__doc__ %= PARAMETER_DOCSTRING
 
 
 class Dataset:

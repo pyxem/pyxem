@@ -235,7 +235,8 @@ class BeamShift(DiffractionVectors1D):
         """
         Calibrate the shifts into the electric field
 
-        m_0 * gamma * |v|^2 * theta / e*t = E
+        .. math::
+            m_0 * gamma * |v|^2 * theta / e*t = E
 
         where m_0 is the electron rest mass, gamma is the Relativistic factor, t is the
         thickness m_0 is the electron rest mass, e is the electron charge, and theta

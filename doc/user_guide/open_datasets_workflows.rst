@@ -1,13 +1,13 @@
-z===========================
+===========================
 Open datasets and workflows
 ===========================
 
 Here are some open datasets which are helpful for running some of the functions using real data:
 
-#. The :ref:`pyxem.data` module included pyxem will either download data from
+#. The :mod:`pyxem.data` module included pyxem will either download data from
    the `zenodo <https://zenodo.org/records/11284654>`_ repo or create dummy datasets on the fly.
 
-#. 4D-STEM atomic resolution dataset of a perovskite oxide thin film: https://zenodo.org/record/4727847/files/011_big_film_512x512_updated.hspy?download=1.
+#. 4D-STEM atomic resolution dataset of a perovskite oxide thin film: https://zenodo.org/record/4727847/files/011_big_film_512x512_updated.hspy.
 
 #. Magnetic STEM-DPC dataset: https://zenodo.org/record/4312960.
 
