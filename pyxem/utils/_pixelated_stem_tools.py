@@ -20,8 +20,7 @@
 
 import copy
 import numpy as np
-import scipy.ndimage as ndi
-from hyperspy.misc.utils import isiterable
+import scipy
 
 
 def _threshold_and_mask_single_frame(im, threshold=None, mask=None):
@@ -29,7 +28,7 @@ def _threshold_and_mask_single_frame(im, threshold=None, mask=None):
     if mask is not None:
         image *= mask
     if threshold is not None:
-        mean_value = ndi.mean(image, mask) * threshold
+        mean_value = scipy.ndimage.mean(image, mask) * threshold
         image[image <= mean_value] = 0
         image[image > mean_value] = 1
     return image

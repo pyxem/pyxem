@@ -1,9 +1,9 @@
 import copy
 import math
 import numpy as np
-import scipy.optimize as opt
+import scipy
 from matplotlib.colors import hsv_to_rgb
-from hyperspy.signals import Signal2D
+import hyperspy.api as hs
 
 
 def _make_bivariate_histogram(
@@ -52,7 +52,7 @@ def _make_bivariate_histogram(
         range=[[s0_range[0], s0_range[1]], [s1_range[0], s1_range[1]]],
     )
 
-    s_hist = Signal2D(hist2d).swap_axes(0, 1)
+    s_hist = hs.signals.Signal2D(hist2d).swap_axes(0, 1)
     s_hist.axes_manager[0].offset = xedges[0]
     s_hist.axes_manager[0].scale = xedges[1] - xedges[0]
     s_hist.axes_manager[1].offset = yedges[0]
@@ -162,7 +162,7 @@ def _get_linear_plane_from_signal2d(signal, mask=None, initial_values=None):
             raise ValueError("signal and mask need to have the same shape")
         points = points[np.invert(mask).flatten()]
 
-    p = opt.leastsq(_residuals, initial_values, args=points)[0]
+    p = scipy.optimize.leastsq(_residuals, initial_values, args=points)[0]
 
     plane = _plane_parameters_to_image(p, xaxis, yaxis)
     return plane
@@ -191,7 +191,7 @@ def _get_linear_plane_by_minimizing_magnitude_variance(
             raise ValueError("signal and mask need to have the same navigation shape")
         points = points[np.invert(mask).flatten()]
 
-    p = opt.leastsq(_magnitude_deviations, initial_values, args=points)[0]
+    p = scipy.optimize.leastsq(_magnitude_deviations, initial_values, args=points)[0]
 
     x, y = np.meshgrid(xaxis, yaxis)
     z_x = p[0] * x + p[1] * y + p[2]

@@ -18,40 +18,6 @@
 
 """Classes to help with generating some more complicated analysis/workflow"""
 
-from .calibration_generator import CalibrationGenerator
-from .displacement_gradient_tensor_generator import (
-    get_DisplacementGradientMap,
-    get_single_DisplacementGradientTensor,
-)
-from .indexation_generator import (
-    IndexationGenerator,
-    VectorIndexationGenerator,
-    TemplateIndexationGenerator,
-    ProfileIndexationGenerator,
-    AcceleratedIndexationGenerator,
-)
-from .integration_generator import IntegrationGenerator
-from .pdf_generator1d import PDFGenerator1D
-from .red_intensity_generator1d import ReducedIntensityGenerator1D
-from .subpixelrefinement_generator import SubpixelrefinementGenerator
-from .variance_generator import VarianceGenerator
-from .virtual_image_generator import VirtualImageGenerator, VirtualDarkFieldGenerator
+import lazy_loader
 
-
-__all__ = [
-    "CalibrationGenerator",
-    "get_DisplacementGradientMap",
-    "get_single_DisplacementGradientTensor",
-    "IndexationGenerator",
-    "VectorIndexationGenerator",
-    "TemplateIndexationGenerator",
-    "ProfileIndexationGenerator",
-    "AcceleratedIndexationGenerator",
-    "IntegrationGenerator",
-    "PDFGenerator1D",
-    "ReducedIntensityGenerator1D",
-    "SubpixelrefinementGenerator",
-    "VarianceGenerator",
-    "VirtualImageGenerator",
-    "VirtualDarkFieldGenerator",
-]
+__getattr__, __dir__, __all__ = lazy_loader.attach_stub(__name__, __file__)

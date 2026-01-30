@@ -1,16 +1,13 @@
 from diffsims.generators.rotation_list_generators import get_beam_directions_grid
-from scipy.spatial import ConvexHull
-from matplotlib.collections import PolyCollection
 from diffsims.generators.simulation_generator import SimulationGenerator
-from orix.quaternion import Rotation
 
 import matplotlib.pyplot as plt
 import numpy as np
 from random import random
 from math import cos, sin, pi, radians
-from skimage.segmentation import watershed
+import scipy
+import skimage
 from copy import deepcopy
-from skimage.draw import disk
 
 
 class CrystalSTEMSimulation:
@@ -61,6 +58,8 @@ class CrystalSTEMSimulation:
         rotations=None,
         accelerating_voltage=200,
     ):
+        from orix.quaternion import Rotation
+
         # Set all the parameters
         if generator is None:
             self.generator = SimulationGenerator(
@@ -246,6 +245,8 @@ class CrystalSTEMSimulation:
         -------
 
         """
+        from matplotlib.collections import PolyCollection
+
         if ax is None:
             fig, ax = plt.subplots(1, 1)
         colors = [
@@ -281,7 +282,7 @@ class CrystalSTEMSimulation:
             vectors = new_vectors
 
         for v in vectors:
-            hull = ConvexHull(v)
+            hull = scipy.spatial.ConvexHull(v)
             vert = hull.points[hull.vertices]
             verts.append(vert)
         p = PolyCollection(verts, color=colors, **kwargs)
@@ -396,7 +397,7 @@ def create_blob(center, size, real_space_pixels):
         dtype=int,
     )
     img[points[:, 0], points[:, 1]] = 1
-    img = watershed(img) == 2
+    img = skimage.segmentation.watershed(img) == 2
     return img
 
 
@@ -448,7 +449,7 @@ def add_disk(image, center, radius, intensity):
 
     """
     disk_image = np.zeros_like(image)
-    rr, cc = disk(center=center, radius=radius, shape=image.shape)
+    rr, cc = skimage.draw.disk(center=center, radius=radius, shape=image.shape)
     disk_image[rr, cc] = intensity  # expected 1 electron per pixel
     image = disk_image + image
     return image

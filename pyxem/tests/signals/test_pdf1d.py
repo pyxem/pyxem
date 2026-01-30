@@ -19,7 +19,7 @@
 import pytest
 import numpy as np
 
-from pyxem.signals.pair_distribution_function1d import PairDistributionFunction1D
+from pyxem.signals._pair_distribution_function1d import PairDistributionFunction1D
 
 
 def test_generate_signal():

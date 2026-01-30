@@ -21,8 +21,8 @@ import numpy as np
 from orix.quaternion import Rotation
 import pytest
 
-from pyxem.utils.indexation_utils import match_vectors
-from pyxem.utils.indexation_utils import (
+from pyxem.utils.indexation import match_vectors
+from pyxem.utils.indexation import (
     index_dataset_with_template_rotation,
     results_dict_to_crystal_map,
 )

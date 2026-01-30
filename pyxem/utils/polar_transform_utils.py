@@ -19,21 +19,10 @@
 """Utils for polar 2D Diffraction Pattern transformations."""
 
 import numpy as np
+import scipy
+
+from pyxem.utils.cuda import get_array_module
 from pyxem.utils.diffraction import find_beam_center_blur
-from scipy import ndimage
-from pyxem.utils.cuda_utils import get_array_module
-
-
-try:
-    import cupy as cp
-    import cupyx.scipy.ndimage as ndigpu
-
-    CUPY_INSTALLED = True
-except ImportError:
-    CUPY_INSTALLED = False
-    cp = None
-    ndigpu = None
-
 
 """ These are designed to be fast and used for indexation, for data correction, see radial_utils"""
 
@@ -223,7 +212,12 @@ def get_polar_pattern_shape(image_shape, delta_r, delta_theta, max_r=None):
 
 
 def _get_map_function(dispatcher):
-    return ndimage.map_coordinates if dispatcher == np else ndigpu.map_coordinates
+    if dispatcher == np:
+        return scipy.ndimage.map_coordinates
+    else:
+        import cupyx.scipy.ndimage as ndigpu
+
+        return ndigpu.map_coordinates
 
 
 def _warp_polar_custom(

@@ -25,7 +25,7 @@ import shapely
 from numba import cuda, prange
 import numba
 
-from pyxem import CUPY_INSTALLED
+from pyxem.common import CUPY_INSTALLED
 
 if CUPY_INSTALLED:
     import cupy as cp
