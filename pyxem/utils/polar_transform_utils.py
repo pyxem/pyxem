@@ -23,7 +23,6 @@ from pyxem.utils.diffraction import find_beam_center_blur
 from scipy import ndimage
 from pyxem.utils.cuda_utils import get_array_module
 
-
 try:
     import cupy as cp
     import cupyx.scipy.ndimage as ndigpu
@@ -33,7 +32,6 @@ except ImportError:
     CUPY_INSTALLED = False
     cp = None
     ndigpu = None
-
 
 """ These are designed to be fast and used for indexation, for data correction, see radial_utils"""
 
@@ -154,9 +152,10 @@ def get_template_cartesian_coordinates(
     in_plane_angle : float, optional
         Angle in degrees representing an in-plane rotation of the template
         around the direct beam
-    window_size : 2-tuple, optional
-        Only return the reflections within the (width, height) in pixels
-        of the image
+    window_size : float or 2-tuple, optional
+        Only return reflections within a given pixel range in the image.
+        If given as a float it is interpreted as a radius, while a tuple
+        is interpreted as a rectangular window.
     mirrored : bool, optional
         Whether to mirror the template
 
@@ -180,7 +179,17 @@ def get_template_cartesian_coordinates(
     x = c * ox - s * oy + center[0]
     y = s * ox + c * oy + center[1]
     if window_size is not None:
-        condition = (x < window_size[0]) & (y < window_size[1]) & (y >= 0) & (x >= 0)
+        try:
+            condition = (np.abs(x - center[0]) <= window_size[0] / 2) & (
+                np.abs(y - center[1]) <= window_size[1] / 2
+            )
+        except (
+            TypeError,
+            IndexError,
+        ) as e:  # Interpret non-indexable window sizes as a radius rather than a window
+            condition = (
+                np.sqrt((x - center[0]) ** 2 + (y - center[1]) ** 2) <= window_size
+            )
         x = x[condition]
         y = y[condition]
         intensities = intensities[condition]
