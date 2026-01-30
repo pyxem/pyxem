@@ -30,7 +30,6 @@ import hyperspy.api as hs
 import hyperspy.misc.utils as hs_utils
 
 
-
 __all__ = [
     "is_ellipse_good",
     "make_ellipse_data_points",
