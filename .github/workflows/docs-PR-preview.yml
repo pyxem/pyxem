@@ -12,6 +12,11 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    # Run only if the docs build workflow succeeded and was triggered by a PR
+    if: >
+      github.repository_owner == 'pyxem' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request'
     permissions:
       contents: write
       pull-requests: write
@@ -30,7 +35,6 @@ jobs:
         run: |
           echo "Parsing deploy_info/info.json:"
           cat deploy_info/info.json
-          echo "workflow_run_id=$(jq -r '.workflow_run_id' deploy_info/info.json)" >> $GITHUB_OUTPUT # to get the run id of the workflow that built the docs
           echo "pr_number=$(jq -r '.pr_number' deploy_info/info.json)" >> $GITHUB_OUTPUT # empty if not a PR
       
       # need to specify the run id to get the artifact from the correct workflow run
@@ -41,7 +45,7 @@ jobs:
         with:
           name: ${{ env.artifact_name }}
           path: ${{ env.html_folder }}
-          run-id: ${{ steps.info.outputs.workflow_run_id }}
+          run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Print doc files

@@ -61,8 +61,7 @@ jobs:
           mkdir -p deploy_info
           cat <<EOF > deploy_info/info.json
           {
-            "workflow_run_id": "${{ github.run_id }}",
-            "pr_number": "${{ github.event.pull_request.number }}",
+            "pr_number": "${{ github.event.pull_request.number }}"
           }
           EOF
 
