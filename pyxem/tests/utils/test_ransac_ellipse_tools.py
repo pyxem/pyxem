@@ -20,8 +20,9 @@ from pytest import approx, mark
 import math
 
 import numpy as np
-from numpy.testing import assert_allclose
+import pytest
 from scipy.signal import convolve2d
+from skimage.measure import EllipseModel
 from skimage import morphology
 from hyperspy.signals import Signal2D
 
@@ -30,11 +31,13 @@ from pyxem.signals import Diffraction2D
 import pyxem.utils.ransac_ellipse_tools as ret
 
 
+pytest.importorskip("skimage", minversion="0.26", reason="API changes in EllipseModel")
+
+
 class TestIsEllipseGood:
     def test_simple(self):
         params = ret._make_ellipse_model_params_focus(30, 50, 30, 20, 0)
-        model = ret.EllipseModel()
-        model.params = params
+        model = EllipseModel(*params)
         is_good = ret.is_ellipse_good(
             ellipse_model=model, data=None, xf=30, yf=50, rf_lim=5
         )
@@ -42,8 +45,8 @@ class TestIsEllipseGood:
 
     @mark.parametrize("xf,out", [(40, True), (46, False), (34, False)])
     def test_xf(self, xf, out):
-        model = ret.EllipseModel()
-        model.params = ret._make_ellipse_model_params_focus(40, 50, 10, 30, 0)
+        params = ret._make_ellipse_model_params_focus(40, 50, 10, 30, 0)
+        model = EllipseModel(*params)
         is_good = ret.is_ellipse_good(
             ellipse_model=model, data=None, xf=xf, yf=50, rf_lim=5
         )
@@ -51,8 +54,8 @@ class TestIsEllipseGood:
 
     @mark.parametrize("yf,out", [(20, False), (10, True), (-9, False)])
     def test_yf(self, yf, out):
-        model = ret.EllipseModel()
-        model.params = ret._make_ellipse_model_params_focus(70, 10, 10, 30, 0)
+        params = ret._make_ellipse_model_params_focus(70, 10, 10, 30, 0)
+        model = EllipseModel(*params)
         is_good = ret.is_ellipse_good(
             ellipse_model=model, data=None, xf=70, yf=yf, rf_lim=5
         )
@@ -60,8 +63,8 @@ class TestIsEllipseGood:
 
     @mark.parametrize("rf_lim,out", [(2, False), (4, True), (3.5, True)])
     def test_rf_lim(self, rf_lim, out):
-        model = ret.EllipseModel()
-        model.params = ret._make_ellipse_model_params_focus(47, 30, 10, 30, 0)
+        params = ret._make_ellipse_model_params_focus(47, 30, 10, 30, 0)
+        model = EllipseModel(*params)
         is_good = ret.is_ellipse_good(
             ellipse_model=model, data=None, xf=50, yf=30, rf_lim=rf_lim
         )
@@ -69,8 +72,8 @@ class TestIsEllipseGood:
 
     @mark.parametrize("semi_len_min,out", [(4, True), (7, False), (6.5, True)])
     def test_semi_len_min(self, semi_len_min, out):
-        model = ret.EllipseModel()
-        model.params = ret._make_ellipse_model_params_focus(50, 30, 6.6, 10, 0)
+        params = ret._make_ellipse_model_params_focus(50, 30, 6.6, 10, 0)
+        model = EllipseModel(*params)
         is_good = ret.is_ellipse_good(
             ellipse_model=model,
             data=None,
@@ -91,14 +94,8 @@ class TestIsEllipseGood:
         ],
     )
     def test_semi_len_max(self, a, b, semi_len_max, out):
-        model = ret.EllipseModel()
-        model.params = ret._make_ellipse_model_params_focus(50, 30, a, b, 0)
-        params = list(model.params)
-        # Changing the params like this is necessary to test if b is larger
-        # than semi_len_max. This is due to the content in model.params not being
-        # the same as the input in ret._make_ellipse_model_params_focus.
-        params[2:5] = a, b, 0.0
-        model.params = tuple(params)
+        params = ret._make_ellipse_model_params_focus(50, 30, a, b, 0)
+        model = EllipseModel(*params)
         is_good = ret.is_ellipse_good(
             ellipse_model=model,
             data=None,
@@ -111,8 +108,8 @@ class TestIsEllipseGood:
 
     @mark.parametrize("semi_len_ratio_lim,out", [(2.1, True), (1.5, False), (3, True)])
     def test_semi_len_ratio_lim(self, semi_len_ratio_lim, out):
-        model = ret.EllipseModel()
-        model.params = ret._make_ellipse_model_params_focus(50, 30, 9, 4.5, 0)
+        params = ret._make_ellipse_model_params_focus(50, 30, 9, 4.5, 0)
+        model = EllipseModel(*params)
         is_good = ret.is_ellipse_good(
             ellipse_model=model,
             data=None,
@@ -125,8 +122,8 @@ class TestIsEllipseGood:
 
     @mark.parametrize("r", [0, 0.5, 0.9, 1.3, np.pi, 2 * np.pi, 9.9])
     def test_different_rotations(self, r):
-        model = ret.EllipseModel()
-        model.params = ret._make_ellipse_model_params_focus(50, 30, 3, 6.5, r)
+        params = ret._make_ellipse_model_params_focus(50, 30, 3, 6.5, r)
+        model = EllipseModel(*params)
         is_good = ret.is_ellipse_good(
             ellipse_model=model, data=None, xf=50, yf=30, rf_lim=5
         )
@@ -146,8 +143,8 @@ class TestIsEllipseGood:
         ],
     )
     def test_many_different_ones(self, x, y, r, smin, smax, srl, out):
-        model = ret.EllipseModel()
-        model.params = ret._make_ellipse_model_params_focus(5, 3, 4, 6.5, 0.1)
+        params = ret._make_ellipse_model_params_focus(5, 3, 4, 6.5, 0.1)
+        model = EllipseModel(*params)
         is_good = ret.is_ellipse_good(
             ellipse_model=model,
             data=None,
@@ -291,8 +288,8 @@ class TestEllipseCentreToFocus:
 
 
 def compare_model_params(params0, params1, rel=None, abs=None):
-    xf0, yf0, a0, b0, r0 = params0
-    xf1, yf1, a1, b1, r1 = params1
+    (xf0, yf0), (a0, b0), r0 = params0
+    (xf1, yf1), (a1, b1), r1 = params1
     # only case in the params
     if a1 < b1:
         r1 += math.pi / 2
@@ -330,7 +327,7 @@ class TestGetEllipseModelRansacSingleFrame:
         )
         assert inliers0[:-1].all()
         assert not inliers0[-1]
-        model_ransac1, inliers1 = ret.get_ellipse_model_ransac_single_frame(
+        _, inliers1 = ret.get_ellipse_model_ransac_single_frame(
             data,
             xf=50,
             yf=55,
@@ -364,8 +361,9 @@ class TestGetEllipseModelRansacSingleFrame:
             residual_threshold=10,
             max_trials=100,
         )
-        params0f = (xf, yf, a, b, r)
-        params1f = ret._ellipse_model_centre_to_focus(*model_ransac.params, xf, yf)
+        params0f = (xf, yf), (a, b), r
+        params = model_ransac.center, model_ransac.axis_lengths, model_ransac.theta
+        params1f = ret._ellipse_model_centre_to_focus(*params, xf, yf)
         assert inliers.all()
         compare_model_params(params0f, params1f, abs=0.01)
 
@@ -375,7 +373,7 @@ class TestGetEllipseModelRansacSingleFrame:
         data0 = ret.make_ellipse_data_points(xf0, yf, a, b, r, nt=25)
         data1 = ret.make_ellipse_data_points(xf1, yf, a, b, r, nt=25)
         data = np.vstack((data0, data1))
-        model_ransac0, inliers0 = ret.get_ellipse_model_ransac_single_frame(
+        model_ransac0, _ = ret.get_ellipse_model_ransac_single_frame(
             data,
             xf=xf0,
             yf=55,
@@ -387,11 +385,12 @@ class TestGetEllipseModelRansacSingleFrame:
             residual_threshold=10,
             max_trials=300,
         )
-        params00f = (xf0, yf, a, b, r)
-        params01f = ret._ellipse_model_centre_to_focus(*model_ransac0.params, xf0, yf)
+        params00f = (xf0, yf), (a, b), r
+        params = model_ransac0.center, model_ransac0.axis_lengths, model_ransac0.theta
+        params01f = ret._ellipse_model_centre_to_focus(*params, xf0, yf)
         compare_model_params(params00f, params01f, abs=0.1)
 
-        model_ransac1, inliers1 = ret.get_ellipse_model_ransac_single_frame(
+        model_ransac1, _ = ret.get_ellipse_model_ransac_single_frame(
             data,
             xf=xf1,
             yf=55,
@@ -403,8 +402,9 @@ class TestGetEllipseModelRansacSingleFrame:
             residual_threshold=10,
             max_trials=300,
         )
-        params10f = (xf1, yf, a, b, r)
-        params11f = ret._ellipse_model_centre_to_focus(*model_ransac1.params, xf1, yf)
+        params10f = (xf1, yf), (a, b), r
+        params = model_ransac1.center, model_ransac1.axis_lengths, model_ransac1.theta
+        params11f = ret._ellipse_model_centre_to_focus(*params, xf1, yf)
         compare_model_params(params10f, params11f, abs=0.1)
 
     @mark.skip(reason="Broken due to changes in skimage 0.19")
@@ -425,8 +425,9 @@ class TestGetEllipseModelRansacSingleFrame:
             residual_threshold=10,
             max_trials=300,
         )
-        params00f = (xf, yf0, a, b, r)
-        params01f = ret._ellipse_model_centre_to_focus(*model_ransac0.params, xf, yf0)
+        params00f = (xf, yf0), (a, b), r
+        params = model_ransac0.center, model_ransac0.axis_lengths, model_ransac0.theta
+        params01f = ret._ellipse_model_centre_to_focus(*params, xf, yf0)
         compare_model_params(params00f, params01f, abs=0.1)
 
         model_ransac1, inliers1 = ret.get_ellipse_model_ransac_single_frame(
@@ -441,8 +442,9 @@ class TestGetEllipseModelRansacSingleFrame:
             residual_threshold=10,
             max_trials=300,
         )
-        params10f = (xf, yf1, a, b, r)
-        params11f = ret._ellipse_model_centre_to_focus(*model_ransac1.params, xf, yf1)
+        params10f = (xf, yf1), (a, b), r
+        params = model_ransac1.center, model_ransac1.axis_lengths, model_ransac1.theta
+        params11f = ret._ellipse_model_centre_to_focus(*params, xf, yf1)
         compare_model_params(params10f, params11f, abs=0.1)
 
     def test_rf_lim(self):
@@ -460,12 +462,13 @@ class TestGetEllipseModelRansacSingleFrame:
             residual_threshold=10,
             max_trials=100,
         )
-        params0f = (xf, yf, a, b, r)
-        params1f = ret._ellipse_model_centre_to_focus(*model_ransac0.params, xf, yf)
+        params0f = (xf, yf), (a, b), r
+        params = *model_ransac0.center, *model_ransac0.axis_lengths, model_ransac0.theta
+        params1f = ret._ellipse_model_centre_to_focus(*params, xf, yf)
         assert inliers0.all()
         compare_model_params(params0f, params1f, abs=0.1)
 
-        model_ransac1, inliers1 = ret.get_ellipse_model_ransac_single_frame(
+        model_ransac1, _ = ret.get_ellipse_model_ransac_single_frame(
             data,
             xf=50,
             yf=50,
@@ -494,12 +497,13 @@ class TestGetEllipseModelRansacSingleFrame:
             residual_threshold=10,
             max_trials=100,
         )
-        params0f = (xf, yf, a, b, r)
-        params1f = ret._ellipse_model_centre_to_focus(*model_ransac0.params, xf, yf)
+        params0f = (xf, yf), (a, b), r
+        params = *model_ransac0.center, *model_ransac0.axis_lengths, model_ransac0.theta
+        params1f = ret._ellipse_model_centre_to_focus(*params, xf, yf)
         assert inliers0.all()
         compare_model_params(params0f, params1f, abs=0.1)
 
-        model_ransac1, inliers1 = ret.get_ellipse_model_ransac_single_frame(
+        model_ransac1, _ = ret.get_ellipse_model_ransac_single_frame(
             data,
             xf=50,
             yf=55,
@@ -528,12 +532,13 @@ class TestGetEllipseModelRansacSingleFrame:
             residual_threshold=10,
             max_trials=100,
         )
-        params0f = (xf, yf, a, b, r)
-        params1f = ret._ellipse_model_centre_to_focus(*model_ransac0.params, xf, yf)
+        params0f = (xf, yf), (a, b), r
+        params = *model_ransac0.center, *model_ransac0.axis_lengths, model_ransac0.theta
+        params1f = ret._ellipse_model_centre_to_focus(*params, xf, yf)
         assert inliers0.all()
         compare_model_params(params0f, params1f, abs=0.1)
 
-        model_ransac1, inliers1 = ret.get_ellipse_model_ransac_single_frame(
+        model_ransac1, _ = ret.get_ellipse_model_ransac_single_frame(
             data,
             xf=50,
             yf=55,
@@ -829,12 +834,11 @@ def test_full_ellipse_ransac_processing():
         ycf, xcf, bf, af, rf = ellipse_array[iy, ix]
         # shifted by pi/2
         compare_model_params(
-            (xcf, ycf, af, bf, rf + np.pi / 2), (yc, xc, a, b, r), abs=0.1
+            ((xcf, ycf), (af, bf), rf + np.pi / 2), ((yc, xc), (a, b), r), abs=0.1
         )
         assert inlier_array[iy, ix].all()
 
     s.add_ellipse_array_as_markers(ellipse_array)
-    x_list, y_list = [], []
 
 
 class TestDetermineEllipse:
