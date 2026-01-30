@@ -11,6 +11,7 @@ def simulated_overlap(
     radius=5,
     recip_space_pixels=64,
     k_range=1,
+    return_sim=False,
 ):
     """
     Create a simulated diffraction pattern with overlapping nanocrystals.
@@ -35,4 +36,7 @@ def simulated_overlap(
     signal.axes_manager.signal_axes[1].scale = k_range / (recip_space_pixels / 2)
     signal.axes_manager.signal_axes[0].scale = k_range / (recip_space_pixels / 2)
     signal.calibration.center = None
-    return signal
+    if return_sim:
+        return signal, sim
+    else:
+        return signal
