@@ -67,7 +67,7 @@ jobs:
           EOF
 
       - name: Upload deploy info artifact # For the follow up deploy job
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: deploy-info
           path: deploy_info/info.json

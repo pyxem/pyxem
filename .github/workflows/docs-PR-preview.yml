@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - name: Download deploy info artifact
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v7
         with:
           name: deploy-info
           path: deploy_info
@@ -37,7 +37,7 @@ jobs:
       # and set the github-token to access the actions scope
       # https://github.com/actions/download-artifact?tab=readme-ov-file#download-artifacts-from-other-workflow-runs-or-repositories
       - name: Download built docs
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v7
         with:
           name: ${{ env.artifact_name }}
           path: ${{ env.html_folder }}
