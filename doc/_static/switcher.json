@@ -6,24 +6,24 @@
     },
     {
         "name": "0.20.0",
-        "version": "0.20.0",
-        "url": "https://pyxem.org/en/v0.20.0/"
+        "version": "0.20",
+        "url": "https://pyxem.readthedocs.io/en/v0.20.0/"
     },
     {
         "name": "0.19.1",
-        "version": "0.19.1",
-        "url": "https://pyxem.org/en/v0.19.1/"
+        "version": "0.19",
+        "url": "https://pyxem.readthedocs.io/en/v0.19.1/"
     },
     {
-        "version": "0.18.0",
-        "url": "https://pyxem.org/en/v0.18.0/"
+        "version": "0.18",
+        "url": "https://pyxem.readthedocs.io/en/v0.18.0/"
     },
     {
-        "version": "0.17.0",
-        "url": "https://pyxem.org/en/v0.17.0/"
+        "version": "0.17",
+        "url": "https://pyxem.readthedocs.io/en/v0.17.0/"
     },
     {
-        "version": "0.16.0",
-        "url": "https://pyxem.org/en/v0.16.0/"
+        "version": "0.16",
+        "url": "https://pyxem.readthedocs.io/en/v0.16.0/"
     }
 ]
