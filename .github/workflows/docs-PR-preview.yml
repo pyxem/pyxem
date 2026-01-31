@@ -22,20 +22,20 @@ jobs:
       pull-requests: write
 
     steps:
-      - name: Download deploy info artifact
+      - name: Download PR number artifact
         uses: actions/download-artifact@v7
         with:
-          name: deploy-info
-          path: deploy_info
+          name: pr_number
+          path: pr
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Parse deploy info
+      - name: Parse PR number
         id: info
         run: |
-          echo "Parsing deploy_info/info.json:"
-          cat deploy_info/info.json
-          echo "pr_number=$(jq -r '.pr_number' deploy_info/info.json)" >> $GITHUB_OUTPUT # empty if not a PR
+          echo "Parsing PR number:"
+          cat pr/pr_number
+          echo "pr_number=$(cat pr/pr_number)" >> $GITHUB_OUTPUT
       
       # need to specify the run id to get the artifact from the correct workflow run
       # and set the github-token to access the actions scope
