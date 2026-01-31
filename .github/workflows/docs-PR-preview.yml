@@ -12,36 +12,40 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    # Run only if the docs build workflow succeeded and was triggered by a PR
+    if: >
+      github.repository_owner == 'pyxem' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request'
     permissions:
       contents: write
       pull-requests: write
 
     steps:
-      - name: Download deploy info artifact
-        uses: actions/download-artifact@v5
+      - name: Download PR number artifact
+        uses: actions/download-artifact@v7
         with:
-          name: deploy-info
-          path: deploy_info
+          name: pr_number
+          path: pr
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Parse deploy info
+      - name: Parse PR number
         id: info
         run: |
-          echo "Parsing deploy_info/info.json:"
-          cat deploy_info/info.json
-          echo "workflow_run_id=$(jq -r '.workflow_run_id' deploy_info/info.json)" >> $GITHUB_OUTPUT # to get the run id of the workflow that built the docs
-          echo "pr_number=$(jq -r '.pr_number' deploy_info/info.json)" >> $GITHUB_OUTPUT # empty if not a PR
+          echo "Parsing PR number:"
+          cat pr/pr_number
+          echo "pr_number=$(cat pr/pr_number)" >> $GITHUB_OUTPUT
       
       # need to specify the run id to get the artifact from the correct workflow run
       # and set the github-token to access the actions scope
       # https://github.com/actions/download-artifact?tab=readme-ov-file#download-artifacts-from-other-workflow-runs-or-repositories
       - name: Download built docs
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v7
         with:
           name: ${{ env.artifact_name }}
           path: ${{ env.html_folder }}
-          run-id: ${{ steps.info.outputs.workflow_run_id }}
+          run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Print doc files

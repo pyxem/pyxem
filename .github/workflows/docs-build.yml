@@ -56,18 +56,16 @@ jobs:
       github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - name: Write deploy info to file
+      # https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#using-data-from-the-triggering-workflow
+      - name: Write PR number to file
+        env:
+          PR_NUMBER: ${{ github.event.number }}
         run: |
-          mkdir -p deploy_info
-          cat <<EOF > deploy_info/info.json
-          {
-            "workflow_run_id": "${{ github.run_id }}",
-            "pr_number": "${{ github.event.pull_request.number }}",
-          }
-          EOF
+          mkdir -p ./pr
+          echo $PR_NUMBER > ./pr/pr_number
 
-      - name: Upload deploy info artifact # For the follow up deploy job
-        uses: actions/upload-artifact@v4
+      - name: Upload PR number artifact # For the follow up deploy job
+        uses: actions/upload-artifact@v6
         with:
-          name: deploy-info
-          path: deploy_info/info.json
+          name: pr_number
+          path: pr/
