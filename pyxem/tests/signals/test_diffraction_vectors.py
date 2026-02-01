@@ -22,8 +22,7 @@ from sklearn.cluster import DBSCAN
 from skimage.draw import disk
 from skimage.morphology import disk as disk2
 
-from hyperspy.signals import Signal2D
-from hyperspy.signal import BaseSignal
+from hyperspy.signals import BaseSignal, Signal2D
 
 
 from pyxem.signals import DiffractionVectors, DiffractionVectors2D

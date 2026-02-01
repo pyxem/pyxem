@@ -22,10 +22,10 @@ import math
 import numpy as np
 import numpy.linalg as la
 from tqdm import tqdm
-from hyperspy.components1d import Polynomial, Gaussian
-from hyperspy.signals import Signal2D
-from hyperspy.misc.utils import isiterable
+
 import hyperspy.api as hs
+import hyperspy.misc.utils as hs_utils
+
 import pyxem.utils._pixelated_stem_tools as pst
 from pyxem.utils._deprecated import deprecated
 
@@ -175,7 +175,7 @@ def get_optimal_centre_position(
         g_A = temp_s.data.max() * 2 * g_sigma
 
         m = temp_s.create_model()
-        g = Gaussian(A=g_A, centre=g_centre, sigma=g_sigma)
+        g = hs.model.components1D.Gaussian(A=g_A, centre=g_centre, sigma=g_sigma)
         m.append(g)
         m.multifit(show_progressbar=False)
         m_list.append(m)
@@ -249,7 +249,7 @@ def _get_offset_image(model_list, s, steps, step_size):
     offset_signal : HyperSpy 2D signal
 
     """
-    s_offset = Signal2D(np.zeros(shape=((steps * 2) + 1, (steps * 2) + 1)))
+    s_offset = hs.signals.Signal2D(np.zeros(shape=((steps * 2) + 1, (steps * 2) + 1)))
     am = s.axes_manager.signal_axes
 
     offset_x0 = -am[0].offset - (steps * step_size)
@@ -295,7 +295,7 @@ def _make_radius_vs_angle_model(
     m_ra.set_signal_range(prepeak_range[0], prepeak_range[1])
     m_ra.add_signal_range(sa.index2value(-3), sa.high_value)
 
-    polynomial = Polynomial(1)
+    polynomial = hs.model.components1D.Polynomial(1)
     m_ra.append(polynomial)
     m_ra.multifit(show_progressbar=show_progressbar)
     polynomial.set_parameters_not_free()
@@ -307,7 +307,7 @@ def _make_radius_vs_angle_model(
     sigma = 3
     A = (s_ra - s_ra.min(axis=1)).data.max() * 2 * sigma
 
-    gaussian = Gaussian(A=A, sigma=sigma, centre=centre_initial)
+    gaussian = hs.model.components1D.Gaussian(A=A, sigma=sigma, centre=centre_initial)
     gaussian.centre.bmin = sa.low_value
     gaussian.centre.bmax = sa.high_value
     m_ra.append(gaussian)
@@ -727,7 +727,7 @@ def fit_ellipses_to_signal(
     ...     s, [(40, 80)], angleN=30, show_progressbar=False)
 
     """
-    if not isiterable(angleN):
+    if not hs_utils.isiterable(angleN):
         angleN = [angleN] * len(radial_signal_span_list)
     else:
         if len(angleN) != len(radial_signal_span_list):

@@ -18,18 +18,16 @@
 
 """Tools for ellipse fitting using RANSAC."""
 
-from tqdm import tqdm
 import math
 from functools import partial
 from packaging.version import Version
+import warnings
 
 import numpy as np
 import skimage
-from skimage.measure import EllipseModel, ransac
-import warnings
-from hyperspy.signals import BaseSignal
-from hyperspy.misc.utils import isiterable
+
 import hyperspy.api as hs
+import hyperspy.misc.utils as hs_utils
 
 
 __all__ = [
@@ -90,9 +88,10 @@ def is_ellipse_good(
 
     Examples
     --------
+    >>> import skimage
     >>> import pyxem.utils.ransac_ellipse_tools as ret
     >>> params = ret._make_ellipse_model_params_focus(30, 50, 30, 20, 0)
-    >>> model = ret.EllipseModel(*params)
+    >>> model = skimage.measure.EllipseModel(*params)
     >>> is_good = ret.is_ellipse_good(
     ...         ellipse_model=model, data=None, xf=30, yf=50, rf_lim=5)
 
@@ -227,7 +226,7 @@ def make_ellipse_data_points(x, y, a, b, r, nt=20, use_focus=True):
     else:
         params = (x, y), (a, b), r
     theta_array = np.arange(0, 2 * np.pi, 2 * np.pi / nt)
-    data = EllipseModel(*params).predict_xy(theta_array)
+    data = skimage.measure.EllipseModel(*params).predict_xy(theta_array)
     return data
 
 
@@ -335,7 +334,8 @@ def get_ellipse_model_ransac_single_frame(
     Examples
     --------
     >>> import pyxem.utils.ransac_ellipse_tools as ret
-    >>> data = ret.EllipseModel((128, 130), (50, 60), 0.2).predict_xy(
+    >>> import skimage
+    >>> data = skimage.measure.EllipseModel((128, 130), (50, 60), 0.2).predict_xy(
     ...        np.arange(0, 2*np.pi, 0.5))
     >>> ellipse_model, inliers = ret.get_ellipse_model_ransac_single_frame(
     ...        data, xf=128, yf=128, rf_lim=5, semi_len_min=45,
@@ -359,9 +359,9 @@ def get_ellipse_model_ransac_single_frame(
     # This is (probably) due to a valid model being found first, then
     # additional inliers are found afterwards.
     for i in range(3):
-        model_ransac, inliers = ransac(
+        model_ransac, inliers = skimage.measure.ransac(
             data.astype(np.float32),
-            EllipseModel,
+            skimage.measure.EllipseModel,
             min_samples=min_samples,
             residual_threshold=residual_threshold,
             max_trials=max_trials,
@@ -430,9 +430,11 @@ def get_ellipse_model_ransac(
         this is None.
 
     """
-    if not isiterable(xf):
+    from tqdm.auto import tqdm
+
+    if not hs_utils.isiterable(xf):
         xf = np.ones(data.shape[:2]) * xf
-    if not isiterable(yf):
+    if not hs_utils.isiterable(yf):
         yf = np.ones(data.shape[:2]) * yf
 
     ellipse_array = np.zeros(data.shape[:2], dtype=object)
@@ -484,7 +486,7 @@ def _get_max_positions(signal, mask=None, num_points=5000):
         The number of points to be considered.
 
     """
-    if isinstance(signal, BaseSignal):
+    if isinstance(signal, hs.signals.BaseSignal):
         data = signal.data
     else:
         data = signal
@@ -700,7 +702,7 @@ def determine_ellipse(
         else:
             el, inlier = get_ellipse_model_ransac_single_frame(pos, **kwargs)
     else:
-        el = EllipseModel.from_estimate(data=pos)
+        el = skimage.measure.EllipseModel.from_estimate(data=pos)
     if el is not None:
         affine = _ellipse_to_affine(el.axis_lengths[1], el.axis_lengths[0], el.theta)
         center = (el.center[0], el.center[1])

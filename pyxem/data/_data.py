@@ -15,7 +15,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
-import orix.crystal_map
 import pooch
 from pyxem.data._registry import _file_names_hash, _urls
 import hyperspy.api as hs
@@ -375,6 +374,7 @@ def au_phase(allow_download=False, **kwargs):  # pragma: no cover
     >>> s = pxm.data.au_phase()
 
     """
+    import orix.crystal_map
 
     sample = Dataset("au.cif")
     file_path = sample.fetch_file_path(allow_download=allow_download)

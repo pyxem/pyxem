@@ -19,8 +19,7 @@
 """Utils for operating on insitu signals."""
 
 import numpy as np
-import scipy.ndimage as ndi
-import scipy.signal as ss
+import scipy
 
 
 def _register_drift_5d(data, shifts1, shifts2, order=1):
@@ -48,7 +47,7 @@ def _register_drift_5d(data, shifts1, shifts2, order=1):
     data_t = np.zeros_like(data)
     time_size = len(shifts1)
     for i in range(time_size):
-        data_t[i, :, :, :, :] = ndi.affine_transform(
+        data_t[i, :, :, :, :] = scipy.ndimage.affine_transform(
             data[i, :, :, :, :],
             np.identity(4),
             offset=(shifts1[i][0, 0, 0, 0], shifts2[i][0, 0, 0, 0], 0, 0),
@@ -79,7 +78,7 @@ def _register_drift_2d(data, shift1, shift2, order=1):
         2D array after translation according to shift vectors
 
     """
-    data_t = ndi.affine_transform(
+    data_t = scipy.ndimage.affine_transform(
         data, np.identity(2), offset=(shift1, shift2), order=order
     )
     return data_t
@@ -123,8 +122,10 @@ def _g2_2d(data, normalization="split", k1bin=1, k2bin=1, tbin=1):
     )
 
     # Calculate autocorrelation along time axis
-    autocorr = ss.fftconvolve(data, data[:, :, ::-1], mode="full", axes=[-1])
-    norm = ss.fftconvolve(np.ones(data.shape), data[:, :, ::-1], mode="full", axes=[-1])
+    autocorr = scipy.signal.fftconvolve(data, data[:, :, ::-1], mode="full", axes=[-1])
+    norm = scipy.signal.fftconvolve(
+        np.ones(data.shape), data[:, :, ::-1], mode="full", axes=[-1]
+    )
     if normalization == "self":
         overlap_factor = np.expand_dims(
             np.linspace(data.shape[-1], 1, data.shape[-1]), axis=(0, 1)

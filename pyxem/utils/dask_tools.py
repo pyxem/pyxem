@@ -22,12 +22,12 @@
 
 
 from pyxem.utils._deprecated import deprecated
-import scipy.ndimage as ndi
+import scipy
 
 
 @deprecated(since="0.18.0", removal="0.20.0")
 def align_single_frame(image, shifts, **kwargs):
-    temp_image = ndi.shift(image, shifts[::-1], **kwargs)
+    temp_image = scipy.ndimage.shift(image, shifts[::-1], **kwargs)
     return temp_image
 
 

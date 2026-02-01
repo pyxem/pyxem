@@ -47,7 +47,7 @@ extra_feature_requirements = {
         "coverage   >= 7.0",
     ],
     "dev": ["black ~= 24.1", "pre-commit >=1.16"],
-    "gpu": ["cupy >= 9.0.0"],
+    "gpu": ["cupy >= 9.0.0", "numba-cuda"],
     "dask": ["dask-image", "distributed"],
 }
 
@@ -88,8 +88,9 @@ setup(
     install_requires=[
         "dask",
         "diffsims       >= 0.7.0",  # ensure we use the latest version
-        "hyperspy       >= 2.2.0",  # Use axes_manager set/get functionality
+        "hyperspy       >= 2.4.0",  # improved lazy import
         "h5py",
+        "lazy-loader",
         "lmfit          >= 1.0.0",  # support for recent version of numpy
         "matplotlib     >= 3.7.5",
         "numba",
@@ -97,8 +98,8 @@ setup(
         "orix           >= 0.12.1",
         "pooch",
         "psutil",
-        "scikit-image   >= 0.19.0, !=0.21.0",  # regression in ellipse fitting"
-        "scikit-learn   >= 1.0",
+        "scikit-image   >= 0.19.0, !=0.21.0, <0.26.0",  # regression in ellipse fitting, EllipseModel issue in 0.26.0
+        "scikit-learn   >= 1.1.0",
         "shapely        > 2.0.0",  # major changes
         "scipy",
         "tqdm",

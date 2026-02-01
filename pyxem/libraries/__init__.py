@@ -19,6 +19,6 @@
 """Library of data for crystallography in pyxem.
 """
 
-from .calibration_library import CalibrationDataLibrary
+import lazy_loader
 
-__all__ = ["CalibrationDataLibrary"]
+__getattr__, __dir__, __all__ = lazy_loader.attach_stub(__name__, __file__)

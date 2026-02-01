@@ -2,9 +2,8 @@
 
 import numpy as np
 
-from scipy.ndimage import gaussian_filter, median_filter
-from skimage.filters.rank import mean as rank_mean
-from skimage.morphology import square
+import scipy
+import skimage
 from pyxem.utils.diffraction import regional_filter
 
 
@@ -24,9 +23,9 @@ def _subtract_radial_median(frame, center_x=128, center_y=128):
 
     Examples
     --------
-    >>> import pyxem.utils._dask as dt
+    >>> import pyxem.utils._background_subtraction as bs
     >>> s = pxm.data.dummy_data.get_cbed_signal()
-    >>> s_rem = dt._background_removal_single_frame_radial_median(s.data[0, 0])
+    >>> s_rem = bs._subtract_radial_median(s.data[0, 0])
     """
 
     y, x = np.indices((frame.shape))
@@ -59,13 +58,13 @@ def _subtract_dog(frame, min_sigma=1, max_sigma=55):
 
     Examples
     --------
-    >>> import pyxem.utils._dask as dt
-    >>> s = pxm.data.dummy_data.dummy_data.get_cbed_signal()
-    >>> s_rem = dt._background_removal_single_frame_dog(s.data[0, 0])
+    >>> import pyxem.utils._background_subtraction as bs
+    >>> s = pxm.data.dummy_data.get_cbed_signal()
+    >>> s_rem = bs._subtract_dog(s.data[0, 0])
 
     """
-    blur_max = gaussian_filter(frame, max_sigma)
-    blur_min = gaussian_filter(frame, min_sigma)
+    blur_max = scipy.ndimage.gaussian_filter(frame, max_sigma)
+    blur_min = scipy.ndimage.gaussian_filter(frame, min_sigma)
     return np.maximum(np.where(blur_min > blur_max, frame, 0) - blur_max, 0)
 
 
@@ -83,20 +82,27 @@ def _subtract_median(frame, footprint=19):
 
     Examples
     --------
-    >>> import pyxem.utils._dask as dt
+    >>> import pyxem.utils._background_subtraction as bs
     >>> s = pxm.data.dummy_data.get_cbed_signal()
-    >>> s_rem = dt._background_removal_single_frame_median(s.data[0, 0])
+    >>> s_rem = bs._subtract_median(s.data[0, 0])
 
     """
-    bg_subtracted = frame - median_filter(frame, size=footprint)
+    bg_subtracted = frame - scipy.ndimage.median_filter(frame, size=footprint)
     return bg_subtracted
 
 
 def _subtract_hdome(frame, **kwargs):
     """Background removal using h-dome filter."""
     max_value = np.max(frame)
-    bg_subtracted = rank_mean(
-        regional_filter(frame / max_value, **kwargs), footprint=square(3)
+    try:
+        footprint = skimage.morphology.footprint_rectangle((3, 3))
+    except AttributeError:
+        # deprecated in skimage 0.25.0
+        footprint = skimage.morphology.square(3)
+
+    bg_subtracted = skimage.filters.rank.mean(
+        regional_filter(frame / max_value, **kwargs),
+        footprint=footprint,
     )
     bg_subtracted = bg_subtracted / np.max(bg_subtracted)
     return bg_subtracted

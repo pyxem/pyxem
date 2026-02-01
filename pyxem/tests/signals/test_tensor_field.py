@@ -19,8 +19,8 @@
 import pytest
 import numpy as np
 
-from pyxem.signals.tensor_field import _polar_decomposition, _get_rotation_angle
-from pyxem.signals.tensor_field import DisplacementGradientMap
+from pyxem.signals._tensor_field import _polar_decomposition, _get_rotation_angle
+from pyxem.signals._tensor_field import DisplacementGradientMap
 
 
 @pytest.mark.parametrize(

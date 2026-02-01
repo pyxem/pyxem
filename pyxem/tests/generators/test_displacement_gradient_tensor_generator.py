@@ -17,7 +17,8 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 from pyxem.generators import get_DisplacementGradientMap
-from pyxem.signals.tensor_field import DisplacementGradientMap, StrainMap
+from pyxem.signals._tensor_field import DisplacementGradientMap
+from pyxem.signals._strain_map import StrainMap
 import hyperspy.api as hs
 import pytest
 import numpy as np

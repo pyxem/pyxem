@@ -23,14 +23,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy.ma import masked_where
-from scipy.ndimage import distance_transform_edt, label, binary_erosion
-from scipy.spatial import distance_matrix
-from scipy.signal import convolve2d
-from skimage.feature import peak_local_max
-from skimage.filters import sobel, threshold_li
-from skimage.morphology import disk
-from skimage.segmentation import watershed
-from sklearn.cluster import DBSCAN
+import scipy
+import skimage
 
 from pyxem.utils._deprecated import deprecated
 
@@ -131,25 +125,27 @@ def separate_watershed(
     if not isinstance(threshold, bool):
         mask = vdf_temp > np.max(vdf_temp) * threshold
     elif threshold:
-        th = threshold_li(vdf_temp)
+        th = skimage.filters.threshold_li(vdf_temp)
         mask = vdf_temp > th
     else:
         mask = vdf_temp.astype("bool")
 
     # Calculate the Eucledian distance from each point in the mask to the
     # nearest background point of value 0.
-    distance = distance_transform_edt(mask)
+    distance = scipy.ndimage.distance_transform_edt(mask)
 
     # If exclude_boarder is given, the edge of the distance is removed
     # by erosion. The distance image is used to find markers, and so the
     # erosion is done to avoid that markers are located at the edge
     # of the mask.
     if exclude_border > 0:
-        distance_mask = binary_erosion(distance, structure=disk(exclude_border))
+        distance_mask = scipy.ndimage.binary_erosion(
+            distance, structure=skimage.morphology.disk(exclude_border)
+        )
         distance = distance * distance_mask.astype("bool")
 
     # Find the coordinates of the local maxima of the distance transform.
-    local_maxi = peak_local_max(
+    local_maxi = skimage.feature.peak_local_max(
         distance,
         min_distance=1,
         num_peaks=max_number_of_grains,
@@ -166,7 +162,7 @@ def separate_watershed(
     # to segments smaller than min_size and should therefore not be
     # considered when deciding which maxima to use as markers.
     if min_size > 1:
-        labels_check = label(mask)[0]
+        labels_check = scipy.ndimage.label(mask)[0]
         delete_indices = []
         for i in np.arange(np.shape(maxi_coord1)[1]):
             index = np.transpose(maxi_coord1)[i]
@@ -180,6 +176,8 @@ def separate_watershed(
     # cluster, only the maximum closest to the average maxima position is
     # used as a marker.
     if min_distance > 1 and np.shape(maxi_coord1)[1] > 1:
+        from sklearn.cluster import DBSCAN
+
         clusters = DBSCAN(
             eps=min_distance,
             metric="euclidean",
@@ -189,7 +187,7 @@ def separate_watershed(
         for n in np.arange(clusters.labels_.max() + 1):
             maxi_coord1_n = np.transpose(maxi_coord1)[clusters.labels_ == n]
             com = np.average(maxi_coord1_n, axis=0).astype("int")
-            index = distance_matrix([com], maxi_coord1_n).argmin()
+            index = scipy.spatial.distance_matrix([com], maxi_coord1_n).argmin()
             index = maxi_coord1_n[index]
             local_maxi[index[0], index[1]] = True
 
@@ -198,26 +196,26 @@ def separate_watershed(
     # label value in a radius given by marker_radius centered at the
     # maximum position. This is done to make the segmentation more robust
     # to local changes in pixel values around the marker.
-    markers = label(local_maxi)[0]
+    markers = scipy.ndimage.label(local_maxi)[0]
     if marker_radius >= 1:
-        disk_mask = disk(marker_radius)
+        disk_mask = skimage.morphology.disk(marker_radius)
         for mm in np.arange(1, np.max(markers) + 1):
             im = np.zeros_like(markers)
             im[np.where(markers == mm)] = markers[np.where(markers == mm)]
-            markers_temp = convolve2d(
+            markers_temp = scipy.signal.convolve2d(
                 im, disk_mask, boundary="fill", mode="same", fillvalue=0
             )
             markers[np.where(markers_temp)] = mm
     markers = markers * mask
 
     # Find the edges of the VDF image using the Sobel transform.
-    elevation = sobel(vdf_temp)
+    elevation = skimage.filters.sobel(vdf_temp)
 
     # 'Flood' the elevation (i.e. edge) image from basins at the marker
     # positions. Find the locations where different basins meet, i.e.
     # the watershed lines (segment boundaries). Only search for segments
     # (labels) in the area defined by mask.
-    labels = watershed(elevation, markers=markers, mask=mask)
+    labels = skimage.segmentation.watershed(elevation, markers=markers, mask=mask)
 
     sep = np.zeros(
         (np.shape(vdf_temp)[0], np.shape(vdf_temp)[1], (np.max(labels))), dtype="int32"

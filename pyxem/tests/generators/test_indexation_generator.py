@@ -18,15 +18,9 @@
 
 import pytest
 import numpy as np
-import hyperspy.api as hs
-import dask.array as da
 
-from hyperspy._signals.signal2d import Signal2D
 from diffsims.libraries.vector_library import DiffractionVectorLibrary
 from diffsims.sims.diffraction_simulation import ProfileSimulation
-from diffsims.generators.diffraction_generator import DiffractionGenerator
-from diffsims.generators.library_generator import DiffractionLibraryGenerator
-from diffsims.libraries.structure_library import StructureLibrary
 
 from pyxem.generators import (
     IndexationGenerator,
@@ -39,7 +33,7 @@ from pyxem.signals import (
     ElectronDiffraction2D,
     DiffractionVectors,
 )
-from pyxem.utils.indexation_utils import OrientationResult
+from pyxem.utils.indexation import OrientationResult
 from unittest.mock import Mock
 import sys
 

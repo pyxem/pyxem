@@ -19,14 +19,13 @@
 """Utils for using dask."""
 
 import numpy as np
-import dask.array as da
-import scipy.ndimage as ndi
-from skimage import morphology
-from hyperspy.misc.utils import isiterable
+import scipy
+import skimage
+import hyperspy.misc.utils as hs_utils
 
 
 def _align_single_frame(image, shifts, **kwargs):
-    temp_image = ndi.shift(image, shifts[::-1], **kwargs)
+    temp_image = scipy.ndimage.shift(image, shifts[::-1], **kwargs)
     return temp_image
 
 
@@ -38,6 +37,8 @@ def _get_signal_dimension_chunk_slice_list(chunks):
     output will be in the HyperSpy order (x, y).
 
     """
+    import dask.array as da
+
     chunk_slice_raw_list = da.core.slices_from_chunks(chunks[-2:])
     chunk_slice_list = []
     for chunk_slice_raw in chunk_slice_raw_list:
@@ -77,15 +78,15 @@ def _intensity_peaks_image_single_frame(frame, peaks, disk_r):
 
     Examples
     --------
-    >>> import pyxem.utils.dask_tools as dt
-    >>> s = pxm.data.dummy_data.dummy_data.get_cbed_signal()
+    >>> import pyxem.utils._dask as dt
+    >>> s = pxm.data.dummy_data.get_cbed_signal()
     >>> peaks = np.array(([50,50],[25,50]))
     >>> intensity = dt._intensity_peaks_image_single_frame(
     ...     s.data[0,0,:,:], peaks, 5)
 
     """
     array_shape = peaks.shape
-    mask = morphology.disk(disk_r)
+    mask = skimage.morphology.disk(disk_r)
     size = np.shape(frame)
     intensity_array = np.zeros((array_shape[0], 3), dtype="float64")
     for i in range(array_shape[0]):
@@ -130,12 +131,14 @@ def _get_chunking(signal, chunk_shape=None, chunk_bytes=None):
     -------
     chunks : tuple
     """
+    import dask.array as da
+
     if chunk_bytes is None:
         chunk_bytes = "30MiB"
     nav_dim = signal.axes_manager.navigation_dimension
     sig_dim = signal.axes_manager.signal_dimension
     if chunk_shape is not None:
-        if not isiterable(chunk_shape):
+        if not hs_utils.isiterable(chunk_shape):
             chunk_shape = [chunk_shape] * nav_dim
 
     chunks_dict = {}
@@ -157,6 +160,8 @@ def _get_chunking(signal, chunk_shape=None, chunk_bytes=None):
 
 
 def _get_dask_array(signal, chunk_shape=None, chunk_bytes=None):
+    import dask.array as da
+
     if signal._lazy:
         dask_array = signal.data
     else:

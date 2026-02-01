@@ -18,13 +18,6 @@
 
 """Classes for analyzing components in a material"""
 
-from .reduced_intensity_correction_component import ReducedIntensityCorrectionComponent
-from .scattering_fit_component_lobato import ScatteringFitComponentLobato
-from .scattering_fit_component_xtables import ScatteringFitComponentXTables
+import lazy_loader
 
-
-__all__ = [
-    "ReducedIntensityCorrectionComponent",
-    "ScatteringFitComponentLobato",
-    "ScatteringFitComponentXTables",
-]
+__getattr__, __dir__, __all__ = lazy_loader.attach_stub(__name__, __file__)

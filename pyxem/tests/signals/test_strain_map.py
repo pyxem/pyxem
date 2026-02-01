@@ -24,7 +24,7 @@ from pyxem.tests.generators.test_displacement_gradient_tensor_generator import (
     generate_test_vectors,
 )
 from pyxem.generators import get_DisplacementGradientMap
-from pyxem.signals.strain_map import _get_rotation_matrix
+from pyxem.signals._strain_map import _get_rotation_matrix
 from pyxem.data import simulated_strain
 
 

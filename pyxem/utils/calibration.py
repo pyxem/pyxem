@@ -17,19 +17,23 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 """Utils for calibrating Diffraction Patterns."""
+from typing import Union
 
 import numpy as np
 import pint
 
 from diffsims.utils.sim_utils import get_electron_wavelength
-import hyperspy.api as hs
 from hyperspy.axes import UniformDataAxis
-from hyperspy.misc.utils import DictionaryTreeBrowser
 
-from pyxem.utils.indexation_utils import index_dataset_with_template_rotation
 from pyxem.utils._azimuthal_integrations import _get_control_points, _get_factors
 from pyxem.utils._deprecated import deprecated
-from typing import Union
+
+from hyperspy.misc import utils as hs_utils
+
+
+__all__ = [
+    "Calibration",
+]
 
 Number = Union[int, float]
 
@@ -85,7 +89,7 @@ def value2standard_units(
 
 def value2node(
     value: Union[str, pint.Quantity, Number],
-    metadata: DictionaryTreeBrowser,
+    metadata: "hs_utils.DictionaryTreeBrowser",
     metadata_key: str,
     standard_unit: Union[str, pint.Unit] = None,
 ) -> pint.Quantity:
@@ -838,7 +842,7 @@ def find_diffraction_calibration(
     max_excitation_error : float
         Maximum exacitation error.  Default is 0.01.
     kwargs
-        Keyword arguments passed to :meth:`index_dataset_with_template_rotation`.
+        Keyword arguments passed to :meth:`pyxem.utils.indexation.index_dataset_with_template_rotation``.
 
     Returns
     -------
@@ -947,7 +951,7 @@ def _calibration_iteration(
     max_excitation_error : float
         Maximum exacitation error.  Default is 0.01.
     kwargs
-        Keyword arguments passed to :meth:`index_dataset_with_template_rotation`.
+        Keyword arguments passed to :meth:`pyxem.utils.indexation.index_dataset_with_template_rotation`.
 
     Returns
     -------
@@ -1006,12 +1010,14 @@ def _create_check_diflib(
     max_excitation_error : float
         Maximum exacitation error.  Default is 0.01.
     kwargs
-        Keyword arguments passed to :meth:`pyxem.utisl.indexation_utils.index_dataset_with_template_rotation`.
+        Keyword arguments passed to :meth:`pyxem.utils.indexation.index_dataset_with_template_rotation`.
 
     Returns
     -------
     correlations : numpy.ndarray
     """
+    # lazily import index_dataset_with_template_rotation
+    from pyxem.utils.indexation import index_dataset_with_template_rotation
 
     half_shape = (images.data.shape[-2] // 2, images.data.shape[-1] // 2)
     reciprocal_r = np.sqrt(half_shape[0] ** 2 + half_shape[1] ** 2) * calibration_guess

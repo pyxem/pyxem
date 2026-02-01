@@ -16,6 +16,8 @@ Added
 - Add :meth:`pyxem.signals.BeamShift.plot_on_signal` function to visualise beam position on signal plot. (#1148)
 - Add ``subpixel`` precision for ``"blur"`` method in :meth:`pyxem.signals.Diffraction2D.get_direct_beam_position`. (#1148)
 - Add Gaussian prefiltering in navigation space in :meth:`pyxem.signals.Diffraction2D.get_direct_beam_position`. (#1148)
+- Implement lazy import to speed up ``pyxem`` import time and reduce memory usage by deferring the import of dependencies until they are actually needed. (#1176)
+
 
 Changed
 -------

@@ -29,42 +29,9 @@ is added to the cache directory. Any old directories are not deleted automatical
 then be deleted manually if desired.
 """
 
-from pyxem.data.simulated_tilt import tilt_boundary_data
-from pyxem.data.simulated_si import (
-    si_phase,
-    si_tilt,
-    si_grains,
-    si_grains_simple,
-    si_rotations_line,
-)
+import lazy_loader
 
-from pyxem.data.simulated_overlap import simulated_overlap
-
-from pyxem.data.simulated_fe import fe_bcc_phase, fe_fcc_phase, fe_multi_phase_grains
-from pyxem.data._data import (
-    au_grating,
-    pdnip_glass,
-    zrnb_precipitate,
-    twinned_nanowire,
-    sample_with_g,
-    mgo_nanocrystals,
-    organic_semiconductor,
-    cuag_orientations,
-    feal_stripes,
-    sped_ag,
-    pdcusi_insitu,
-    au_grating_20cm,
-    small_ptychography,
-    au_phase,
-    zrcual_1,
-    zrcual_2,
-    zrcual_3,
-)
-from pyxem.data.simulated_dpc import (
-    simulated_stripes,
-    simulated_constant_shift_magnitude,
-    simulated_pn_junction,
-)
+__getattr__, __dir__, __all__ = lazy_loader.attach_stub(__name__, __file__)
 
 __doctest_skip__ = [
     "au_grating",
@@ -83,37 +50,4 @@ __doctest_skip__ = [
     "zrcual_2",
     "zrcual_3",
     "small_ptychography",
-]
-
-from pyxem.data.simulated_strain import simulated_strain
-
-__all__ = [
-    "au_grating",
-    "pdnip_glass",
-    "zrnb_precipitate",
-    "twinned_nanowire",
-    "sample_with_g",
-    "mgo_nanocrystals",
-    "tilt_boundary_data",
-    "si_phase",
-    "si_tilt",
-    "si_grains",
-    "si_grains_simple",
-    "si_rotations_line",
-    "simulated_stripes",
-    "fe_multi_phase_grains",
-    "fe_fcc_phase",
-    "fe_bcc_phase",
-    "cuag_orientations",
-    "organic_semiconductor",
-    "feal_stripes",
-    "sped_ag",
-    "pdcusi_insitu",
-    "simulated_constant_shift_magnitude",
-    "au_grating_20cm",
-    "small_ptychography",
-    "au_phase",
-    "simulated_overlap",
-    "simulated_strain",
-    "simulated_pn_junction",
 ]

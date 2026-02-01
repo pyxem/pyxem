@@ -22,8 +22,8 @@ import numpy as np
 import hyperspy.api as hs
 from sklearn.cluster import DBSCAN
 
-from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
-from pyxem.signals.labeled_diffraction_vectors2d import LabeledDiffractionVectors2D
+from pyxem.signals._electron_diffraction2d import ElectronDiffraction2D
+from pyxem.signals._labeled_diffraction_vectors2d import LabeledDiffractionVectors2D
 
 
 class TestLabelledDiffractionVectors:
