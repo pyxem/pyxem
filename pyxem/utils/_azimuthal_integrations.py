@@ -199,7 +199,7 @@ def _slice_radial_integrate1d(
 
 
 @numba.njit(cache=True)
-def _clip_poly_by_box(px, py, n_in, xmin, ymin, xmax, ymax, out_x, out_y):
+def _clip_poly_by_box(px, py, n_in, xmin, ymin, xmax, ymax, out_x, out_y):  # pragma: no cover
     """Clip a polygon against an axis-aligned box using Sutherland-Hodgman.
 
     Parameters
@@ -303,7 +303,7 @@ def _clip_poly_by_box(px, py, n_in, xmin, ymin, xmax, ymax, out_x, out_y):
 
 
 @numba.njit(cache=True)
-def _poly_area_2d(vx, vy, n):
+def _poly_area_2d(vx, vy, n):  # pragma: no cover
     """Shoelace formula for the signed area of an n-vertex polygon."""
     area = 0.0
     for i in range(n):
@@ -313,7 +313,7 @@ def _poly_area_2d(vx, vy, n):
 
 
 @numba.njit(cache=True, parallel=True)
-def _compute_factors_numba(
+def _compute_factors_numba(  # pragma: no cover
     control_points, slices, x_ext_left, x_ext_right, y_ext_left, y_ext_right
 ):
     """Parallel numba kernel that replaces the shapely intersection loop.
