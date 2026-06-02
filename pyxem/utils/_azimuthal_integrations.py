@@ -199,7 +199,9 @@ def _slice_radial_integrate1d(
 
 
 @numba.njit(cache=True)
-def _clip_poly_by_box(px, py, n_in, xmin, ymin, xmax, ymax, out_x, out_y):  # pragma: no cover
+def _clip_poly_by_box(
+    px, py, n_in, xmin, ymin, xmax, ymax, out_x, out_y
+):  # pragma: no cover
     """Clip a polygon against an axis-aligned box using Sutherland-Hodgman.
 
     Parameters
@@ -397,7 +399,6 @@ def _get_factors(control_points, slices, pixel_extents):
     return _compute_factors_numba(
         cp_arr, slices_arr, x_ext_left, x_ext_right, y_ext_left, y_ext_right
     )
-
 
 
 def _get_control_points(npt, npt_azim, radial_range, azimuthal_range, affine):
