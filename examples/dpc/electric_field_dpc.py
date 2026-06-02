@@ -114,4 +114,4 @@ for i, s in enumerate([E_x, E_y]):
 line.add_widget(rot_signal)
 
 # %%
-# sphinx_gallery_thumbnail_number = 5
+# sphinx_gallery_thumbnail_number = 3
