@@ -6,6 +6,10 @@ Strain Mapping
 ==============
 Below is a gallery of examples showing how to perform strain mapping in pyxem.
 
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
 
 .. raw:: html
 

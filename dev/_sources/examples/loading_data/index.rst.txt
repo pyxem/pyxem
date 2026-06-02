@@ -6,6 +6,10 @@ Loading Data
 ============
 Below is a gallery of examples on how to load and calibrate data using pyxem.
 
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
 
 .. raw:: html
 

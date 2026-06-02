@@ -6,6 +6,10 @@ Orientation Mapping
 ===================
 Below is a gallery of examples on how to do orientation mapping in pyxem.
 
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
 
 .. raw:: html
 

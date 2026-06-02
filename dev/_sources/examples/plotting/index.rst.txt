@@ -6,6 +6,10 @@ Plotting
 ========
 Below is a gallery of examples on how to plot data in pyxem.
 
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
 
 .. raw:: html
 

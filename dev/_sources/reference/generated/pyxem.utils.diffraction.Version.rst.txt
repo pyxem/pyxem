@@ -67,6 +67,9 @@ Version
         :template: custom-method-template.rst
         
         
+        
+        Version.from_parts
+        
     
     
 

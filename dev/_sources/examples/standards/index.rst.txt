@@ -6,6 +6,10 @@ Standards
 =========
 Below is a gallery of examples showing different standards in pyxem
 
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
 
 .. raw:: html
 

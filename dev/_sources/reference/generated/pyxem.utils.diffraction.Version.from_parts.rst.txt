@@ -1,0 +1,6 @@
+from\_parts
+===========
+
+.. currentmodule:: pyxem.utils.diffraction
+
+.. automethod:: Version.from_parts

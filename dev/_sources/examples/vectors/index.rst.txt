@@ -6,6 +6,10 @@ Vectors
 =======
 Below is a gallery of examples for operations on vectors.
 
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
 
 .. raw:: html
 

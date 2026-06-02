@@ -27,40 +27,42 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="_static/styles/theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d75fae25" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="_static/sphinx-codeautolink.css?v=b2176991" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=fd6457a4" />
     <link rel="stylesheet" type="text/css" href="_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- So that users can add custom icons -->
-  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="_static/scripts/fontawesome.js?digest=0790524f97105ba85085"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=0790524f97105ba85085" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085" />
 
     <script src="_static/documentation_options.js?v=88e4c0c0"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/sg-tags.js?v=d80f6fa4"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="_static/copybutton.js?v=f281be69"></script>
     <script src="_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'changelog';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_version = '0.18.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://pyxem.readthedocs.io/en/latest/_static/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.21';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
             false;
         </script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="icon" href="_static/logo.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -68,20 +70,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="0.21.0" />
+  
+    
+    <script src="_static/searchtools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="searchindex.js"></script>
+  
   </head>
-  
-  
-  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
-
+  <body data-default-mode="">
   
   
   <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
   
   <div id="pst-scroll-pixel-helper"></div>
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-
+  
+  
+  
   
   <dialog id="pst-search-dialog">
     
@@ -110,7 +118,7 @@
 </aside>
 
   
-    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
   <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
@@ -241,11 +249,18 @@
       
         <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
       
         <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -258,8 +273,7 @@
           
           
           
-          <a href="https://github.com/pyxem/pyxem" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/pyxem/pyxem" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
 </ul></div>
       
@@ -369,11 +383,18 @@
         
           <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
         
           <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -386,8 +407,7 @@
           
           
           
-          <a href="https://github.com/pyxem/pyxem" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/pyxem/pyxem" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
 </ul></div>
         
@@ -396,7 +416,14 @@
   </div>
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar"><svg class="pst-icon svg-inline--fa" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
         <div class="sidebar-primary-item">
+
 <nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
@@ -476,6 +503,8 @@ and this project adheres to <a class="reference external" href="https://semver.o
 <section id="changed">
 <h3>Changed<a class="headerlink" href="#changed" title="Link to this heading">#</a></h3>
 <ul class="simple">
+<li><p>Replace shapely-based pixel overlap calculation in azimuthal integration with a numba-parallelized Sutherland-Hodgman clipper, giving a ~400-500× speedup. (#1185)</p></li>
+<li><p>Remove <code class="docutils literal notranslate"><span class="pre">shapely</span></code> as an install dependency. (#1185)</p></li>
 <li><p>Drop support for python 3.8. (#1147)</p></li>
 <li><p>Refactor <a class="reference internal" href="reference/generated/pyxem.signals.Diffraction2D.center_direct_beam.html#pyxem.signals.Diffraction2D.center_direct_beam" title="pyxem.signals.Diffraction2D.center_direct_beam"><code class="xref py py-meth docutils literal notranslate"><span class="pre">center_direct_beam()</span></code></a> and <a class="reference internal" href="reference/generated/pyxem.signals.Diffraction2D.shift_diffraction.html#pyxem.signals.Diffraction2D.shift_diffraction" title="pyxem.signals.Diffraction2D.shift_diffraction"><code class="xref py py-meth docutils literal notranslate"><span class="pre">shift_diffraction()</span></code></a> to use consistent signature and avoid code duplication and  (#1144)</p></li>
 <li><p>Speed up documentation build by caching the gallery of examples and enable parallel build. (#1152)</p></li>
@@ -485,6 +514,7 @@ and this project adheres to <a class="reference external" href="https://semver.o
 <section id="fixed">
 <h3>Fixed<a class="headerlink" href="#fixed" title="Link to this heading">#</a></h3>
 <ul class="simple">
+<li><p>Fix <a class="reference internal" href="reference/generated/pyxem.utils.ransac_ellipse_tools.determine_ellipse.html#pyxem.utils.ransac_ellipse_tools.determine_ellipse" title="pyxem.utils.ransac_ellipse_tools.determine_ellipse"><code class="xref py py-func docutils literal notranslate"><span class="pre">determine_ellipse()</span></code></a> packing ellipse parameters into a single <code class="docutils literal notranslate"><span class="pre">params</span></code> array when <code class="docutils literal notranslate"><span class="pre">return_params=True</span></code>, so the return signature matches <code class="docutils literal notranslate"><span class="pre">(center,</span> <span class="pre">affine,</span> <span class="pre">params,</span> <span class="pre">pos[,</span> <span class="pre">inlier])</span></code> as expected by callers. (#1185)</p></li>
 <li><p>Add explicit support for python 3.12 and 3.13 and update test matrix. (#1147)</p></li>
 <li><p>Silence axes warning in functions using <a class="reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.signals/BaseSignal.html#hyperspy.api.signals.BaseSignal.map" title="(in HyperSpy v2.4)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">map()</span></code></a>. (#1168)</p></li>
 </ul>
@@ -494,6 +524,12 @@ and this project adheres to <a class="reference external" href="https://semver.o
 <ul class="simple">
 <li><p>The <code class="docutils literal notranslate"><span class="pre">shift_x</span></code> and <code class="docutils literal notranslate"><span class="pre">shift_y</span></code> arguments in <a class="reference internal" href="reference/generated/pyxem.signals.Diffraction2D.shift_diffraction.html#pyxem.signals.Diffraction2D.shift_diffraction" title="pyxem.signals.Diffraction2D.shift_diffraction"><code class="xref py py-meth docutils literal notranslate"><span class="pre">shift_diffraction()</span></code></a> are deprecated in favor of the <code class="docutils literal notranslate"><span class="pre">shifts</span></code> argument. (#1144)</p></li>
 <li><p>The <code class="docutils literal notranslate"><span class="pre">interpolation_order</span></code> argument in <a class="reference internal" href="reference/generated/pyxem.signals.Diffraction2D.shift_diffraction.html#pyxem.signals.Diffraction2D.shift_diffraction" title="pyxem.signals.Diffraction2D.shift_diffraction"><code class="xref py py-meth docutils literal notranslate"><span class="pre">shift_diffraction()</span></code></a> have been renamed to <code class="docutils literal notranslate"><span class="pre">order</span></code> to be consistent with the signature of <a class="reference internal" href="reference/generated/pyxem.signals.Diffraction2D.center_direct_beam.html#pyxem.signals.Diffraction2D.center_direct_beam" title="pyxem.signals.Diffraction2D.center_direct_beam"><code class="xref py py-meth docutils literal notranslate"><span class="pre">center_direct_beam()</span></code></a> and <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.shift.html#scipy.ndimage.shift" title="(in SciPy v1.17.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.ndimage.shift()</span></code></a>. (#1144)</p></li>
+</ul>
+</section>
+<section id="removed">
+<h3>Removed<a class="headerlink" href="#removed" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Remove internal <code class="docutils literal notranslate"><span class="pre">get_boxes</span></code> helper from <code class="docutils literal notranslate"><span class="pre">pyxem.utils._azimuthal_integrations</span></code>; it was only used by the old shapely-based <code class="docutils literal notranslate"><span class="pre">_get_factors</span></code> and is superseded by the numba kernel. (#1185)</p></li>
 </ul>
 </section>
 </section>
@@ -539,8 +575,8 @@ and this project adheres to <a class="reference external" href="https://semver.o
 <li><p>Added support for numpy 2.0.0</p></li>
 </ul>
 </section>
-<section id="removed">
-<h3>Removed<a class="headerlink" href="#removed" title="Link to this heading">#</a></h3>
+<section id="id5">
+<h3>Removed<a class="headerlink" href="#id5" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Removed Dependency on pyfai.  Azimuthal integration is all handled internally (#1103)</p></li>
 </ul>
@@ -548,15 +584,15 @@ and this project adheres to <a class="reference external" href="https://semver.o
 </section>
 <section id="version-0-19-1">
 <h2>2024-06-10 - version 0.19.1<a class="headerlink" href="#version-0-19-1" title="Link to this heading">#</a></h2>
-<section id="id5">
-<h3>Fixed<a class="headerlink" href="#id5" title="Link to this heading">#</a></h3>
+<section id="id6">
+<h3>Fixed<a class="headerlink" href="#id6" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Fixed bugs releated to orientation mapping with multiple phases and the plotting of the
 vector annotations. (#1090)</p></li>
 </ul>
 </section>
-<section id="id6">
-<h3>Added<a class="headerlink" href="#id6" title="Link to this heading">#</a></h3>
+<section id="id7">
+<h3>Added<a class="headerlink" href="#id7" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Added a way to fit linear planes in <a class="reference internal" href="reference/generated/pyxem.signals.BeamShift.get_linear_plane.html#pyxem.signals.BeamShift.get_linear_plane" title="pyxem.signals.BeamShift.get_linear_plane"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyxem.signals.BeamShift.get_linear_plane()</span></code></a> by minimizing magnitude variance. (#1116)</p></li>
 <li><p>In <a class="reference internal" href="reference/generated/pyxem.signals.BeamShift.get_linear_plane.html#pyxem.signals.BeamShift.get_linear_plane" title="pyxem.signals.BeamShift.get_linear_plane"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyxem.signals.BeamShift.get_linear_plane()</span></code></a> exposed initial values for optimization to make it more flexible. (#1116)</p></li>
@@ -578,14 +614,14 @@ vector annotations. (#1090)</p></li>
 <li><p><cite>gaussian_blur</cite> and <cite>flip_axis_90_degrees</cite> has been deprecated, as this can easily be done using <cite>s.map</cite></p></li>
 </ul>
 </section>
-<section id="id7">
-<h3>Fixed<a class="headerlink" href="#id7" title="Link to this heading">#</a></h3>
+<section id="id8">
+<h3>Fixed<a class="headerlink" href="#id8" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Fixed indexing error in <a class="reference internal" href="reference/generated/pyxem.signals.Diffraction2D.get_direct_beam_position.html#pyxem.signals.Diffraction2D.get_direct_beam_position" title="pyxem.signals.Diffraction2D.get_direct_beam_position"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_direct_beam_position()</span></code></a> (#1080)</p></li>
 </ul>
 </section>
-<section id="id8">
-<h3>Added<a class="headerlink" href="#id8" title="Link to this heading">#</a></h3>
+<section id="id9">
+<h3>Added<a class="headerlink" href="#id9" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Added Examples for doing a Circular Hough Transform and Increased Documentation for Filtering Data (#1082)</p></li>
 <li><p>Added <cite>circular_background</cite> to <a class="reference internal" href="reference/generated/pyxem.signals.Diffraction2D.template_match_disk.html#pyxem.signals.Diffraction2D.template_match_disk" title="pyxem.signals.Diffraction2D.template_match_disk"><code class="xref py py-meth docutils literal notranslate"><span class="pre">template_match_disk()</span></code></a> to account for
@@ -602,8 +638,8 @@ based on a <a class="reference internal" href="reference/generated/pyxem.signals
 </section>
 <section id="version-0-18-0">
 <h2>2024-05-08 - version 0.18.0<a class="headerlink" href="#version-0-18-0" title="Link to this heading">#</a></h2>
-<section id="id9">
-<h3>Fixed<a class="headerlink" href="#id9" title="Link to this heading">#</a></h3>
+<section id="id10">
+<h3>Fixed<a class="headerlink" href="#id10" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Fixed pytest failure. Changed <code class="docutils literal notranslate"><span class="pre">setup</span></code> –&gt; <code class="docutils literal notranslate"><span class="pre">setup_method</span></code> (#997)</p></li>
 <li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyxem.signals.Diffraction2D.center_of_mass()</span></code> now uses the <code class="xref py py-meth docutils literal notranslate"><span class="pre">hyperspy.api.BaseSignal.map()</span></code> function. (#1005)</p></li>
@@ -615,8 +651,8 @@ based on a <a class="reference internal" href="reference/generated/pyxem.signals
 <li><p>Fix handling of azimuthal range in <a class="reference internal" href="reference/generated/pyxem.signals.Diffraction2D.get_azimuthal_integral2d.html#pyxem.signals.Diffraction2D.get_azimuthal_integral2d" title="pyxem.signals.Diffraction2D.get_azimuthal_integral2d"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyxem.signals.Diffraction2D.get_azimuthal_integral2d()</span></code></a> (#1060)</p></li>
 </ul>
 </section>
-<section id="id10">
-<h3>Added<a class="headerlink" href="#id10" title="Link to this heading">#</a></h3>
+<section id="id11">
+<h3>Added<a class="headerlink" href="#id11" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Added <code class="xref py py-class docutils literal notranslate"><span class="pre">pyxem.utils.calibration_utils.Calibration</span></code> class  for calibrating the signal axes of a 4-D STEM dataset(#993)</p></li>
 <li><p>Added <code class="xref py py-meth docutils literal notranslate"><span class="pre">pyxem.signals.Diffraction2D.get_azimuthal_integral1D()</span></code> method to calculate the azimuthal integral of a 2D diffraction pattern (#1008)</p></li>
@@ -630,8 +666,8 @@ from a 4D STEM dataset (#1014)</p></li>
 <li><p>Added <a class="reference internal" href="reference/generated/pyxem.signals.PolarDiffraction2D.subtract_diffraction_background.html#pyxem.signals.PolarDiffraction2D.subtract_diffraction_background" title="pyxem.signals.PolarDiffraction2D.subtract_diffraction_background"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyxem.signals.PolarDiffraction2D.subtract_diffraction_background()</span></code></a> for polar-specific background subtraction (#1062)</p></li>
 </ul>
 </section>
-<section id="id11">
-<h3>Deprecated<a class="headerlink" href="#id11" title="Link to this heading">#</a></h3>
+<section id="id12">
+<h3>Deprecated<a class="headerlink" href="#id12" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>The module &amp; all functions within <code class="docutils literal notranslate"><span class="pre">utils.reduced_intensity1d</span></code> are deprecated in favour of using the methods of <cite>ReducedIntensity1D</cite> (#994).</p></li>
 <li><p>Deprecated <code class="docutils literal notranslate"><span class="pre">CalibrationGenerator</span></code> and <code class="docutils literal notranslate"><span class="pre">CalibrationLibrary</span></code> in favour of <a class="reference internal" href="reference/generated/pyxem.utils.calibration.Calibration.html#pyxem.utils.calibration.Calibration" title="pyxem.utils.calibration.Calibration"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyxem.utils.calibration.Calibration</span></code></a> class (#1000)</p></li>
@@ -654,8 +690,8 @@ favor of  <a class="reference internal" href="reference/generated/pyxem.signals.
 <li><p><code class="docutils literal notranslate"><span class="pre">dummy_data</span></code> that content is now available under <code class="docutils literal notranslate"><span class="pre">data.dummy_data</span></code></p></li>
 </ul>
 </section>
-<section id="id12">
-<h3>Changed<a class="headerlink" href="#id12" title="Link to this heading">#</a></h3>
+<section id="id13">
+<h3>Changed<a class="headerlink" href="#id13" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Subpixel refinement now a function of the <a class="reference internal" href="reference/generated/pyxem.signals.DiffractionVectors.html#pyxem.signals.DiffractionVectors" title="pyxem.signals.DiffractionVectors"><code class="xref py py-class docutils literal notranslate"><span class="pre">DiffractionVectors</span></code></a> class (#980)</p></li>
 <li><p>The <a class="reference internal" href="reference/generated/pyxem.generators.SubpixelrefinementGenerator.html#pyxem.generators.SubpixelrefinementGenerator" title="pyxem.generators.SubpixelrefinementGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SubpixelrefinementGenerator</span></code></a> class has been deprecated (#980)</p></li>
@@ -664,8 +700,8 @@ favor of  <a class="reference internal" href="reference/generated/pyxem.signals.
 </section>
 <section id="version-0-17-0">
 <h2>2024-01-05 - version 0.17.0<a class="headerlink" href="#version-0-17-0" title="Link to this heading">#</a></h2>
-<section id="id13">
-<h3>Added<a class="headerlink" href="#id13" title="Link to this heading">#</a></h3>
+<section id="id14">
+<h3>Added<a class="headerlink" href="#id14" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>LazyDiffractionVectors are now supported(#969)</p></li>
 <li><p>DiffractionVectors now support intensity(#969)</p></li>
@@ -678,14 +714,14 @@ favor of  <a class="reference internal" href="reference/generated/pyxem.signals.
 <li><p>Added <code class="xref py py-class docutils literal notranslate"><span class="pre">pyxem.signals.LabeledDiffractionVectors</span></code> for labeled diffraction vectors after clustering (#981)</p></li>
 </ul>
 </section>
-<section id="id14">
-<h3>Changed<a class="headerlink" href="#id14" title="Link to this heading">#</a></h3>
+<section id="id15">
+<h3>Changed<a class="headerlink" href="#id15" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Revised the pyxem logo banner and favicon (#988)</p></li>
 </ul>
 </section>
-<section id="id15">
-<h3>Fixed<a class="headerlink" href="#id15" title="Link to this heading">#</a></h3>
+<section id="id16">
+<h3>Fixed<a class="headerlink" href="#id16" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Update pyxem to work with hyperspy 2.0.0 (#969)</p></li>
 <li><p>Fixed slow markers (#969)</p></li>
@@ -695,8 +731,8 @@ for a more consistent API (#972)</p></li>
 <li><p>Fix <a class="reference internal" href="reference/generated/pyxem.data.zrnb_precipitate.html#pyxem.data.zrnb_precipitate" title="pyxem.data.zrnb_precipitate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">zrnb_precipitate()</span></code></a> dataset to point to proper dataset</p></li>
 </ul>
 </section>
-<section id="id16">
-<h3>Removed<a class="headerlink" href="#id16" title="Link to this heading">#</a></h3>
+<section id="id17">
+<h3>Removed<a class="headerlink" href="#id17" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Removed MIB reader (#979) in favor of <a class="github reference external" href="https://github.com/hyperspy/rosettasciio/pull/174">hyperspy/rosettasciio#174</a></p></li>
 <li><p>Support for Hyperspy 1.x.x is not supported.  Use pyxem 0.16.0 instead if using Hyperspy 1.x.x (#969)</p></li>
@@ -705,8 +741,8 @@ for a more consistent API (#972)</p></li>
 </section>
 <section id="version-0-16-0">
 <h2>2023-11-14 - version 0.16.0<a class="headerlink" href="#version-0-16-0" title="Link to this heading">#</a></h2>
-<section id="id17">
-<h3>Added<a class="headerlink" href="#id17" title="Link to this heading">#</a></h3>
+<section id="id18">
+<h3>Added<a class="headerlink" href="#id18" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Added <cite>magnitude_limits</cite> to <cite>DPCSignal2D</cite> methods (#949)</p></li>
 <li><p>Added <a class="reference internal" href="reference/generated/pyxem.signals.LazyCorrelation1D.html#pyxem.signals.LazyCorrelation1D" title="pyxem.signals.LazyCorrelation1D"><code class="xref py py-class docutils literal notranslate"><span class="pre">LazyCorrelation1D</span></code></a> for lazy Correlation1D signals</p></li>
@@ -715,8 +751,8 @@ for a more consistent API (#972)</p></li>
 <li><p>Add new <a class="reference internal" href="reference/generated/pyxem.signals.InSituDiffraction2D.html#pyxem.signals.InSituDiffraction2D" title="pyxem.signals.InSituDiffraction2D"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyxem.signals.InSituDiffraction2D</span></code></a> class for in-situ diffraction data</p></li>
 </ul>
 </section>
-<section id="id18">
-<h3>Fixed<a class="headerlink" href="#id18" title="Link to this heading">#</a></h3>
+<section id="id19">
+<h3>Fixed<a class="headerlink" href="#id19" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Remove <code class="docutils literal notranslate"><span class="pre">ipywidgets</span></code> from requirements as it is not a dependency</p></li>
 <li><p>Set skimage != to version 0.21.0 because of regression</p></li>
@@ -729,8 +765,8 @@ passing orientations as tuples.</p></li>
 </section>
 <section id="version-0-15-1">
 <h2>2023-05-08 - version 0.15.1<a class="headerlink" href="#version-0-15-1" title="Link to this heading">#</a></h2>
-<section id="id19">
-<h3>Fixed<a class="headerlink" href="#id19" title="Link to this heading">#</a></h3>
+<section id="id20">
+<h3>Fixed<a class="headerlink" href="#id20" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Fixed type error in <code class="docutils literal notranslate"><span class="pre">separate_watershed</span></code> with scikit-image 0.21 (#921)</p></li>
 <li><p>Fixed VDF creation from peaks using generators.VirtualDarkFieldGenerator.get_virtual_dark_field_images (#926)</p></li>
@@ -741,8 +777,8 @@ passing orientations as tuples.</p></li>
 </section>
 <section id="version-0-15-0">
 <h2>2023-04-06 - version 0.15.0<a class="headerlink" href="#version-0-15-0" title="Link to this heading">#</a></h2>
-<section id="id20">
-<h3>Added<a class="headerlink" href="#id20" title="Link to this heading">#</a></h3>
+<section id="id21">
+<h3>Added<a class="headerlink" href="#id21" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Added damp_extrapolate_to_zero to ReducedIntensity1D</p></li>
 <li><p>Added in deprecation wrapper class to wrap deprecated functions in pyxem.</p></li>
@@ -753,8 +789,8 @@ to be passed to <cite>phase_cross_correlation</cite> (#907)</p></li>
 <li><p>Added <cite>LazyVirtualDarkField</cite> signal</p></li>
 </ul>
 </section>
-<section id="id21">
-<h3>Changed<a class="headerlink" href="#id21" title="Link to this heading">#</a></h3>
+<section id="id22">
+<h3>Changed<a class="headerlink" href="#id22" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Sklearn is now required to be on the 1.0 series.</p></li>
 <li><p>Changed <cite>set_signal_dimension</cite> to <cite>Hyperspy.signals.BaseSignal.transpose</cite></p></li>
@@ -767,8 +803,8 @@ to be passed to <cite>phase_cross_correlation</cite> (#907)</p></li>
 <li><p>Increased minimal version of Matplotlib to &gt;= 3.3</p></li>
 </ul>
 </section>
-<section id="id22">
-<h3>Fixed<a class="headerlink" href="#id22" title="Link to this heading">#</a></h3>
+<section id="id23">
+<h3>Fixed<a class="headerlink" href="#id23" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Fixed a factor of 1/2 missing in ScatteringFitComponentXTables</p></li>
 <li><p>Fixed error related to <cite>DiffractionSignal2D.apply_affine_transformation</cite> when multiple affine transformations are given. (#870)</p></li>
@@ -782,15 +818,15 @@ for ragged arrays. (#880 &amp; #881)</p></li>
 </section>
 <section id="version-0-14-2">
 <h2>2022-06-15 - version 0.14.2<a class="headerlink" href="#version-0-14-2" title="Link to this heading">#</a></h2>
-<section id="id23">
-<h3>Changed<a class="headerlink" href="#id23" title="Link to this heading">#</a></h3>
+<section id="id24">
+<h3>Changed<a class="headerlink" href="#id24" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Increase minimal version of orix to &gt;= 0.9.</p></li>
 <li><p>Increase minimal version of diffsims to &gt;= 0.5.</p></li>
 </ul>
 </section>
-<section id="id24">
-<h3>Fixed<a class="headerlink" href="#id24" title="Link to this heading">#</a></h3>
+<section id="id25">
+<h3>Fixed<a class="headerlink" href="#id25" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Fix bug in <cite>get_DisplacementGradientMap</cite> (#852)</p></li>
 <li><p>Fix template matching bugs (originally fixed in #771 but omitted from 0.14 series by accident)</p></li>
@@ -799,8 +835,8 @@ for ragged arrays. (#880 &amp; #881)</p></li>
 </section>
 <section id="version-0-14-1">
 <h2>2022-04-29 - version 0.14.1<a class="headerlink" href="#version-0-14-1" title="Link to this heading">#</a></h2>
-<section id="id25">
-<h3>Added<a class="headerlink" href="#id25" title="Link to this heading">#</a></h3>
+<section id="id26">
+<h3>Added<a class="headerlink" href="#id26" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Getting and plot integrated intensity now support signals containing nan (#722)</p></li>
 <li><p>Add Symmetry1D signal class and symmetry analysis methods (#724)</p></li>
@@ -812,15 +848,15 @@ for ragged arrays. (#880 &amp; #881)</p></li>
 <li><p>Added the ability to determine the center and ellipticity using the <cite>determine_ellipse</cite> function.</p></li>
 </ul>
 </section>
-<section id="id26">
-<h3>Removed<a class="headerlink" href="#id26" title="Link to this heading">#</a></h3>
+<section id="id27">
+<h3>Removed<a class="headerlink" href="#id27" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>lazy_* virtual imaging has been removed, use get_integrated_intensity (#722)</p></li>
 <li><p><cite>big_data_utils</cite> has been removed as this is not the modern way of attacking this problem</p></li>
 <li><p>similarly, <cite>TemplateIndexationGenerator</cite> has been removed as the Accelerated approach is far better (#823)</p></li>
 </ul>
-<section id="id27">
-<h4>Fixed<a class="headerlink" href="#id27" title="Link to this heading">#</a></h4>
+<section id="id28">
+<h4>Fixed<a class="headerlink" href="#id28" title="Link to this heading">#</a></h4>
 <ul class="simple">
 <li><p>Symmetry STEM Class updated to allow for better interpolation and lazy operation. (#809)</p></li>
 <li><p>Generalized plotting diffraction vectors on ND stacks of images (#783)</p></li>
@@ -828,14 +864,14 @@ for ragged arrays. (#880 &amp; #881)</p></li>
 <li><p>Bugfix:AzimuthalIntegral1D accepts masks and uses updated <cite>map</cite> function (#826)</p></li>
 </ul>
 </section>
-<section id="id28">
-<h4>Deprecated<a class="headerlink" href="#id28" title="Link to this heading">#</a></h4>
+<section id="id29">
+<h4>Deprecated<a class="headerlink" href="#id29" title="Link to this heading">#</a></h4>
 <ul class="simple">
 <li><p>The <cite>lazy_result</cite> keyword, which has been changed to <cite>lazy_output</cite> to conform to similar keyword in HyperSpy</p></li>
 </ul>
 </section>
-<section id="id29">
-<h4>Changed<a class="headerlink" href="#id29" title="Link to this heading">#</a></h4>
+<section id="id30">
+<h4>Changed<a class="headerlink" href="#id30" title="Link to this heading">#</a></h4>
 <ul class="simple">
 <li><p>For developers: HyperSpy’s <cite>.map</cite> function will now be used to process big datasets, instead of pyXem’s <cite>process_dask_array</cite></p></li>
 </ul>
@@ -849,15 +885,15 @@ recreated to fix an error with the Zenodo files.</p>
 </section>
 <section id="version-0-13-2">
 <h2>2021-04-14 - version 0.13.2<a class="headerlink" href="#version-0-13-2" title="Link to this heading">#</a></h2>
-<section id="id30">
-<h3>Added<a class="headerlink" href="#id30" title="Link to this heading">#</a></h3>
+<section id="id31">
+<h3>Added<a class="headerlink" href="#id31" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Code now support python 3.9</p></li>
 <li><p>Code now runs on hyperspy 1.6.2</p></li>
 </ul>
 </section>
-<section id="id31">
-<h3>Fixed<a class="headerlink" href="#id31" title="Link to this heading">#</a></h3>
+<section id="id32">
+<h3>Fixed<a class="headerlink" href="#id32" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>np.bool replaced by bool</p></li>
 <li><p>np.object replaced by object</p></li>
@@ -866,8 +902,8 @@ recreated to fix an error with the Zenodo files.</p>
 </section>
 <section id="version-0-13-1">
 <h2>2021-03-21 - version 0.13.1<a class="headerlink" href="#version-0-13-1" title="Link to this heading">#</a></h2>
-<section id="id32">
-<h3>Fixed<a class="headerlink" href="#id32" title="Link to this heading">#</a></h3>
+<section id="id33">
+<h3>Fixed<a class="headerlink" href="#id33" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>load_mib (#734)</p></li>
 <li><p>correct_bad_pixels now returns the same result when lazy/not-lazy (bug #723, fix #735)</p></li>
@@ -877,8 +913,8 @@ recreated to fix an error with the Zenodo files.</p>
 <li><p>bug in .to_crystal_map()</p></li>
 </ul>
 </section>
-<section id="id33">
-<h3>Deprecated<a class="headerlink" href="#id33" title="Link to this heading">#</a></h3>
+<section id="id34">
+<h3>Deprecated<a class="headerlink" href="#id34" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>lazy_virtual_bright_field, use get_integrated_intensity instead</p></li>
 <li><p>lazy_virtual_dark_field, use get_integrated_intensity instead</p></li>
@@ -887,8 +923,8 @@ recreated to fix an error with the Zenodo files.</p>
 </section>
 <section id="version-0-13-0">
 <h2>2021-01-13 - version 0.13.0<a class="headerlink" href="#version-0-13-0" title="Link to this heading">#</a></h2>
-<section id="id34">
-<h3>Added<a class="headerlink" href="#id34" title="Link to this heading">#</a></h3>
+<section id="id35">
+<h3>Added<a class="headerlink" href="#id35" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Faster rotation indexing, using in plane speeds up, added as AcceleratedIndexationGenerator (#673)</p></li>
 <li><p>get_direct_beam_position now supports lazy processing (#648)</p></li>
@@ -899,8 +935,8 @@ recreated to fix an error with the Zenodo files.</p>
 <li><p>Added a setup.cfg</p></li>
 </ul>
 </section>
-<section id="id35">
-<h3>Changed<a class="headerlink" href="#id35" title="Link to this heading">#</a></h3>
+<section id="id36">
+<h3>Changed<a class="headerlink" href="#id36" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>The importing of pyxem objects has been standardized (#704)</p></li>
 <li><p>get_direct_beam_position now has reversed order of the shifts [y, x] to [x, y] (#653)</p></li>
@@ -912,8 +948,8 @@ recreated to fix an error with the Zenodo files.</p>
 <li><p>Azimuthal integration has been refactored (see PRs #625,#676 for details)</p></li>
 </ul>
 </section>
-<section id="id36">
-<h3>Removed<a class="headerlink" href="#id36" title="Link to this heading">#</a></h3>
+<section id="id37">
+<h3>Removed<a class="headerlink" href="#id37" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Diffraction2D.remove_dead_pixels has been removed, use .correct_bad_pixels (#681)</p></li>
 <li><p>Diffraction2D.remove_background, has been moved to .subtract_diffraction_background (#697)</p></li>
@@ -930,8 +966,8 @@ recreated to fix an error with the Zenodo files.</p>
 </section>
 <section id="version-0-12-3">
 <h2>2020-12-02 - version 0.12.3<a class="headerlink" href="#version-0-12-3" title="Link to this heading">#</a></h2>
-<section id="id37">
-<h3>Changed<a class="headerlink" href="#id37" title="Link to this heading">#</a></h3>
+<section id="id38">
+<h3>Changed<a class="headerlink" href="#id38" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>CI is now provided by github actions</p></li>
 <li><p>Code now depends on hyperspy==1.6.1 and skimage&gt;=0.17.0</p></li>
@@ -940,14 +976,14 @@ recreated to fix an error with the Zenodo files.</p>
 </section>
 <section id="version-0-12-2">
 <h2>2020-10-04 - version 0.12.2<a class="headerlink" href="#version-0-12-2" title="Link to this heading">#</a></h2>
-<section id="id38">
-<h3>Added<a class="headerlink" href="#id38" title="Link to this heading">#</a></h3>
+<section id="id39">
+<h3>Added<a class="headerlink" href="#id39" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>This project now keeps a Changelog</p></li>
 </ul>
 </section>
-<section id="id39">
-<h3>Changed<a class="headerlink" href="#id39" title="Link to this heading">#</a></h3>
+<section id="id40">
+<h3>Changed<a class="headerlink" href="#id40" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Slow tests now don’t run by default</p></li>
 <li><p>Depend only on hyperspy-base and pyfai-base</p></li>
@@ -992,106 +1028,107 @@ recreated to fix an error with the Zenodo files.</p>
     class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> On this page
   </div>
-  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
-    <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#unreleased">Unreleased</a><ul class="visible nav section-nav flex-column">
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#unreleased">Unreleased</a><ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#added">Added</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#changed">Changed</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fixed">Fixed</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#deprecated">Deprecated</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#removed">Removed</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-21-0">2025-06-04 - version 0.21.0</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-21-0">2025-06-04 - version 0.21.0</a><ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Added</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Fixed</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-20-0">2024-12-09 - version 0.20.0</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-20-0">2024-12-09 - version 0.20.0</a><ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Fixed</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">Added</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#removed">Removed</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">Removed</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-19-1">2024-06-10 - version 0.19.1</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">Fixed</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">Added</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-19-1">2024-06-10 - version 0.19.1</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">Fixed</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">Added</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-19-0">2024-06-08 - version 0.19.0</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-19-0">2024-06-08 - version 0.19.0</a><ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#restructuring-of-dpc-processing">Restructuring of DPC processing</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">Fixed</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">Added</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">Fixed</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">Added</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-18-0">2024-05-08 - version 0.18.0</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">Fixed</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id10">Added</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id11">Deprecated</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-18-0">2024-05-08 - version 0.18.0</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id10">Fixed</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id11">Added</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id12">Deprecated</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#deleted">Deleted</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id12">Changed</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id13">Changed</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-17-0">2024-01-05 - version 0.17.0</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id13">Added</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id14">Changed</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id15">Fixed</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id16">Removed</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-17-0">2024-01-05 - version 0.17.0</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id14">Added</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id15">Changed</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id16">Fixed</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id17">Removed</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-16-0">2023-11-14 - version 0.16.0</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id17">Added</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id18">Fixed</a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-15-1">2023-05-08 - version 0.15.1</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-16-0">2023-11-14 - version 0.16.0</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id18">Added</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id19">Fixed</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-15-0">2023-04-06 - version 0.15.0</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id20">Added</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id21">Changed</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id22">Fixed</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-15-1">2023-05-08 - version 0.15.1</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id20">Fixed</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-14-2">2022-06-15 - version 0.14.2</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id23">Changed</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id24">Fixed</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-15-0">2023-04-06 - version 0.15.0</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id21">Added</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id22">Changed</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id23">Fixed</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-14-1">2022-04-29 - version 0.14.1</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id25">Added</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id26">Removed</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id27">Fixed</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id28">Deprecated</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id29">Changed</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-14-2">2022-06-15 - version 0.14.2</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id24">Changed</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id25">Fixed</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-14-1">2022-04-29 - version 0.14.1</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id26">Added</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id27">Removed</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id28">Fixed</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id29">Deprecated</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id30">Changed</a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-14-0">2022-04-29 - version 0.14.0</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-13-2">2021-04-14 - version 0.13.2</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id30">Added</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id31">Fixed</a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-13-1">2021-03-21 - version 0.13.1</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-13-2">2021-04-14 - version 0.13.2</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id31">Added</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id32">Fixed</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id33">Deprecated</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-13-0">2021-01-13 - version 0.13.0</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id34">Added</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id35">Changed</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id36">Removed</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-13-1">2021-03-21 - version 0.13.1</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id33">Fixed</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id34">Deprecated</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-12-3">2020-12-02 - version 0.12.3</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id37">Changed</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-13-0">2021-01-13 - version 0.13.0</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id35">Added</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id36">Changed</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id37">Removed</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-12-2">2020-10-04 - version 0.12.2</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id38">Added</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id39">Changed</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-12-3">2020-12-02 - version 0.12.3</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id38">Changed</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-12-2">2020-10-04 - version 0.12.2</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id39">Added</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id40">Changed</a></li>
 </ul>
 </li>
 </ul>
@@ -1114,13 +1151,13 @@ recreated to fix an error with the Zenodo files.</p>
 </div>
 
   <div class="sidebar-secondary-item">
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/changelog.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div></div>
+
+  <div class="tocsection sourcelink">
+    <a href="_sources/changelog.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
 
 </div></div>
               
@@ -1135,8 +1172,8 @@ recreated to fix an error with the Zenodo files.</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="_static/scripts/bootstrap.js?digest=0790524f97105ba85085"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1170,7 +1207,7 @@ recreated to fix an error with the Zenodo files.</p>
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.18.0.
 </p></div>
       
     </div>

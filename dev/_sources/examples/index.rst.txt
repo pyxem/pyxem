@@ -8,6 +8,10 @@ Gallery of Examples
 Below is a gallery of examples for different operations in pyxem.
 
 
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
 
 .. raw:: html
 
@@ -24,6 +28,10 @@ Below is a gallery of examples for different operations in pyxem.
 Amorphous Characterization
 ==========================
 Below is a gallery of examples on how to characterize amorphous materials.
+
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
 
 
 .. raw:: html
@@ -58,6 +66,10 @@ Below is a gallery of examples on how to characterize amorphous materials.
 Differential Phase Contrast (DPC)
 =================================
 Below is a gallery of examples on how to do Differential Phase Contrast (DPC) in pyxem.
+
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
 
 
 .. raw:: html
@@ -110,6 +122,10 @@ Loading Data
 ============
 Below is a gallery of examples on how to load and calibrate data using pyxem.
 
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
 
 .. raw:: html
 
@@ -160,6 +176,10 @@ Below is a gallery of examples on how to load and calibrate data using pyxem.
 Orientation Mapping
 ===================
 Below is a gallery of examples on how to do orientation mapping in pyxem.
+
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
 
 
 .. raw:: html
@@ -228,6 +248,10 @@ Below is a gallery of examples on how to do orientation mapping in pyxem.
 Plotting
 ========
 Below is a gallery of examples on how to plot data in pyxem.
+
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
 
 
 .. raw:: html
@@ -313,6 +337,10 @@ Below is a gallery of examples on how to plot data in pyxem.
 Data Processing
 ================
 Below is a gallery of examples on how to process 4-D STEM data in pyxem
+
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
 
 
 .. raw:: html
@@ -484,6 +512,10 @@ Standards
 =========
 Below is a gallery of examples showing different standards in pyxem
 
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
 
 .. raw:: html
 
@@ -535,6 +567,10 @@ Strain Mapping
 ==============
 Below is a gallery of examples showing how to perform strain mapping in pyxem.
 
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
 
 .. raw:: html
 
@@ -568,6 +604,10 @@ Below is a gallery of examples showing how to perform strain mapping in pyxem.
 Vectors
 =======
 Below is a gallery of examples for operations on vectors.
+
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
 
 
 .. raw:: html
@@ -653,6 +693,10 @@ Below is a gallery of examples for operations on vectors.
 Virtual Imaging
 ===============
 Below is a gallery of examples on how to make virtual images from 4-D STEM data in pyxem
+
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
 
 
 .. raw:: html

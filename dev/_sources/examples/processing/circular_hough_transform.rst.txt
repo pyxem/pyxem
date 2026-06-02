@@ -51,6 +51,13 @@ Making a Dummy Dataset
 
 
 
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    /opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/site-packages/hyperspy/misc/utils.py:72: VisibleDeprecationWarning: `_get_block_pattern` has moved to `hyperspy.misc.dask_utils`. It is for internal use only and may be removed in the future.
+      warnings.warn(
+
 
 
 
@@ -102,7 +109,7 @@ outlines of the disks.  This is basically a 1st diriviative in reciporical space
 
  .. code-block:: none
 
-      0%|          | 0/51 [00:00<?, ?it/s]     33%|███▎      | 17/51 [00:00<00:00, 134.84it/s]     65%|██████▍   | 33/51 [00:00<00:00, 108.72it/s]     88%|████████▊ | 45/51 [00:00<00:00, 108.59it/s]    100%|██████████| 51/51 [00:00<00:00, 118.25it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]     25%|██▌       | 13/51 [00:00<00:00, 119.28it/s]     65%|██████▍   | 33/51 [00:00<00:00, 160.10it/s]    100%|██████████| 51/51 [00:00<00:00, 181.00it/s]
 
 
 
@@ -154,7 +161,7 @@ have multiple radii but that will return multiple signals for each radii
 
  .. code-block:: none
 
-      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 551.14it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 954.45it/s]
 
 
 
@@ -201,9 +208,11 @@ Finding peaks is fairly easy from this point and uses the ``get_diffraction_vect
 
  .. code-block:: none
 
-      0%|          | 0/51 [00:00<?, ?it/s]     18%|█▊        | 9/51 [00:00<00:00, 68.58it/s]     49%|████▉     | 25/51 [00:00<00:00, 98.96it/s]     76%|███████▋  | 39/51 [00:00<00:00, 113.87it/s]    100%|██████████| 51/51 [00:00<00:00, 116.65it/s]
-      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 6782.81it/s]
-      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 6976.60it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]     18%|█▊        | 9/51 [00:00<00:00, 81.15it/s]     49%|████▉     | 25/51 [00:00<00:00, 116.23it/s]     78%|███████▊  | 40/51 [00:00<00:00, 130.47it/s]    100%|██████████| 51/51 [00:00<00:00, 132.01it/s]
+    WARNING | Hyperspy | The function you applied does not take into account the difference of scales in-between axes. (hyperspy.signal:5597)
+    WARNING | Hyperspy | The function you applied does not take into account the difference of units in-between axes. (hyperspy.signal:5602)
+      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 6437.24it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 6666.34it/s]
 
 
 
@@ -215,7 +224,7 @@ sphinx_gallery_thumbnail_number = 6
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 2.950 seconds)
+   **Total running time of the script:** (0 minutes 6.030 seconds)
 
 
 .. _sphx_glr_download_examples_processing_circular_hough_transform.py:

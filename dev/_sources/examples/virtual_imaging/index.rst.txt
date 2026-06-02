@@ -6,6 +6,10 @@ Virtual Imaging
 ===============
 Below is a gallery of examples on how to make virtual images from 4-D STEM data in pyxem
 
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
 
 .. raw:: html
 
