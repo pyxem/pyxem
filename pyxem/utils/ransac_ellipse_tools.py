@@ -658,10 +658,19 @@ def determine_ellipse(
 
     Returns
     -------
-    center : (x,y)
+    center : (x, y)
         The center of the diffraction pattern.
     affine :
         The affine transformation to make the diffraction pattern circular.
+    params : np.ndarray, optional
+        Array ``[x_c, y_c, semi_len0, semi_len1, rotation]`` of the fitted ellipse.
+        Only returned when ``return_params=True``.
+    pos : np.ndarray, optional
+        The point positions used for fitting.
+        Only returned when ``return_params=True``.
+    inlier : np.ndarray of bool, optional
+        Boolean mask of inlier points.
+        Only returned when ``return_params=True`` and ``use_ransac=True``.
 
     Examples
     --------
@@ -705,9 +714,27 @@ def determine_ellipse(
         affine = _ellipse_to_affine(el.axis_lengths[1], el.axis_lengths[0], el.theta)
         center = (el.center[0], el.center[1])
         if return_params and use_ransac:
-            return center, affine, *el.center, *el.axis_lengths, el.theta, pos, inlier
+            params = np.array(
+                [
+                    el.center[0],
+                    el.center[1],
+                    el.axis_lengths[0],
+                    el.axis_lengths[1],
+                    el.theta,
+                ]
+            )
+            return center, affine, params, pos, inlier
         elif return_params:
-            return center, affine, *el.center, *el.axis_lengths, el.theta, pos
+            params = np.array(
+                [
+                    el.center[0],
+                    el.center[1],
+                    el.axis_lengths[0],
+                    el.axis_lengths[1],
+                    el.theta,
+                ]
+            )
+            return center, affine, params, pos
         else:
             return center, affine
     else:  # pragma: no cover

@@ -20,8 +20,6 @@
 
 import numpy as np
 
-from shapely import Polygon, box
-import shapely
 from numba import cuda, prange
 import numba
 
@@ -200,60 +198,207 @@ def _slice_radial_integrate1d(
     return ans
 
 
-def _get_factors(control_points, slices, pixel_extents):
-    """This function takes a set of control points (vertices of bounding polygons) and
-    slices (min and max indices for each control point) and returns the factors for
-    each slice. The factors are the area of the intersection of the polygon and the
-    sliced pixels.
+@numba.njit(cache=True)
+def _clip_poly_by_box(
+    px, py, n_in, xmin, ymin, xmax, ymax, out_x, out_y
+):  # pragma: no cover
+    """Clip a polygon against an axis-aligned box using Sutherland-Hodgman.
+
+    Parameters
+    ----------
+    px, py : float array
+        Input polygon vertex coordinates (length >= n_in).
+    n_in : int
+        Number of input polygon vertices.
+    xmin, ymin, xmax, ymax : float
+        Axis-aligned clipping rectangle.
+    out_x, out_y : float array
+        Pre-allocated output vertex buffers (length >= 32).
+
+    Returns
+    -------
+    int
+        Number of vertices in the clipped polygon stored in out_x/out_y.
     """
-    all_boxes = get_boxes(slices, pixel_extent=pixel_extents)
-    max_num = np.max([len(x) for x in all_boxes])
-    num_box = len(all_boxes)
-    boxes = shapely.empty((num_box, max_num))
+    _MAX_V = 32
+    tmp_x = np.empty(_MAX_V)
+    tmp_y = np.empty(_MAX_V)
 
-    p = shapely.polygons(control_points)
-    for i, bx in enumerate(all_boxes):
-        try:
-            b = shapely.box(bx[:, 0], bx[:, 1], bx[:, 2], bx[:, 3])
-            boxes[i, : len(b)] = b
-        except IndexError:  # the box is empty.
-            pass
+    # --- clip by x >= xmin ---
+    m = 0
+    for i in range(n_in):
+        j = (i + 1) % n_in
+        ci = px[i] >= xmin
+        nj = px[j] >= xmin
+        if ci:
+            tmp_x[m] = px[i]
+            tmp_y[m] = py[i]
+            m += 1
+        if ci != nj:
+            dx = px[j] - px[i]
+            if dx != 0.0:
+                t = (xmin - px[i]) / dx
+                tmp_x[m] = xmin
+                tmp_y[m] = py[i] + t * (py[j] - py[i])
+                m += 1
+    if m == 0:
+        return 0
 
-    factors = shapely.area(
-        shapely.intersection(boxes, p[:, np.newaxis])
-    ) / shapely.area(boxes)
-    not_nan = np.logical_not(np.isnan(factors))
+    # --- clip by x <= xmax ---
+    n2 = 0
+    for i in range(m):
+        j = (i + 1) % m
+        ci = tmp_x[i] <= xmax
+        nj = tmp_x[j] <= xmax
+        if ci:
+            out_x[n2] = tmp_x[i]
+            out_y[n2] = tmp_y[i]
+            n2 += 1
+        if ci != nj:
+            dx = tmp_x[j] - tmp_x[i]
+            if dx != 0.0:
+                t = (xmax - tmp_x[i]) / dx
+                out_x[n2] = xmax
+                out_y[n2] = tmp_y[i] + t * (tmp_y[j] - tmp_y[i])
+                n2 += 1
+    if n2 == 0:
+        return 0
 
-    factors = factors.flatten()
-    factors = factors[not_nan.flatten()]
+    # --- clip by y >= ymin ---
+    m = 0
+    for i in range(n2):
+        j = (i + 1) % n2
+        ci = out_y[i] >= ymin
+        nj = out_y[j] >= ymin
+        if ci:
+            tmp_x[m] = out_x[i]
+            tmp_y[m] = out_y[i]
+            m += 1
+        if ci != nj:
+            dy = out_y[j] - out_y[i]
+            if dy != 0.0:
+                t = (ymin - out_y[i]) / dy
+                tmp_x[m] = out_x[i] + t * (out_x[j] - out_x[i])
+                tmp_y[m] = ymin
+                m += 1
+    if m == 0:
+        return 0
 
-    num = np.sum(not_nan, axis=1)
-    factors_slice = np.cumsum(num)
-    factors_slice = np.hstack(([0], factors_slice))
-    factors_slice = np.stack((factors_slice[:-1], factors_slice[1:])).T
+    # --- clip by y <= ymax ---
+    n3 = 0
+    for i in range(m):
+        j = (i + 1) % m
+        ci = tmp_y[i] <= ymax
+        nj = tmp_y[j] <= ymax
+        if ci:
+            out_x[n3] = tmp_x[i]
+            out_y[n3] = tmp_y[i]
+            n3 += 1
+        if ci != nj:
+            dy = tmp_y[j] - tmp_y[i]
+            if dy != 0.0:
+                t = (ymax - tmp_y[i]) / dy
+                out_x[n3] = tmp_x[i] + t * (tmp_x[j] - tmp_x[i])
+                out_y[n3] = ymax
+                n3 += 1
+    return n3
+
+
+@numba.njit(cache=True)
+def _poly_area_2d(vx, vy, n):  # pragma: no cover
+    """Shoelace formula for the signed area of an n-vertex polygon."""
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vx[i] * vy[j] - vx[j] * vy[i]
+    return abs(area) * 0.5
+
+
+@numba.njit(cache=True, parallel=True)
+def _compute_factors_numba(  # pragma: no cover
+    control_points, slices, x_ext_left, x_ext_right, y_ext_left, y_ext_right
+):
+    """Parallel numba kernel that replaces the shapely intersection loop.
+
+    Parameters
+    ----------
+    control_points : float64 array (N, 4, 2)
+    slices : int64 array (N, 4)  –  [row_min, col_min, row_max, col_max]
+    x_ext_left, x_ext_right : float64 1-D arrays  (pixel edges along the x axis)
+    y_ext_left, y_ext_right : float64 1-D arrays  (pixel edges along the y axis)
+
+    Returns
+    -------
+    factors : float64 1-D array
+    factors_slice : int64 array (N, 2)
+    """
+    N = len(control_points)
+
+    # Build prefix-sum of pixel counts so each polygon knows its output slice.
+    offsets = np.empty(N + 1, dtype=np.int64)
+    offsets[0] = 0
+    for i in range(N):
+        nr = slices[i, 2] - slices[i, 0]
+        nc = slices[i, 3] - slices[i, 1]
+        offsets[i + 1] = offsets[i] + nr * nc
+
+    total = offsets[N]
+    factors = np.zeros(total, dtype=np.float64)
+    factors_slice = np.empty((N, 2), dtype=np.int64)
+    for i in range(N):
+        factors_slice[i, 0] = offsets[i]
+        factors_slice[i, 1] = offsets[i + 1]
+
+    # Parallel loop: each polygon is independent.
+    for i in prange(N):
+        poly_x = control_points[i, :, 0]
+        poly_y = control_points[i, :, 1]
+        row_min = slices[i, 0]
+        col_min = slices[i, 1]
+        row_max = slices[i, 2]
+        col_max = slices[i, 3]
+
+        out_x = np.empty(32)
+        out_y = np.empty(32)
+        idx = offsets[i]
+        for r in range(row_min, row_max):
+            for c in range(col_min, col_max):
+                xmin_b = x_ext_left[r]
+                xmax_b = x_ext_right[r]
+                ymin_b = y_ext_left[c]
+                ymax_b = y_ext_right[c]
+                box_area = (xmax_b - xmin_b) * (ymax_b - ymin_b)
+                nv = _clip_poly_by_box(
+                    poly_x, poly_y, 4, xmin_b, ymin_b, xmax_b, ymax_b, out_x, out_y
+                )
+                if box_area > 0.0 and nv >= 3:
+                    factors[idx] = _poly_area_2d(out_x, out_y, nv) / box_area
+                idx += 1
+
     return factors, factors_slice
 
 
-def get_boxes(slices, pixel_extent):
-    all_boxes = []
-    x_extent, y_extent = pixel_extent
-    x_ext_left, x_ext_right = x_extent
-    y_ext_left, y_ext_right = y_extent
-    for sl in slices:
-        x_edges = list(range(sl[0], sl[2]))
-        y_edges = list(range(sl[1], sl[3]))
-        boxes = []
-        for i, x in enumerate(x_edges):
-            for j, y in enumerate(y_edges):
-                b = [
-                    x_ext_left[x],
-                    y_ext_left[y],
-                    x_ext_right[x],
-                    y_ext_right[y],
-                ]
-                boxes.append(b)
-        all_boxes.append(np.array(boxes))
-    return all_boxes
+def _get_factors(control_points, slices, pixel_extents):
+    """Compute per-pixel overlap factors for each azimuthal/radial bin polygon.
+
+    Takes a set of control points (vertices of bounding polygons) and slices
+    (min/max pixel indices for each polygon) and returns the fractional pixel
+    overlap factors.
+
+    The implementation uses a numba-parallelised Sutherland-Hodgman polygon
+    clipper, avoiding the shapely dependency and giving a large speedup.
+    """
+    x_extent, y_extent = pixel_extents
+    x_ext_left = np.asarray(x_extent[0], dtype=np.float64)
+    x_ext_right = np.asarray(x_extent[1], dtype=np.float64)
+    y_ext_left = np.asarray(y_extent[0], dtype=np.float64)
+    y_ext_right = np.asarray(y_extent[1], dtype=np.float64)
+    slices_arr = np.asarray(slices, dtype=np.int64)
+    cp_arr = np.asarray(control_points, dtype=np.float64)
+
+    return _compute_factors_numba(
+        cp_arr, slices_arr, x_ext_left, x_ext_right, y_ext_left, y_ext_right
+    )
 
 
 def _get_control_points(npt, npt_azim, radial_range, azimuthal_range, affine):

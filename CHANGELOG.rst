@@ -19,6 +19,8 @@ Added
 
 Changed
 -------
+- Replace shapely-based pixel overlap calculation in azimuthal integration with a numba-parallelized Sutherland-Hodgman clipper, giving a ~400-500× speedup. (#1185)
+- Remove ``shapely`` as an install dependency. (#1185)
 - Drop support for python 3.8. (#1147)
 - Refactor :meth:`~pyxem.signals.Diffraction2D.center_direct_beam` and :meth:`~pyxem.signals.Diffraction2D.shift_diffraction` to use consistent signature and avoid code duplication and  (#1144)
 - Speed up documentation build by caching the gallery of examples and enable parallel build. (#1152)
@@ -26,6 +28,7 @@ Changed
 
 Fixed
 -----
+- Fix :func:`~pyxem.utils.ransac_ellipse_tools.determine_ellipse` packing ellipse parameters into a single ``params`` array when ``return_params=True``, so the return signature matches ``(center, affine, params, pos[, inlier])`` as expected by callers. (#1185)
 - Add explicit support for python 3.12 and 3.13 and update test matrix. (#1147)
 - Silence axes warning in functions using :meth:`~hyperspy.api.signals.BaseSignal.map`. (#1168)
 
@@ -34,6 +37,10 @@ Deprecated
 ----------
 - The ``shift_x`` and ``shift_y`` arguments in :meth:`~pyxem.signals.Diffraction2D.shift_diffraction` are deprecated in favor of the ``shifts`` argument. (#1144)
 - The ``interpolation_order`` argument in :meth:`~pyxem.signals.Diffraction2D.shift_diffraction` have been renamed to ``order`` to be consistent with the signature of :meth:`~pyxem.signals.Diffraction2D.center_direct_beam` and :func:`scipy.ndimage.shift`. (#1144)
+
+Removed
+-------
+- Remove internal ``get_boxes`` helper from ``pyxem.utils._azimuthal_integrations``; it was only used by the old shapely-based ``_get_factors`` and is superseded by the numba kernel. (#1185)
 
 
 2025-06-04 - version 0.21.0
