@@ -484,7 +484,12 @@ class Dataset:
     ) -> str:
         if show_progressbar is None:
             show_progressbar = hs.preferences.General.show_progressbar
-        downloader = pooch.HTTPDownloader(progressbar=show_progressbar)
+
+        downloader = pooch.HTTPDownloader(
+            progressbar=show_progressbar,
+            chunk_size=4096,
+            headers={"User-Agent": "pyxem (https://pyxem.org)"},
+        )
 
         if self.is_in_cache:
             if self.has_correct_hash:
