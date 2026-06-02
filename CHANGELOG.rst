@@ -31,7 +31,7 @@ Fixed
 - Fix :func:`~pyxem.utils.ransac_ellipse_tools.determine_ellipse` packing ellipse parameters into a single ``params`` array when ``return_params=True``, so the return signature matches ``(center, affine, params, pos[, inlier])`` as expected by callers. (#1185)
 - Add explicit support for python 3.12 and 3.13 and update test matrix. (#1147)
 - Silence axes warning in functions using :meth:`~hyperspy.api.signals.BaseSignal.map`. (#1168)
-- Fix: Increased ChunkSize and added a header for downloading from Zenodo. #1180
+- Increase chunk size and add User-Agent header for downloads from Zenodo. (#1180)
 
 
 Deprecated
