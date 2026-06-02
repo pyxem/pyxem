@@ -714,10 +714,26 @@ def determine_ellipse(
         affine = _ellipse_to_affine(el.axis_lengths[1], el.axis_lengths[0], el.theta)
         center = (el.center[0], el.center[1])
         if return_params and use_ransac:
-            params = np.array([el.center[0], el.center[1], el.axis_lengths[0], el.axis_lengths[1], el.theta])
+            params = np.array(
+                [
+                    el.center[0],
+                    el.center[1],
+                    el.axis_lengths[0],
+                    el.axis_lengths[1],
+                    el.theta,
+                ]
+            )
             return center, affine, params, pos, inlier
         elif return_params:
-            params = np.array([el.center[0], el.center[1], el.axis_lengths[0], el.axis_lengths[1], el.theta])
+            params = np.array(
+                [
+                    el.center[0],
+                    el.center[1],
+                    el.axis_lengths[0],
+                    el.axis_lengths[1],
+                    el.theta,
+                ]
+            )
             return center, affine, params, pos
         else:
             return center, affine
