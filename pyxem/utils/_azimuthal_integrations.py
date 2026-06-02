@@ -399,27 +399,6 @@ def _get_factors(control_points, slices, pixel_extents):
     )
 
 
-def get_boxes(slices, pixel_extent):
-    all_boxes = []
-    x_extent, y_extent = pixel_extent
-    x_ext_left, x_ext_right = x_extent
-    y_ext_left, y_ext_right = y_extent
-    for sl in slices:
-        x_edges = list(range(sl[0], sl[2]))
-        y_edges = list(range(sl[1], sl[3]))
-        boxes = []
-        for i, x in enumerate(x_edges):
-            for j, y in enumerate(y_edges):
-                b = [
-                    x_ext_left[x],
-                    y_ext_left[y],
-                    x_ext_right[x],
-                    y_ext_right[y],
-                ]
-                boxes.append(b)
-        all_boxes.append(np.array(boxes))
-    return all_boxes
-
 
 def _get_control_points(npt, npt_azim, radial_range, azimuthal_range, affine):
     """Get the control points in the form of an array (npt_azim*npt, 4, 2) representing
