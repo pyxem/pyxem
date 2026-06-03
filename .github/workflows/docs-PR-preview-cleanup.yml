@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.0.2
 
       - name: Create empty deploy folder
         run: |
@@ -26,7 +26,7 @@ jobs:
         # run on pull request only
         # until rossjrw/pr-preview-action suppports passing the PR number as input,
         # use the github-pages-deploy-action directly
-        uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e
+        uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453
         with:
           personal_token: ${{ secrets.PREVIEW_DEPLOY_KEY }}
           publish_dir:  ${{ env.html_folder }}
@@ -38,7 +38,7 @@ jobs:
         run: echo "utc=$(date -u '+%Y-%m-%d %H:%M UTC')" >> "$GITHUB_OUTPUT"
 
       - name: Post removal sticky PR comment
-        uses: marocchino/sticky-pull-request-comment@v2
+        uses: marocchino/sticky-pull-request-comment@v3
         with:
           number: ${{ github.event.pull_request.number }}
           header: pr-preview
