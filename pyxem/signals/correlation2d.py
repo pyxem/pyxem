@@ -128,8 +128,8 @@ class Correlation2D(Signal2D, CommonDiffraction):
 
         Returns
         -------
-        signals: Signal1D
-            Symmetry coefficient
+        signals: Signal2D
+            Symmetry coefficient (symmetry order x k) per navigation position
         """
         angles = [set(frac(j, i) for j in range(0, i)) for i in symmetries]
         if not include_duplicates:

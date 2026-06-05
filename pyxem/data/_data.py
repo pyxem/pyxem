@@ -36,12 +36,12 @@ kipper = pooch.create(
 )
 
 PARAMETER_DOCSTRING = """Parameters
-    ----------
-    allow_download: bool
-        If True, the file will be downloaded from the repository to the local cache.
-    **kwargs
-        Keyword arguments passed to :func:`~hyperspy.api.load`.
-    """
+----------
+allow_download: bool
+    If True, the file will be downloaded from the repository to the local cache.
+**kwargs
+    Keyword arguments passed to :func:`~hyperspy.api.load`.
+"""
 
 
 def au_grating(allow_download=False, **kwargs):

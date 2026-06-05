@@ -16,8 +16,8 @@ s = pxm.data.tilt_boundary_data()
 
 try:
     s.find_peaks(interactive=True)  # find the peaks using the interactive peak finder
-except Exception:
-    pass  # interactive mode requires a GUI; skipped in non-interactive environments
+except Exception as e:
+    print(f"Interactive peak finder skipped (requires a GUI): {e}")
 
 # %%
 
