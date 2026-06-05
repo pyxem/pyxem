@@ -158,10 +158,7 @@ nitpick_ignore = [
     ("py:class", "pyxem.utils.calibration_utils.Calibration"),
     ("py:meth", "pyxem.signals.Diffraction2D.get_azimuthal_integral1D"),
     ("py:class", "pyxem.signals.LabeledDiffractionVectors"),
-    # Informal type names used in docstring Returns sections
-    ("py:class", "Signal2D"),
-    ("py:class", "Signal1D"),
-    ("py:class", "BaseSignal"),
+    # Informal array type names — too widespread to fix individually
     ("py:class", "np.array"),
     ("py:class", "numpy.array"),
     ("py:class", "np.ndarray"),
@@ -169,16 +166,6 @@ nitpick_ignore = [
     ("py:class", "array"),
     ("py:class", "array-like"),
     ("py:class", "2-d array"),
-    ("py:class", "None."),
-    ("py:class", "shift_vectors"),
-    ("py:class", "subclass"),
-    ("py:class", "roi"),
-    ("py:class", "matplotlib figure"),
-    ("py:class", "h-dome subtracted image as numpy.ndarray"),
-    # Internal pyxem informal types (removed classes)
-    ("py:class", "DiffractionVectorLibrary"),
-    ("py:class", "PDF1D"),
-    ("py:class", "ProfileIndexation"),
     # External package types not in intersphinx
     ("py:class", "pint.registry.Quantity"),
     ("py:class", "pint.registry.Unit"),
@@ -186,12 +173,6 @@ nitpick_ignore = [
     ("py:class", "numpy._typing._array_like._ScalarT"),
     # scipy internal ref
     ("py:obj", "least_squares"),
-    # hyperspy informal names
-    ("py:class", "hyperspy.api.roi.Line2D"),
-    # hs.* shorthand refs
-    ("py:class", "hs.signals.BaseSignal"),
-    ("py:class", "hs.plot.markers.Markers"),
-    ("py:class", "orix.Quaternion.Rotation"),
 ]
 
 # nitpick_ignore_regex: suppress warnings matching these regex patterns

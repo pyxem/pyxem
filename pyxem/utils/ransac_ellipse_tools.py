@@ -476,7 +476,7 @@ def _get_max_positions(signal, mask=None, num_points=5000):
 
     Parameters
     --------------
-    signal : BaseSignal
+    signal : ~hyperspy.api.signals.BaseSignal
         The signal which we want to find the max positions for.
     mask : np.array
         A mask to be applied to the data for values to ignore.
@@ -638,7 +638,7 @@ def determine_ellipse(
 
     Parameters
     -----------
-    signal : Signal2D
+    signal : ~hyperspy.api.signals.Signal2D
         The signal of interest.
     pos : np.ndarray
         The positions of the points to be used to determine the ellipse.

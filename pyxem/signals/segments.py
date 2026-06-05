@@ -50,7 +50,7 @@ class LearningSegment:
 
         Returns
         -------
-        ncc_matrix : Signal2D
+        ncc_matrix : ~hyperspy.api.signals.Signal2D
             Normalised correlation coefficient matrix for loadings and factors.
         """
         # Set up empty matrices of correct size to store NCC values.
@@ -292,7 +292,7 @@ class VDFSegment:
 
         Returns
         -------
-        ncc_matrix : Signal2D
+        ncc_matrix : ~hyperspy.api.signals.Signal2D
             Normalised correlation coefficient matrix.
         """
         # TODO: This code should be factored out for reuse in other ncc method.

@@ -74,7 +74,7 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
 
         Returns
         -------
-        correlation: Signal2D
+        correlation: ~hyperspy.api.signals.Signal2D
             The radial correlation for the signal2D, when inplace is False,
             otherwise None
 
@@ -120,7 +120,7 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
 
         Returns
         -------
-        power: Signal2D
+        power: ~hyperspy.api.signals.Signal2D
             The power spectrum of the Signal2D, when inplace is False, otherwise
             return None
         """
@@ -167,7 +167,7 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
             Any additional options for the :meth:`~hyperspy.api.signals.BaseSignal.map` function.
         Returns
         -------
-        correlation: Signal1D,
+        correlation: ~hyperspy.api.signals.Signal1D,
             The pearson rotational correlation when inplace is False, otherwise
             return None
         """
@@ -365,7 +365,7 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
 
         Returns
         -------
-        orientation : BaseSignal
+        orientation : ~hyperspy.api.signals.BaseSignal
             A signal with the orientation at each navigation position.
 
         Notes

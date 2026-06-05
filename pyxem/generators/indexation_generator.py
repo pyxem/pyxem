@@ -232,7 +232,7 @@ class ProfileIndexationGenerator:
 
         Returns
         -------
-        matching_results : ProfileIndexation
+        matching_results : ~numpy.ndarray
 
         """
         return index_magnitudes(np.array(self.magnitudes), self.simulation, tolerance)
@@ -477,7 +477,7 @@ class VectorIndexationGenerator:
     ----------
     vectors : DiffractionVectors
         DiffractionVectors to be indexed.
-    vector_library : DiffractionVectorLibrary
+    vector_library : dict
         Library of theoretical diffraction vector magnitudes and inter-vector
         angles for indexation.
 
@@ -485,7 +485,7 @@ class VectorIndexationGenerator:
     ----------
     vectors : DiffractionVectors
         DiffractionVectors to be indexed.
-    vector_library : DiffractionVectorLibrary
+    vector_library : dict
         Library of theoretical diffraction vector magnitudes and inter-vector
         angles for indexation.
     """

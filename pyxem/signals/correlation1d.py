@@ -65,7 +65,7 @@ class Correlation1D(Signal1D):
 
         Returns
         -------
-        signals: Signal1D
+        signals: ~hyperspy.api.signals.Signal1D
             Symmetry coefficient
         """
         angles = [set(frac(j, i) for j in range(1, i)) for i in symmetries]

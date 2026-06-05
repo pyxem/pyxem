@@ -15,7 +15,7 @@ def simulated_stripes(beam_shifts=None):
         corresponds to a shift of [[3, 3], [-3,3]] for the alternating stripes.
     Returns
     -------
-    diffraction_pattern : Signal2D
+    diffraction_pattern : ~hyperspy.api.signals.Signal2D
         A simulated diffraction pattern with the direct beam shifted by .
     """
     if beam_shifts is None:
@@ -95,7 +95,7 @@ def simulated_pn_junction(beam_shifts=None):
         corresponds to a shift of [[3, 3], [-3,3]] for the alternating stripes.
     Returns
     -------
-    diffraction_pattern : Signal2D
+    diffraction_pattern : ~hyperspy.api.signals.Signal2D
         A simulated diffraction pattern with the direct beam shifted by .
     """
     if beam_shifts is None:

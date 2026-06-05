@@ -66,7 +66,7 @@ class InSituDiffraction2D(Diffraction2D):
 
         Returns
         ---------
-        virtual_series: Signal2D
+        virtual_series: ~hyperspy.api.signals.Signal2D
             Time series of virtual detector images
         """
         out_axes = [0, 1, 2]
@@ -105,7 +105,7 @@ class InSituDiffraction2D(Diffraction2D):
 
         Returns
         -------
-        shift_vectors
+        shift_vectors : ~hyperspy.api.signals.Signal1D
         """
         roi = kwargs.pop("roi", None)
         ref = self.get_time_series(roi=roi, time_axis=time_axis)
@@ -130,7 +130,7 @@ class InSituDiffraction2D(Diffraction2D):
 
         Parameters
         ----------
-        shifts: Signal1D
+        shifts: ~hyperspy.api.signals.Signal1D
             shift vectors to register, must be in the shape of <N_time | 2>.
             If None, shift vectors will be calculated automatically
         time_axis: int
@@ -218,7 +218,7 @@ class InSituDiffraction2D(Diffraction2D):
 
         Parameters
         ----------
-        shifts: Signal1D
+        shifts: ~hyperspy.api.signals.Signal1D
             shift vectors to register, must be in the shape of <N_time | 2>.
             If None, shift vectors will be calculated automatically
         time_axis: int
@@ -323,7 +323,7 @@ class InSituDiffraction2D(Diffraction2D):
 
         Returns
         ---------
-        g2kt: Signal2D or Correlation2D
+        g2kt : ~hyperspy.api.signals.Signal2D or ~pyxem.signals.Correlation2D
             k resolved time correlation signal
         """
         if time_axis != 2:

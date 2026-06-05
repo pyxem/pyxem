@@ -57,7 +57,7 @@ class Correlation2D(Signal2D, CommonDiffraction):
 
         Returns
         -------
-        power: Signal2D
+        power: ~hyperspy.api.signals.Signal2D
             The power spectrum of the Signal2D
         """
         power = self.map(
@@ -128,7 +128,7 @@ class Correlation2D(Signal2D, CommonDiffraction):
 
         Returns
         -------
-        signals: Signal2D
+        signals: ~hyperspy.api.signals.Signal2D
             Symmetry coefficient (symmetry order x k) per navigation position
         """
         angles = [set(frac(j, i) for j in range(0, i)) for i in symmetries]

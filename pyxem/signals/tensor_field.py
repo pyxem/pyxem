@@ -95,7 +95,7 @@ class DisplacementGradientMap(Signal2D):
 
         Returns
         -------
-        strain_results : BaseSignal
+        strain_results : ~hyperspy.api.signals.BaseSignal
             Signal of shape < 4 | , > , navigation order is e11,e22,e12,theta
         """
         if self._lazy:

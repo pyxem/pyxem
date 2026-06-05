@@ -66,7 +66,7 @@ class PolarVectors(DiffractionVectors):
 
         Returns
         -------
-        angles : BaseSignal
+        angles : ~hyperspy.api.signals.BaseSignal
             A signal with navigation dimensions as the original diffraction
             vectors containg an array of inscribed angles at each
             navigation position.

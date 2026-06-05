@@ -817,7 +817,7 @@ class DiffractionVectors(BaseSignal):
             for it to be considered a core sample, i.e. to not be considered
             noise. Will be passed to get_unique_vectors if no unique vectors
             are given. Only used if method=='DBSCAN'.
-        image_to_plot_on : BaseSignal, optional
+        image_to_plot_on : ~hyperspy.api.signals.BaseSignal, optional
             If provided, the vectors will be plotted on top of this image.
             The image must be calibrated in terms of offset and scale.
         image_cmap : str, optional
@@ -834,7 +834,7 @@ class DiffractionVectors(BaseSignal):
 
         Returns
         -------
-        fig : matplotlib figure
+        fig : ~matplotlib.figure.Figure
             The plot as a matplotlib figure.
 
         """
@@ -965,7 +965,7 @@ class DiffractionVectors(BaseSignal):
 
         Returns
         -------
-        magnitudes : BaseSignal
+        magnitudes : ~hyperspy.api.signals.BaseSignal
             A signal with navigation dimensions as the original diffraction
             vectors containg an array of gvector magnitudes at each
             navigation position.
@@ -997,7 +997,7 @@ class DiffractionVectors(BaseSignal):
 
         Returns
         -------
-        ghis : Signal1D
+        ghis : ~hyperspy.api.signals.Signal1D
             Histogram of gvector magnitudes.
 
         """
@@ -1186,7 +1186,7 @@ class DiffractionVectors(BaseSignal):
 
         Returns
         -------
-        strain_map : Signal2D
+        strain_map : ~hyperspy.api.signals.Signal2D
             The strain map.
         """
         # TODO: remove this import when the function is moved to a utility module
@@ -1371,7 +1371,7 @@ class DiffractionVectors(BaseSignal):
 
         Returns
         -------
-        crystim : Signal2D
+        crystim : ~hyperspy.api.signals.Signal2D
             2D map of diffracting pixels.
         """
         if in_range:

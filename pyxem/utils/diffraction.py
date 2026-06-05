@@ -282,7 +282,8 @@ def regional_filter(z, h):
 
     Returns
     -------
-        h-dome subtracted image as numpy.ndarray
+    img : ~numpy.ndarray
+        h-dome subtracted image.
     """
     seed = np.copy(z)
     seed = z - h
