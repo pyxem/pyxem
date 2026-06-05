@@ -212,7 +212,7 @@ def get_ipf_outline(
         (original_offset - ((maxes + mins) / 2)) / (maxes.max() - mins.min()) * scale
     )
     original_offset = original_offset + offset
-    polygon_sector = ~hyperspy.api.plot.markers.Polygons(
+    polygon_sector = hs.plot.markers.Polygons(
         verts=original_offset[np.newaxis],
         transform="axes",
         alpha=1,
@@ -226,7 +226,7 @@ def get_ipf_outline(
             (texts_offset - ((maxes + mins) / 2)) / (maxes.max() - mins.min()) * scale
         )
         texts_offset = texts_offset + offset
-        texts = ~hyperspy.api.plot.markers.Texts(
+        texts = hs.plot.markers.Texts(
             texts=labels,
             offsets=texts_offset,
             sizes=(1,),
@@ -282,7 +282,7 @@ def get_ipf_annotation_markers(phase: Phase, offset: float = 0.85, scale: float 
     x = x / (max_x - min_x) * scale + offset
     xx, yy = np.meshgrid(y, x)
 
-    mesh = ~hyperspy.api.plot.markers.Markers(
+    mesh = hs.plot.markers.Markers(
         collection=QuadMesh,
         coordinates=np.stack((xx, yy), axis=-1),
         array=g,
@@ -959,7 +959,7 @@ class OrientationMap(DiffractionVectors2D):
             out_xy = (out_xy - ((maxs + mins) / 2)) / (maxs.max() - mins.min()) * scale
             out_xy += offset
 
-            mesh = ~hyperspy.api.plot.markers.Markers(
+            mesh = hs.plot.markers.Markers(
                 collection=QuadMesh,
                 coordinates=out_xy,
                 array=g.T,
@@ -999,7 +999,7 @@ class OrientationMap(DiffractionVectors2D):
         intensity_scale: float = 1,
         fast: bool = True,
         **kwargs,
-    ) -> Sequence[~hyperspy.api.plot.markers.Markers]:
+    ) -> Sequence[hs.plot.markers.Markers]:
         """Convert the orientation map to a set of markers for plotting.
 
         Parameters
@@ -1095,7 +1095,7 @@ class OrientationMap(DiffractionVectors2D):
                     lazy_output=True,
                     silence_warnings=True,
                 )
-                text_markers = ~hyperspy.api.plot.markers.Texts.from_signal(
+                text_markers = hs.plot.markers.Texts.from_signal(
                     text_coords, texts=texts.data.T, color=text_color, **text_kwargs
                 )
                 all_markers.append(text_markers)
@@ -1115,7 +1115,7 @@ class OrientationMap(DiffractionVectors2D):
         marker_colors: str = ("red", "blue", "green", "orange", "purple"),
         lazy_output: bool = None,
         **kwargs,
-    ) -> Iterator[~hyperspy.api.plot.markers.Markers]:
+    ) -> Iterator[hs.plot.markers.Markers]:
         return self.to_polar_markers(
             n_best=n_best,
             marker_colors=marker_colors,
@@ -1129,7 +1129,7 @@ class OrientationMap(DiffractionVectors2D):
         marker_colors: str = ("red", "blue", "green", "orange", "purple"),
         lazy_output: bool = None,
         **kwargs,
-    ) -> Iterator[~hyperspy.api.plot.markers.Markers]:
+    ) -> Iterator[hs.plot.markers.Markers]:
         """
         Convert the orientation map to a set of markers for plotting in polar coordinates.
 
