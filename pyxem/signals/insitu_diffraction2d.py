@@ -226,7 +226,7 @@ class InSituDiffraction2D(Diffraction2D):
         order: int
            The order of the spline interpolation for registration. Default is 1
         **kwargs:
-            Passed to :meth:`~hyperspy.signal.BaseSignal.map`
+            Passed to :meth:`~hyperspy.api.signals.BaseSignal.map`
 
         Returns
         ---------

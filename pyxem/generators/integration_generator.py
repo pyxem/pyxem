@@ -230,7 +230,7 @@ class IntegrationGenerator:
 
         Returns
         -------
-        intensities : :obj:`hyperspy.signals.BaseSignal`
+        intensities : :obj:`hyperspy.api.signals.BaseSignal`
             List of extracted intensities
         """
         intensities = self.dp.map(

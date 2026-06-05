@@ -151,11 +151,11 @@ class PolarVectors(DiffractionVectors):
             If True, the vectors will be converted to cartesian coordinates before plotting.
             The default is True.
         **kwargs :
-            Keyword arguments to be passed to the :class:`hyperspy.api.plot.markers.Point` class.
+            Keyword arguments to be passed to the :class:`hyperspy.api.plot.markers.Points` class.
 
         Returns
         -------
-        :class:`hyperspy.api.plot.markers.Point`
+        :class:`hyperspy.api.plot.markers.Points`
             A Point object containing the markers.
         """
         if cartesian:

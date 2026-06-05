@@ -246,7 +246,7 @@ class CommonDiffraction:
 
         Returns
         -------
-        integrated_intensity : :obj:`hyperspy.signals.Signal2D` or :obj:`hyperspy.signals.Signal1D`
+        integrated_intensity : :obj:`hyperspy.api.signals.Signal2D` or :obj:`hyperspy.api.signals.Signal1D`
             The intensity integrated over the scattering range as defined by
             the roi.
 

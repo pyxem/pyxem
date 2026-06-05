@@ -41,7 +41,7 @@ sim1d = sim_gen.calculate_diffraction1d(gold_phase, reciprocal_radius=1.2)
 # The polar unwrapping for the 2D image will give a 1D diffraction pattern
 # that can be used for calibration.  The calibration is done by comparing
 # the positions of the peaks in the simulated and experimental diffraction
-# patterns. Fitting with a :class:`hyperspy.model.Model1D` can be used to find the
+# patterns. Fitting with a :class:`hyperspy.models.model1d.Model1D` can be used to find the
 # scale or the camera length.
 
 au_dpeg.calibration.center = None  # Set the center

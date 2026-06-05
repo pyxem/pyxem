@@ -254,11 +254,11 @@ def apply_transformation(z, transformation, keep_dtype, order=1, *args, **kwargs
 
     Notes
     -----
-    Generally used in combination with :func:`pyxem.expt_utils.convert_affine_to_transform`
+    Generally used in combination with :func:`pyxem.utils.diffraction.convert_affine_to_transform`
 
     See Also
     --------
-    pyxem.expt_utils.convert_affine_to_transform
+    pyxem.utils.diffraction.convert_affine_to_transform
     """
 
     if keep_dtype is False:
@@ -630,7 +630,6 @@ def investigate_dog_background_removal_interactive(
 
     See Also
     --------
-    subtract_background_dog : The background subtraction method used.
     numpy.arange : Produces suitable objects for std_dev_maxs
 
     """

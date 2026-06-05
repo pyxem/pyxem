@@ -75,7 +75,7 @@ class ElectronDiffraction1D(Diffraction1D):
 
         Returns
         -------
-        model : hyperspy.models.Model1D
+        model : hyperspy.models.model1d.Model1D
             The model for fitting the diffraction peaks to a 1D diffraction pattern.
 
         Notes
@@ -109,14 +109,14 @@ class ElectronDiffraction1D(Diffraction1D):
 
     def model2theta_scale(self, simulation, model, beam_energy):
         """Find the theta calibration scale for a 1d diffraction pattern based
-        on a :class:`diffsims.simulations.Simulation1D`, a :class:`hyperspy.models.Model1D`
+        on a :class:`diffsims.simulations.Simulation1D`, a :class:`hyperspy.models.model1d.Model1D`
         and the beam energy.
 
         Parameters
         ----------
         simulation : diffsims.simulations.Simulation1D
             The simulation of a 1D "powder" diffraction pattern.
-        model : hyperspy.models.Model1D
+        model : hyperspy.models.model1d.Model1D
             The model for fitting the diffraction peaks to a 1D diffraction pattern.
         beam_energy : float
             The beam energy in keV.
@@ -151,7 +151,7 @@ class ElectronDiffraction1D(Diffraction1D):
         ----------
         simulation : diffsims.simulations.Simulation1D
             The simulation of a 1D "powder" diffraction pattern.
-        model : hyperspy.models.Model1D
+        model : hyperspy.models.model1d.Model1D
             The model for fitting the diffraction peaks to a 1D diffraction pattern.
         beam_energy : float
             The beam energy in keV.

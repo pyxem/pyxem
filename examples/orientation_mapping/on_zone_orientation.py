@@ -3,7 +3,7 @@ On Zone Orientation
 ===================
 Sometimes you have a tilt boundary and you might want to know the orientation of the
 grains on each side of the boundary. This can be done using the
-:meth:`pyxem.signals.PolarSignal2D.get_orientation` method.
+:meth:`pyxem.signals.PolarDiffraction2D.get_orientation` method.
 
 For more information on the orientation mapping process see :cite:`pyxemorientationmapping2022`
 """

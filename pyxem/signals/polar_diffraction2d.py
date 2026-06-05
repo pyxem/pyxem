@@ -161,10 +161,10 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
             value is in corresponding unit.
             If None (default), use the entire pattern .
         inplace: bool
-            From :meth:`~hyperspy.signal.BaseSignal.map` inplace=True means the signal is
+            From :meth:`~hyperspy.api.signals.BaseSignal.map` inplace=True means the signal is
             overwritten.
         kwargs: dict
-            Any additional options for the :meth:`~hyperspy.signal.BaseSignal.map` function.
+            Any additional options for the :meth:`~hyperspy.api.signals.BaseSignal.map` function.
         Returns
         -------
         correlation: Signal1D,
@@ -231,10 +231,10 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
             value is in corresponding unit.
             If None (default), use the entire pattern .
         inplace: bool
-            From :meth:`~hyperspy.signals.BaseSignal.map` inplace=True means the signal is
+            From :meth:`~hyperspy.api.signals.BaseSignal.map` inplace=True means the signal is
             overwritten.
         kwargs: dict
-            Any additional options for the :meth:`~hyperspy.signals.BaseSignal.map` function
+            Any additional options for the :meth:`~hyperspy.api.signals.BaseSignal.map` function
 
 
         Returns
@@ -361,7 +361,7 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
         normalize_templates : bool
             Normalize the templates to the same intensity.
         kwargs : dict
-            Any additional options for the :meth:`~hyperspy.signals.BaseSignal.map` function.
+            Any additional options for the :meth:`~hyperspy.api.signals.BaseSignal.map` function.
 
         Returns
         -------
@@ -385,10 +385,6 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
             Additionally, subtracting a small value can sometimes be helpful as it penalizes
             diffraction patterns which do not have the full compliment of simulated diffraction
             vectors.
-
-        References
-        ----------
-            .. bibliography::
 
         """
         (

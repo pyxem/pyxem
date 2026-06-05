@@ -142,6 +142,64 @@ napoleon_use_param = False
 napoleon_use_ivar = True
 nitpicky = True
 
+# Suppress warnings for toctree glob patterns that don't match (e.g., when
+# the pyxem-demos git submodule is not checked out during the build).
+suppress_warnings = ["toc.glob"]
+
+# nitpick_ignore: suppress specific false-positive cross-reference warnings
+# These are either historical refs in CHANGELOG, informal type names in
+# docstrings, or external package types not covered by intersphinx.
+nitpick_ignore = [
+    # CHANGELOG historical refs (removed/renamed API)
+    ("py:meth", "pyxem.signals.Diffraction2D.get_center_beam_position"),
+    ("py:func", "pyxem.utils.plotting.plot_beam_shift_color"),
+    ("py:meth", "pyxem.signals.Diffraction2D.center_of_mass"),
+    ("py:meth", "hyperspy.api.BaseSignal.map"),
+    ("py:class", "pyxem.utils.calibration_utils.Calibration"),
+    ("py:meth", "pyxem.signals.Diffraction2D.get_azimuthal_integral1D"),
+    ("py:class", "pyxem.signals.LabeledDiffractionVectors"),
+    # Informal type names used in docstring Returns sections
+    ("py:class", "Signal2D"),
+    ("py:class", "Signal1D"),
+    ("py:class", "BaseSignal"),
+    ("py:class", "np.array"),
+    ("py:class", "numpy.array"),
+    ("py:class", "np.ndarray"),
+    ("py:class", "numpy.ndarray"),
+    ("py:class", "array"),
+    ("py:class", "array-like"),
+    ("py:class", "2-d array"),
+    ("py:class", "None."),
+    ("py:class", "shift_vectors"),
+    ("py:class", "subclass"),
+    ("py:class", "roi"),
+    ("py:class", "matplotlib figure"),
+    ("py:class", "h-dome subtracted image as numpy.ndarray"),
+    # Internal pyxem informal types (removed classes)
+    ("py:class", "DiffractionVectorLibrary"),
+    ("py:class", "PDF1D"),
+    ("py:class", "ProfileIndexation"),
+    # External package types not in intersphinx
+    ("py:class", "pint.registry.Quantity"),
+    ("py:class", "pint.registry.Unit"),
+    ("py:class", "pint.Quantity"),
+    ("py:class", "numpy._typing._array_like._ScalarT"),
+    # scipy internal ref
+    ("py:obj", "least_squares"),
+    # hyperspy informal names
+    ("py:class", "hyperspy.api.roi.Line2D"),
+    # hs.* shorthand refs
+    ("py:class", "hs.signals.BaseSignal"),
+    ("py:class", "hs.plot.markers.Markers"),
+    ("py:class", "orix.Quaternion.Rotation"),
+]
+
+# nitpick_ignore_regex: suppress warnings matching these regex patterns
+nitpick_ignore_regex = [
+    # hyperspy.signals.* (without api.) - wrong but widely used in old docstrings
+    (r"py:.*", r"hyperspy\.signals\..*"),
+]
+
 # Figure references
 numfig = True
 

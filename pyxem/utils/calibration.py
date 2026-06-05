@@ -849,7 +849,7 @@ def find_diffraction_calibration(
     max_excitation_error : float
         Maximum exacitation error.  Default is 0.01.
     kwargs
-        Keyword arguments passed to :meth:`index_dataset_with_template_rotation`.
+        Keyword arguments passed to :func:`~pyxem.utils.indexation_utils.index_dataset_with_template_rotation`.
 
     Returns
     -------
@@ -958,7 +958,7 @@ def _calibration_iteration(
     max_excitation_error : float
         Maximum exacitation error.  Default is 0.01.
     kwargs
-        Keyword arguments passed to :meth:`index_dataset_with_template_rotation`.
+        Keyword arguments passed to :func:`~pyxem.utils.indexation_utils.index_dataset_with_template_rotation`.
 
     Returns
     -------
@@ -1017,7 +1017,7 @@ def _create_check_diflib(
     max_excitation_error : float
         Maximum exacitation error.  Default is 0.01.
     kwargs
-        Keyword arguments passed to :meth:`pyxem.utisl.indexation_utils.index_dataset_with_template_rotation`.
+        Keyword arguments passed to :func:`~pyxem.utils.indexation_utils.index_dataset_with_template_rotation`.
 
     Returns
     -------

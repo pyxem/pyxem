@@ -423,7 +423,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         *args:
             Arguments to be passed to :meth:`hyperspy.api.signals.BaseSignal.map`.
         **kwargs:
-            Keyword arguments to be passed to :meth:`hyperspy.api.signal.BaseSignal.map`.
+            Keyword arguments to be passed to :meth:`hyperspy.api.signals.BaseSignal.map`.
 
         """
         return self.map(
@@ -726,7 +726,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             Additional arguments accepted by :func:`pyxem.utils.diffraction.find_beam_center_blur`,
             :func:`pyxem.utils.diffraction.find_beam_center_interpolate`,
             :func:`pyxem.utils.diffraction.find_beam_offset_cross_correlation`,
-            and :func:`pyxem.signals.diffraction.center_of_mass_from_image`,
+            and :func:`pyxem.utils.diffraction.center_of_mass_from_image`,
 
         Returns
         -------
@@ -1108,7 +1108,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             will compute the result and return a Diffraction2D object.
         kwargs :
             Passed to :func:`pyxem.utils.diffraction.normalize_template_match` or
-            the :func:`hyperspy.api.BaseSignal.map` method.
+            the :meth:`hyperspy.api.signals.BaseSignal.map` method.
 
         Returns
         -------
@@ -1155,7 +1155,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             new signal is returned. Default False.
         kwargs :
             Passed to :func:`pyxem.utils.diffraction.normalize_template_match` or
-            the :func:`hyperspy.api.BaseSignal.map` method.
+            the :meth:`hyperspy.api.signals.BaseSignal.map` method.
 
         Returns
         -------
@@ -1572,7 +1572,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         ----------
         **kwargs : dict
             Additional keyword arguments to customize the line profile, such as
-            'color', 'linewidth', etc. These will be passed to :class:`~hyperspy.api.roi.Line2D`
+            'color', 'linewidth', etc. These will be passed to :class:`~hyperspy.api.roi.Line2DROI`
         """
         if self._plot is None:
             self.plot()

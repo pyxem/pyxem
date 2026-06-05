@@ -546,7 +546,7 @@ class OrientationMap(DiffractionVectors2D):
     def simulation(self):
         """Simulation object used to generate the orientation map.  This is stored in the metadata
         but can be accessed using the ``.simulation`` attribute. The simulation object is a
-        :class:`diffsims.simulation.Simulation2D` object."""
+        :class:`diffsims.simulations.Simulation2D` object."""
         return self.metadata.get_item("simulation")
 
     @simulation.setter
