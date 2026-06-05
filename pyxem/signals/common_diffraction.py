@@ -152,15 +152,15 @@ class CommonDiffraction:
         --------
         .. code-block:: python
 
-            >>> # For 1D diffraction signal, we can use a SpanROI
-            >>> roi = hs.roi.SpanROI(left=1., right=2.)
-            >>> dp.plot_integrated_intensity(roi)
+            # For 1D diffraction signal, we can use a SpanROI
+            roi = hs.roi.SpanROI(left=1., right=2.)
+            dp.plot_integrated_intensity(roi)
 
         .. code-block:: python
 
-            >>> # For 2D diffraction signal,we can use a CircleROI
-            >>> roi = hs.roi.CircleROI(3, 3, 5)
-            >>> dp.plot_integrated_intensity(roi)
+            # For 2D diffraction signal, we can use a CircleROI
+            roi = hs.roi.CircleROI(3, 3, 5)
+            dp.plot_integrated_intensity(roi)
 
         """
         # Plot signal when necessary
@@ -254,15 +254,15 @@ class CommonDiffraction:
         --------
         .. code-block:: python
 
-            >>> # For 1D diffraction signal, we can use a SpanROI
-            >>> roi = hs.roi.SpanROI(left=1., right=2.)
-            >>> virtual_image = dp.get_integrated_intensity(roi)
+            # For 1D diffraction signal, we can use a SpanROI
+            roi = hs.roi.SpanROI(left=1., right=2.)
+            virtual_image = dp.get_integrated_intensity(roi)
 
         .. code-block:: python
 
-            >>> # For 2D diffraction signal,we can use a CircleROI
-            >>> roi = hs.roi.CircleROI(3, 3, 5)
-            >>> virtual_image = dp.get_integrated_intensity(roi)
+            # For 2D diffraction signal, we can use a CircleROI
+            roi = hs.roi.CircleROI(3, 3, 5)
+            virtual_image = dp.get_integrated_intensity(roi)
 
         """
         dark_field = roi(self, axes=self.axes_manager.signal_axes)

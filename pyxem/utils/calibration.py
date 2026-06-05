@@ -18,6 +18,13 @@
 
 """Utils for calibrating Diffraction Patterns."""
 
+__all__ = [
+    "Calibration",
+    "find_diffraction_calibration",
+    "value2node",
+    "value2standard_units",
+]
+
 import numpy as np
 import pint
 
@@ -578,22 +585,24 @@ class Calibration:
         """
         Return an array with axes [x/y, left/right, pixel_extent], as follows:
 
-        [
-            # x axis
+        .. code-block::
+
             [
-                # left
-                [boundary 1, boundary 2 ...],
-                # right
-                [boundary 1, boundary 2 ...],
-            ],
-            # y axis
-            [
-                # left
-                [boundary 1, boundary 2 ...],
-                # right
-                [boundary 1, boundary 2 ...],
-            ],
-        ]
+                # x axis
+                [
+                    # left
+                    [boundary 1, boundary 2 ...],
+                    # right
+                    [boundary 1, boundary 2 ...],
+                ],
+                # y axis
+                [
+                    # left
+                    [boundary 1, boundary 2 ...],
+                    # right
+                    [boundary 1, boundary 2 ...],
+                ],
+            ]
         """
         if self.flat_ewald:
             left_scales = self.scale

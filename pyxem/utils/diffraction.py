@@ -21,6 +21,27 @@ This module contains utility functions for processing electron diffraction
 patterns.
 """
 
+__all__ = [
+    "apply_transformation",
+    "center_of_mass_from_image",
+    "circular_mask",
+    "convert_affine_to_transform",
+    "find_beam_center_blur",
+    "find_beam_center_interpolate",
+    "find_beam_offset_cross_correlation",
+    "find_center_of_mass",
+    "find_hot_pixels",
+    "gain_normalise",
+    "investigate_dog_background_removal_interactive",
+    "match_template_dilate",
+    "normalize_template_match",
+    "peaks_as_gvectors",
+    "reference_circle",
+    "regional_filter",
+    "remove_bad_pixels",
+    "remove_dead",
+]
+
 import numpy as np
 import scipy.ndimage as ndi
 import pyxem as pxm  # for ElectronDiffraction2D

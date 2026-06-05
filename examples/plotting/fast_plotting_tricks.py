@@ -7,8 +7,9 @@ this mostly happens with "large" data that is loaded Lazily.
 
 There are a couple of different ways that plotting in hyperspy/pyxem can be slow:
 
-1. The data is too large and the navigator is being recalculated every time you plot. (i.e. calling s.plot()
- takes a long time to render)
+1. The data is too large and the navigator is being recalculated every time you plot.
+   (i.e. calling ``s.plot()`` takes a long time to render)
+
 2. Dragging the navigator is slow and laggy.
 
 """
@@ -37,7 +38,7 @@ print(s.navigator)
 # 2. You can also set the navigator directly using `s.navigator = ...` if you have a navigator
 # that you want to use. This is useful if a virtual image is created along with the signal when
 # the data is acquired.  This will also save the navigator in the metadata. This is similar to the
-# :meth:`hyperspy._signals.LazySignal.compute_navigator`method of the signal and
+# :meth:`hyperspy._signals.LazySignal.compute_navigator` method of the signal and
 # will be saved when the signal is saved.
 
 dummy_navigator = hs.signals.Signal2D(np.ones((20, 20)))  # just a dummy navigator

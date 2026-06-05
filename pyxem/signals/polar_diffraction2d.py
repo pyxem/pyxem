@@ -91,7 +91,7 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
         s = self if inplace else correlation
         theta_axis = s.axes_manager.signal_axes[0]
 
-        theta_axis.name = "Angular Correlation, $ \Delta \Theta$"
+        theta_axis.name = r"Angular Correlation, $ \Delta \Theta$"
         theta_axis.offset = 0
 
         s.set_signal_type("correlation")
@@ -198,7 +198,7 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
         s.set_signal_type("correlation")
 
         rho_axis = s.axes_manager.signal_axes[0]
-        rho_axis.name = "Correlation Angle, $ \Delta \Theta$"
+        rho_axis.name = r"Correlation Angle, $ \Delta \Theta$"
         rho_axis.offset = 0
         rho_axis.units = "rad"
         rho_axis.scale = self.axes_manager[-2].scale
@@ -271,7 +271,7 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
         s.set_signal_type("correlation")
 
         rho_axis = s.axes_manager.signal_axes[0]
-        rho_axis.name = "Correlation Angle, $ \Delta \Theta$"
+        rho_axis.name = r"Correlation Angle, $ \Delta \Theta$"
         rho_axis.offset = 0
         rho_axis.units = "rad"
         rho_axis.scale = self.axes_manager[-2].scale
@@ -282,7 +282,7 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
             k_axis.offset = krange[0]
         else:
             k_axis.offset = self.axes_manager[-1].offset
-        k_axis.units = "$\AA^{-1}$"
+        k_axis.units = r"$\AA^{-1}$"
         k_axis.scale = self.axes_manager[-1].scale
 
         return correlation
