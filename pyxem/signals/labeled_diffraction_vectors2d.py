@@ -20,7 +20,7 @@ import sklearn.base
 from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
 import numpy as np
 import matplotlib.pyplot as plt
-from typing import Tuple
+from typing import Optional, Sequence
 
 
 import hyperspy.api as hs
@@ -58,7 +58,7 @@ class LabeledDiffractionVectors2D(DiffractionVectors2D):
         func,
         dtype: np.dtype,
         label_index: int = -1,
-        shape: Tuple[int] = None,
+        shape: Optional[Sequence[int]] = None,
         **kwargs,
     ):
         """
@@ -101,14 +101,14 @@ class LabeledDiffractionVectors2D(DiffractionVectors2D):
     @only_signal_axes
     def plot_clustered(
         self,
-        nav_columms: Tuple[int] = None,
-        signal_columns: Tuple[int] = None,
-        navigation_pixels: Tuple[int] = (105, 105),
-        scales: Tuple[float] = None,
-        offsets: Tuple[float] = None,
-        labels: Tuple[str] = None,
+        nav_columms: Optional[Sequence[int]] = None,
+        signal_columns: Optional[Sequence[int]] = None,
+        navigation_pixels: Sequence[int] = (105, 105),
+        scales: Optional[Sequence[float]] = None,
+        offsets: Optional[Sequence[float]] = None,
+        labels: Optional[Sequence[str]] = None,
         signal=None,
-        figsize: Tuple[float] = None,
+        figsize: Optional[Sequence[float]] = None,
     ):
         """Plot the clustered vectors and the characteristic diffraction patterns
 
@@ -188,7 +188,7 @@ class LabeledDiffractionVectors2D(DiffractionVectors2D):
     def cluster_labeled_vectors(
         self,
         method: sklearn.base.ClusterMixin,
-        columns: Tuple[int] = None,
+        columns: Optional[Sequence[int]] = None,
         preprocessing: str = "mean",
         **kwargs,
     ):

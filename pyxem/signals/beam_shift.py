@@ -29,9 +29,10 @@ from pyxem.signals import DiffractionVectors1D
 from pyxem.utils._deprecated import deprecated
 from diffsims.utils.sim_utils import get_electron_wavelength
 from scipy.constants import c, e, m_e
-from typing import Optional, Sequence, Tuple
+from typing import Optional, Sequence
 
 from hyperspy.signals import Signal2D
+from pyxem.utils._typing import Degrees, Number
 
 
 class BeamShift(DiffractionVectors1D):
@@ -171,10 +172,10 @@ class BeamShift(DiffractionVectors1D):
 
     def get_bivariate_histogram(
         self,
-        histogram_range: Optional[Tuple[float, float]] = None,
+        histogram_range: Optional[Sequence[float]] = None,
         masked: Optional[np.ndarray] = None,
         bins: int = 200,
-        spatial_std: float = 3,
+        spatial_std: Number = 3,
     ) -> Signal2D:
         """
         Useful for finding the distribution of the beam shifts.
@@ -374,8 +375,8 @@ class BeamShift(DiffractionVectors1D):
     def get_magnitude_signal(
         self,
         autolim: bool = True,
-        autolim_sigma: float = 4,
-        magnitude_limits: Optional[Tuple[float, float]] = None,
+        autolim_sigma: Number = 4,
+        magnitude_limits: Optional[Sequence[float]] = None,
     ) -> Signal2D:
         """Get beam shift magnitude image visualized as greyscale.
 
@@ -582,7 +583,7 @@ class BeamShift(DiffractionVectors1D):
 
     def get_phase_signal(
         self,
-        rotation: Optional[float] = None,
+        rotation: Optional[Degrees] = None,
         add_color_wheel_marker: bool = True,
     ) -> Signal2D:
         """Get beam shift phase image visualized using continuous color scale.
@@ -651,10 +652,10 @@ class BeamShift(DiffractionVectors1D):
 
     def get_magnitude_phase_signal(
         self,
-        rotation: Optional[float] = None,
+        rotation: Optional[Degrees] = None,
         autolim: bool = True,
-        autolim_sigma: float = 4,
-        magnitude_limits: Optional[Tuple[float, float]] = None,
+        autolim_sigma: Number = 4,
+        magnitude_limits: Optional[Sequence[float]] = None,
         add_color_wheel_marker: bool = True,
     ) -> Signal2D:
         """Get beam shift image visualized using continuous color scale.
@@ -730,7 +731,7 @@ class BeamShift(DiffractionVectors1D):
             s_rgb.add_marker(color_wheel_marker, permanent=True, plot_marker=False)
         return s_rgb
 
-    def rotate_beam_shifts(self, angle: float) -> "BeamShift":
+    def rotate_beam_shifts(self, angle: Degrees) -> "BeamShift":
         """Rotate the beam shift vector.
 
         Parameters
@@ -760,7 +761,7 @@ class BeamShift(DiffractionVectors1D):
         return s_new
 
     def rotate_scan_dimensions(
-        self, angle: float, reshape: bool = False
+        self, angle: Degrees, reshape: bool = False
     ) -> "BeamShift":
         """Rotate the scan dimensions by angle.
 

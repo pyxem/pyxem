@@ -18,7 +18,7 @@
 
 
 import numpy as np
-from typing import Tuple
+from typing import Optional, Sequence
 
 from pyxem.signals.diffraction2d import Diffraction2D, LazyDiffraction2D
 from diffsims.utils.sim_utils import get_electron_wavelength
@@ -159,7 +159,7 @@ class ElectronDiffraction2D(Diffraction2D):
             )
 
     def set_diffraction_calibration(
-        self, calibration: float, center: Tuple[float] = None
+        self, calibration: float, center: Optional[Sequence[float]] = None
     ):
         """Set diffraction pattern pixel size in reciprocal Angstroms and origin
         location.

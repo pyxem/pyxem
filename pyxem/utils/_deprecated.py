@@ -29,7 +29,6 @@ import functools
 import inspect
 from typing import Callable, Optional, Union
 import warnings
-from numpydoc.docscrape import NumpyDocString
 
 
 from pyxem.common import VisibleDeprecationWarning
@@ -190,6 +189,8 @@ class extend_docs:
 
     def _extend_docs(self, func):
         """Extend the docstring of the function with the docstring of the method."""
+        from numpydoc.docscrape import NumpyDocString
+
         # Get the docstring of the function
         main_doc = NumpyDocString(inspect.getdoc(func))
         # Get the docstring of the method

@@ -17,7 +17,9 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from typing import TYPE_CHECKING, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Optional, Sequence, Union
+
+from pyxem.utils._typing import Number
 
 import numpy as np
 from hyperspy.signals import Signal2D
@@ -166,7 +168,7 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
     def get_full_pearson_correlation(
         self,
         mask: Optional[np.ndarray] = None,
-        krange: Optional[Tuple[Union[int, float], Union[int, float]]] = None,
+        krange: Optional[Sequence[Number]] = None,
         inplace: bool = False,
         **kwargs,
     ) -> Optional["Correlation1D"]:
@@ -239,7 +241,7 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
     def get_resolved_pearson_correlation(
         self,
         mask: Optional[np.ndarray] = None,
-        krange: Optional[Tuple[Union[int, float], Union[int, float]]] = None,
+        krange: Optional[Sequence[Number]] = None,
         inplace: bool = False,
         **kwargs,
     ) -> Optional["Correlation2D"]:

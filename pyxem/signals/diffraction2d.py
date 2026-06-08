@@ -16,7 +16,9 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 from copy import deepcopy
-from typing import Optional, Tuple, TYPE_CHECKING, Union
+from typing import Optional, Sequence, Tuple, TYPE_CHECKING, Union
+
+from pyxem.utils._typing import Degrees, Number
 
 import numpy as np
 import scipy.ndimage as ndi
@@ -311,7 +313,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             return s_shift
 
     def rotate_diffraction(
-        self, angle: float, show_progressbar: bool = True
+        self, angle: Degrees, show_progressbar: bool = True
     ) -> "Diffraction2D":
         """
         Rotate the diffraction dimensions.
@@ -406,7 +408,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
     """ Masking and other non-geometrical 'correction' to patterns """
 
-    def get_direct_beam_mask(self, radius: float) -> Signal2D:
+    def get_direct_beam_mask(self, radius: Number) -> Signal2D:
         """Generate a signal mask for the direct beam.
 
         Parameters
@@ -1159,7 +1161,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         name="lazy_result", alternative="lazy_output", since="0.15.0", removal="1.0.0"
     )
     def template_match_disk(
-        self, disk_r: float = 4, inplace: bool = False, **kwargs
+        self, disk_r: Number = 4, inplace: bool = False, **kwargs
     ) -> Optional["Diffraction2D"]:
         """Template match the signal dimensions with a disk.
 
@@ -1204,7 +1206,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         name="lazy_result", alternative="lazy_output", since="0.15.0", removal="1.0.0"
     )
     def template_match_ring(
-        self, r_inner: float = 5, r_outer: float = 7, inplace: bool = False, **kwargs
+        self, r_inner: Number = 5, r_outer: Number = 7, inplace: bool = False, **kwargs
     ) -> Optional["Diffraction2D"]:
         """Template match the signal dimensions with a ring.
 
@@ -1915,7 +1917,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         self,
         npt: int,
         mask=None,
-        radial_range: Optional[Tuple[float, float]] = None,
+        radial_range: Optional[Sequence[float]] = None,
         inplace: bool = False,
         **kwargs,
     ) -> "Diffraction1D":
@@ -2015,8 +2017,8 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         npt: int,
         npt_azim: int = 360,
         mask=None,
-        radial_range: Optional[Tuple[float, float]] = None,
-        azimuth_range: Optional[Tuple[float, float]] = None,
+        radial_range: Optional[Sequence[float]] = None,
+        azimuth_range: Optional[Sequence[float]] = None,
         inplace: bool = False,
         mean: bool = False,
         **kwargs,
