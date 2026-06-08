@@ -46,7 +46,7 @@ class Correlation1D(Signal1D):
         method: str = "average",
         include_duplicates: bool = False,
         normalize: bool = True,
-    ):
+    ) -> "Correlation1D":
         """
         Return symmetry coefficient from pearson correlation function at all real
         space positions (n from 2 to 10).

@@ -15,6 +15,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+from typing import List
+
 from hyperspy.signals import Signal1D
 from pyxem.signals import DiffractionVectors
 from hyperspy.utils.plot import plot_images
@@ -48,7 +50,7 @@ class DiffractionVectors1D(DiffractionVectors, Signal1D):
     _signal_dimension = 1
     _signal_type = "diffraction_vectors"
 
-    def plot(self, tight_layout: bool = True, **kwargs):
+    def plot(self, tight_layout: bool = True, **kwargs) -> List:
         """
         Plot the beam shifts, utilizing HyperSpy's :func:`hyperspy.api.plot.plot_images`
         function. Each Vector is plotted as a separate image with the column names as labels.
@@ -76,7 +78,7 @@ class DiffractionVectors1D(DiffractionVectors, Signal1D):
         )
         return axes_list
 
-    def flatten_diffraction_vectors(self, **kwargs):
+    def flatten_diffraction_vectors(self, **kwargs) -> None:
         raise NotImplementedError(
             "flatten_diffraction_vectors is not implemented yet for DiffractionVectors1D."
         )

@@ -17,9 +17,14 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import warnings
+from typing import TYPE_CHECKING
+
 from hyperspy.signals import Signal1D, Signal2D
 from hyperspy._signals.lazy import LazySignal
 from pyxem.utils._deprecated import deprecated
+
+if TYPE_CHECKING:
+    from pyxem.signals.beam_shift import BeamShift
 
 
 class DPCSignal1D(Signal1D):
@@ -52,7 +57,7 @@ class DPCSignal1D(Signal1D):
             DeprecationWarning,
         )
 
-    def to_beamshift(self):
+    def to_beamshift(self) -> "BeamShift":
         """Get BeamShift signal from the DPCSignal.
 
         The BeamShift signal is a utility signal focused on correcting the shift of the
@@ -96,7 +101,7 @@ class DPCSignal2D(Signal2D):
             DeprecationWarning,
         )
 
-    def to_beamshift(self):
+    def to_beamshift(self) -> "BeamShift":
         """Get BeamShift signal from the DPCSignal.
 
         The BeamShift signal is a utility signal focused on correcting the shift of the

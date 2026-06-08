@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 from copy import deepcopy
+from typing import Optional, Tuple, TYPE_CHECKING, Union
 
 import numpy as np
 import scipy.ndimage as ndi
@@ -82,6 +83,12 @@ from pyxem import CUPY_INSTALLED
 if CUPY_INSTALLED:
     import cupy as cp
 
+if TYPE_CHECKING:
+    from pyxem.signals.beam_shift import BeamShift
+    from pyxem.signals.diffraction1d import Diffraction1D
+    from pyxem.signals.polar_diffraction2d import PolarDiffraction2D
+    from pyxem.signals.diffraction_vectors import DiffractionVectors
+
 
 class Diffraction2D(CommonDiffraction, Signal2D):
     """Signal class for two-dimensional diffraction data in Cartesian coordinates.
@@ -133,8 +140,14 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         method_name="hyperspy.signal.BaseSignal.map",
     )
     def apply_affine_transformation(
-        self, D, order=1, keep_dtype=False, inplace=True, *args, **kwargs
-    ):
+        self,
+        D,
+        order: int = 1,
+        keep_dtype: bool = False,
+        inplace: bool = True,
+        *args,
+        **kwargs,
+    ) -> Optional["Diffraction2D"]:
         """Correct geometric distortion by applying an affine transformation.
 
         Parameters
@@ -297,7 +310,9 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         if not inplace:
             return s_shift
 
-    def rotate_diffraction(self, angle, show_progressbar=True):
+    def rotate_diffraction(
+        self, angle: float, show_progressbar: bool = True
+    ) -> "Diffraction2D":
         """
         Rotate the diffraction dimensions.
 
@@ -330,7 +345,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             s_rotated.compute(show_progressbar=show_progressbar)
         return s_rotated
 
-    def flip_diffraction_x(self):
+    def flip_diffraction_x(self) -> "Diffraction2D":
         """Flip the dataset along the diffraction x-axis.
 
         The function returns a new signal, but the data itself
@@ -359,7 +374,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         s_out.data = np.flip(self.data, axis=-1)
         return s_out
 
-    def flip_diffraction_y(self):
+    def flip_diffraction_y(self) -> "Diffraction2D":
         """Flip the dataset along the diffraction y-axis.
 
         The function returns a new signal, but the data itself
@@ -391,7 +406,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
     """ Masking and other non-geometrical 'correction' to patterns """
 
-    def get_direct_beam_mask(self, radius):
+    def get_direct_beam_mask(self, radius: float) -> Signal2D:
         """Generate a signal mask for the direct beam.
 
         Parameters
@@ -417,8 +432,8 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         method_name="hyperspy.signal.BaseSignal.map",
     )
     def apply_gain_normalisation(
-        self, dark_reference, bright_reference, inplace=True, *args, **kwargs
-    ):
+        self, dark_reference, bright_reference, inplace: bool = True, *args, **kwargs
+    ) -> Optional["Diffraction2D"]:
         """Apply gain normalization to experimentally acquired electron
         diffraction patterns.
 
@@ -475,8 +490,8 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         method_name="pyxem.utils._background_subtraction._subtract_hdome",
     )
     def subtract_diffraction_background(
-        self, method="median kernel", inplace=False, **kwargs
-    ):
+        self, method: str = "median kernel", inplace: bool = False, **kwargs
+    ) -> Optional["Diffraction2D"]:
         """Background subtraction of the diffraction data.
 
         Parameters
@@ -535,9 +550,9 @@ class Diffraction2D(CommonDiffraction, Signal2D):
     )
     def find_dead_pixels(
         self,
-        dead_pixel_value=0,
-        mask=None,
-    ):
+        dead_pixel_value: float = 0,
+        mask: Optional[np.ndarray] = None,
+    ) -> Signal2D:
         """Find dead pixels in the diffraction images.
 
         Parameters
@@ -593,8 +608,12 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         name="lazy_result", since="0.15.0", removal="1.0.0", alternative="lazy_output"
     )
     def find_hot_pixels(
-        self, threshold_multiplier=500, mask=None, inplace=False, **kwargs
-    ):
+        self,
+        threshold_multiplier: float = 500,
+        mask: Optional[np.ndarray] = None,
+        inplace: bool = False,
+        **kwargs,
+    ) -> Optional["Diffraction2D"]:
         """Find hot pixels in the diffraction images.
 
         Note: this method will be default return a lazy signal, since the
@@ -655,7 +674,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         self,
         bad_pixel_array,
         **kwargs,
-    ):
+    ) -> "Diffraction2D":
         """Correct bad (dead/hot) pixels by replacing their values with the mean value of neighbors.
 
         Parameters
@@ -704,15 +723,15 @@ class Diffraction2D(CommonDiffraction, Signal2D):
     )
     def get_direct_beam_position(
         self,
-        method,
-        lazy_output=None,
+        method: str,
+        lazy_output: Optional[bool] = None,
         signal_slice=None,
         half_square_width=None,
-        show_slice_on_plot=False,
-        subpixel=True,
-        prefilter_sigma=None,
+        show_slice_on_plot: bool = False,
+        subpixel: bool = True,
+        prefilter_sigma: Optional[float] = None,
         **kwargs,
-    ):
+    ) -> "BeamShift":
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern. Returns the shifts required to center the
         diffraction pattern.
@@ -1077,7 +1096,12 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         else:
             return aligned
 
-    def threshold_and_mask(self, threshold=None, mask=None, show_progressbar=True):
+    def threshold_and_mask(
+        self,
+        threshold: Optional[float] = None,
+        mask: Optional[tuple] = None,
+        show_progressbar: bool = True,
+    ) -> "Diffraction2D":
         """Get a thresholded and masked of the signal.
 
         Useful for figuring out optimal settings when using 'center_of_mass' in
@@ -1134,7 +1158,9 @@ class Diffraction2D(CommonDiffraction, Signal2D):
     @deprecated_argument(
         name="lazy_result", alternative="lazy_output", since="0.15.0", removal="1.0.0"
     )
-    def template_match_disk(self, disk_r=4, inplace=False, **kwargs):
+    def template_match_disk(
+        self, disk_r: float = 4, inplace: bool = False, **kwargs
+    ) -> Optional["Diffraction2D"]:
         """Template match the signal dimensions with a disk.
 
         Used to find diffraction disks in convergent beam electron
@@ -1177,7 +1203,9 @@ class Diffraction2D(CommonDiffraction, Signal2D):
     @deprecated_argument(
         name="lazy_result", alternative="lazy_output", since="0.15.0", removal="1.0.0"
     )
-    def template_match_ring(self, r_inner=5, r_outer=7, inplace=False, **kwargs):
+    def template_match_ring(
+        self, r_inner: float = 5, r_outer: float = 7, inplace: bool = False, **kwargs
+    ) -> Optional["Diffraction2D"]:
         """Template match the signal dimensions with a ring.
 
         Used to find diffraction rings in convergent beam electron
@@ -1230,7 +1258,9 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             normalize_template_match, template=ring, inplace=inplace, **kwargs
         )
 
-    def filter(self, func, inplace=False, **kwargs):
+    def filter(
+        self, func, inplace: bool = False, **kwargs
+    ) -> Optional["Diffraction2D"]:
         """Filters the entire dataset given some function applied to the data.
 
         The function must take a numpy or dask array as input and return a
@@ -1273,7 +1303,9 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         else:
             return self._deepcopy_with_new_data(data=new_data)
 
-    def template_match(self, template, inplace=False, **kwargs):
+    def template_match(
+        self, template: np.ndarray, inplace: bool = False, **kwargs
+    ) -> Optional["Diffraction2D"]:
         """Template match the signal dimensions with a binary image.
 
         Used to find diffraction disks in convergent beam electron
@@ -1367,13 +1399,13 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
     def get_diffraction_vectors(
         self,
-        center=None,
-        calibration=None,
-        column_names=None,
-        units=None,
-        get_intensity=True,
+        center: Optional[tuple] = None,
+        calibration: Optional[tuple] = None,
+        column_names: Optional[tuple] = None,
+        units: Optional[tuple] = None,
+        get_intensity: bool = True,
         **kwargs,
-    ):
+    ) -> "DiffractionVectors":
         """Find vectors from the diffraction pattern. Wraps `hyperspy.api.signals.Signal2D.find_peaks`
 
         Parameters
@@ -1530,7 +1562,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
     """ Plotting (or plotting adjacent) methods """
 
-    def make_probe_navigation(self, method="fast"):
+    def make_probe_navigation(self, method: str = "fast") -> None:
         nav_dim = self.axes_manager.navigation_dimension
         if (0 == nav_dim) or (nav_dim > 2):
             raise ValueError(
@@ -1881,12 +1913,12 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
     def get_azimuthal_integral1d(
         self,
-        npt,
+        npt: int,
         mask=None,
-        radial_range=None,
-        inplace=False,
+        radial_range: Optional[Tuple[float, float]] = None,
+        inplace: bool = False,
         **kwargs,
-    ):
+    ) -> "Diffraction1D":
         """Creates a polar reprojection using pyFAI's azimuthal integrate 2d. This method is designed
         with 2 cases in mind. (1) the signal has pyxem style units, if a wavelength is not provided
         no account is made for the curvature of the Ewald sphere. (2) the signal has pyFAI style units,
@@ -1980,15 +2012,15 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
     def get_azimuthal_integral2d(
         self,
-        npt,
-        npt_azim=360,
+        npt: int,
+        npt_azim: int = 360,
         mask=None,
-        radial_range=None,
-        azimuth_range=None,
-        inplace=False,
-        mean=False,
+        radial_range: Optional[Tuple[float, float]] = None,
+        azimuth_range: Optional[Tuple[float, float]] = None,
+        inplace: bool = False,
+        mean: bool = False,
         **kwargs,
-    ):
+    ) -> "PolarDiffraction2D":
         """Creates a polar reprojection using pyFAI's azimuthal integrate 2d. This method is designed
         with 2 cases in mind. (1) the signal has pyxem style units, if a wavelength is not provided
         no account is made for the curvature of the Ewald sphere. (2) the signal has pyFAI style units,

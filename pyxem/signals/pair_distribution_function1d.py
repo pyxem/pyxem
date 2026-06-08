@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+from typing import Optional
+
 import numpy as np
 from hyperspy.signals import Signal1D
 
@@ -36,7 +38,7 @@ class PairDistributionFunction1D(Signal1D):
 
     def normalise_signal(
         self, s_min: float = 0, inplace: bool = False, *args, **kwargs
-    ):
+    ) -> Optional["PairDistributionFunction1D"]:
         """
         Normalises the Reduced PDF signal to having a maximum of 1.
         This is applied to each pdf separately in a multidimensional signal.

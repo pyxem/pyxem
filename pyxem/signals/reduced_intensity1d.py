@@ -17,6 +17,8 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
+from typing import Optional
+
 from hyperspy.signals import Signal1D
 import numpy as np
 
@@ -29,7 +31,9 @@ class ReducedIntensity1D(Signal1D):
 
     _signal_type = "reduced_intensity"
 
-    def damp_exponential(self, b: float, inplace: bool = True, *args, **kwargs):
+    def damp_exponential(
+        self, b: float, inplace: bool = True, *args, **kwargs
+    ) -> Optional["ReducedIntensity1D"]:
         """Damps the reduced intensity signal to reduce noise in the high s
         region by a factor of exp(-b*(s^2)), where b is the damping parameter.
 
@@ -58,10 +62,12 @@ class ReducedIntensity1D(Signal1D):
             s_offset=s_offset,
             inplace=inplace,
             *args,
-            **kwargs
+            **kwargs,
         )
 
-    def damp_lorch(self, s_max: float = None, inplace: bool = True, *args, **kwargs):
+    def damp_lorch(
+        self, s_max: float = None, inplace: bool = True, *args, **kwargs
+    ) -> Optional["ReducedIntensity1D"]:
         """Damps the reduced intensity signal to reduce noise in the high s
         region by a factor of sin(s*delta) / (s*delta), where
         delta = pi / s_max. See [1].
@@ -98,12 +104,12 @@ class ReducedIntensity1D(Signal1D):
             s_offset=s_offset,
             inplace=inplace,
             *args,
-            **kwargs
+            **kwargs,
         )
 
     def damp_updated_lorch(
         self, s_max: float = None, inplace: bool = True, *args, **kwargs
-    ):
+    ) -> Optional["ReducedIntensity1D"]:
         """Damps the reduced intensity signal to reduce noise in the high s
         region by a factor of 3 / (s*delta)^3 (sin(s*delta)-s*delta(cos(s*delta))),
         where delta = pi / s_max. From [1].
@@ -141,10 +147,12 @@ class ReducedIntensity1D(Signal1D):
             s_offset=s_offset,
             inplace=inplace,
             *args,
-            **kwargs
+            **kwargs,
         )
 
-    def damp_extrapolate_to_zero(self, s_min: float, *args, **kwargs):
+    def damp_extrapolate_to_zero(
+        self, s_min: float, *args, **kwargs
+    ) -> Optional["ReducedIntensity1D"]:
         """Extrapolates the reduced intensity to zero linearly below s_min.
         This method is always inplace.
 
@@ -168,7 +176,7 @@ class ReducedIntensity1D(Signal1D):
             s_size=s_size,
             s_offset=s_offset,
             *args,
-            **kwargs
+            **kwargs,
         )
 
     def damp_low_q_region_erfc(
@@ -177,8 +185,8 @@ class ReducedIntensity1D(Signal1D):
         offset: float = 1.3,
         inplace: bool = True,
         *args,
-        **kwargs
-    ):
+        **kwargs,
+    ) -> Optional["ReducedIntensity1D"]:
         """Damps the reduced intensity signal in the low q region as a
         correction to central beam effects. The reduced intensity profile is
         damped by (erf(scale * s - offset) + 1) / 2
@@ -210,12 +218,12 @@ class ReducedIntensity1D(Signal1D):
             s_offset=s_offset,
             inplace=inplace,
             *args,
-            **kwargs
+            **kwargs,
         )
 
     def fit_thermal_multiple_scattering_correction(
         self, s_max: float = None, plot: bool = False
-    ):
+    ) -> None:
         """Fits a 4th order polynomial function to the reduced intensity.
         This is used to calculate the error in the reduced intensity due to
         the effects of multiple and thermal diffuse scattering, which

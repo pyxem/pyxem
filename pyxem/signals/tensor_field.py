@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+from typing import Tuple
+
 import numpy as np
 from scipy.linalg import polar
 import math
@@ -71,7 +73,9 @@ class DisplacementGradientMap(Signal2D):
         # Check that the signal dimensions are (3,3) for it to be a valid
         # TensorField
 
-    def polar_decomposition(self):
+    def polar_decomposition(
+        self,
+    ) -> Tuple["DisplacementGradientMap", "DisplacementGradientMap"]:
         """Perform polar decomposition on the second rank tensors describing
         the TensorField. The polar decomposition is right handed and given by
         :math:`D = RU`
@@ -89,7 +93,7 @@ class DisplacementGradientMap(Signal2D):
         )
         return RU.isig[:, :, 0], RU.isig[:, :, 1]
 
-    def get_strain_maps(self):
+    def get_strain_maps(self) -> StrainMap:
         """Obtain strain maps from the displacement gradient tensor at each
         navigation position in the small strain approximation.
 
