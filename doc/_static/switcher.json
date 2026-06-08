@@ -2,7 +2,7 @@
     {
         "name": "dev",
         "version": "dev",
-        "url": "https://pyxem.readthedocs.io/en/latest/"
+        "url": "https://pyxem.org/dev/"
     },
     {
         "name": "0.20.0",
