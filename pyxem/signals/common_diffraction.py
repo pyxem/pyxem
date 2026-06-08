@@ -282,7 +282,7 @@ class CommonDiffraction:
 
         Parameters
         -------------------
-        data: np.array
+        data: ~numpy.ndarray
             The data for the navigation signal.  Should be the same size as the navigation axis.
         name: str
             The name of the axis.

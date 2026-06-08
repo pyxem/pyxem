@@ -158,14 +158,6 @@ nitpick_ignore = [
     ("py:class", "pyxem.utils.calibration_utils.Calibration"),
     ("py:meth", "pyxem.signals.Diffraction2D.get_azimuthal_integral1D"),
     ("py:class", "pyxem.signals.LabeledDiffractionVectors"),
-    # Informal array type names — too widespread to fix individually
-    ("py:class", "np.array"),
-    ("py:class", "numpy.array"),
-    ("py:class", "np.ndarray"),
-    ("py:class", "numpy.ndarray"),
-    ("py:class", "array"),
-    ("py:class", "array-like"),
-    ("py:class", "2-d array"),
     # pint types not in intersphinx
     ("py:class", "pint.Quantity"),
 ]

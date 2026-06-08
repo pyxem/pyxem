@@ -267,7 +267,7 @@ def _damp_ri_exponential(z, b, s_scale, s_size, s_offset, *args, **kwargs):
 
     Parameters
     ----------
-    z : np.array
+    z : ~numpy.ndarray
         A reduced intensity np.array to be transformed.
     b : float
         The damping parameter.
@@ -292,7 +292,7 @@ def _damp_ri_lorch(z, s_max, s_scale, s_size, s_offset, *args, **kwargs):
 
     Parameters
     ----------
-    z : np.array
+    z : ~numpy.ndarray
         A reduced intensity np.array to be transformed.
     s_max : float
         The maximum s value to be used for transformation to PDF.
@@ -324,7 +324,7 @@ def _damp_ri_updated_lorch(z, s_max, s_scale, s_size, s_offset, *args, **kwargs)
 
     Parameters
     ----------
-    z : np.array
+    z : ~numpy.ndarray
         A reduced intensity np.array to be transformed.
     s_max : float
         The damping parameter, which need not be the maximum scattering
@@ -359,7 +359,7 @@ def _damp_ri_extrapolate_to_zero(z, s_min, s_scale, s_size, s_offset, *args, **k
 
     Parameters
     ----------
-    z : np.array
+    z : ~numpy.ndarray
         A reduced intensity np.array to be transformed.
     s_min : float
         Value of s below which data is extrapolated to zero.
@@ -393,7 +393,7 @@ def _damp_ri_low_q_region_erfc(
 
     Parameters
     ----------
-    z : np.array
+    z : ~numpy.ndarray
         A reduced intensity np.array to be transformed.
     scale : float
         A scalar multiplier for s in the error function

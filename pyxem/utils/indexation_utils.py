@@ -91,7 +91,7 @@ def get_nth_best_solution(
         best_fit : `OrientationResult`
             Parameters for the best fitting orientation
             Library Number, rotation_matrix, match_rate, error_hkls, total_error
-    TemplateMatching: np.array
+    TemplateMatching: ~numpy.ndarray
             Parameters for the best fitting orientation
             Library Number , [z, x, z], Correlation Score
     """
@@ -123,7 +123,7 @@ def index_magnitudes(z, simulation, tolerance):
 
     Returns
     -------
-    indexation : np.array()
+    indexation : ~numpy.ndarray
         indexation results.
 
     """
@@ -159,7 +159,7 @@ def _choose_peak_ids(peaks, n_peaks_to_index):
 
     Returns
     -------
-    peak_ids : numpy.array
+    peak_ids : ~numpy.ndarray
         Array of indices of the chosen peaks.
     """
     r, angles = _cart2polar(peaks[:, 0], peaks[:, 1])
@@ -176,7 +176,7 @@ def match_vectors(
 
     Parameters
     ----------
-    peaks : np.array()
+    peaks : ~numpy.ndarray
         The experimentally measured diffraction vectors, associated with a
         particular probe position, to be indexed. In Cartesian coordinates.
     library : VectorLibrary
@@ -195,7 +195,7 @@ def match_vectors(
 
     Returns
     -------
-    indexation : np.array()
+    indexation : ~numpy.ndarray
         A numpy array containing the indexation results, each result consisting of 5 entries:
             [phase index, rotation matrix, match rate, error hkls, total error]
 
@@ -360,11 +360,11 @@ def _simulations_to_arrays(simulations, max_radius=None):
 
     Returns
     -------
-    positions : numpy.ndarray (N, 2, R)
+    positions : ~numpy.ndarray (N, 2, R)
         An array containing all (x,y) coordinates of reflections of N templates. R represents
         the maximum number of reflections; templates containing fewer
         reflections are padded with 0's at the end. In pixel units.
-    intensities : numpy.ndarray (N, R)
+    intensities : ~numpy.ndarray (N, R)
         An array containing all intensities of reflections of N templates
     """
     num_spots = [i.intensities.shape[0] for i in simulations]

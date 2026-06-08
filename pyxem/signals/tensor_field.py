@@ -32,7 +32,7 @@ def _polar_decomposition(image, side):
 
     Parameters
     ----------
-    image : numpy.ndarray
+    image : ~numpy.ndarray
         Matrix on which to form polar decomposition.
     side : str
         'left' or 'right' the side on which to perform polar decomposition.
@@ -51,7 +51,7 @@ def _get_rotation_angle(matrix):
 
     Parameters
     ----------
-    matrix : numpy.ndarray
+    matrix : ~numpy.ndarray
         A rotation matrix.
 
     Returns

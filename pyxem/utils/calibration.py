@@ -679,11 +679,11 @@ class Calibration:
 
         Returns
         -------
-        indexes: np.ndarray (n, 2)
+        indexes: ~numpy.ndarray (n, 2)
             The indexes of the pixels to integrate flattened
-        factors: np.ndarray (n)
+        factors: ~numpy.ndarray (n)
             The factors(representing the pixel fraction) to multiply each pixel value by
-        factor_slices: np.ndarray (npt+1)
+        factor_slices: ~numpy.ndarray (npt+1)
             The start and end index of the factors for each slice such that for some
             slice i, factors[factor_slices[i]:factor_slices[i+1]] is the factors for that radial slice
         radial_range: tuple
@@ -855,9 +855,9 @@ def find_diffraction_calibration(
     -------
     mean_cal : float
         Mean of calibrations found for each pattern.
-    full_corrlines : numpy.ndarray
+    full_corrlines : ~numpy.ndarray
         Gives the explicit correlation vs calibration values. Shape:(size*2 + 20, 2 , number of patterns)
-    found_cals : numpy.ndarray
+    found_cals : ~numpy.ndarray
         List of optimal calibration values for each pattern. Shape:(number of patterns)
     """
 
@@ -962,7 +962,7 @@ def _calibration_iteration(
 
     Returns
     -------
-    corrlines : numpy.ndarray
+    corrlines : ~numpy.ndarray
     """
     corrlines = np.zeros((0, 2, num_patterns))
     temp_line = np.zeros((1, 2, num_patterns))
@@ -1021,7 +1021,7 @@ def _create_check_diflib(
 
     Returns
     -------
-    correlations : numpy.ndarray
+    correlations : ~numpy.ndarray
     """
 
     half_shape = (images.data.shape[-2] // 2, images.data.shape[-1] // 2)

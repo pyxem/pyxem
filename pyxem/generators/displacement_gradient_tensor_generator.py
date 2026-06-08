@@ -45,7 +45,7 @@ def get_DisplacementGradientMap(
         Signal2D with a 2 x n array at each navigation position containing the
         Cartesian components of two strained basis vectors, V and U, defined as
         row vectors.
-    unstrained_vectors : numpy.array
+    unstrained_vectors : np.ndarray
         A 2 x n array containing the Cartesian components of two unstrained
         basis vectors, V and U, defined as row vectors.
     weights : list
@@ -113,10 +113,10 @@ def get_single_DisplacementGradientTensor(
 
     Parameters
     ----------
-    Vs : numpy.array
+    Vs : np.ndarray
         A 2 x n array containing the Cartesian components of two strained basis
         vectors, V and U, defined as row vectors.
-    Vu : numpy.array
+    Vu : np.ndarray
         A 2 x n array containing the Cartesian components of two unstrained
         basis vectors, V and U, defined as row vectors.
     weights : list
@@ -125,9 +125,9 @@ def get_single_DisplacementGradientTensor(
         If the residuals for the least squares optimiser should be returned.
     Returns
     -------
-    D : numpy.array
+    D : np.ndarray
         A 3 x 3 displacement gradient tensor (measured in reciprocal space).
-    residuals : numpy.array
+    residuals : np.ndarray
         The residuals for the least squares fitting.
 
     Notes

@@ -31,16 +31,16 @@ def get_experimental_square(z, vector, square_size):
 
     Parameters
     ----------
-    z : np.array()
+    z : ~numpy.ndarray
         Single diffraction pattern
-    vector : np.array()
+    vector : ~numpy.ndarray
         Single vector in pixels (int) [x,y] with top left as [0,0]
     square_size : int
         The length of one side of the bounding square (must be even)
 
     Returns
     -------
-    square : np.array()
+    square : ~numpy.ndarray
         Of size (L,L) where L = square_size
 
     """
@@ -65,7 +65,7 @@ def get_simulated_disc(square_size, disc_radius):
 
     Returns
     -------
-    arr: np.array()
+    arr: ~numpy.ndarray
         Upsampled copy of the simulated disc as a numpy array
 
     """
@@ -164,9 +164,9 @@ def _conventional_xc(exp_disc, sim_disc, upsample_factor):
 
     Parameters
     ----------
-    exp_disc : np.array()
+    exp_disc : ~numpy.ndarray
         A numpy array of the "experimental" disc
-    sim_disc : np.array()
+    sim_disc : ~numpy.ndarray
         A numpy array of the disc used as a template
     upsample_factor: int (must be even)
         Factor to upsample by, reciprocal of the subpixel resolution
@@ -192,7 +192,7 @@ def _center_of_mass_hs(z):
 
     Parameters
     ----------
-    z : np.array
+    z : ~numpy.ndarray
 
     Returns
     -------
@@ -218,15 +218,15 @@ def _com_experimental_square(z, vector, square_size):
 
     Parameters
     ----------
-    z : np.array
+    z : ~numpy.ndarray
 
-    vector : np.array([x,y])
+    vector : ~numpy.ndarray([x,y])
 
     square_size : int (even)
 
     Returns
     -------
-    z_adpt : np.array
+    z_adpt : ~numpy.ndarray
         z, but with row and column zero set to 0
     """
     # Copy to make sure we don't change the dp

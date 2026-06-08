@@ -43,14 +43,14 @@ class Power2D(Signal2D):
 
         Parameters
         ----------
-        k_region: array-like
+        k_region: ~numpy.typing.ArrayLike
            upper and lower k values to integrate over, allows both ints and floats for indexing
         symmetry: int or array-like
             specific integers or list of symmetries to average over when creating the map of the correlations.
 
         Returns
         -------
-        symmetry_map: 2-d array
+        symmetry_map: ~numpy.ndarray
             2 dimensional map of from the power spectrum
         """
         if k_region is None:
@@ -81,7 +81,7 @@ class Power2D(Signal2D):
 
         Parameters
         ----------
-         k_region: array-like
+         k_region: ~numpy.typing.ArrayLike
            upper and lower k values to integrate over, allows both ints and floats for indexing
         symmetry: list or None
             specific integers or list of symmetries to average over when creating the map of the correlations.

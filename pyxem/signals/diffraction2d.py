@@ -133,7 +133,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Parameters
         ----------
-        D : array or Signal2D of arrays
+        D : ~numpy.ndarray or Signal2D of arrays
             3x3 np.array (or Signal2D thereof) specifying the affine transform
             to be applied.
         order : 1,2,3,4 or 5
@@ -624,7 +624,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Parameters
         ----------
-        bad_pixel_array : array-like
+        bad_pixel_array : ~numpy.typing.ArrayLike
             List of pixels to correct
         show_progressbar : bool, optional
             Default True
@@ -1243,7 +1243,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Parameters
         ----------
-        template : numpy.ndarray
+        template : ~numpy.ndarray
             The 2D template to match with the signal.
         inplace : bool, optional
             If True, the data is replaced by the filtered data. If False, a
@@ -1292,7 +1292,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Parameters
         ----------
-        binary_image : numpy.ndarray (2-D NumPy array)
+        binary_image : ~numpy.ndarray (2-D NumPy array)
         lazy_result : bool, default True
             If True, will return a LazyDiffraction2D object. If False,
             will compute the result and return a Diffraction2D object.
@@ -1691,7 +1691,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Returns
         -------
-        mask_array : numpy.ndarray
+        mask_array : ~numpy.ndarray
             The True values will be the region between angle0 and angle1.
             The array will have the same dimensions as the signal.
 
@@ -1748,7 +1748,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Returns
         -------
-        variance : array-like
+        variance : ~numpy.typing.ArrayLike
             Calculate variance as it's own signal
 
         References

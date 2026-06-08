@@ -30,12 +30,12 @@ def normalize_virtual_images(im):
 
     Parameters
     ----------
-    im : np.array()
+    im : ~numpy.ndarray
         Array of image intensities
 
     Returns
     -------
-    imn : np.array()
+    imn : ~numpy.ndarray
         Array of normalized image intensities
 
     """

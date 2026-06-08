@@ -78,10 +78,10 @@ class DiffractionVectors(BaseSignal):
 
     Attributes
     ----------
-    cartesian : numpy.array
+    cartesian : ~numpy.ndarray
         Array of 3-vectors describing Cartesian coordinates associated with
         each diffraction vector.
-    hkls : numpy.array
+    hkls : ~numpy.ndarray
         Array of Miller indices associated with each diffraction vector
         following indexation.
     """
@@ -189,9 +189,9 @@ class DiffractionVectors(BaseSignal):
         peaks : hyperspy.api.signals.BaseSignal
             Signal containing lists (np.array) of pixel coordinates specifying
             the reflection positions
-        center : np.array or None
+        center : ~numpy.ndarray or None
             Diffraction pattern center in array indices.
-        calibration : np.array or None
+        calibration : ~numpy.ndarray or None
             Calibration in reciprocal Angstroms per pixels for each of the dimensions.
 
         Returns
@@ -1232,7 +1232,7 @@ class DiffractionVectors(BaseSignal):
 
         Parameters
         ----------
-        basis: array-like or BaseSignal
+        basis: ~numpy.typing.ArrayLike or BaseSignal
             The set of vectors to be compared. This should have the same
             number of columns as the length of the ``columns`` parameter.
         distance: float

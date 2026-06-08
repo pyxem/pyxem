@@ -152,7 +152,7 @@ class PolarDiffraction2D(CommonDiffraction, Signal2D):
 
         Parameters
         ----------
-        mask: numpy.ndarray
+        mask: ~numpy.ndarray
             A bool mask of values to ignore of shape equal to the signal shape.
             True for elements masked, False for elements unmasked
         krange: tuple of int or float

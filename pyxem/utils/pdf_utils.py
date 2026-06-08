@@ -31,7 +31,7 @@ def normalise_pdf_signal_to_max(z, index_min, *args, **kwargs):
 
     Parameters
     ----------
-    z : np.array
+    z : ~numpy.ndarray
         A pair distribution function np.array to be transformed
     index_min : int
         The minimum scattering vector s to be considered, given as the lowest

@@ -84,7 +84,7 @@ class ScatteringFitComponentLobato(Component):
 
         Parameters
         ----------
-        x : array-like
+        x : ~numpy.typing.ArrayLike
             The scattering vector magnitude
 
         """

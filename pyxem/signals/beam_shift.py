@@ -91,7 +91,7 @@ class BeamShift(DiffractionVectors1D):
         fit_corners : float, optional
             Make a mask so that the planes are fitted to the corners of the
             signal. This mush be set with a number, like 0.05 (5%) or 0.10 (10%).
-        initial_values : array of floats, optional
+        initial_values : ~numpy.ndarray of floats, optional
             Initial guess for the plane parameters. Useful to vary if the plane fitting
             does not give desirable results.
             The horizontal- and vertical-shifts are described by two linear planes
