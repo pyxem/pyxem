@@ -11,6 +11,8 @@ Unreleased
 ==========
 Added
 -----
+- Add type annotations to all public signal classes (``Diffraction2D``, ``BeamShift``, ``PolarDiffraction2D``, ``StrainMap``, ``DisplacementGradientMap``, ``Correlation1D``, ``Correlation2D``, ``ReducedIntensity1D``, ``PairDistributionFunction1D``, ``InSituDiffraction2D``, ``VirtualDarkFieldImage``, ``DiffractionVectors1D``, ``DiffractionVectors2D``, ``Power2D``, ``LabeledDiffractionVectors2D``, ``ElectronDiffraction2D``). (#1114)
+- Add ``pyxem.utils._typing`` module with ``Number``, ``Degrees``, and ``Radians`` type aliases for use in annotations across the codebase. (#1114)
 - Add ``show_slice_on_plot`` argument to :meth:`pyxem.signals.Diffraction2D.get_direct_beam_position`. (#1148)
 - Add ``spacing`` and ``spot_radius`` argument to :func:`pyxem.data.tilt_boundary_data` and add docstring. (#1148)
 - Add :meth:`pyxem.signals.BeamShift.plot_on_signal` function to visualise beam position on signal plot. (#1148)
