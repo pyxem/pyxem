@@ -57,8 +57,8 @@ any questions.
 
  .. code-block:: none
 
-      0%|                                               | 0.00/263k [00:00<?, ?B/s]      4%|█▋                                    | 11.3k/263k [00:00<00:02, 87.5kB/s]     15%|█████▉                                 | 39.9k/263k [00:00<00:01, 146kB/s]     32%|████████████▎                          | 82.9k/263k [00:00<00:00, 225kB/s]     63%|█████████████████████████               | 165k/263k [00:00<00:00, 362kB/s]     88%|███████████████████████████████████     | 230k/263k [00:00<00:00, 395kB/s]      0%|                                               | 0.00/263k [00:00<?, ?B/s]    100%|███████████████████████████████████████| 263k/263k [00:00<00:00, 2.21GB/s]
-      0%|                                              | 0.00/4.58k [00:00<?, ?B/s]      0%|                                              | 0.00/4.58k [00:00<?, ?B/s]    100%|█████████████████████████████████████| 4.58k/4.58k [00:00<00:00, 49.3MB/s]
+      0%|                                               | 0.00/263k [00:00<?, ?B/s]      2%|▌                                     | 4.10k/263k [00:00<00:07, 32.4kB/s]     14%|█████▍                                 | 36.9k/263k [00:00<00:01, 154kB/s]     36%|█████████████▉                         | 94.2k/263k [00:00<00:00, 300kB/s]     55%|█████████████████████▊                  | 143k/263k [00:00<00:00, 337kB/s]      0%|                                               | 0.00/263k [00:00<?, ?B/s]    100%|███████████████████████████████████████| 263k/263k [00:00<00:00, 1.21GB/s]
+      0%|                                              | 0.00/4.58k [00:00<?, ?B/s]      0%|                                              | 0.00/4.58k [00:00<?, ?B/s]    100%|█████████████████████████████████████| 4.58k/4.58k [00:00<00:00, 26.7MB/s]
 
 
 
@@ -92,7 +92,7 @@ Azimuthal Integration and Calibration
 The polar unwrapping for the 2D image will give a 1D diffraction pattern
 that can be used for calibration.  The calibration is done by comparing
 the positions of the peaks in the simulated and experimental diffraction
-patterns. Fitting with a :class:`hyperspy.model.Model1D` can be used to find the
+patterns. Fitting with a :class:`hyperspy.models.model1d.Model1D` can be used to find the
 scale or the camera length.
 
 .. GENERATED FROM PYTHON SOURCE LINES 46-67
@@ -133,9 +133,9 @@ scale or the camera length.
 
  .. code-block:: none
 
-      0%|          | 0/2 [00:00<?, ?it/s]     50%|█████     | 1/2 [00:00<00:00,  2.24it/s]    100%|██████████| 2/2 [00:00<00:00,  4.48it/s]
-    Theta Scale:  0.00025453039905591417  Rad
-    Camera Length:  21.608420454399063  cm
+      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 21.05it/s]
+    Theta Scale:  0.000254876916706314  Rad
+    Camera Length:  21.579042747288163  cm
 
 
 
@@ -197,7 +197,7 @@ Aside: Showing how the Camera Length and scale is caluclated:
  .. code-block:: none
 
 
-    Text(0.05, 0.5, 'Camera Length: 21.61cm')
+    Text(0.05, 0.5, 'Camera Length: 21.58cm')
 
 
 
@@ -295,7 +295,7 @@ accounts for the ewald sphere now and uses the non uniform axes.
 
  .. code-block:: none
 
-      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 972.82it/s]
+      0%|          | 0/2 [00:00<?, ?it/s]     50%|█████     | 1/2 [00:00<00:00,  9.96it/s]    100%|██████████| 2/2 [00:00<00:00, 19.85it/s]
 
 
 
@@ -303,7 +303,7 @@ accounts for the ewald sphere now and uses the non uniform axes.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 12.093 seconds)
+   **Total running time of the script:** (0 minutes 40.263 seconds)
 
 
 .. _sphx_glr_download_examples_processing_calibrating_recip_space.py:

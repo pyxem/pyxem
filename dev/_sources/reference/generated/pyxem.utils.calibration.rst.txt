@@ -16,8 +16,6 @@ calibration
         :template: custom-function-template.rst
         
         find_diffraction_calibration
-        get_electron_wavelength
-        index_dataset_with_template_rotation
         value2node
         value2standard_units
     
@@ -32,9 +30,6 @@ calibration
         :template: custom-class-template.rst
         
         Calibration
-        DictionaryTreeBrowser
-        UniformDataAxis
-        deprecated
     
     
 

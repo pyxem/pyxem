@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:18.395** total execution time for 1 file **from examples/amorphous_characterization**:
+**02:08.238** total execution time for 1 file **from examples/amorphous_characterization**:
 
 .. container::
 
@@ -33,5 +33,5 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_examples_amorphous_characterization_FEM.py` (``FEM.py``)
-     - 00:18.395
+     - 02:08.238
      - 0.0

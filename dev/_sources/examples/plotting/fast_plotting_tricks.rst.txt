@@ -26,11 +26,12 @@ this mostly happens with "large" data that is loaded Lazily.
 
 There are a couple of different ways that plotting in hyperspy/pyxem can be slow:
 
-1. The data is too large and the navigator is being recalculated every time you plot. (i.e. calling s.plot()
- takes a long time to render)
+1. The data is too large and the navigator is being recalculated every time you plot.
+   (i.e. calling ``s.plot()`` takes a long time to render)
+
 2. Dragging the navigator is slow and laggy.
 
-.. GENERATED FROM PYTHON SOURCE LINES 15-22
+.. GENERATED FROM PYTHON SOURCE LINES 16-23
 
 .. code-block:: Python
 
@@ -48,17 +49,17 @@ There are a couple of different ways that plotting in hyperspy/pyxem can be slow
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 23-30
+.. GENERATED FROM PYTHON SOURCE LINES 24-31
 
 Pre Computing a Navaigator
 --------------------------
 To solve the first problem, you can:
 
-1. Precompute the navigator using the :meth:`hyperspy.api.signals.plot` method or
-the :meth:`hyperspy._signals.LazySignal.compute_navigator` method
+1. Precompute the navigator using the
+:meth:`hyperspy.api.signals.LazySignal.compute_navigator` method
 which will compute the navigator and store it in the signal. This will make plotting faster.
 
-.. GENERATED FROM PYTHON SOURCE LINES 30-34
+.. GENERATED FROM PYTHON SOURCE LINES 31-35
 
 .. code-block:: Python
 
@@ -74,23 +75,23 @@ which will compute the navigator and store it in the signal. This will make plot
 
  .. code-block:: none
 
-      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 684.45it/s]
+      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 480.06it/s]
     <Diffraction2D, title: , dimensions: (|20, 20)>
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 35-42
+.. GENERATED FROM PYTHON SOURCE LINES 36-43
 
 Setting a Navigator
 -------------------
 2. You can also set the navigator directly using `s.navigator = ...` if you have a navigator
 that you want to use. This is useful if a virtual image is created along with the signal when
 the data is acquired.  This will also save the navigator in the metadata. This is similar to the
-:meth:`hyperspy._signals.LazySignal.compute_navigator`method of the signal and
+:meth:`hyperspy.api.signals.LazySignal.compute_navigator` method of the signal and
 will be saved when the signal is saved.
 
-.. GENERATED FROM PYTHON SOURCE LINES 42-48
+.. GENERATED FROM PYTHON SOURCE LINES 43-49
 
 .. code-block:: Python
 
@@ -124,14 +125,14 @@ will be saved when the signal is saved.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 49-53
+.. GENERATED FROM PYTHON SOURCE LINES 50-54
 
 Using a Slider to Navigate
 --------------------------
 3. You also don't need to plot the navigator every time you plot the signal. You can set
 `navigator = "slider"` to avoid plotting the navigator altogether and just use the sliders.
 
-.. GENERATED FROM PYTHON SOURCE LINES 53-57
+.. GENERATED FROM PYTHON SOURCE LINES 54-58
 
 .. code-block:: Python
 
@@ -157,7 +158,7 @@ Using a Slider to Navigate
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 58-74
+.. GENERATED FROM PYTHON SOURCE LINES 59-75
 
 Using the QT Backend and Blitting
 ---------------------------------
@@ -176,7 +177,7 @@ dragging the navigator and loading all the data in between.
 
 3. You can also set the navigator point using the `axes_manager.indices` attribute.
 
-.. GENERATED FROM PYTHON SOURCE LINES 74-78
+.. GENERATED FROM PYTHON SOURCE LINES 75-79
 
 .. code-block:: Python
 
@@ -208,14 +209,14 @@ dragging the navigator and loading all the data in between.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 79-83
+.. GENERATED FROM PYTHON SOURCE LINES 80-84
 
 Saving the Data
 ---------------
 4. Finally, you can always consider saving the data in a more performant format like `.zspy`
 This will make loading the data faster which will in turn make plotting faster!
 
-.. GENERATED FROM PYTHON SOURCE LINES 83-87
+.. GENERATED FROM PYTHON SOURCE LINES 84-88
 
 .. code-block:: Python
 
@@ -250,7 +251,7 @@ This will make loading the data faster which will in turn make plotting faster!
 
     /opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/site-packages/rsciio/zspy/_api.py:235: FutureWarning: The NestedDirectoryStore is deprecated and will be removed in a Zarr-Python version 3, see https://github.com/zarr-developers/zarr-python/issues/1274 for more information.
       store = zarr.storage.NestedDirectoryStore(filename)
-    [                                        ] | 0% Completed | 221.09 us    [                                        ] | 0% Completed | 100.35 ms    [########################################] | 100% Completed | 200.64 ms
+    [                                        ] | 0% Completed | 201.79 us    [                                        ] | 0% Completed | 100.47 ms    [########################################] | 100% Completed | 200.81 ms
 
 
 
@@ -258,7 +259,7 @@ This will make loading the data faster which will in turn make plotting faster!
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 1.847 seconds)
+   **Total running time of the script:** (0 minutes 1.619 seconds)
 
 
 .. _sphx_glr_download_examples_plotting_fast_plotting_tricks.py:

@@ -22,7 +22,7 @@ On Zone Orientation
 ===================
 Sometimes you have a tilt boundary and you might want to know the orientation of the
 grains on each side of the boundary. This can be done using the
-:meth:`pyxem.signals.PolarSignal2D.get_orientation` method.
+:meth:`pyxem.signals.PolarDiffraction2D.get_orientation` method.
 
 For more information on the orientation mapping process see :cite:`pyxemorientationmapping2022`
 
@@ -91,7 +91,7 @@ this makes the high k values more visible
 
  .. code-block:: none
 
-      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 37.10it/s]
+      0%|          | 0/2 [00:00<?, ?it/s]     50%|█████     | 1/2 [00:07<00:07,  7.87s/it]    100%|██████████| 2/2 [00:07<00:00,  3.94s/it]
 
 
 
@@ -155,10 +155,10 @@ this makes the high k values more visible
 
  .. code-block:: none
 
-      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 280.32it/s]
-      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 3097.71it/s]
-      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 555.68it/s]
-      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 535.19it/s]
+      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 295.74it/s]
+      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 3421.13it/s]
+      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 855.20it/s]
+      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 757.98it/s]
 
 
 
@@ -166,7 +166,7 @@ this makes the high k values more visible
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 1.191 seconds)
+   **Total running time of the script:** (0 minutes 14.890 seconds)
 
 
 .. _sphx_glr_download_examples_orientation_mapping_on_zone_orientation.py:

@@ -43,12 +43,15 @@ signal and then plot them using hyperspy's markers.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 16-19
+.. GENERATED FROM PYTHON SOURCE LINES 16-22
 
 .. code-block:: Python
 
 
-    s.find_peaks(interactive=True)  # find the peaks using the interactive peak finder
+    try:
+        s.find_peaks(interactive=True)  # find the peaks using the interactive peak finder
+    except Exception as e:
+        print(f"Interactive peak finder skipped (requires a GUI): {e}")
 
 
 
@@ -77,11 +80,10 @@ signal and then plot them using hyperspy's markers.
 
     VBox(children=(Accordion(children=(VBox(children=(HBox(children=(Label(value='x', layout=Layout(width='15%')), IntSlider(value=0, description='index', max=9), BoundedFloatText(value=0.0, continuous_update=True, description='value', max=9.0, step=1.0), Label(value='px', layout=Layout(width='5%')))), HBox(children=(Label(value='y', layout=Layout(width='15%')), IntSlider(value=0, description='index', max=9), BoundedFloatText(value=0.0, continuous_update=True, description='value', max=9.0, step=1.0), Label(value='px', layout=Layout(width='5%')))), Button(description='Set random navigation position.', layout=Layout(width='auto'), style=ButtonStyle(), tooltip='Set random navigation position, useful to check the method parameters.'), Checkbox(value=True, description='Continuous update'))),), titles=('Navigation sliders',)), Accordion(children=(VBox(children=(HBox(children=(Label(value='Method', layout=Layout(width='auto')), Dropdown(options=('Local max', 'Max', 'Minmax', 'Zaefferer', 'Stat', 'Laplacian of Gaussian', 'Difference of Gaussian', 'Template matching'), value='Local max')), layout=Layout(display='flex', flex_flow='row', justify_content='space-between')), VBox(children=(HBox(children=(Label(value='Distance', layout=Layout(width='auto')), IntSlider(value=3, max=20, min=1)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between')), HBox(children=(Label(value='Threshold', layout=Layout(width='auto')), FloatSlider(value=10.0, max=20.0)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between'))), layout=Layout(display='')), VBox(children=(HBox(children=(Label(value='Alpha', layout=Layout(width='auto')), FloatSlider(value=3.0, max=6.0)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between')), HBox(children=(Label(value='Distance', layout=Layout(width='auto')), IntSlider(value=10, max=20, min=1)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between'))), layout=Layout(display='none')), VBox(children=(HBox(children=(Label(value='Distance', layout=Layout(width='auto')), FloatSlider(value=3.0, max=6.0)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between')), HBox(children=(Label(value='Threshold', layout=Layout(width='auto')), FloatSlider(value=10.0, max=20.0)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between'))), layout=Layout(display='none')), VBox(children=(HBox(children=(Label(value='Gradient threshold', layout=Layout(width='auto')), FloatSlider(value=0.1, max=0.2, step=0.020000000000000004)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between')), HBox(children=(Label(value='Window size', layout=Layout(width='auto')), IntSlider(value=40, max=80, min=2)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between')), HBox(children=(Label(value='Distance cutoff', layout=Layout(width='auto')), FloatSlider(value=50.0)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between'))), layout=Layout(display='none')), VBox(children=(HBox(children=(Label(value='Alpha', layout=Layout(width='auto')), FloatSlider(value=1.0, max=2.0)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between')), HBox(children=(Label(value='Radius', layout=Layout(width='auto')), IntSlider(value=10, max=20, min=5)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between')), HBox(children=(Label(value='Convergence ratio', layout=Layout(width='auto')), FloatSlider(value=0.05, max=0.1)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between'))), layout=Layout(display='none')), VBox(children=(HBox(children=(Label(value='Min sigma', layout=Layout(width='auto')), FloatSlider(value=1.0, max=2.0)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between')), HBox(children=(Label(value='Max sigma', layout=Layout(width='auto')), FloatSlider(value=50.0)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between')), HBox(children=(Label(value='Num sigma', layout=Layout(width='auto')), FloatSlider(value=10.0, max=20.0)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between')), HBox(children=(Label(value='Threshold', layout=Layout(width='auto')), FloatSlider(value=0.2, max=0.4)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between')), HBox(children=(Label(value='Overlap', layout=Layout(width='auto')), FloatSlider(value=0.5, max=1.0)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between')), HBox(children=(Label(value='Log scale', layout=Layout(width='auto')), Checkbox(value=False)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between'))), layout=Layout(display='none')), VBox(children=(HBox(children=(Label(value='Min sigma', layout=Layout(width='auto')), FloatSlider(value=1.0, max=2.0)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between')), HBox(children=(Label(value='Max sigma', layout=Layout(width='auto')), FloatSlider(value=50.0)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between')), HBox(children=(Label(value='Sigma ratio', layout=Layout(width='auto')), FloatSlider(value=1.6, max=3.2)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between')), HBox(children=(Label(value='Threshold', layout=Layout(width='auto')), FloatSlider(value=0.2, max=0.4)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between')), HBox(children=(Label(value='Overlap', layout=Layout(width='auto')), FloatSlider(value=0.5, max=1.0)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between'))), layout=Layout(display='none')), VBox(children=(HBox(children=(Label(value='Distance', layout=Layout(width='auto')), FloatSlider(value=5.0, max=10.0)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between')), HBox(children=(Label(value='Threshold', layout=Layout(width='auto')), FloatSlider(value=0.5, max=2.0)), layout=Layout(display='flex', flex_flow='row', justify_content='space-between'))), layout=Layout(display='none')))),), titles=('Method parameters',)), HBox(children=(Button(description='Compute over navigation axes.', style=ButtonStyle(), tooltip='Find the peaks by iterating over the navigation axes.'), Button(description='Close', style=ButtonStyle(), tooltip='Close widget and close figure.')))))
 
-    <BaseSignal, title: , dimensions: (10, 10|)>
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 20-45
+.. GENERATED FROM PYTHON SOURCE LINES 23-48
 
 .. code-block:: Python
 
@@ -123,22 +125,22 @@ signal and then plot them using hyperspy's markers.
 
  .. code-block:: none
 
-      0%|          | 0/51 [00:00<?, ?it/s]     33%|███▎      | 17/51 [00:00<00:00, 129.62it/s]     69%|██████▊   | 35/51 [00:00<00:00, 152.41it/s]    100%|██████████| 51/51 [00:00<00:00, 167.47it/s]
-      0%|          | 0/51 [00:00<?, ?it/s]     33%|███▎      | 17/51 [00:00<00:00, 138.84it/s]     76%|███████▋  | 39/51 [00:00<00:00, 182.33it/s]    100%|██████████| 51/51 [00:00<00:00, 183.07it/s]
-      0%|          | 0/51 [00:00<?, ?it/s]     18%|█▊        | 9/51 [00:00<00:00, 89.58it/s]     61%|██████    | 31/51 [00:00<00:00, 165.15it/s]    100%|██████████| 51/51 [00:00<00:00, 171.37it/s]
-      0%|          | 0/51 [00:00<?, ?it/s]     22%|██▏       | 11/51 [00:00<00:00, 101.09it/s]     53%|█████▎    | 27/51 [00:00<00:00, 127.75it/s]     84%|████████▍ | 43/51 [00:00<00:00, 139.23it/s]    100%|██████████| 51/51 [00:00<00:00, 149.25it/s]
-      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 7734.65it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]     41%|████      | 21/51 [00:00<00:00, 204.35it/s]     96%|█████████▌| 49/51 [00:00<00:00, 239.54it/s]    100%|██████████| 51/51 [00:00<00:00, 238.49it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]     41%|████      | 21/51 [00:00<00:00, 204.89it/s]     96%|█████████▌| 49/51 [00:00<00:00, 242.85it/s]    100%|██████████| 51/51 [00:00<00:00, 241.39it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]     33%|███▎      | 17/51 [00:00<00:00, 166.10it/s]     80%|████████  | 41/51 [00:00<00:00, 203.65it/s]    100%|██████████| 51/51 [00:00<00:00, 223.89it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]     22%|██▏       | 11/51 [00:00<00:00, 107.62it/s]     53%|█████▎    | 27/51 [00:00<00:00, 136.22it/s]     84%|████████▍ | 43/51 [00:00<00:00, 143.14it/s]    100%|██████████| 51/51 [00:00<00:00, 158.90it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 9518.51it/s]
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 46-49
+.. GENERATED FROM PYTHON SOURCE LINES 49-52
 
 Plotting Peaks
 ==============
 We can plot the peaks using hyperSpy's markers and DiffractionVectors.
 
-.. GENERATED FROM PYTHON SOURCE LINES 49-53
+.. GENERATED FROM PYTHON SOURCE LINES 52-56
 
 .. code-block:: Python
 
@@ -171,12 +173,12 @@ We can plot the peaks using hyperSpy's markers and DiffractionVectors.
 
  .. code-block:: none
 
-      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 9570.04it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 8233.94it/s]
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 54-63
+.. GENERATED FROM PYTHON SOURCE LINES 57-66
 
 Subpixel Peak Fitting
 =====================
@@ -188,7 +190,7 @@ can be up-sampled using the :func:`pyxem.signals.DiffractionVectors.subpixel_ref
 This only really works up to up-sampling of 2-4. There is little improvement with increased up-sampling while
 it greatly increases the computation time.
 
-.. GENERATED FROM PYTHON SOURCE LINES 63-78
+.. GENERATED FROM PYTHON SOURCE LINES 66-81
 
 .. code-block:: Python
 
@@ -232,18 +234,18 @@ it greatly increases the computation time.
 
  .. code-block:: none
 
-      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 1724.80it/s]
-      0%|          | 0/76 [00:00<?, ?it/s]     24%|██▎       | 18/76 [00:00<00:00, 179.69it/s]     47%|████▋     | 36/76 [00:00<00:00, 165.60it/s]     70%|██████▉   | 53/76 [00:00<00:00, 127.06it/s]     91%|█████████ | 69/76 [00:00<00:00, 129.58it/s]    100%|██████████| 76/76 [00:00<00:00, 135.23it/s]
-      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 2008.43it/s]
-      0%|          | 0/76 [00:00<?, ?it/s]     12%|█▏        | 9/76 [00:02<00:16,  4.14it/s]     24%|██▎       | 18/76 [00:02<00:06,  9.28it/s]     30%|███       | 23/76 [00:04<00:10,  4.96it/s]     34%|███▍      | 26/76 [00:04<00:08,  6.02it/s]     43%|████▎     | 33/76 [00:06<00:09,  4.58it/s]     51%|█████▏    | 39/76 [00:06<00:05,  6.61it/s]     59%|█████▉    | 45/76 [00:08<00:06,  4.52it/s]     67%|██████▋   | 51/76 [00:08<00:03,  6.33it/s]     71%|███████   | 54/76 [00:09<00:02,  7.36it/s]     75%|███████▌  | 57/76 [00:10<00:04,  4.22it/s]     79%|███████▉  | 60/76 [00:11<00:03,  5.21it/s]     87%|████████▋ | 66/76 [00:11<00:01,  7.50it/s]     91%|█████████ | 69/76 [00:13<00:01,  4.18it/s]     97%|█████████▋| 74/76 [00:13<00:00,  5.99it/s]    100%|██████████| 76/76 [00:13<00:00,  5.58it/s]
-      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 9383.23it/s]
-      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 7637.72it/s]
-      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 7374.92it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 2549.58it/s]
+      0%|          | 0/76 [00:00<?, ?it/s]     20%|█▉        | 15/76 [00:00<00:00, 139.28it/s]     47%|████▋     | 36/76 [00:00<00:00, 174.84it/s]     71%|███████   | 54/76 [00:00<00:00, 173.95it/s]     96%|█████████▌| 73/76 [00:00<00:00, 159.23it/s]    100%|██████████| 76/76 [00:00<00:00, 165.44it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 2331.36it/s]
+      0%|          | 0/76 [00:00<?, ?it/s]     12%|█▏        | 9/76 [00:01<00:13,  5.02it/s]     28%|██▊       | 21/76 [00:03<00:08,  6.20it/s]     43%|████▎     | 33/76 [00:05<00:06,  6.51it/s]     59%|█████▉    | 45/76 [00:06<00:04,  6.73it/s]     75%|███████▌  | 57/76 [00:08<00:02,  6.86it/s]     91%|█████████ | 69/76 [00:10<00:01,  6.88it/s]     99%|█████████▊| 75/76 [00:10<00:00,  7.64it/s]    100%|██████████| 76/76 [00:10<00:00,  7.05it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 10407.70it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 11250.70it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 10162.94it/s]
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 79-81
+.. GENERATED FROM PYTHON SOURCE LINES 82-84
 
 .. code-block:: Python
 
@@ -259,7 +261,7 @@ it greatly increases the computation time.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 18.150 seconds)
+   **Total running time of the script:** (0 minutes 14.491 seconds)
 
 
 .. _sphx_glr_download_examples_processing_vector_finding.py:

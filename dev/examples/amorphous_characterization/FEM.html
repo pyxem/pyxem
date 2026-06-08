@@ -1,443 +1,279 @@
 
 <!DOCTYPE html>
 
-
-<html lang="en" data-content_root="../../" >
-
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
-
-    <title>Fluctuation Electron Microscopy &#8212; pyxem 0.21.0 documentation</title>
-  
-  
-  
-  <script data-cfasync="false">
+<html data-content_root="../../" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Fluctuation Electron Microscopy — pyxem 0.21.0 documentation</title>
+<script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!--
+<!--
     this give us a css class that will be invisible only if js is disabled
   -->
-  <noscript>
-    <style>
+<noscript>
+<style>
       .pst-js-only { display: none !important; }
 
     </style>
-  </noscript>
-  
-  <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
-
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d75fae25" />
-    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
-    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-codeautolink.css?v=b2176991" />
-    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=fd6457a4" />
-    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
-    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
-    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
-    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
-  
-  <!-- So that users can add custom icons -->
-  <script defer src="../../_static/scripts/fontawesome.js?digest=0790524f97105ba85085"></script>
-  <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085" />
-
-    <script src="../../_static/documentation_options.js?v=88e4c0c0"></script>
-    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
-    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
-    <script src="../../_static/sg-tags.js?v=d80f6fa4"></script>
-    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
-    <script src="../../_static/copybutton.js?v=f281be69"></script>
-    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
-    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'examples/amorphous_characterization/FEM';</script>
-    <script>
+</noscript>
+<!-- Loaded before other Sphinx assets -->
+<link href="../../_static/styles/theme.css?digest=0790524f97105ba85085" rel="stylesheet"/>
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=0790524f97105ba85085" rel="stylesheet"/>
+<link href="../../_static/pygments.css?v=d75fae25" rel="stylesheet" type="text/css"/>
+<link href="../../_static/graphviz.css?v=4ae1632d" rel="stylesheet" type="text/css"/>
+<link href="../../_static/sphinx-codeautolink.css?v=b2176991" rel="stylesheet" type="text/css"/>
+<link href="../../_static/copybutton.css?v=76b2166b" rel="stylesheet" type="text/css"/>
+<link href="../../_static/sg_gallery.css?v=fd6457a4" rel="stylesheet" type="text/css"/>
+<link href="../../_static/sg_gallery-binder.css?v=f4aeca0c" rel="stylesheet" type="text/css"/>
+<link href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" rel="stylesheet" type="text/css"/>
+<link href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" rel="stylesheet" type="text/css"/>
+<link href="../../_static/sphinx-design.min.css?v=95c83b7e" rel="stylesheet" type="text/css"/>
+<!-- So that users can add custom icons -->
+<script defer="" src="../../_static/scripts/fontawesome.js?digest=0790524f97105ba85085"></script>
+<!-- Pre-loaded scripts that we'll load fully later -->
+<link as="script" href="../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085" rel="preload"/>
+<link as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085" rel="preload"/>
+<script src="../../_static/documentation_options.js?v=88e4c0c0"></script>
+<script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+<script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+<script src="../../_static/sg-tags.js?v=d80f6fa4"></script>
+<script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+<script src="../../_static/copybutton.js?v=f281be69"></script>
+<script src="../../_static/design-tabs.js?v=f930bc37"></script>
+<script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+<script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+<script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+<script>DOCUMENTATION_OPTIONS.pagename = 'examples/amorphous_characterization/FEM';</script>
+<script>
         DOCUMENTATION_OPTIONS.theme_version = '0.18.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://pyxem.readthedocs.io/en/latest/_static/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.21';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
             false;
         </script>
-    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
-    <link rel="icon" href="../../_static/logo.ico"/>
-    <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Differential Phase Contrast (DPC)" href="../dpc/index.html" />
-    <link rel="prev" title="Amorphous Characterization" href="index.html" />
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.21.0" />
-  
-    
-    <script src="../../_static/searchtools.js"></script>
-    <script src="../../_static/language_data.js"></script>
-    <script src="../../searchindex.js"></script>
-  
-  </head>
-  <body data-default-mode="">
-  
-  
-  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
-
-  
-  <div id="pst-scroll-pixel-helper"></div>
-  
-  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
-    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-  
-  
-  
-  
-  <dialog id="pst-search-dialog">
-    
-<form class="bd-search d-flex align-items-center"
-      action="../../search.html"
-      method="get">
-  <i class="fa-solid fa-magnifying-glass"></i>
-  <input type="search"
-         class="form-control"
-         name="q"
-         placeholder="Search the docs ..."
-         aria-label="Search the docs ..."
-         autocomplete="off"
-         autocorrect="off"
-         autocapitalize="off"
-         spellcheck="false"/>
-  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+<script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+<link href="../../_static/logo.ico" rel="icon"/>
+<link href="../../genindex.html" rel="index" title="Index"/>
+<link href="../../search.html" rel="search" title="Search"/>
+<link href="../dpc/index.html" rel="next" title="Differential Phase Contrast (DPC)"/>
+<link href="index.html" rel="prev" title="Amorphous Characterization"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="en" name="docsearch:language"/>
+<meta content="0.21.0" name="docsearch:version"/>
+<script src="../../_static/searchtools.js"></script>
+<script src="../../_static/language_data.js"></script>
+<script src="../../searchindex.js"></script>
+</head>
+<body data-default-mode="">
+<div class="skip-link d-print-none" id="pst-skip-link"><a href="#main-content">Skip to main content</a></div>
+<div id="pst-scroll-pixel-helper"></div>
+<button class="btn rounded-pill" id="pst-back-to-top" type="button">
+<i class="fa-solid fa-arrow-up"></i>Back to top</button>
+<dialog id="pst-search-dialog">
+<form action="../../search.html" class="bd-search d-flex align-items-center" method="get">
+<i class="fa-solid fa-magnifying-glass"></i>
+<input aria-label="Search the docs ..." autocapitalize="off" autocomplete="off" autocorrect="off" class="form-control" name="q" placeholder="Search the docs ..." spellcheck="false" type="search"/>
+<span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
 </form>
-  </dialog>
-
-  <div class="pst-async-banner-revealer d-none">
-  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</dialog>
+<div class="pst-async-banner-revealer d-none">
+<aside aria-label="Version warning" class="d-none d-print-none" id="bd-header-version-warning"></aside>
 </div>
-<aside class="bd-header-announcement" aria-label="Announcement">
-  <div class="bd-header-announcement__content">Check out the new <a href='https://pyxem.readthedocs.io/en/latest/examples/index.html'>Examples Gallery!</a> </div>
+<aside aria-label="Announcement" class="bd-header-announcement">
+<div class="bd-header-announcement__content">Check out the new <a href="https://pyxem.readthedocs.io/en/latest/examples/index.html">Examples Gallery!</a> </div>
 </aside>
-
-  
-    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none" id="pst-header">
 <div class="bd-header__inner bd-page-width">
-  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
-    <span class="fa-solid fa-bars"></span>
-  </button>
-  
-  
-  <div class="col-lg-3 navbar-header-items__start">
-    
-      <div class="navbar-item">
-
-  
-    
-  
-
+<button aria-label="Site navigation" class="pst-navbar-icon sidebar-toggle primary-toggle">
+<span class="fa-solid fa-bars"></span>
+</button>
+<div class="col-lg-3 navbar-header-items__start">
+<div class="navbar-item">
 <a class="navbar-brand logo" href="../../index.html">
-  
-  
-  
-  
-  
-    
-    
-      
-    
-    
-    <img src="../../_static/logo.png" class="logo__image only-light" alt="pyxem 0.21.0 documentation - Home"/>
-    <img src="../../_static/logo.png" class="logo__image only-dark pst-js-only" alt="pyxem 0.21.0 documentation - Home"/>
-  
-  
+<img alt="pyxem 0.21.0 documentation - Home" class="logo__image only-light" src="../../_static/logo.png"/>
+<img alt="pyxem 0.21.0 documentation - Home" class="logo__image only-dark pst-js-only" src="../../_static/logo.png"/>
 </a></div>
-    
-      <div class="navbar-item">
+<div class="navbar-item">
 <div class="version-switcher__container dropdown pst-js-only">
-  <button id="pst-version-switcher-button-2"
-    type="button"
-    class="version-switcher__button btn btn-sm dropdown-toggle"
-    data-bs-toggle="dropdown"
-    aria-haspopup="listbox"
-    aria-controls="pst-version-switcher-list-2"
-    aria-label="Version switcher list"
-  >
+<button aria-controls="pst-version-switcher-list-2" aria-haspopup="listbox" aria-label="Version switcher list" class="version-switcher__button btn btn-sm dropdown-toggle" data-bs-toggle="dropdown" id="pst-version-switcher-button-2" type="button">
     Choose version  <!-- this text may get changed later by javascript -->
-    <span class="caret"></span>
-  </button>
-  <div id="pst-version-switcher-list-2"
-    class="version-switcher__menu dropdown-menu list-group-flush py-0"
-    role="listbox" aria-labelledby="pst-version-switcher-button-2">
-    <!-- dropdown will be populated by javascript on page load -->
-  </div>
-</div></div>
-    
-  </div>
-  
-  <div class="col-lg-9 navbar-header-items">
-    
-    <div class="me-auto navbar-header-items__center">
-      
-        <div class="navbar-item">
-<nav>
-  <ul class="bd-navbar-elements navbar-nav">
-    
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../intro.html">
-    Introduction
-  </a>
-</li>
-
-
-<li class="nav-item current active">
-  <a class="nav-link nav-internal" href="../../user_guide/index.html">
-    User Guide
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../index.html">
-    Examples
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../tutorials/index.html">
-    Tutorials
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../reference/index.html">
-    Reference
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../dev_guide/index.html">
-    Dev Guide
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../changelog.html">
-    Changelog
-  </a>
-</li>
-
-  </ul>
-</nav></div>
-      
-    </div>
-    
-    
-    <div class="navbar-header-items__end">
-      
-        <div class="navbar-item navbar-persistent--container">
-          
-
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+<span class="caret"></span>
 </button>
-        </div>
-      
-      
-        <div class="navbar-item">
-
-<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
-  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
-    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
-  </button>
-  <ul class="dropdown-menu dropdown-menu-end">
-    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
-    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
-    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
-  </ul>
-</div></div>
-      
-        <div class="navbar-item"><ul class="navbar-icon-links"
-    aria-label="Icon Links">
-        <li class="nav-item">
-          
-          
-          
-          
-          
-          
-          
-          
-          <a href="https://github.com/pyxem/pyxem" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
-        </li>
-</ul></div>
-      
-    </div>
-    
-  </div>
-  
-  
-    <div class="navbar-persistent--mobile">
-
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
-    </div>
-  
-
-  
-    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
-      <span class="fa-solid fa-outdent"></span>
-    </button>
-  
+<div aria-labelledby="pst-version-switcher-button-2" class="version-switcher__menu dropdown-menu list-group-flush py-0" id="pst-version-switcher-list-2" role="listbox">
+<!-- dropdown will be populated by javascript on page load -->
 </div>
-
-    </header>
-  
-
-  <div class="bd-container">
-    <div class="bd-container__inner bd-page-width">
-      
-      
-      
-      <dialog id="pst-primary-sidebar-modal"></dialog>
-      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
-        
-
-  
-  <div class="sidebar-header-items sidebar-primary__section">
-    
-    
-      <div class="sidebar-header-items__center">
-        
-          
-          
-            <div class="navbar-item">
+</div></div>
+</div>
+<div class="col-lg-9 navbar-header-items">
+<div class="me-auto navbar-header-items__center">
+<div class="navbar-item">
 <nav>
-  <ul class="bd-navbar-elements navbar-nav">
-    
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../intro.html">
+<ul class="bd-navbar-elements navbar-nav">
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../../intro.html">
     Introduction
   </a>
 </li>
-
-
 <li class="nav-item current active">
-  <a class="nav-link nav-internal" href="../../user_guide/index.html">
+<a class="nav-link nav-internal" href="../../user_guide/index.html">
     User Guide
   </a>
 </li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../index.html">
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../index.html">
     Examples
   </a>
 </li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../tutorials/index.html">
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../../tutorials/index.html">
     Tutorials
   </a>
 </li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../reference/index.html">
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../../reference/index.html">
     Reference
   </a>
 </li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../dev_guide/index.html">
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../../dev_guide/index.html">
     Dev Guide
   </a>
 </li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../changelog.html">
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../../changelog.html">
     Changelog
   </a>
 </li>
-
-  </ul>
+</ul>
 </nav></div>
-          
-        
-      </div>
-    
-    
-    
-      <div class="sidebar-header-items__end">
-        
-          <div class="navbar-item">
-
-<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
-  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
-    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
-  </button>
-  <ul class="dropdown-menu dropdown-menu-end">
-    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
-    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
-    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
-  </ul>
+</div>
+<div class="navbar-header-items__end">
+<div class="navbar-item navbar-persistent--container">
+<button aria-label="Search" class="btn search-button-field search-button__button pst-js-only" data-bs-placement="bottom" data-bs-toggle="tooltip" title="Search">
+<i class="fa-solid fa-magnifying-glass"></i>
+<span class="search-button__default-text">Search</span>
+<span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+</div>
+<div class="navbar-item">
+<div class="theme-switch-container dropdown pst-js-only" data-bs-placement="bottom" data-bs-toggle="tooltip" title="Color mode">
+<button aria-label="Color mode" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" data-bs-toggle="dropdown">
+<i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+<i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+<i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+</button>
+<ul class="dropdown-menu dropdown-menu-end">
+<li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+<li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+<li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+</ul>
 </div></div>
-        
-          <div class="navbar-item"><ul class="navbar-icon-links"
-    aria-label="Icon Links">
-        <li class="nav-item">
-          
-          
-          
-          
-          
-          
-          
-          
-          <a href="https://github.com/pyxem/pyxem" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
-        </li>
+<div class="navbar-item"><ul aria-label="Icon Links" class="navbar-icon-links">
+<li class="nav-item">
+<a class="nav-link pst-navbar-icon" data-bs-placement="bottom" data-bs-toggle="tooltip" href="https://github.com/pyxem/pyxem" rel="noopener" target="_blank" title="GitHub"><i aria-hidden="true" class="fa-brands fa-square-github fa-lg"></i><span class="visually-hidden">GitHub</span></a>
+</li>
 </ul></div>
-        
-      </div>
-    
-  </div>
-  
-    <div class="sidebar-primary-items__start sidebar-primary__section">
-        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar"><svg class="pst-icon svg-inline--fa" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
-  </svg>
-  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
-  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</div>
+</div>
+<div class="navbar-persistent--mobile">
+<button aria-label="Search" class="btn search-button-field search-button__button pst-js-only" data-bs-placement="bottom" data-bs-toggle="tooltip" title="Search">
+<i class="fa-solid fa-magnifying-glass"></i>
+<span class="search-button__default-text">Search</span>
+<span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+</div>
+<button aria-label="On this page" class="pst-navbar-icon sidebar-toggle secondary-toggle">
+<span class="fa-solid fa-outdent"></span>
+</button>
+</div>
+</header>
+<div class="bd-container">
+<div class="bd-container__inner bd-page-width">
+<dialog id="pst-primary-sidebar-modal"></dialog>
+<div class="bd-sidebar-primary bd-sidebar" id="pst-primary-sidebar">
+<div class="sidebar-header-items sidebar-primary__section">
+<div class="sidebar-header-items__center">
+<div class="navbar-item">
+<nav>
+<ul class="bd-navbar-elements navbar-nav">
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../../intro.html">
+    Introduction
+  </a>
+</li>
+<li class="nav-item current active">
+<a class="nav-link nav-internal" href="../../user_guide/index.html">
+    User Guide
+  </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../index.html">
+    Examples
+  </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../../tutorials/index.html">
+    Tutorials
+  </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../../reference/index.html">
+    Reference
+  </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../../dev_guide/index.html">
+    Dev Guide
+  </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../../changelog.html">
+    Changelog
+  </a>
+</li>
+</ul>
+</nav></div>
+</div>
+<div class="sidebar-header-items__end">
+<div class="navbar-item">
+<div class="theme-switch-container dropdown pst-js-only" data-bs-placement="bottom" data-bs-toggle="tooltip" title="Color mode">
+<button aria-label="Color mode" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" data-bs-toggle="dropdown">
+<i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+<i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+<i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+</button>
+<ul class="dropdown-menu dropdown-menu-end">
+<li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+<li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+<li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+</ul>
+</div></div>
+<div class="navbar-item"><ul aria-label="Icon Links" class="navbar-icon-links">
+<li class="nav-item">
+<a class="nav-link pst-navbar-icon" data-bs-placement="bottom" data-bs-toggle="tooltip" href="https://github.com/pyxem/pyxem" rel="noopener" target="_blank" title="GitHub"><i aria-hidden="true" class="fa-brands fa-square-github fa-lg"></i><span class="visually-hidden">GitHub</span></a>
+</li>
+</ul></div>
+</div>
+</div>
+<div class="sidebar-primary-items__start sidebar-primary__section">
+<div class="sidebar-primary-item pst-sidebar-collapse"><button aria-controls="pst-primary-sidebar" aria-expanded="true" id="pst-collapse-sidebar-button"><svg aria-hidden="true" class="pst-icon svg-inline--fa" focusable="false" role="img" viewbox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+<path d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z" fill="currentColor"></path>
+</svg>
+<span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+<span class="pst-expand-sidebar-label">Expand Sidebar</span>
 </button></div>
-        <div class="sidebar-primary-item">
-
-<nav class="bd-docs-nav bd-links"
-     aria-label="Section Navigation">
-  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
-  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<div class="sidebar-primary-item">
+<nav aria-label="Section Navigation" class="bd-docs-nav bd-links">
+<p aria-level="1" class="bd-links__title" role="heading">Section Navigation</p>
+<div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../../user_guide/installing.html">Installing pyxem</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../user_guide/using_a_jupyter_notebook.html">Using Jupyter Lab</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../user_guide/loading_data.html">Loading Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../user_guide/distributed_big_data.html">Big Data</a></li>
-
-
 <li class="toctree-l1"><a class="reference internal" href="../../user_guide/gpu_computations.html">GPU Computing</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Usage</span></p>
@@ -446,16 +282,6 @@
 </ul>
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Gallery of Examples</a></li>
-
-
-
-
-
-
-
-
-
-
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Resources</span></p>
 <ul class="nav bd-sidenav">
@@ -493,20 +319,14 @@
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../reference/generated/pyxem.components.html">components</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../reference/generated/pyxem.components.ReducedIntensityCorrectionComponent.html">ReducedIntensityCorrectionComponent</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.components.ReducedIntensityCorrectionComponent.trait_added.html">trait_added</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.components.ReducedIntensityCorrectionComponent.trait_modified.html">trait_modified</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.components.ReducedIntensityCorrectionComponent.function.html">function</a></li>
 </ul>
 </details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../reference/generated/pyxem.components.ScatteringFitComponentLobato.html">ScatteringFitComponentLobato</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.components.ScatteringFitComponentLobato.trait_added.html">trait_added</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.components.ScatteringFitComponentLobato.trait_modified.html">trait_modified</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.components.ScatteringFitComponentLobato.function.html">function</a></li>
 </ul>
 </details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../reference/generated/pyxem.components.ScatteringFitComponentXTables.html">ScatteringFitComponentXTables</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.components.ScatteringFitComponentXTables.trait_added.html">trait_added</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.components.ScatteringFitComponentXTables.trait_modified.html">trait_modified</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.components.ScatteringFitComponentXTables.function.html">function</a></li>
 </ul>
 </details></li>
@@ -907,8 +727,6 @@
 <li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.utils.diffraction.center_of_mass_from_image.html">center_of_mass_from_image</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.utils.diffraction.circular_mask.html">circular_mask</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.utils.diffraction.convert_affine_to_transform.html">convert_affine_to_transform</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.utils.diffraction.ellipse_perimeter.html">ellipse_perimeter</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.utils.diffraction.fftconvolve.html">fftconvolve</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.utils.diffraction.find_beam_center_blur.html">find_beam_center_blur</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.utils.diffraction.find_beam_center_interpolate.html">find_beam_center_interpolate</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.utils.diffraction.find_beam_offset_cross_correlation.html">find_beam_offset_cross_correlation</a></li>
@@ -916,33 +734,20 @@
 <li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.utils.diffraction.find_hot_pixels.html">find_hot_pixels</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.utils.diffraction.gain_normalise.html">gain_normalise</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.utils.diffraction.investigate_dog_background_removal_interactive.html">investigate_dog_background_removal_interactive</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.utils.diffraction.is_cupy_array.html">is_cupy_array</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.utils.diffraction.isiterable.html">isiterable</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.utils.diffraction.match_template.html">match_template</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.utils.diffraction.match_template_dilate.html">match_template_dilate</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.utils.diffraction.normalize_template_match.html">normalize_template_match</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.utils.diffraction.peaks_as_gvectors.html">peaks_as_gvectors</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.utils.diffraction.phase_cross_correlation.html">phase_cross_correlation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.utils.diffraction.reference_circle.html">reference_circle</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.utils.diffraction.regional_filter.html">regional_filter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.utils.diffraction.remove_bad_pixels.html">remove_bad_pixels</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.utils.diffraction.remove_dead.html">remove_dead</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.utils.diffraction.Version.html">Version</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.utils.diffraction.deprecated.html">deprecated</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.utils.diffraction.interp1d.html">interp1d</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.utils.diffraction.tqdm.html">tqdm</a></li>
 </ul>
 </details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../reference/generated/pyxem.utils.calibration.html">calibration</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.utils.calibration.find_diffraction_calibration.html">find_diffraction_calibration</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.utils.calibration.get_electron_wavelength.html">get_electron_wavelength</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.utils.calibration.index_dataset_with_template_rotation.html">index_dataset_with_template_rotation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.utils.calibration.value2node.html">value2node</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.utils.calibration.value2standard_units.html">value2standard_units</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.utils.calibration.Calibration.html">Calibration</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.utils.calibration.DictionaryTreeBrowser.html">DictionaryTreeBrowser</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.utils.calibration.UniformDataAxis.html">UniformDataAxis</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../reference/generated/pyxem.utils.calibration.deprecated.html">deprecated</a></li>
 </ul>
 </details></li>
 <li class="toctree-l3"><a class="reference internal" href="../../reference/generated/pyxem.utils.find_diffraction_calibration.html">find_diffraction_calibration</a></li>
@@ -954,75 +759,46 @@
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../../user_guide/bibliography.html">Bibliography</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../user_guide/cite.html">Citing pyxem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../user_guide/open_datasets_workflows.html">Open datasets and workflows</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../user_guide/related_projects.html">Related projects</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://github.com/pyxem/pyxem/main/develop/LICENSE">License</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/pyxem/pyxem/blob/main/LICENSE">License</a></li>
 </ul>
 </div>
 </nav></div>
-    </div>
-  
-  
-  <div class="sidebar-primary-items__end sidebar-primary__section">
-      <div class="sidebar-primary-item">
-<div id="ethical-ad-placement"
-      class="flat"
-      data-ea-publisher="readthedocs"
-      data-ea-type="readthedocs-sidebar"
-      data-ea-manual="true">
+</div>
+<div class="sidebar-primary-items__end sidebar-primary__section">
+<div class="sidebar-primary-item">
+<div class="flat" data-ea-manual="true" data-ea-publisher="readthedocs" data-ea-type="readthedocs-sidebar" id="ethical-ad-placement">
 </div></div>
-  </div>
-
-
-      </div>
-      
-      <main id="main-content" class="bd-main" role="main">
-        
-        
-          <div class="bd-content">
-            <div class="bd-article-container">
-              
-              <div class="bd-header-article d-print-none">
+</div>
+</div>
+<main class="bd-main" id="main-content" role="main">
+<div class="bd-content">
+<div class="bd-article-container">
+<div class="bd-header-article d-print-none">
 <div class="header-article-items header-article__inner">
-  
-    <div class="header-article-items__start">
-      
-        <div class="header-article-item">
-
+<div class="header-article-items__start">
+<div class="header-article-item">
 <nav aria-label="Breadcrumb" class="d-print-none">
-  <ul class="bd-breadcrumbs">
-    
-    <li class="breadcrumb-item breadcrumb-home">
-      <a href="../../index.html" class="nav-link" aria-label="Home">
-        <i class="fa-solid fa-home"></i>
-      </a>
-    </li>
-    
-    <li class="breadcrumb-item"><a href="../../user_guide/index.html" class="nav-link">Where do I start?</a></li>
-    
-    
-    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Gallery of Examples</a></li>
-    
-    
-    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Amorphous Characterization</a></li>
-    
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Fluctuation Electron Microscopy</span></li>
-  </ul>
+<ul class="bd-breadcrumbs">
+<li class="breadcrumb-item breadcrumb-home">
+<a aria-label="Home" class="nav-link" href="../../index.html">
+<i class="fa-solid fa-home"></i>
+</a>
+</li>
+<li class="breadcrumb-item"><a class="nav-link" href="../../user_guide/index.html">Where do I start?</a></li>
+<li class="breadcrumb-item"><a class="nav-link" href="../index.html">Gallery of Examples</a></li>
+<li class="breadcrumb-item"><a class="nav-link" href="index.html">Amorphous Characterization</a></li>
+<li aria-current="page" class="breadcrumb-item active"><span class="ellipsis">Fluctuation Electron Microscopy</span></li>
+</ul>
 </nav>
 </div>
-      
-    </div>
-  
-  
 </div>
 </div>
-              
-              
-              
-                
+</div>
 <div id="searchbox"></div>
-                <article class="bd-article">
-                  
-  <div class="sphx-glr-download-link-note admonition note">
+<article class="bd-article">
+<div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#sphx-glr-download-examples-amorphous-characterization-fem-py"><span class="std std-ref">Go to the end</span></a>
 to download the full example code.</p>
@@ -1042,44 +818,203 @@ the variance for Poisson noise in the data.</p>
 <p>(There are several different possible variance signals. Here, we use the notation from
 Daulton, et al. Ultramicroscopy 110, 1279–1289 (2010), DOI: 10.1016/j.ultramic.2010.05.010.)</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pyxem</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pxm</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyxem.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">determine_ellipse</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">hyperspy.api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">hs</span>
+<span class="kn">from</span><span class="w"> </span><a class="sphinx-codeautolink-a" href="../../reference/generated/pyxem.utils.html#module-pyxem.utils" title="pyxem.utils"><span class="nn">pyxem.utils</span></a><span class="w"> </span><span class="kn">import</span> <a class="sphinx-codeautolink-a" href="../../reference/generated/pyxem.utils.determine_ellipse.html#pyxem.utils.determine_ellipse" title="pyxem.utils.determine_ellipse"><span class="n">determine_ellipse</span></a>
+<span class="kn">import</span><span class="w"> </span><a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/index.html#module-numpy" title="numpy"><span class="nn">numpy</span></a><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><a class="sphinx-codeautolink-a" href="https://hyperspy.org/hyperspy-doc/current/reference/api.html#module-hyperspy.api" title="hyperspy.api"><span class="nn">hyperspy.api</span></a><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">hs</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyxem.utils._pixelated_stem_tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">_copy_axes_object_metadata</span>
 
-<a href="../../reference/generated/pyxem.signals.ElectronDiffraction2D.html#pyxem.signals.ElectronDiffraction2D" title="pyxem.signals.ElectronDiffraction2D" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">s</span></a> <span class="o">=</span> <span class="n">pxm</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">zrcual_1</span><span class="p">(</span><span class="n">allow_download</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">signal_type</span><span class="o">=</span><span class="s2">&quot;electron_diffraction&quot;</span><span class="p">)</span>
+<a href="../../reference/generated/pyxem.signals.ElectronDiffraction2D.html#pyxem.signals.ElectronDiffraction2D" title="pyxem.signals.ElectronDiffraction2D" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">s</span></a> <span class="o">=</span> <span class="n">pxm</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">zrcual_1</span><span class="p">(</span><span class="n">allow_download</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">signal_type</span><span class="o">=</span><span class="s2">"electron_diffraction"</span><span class="p">)</span>
 <a href="../../reference/generated/pyxem.signals.Diffraction2D.plot.html#pyxem.signals.Diffraction2D.plot" title="pyxem.signals.Diffraction2D.plot" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method"><span class="n">s</span><span class="o">.</span><span class="n">plot</span></a><span class="p">()</span>
 </pre></div>
 </div>
 <ul class="sphx-glr-horizontal">
-<li><img src="../../_images/sphx_glr_FEM_001.png" srcset="../../_images/sphx_glr_FEM_001.png" alt="pos1-1 Navigator" class = "sphx-glr-multi-img"/></li>
-<li><img src="../../_images/sphx_glr_FEM_002.png" srcset="../../_images/sphx_glr_FEM_002.png" alt="pos1-1 Signal" class = "sphx-glr-multi-img"/></li>
+<li><img alt="pos1-1 Navigator" class="sphx-glr-multi-img" src="../../_images/sphx_glr_FEM_001.png" srcset="../../_images/sphx_glr_FEM_001.png"/></li>
+<li><img alt="pos1-1 Signal" class="sphx-glr-multi-img" src="../../_images/sphx_glr_FEM_002.png" srcset="../../_images/sphx_glr_FEM_002.png"/></li>
 </ul>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/site-packages/hyperspy/misc/utils.py:72: VisibleDeprecationWarning: `_get_block_pattern` has moved to `hyperspy.misc.dask_utils`. It is for internal use only and may be removed in the future.
-  warnings.warn(
-Downloading file &#39;pos1-1.zspy&#39; from &#39;https://zenodo.org/records/15490547/files/pos1-1.zspy&#39; to &#39;/home/runner/.cache/pyxem/0.21.0&#39;.
-
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|                                              | 0.00/18.3M [00:00&lt;?, ?B/s]
+  0%|                                     | 12.3k/18.3M [00:00&lt;03:53, 78.1kB/s]
+  0%|                                      | 36.9k/18.3M [00:00&lt;02:14, 136kB/s]
+  0%|▏                                     | 86.0k/18.3M [00:00&lt;01:16, 238kB/s]
+  1%|▎                                      | 135k/18.3M [00:00&lt;01:02, 290kB/s]
+  1%|▍                                      | 229k/18.3M [00:00&lt;00:41, 437kB/s]
+  2%|▌                                      | 291k/18.3M [00:00&lt;00:40, 447kB/s]
+  2%|▊                                      | 397k/18.3M [00:00&lt;00:31, 561kB/s]
+  3%|█                                      | 479k/18.3M [00:01&lt;00:30, 580kB/s]
+  3%|█▏                                     | 578k/18.3M [00:01&lt;00:28, 631kB/s]
+  4%|█▌                                     | 709k/18.3M [00:01&lt;00:23, 741kB/s]
+  4%|█▋                                     | 786k/18.3M [00:01&lt;00:25, 695kB/s]
+  5%|█▉                                     | 889k/18.3M [00:01&lt;00:24, 719kB/s]
+  5%|██                                     | 971k/18.3M [00:01&lt;00:25, 688kB/s]
+  6%|██▏                                   | 1.04M/18.3M [00:01&lt;00:26, 640kB/s]
+  6%|██▎                                   | 1.12M/18.3M [00:02&lt;00:27, 624kB/s]
+  7%|██▋                                   | 1.27M/18.3M [00:02&lt;00:22, 772kB/s]
+  7%|██▊                                   | 1.35M/18.3M [00:02&lt;00:23, 726kB/s]
+  8%|██▉                                   | 1.43M/18.3M [00:02&lt;00:24, 694kB/s]
+  8%|███▏                                  | 1.51M/18.3M [00:02&lt;00:24, 671kB/s]
+  9%|███▍                                  | 1.64M/18.3M [00:02&lt;00:21, 766kB/s]
+ 10%|███▋                                  | 1.76M/18.3M [00:02&lt;00:20, 796kB/s]
+ 10%|███▊                                  | 1.84M/18.3M [00:02&lt;00:22, 742kB/s]
+ 11%|████                                  | 1.93M/18.3M [00:03&lt;00:22, 734kB/s]
+ 11%|████▎                                 | 2.05M/18.3M [00:03&lt;00:20, 774kB/s]
+ 12%|████▌                                 | 2.18M/18.3M [00:03&lt;00:19, 839kB/s]
+ 13%|████▊                                 | 2.29M/18.3M [00:03&lt;00:18, 847kB/s]
+ 13%|█████                                 | 2.46M/18.3M [00:03&lt;00:16, 964kB/s]
+ 14%|█████▎                                | 2.56M/18.3M [00:03&lt;00:17, 898kB/s]
+ 14%|█████▌                                | 2.65M/18.3M [00:03&lt;00:18, 834kB/s]
+ 15%|█████▋                                | 2.73M/18.3M [00:04&lt;00:19, 777kB/s]
+ 16%|█████▉                                | 2.85M/18.3M [00:04&lt;00:18, 813kB/s]
+ 16%|██████▏                               | 2.97M/18.3M [00:04&lt;00:18, 827kB/s]
+ 17%|██████▍                               | 3.06M/18.3M [00:04&lt;00:18, 801kB/s]
+ 17%|██████▌                               | 3.18M/18.3M [00:04&lt;00:18, 821kB/s]
+ 18%|██████▊                               | 3.26M/18.3M [00:04&lt;00:19, 771kB/s]
+ 18%|██████▉                               | 3.34M/18.3M [00:04&lt;00:20, 716kB/s]
+ 19%|███████▏                              | 3.44M/18.3M [00:04&lt;00:20, 725kB/s]
+ 19%|███████▎                              | 3.52M/18.3M [00:05&lt;00:21, 693kB/s]
+ 20%|███████▌                              | 3.64M/18.3M [00:05&lt;00:19, 740kB/s]
+ 20%|███████▋                              | 3.72M/18.3M [00:05&lt;00:20, 705kB/s]
+ 21%|███████▉                              | 3.80M/18.3M [00:05&lt;00:21, 677kB/s]
+ 21%|████████                              | 3.88M/18.3M [00:05&lt;00:21, 661kB/s]
+ 22%|████████▏                             | 3.96M/18.3M [00:05&lt;00:22, 639kB/s]
+ 22%|████████▍                             | 4.04M/18.3M [00:05&lt;00:22, 632kB/s]
+ 23%|████████▌                             | 4.12M/18.3M [00:05&lt;00:22, 625kB/s]
+ 23%|████████▊                             | 4.21M/18.3M [00:06&lt;00:22, 624kB/s]
+ 24%|█████████                             | 4.34M/18.3M [00:06&lt;00:18, 734kB/s]
+ 24%|█████████▎                            | 4.47M/18.3M [00:06&lt;00:17, 808kB/s]
+ 25%|█████████▌                            | 4.58M/18.3M [00:06&lt;00:16, 823kB/s]
+ 26%|█████████▋                            | 4.68M/18.3M [00:06&lt;00:16, 800kB/s]
+ 26%|█████████▉                            | 4.76M/18.3M [00:06&lt;00:18, 747kB/s]
+ 27%|██████████                            | 4.84M/18.3M [00:06&lt;00:19, 699kB/s]
+ 27%|██████████▎                           | 4.93M/18.3M [00:07&lt;00:19, 685kB/s]
+ 27%|██████████▍                           | 5.01M/18.3M [00:07&lt;00:19, 666kB/s]
+ 28%|██████████▌                           | 5.09M/18.3M [00:07&lt;00:20, 651kB/s]
+ 28%|██████████▊                           | 5.17M/18.3M [00:07&lt;00:20, 642kB/s]
+ 29%|██████████▉                           | 5.27M/18.3M [00:07&lt;00:19, 673kB/s]
+ 29%|███████████▏                          | 5.39M/18.3M [00:07&lt;00:17, 732kB/s]
+ 30%|███████████▍                          | 5.47M/18.3M [00:07&lt;00:18, 699kB/s]
+ 30%|███████████▌                          | 5.55M/18.3M [00:07&lt;00:19, 666kB/s]
+ 31%|███████████▋                          | 5.63M/18.3M [00:08&lt;00:19, 652kB/s]
+ 31%|███████████▉                          | 5.73M/18.3M [00:08&lt;00:18, 680kB/s]
+ 32%|████████████▏                         | 5.83M/18.3M [00:08&lt;00:17, 699kB/s]
+ 32%|████████████▎                         | 5.91M/18.3M [00:08&lt;00:18, 675kB/s]
+ 33%|████████████▌                         | 6.01M/18.3M [00:08&lt;00:17, 695kB/s]
+ 34%|████████████▊                         | 6.15M/18.3M [00:08&lt;00:14, 811kB/s]
+ 34%|████████████▉                         | 6.23M/18.3M [00:08&lt;00:15, 753kB/s]
+ 35%|█████████████▏                        | 6.33M/18.3M [00:09&lt;00:15, 750kB/s]
+ 35%|█████████████▍                        | 6.43M/18.3M [00:09&lt;00:15, 748kB/s]
+ 36%|█████████████▌                        | 6.53M/18.3M [00:09&lt;00:15, 747kB/s]
+ 36%|█████████████▊                        | 6.63M/18.3M [00:09&lt;00:15, 745kB/s]
+ 37%|█████████████▉                        | 6.71M/18.3M [00:09&lt;00:16, 707kB/s]
+ 37%|██████████████▏                       | 6.79M/18.3M [00:09&lt;00:16, 681kB/s]
+ 38%|██████████████▎                       | 6.87M/18.3M [00:09&lt;00:17, 663kB/s]
+ 38%|██████████████▌                       | 6.99M/18.3M [00:09&lt;00:15, 723kB/s]
+ 39%|██████████████▊                       | 7.10M/18.3M [00:10&lt;00:14, 767kB/s]
+ 39%|██████████████▉                       | 7.18M/18.3M [00:10&lt;00:15, 721kB/s]
+ 40%|███████████████▎                      | 7.35M/18.3M [00:10&lt;00:12, 876kB/s]
+ 41%|███████████████▌                      | 7.50M/18.3M [00:10&lt;00:11, 940kB/s]
+ 42%|███████████████▊                      | 7.61M/18.3M [00:10&lt;00:11, 918kB/s]
+ 42%|████████████████                      | 7.74M/18.3M [00:10&lt;00:11, 938kB/s]
+ 43%|████████████████▎                     | 7.84M/18.3M [00:10&lt;00:11, 878kB/s]
+ 43%|████████████████▌                     | 7.93M/18.3M [00:11&lt;00:12, 818kB/s]
+ 44%|████████████████▋                     | 8.01M/18.3M [00:11&lt;00:13, 760kB/s]
+ 44%|████████████████▊                     | 8.10M/18.3M [00:11&lt;00:13, 736kB/s]
+ 45%|█████████████████                     | 8.18M/18.3M [00:11&lt;00:14, 702kB/s]
+ 45%|█████████████████▏                    | 8.28M/18.3M [00:11&lt;00:14, 705kB/s]
+ 46%|█████████████████▍                    | 8.36M/18.3M [00:11&lt;00:14, 677kB/s]
+ 46%|█████████████████▋                    | 8.47M/18.3M [00:11&lt;00:13, 734kB/s]
+ 47%|█████████████████▊                    | 8.57M/18.3M [00:11&lt;00:13, 737kB/s]
+ 47%|██████████████████                    | 8.67M/18.3M [00:12&lt;00:12, 739kB/s]
+ 48%|██████████████████▎                   | 8.80M/18.3M [00:12&lt;00:11, 814kB/s]
+ 49%|██████████████████▌                   | 8.90M/18.3M [00:12&lt;00:11, 794kB/s]
+ 49%|██████████████████▊                   | 9.02M/18.3M [00:12&lt;00:11, 814kB/s]
+ 50%|██████████████████▉                   | 9.10M/18.3M [00:12&lt;00:12, 756kB/s]
+ 50%|███████████████████                   | 9.18M/18.3M [00:12&lt;00:12, 715kB/s]
+ 51%|███████████████████▎                  | 9.28M/18.3M [00:12&lt;00:12, 723kB/s]
+ 51%|███████████████████▍                  | 9.36M/18.3M [00:13&lt;00:12, 691kB/s]
+ 52%|███████████████████▊                  | 9.51M/18.3M [00:13&lt;00:10, 818kB/s]
+ 53%|███████████████████▉                  | 9.59M/18.3M [00:13&lt;00:11, 759kB/s]
+ 53%|████████████████████                  | 9.67M/18.3M [00:13&lt;00:11, 716kB/s]
+ 54%|████████████████████▍                 | 9.82M/18.3M [00:13&lt;00:10, 835kB/s]
+ 54%|████████████████████▌                 | 9.90M/18.3M [00:13&lt;00:10, 780kB/s]
+ 55%|████████████████████▊                 | 9.99M/18.3M [00:13&lt;00:11, 731kB/s]
+ 55%|████████████████████▉                 | 10.1M/18.3M [00:13&lt;00:11, 686kB/s]
+ 56%|█████████████████████▏                | 10.2M/18.3M [00:14&lt;00:11, 703kB/s]
+ 56%|█████████████████████▎                | 10.2M/18.3M [00:14&lt;00:12, 659kB/s]
+ 57%|█████████████████████▌                | 10.4M/18.3M [00:14&lt;00:10, 768kB/s]
+ 58%|█████████████████████▉                | 10.5M/18.3M [00:14&lt;00:08, 871kB/s]
+ 58%|██████████████████████                | 10.6M/18.3M [00:14&lt;00:09, 833kB/s]
+ 59%|██████████████████████▎               | 10.7M/18.3M [00:14&lt;00:08, 880kB/s]
+ 60%|██████████████████████▋               | 10.9M/18.3M [00:14&lt;00:08, 905kB/s]
+ 60%|██████████████████████▊               | 11.0M/18.3M [00:15&lt;00:08, 857kB/s]
+ 61%|███████████████████████               | 11.1M/18.3M [00:15&lt;00:09, 795kB/s]
+ 61%|███████████████████████▎              | 11.2M/18.3M [00:15&lt;00:08, 880kB/s]
+ 62%|███████████████████████▌              | 11.3M/18.3M [00:15&lt;00:07, 913kB/s]
+ 63%|███████████████████████▊              | 11.4M/18.3M [00:15&lt;00:07, 862kB/s]
+ 63%|████████████████████████              | 11.5M/18.3M [00:15&lt;00:08, 826kB/s]
+ 64%|████████████████████████▎             | 11.7M/18.3M [00:15&lt;00:07, 912kB/s]
+ 65%|████████████████████████▌             | 11.8M/18.3M [00:15&lt;00:06, 972kB/s]
+ 65%|████████████████████████▊             | 11.9M/18.3M [00:16&lt;00:07, 902kB/s]
+ 66%|█████████████████████████             | 12.0M/18.3M [00:16&lt;00:07, 855kB/s]
+ 67%|█████████████████████████▎            | 12.2M/18.3M [00:16&lt;00:06, 895kB/s]
+ 67%|█████████████████████████▋            | 12.3M/18.3M [00:16&lt;00:05, 999kB/s]
+ 68%|█████████████████████████▊            | 12.4M/18.3M [00:16&lt;00:06, 925kB/s]
+ 69%|██████████████████████████            | 12.5M/18.3M [00:16&lt;00:06, 861kB/s]
+ 69%|██████████████████████████▎           | 12.6M/18.3M [00:16&lt;00:06, 854kB/s]
+ 70%|██████████████████████████▍           | 12.7M/18.3M [00:16&lt;00:06, 818kB/s]
+ 70%|██████████████████████████▋           | 12.8M/18.3M [00:17&lt;00:07, 759kB/s]
+ 71%|██████████████████████████▉           | 13.0M/18.3M [00:17&lt;00:06, 865kB/s]
+ 71%|███████████████████████████▏          | 13.0M/18.3M [00:17&lt;00:06, 810kB/s]
+ 72%|███████████████████████████▍          | 13.2M/18.3M [00:17&lt;00:05, 883kB/s]
+ 73%|███████████████████████████▋          | 13.3M/18.3M [00:17&lt;00:05, 953kB/s]
+ 74%|███████████████████████████▉          | 13.4M/18.3M [00:17&lt;00:05, 890kB/s]
+ 74%|████████████████████████████▏         | 13.5M/18.3M [00:17&lt;00:05, 844kB/s]
+ 75%|████████████████████████████▎         | 13.6M/18.3M [00:18&lt;00:05, 784kB/s]
+ 75%|████████████████████████████▌         | 13.7M/18.3M [00:18&lt;00:06, 735kB/s]
+ 75%|████████████████████████████▋         | 13.8M/18.3M [00:18&lt;00:06, 691kB/s]
+ 76%|████████████████████████████▊         | 13.9M/18.3M [00:18&lt;00:06, 707kB/s]
+ 77%|█████████████████████████████▏        | 14.0M/18.3M [00:18&lt;00:05, 829kB/s]
+ 77%|█████████████████████████████▎        | 14.1M/18.3M [00:18&lt;00:05, 776kB/s]
+ 78%|█████████████████████████████▋        | 14.2M/18.3M [00:18&lt;00:04, 869kB/s]
+ 79%|█████████████████████████████▊        | 14.3M/18.3M [00:18&lt;00:04, 814kB/s]
+ 79%|██████████████████████████████        | 14.5M/18.3M [00:19&lt;00:04, 849kB/s]
+ 80%|██████████████████████████████▍       | 14.6M/18.3M [00:19&lt;00:03, 920kB/s]
+ 81%|██████████████████████████████▌       | 14.7M/18.3M [00:19&lt;00:04, 857kB/s]
+ 81%|██████████████████████████████▊       | 14.8M/18.3M [00:19&lt;00:04, 796kB/s]
+ 81%|██████████████████████████████▉       | 14.9M/18.3M [00:19&lt;00:04, 744kB/s]
+ 82%|███████████████████████████████▏      | 15.0M/18.3M [00:19&lt;00:04, 744kB/s]
+ 83%|███████████████████████████████▎      | 15.1M/18.3M [00:19&lt;00:04, 745kB/s]
+ 83%|███████████████████████████████▌      | 15.1M/18.3M [00:20&lt;00:04, 707kB/s]
+ 84%|███████████████████████████████▊      | 15.3M/18.3M [00:20&lt;00:03, 792kB/s]
+ 84%|███████████████████████████████▉      | 15.4M/18.3M [00:20&lt;00:03, 779kB/s]
+ 85%|████████████████████████████████▏     | 15.5M/18.3M [00:20&lt;00:03, 732kB/s]
+ 85%|████████████████████████████████▎     | 15.5M/18.3M [00:20&lt;00:03, 698kB/s]
+ 86%|████████████████████████████████▌     | 15.6M/18.3M [00:20&lt;00:03, 712kB/s]
+ 86%|████████████████████████████████▋     | 15.7M/18.3M [00:20&lt;00:03, 685kB/s]
+ 87%|█████████████████████████████████     | 15.9M/18.3M [00:20&lt;00:02, 814kB/s]
+ 87%|█████████████████████████████████▏    | 16.0M/18.3M [00:21&lt;00:02, 793kB/s]
+ 88%|█████████████████████████████████▍    | 16.0M/18.3M [00:21&lt;00:02, 742kB/s]
+ 88%|█████████████████████████████████▌    | 16.1M/18.3M [00:21&lt;00:03, 706kB/s]
+ 89%|█████████████████████████████████▊    | 16.2M/18.3M [00:21&lt;00:02, 717kB/s]
+ 90%|██████████████████████████████████    | 16.4M/18.3M [00:21&lt;00:02, 837kB/s]
+ 90%|██████████████████████████████████▎   | 16.5M/18.3M [00:21&lt;00:01, 883kB/s]
+ 91%|██████████████████████████████████▋   | 16.7M/18.3M [00:21&lt;00:01, 942kB/s]
+ 92%|██████████████████████████████████▊   | 16.7M/18.3M [00:22&lt;00:01, 874kB/s]
+ 92%|███████████████████████████████████   | 16.8M/18.3M [00:22&lt;00:01, 816kB/s]
+ 93%|███████████████████████████████████▎  | 17.0M/18.3M [00:22&lt;00:01, 860kB/s]
+ 93%|███████████████████████████████████▍  | 17.1M/18.3M [00:22&lt;00:01, 807kB/s]
+ 94%|███████████████████████████████████▋  | 17.1M/18.3M [00:22&lt;00:01, 769kB/s]
+ 94%|███████████████████████████████████▊  | 17.2M/18.3M [00:22&lt;00:01, 724kB/s]
+ 95%|████████████████████████████████████  | 17.3M/18.3M [00:22&lt;00:01, 693kB/s]
+ 95%|████████████████████████████████████▏ | 17.4M/18.3M [00:22&lt;00:01, 709kB/s]
+ 96%|████████████████████████████████████▍ | 17.5M/18.3M [00:23&lt;00:01, 680kB/s]
+ 96%|████████████████████████████████████▌ | 17.6M/18.3M [00:23&lt;00:01, 662kB/s]
+ 97%|████████████████████████████████████▊ | 17.7M/18.3M [00:23&lt;00:00, 799kB/s]
+ 98%|█████████████████████████████████████ | 17.8M/18.3M [00:23&lt;00:00, 819kB/s]
+ 98%|█████████████████████████████████████▎| 17.9M/18.3M [00:23&lt;00:00, 769kB/s]
+ 99%|█████████████████████████████████████▍| 18.0M/18.3M [00:23&lt;00:00, 716kB/s]
+ 99%|█████████████████████████████████████▌| 18.1M/18.3M [00:23&lt;00:00, 688kB/s]
+100%|█████████████████████████████████████▊| 18.2M/18.3M [00:24&lt;00:00, 705kB/s]
   0%|                                              | 0.00/18.3M [00:00&lt;?, ?B/s]
-  0%|                                     | 11.3k/18.3M [00:00&lt;03:31, 86.5kB/s]
-  0%|                                      | 39.9k/18.3M [00:00&lt;02:16, 133kB/s]
-  1%|▏                                     | 93.2k/18.3M [00:00&lt;01:11, 252kB/s]
-  1%|▎                                      | 142k/18.3M [00:00&lt;01:01, 297kB/s]
-  1%|▌                                      | 245k/18.3M [00:00&lt;00:40, 448kB/s]
-  2%|▊                                      | 357k/18.3M [00:00&lt;00:31, 561kB/s]
-  3%|█▏                                     | 570k/18.3M [00:01&lt;00:20, 861kB/s]
-  4%|█▌                                    | 766k/18.3M [00:01&lt;00:17, 1.02MB/s]
-  6%|██▏                                  | 1.11M/18.3M [00:01&lt;00:11, 1.44MB/s]
-  8%|██▉                                  | 1.42M/18.3M [00:01&lt;00:10, 1.66MB/s]
- 11%|████                                 | 2.03M/18.3M [00:01&lt;00:06, 2.43MB/s]
- 14%|█████▎                               | 2.60M/18.3M [00:01&lt;00:05, 2.89MB/s]
- 20%|███████▌                             | 3.73M/18.3M [00:01&lt;00:03, 4.37MB/s]
- 26%|█████████▋                           | 4.80M/18.3M [00:02&lt;00:02, 5.29MB/s]
- 36%|█████████████▎                       | 6.55M/18.3M [00:02&lt;00:01, 7.33MB/s]
- 47%|█████████████████▎                   | 8.52M/18.3M [00:02&lt;00:01, 9.19MB/s]
- 62%|██████████████████████▊              | 11.3M/18.3M [00:02&lt;00:00, 12.1MB/s]
- 79%|█████████████████████████████▎       | 14.4M/18.3M [00:02&lt;00:00, 15.0MB/s]
-  0%|                                              | 0.00/18.3M [00:00&lt;?, ?B/s]
-100%|██████████████████████████████████████| 18.3M/18.3M [00:00&lt;00:00, 107GB/s]
+100%|██████████████████████████████████████| 18.3M/18.3M [00:00&lt;00:00, 119GB/s]
 </pre></div>
 </div>
 <section id="using-manual-ellipse-determination">
@@ -1099,7 +1034,7 @@ can force the ellipse to fit the first ring by masking the zero beam.</p>
     <span class="n">points</span><span class="o">=</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pos</span></a><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="c1"># we don&#39;t account for scales/offsets yet</span>
+<span class="c1"># we don't account for scales/offsets yet</span>
 <a href="https://hyperspy.org/hyperspy-doc/current/reference/base_classes/axes.html#hyperspy.axes.AxesManager.signal_axes" title="hyperspy.axes.AxesManager.signal_axes" class="sphx-glr-backref-module-hyperspy-axes sphx-glr-backref-type-py-property"><span class="n">summed</span><span class="o">.</span><span class="n">axes_manager</span><span class="o">.</span><span class="n">signal_axes</span></a><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="mi">1</span>
 <a href="https://hyperspy.org/hyperspy-doc/current/reference/base_classes/axes.html#hyperspy.axes.AxesManager.signal_axes" title="hyperspy.axes.AxesManager.signal_axes" class="sphx-glr-backref-module-hyperspy-axes sphx-glr-backref-type-py-property"><span class="n">summed</span><span class="o">.</span><span class="n">axes_manager</span><span class="o">.</span><span class="n">signal_axes</span></a><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="mi">1</span>
 <a href="https://hyperspy.org/hyperspy-doc/current/reference/base_classes/axes.html#hyperspy.axes.AxesManager.signal_axes" title="hyperspy.axes.AxesManager.signal_axes" class="sphx-glr-backref-module-hyperspy-axes sphx-glr-backref-type-py-property"><span class="n">summed</span><span class="o">.</span><span class="n">axes_manager</span><span class="o">.</span><span class="n">signal_axes</span></a><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
@@ -1125,19 +1060,35 @@ That should end up a nice straight line</p>
 </pre></div>
 </div>
 <ul class="sphx-glr-horizontal">
-<li><img src="../../_images/sphx_glr_FEM_003.png" srcset="../../_images/sphx_glr_FEM_003.png" alt="Signal" class = "sphx-glr-multi-img"/></li>
-<li><img src="../../_images/sphx_glr_FEM_004.png" srcset="../../_images/sphx_glr_FEM_004.png" alt="Signal" class = "sphx-glr-multi-img"/></li>
+<li><img alt="Signal" class="sphx-glr-multi-img" src="../../_images/sphx_glr_FEM_003.png" srcset="../../_images/sphx_glr_FEM_003.png"/></li>
+<li><img alt="Signal" class="sphx-glr-multi-img" src="../../_images/sphx_glr_FEM_004.png" srcset="../../_images/sphx_glr_FEM_004.png"/></li>
 </ul>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/26 [00:00&lt;?, ?it/s]
-  4%|▍         | 1/26 [00:03&lt;01:18,  3.15s/it]
- 62%|██████▏   | 16/26 [00:03&lt;00:01,  6.79it/s]
-100%|██████████| 26/26 [00:03&lt;00:00,  7.84it/s]
+  4%|▍         | 1/26 [00:04&lt;01:40,  4.01s/it]
+  8%|▊         | 2/26 [00:04&lt;00:41,  1.74s/it]
+ 15%|█▌        | 4/26 [00:04&lt;00:15,  1.43it/s]
+ 19%|█▉        | 5/26 [00:08&lt;00:35,  1.71s/it]
+ 27%|██▋       | 7/26 [00:08&lt;00:17,  1.07it/s]
+ 35%|███▍      | 9/26 [00:12&lt;00:22,  1.35s/it]
+ 42%|████▏     | 11/26 [00:12&lt;00:13,  1.09it/s]
+ 50%|█████     | 13/26 [00:16&lt;00:16,  1.25s/it]
+ 58%|█████▊    | 15/26 [00:16&lt;00:09,  1.14it/s]
+ 62%|██████▏   | 16/26 [00:17&lt;00:07,  1.28it/s]
+ 65%|██████▌   | 17/26 [00:20&lt;00:12,  1.35s/it]
+ 69%|██████▉   | 18/26 [00:20&lt;00:08,  1.06s/it]
+ 73%|███████▎  | 19/26 [00:20&lt;00:05,  1.17it/s]
+ 77%|███████▋  | 20/26 [00:21&lt;00:04,  1.34it/s]
+ 81%|████████  | 21/26 [00:24&lt;00:07,  1.43s/it]
+ 85%|████████▍ | 22/26 [00:24&lt;00:04,  1.15s/it]
+ 88%|████████▊ | 23/26 [00:25&lt;00:02,  1.15it/s]
+ 96%|█████████▌| 25/26 [00:26&lt;00:00,  1.46it/s]
+100%|██████████| 26/26 [00:26&lt;00:00,  1.00s/it]
 </pre></div>
 </div>
 </section>
 <section id="getting-the-variance">
 <h2>Getting the Variance<a class="headerlink" href="#getting-the-variance" title="Link to this heading">#</a></h2>
-<p>The <code class="xref py py-meth docutils literal notranslate"><span class="pre">get_variance()</span></code> function will calculate the variance using the affine correction
+<p>The <a class="reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.get_variance.html#pyxem.signals.Diffraction2D.get_variance" title="pyxem.signals.Diffraction2D.get_variance"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_variance()</span></code></a> function will calculate the variance using the affine correction
 and the center as described above. Restricting the radial range is also nice to remove
 the effects of the high intensity at the top end. Adding a mask can also be helpful for
 reducing the effects of a beam stop. The <code class="docutils literal notranslate"><span class="pre">gain</span></code> parameter is number of detector units for 1 electron.
@@ -1146,21 +1097,55 @@ use a gain of 1.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="../../reference/generated/pyxem.signals.ElectronDiffraction2D.html#pyxem.signals.ElectronDiffraction2D" title="pyxem.signals.ElectronDiffraction2D" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">mask</span></a> <span class="o">=</span> <a href="../../reference/generated/pyxem.signals.ElectronDiffraction2D.html#pyxem.signals.ElectronDiffraction2D" title="pyxem.signals.ElectronDiffraction2D" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">summed</span></a> <span class="o">&lt;</span> <span class="mi">10000</span>
 <a href="../../reference/generated/pyxem.signals.Diffraction2D.plot.html#pyxem.signals.Diffraction2D.plot" title="pyxem.signals.Diffraction2D.plot" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method"><span class="n">mask</span><span class="o">.</span><span class="n">plot</span></a><span class="p">()</span>
 <a href="../../reference/generated/pyxem.signals.ElectronDiffraction1D.html#pyxem.signals.ElectronDiffraction1D" title="pyxem.signals.ElectronDiffraction1D" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">variance</span></a> <span class="o">=</span> <a href="../../reference/generated/pyxem.signals.Diffraction2D.get_variance.html#pyxem.signals.Diffraction2D.get_variance" title="pyxem.signals.Diffraction2D.get_variance" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method"><span class="n">s</span><span class="o">.</span><span class="n">get_variance</span></a><span class="p">(</span><span class="n">npt</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">gain</span><span class="o">=</span><span class="mf">4.2</span><span class="p">,</span> <span class="n">radial_range</span><span class="o">=</span><span class="p">(</span><span class="mf">3.0</span><span class="p">,</span> <span class="mf">5.75</span><span class="p">),</span> <a href="../../reference/generated/pyxem.signals.ElectronDiffraction2D.html#pyxem.signals.ElectronDiffraction2D" title="pyxem.signals.ElectronDiffraction2D" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">mask</span></a><span class="o">=</span><a href="../../reference/generated/pyxem.signals.ElectronDiffraction2D.html#pyxem.signals.ElectronDiffraction2D" title="pyxem.signals.ElectronDiffraction2D" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">mask</span></a><span class="p">)</span>
-<a href="https://hyperspy.org/hyperspy-doc/current/reference/base_classes/axes.html#hyperspy.axes.AxesManager" title="hyperspy.axes.AxesManager" class="sphx-glr-backref-module-hyperspy-axes sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">variance</span><span class="o">.</span><span class="n">axes_manager</span></a><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s2">&quot;$nm^{-1}$&quot;</span>
+<a href="https://hyperspy.org/hyperspy-doc/current/reference/base_classes/axes.html#hyperspy.axes.AxesManager" title="hyperspy.axes.AxesManager" class="sphx-glr-backref-module-hyperspy-axes sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">variance</span><span class="o">.</span><span class="n">axes_manager</span></a><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s2">"$nm^{-1}$"</span>
 <a href="../../reference/generated/pyxem.signals.ElectronDiffraction1D.html#pyxem.signals.ElectronDiffraction1D" title="pyxem.signals.ElectronDiffraction1D" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">variance</span></a><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
 <ul class="sphx-glr-horizontal">
-<li><img src="../../_images/sphx_glr_FEM_005.png" srcset="../../_images/sphx_glr_FEM_005.png" alt="Signal" class = "sphx-glr-multi-img"/></li>
-<li><img src="../../_images/sphx_glr_FEM_006.png" srcset="../../_images/sphx_glr_FEM_006.png" alt="Signal" class = "sphx-glr-multi-img"/></li>
+<li><img alt="Signal" class="sphx-glr-multi-img" src="../../_images/sphx_glr_FEM_005.png" srcset="../../_images/sphx_glr_FEM_005.png"/></li>
+<li><img alt="Signal" class="sphx-glr-multi-img" src="../../_images/sphx_glr_FEM_006.png" srcset="../../_images/sphx_glr_FEM_006.png"/></li>
 </ul>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/51 [00:00&lt;?, ?it/s]
-  2%|▏         | 1/51 [00:01&lt;00:50,  1.02s/it]
-100%|██████████| 51/51 [00:01&lt;00:00, 46.15it/s]
+  2%|▏         | 1/51 [00:00&lt;00:34,  1.44it/s]
+  6%|▌         | 3/51 [00:00&lt;00:10,  4.52it/s]
+ 10%|▉         | 5/51 [00:00&lt;00:06,  6.92it/s]
+ 18%|█▊        | 9/51 [00:01&lt;00:06,  6.47it/s]
+ 24%|██▎       | 12/51 [00:01&lt;00:04,  9.00it/s]
+ 27%|██▋       | 14/51 [00:01&lt;00:03,  9.90it/s]
+ 33%|███▎      | 17/51 [00:02&lt;00:04,  7.60it/s]
+ 37%|███▋      | 19/51 [00:02&lt;00:03,  8.53it/s]
+ 43%|████▎     | 22/51 [00:02&lt;00:02, 10.96it/s]
+ 47%|████▋     | 24/51 [00:02&lt;00:02, 10.08it/s]
+ 51%|█████     | 26/51 [00:03&lt;00:03,  7.39it/s]
+ 61%|██████    | 31/51 [00:03&lt;00:02,  9.84it/s]
+ 65%|██████▍   | 33/51 [00:04&lt;00:02,  7.65it/s]
+ 69%|██████▊   | 35/51 [00:04&lt;00:01,  8.76it/s]
+ 73%|███████▎  | 37/51 [00:04&lt;00:01, 10.12it/s]
+ 76%|███████▋  | 39/51 [00:04&lt;00:01, 10.65it/s]
+ 80%|████████  | 41/51 [00:04&lt;00:01,  8.50it/s]
+ 84%|████████▍ | 43/51 [00:05&lt;00:00,  9.13it/s]
+ 88%|████████▊ | 45/51 [00:05&lt;00:00,  8.89it/s]
+ 96%|█████████▌| 49/51 [00:05&lt;00:00, 12.53it/s]
+100%|██████████| 51/51 [00:05&lt;00:00,  9.18it/s]
 
   0%|          | 0/51 [00:00&lt;?, ?it/s]
-  2%|▏         | 1/51 [00:00&lt;00:33,  1.50it/s]
-100%|██████████| 51/51 [00:00&lt;00:00, 71.06it/s]
+  2%|▏         | 1/51 [00:00&lt;00:20,  2.46it/s]
+ 10%|▉         | 5/51 [00:00&lt;00:04,  9.89it/s]
+ 18%|█▊        | 9/51 [00:00&lt;00:03, 11.15it/s]
+ 25%|██▌       | 13/51 [00:01&lt;00:02, 13.54it/s]
+ 31%|███▏      | 16/51 [00:01&lt;00:02, 16.38it/s]
+ 37%|███▋      | 19/51 [00:01&lt;00:02, 14.18it/s]
+ 41%|████      | 21/51 [00:01&lt;00:02, 13.55it/s]
+ 47%|████▋     | 24/51 [00:01&lt;00:01, 16.00it/s]
+ 51%|█████     | 26/51 [00:01&lt;00:01, 16.28it/s]
+ 55%|█████▍    | 28/51 [00:02&lt;00:01, 14.63it/s]
+ 59%|█████▉    | 30/51 [00:02&lt;00:01, 14.75it/s]
+ 63%|██████▎   | 32/51 [00:02&lt;00:01, 15.49it/s]
+ 69%|██████▊   | 35/51 [00:02&lt;00:01, 12.63it/s]
+ 76%|███████▋  | 39/51 [00:02&lt;00:00, 16.98it/s]
+ 80%|████████  | 41/51 [00:02&lt;00:00, 16.40it/s]
+ 84%|████████▍ | 43/51 [00:03&lt;00:00, 11.40it/s]
+100%|██████████| 51/51 [00:03&lt;00:00, 15.39it/s]
 </pre></div>
 </div>
 </section>
@@ -1195,11 +1180,11 @@ in Zhang et al. Ultramicroscopy 171, 89–95 (2016), DOI: 10.1016/j.ultramic.201
 <span class="k">def</span><span class="w"> </span><span class="nf">thickness_filter</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">thickness</span></a><span class="p">,</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">bins</span></a><span class="p">):</span>
     <span class="n">masks</span> <span class="o">=</span> <span class="p">[</span>
         <a href="https://numpy.org/doc/stable/reference/generated/numpy.ufunc.html#numpy.ufunc" title="numpy.ufunc" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">np</span><span class="o">.</span><span class="n">logical_and</span></a><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">bins</span></a><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">thickness</span></a><span class="p">,</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">bins</span></a><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">thickness</span></a><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">bins</span></a><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/stdtypes.html#range" title="range"><span class="nb">range</span></a><span class="p">(</span><a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#len" title="len"><span class="nb">len</span></a><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">bins</span></a><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
     <span class="p">]</span>
     <a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">filtered</span></a> <span class="o">=</span> <span class="p">[</span><a href="https://hyperspy.org/hyperspy-doc/current/reference/api.signals/Signal2D.html#hyperspy.api.signals.Signal2D" title="hyperspy._signals.signal2d.Signal2D" class="sphx-glr-backref-module-hyperspy-_signals-signal2d sphx-glr-backref-type-py-class"><span class="n">hs</span><span class="o">.</span><span class="n">signals</span><span class="o">.</span><span class="n">Signal2D</span></a><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">masks</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">filtered</span></a><span class="p">:</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">set_signal_type</span><span class="p">(</span><span class="s2">&quot;electron_diffraction&quot;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">set_signal_type</span><span class="p">(</span><span class="s2">"electron_diffraction"</span><span class="p">)</span>
         <span class="n">_copy_axes_object_metadata</span><span class="p">(</span>
             <span class="n">signal</span><span class="o">.</span><span class="n">axes_manager</span><span class="o">.</span><span class="n">signal_axes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">f</span><span class="o">.</span><span class="n">axes_manager</span><span class="o">.</span><span class="n">signal_axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="p">)</span>
@@ -1219,28 +1204,76 @@ in Zhang et al. Ultramicroscopy 171, 89–95 (2016), DOI: 10.1016/j.ultramic.201
     <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">filtered</span></a>
 <span class="p">]</span>
 
-<span class="c1"># Note that the y-axis is the variance here. Hyperspy just always labels this as &quot;Intensity&quot;</span>
+<span class="c1"># Note that the y-axis is the variance here. Hyperspy just always labels this as "Intensity"</span>
 <span class="k">for</span> <a href="../../reference/generated/pyxem.signals.ElectronDiffraction1D.html#pyxem.signals.ElectronDiffraction1D" title="pyxem.signals.ElectronDiffraction1D" class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">v</span></a> <span class="ow">in</span> <a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">var</span></a><span class="p">:</span>
-    <a href="https://hyperspy.org/hyperspy-doc/current/reference/base_classes/axes.html#hyperspy.axes.AxesManager" title="hyperspy.axes.AxesManager" class="sphx-glr-backref-module-hyperspy-axes sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">v</span><span class="o">.</span><span class="n">axes_manager</span></a><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s2">&quot;$nm^{-1}$&quot;</span>
-<a href="https://hyperspy.org/hyperspy-doc/current/reference/api.plot/index.html#hyperspy.api.plot.plot_spectra" title="hyperspy.api.plot.plot_spectra" class="sphx-glr-backref-module-hyperspy-api-plot sphx-glr-backref-type-py-function"><span class="n">hs</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_spectra</span></a><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">var</span></a><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;thickness&lt;17.5nm&quot;</span><span class="p">,</span> <span class="s2">&quot;thickness&lt;18.5nm&quot;</span><span class="p">])</span>
+    <a href="https://hyperspy.org/hyperspy-doc/current/reference/base_classes/axes.html#hyperspy.axes.AxesManager" title="hyperspy.axes.AxesManager" class="sphx-glr-backref-module-hyperspy-axes sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">v</span><span class="o">.</span><span class="n">axes_manager</span></a><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s2">"$nm^{-1}$"</span>
+<a href="https://hyperspy.org/hyperspy-doc/current/reference/api.plot/index.html#hyperspy.api.plot.plot_spectra" title="hyperspy.api.plot.plot_spectra" class="sphx-glr-backref-module-hyperspy-api-plot sphx-glr-backref-type-py-function"><span class="n">hs</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_spectra</span></a><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">var</span></a><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="p">[</span><span class="s2">"thickness&lt;17.5nm"</span><span class="p">,</span> <span class="s2">"thickness&lt;18.5nm"</span><span class="p">])</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_FEM_007.png" srcset="../../_images/sphx_glr_FEM_007.png" alt="FEM" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/49 [00:00&lt;?, ?it/s]
-100%|██████████| 49/49 [00:00&lt;00:00, 1019.33it/s]
+<img alt="FEM" class="sphx-glr-single-img" src="../../_images/sphx_glr_FEM_007.png" srcset="../../_images/sphx_glr_FEM_007.png"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/49 [00:00&lt;?, ?it/s]
+  2%|▏         | 1/49 [00:00&lt;00:15,  3.11it/s]
+ 12%|█▏        | 6/49 [00:00&lt;00:02, 16.74it/s]
+ 18%|█▊        | 9/49 [00:00&lt;00:02, 14.47it/s]
+ 24%|██▍       | 12/49 [00:00&lt;00:02, 17.36it/s]
+ 31%|███       | 15/49 [00:01&lt;00:02, 12.76it/s]
+ 45%|████▍     | 22/49 [00:01&lt;00:01, 20.77it/s]
+ 51%|█████     | 25/49 [00:01&lt;00:01, 18.69it/s]
+ 57%|█████▋    | 28/49 [00:01&lt;00:01, 16.93it/s]
+ 63%|██████▎   | 31/49 [00:02&lt;00:01, 14.21it/s]
+ 78%|███████▊  | 38/49 [00:02&lt;00:00, 22.86it/s]
+ 86%|████████▌ | 42/49 [00:02&lt;00:00, 18.31it/s]
+ 92%|█████████▏| 45/49 [00:02&lt;00:00, 19.80it/s]
+100%|██████████| 49/49 [00:02&lt;00:00, 18.44it/s]
 
   0%|          | 0/49 [00:00&lt;?, ?it/s]
-100%|██████████| 49/49 [00:00&lt;00:00, 1642.94it/s]
+  2%|▏         | 1/49 [00:00&lt;00:08,  5.34it/s]
+ 12%|█▏        | 6/49 [00:00&lt;00:01, 23.20it/s]
+ 18%|█▊        | 9/49 [00:00&lt;00:01, 23.39it/s]
+ 31%|███       | 15/49 [00:00&lt;00:01, 33.16it/s]
+ 39%|███▉      | 19/49 [00:00&lt;00:01, 24.58it/s]
+ 51%|█████     | 25/49 [00:00&lt;00:00, 29.62it/s]
+ 59%|█████▉    | 29/49 [00:01&lt;00:00, 29.50it/s]
+ 67%|██████▋   | 33/49 [00:01&lt;00:00, 31.26it/s]
+ 76%|███████▌  | 37/49 [00:01&lt;00:00, 26.99it/s]
+ 92%|█████████▏| 45/49 [00:01&lt;00:00, 32.23it/s]
+100%|██████████| 49/49 [00:01&lt;00:00, 31.13it/s]
 
   0%|          | 0/51 [00:00&lt;?, ?it/s]
-100%|██████████| 51/51 [00:00&lt;00:00, 1013.65it/s]
+  2%|▏         | 1/51 [00:00&lt;00:17,  2.82it/s]
+ 12%|█▏        | 6/51 [00:00&lt;00:02, 15.67it/s]
+ 18%|█▊        | 9/51 [00:00&lt;00:02, 15.29it/s]
+ 24%|██▎       | 12/51 [00:00&lt;00:02, 18.56it/s]
+ 29%|██▉       | 15/51 [00:01&lt;00:02, 14.93it/s]
+ 41%|████      | 21/51 [00:01&lt;00:01, 16.86it/s]
+ 45%|████▌     | 23/51 [00:01&lt;00:01, 16.95it/s]
+ 51%|█████     | 26/51 [00:01&lt;00:01, 19.03it/s]
+ 57%|█████▋    | 29/51 [00:01&lt;00:01, 20.24it/s]
+ 63%|██████▎   | 32/51 [00:01&lt;00:01, 18.23it/s]
+ 67%|██████▋   | 34/51 [00:02&lt;00:01, 16.42it/s]
+ 73%|███████▎  | 37/51 [00:02&lt;00:00, 18.05it/s]
+ 76%|███████▋  | 39/51 [00:02&lt;00:00, 16.79it/s]
+ 84%|████████▍ | 43/51 [00:02&lt;00:00, 19.40it/s]
+ 90%|█████████ | 46/51 [00:02&lt;00:00, 20.83it/s]
+ 96%|█████████▌| 49/51 [00:02&lt;00:00, 22.54it/s]
+100%|██████████| 51/51 [00:02&lt;00:00, 18.58it/s]
 
   0%|          | 0/51 [00:00&lt;?, ?it/s]
-100%|██████████| 51/51 [00:00&lt;00:00, 1636.33it/s]
+  2%|▏         | 1/51 [00:00&lt;00:10,  4.85it/s]
+ 18%|█▊        | 9/51 [00:00&lt;00:01, 24.09it/s]
+ 29%|██▉       | 15/51 [00:00&lt;00:01, 32.24it/s]
+ 37%|███▋      | 19/51 [00:00&lt;00:01, 29.55it/s]
+ 45%|████▌     | 23/51 [00:00&lt;00:00, 29.09it/s]
+ 53%|█████▎    | 27/51 [00:00&lt;00:00, 28.16it/s]
+ 63%|██████▎   | 32/51 [00:01&lt;00:00, 30.80it/s]
+ 71%|███████   | 36/51 [00:01&lt;00:00, 28.86it/s]
+ 78%|███████▊  | 40/51 [00:01&lt;00:00, 30.46it/s]
+ 86%|████████▋ | 44/51 [00:01&lt;00:00, 30.34it/s]
+100%|██████████| 51/51 [00:01&lt;00:00, 31.13it/s]
 
-&lt;Axes: xlabel=&#39;Radius ($nm^{-1}$)&#39;, ylabel=&#39;Intensity&#39;&gt;
+&lt;Axes: xlabel='Radius ($nm^{-1}$)', ylabel='Intensity'&gt;
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 18.395 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (2 minutes 8.238 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-amorphous-characterization-fem-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/5e921b70d014b71510213fabf69d880f/FEM.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">FEM.ipynb</span></code></a></p>
@@ -1255,67 +1288,44 @@ in Zhang et al. Ultramicroscopy 171, 89–95 (2016), DOI: 10.1016/j.ultramic.201
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
 </section>
 </section>
-
-
-                </article>
-              
-              
-              
-              
-              
-                <footer class="prev-next-footer d-print-none">
-                  
+</article>
+<footer class="prev-next-footer d-print-none">
 <div class="prev-next-area">
-    <a class="left-prev"
-       href="index.html"
-       title="previous page">
-      <i class="fa-solid fa-angle-left"></i>
-      <div class="prev-next-info">
-        <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Amorphous Characterization</p>
-      </div>
-    </a>
-    <a class="right-next"
-       href="../dpc/index.html"
-       title="next page">
-      <div class="prev-next-info">
-        <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Differential Phase Contrast (DPC)</p>
-      </div>
-      <i class="fa-solid fa-angle-right"></i>
-    </a>
+<a class="left-prev" href="index.html" title="previous page">
+<i class="fa-solid fa-angle-left"></i>
+<div class="prev-next-info">
+<p class="prev-next-subtitle">previous</p>
+<p class="prev-next-title">Amorphous Characterization</p>
 </div>
-                </footer>
-              
-            </div>
-            
-            
-              
-                <dialog id="pst-secondary-sidebar-modal"></dialog>
-                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
-
-
-  <div class="sidebar-secondary-item">
-<div
-    id="pst-page-navigation-heading-2"
-    class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> On this page
+</a>
+<a class="right-next" href="../dpc/index.html" title="next page">
+<div class="prev-next-info">
+<p class="prev-next-subtitle">next</p>
+<p class="prev-next-title">Differential Phase Contrast (DPC)</p>
+</div>
+<i class="fa-solid fa-angle-right"></i>
+</a>
+</div>
+</footer>
+</div>
+<dialog id="pst-secondary-sidebar-modal"></dialog>
+<div class="bd-sidebar-secondary bd-toc" id="pst-secondary-sidebar"><div class="sidebar-secondary-items sidebar-secondary__inner">
+<div class="sidebar-secondary-item">
+<div class="page-toc tocsection onthispage" id="pst-page-navigation-heading-2">
+<i class="fa-solid fa-list"></i> On this page
   </div>
-  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
-    <ul class="pst-show_toc_level nav section-nav flex-column">
+<nav aria-labelledby="pst-page-navigation-heading-2" class="page-toc" id="pst-page-toc-nav">
+<ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-manual-ellipse-determination">Using Manual Ellipse Determination</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#checking">Checking</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#getting-the-variance">Getting the Variance</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#getting-a-good-variance">Getting a (Good) Variance</a></li>
 </ul>
-  </nav></div>
-
-  <div class="sidebar-secondary-item">
-
-  
-  <div class="tocsection editthispage">
-    <a href="https://github.com/pyxem/pyxem/edit/main/doc/examples/amorphous_characterization/FEM.rst">
-      <i class="fa-solid fa-pencil"></i>
+</nav></div>
+<div class="sidebar-secondary-item">
+<div class="tocsection editthispage">
+<a href="https://github.com/pyxem/pyxem/edit/main/doc/examples/amorphous_characterization/FEM.rst">
+<i class="fa-solid fa-pencil"></i>
       
       
         
@@ -1323,73 +1333,50 @@ in Zhang et al. Ultramicroscopy 171, 89–95 (2016), DOI: 10.1016/j.ultramic.201
         
       
     </a>
-  </div>
 </div>
-
-  <div class="sidebar-secondary-item">
-
-  <div class="tocsection sourcelink">
-    <a href="../../_sources/examples/amorphous_characterization/FEM.rst.txt">
-      <i class="fa-solid fa-file-lines"></i> Show Source
+</div>
+<div class="sidebar-secondary-item">
+<div class="tocsection sourcelink">
+<a href="../../_sources/examples/amorphous_characterization/FEM.rst.txt">
+<i class="fa-solid fa-file-lines"></i> Show Source
     </a>
-  </div>
 </div>
-
+</div>
 </div></div>
-              
-            
-          </div>
-          <footer class="bd-footer-content">
-            
-          </footer>
-        
-      </main>
-    </div>
-  </div>
-  
-  <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085"></script>
-
-  <footer class="bd-footer">
+</div>
+<footer class="bd-footer-content">
+</footer>
+</main>
+</div>
+</div>
+<!-- Scripts loaded after <body> so the DOM is not blocked -->
+<script defer="" src="../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085"></script>
+<script defer="" src="../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085"></script>
+<footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
-  
-    <div class="footer-items__start">
-      
-        <div class="footer-item">
-
-  <p class="copyright">
+<div class="footer-items__start">
+<div class="footer-item">
+<p class="copyright">
     
       © Copyright Copyright 2016-2025, The pyxem developers.
       <br/>
-    
-  </p>
+</p>
 </div>
-      
-        <div class="footer-item">
-
-  <p class="sphinx-version">
+<div class="footer-item">
+<p class="sphinx-version">
     Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
     <br/>
-  </p>
+</p>
 </div>
-      
-    </div>
-  
-  
-  
-    <div class="footer-items__end">
-      
-        <div class="footer-item">
+</div>
+<div class="footer-items__end">
+<div class="footer-item">
 <p class="theme-version">
-  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+<!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
   Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.18.0.
 </p></div>
-      
-    </div>
-  
 </div>
-
-  </footer>
-  </body>
+</div>
+</footer>
+</body>
 </html>

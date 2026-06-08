@@ -42,7 +42,7 @@ Making a Dummy Dataset with a Zero Beam that systematically deviates from the ce
 
  .. code-block:: none
 
-      0%|          | 0/76 [00:00<?, ?it/s]    100%|██████████| 76/76 [00:00<00:00, 788.54it/s]
+      0%|          | 0/76 [00:00<?, ?it/s]    100%|██████████| 76/76 [00:00<00:00, 859.43it/s]
 
 
 
@@ -51,7 +51,7 @@ Making a Dummy Dataset with a Zero Beam that systematically deviates from the ce
 
 Getting the Position of the Zero beam
 -------------------------------------
-The zero beam position can be obtained using the :meth:`get_direct_beam_position` method.
+The zero beam position can be obtained using the :meth:`~pyxem.signals.Diffraction2D.get_direct_beam_position` method.
 
 .. GENERATED FROM PYTHON SOURCE LINES 17-22
 
@@ -75,7 +75,7 @@ The zero beam position can be obtained using the :meth:`get_direct_beam_position
 
  .. code-block:: none
 
-      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 526.95it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 686.03it/s]
 
     [<Axes: title={'center': 'x-shift'}, xlabel='x axis (px)', ylabel='y axis (px)'>, <Axes: title={'center': 'y-shift'}, xlabel='x axis (px)', ylabel='y axis (px)'>]
 
@@ -119,7 +119,7 @@ To visualize the zero beam position, we can plot the beam position on the origin
 
  .. code-block:: none
 
-      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 7019.18it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 8001.10it/s]
 
 
 
@@ -127,10 +127,10 @@ To visualize the zero beam position, we can plot the beam position on the origin
 .. GENERATED FROM PYTHON SOURCE LINES 30-35
 
 Getting a Linear Plane
----------------------
+----------------------
 In many instances the zero beam position will vary systematically with the scan position.
 This can be corrected by fitting a linear plane to the zero beam position using the
-:meth:`get_linear_plane` method.
+:meth:`~pyxem.signals.BeamShift.get_linear_plane` method.
 
 .. GENERATED FROM PYTHON SOURCE LINES 35-38
 
@@ -161,7 +161,7 @@ This can be corrected by fitting a linear plane to the zero beam position using 
 
 Centering the Zero Beam
 -----------------------
-The zero beam can be centered using the :meth:`center_direct_beam` method.
+The zero beam can be centered using the :meth:`~pyxem.signals.Diffraction2D.center_direct_beam` method.
 Then we sum all the diffraction patterns for the both the centered beam,
 and the non-centered one, to compare them.
 
@@ -189,7 +189,7 @@ and the non-centered one, to compare them.
 
  .. code-block:: none
 
-      0%|          | 0/76 [00:00<?, ?it/s]    100%|██████████| 76/76 [00:00<00:00, 762.51it/s]
+      0%|          | 0/76 [00:00<?, ?it/s]    100%|██████████| 76/76 [00:00<00:00, 841.59it/s]
 
     [<Axes: title={'center': 'Original'}, xlabel='kx axis (px)', ylabel='ky axis (px)'>, <Axes: title={'center': 'Centered'}, xlabel='kx axis (px)', ylabel='ky axis (px)'>]
 
@@ -227,7 +227,7 @@ domains for good performance.
 
  .. code-block:: none
 
-      0%|          | 0/76 [00:00<?, ?it/s]     88%|████████▊ | 67/76 [00:00<00:00, 668.32it/s]    100%|██████████| 76/76 [00:00<00:00, 657.54it/s]
+      0%|          | 0/76 [00:00<?, ?it/s]    100%|██████████| 76/76 [00:00<00:00, 924.57it/s]
 
 
 
@@ -274,7 +274,7 @@ we can center the direct beam as normal.
 
  .. code-block:: none
 
-      0%|          | 0/76 [00:00<?, ?it/s]     91%|█████████ | 69/76 [00:00<00:00, 689.87it/s]    100%|██████████| 76/76 [00:00<00:00, 667.98it/s]
+      0%|          | 0/76 [00:00<?, ?it/s]    100%|██████████| 76/76 [00:00<00:00, 858.34it/s]
 
 
 
@@ -314,7 +314,7 @@ from the original shifts.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 2.907 seconds)
+   **Total running time of the script:** (0 minutes 2.577 seconds)
 
 
 .. _sphx_glr_download_examples_processing_centering_the_zero_beam.py:

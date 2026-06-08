@@ -18,10 +18,6 @@ ScatteringFitComponentLobato
         
         
         
-        ScatteringFitComponentLobato.trait_added
-        
-        
-        ScatteringFitComponentLobato.trait_modified
         
     
     

@@ -517,6 +517,7 @@ and this project adheres to <a class="reference external" href="https://semver.o
 <li><p>Fix <a class="reference internal" href="reference/generated/pyxem.utils.ransac_ellipse_tools.determine_ellipse.html#pyxem.utils.ransac_ellipse_tools.determine_ellipse" title="pyxem.utils.ransac_ellipse_tools.determine_ellipse"><code class="xref py py-func docutils literal notranslate"><span class="pre">determine_ellipse()</span></code></a> packing ellipse parameters into a single <code class="docutils literal notranslate"><span class="pre">params</span></code> array when <code class="docutils literal notranslate"><span class="pre">return_params=True</span></code>, so the return signature matches <code class="docutils literal notranslate"><span class="pre">(center,</span> <span class="pre">affine,</span> <span class="pre">params,</span> <span class="pre">pos[,</span> <span class="pre">inlier])</span></code> as expected by callers. (#1185)</p></li>
 <li><p>Add explicit support for python 3.12 and 3.13 and update test matrix. (#1147)</p></li>
 <li><p>Silence axes warning in functions using <a class="reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.signals/BaseSignal.html#hyperspy.api.signals.BaseSignal.map" title="(in HyperSpy v2.4)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">map()</span></code></a>. (#1168)</p></li>
+<li><p>Increase chunk size and add User-Agent header for downloads from Zenodo. (#1180)</p></li>
 </ul>
 </section>
 <section id="deprecated">

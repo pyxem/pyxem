@@ -21,7 +21,7 @@
 Strain Mapping
 ==============
 
-Strain mapping in pyxem is done by fitting a :class:`~.signals.tensor_field.DisplacementGradientMap` to the data.
+Strain mapping in pyxem is done by fitting a :class:`~pyxem.signals.DisplacementGradientMap` to the data.
 This can be thought of as image distortion around some central point.
 
 .. GENERATED FROM PYTHON SOURCE LINES 8-13
@@ -42,10 +42,10 @@ This can be thought of as image distortion around some central point.
 
 .. GENERATED FROM PYTHON SOURCE LINES 14-18
 
-In this example we will create a simulated strain map using the :meth:`~.data.simulated_strain` function.
+In this example we will create a simulated strain map using the :func:`~pyxem.data.simulated_strain` function.
 This just creates a simulated diffraction pattern and applies a simple "strain" to it. In this
 case using simulated data is slightly easier for demonstration purposes. If you want to use
-real data the :meth:`~.data.zrnb_precipitate` dataset is a good example of strain from a precipitate.
+real data the :func:`~pyxem.data.zrnb_precipitate` dataset is a good example of strain from a precipitate.
 
 .. GENERATED FROM PYTHON SOURCE LINES 18-28
 
@@ -71,7 +71,7 @@ real data the :meth:`~.data.zrnb_precipitate` dataset is a good example of strai
 .. GENERATED FROM PYTHON SOURCE LINES 29-31
 
 The first thing we want to do is to find peaks within the diffraction pattern. I'd recommend
-using the :meth:`~.signals.diffraction2d.get_diffraction_vectors` method
+using the :meth:`~pyxem.signals.Diffraction2D.get_diffraction_vectors` method
 
 .. GENERATED FROM PYTHON SOURCE LINES 31-37
 
@@ -108,7 +108,7 @@ using the :meth:`~.signals.diffraction2d.get_diffraction_vectors` method
 
  .. code-block:: none
 
-      0%|          | 0/65 [00:00<?, ?it/s]      2%|▏         | 1/65 [00:00<00:53,  1.20it/s]     14%|█▍        | 9/65 [00:01<00:09,  6.21it/s]     26%|██▌       | 17/65 [00:02<00:06,  7.80it/s]     38%|███▊      | 25/65 [00:03<00:04,  8.51it/s]     51%|█████     | 33/65 [00:04<00:03,  8.95it/s]     63%|██████▎   | 41/65 [00:04<00:02,  9.19it/s]     75%|███████▌  | 49/65 [00:05<00:01,  9.34it/s]     88%|████████▊ | 57/65 [00:06<00:00,  9.44it/s]    100%|██████████| 65/65 [00:06<00:00,  9.80it/s]
+      0%|          | 0/65 [00:00<?, ?it/s]      2%|▏         | 1/65 [00:01<01:10,  1.11s/it]     14%|█▍        | 9/65 [00:02<00:12,  4.46it/s]     26%|██▌       | 17/65 [00:03<00:08,  5.51it/s]     32%|███▏      | 21/65 [00:03<00:06,  7.25it/s]     38%|███▊      | 25/65 [00:04<00:06,  5.76it/s]     45%|████▍     | 29/65 [00:04<00:04,  7.51it/s]     51%|█████     | 33/65 [00:05<00:05,  6.00it/s]     57%|█████▋    | 37/65 [00:05<00:03,  7.73it/s]     63%|██████▎   | 41/65 [00:06<00:03,  6.10it/s]     69%|██████▉   | 45/65 [00:07<00:02,  7.65it/s]     75%|███████▌  | 49/65 [00:08<00:02,  6.28it/s]     82%|████████▏ | 53/65 [00:08<00:01,  7.74it/s]     88%|████████▊ | 57/65 [00:09<00:01,  6.48it/s]     94%|█████████▍| 61/65 [00:09<00:00,  8.30it/s]    100%|██████████| 65/65 [00:09<00:00,  6.99it/s]
 
 
 
@@ -116,7 +116,7 @@ using the :meth:`~.signals.diffraction2d.get_diffraction_vectors` method
 .. GENERATED FROM PYTHON SOURCE LINES 38-40
 
 Plotting the template matched signal and setting ``vmin`` is a good way to see what threshold you
-should use for the :meth:`~.signals.diffraction2d.get_diffraction_vectors` method.
+should use for the :meth:`~pyxem.signals.Diffraction2D.get_diffraction_vectors` method.
 
 .. GENERATED FROM PYTHON SOURCE LINES 40-49
 
@@ -156,7 +156,7 @@ should use for the :meth:`~.signals.diffraction2d.get_diffraction_vectors` metho
 
  .. code-block:: none
 
-      0%|          | 0/65 [00:00<?, ?it/s]    100%|██████████| 65/65 [00:00<00:00, 1049.94it/s]
+      0%|          | 0/65 [00:00<?, ?it/s]    100%|██████████| 65/65 [00:00<00:00, 861.38it/s]
 
 
 
@@ -166,8 +166,8 @@ should use for the :meth:`~.signals.diffraction2d.get_diffraction_vectors` metho
 Determining the Strain
 ----------------------
 We can just use the first ring of the diffraction pattern to determine the strain. We can do this by
-using the :meth:`~.signals.DiffractionVectors.filter_magnitude` method. You can also look at the
-:ref:`filtering vectors <_sphx_glr_examples_vectors_masking_vectors.py>` example to see
+using the :meth:`~pyxem.signals.DiffractionVectors.filter_magnitude` method. You can also look at the
+filtering vectors example to see
 how to select which vectors you want to use more generally. You can also just manually input the un-strained
 vectors or use simulated/ rotated vectors as well.
 
@@ -201,12 +201,12 @@ vectors or use simulated/ rotated vectors as well.
 
  .. code-block:: none
 
-      0%|          | 0/2 [00:00<?, ?it/s]     50%|█████     | 1/2 [00:00<00:00,  1.30it/s]    100%|██████████| 2/2 [00:00<00:00,  2.59it/s]
-      0%|          | 0/65 [00:00<?, ?it/s]      2%|▏         | 1/65 [00:01<01:13,  1.14s/it]     14%|█▍        | 9/65 [00:02<00:12,  4.38it/s]     26%|██▌       | 17/65 [00:03<00:08,  5.49it/s]     38%|███▊      | 25/65 [00:04<00:06,  5.97it/s]     51%|█████     | 33/65 [00:05<00:05,  6.27it/s]     63%|██████▎   | 41/65 [00:07<00:03,  6.39it/s]     75%|███████▌  | 49/65 [00:08<00:02,  6.53it/s]     88%|████████▊ | 57/65 [00:09<00:01,  6.59it/s]    100%|██████████| 65/65 [00:09<00:00,  6.86it/s]
-      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 697.53it/s]
-      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 878.07it/s]
-      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 6267.12it/s]
-      0%|          | 0/9 [00:00<?, ?it/s]    100%|██████████| 9/9 [00:00<00:00, 8114.52it/s]
+      0%|          | 0/2 [00:00<?, ?it/s]     50%|█████     | 1/2 [00:00<00:00,  1.22it/s]    100%|██████████| 2/2 [00:00<00:00,  2.43it/s]
+      0%|          | 0/65 [00:00<?, ?it/s]      2%|▏         | 1/65 [00:01<01:30,  1.42s/it]     14%|█▍        | 9/65 [00:02<00:15,  3.67it/s]     26%|██▌       | 17/65 [00:04<00:10,  4.54it/s]     32%|███▏      | 21/65 [00:04<00:07,  6.05it/s]     38%|███▊      | 25/65 [00:05<00:08,  4.66it/s]     45%|████▍     | 29/65 [00:05<00:05,  6.21it/s]     51%|█████     | 33/65 [00:07<00:06,  4.81it/s]     57%|█████▋    | 37/65 [00:07<00:04,  6.34it/s]     63%|██████▎   | 41/65 [00:08<00:04,  4.87it/s]     69%|██████▉   | 45/65 [00:08<00:03,  6.47it/s]     75%|███████▌  | 49/65 [00:09<00:03,  4.91it/s]     82%|████████▏ | 53/65 [00:10<00:01,  6.47it/s]     88%|████████▊ | 57/65 [00:11<00:01,  4.96it/s]     91%|█████████ | 59/65 [00:11<00:01,  5.68it/s]    100%|██████████| 65/65 [00:11<00:00,  5.65it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 591.71it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 737.32it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 6682.58it/s]
+      0%|          | 0/9 [00:00<?, ?it/s]    100%|██████████| 9/9 [00:00<00:00, 7297.26it/s]
 
     [<Axes: title={'center': 'e11'}, xlabel='x axis (nm)', ylabel='y axis (nm)'>, <Axes: title={'center': 'e22'}, xlabel='x axis (nm)', ylabel='y axis (nm)'>, <Axes: title={'center': 'e12'}, xlabel='x axis (nm)', ylabel='y axis (nm)'>, <Axes: title={'center': 'theta'}, xlabel='x axis (nm)', ylabel='y axis (nm)'>]
 
@@ -226,7 +226,7 @@ sphinx_gallery_thumbnail_number = 5
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 32.425 seconds)
+   **Total running time of the script:** (0 minutes 39.334 seconds)
 
 
 .. _sphx_glr_download_examples_strain_mapping_strain_mapping.py:
