@@ -1,12 +1,14 @@
 """
-# Orientation Mapping of Polycrystalline Silicon
+Orientation Mapping of Polycrystalline Silicon
+===============================================
 
 Orientation mapping in 4D-STEM determines the crystallographic orientation at
 every scan position across a polycrystalline or multi-grain sample.  Unlike
 EBSD (which only samples the surface), 4D-STEM captures the full diffraction
 geometry and can resolve grains in bulk and thin specimens alike.
 
-## How it works: template matching in polar space
+How it works: template matching in polar space
+----------------------------------------------
 
 The core idea is **template matching**:
 
@@ -260,10 +262,7 @@ orientation_map.plot_over_signal(s, vmax="96th", add_ipf_correlation_heatmap=Tru
 # - export to .ang or .ctf format for comparison with EBSD
 
 cmap = orientation_map.to_crystal_map()
-cmap.plot(
-    "phase_name",
-    legend=True,
-)
+cmap.plot()
 
 # %%
 # Tips for Better Results

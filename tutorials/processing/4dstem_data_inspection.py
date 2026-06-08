@@ -1,5 +1,6 @@
 """
-# 4D-STEM Data Inspection and Preprocessing
+4D-STEM Data Inspection and Preprocessing
+==========================================
 
 This tutorial walks through a complete 4D-STEM data inspection and preprocessing
 workflow using a real GaAs twinned nanowire dataset. It covers:
@@ -128,7 +129,7 @@ subset.plot_explained_variance_ratio(n=20)
 # The first sharp "elbow" in the scree plot indicates the number of meaningful
 # components; noise components lie on the flat tail.
 
-subset.plot_decomposition_results(n_factors=4)
+subset.plot_decomposition_results()
 
 # %%
 # Decomposition: NMF

@@ -1,5 +1,6 @@
 """
-# Angular Correlations of Amorphous Materials
+Angular Correlations of Amorphous Materials
+============================================
 
 Amorphous materials lack long-range order, but they often have characteristic
 **short-range** and **medium-range** order that can be probed with 4D-STEM.

@@ -171,20 +171,6 @@ nitpick_ignore_regex = [
 # Figure references
 numfig = True
 
-# nbsphinx configuration
-# Taken from nbsphinx' own nbsphinx configuration file, with slight
-# modification to point nbviewer and Binder to the GitHub master links
-# when the documentation is launched from a pyxem version with
-# "dev" in the version.
-if "dev" in version:
-    release_version = "master"
-else:
-    release_version = "v" + version
-
-# https://nbsphinx.readthedocs.io/en/0.8.0/never-execute.html
-nbsphinx_execute = "never"  # auto, always, never
-nbsphinx_kernel_name = "python3"
-nbsphinx_allow_errors = True
 exclude_patterns = [
     "_build",
     "**.ipynb_checkpoints",
