@@ -26,7 +26,6 @@ exec(open("pyxem/release_info.py").read())  # grab version info
 # https://setuptools.readthedocs.io/en/latest/setuptools.html#declaring-extras-optional-features-with-their-own-dependencies
 extra_feature_requirements = {
     "doc": [
-        "nbsphinx                   >= 0.7",
         "sphinx                     >= 3.0.2",
         "sphinx-copybutton          >= 0.2.5",
         "sphinx-autodoc-typehints   >= 1.10.3",
@@ -37,7 +36,6 @@ extra_feature_requirements = {
         "pydata-sphinx-theme",
         "hyperspy_gui_ipywidgets    >= 2.0",
         "dask-image",
-        "pandoc",
     ],
     "tests": [
         "pytest     >= 5.0",

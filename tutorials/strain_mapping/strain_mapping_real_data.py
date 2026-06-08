@@ -1,12 +1,14 @@
 """
-# Strain Mapping of a ZrNb Precipitate
+Strain Mapping of a ZrNb Precipitate
+======================================
 
 Strain mapping in 4D-STEM measures local lattice distortions by tracking how
 diffraction spot positions shift relative to an unstrained reference.  Where
 orientation mapping asks *"which grain orientation is here?"*, strain mapping
 asks *"how is the lattice stretched or sheared here?"*.
 
-## Physical Background
+Physical Background
+-------------------
 
 In a crystalline material under strain the lattice planes are no longer at
 their equilibrium spacing.  This shifts the Bragg spots in the diffraction
@@ -199,10 +201,13 @@ first_ring = diffraction_vectors.filter_magnitude(
 
 # Choose a reference in the matrix far from the precipitate.
 # Inspect the VBF to confirm this is in the unstrained matrix region.
+# ``inav[col, row]`` follows HyperSpy display order (col, row).
+# We extract the raw numpy array via ``data[()]`` so that ``get_strain_maps``
+# receives a plain (n_vectors, 2) float array rather than a 0-D object signal.
 ref_col, ref_row = 5, 5
-unstrained_vectors = first_ring.inav[ref_col, ref_row]
+unstrained_vectors = first_ring.inav[ref_col, ref_row].data[()]
 print(f"Reference vectors at scan position ({ref_col}, {ref_row}):")
-print(unstrained_vectors.data)
+print(unstrained_vectors)
 
 # %%
 # Computing the Strain Maps

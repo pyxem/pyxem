@@ -1,5 +1,6 @@
 """
-# Pair Distribution Function Analysis
+Pair Distribution Function Analysis
+=====================================
 
 The **pair distribution function** (PDF), g(r), gives the probability of finding
 an atom at distance r from a reference atom.  Unlike conventional diffraction,

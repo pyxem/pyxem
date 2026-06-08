@@ -1,23 +1,31 @@
 """
-# Analysing magnetic materials using STEM-DPC
+Analysing Magnetic Materials using STEM-DPC
+============================================
 
-This notebook shows how to use the `pyXem` library to analyse 4-D scanning transmission electron microscopy (STEM) data, specifical magnetic materials using differential phase contrast (DPC). For more information about this imaging method, see the Wikipedia article on Scanning Transmission Electron Microscopy, which has a subsection on DPC: https://en.wikipedia.org/wiki/Scanning_transmission_electron_microscopy#Differential_phase_contrast
+This tutorial shows how to use pyxem to analyse 4D-STEM data from
+magnetic materials using differential phase contrast (DPC). For more
+information about this imaging method, see the Wikipedia article on
+`Scanning Transmission Electron Microscopy
+<https://en.wikipedia.org/wiki/Scanning_transmission_electron_microscopy#Differential_phase_contrast>`_,
+which has a subsection on DPC.
 
-The data we'll be looking at there is from the paper **Strain Anisotropy and Magnetic Domains in Embedded Nanomagnets**, and is STEM data recorded on a Merlin fast pixelated electron detector system, where the objective lens has been turned off.
-This allows for magnetic information to be extracted, by carefully mapping the beam shifts.
+The data is from the paper **Strain Anisotropy and Magnetic Domains in
+Embedded Nanomagnets**, recorded on a Merlin fast pixelated detector with
+the objective lens turned off. This allows magnetic information to be
+extracted by carefully mapping the beam shifts.
 
-More documentation about pyXem is found at https://pyxem.readthedocs.io/
+More documentation about pyxem is found at https://pyxem.readthedocs.io/
 
 Journal article:
+
 * **Strain Anisotropy and Magnetic Domains in Embedded Nanomagnets**
 * Nord, M., Semisalova, A., Kákay, A., Hlawacek, G., MacLaren, I., Liersch, V., Volkov, O. M., Makarov, D., Paterson, G. W., Potzger, K., Lindner, J., Fassbender, J., McGrouther, D., Bali, R.
 * Small 2019, 15, 1904738. https://doi.org/10.1002/smll.201904738
 
-The full dataset and scripts used in analysing this data is found at Zenodo: https://zenodo.org/record/3466591
+The full dataset and scripts are available at Zenodo: https://zenodo.org/record/3466591
 
-This notebook has been modified to use a cropped version of the data with only the infromation about the zero beam.
-
-Refer to the link above to look at the entire dataset.
+This tutorial uses a cropped version of the data containing only the
+information about the zero beam.
 """
 
 # %%
@@ -105,7 +113,8 @@ com.plot()
 #  values for these.
 # For this, we use `threshold_and_mask` on a subset of the dataset.
 
-s_threshold_mask = s.threshold_and_mask(
+s_computed = s.compute()
+s_threshold_mask = s_computed.threshold_and_mask(
     threshold=1,
     mask=(64, 64, 46),  # x  # y  # radius
 )

@@ -1,34 +1,21 @@
 """
-# Orientation mapping for Molecular Glasses
+Orientation Mapping for Molecular Glasses
+==========================================
 
-This notebook looks into doing orientation mapping for polymers using hyperspy and pyxem.
-This is a similar work flow for producing figures similar to those in the paper:
+This tutorial demonstrates orientation mapping for molecular glass films using
+pyxem and HyperSpy. The workflow produces figures similar to those in:
 
-```
-Using 4D STEM to Probe Mesoscale Order in Molecular Glass Films Prepared by Physical Vapor Deposition
-Debaditya Chatterjee, Shuoyuan Huang, Kaichen Gu, Jianzhu Ju, Junguang Yu, Harald Bock, Lian Yu, M. D. Ediger, and Paul M. Voyles
-Nano Letters 2023 23 (5), 2009-2015
-DOI: 10.1021/acs.nanolett.3c00197
-```
+    Chatterjee, D. et al. "Using 4D STEM to Probe Mesoscale Order in Molecular
+    Glass Films Prepared by Physical Vapor Deposition."
+    *Nano Letters* 2023, 23 (5), 2009–2015.
+    DOI: 10.1021/acs.nanolett.3c00197
 
-In this paper disk like structures in the glass are oriented in domains in the molecular glass.
- These domains result from Pi-Pi like stacking and the orientation of the structure can be measured by 4-D STEM.
+In this paper, disk-like molecules in the glass are oriented in domains due to
+π–π stacking. The orientation of these domains can be measured by 4D-STEM.
 
-Here we will go through the processing in pyxem/ hyperspy to create a figure similar to the image below which comes from the above paper.
-
-<center><img src="data/12/ExampleImage.jpeg" style="height:400px"></center>
-
-This is also a good example of how to develop custom workflows in pyxem.  This might eventaully be added as a supported feature to pyxem/hyperspy
-using the `Model` class upstream in hyperspy but this requires that parallel processing in `hyperspy` when fitting signals is improved.
-
-There are a couple of really cool things to focus on. Specifically this make heavy use of the `map` function in
- order to make these workflows both parallel and operate out of memory. This notebook is also designed to be easy
-   to modify in the case that you have a different function that you want to fit!
-
-The raw data used in section1 can be found at the link below:
-
-https://app.globus.org/file-manager?origin_id=82f1b5c6-6e9b-11e5-ba47-22000b92c6ec&origin_path=%2Fmdf_open%2Fchatterjee_phenester_orientation_v1.3%2FFig2%2Fhttps://app.globus.org/file-manager?origin_id=82f1b5c6-6e9b-11e5-ba47-22000b92c6ec&origin_path=%2Fmdf_open%2Fchatterjee_phenester_orientation_v1.3%2FFig2%2F
-
+This tutorial is also a good example of how to develop custom per-pattern
+workflows in pyxem using the ``map`` function, which runs the analysis lazily
+and in parallel without loading the full dataset into memory.
 """
 
 # %%
@@ -164,7 +151,7 @@ def mask_gaussian1D(
             data[masked_region[1] :], sigma
         )
     else:
-        data_smooth = gaussian_filter1d(data, sig)
+        data_smooth = gaussian_filter1d(data, sigma)
     return data_smooth
 
 
