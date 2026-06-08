@@ -29,7 +29,7 @@ from traits.trait_base import Undefined
 from pyxem import CUPY_INSTALLED
 from hyperspy.misc.utils import _get_block_pattern, add_scalar_axis
 from tlz import concat
-from typing import Union, Sequence
+from typing import Optional, Union, Sequence
 
 if CUPY_INSTALLED:
     import cupy as cp

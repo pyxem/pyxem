@@ -106,7 +106,7 @@ class Correlation2D(Signal2D, CommonDiffraction):
 
     def get_symmetry_coefficient(
         self,
-        symmetries: Sequence[int] = [2, 3, 4, 5, 6, 7, 8, 9, 10],
+        symmetries: Sequence[int] = (2, 3, 4, 5, 6, 7, 8, 9, 10),
         angular_range: float = 0,
         method: str = "average",
         include_duplicates: bool = False,

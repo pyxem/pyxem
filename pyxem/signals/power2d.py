@@ -16,7 +16,9 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-from typing import Sequence, Union
+from typing import Optional, Sequence, Union
+
+from pyxem.utils._typing import Number
 from hyperspy.signals import Signal2D
 from hyperspy._signals.lazy import LazySignal
 
@@ -40,8 +42,8 @@ class Power2D(Signal2D):
 
     def get_map(
         self,
-        k_region: Union[Sequence[int], Sequence[float]] = None,
-        symmetry: Sequence[int] = None,
+        k_region: Optional[Sequence[Number]] = None,
+        symmetry: Optional[Sequence[int]] = None,
     ):
         """Creates a 2 dimensional map of from the power spectrum.
 
@@ -82,7 +84,7 @@ class Power2D(Signal2D):
 
     def plot_symmetries(
         self,
-        k_region: Union[Sequence[int], Sequence[float]] == None,
+        k_region: Optional[Sequence[Number]] = None,
         symmetry: Sequence[int] = None,
         *args,
         **kwargs

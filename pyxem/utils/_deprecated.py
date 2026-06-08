@@ -189,25 +189,22 @@ class extend_docs:
 
     def _extend_docs(self, func):
         """Extend the docstring of the function with the docstring of the method."""
-        from numpydoc.docscrape import NumpyDocString
+        try:
+            from numpydoc.docscrape import NumpyDocString
+        except ImportError:
+            return inspect.getdoc(func)
 
-        # Get the docstring of the function
         main_doc = NumpyDocString(inspect.getdoc(func))
-        # Get the docstring of the method
         extend_doc = NumpyDocString(inspect.getdoc(self.function))
 
-        # Get the parameters of the function
-        main_params = main_doc["Parameters"]
-        # Get the parameters of the method
         extend_params = extend_doc["Parameters"]
         if self.remove_first_param:
             extend_params = extend_params[1:]
+
+        ext_params = []
         if self.method_name is not None:
-            ext_params = []
             for e in extend_params:
-                if e.name not in [
-                    p.name for p in main_doc["Parameters"]
-                ]:  # remove duplicates
+                if e.name not in [p.name for p in main_doc["Parameters"]]:
                     e.desc.append(f"Passed to the :func:`{self.method_name}` method.")
                     ext_params.append(e)
         main_doc["Other Parameters"] = main_doc["Other Parameters"] + ext_params

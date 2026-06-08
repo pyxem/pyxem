@@ -42,7 +42,7 @@ class Correlation1D(Signal1D):
     def get_symmetry_coefficient(
         self,
         angular_range: float = 0.1,
-        symmetries: Sequence[int] = [2, 3, 4, 5, 6, 7, 8, 9, 10],
+        symmetries: Sequence[int] = (2, 3, 4, 5, 6, 7, 8, 9, 10),
         method: str = "average",
         include_duplicates: bool = False,
         normalize: bool = True,
