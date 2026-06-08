@@ -108,13 +108,13 @@ def get_template_polar_coordinates(
 
     Returns
     -------
-    r : np.ndarray
+    r : ~numpy.ndarray
         The r coordinates of the diffraction spots in the template scaled by
         delta_r
-    theta : np.ndarray
+    theta : ~numpy.ndarray
         The theta coordinates of the diffraction spots in the template, scaled
         by delta_theta
-    intensities : np.ndarray
+    intensities : ~numpy.ndarray
         The intensities of the diffraction spots with dtype float
     """
     x = simulation.calibrated_coordinates[:, 0]
@@ -162,11 +162,11 @@ def get_template_cartesian_coordinates(
 
     Returns
     -------
-    x : np.ndarray
+    x : ~numpy.ndarray
         x coordinates of the diffraction spots in the template in pixel units
-    y : np.ndarray
+    y : ~numpy.ndarray
         y coordinates of the diffraction spots in the template in pixel units
-    intensities: np.ndarray
+    intensities: ~numpy.ndarray
         intensities of the spots
     """
     ox = simulation.calibrated_coordinates[:, 0]
@@ -235,7 +235,7 @@ def _warp_polar_custom(
 
     Parameters
     ----------
-    image: numpy.ndarray or cupy.ndarray
+    image: ~numpy.ndarray or cupy.ndarray
         Input image. Only 2-D arrays are accepted.
     center: tuple (row, col)
         Point in image that represents the center of the transformation
@@ -251,7 +251,7 @@ def _warp_polar_custom(
 
     Returns
     -------
-    polar: numpy.ndarray or cupy.ndarray
+    polar: ~numpy.ndarray or cupy.ndarray
         polar image of dtype float64
 
     Notes

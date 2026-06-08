@@ -48,7 +48,7 @@ def _get_intensities(z, vectors, radius=1):
 
     Returns
     -------
-    intensities : np.array
+    intensities : ~numpy.ndarray
         List of extracted intensities
     """
     i, j = np.array(vectors.data).astype(int).T
@@ -118,7 +118,7 @@ def _get_intensities_summation_method(
 
     Returns
     -------
-    peaks : np.array
+    peaks : ~numpy.ndarray
         Array with 4 columns: X-position, Y-position, intensity, reflection SNR
 
     Notes
@@ -230,7 +230,7 @@ class IntegrationGenerator:
 
         Returns
         -------
-        intensities : :obj:`hyperspy.signals.BaseSignal`
+        intensities : :obj:`hyperspy.api.signals.BaseSignal`
             List of extracted intensities
         """
         intensities = self.dp.map(

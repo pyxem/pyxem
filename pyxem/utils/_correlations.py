@@ -31,11 +31,11 @@ def _correlation(z, axis=0, mask=None, wrap=True, normalize=True):
 
     Parameters
     ----------
-    z: np.array
+    z: np.ndarray
         A nd numpy array
     axis: int
         The axis to apply the correlation to
-    mask: np.array
+    mask: np.ndarray
         A boolean array of the same size as z
     wrap: bool
         Allow the function to wrap or add zeros to the beginning and the
@@ -105,11 +105,11 @@ def _power(z, axis=0, mask=None, wrap=True, normalize=True):
 
     Parameters
     ----------
-    z: np.array
+    z: ~numpy.ndarray
         Some n-d array to get the power spectrum from.
     axis: int
         The axis to preform the operation on.
-    mask: np.array
+    mask: ~numpy.ndarray
         A boolean mask to be applied.
     wrap: bool
         Choose if the function should wrap.  In most cases this will be True
@@ -119,7 +119,7 @@ def _power(z, axis=0, mask=None, wrap=True, normalize=True):
 
     Returns
     -------
-    power: np.array
+    power: ~numpy.ndarray
         The power spectrum along some axis
     """
     if mask is None:  # This might not normalize things as well
@@ -141,16 +141,16 @@ def _pearson_correlation(z, mask=None, mode="full"):
 
      Parameters
     ----------
-    z: np.array
+    z: ~numpy.ndarray
         Input image in 2D array
-    mask: np.array
+    mask: ~numpy.ndarray
         A boolean mask to be applied.
     mode: str 'full' or 'kresolved'
         Mode for calculating pearson correlation, default is 'full'
 
     Returns
     -------
-    p_correlation: np.array
+    p_correlation: ~numpy.ndarray
         Pearson correlation of the input image
 
     """
@@ -282,7 +282,8 @@ def _get_interpolation_matrix(angles, angular_range, num_points, method="average
 
 
 def _symmetry_stem(signal, interpolation, method="average"):
-    """Returns the "average" "max" or "first" value for some given signal and an interpolation matrix.
+    """
+    Returns the "average" "max" or "first" value for some given signal and an interpolation matrix.
 
     The interpolation matrix is defined by the  `_get_interpolation_matrix` function which creates a
     matrix which when matrix multiplied by the signal returns the "average", "max" or "first" value for
@@ -292,9 +293,9 @@ def _symmetry_stem(signal, interpolation, method="average"):
 
     Parameters
     ----------
-    signal: np.array
+    signal: ~numpy.ndarray
         The signal from which to calculate the symmetry stem given an interpolation matrix
-    interpolation: np.array
+    interpolation: ~numpy.ndarray
         The interpolation matrix for calculating the expression of certain symmetry operations.
     method:str
         One of "average", "max" or "first"

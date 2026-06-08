@@ -17,7 +17,7 @@ def simulated_overlap(
 
     Returns
     -------
-    diffraction_pattern : Signal2D
+    diffraction_pattern : ~hyperspy.api.signals.Signal2D
         A simulated diffraction pattern with overlapping nanocrystals.
     """
     fcc_fe = fe_fcc_phase()

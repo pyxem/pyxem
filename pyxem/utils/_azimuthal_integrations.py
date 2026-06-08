@@ -44,7 +44,7 @@ def _slice_radial_integrate(
 
     Parameters
     ----------
-    img: np.array
+    img: ~numpy.ndarray
         The image to be sliced
     factors:
         The factors to multiply the slices by
@@ -117,7 +117,7 @@ def __slice_radial_integrate_cupy(
     """Slice the image into small chunks and multiply by the factors.
     Parameters
     ----------
-    img: np.array
+    img: ~numpy.ndarray
         The image to be sliced
     factors:
         The factors to multiply the slices by
@@ -156,7 +156,7 @@ def _slice_radial_integrate1d(
 
     Parameters
     ----------
-    img: np.array
+    img: ~numpy.ndarray
         The image to be sliced
     indexes:
         The indexes of the pixels to multiply by the `factors`

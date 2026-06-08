@@ -21,6 +21,27 @@ This module contains utility functions for processing electron diffraction
 patterns.
 """
 
+__all__ = [
+    "apply_transformation",
+    "center_of_mass_from_image",
+    "circular_mask",
+    "convert_affine_to_transform",
+    "find_beam_center_blur",
+    "find_beam_center_interpolate",
+    "find_beam_offset_cross_correlation",
+    "find_center_of_mass",
+    "find_hot_pixels",
+    "gain_normalise",
+    "investigate_dog_background_removal_interactive",
+    "match_template_dilate",
+    "normalize_template_match",
+    "peaks_as_gvectors",
+    "reference_circle",
+    "regional_filter",
+    "remove_bad_pixels",
+    "remove_dead",
+]
+
 import numpy as np
 import scipy.ndimage as ndi
 import pyxem as pxm  # for ElectronDiffraction2D
@@ -68,7 +89,7 @@ def _index_coords(z, origin=None):
 
     Parameters
     ----------
-    z : numpy.ndarray
+    z : ~numpy.ndarray
         Two-dimensional data array containing signal.
     origin : tuple
         (x,y) defaults to the center of the image. Specify origin=(0,0) to set
@@ -136,7 +157,7 @@ def gain_normalise(z, dref, bref):
 
     Parameters
     ----------
-    z : numpy.ndarray
+    z : ~numpy.ndarray
         Two-dimensional data array containing signal.
     dref : ElectronDiffraction2D
         Two-dimensional data array containing dark reference.
@@ -145,7 +166,7 @@ def gain_normalise(z, dref, bref):
 
     Returns
     -------
-    z1 : np.array()
+    z1 : ~numpy.ndarray
         Two dimensional data array of gain normalized z.
     """
     return ((z - dref) / (bref - dref)) * np.mean((bref - dref))
@@ -156,15 +177,15 @@ def remove_dead(z, deadpixels):
 
     Parameters
     ----------
-    z : np.array()
+    z : ~numpy.ndarray
         Two-dimensional data array containing signal.
-    deadpixels : np.array()
+    deadpixels : ~numpy.ndarray
         Array containing the array indices of dead pixels in the diffraction
         pattern.
 
     Returns
     -------
-    img : array
+    img : ~numpy.ndarray
         Two-dimensional data array containing z with dead pixels removed.
     """
     z_bar = np.copy(z)
@@ -180,14 +201,14 @@ def convert_affine_to_transform(D, shape):
 
     Parameters
     ----------
-    D : numpy.ndarray
+    D : ~numpy.ndarray
         Affine transform to be applied
     shape : tuple
         Shape tuple in form (y,x) for the diffraction pattern
 
     Returns
     -------
-    transformation : numpy.ndarray
+    transformation : ~numpy.ndarray
         3x3 numpy array of the transformation to be applied.
 
     """
@@ -213,9 +234,9 @@ def apply_transformation(z, transformation, keep_dtype, order=1, *args, **kwargs
 
     Parameters
     ----------
-    z : numpy.ndarray
+    z : ~numpy.ndarray
         Array to be transformed
-    transformation : numpy.ndarray
+    transformation : ~numpy.ndarray
         3x3 numpy array specifying the transformation to be applied.
     order : int
         Interpolation order.
@@ -228,16 +249,16 @@ def apply_transformation(z, transformation, keep_dtype, order=1, *args, **kwargs
 
     Returns
     -------
-    trans : array
+    trans : ~numpy.ndarray
         Affine transformed diffraction pattern.
 
     Notes
     -----
-    Generally used in combination with :func:`pyxem.expt_utils.convert_affine_to_transform`
+    Generally used in combination with :func:`pyxem.utils.diffraction.convert_affine_to_transform`
 
     See Also
     --------
-    pyxem.expt_utils.convert_affine_to_transform
+    pyxem.utils.diffraction.convert_affine_to_transform
     """
 
     if keep_dtype is False:
@@ -261,7 +282,8 @@ def regional_filter(z, h):
 
     Returns
     -------
-        h-dome subtracted image as numpy.ndarray
+    img : ~numpy.ndarray
+        h-dome subtracted image.
     """
     seed = np.copy(z)
     seed = z - h
@@ -285,7 +307,7 @@ def circular_mask(shape, radius, center=None):
 
     Returns
     -------
-    mask : numpy.ndarray
+    mask : ~numpy.ndarray
         The circular mask.
 
     """
@@ -302,7 +324,7 @@ def reference_circle(coords, dimX, dimY, radius):
 
     Parameters
     ----------
-    coords : numpy.ndarray size n,2
+    coords : ~numpy.ndarray size n,2
         size n,2 array of coordinates to draw the circle.
     dimX : int
         first dimension of the diffraction pattern (size)
@@ -313,7 +335,7 @@ def reference_circle(coords, dimX, dimY, radius):
 
     Returns
     -------
-    img: numpy.ndarray
+    img: ~numpy.ndarray
         Array containing the circle at the position given in the coordinates.
     """
     img = np.zeros((dimX, dimY))
@@ -393,7 +415,7 @@ def find_beam_center_interpolate(z, sigma, upsample_factor=1.0, kind="nearest"):
 
     Returns
     -------
-    center : numpy.ndarray
+    center : ~numpy.ndarray
         numpy.ndarray, [y, x] containing indices of estimated direct beam positon
     """
     xx = np.sum(z, axis=1)
@@ -428,7 +450,7 @@ def find_beam_center_blur(z, sigma, upsample_factor=1.0, order=1, **kwargs):
 
     Returns
     -------
-    center : numpy.ndarray
+    center : ~numpy.ndarray
         numpy.ndarray [x, y] containing indices of estimated direct beam positon.
     """
     if is_cupy_array(z):  # pragma: no cover
@@ -482,16 +504,16 @@ def center_of_mass_from_image(z, mask=None, threshold=None):
 
     Parameters
     ----------
-    z : numpy.ndarray
+    z : ~numpy.ndarray
         Two-dimensional data array containing signal.
-    mask : numpy.ndarray
+    mask : ~numpy.ndarray
         Two-dimensional data array containing mask.
     threshold : float
         Threshold value for center of mass calculation.
 
     Returns
     -------
-    center : numpy.ndarray
+    center : ~numpy.ndarray
         numpy.ndarray [x, y] containing indices of estimated direct beam positon.
     """
     if mask is not None:
@@ -511,7 +533,7 @@ def find_beam_offset_cross_correlation(z, radius_start, radius_finish, **kwargs)
 
     Parameters
     ----------
-    z: numpy.ndarray
+    z: ~numpy.ndarray
         The two dimensional array/image that is operated on
     radius_start : int
         The lower bound for the radius of the central disc to be used in the
@@ -524,7 +546,7 @@ def find_beam_offset_cross_correlation(z, radius_start, radius_finish, **kwargs)
 
     Returns
     -------
-    shift: numpy.ndarray
+    shift: ~numpy.ndarray
         numpy.ndarray [y, x] containing offset (from center) of the direct beam positon.
     """
     radiusList = np.arange(radius_start, radius_finish)
@@ -569,16 +591,16 @@ def peaks_as_gvectors(z, center, calibration):
 
     Parameters
     ----------
-    z : numpy.ndarray
+    z : ~numpy.ndarray
         peak positions as array indices.
-    center : numpy.ndarray
+    center : ~numpy.ndarray
         diffraction pattern center in array indices.
     calibration : float
         calibration in reciprocal Angstroms per pixels.
 
     Returns
     -------
-    g : numpy.ndarray
+    g : ~numpy.ndarray
         peak positions in calibrated units.
 
     """
@@ -609,7 +631,6 @@ def investigate_dog_background_removal_interactive(
 
     See Also
     --------
-    subtract_background_dog : The background subtraction method used.
     numpy.arange : Produces suitable objects for std_dev_maxs
 
     """
@@ -652,11 +673,11 @@ def find_hot_pixels(z, threshold_multiplier=500, mask=None):
 
     Parameters
     ----------
-    z : numpy.ndarray
+    z : ~numpy.ndarray
         Frame to operate on
     threshold_multiplier : scaler
         Used to threshold the dif.
-    mask : numpy.ndarray, optional
+    mask : ~numpy.ndarray, optional
         Array with bool values. The True values will be masked
         (i.e. ignored). Must have the same shape as the two
         last dimensions in dask_array.
@@ -676,9 +697,9 @@ def remove_bad_pixels(z, bad_pixels):
 
     Parameters
     ----------
-    z : numpy.ndarray
+    z : ~numpy.ndarray
         A single frame
-    bad_pixels : numpy.ndarray
+    bad_pixels : ~numpy.ndarray
         Must either have the same shape as dask_array,
         or the same shape as the two last dimensions of dask_array.
 
@@ -709,9 +730,9 @@ def normalize_template_match(z, template, subtract_min=True, pad_input=True, **k
 
     Parameters
     ----------
-    z : numpy.ndarray
+    z : ~numpy.ndarray
         Two-dimensional data array containing signal.
-    template : numpy.ndarray
+    template : ~numpy.ndarray
         Two-dimensional data array containing template.
     subtract_min : bool
         If True the minimum value will be subtracted from the correlation.
@@ -773,9 +794,9 @@ def match_template_dilate(
 
     Parameters
     ----------
-    image : np.array
+    image : ~numpy.ndarray
         Image to be matched
-    template : np.array
+    template : ~numpy.ndarray
         Template to preform the normalized cross-correlation with
     template_dilation : int
         The number of pixels to dilate the template by for the windowed cross-correlation
@@ -786,7 +807,7 @@ def match_template_dilate(
 
     Returns
     -------
-    response : np.array
+    response : ~numpy.ndarray
         The windowed cross-correlation of the image and template
     """
 

@@ -21,7 +21,7 @@ s_beam_pos = s.get_direct_beam_position(
 # %%
 # Visualizing the Shifts
 # -----------------------
-# The shifts can be visualized using the :meth:`plot` method which shows both the
+# The shifts can be visualized using the ``plot()`` method which shows both the
 # x and y shifts in a single plot.
 
 s_beam_pos.plot()

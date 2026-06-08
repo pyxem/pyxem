@@ -29,11 +29,11 @@ def _register_drift_5d(data, shifts1, shifts2, order=1):
 
      Parameters
     ----------
-    data: np.array or dask.array
+    data: ~numpy.ndarray or dask.array
         Input image in 5D array (time * rx * ry * kx * ky)
-    shifts1: np.array
+    shifts1: ~numpy.ndarray
         1D array for shifts in 1st real space direction or x in hyperspy indexing.
-    shifts2: np.array
+    shifts2: ~numpy.ndarray
         1D array for shifts in 2nd real space direction or y in hyperspy indexing.
     order: int
         The order of the spline interpolation for affine transformation. Default
@@ -41,7 +41,7 @@ def _register_drift_5d(data, shifts1, shifts2, order=1):
 
     Returns
     -------
-    data_t: np.array
+    data_t: ~numpy.ndarray
         5D array after translation according to shift vectors
 
     """
@@ -63,7 +63,7 @@ def _register_drift_2d(data, shift1, shift2, order=1):
 
      Parameters
     ----------
-    data: np.array or dask.array
+    data: ~numpy.ndarray or dask.array
         Input image in 2D array (ry * rx)
     shift1: float
         shifts in 1st real space direction or x in hyperspy indexing.
@@ -75,7 +75,7 @@ def _register_drift_2d(data, shift1, shift2, order=1):
 
     Returns
     -------
-    data_t: np.array
+    data_t: ~numpy.ndarray
         2D array after translation according to shift vectors
 
     """

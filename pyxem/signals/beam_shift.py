@@ -91,7 +91,7 @@ class BeamShift(DiffractionVectors1D):
         fit_corners : float, optional
             Make a mask so that the planes are fitted to the corners of the
             signal. This mush be set with a number, like 0.05 (5%) or 0.10 (10%).
-        initial_values : array of floats, optional
+        initial_values : ~numpy.ndarray of floats, optional
             Initial guess for the plane parameters. Useful to vary if the plane fitting
             does not give desirable results.
             The horizontal- and vertical-shifts are described by two linear planes
@@ -192,7 +192,7 @@ class BeamShift(DiffractionVectors1D):
 
         Returns
         -------
-        s_hist : HyperSpy Signal2D
+        s_hist : hyperspy.api.signals.Signal2D
 
         Examples
         --------
@@ -235,7 +235,9 @@ class BeamShift(DiffractionVectors1D):
         """
         Calibrate the shifts into the electric field
 
-        m_0 * gamma * |v|^2 * theta / e*t = E
+        .. math::
+
+            m_0 * \\gamma * |v|^2 * \\theta / (e \\cdot t) = E
 
         where m_0 is the electron rest mass, gamma is the Relativistic factor, t is the
         thickness m_0 is the electron rest mass, e is the electron charge, and theta
@@ -322,7 +324,7 @@ class BeamShift(DiffractionVectors1D):
 
         Parameters
         ----------
-        signal : HyperSpy Signal2D
+        signal : hyperspy.api.signals.Signal2D
             The signal to plot the beam shifts on top of.
         **kwargs : dict
             Additional keyword arguments to pass to the marker.
@@ -377,7 +379,7 @@ class BeamShift(DiffractionVectors1D):
 
         Returns
         -------
-        magnitude_signal : HyperSpy 2D signal
+        magnitude_signal : hyperspy.api.signals.Signal2D
 
         Examples
         --------
@@ -446,7 +448,7 @@ class BeamShift(DiffractionVectors1D):
 
         Returns
         -------
-        signal : HyperSpy 2D signal
+        signal : hyperspy.api.signals.Signal2D
             the phase retrieved.
 
         References
@@ -576,7 +578,7 @@ class BeamShift(DiffractionVectors1D):
 
         Returns
         -------
-        phase_signal : HyperSpy 2D RGB signal
+        phase_signal : hyperspy.api.signals.Signal2D
 
         Examples
         --------
@@ -651,7 +653,7 @@ class BeamShift(DiffractionVectors1D):
 
         Returns
         -------
-        color_signal : HyperSpy 2D RGB signal
+        color_signal : hyperspy.api.signals.Signal2D
 
         Examples
         --------

@@ -13,7 +13,7 @@ s = pxm.data.tilt_boundary_data(correct_pivot_point=False)
 # %%
 # Getting the Position of the Zero beam
 # -------------------------------------
-# The zero beam position can be obtained using the :meth:`get_direct_beam_position` method.
+# The zero beam position can be obtained using the :meth:`~pyxem.signals.Diffraction2D.get_direct_beam_position` method.
 
 s_shifts = s.get_direct_beam_position(method="blur", sigma=5, half_square_width=20)
 s_shifts.plot()
@@ -28,17 +28,17 @@ s_shifts.plot_on_signal(s)
 
 # %%
 # Getting a Linear Plane
-# ---------------------
+# ----------------------
 # In many instances the zero beam position will vary systematically with the scan position.
 # This can be corrected by fitting a linear plane to the zero beam position using the
-# :meth:`get_linear_plane` method.
+# :meth:`~pyxem.signals.BeamShift.get_linear_plane` method.
 s_linear_plane = s_shifts.get_linear_plane()
 s_linear_plane.plot()
 
 # %%
 # Centering the Zero Beam
 # -----------------------
-# The zero beam can be centered using the :meth:`center_direct_beam` method.
+# The zero beam can be centered using the :meth:`~pyxem.signals.Diffraction2D.center_direct_beam` method.
 # Then we sum all the diffraction patterns for the both the centered beam,
 # and the non-centered one, to compare them.
 

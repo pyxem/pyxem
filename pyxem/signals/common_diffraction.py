@@ -152,15 +152,15 @@ class CommonDiffraction:
         --------
         .. code-block:: python
 
-            >>> # For 1D diffraction signal, we can use a SpanROI
-            >>> roi = hs.roi.SpanROI(left=1., right=2.)
-            >>> dp.plot_integrated_intensity(roi)
+            # For 1D diffraction signal, we can use a SpanROI
+            roi = hs.roi.SpanROI(left=1., right=2.)
+            dp.plot_integrated_intensity(roi)
 
         .. code-block:: python
 
-            >>> # For 2D diffraction signal,we can use a CircleROI
-            >>> roi = hs.roi.CircleROI(3, 3, 5)
-            >>> dp.plot_integrated_intensity(roi)
+            # For 2D diffraction signal, we can use a CircleROI
+            roi = hs.roi.CircleROI(3, 3, 5)
+            dp.plot_integrated_intensity(roi)
 
         """
         # Plot signal when necessary
@@ -246,7 +246,7 @@ class CommonDiffraction:
 
         Returns
         -------
-        integrated_intensity : :obj:`hyperspy.signals.Signal2D` or :obj:`hyperspy.signals.Signal1D`
+        integrated_intensity : :obj:`hyperspy.api.signals.Signal2D` or :obj:`hyperspy.api.signals.Signal1D`
             The intensity integrated over the scattering range as defined by
             the roi.
 
@@ -254,15 +254,15 @@ class CommonDiffraction:
         --------
         .. code-block:: python
 
-            >>> # For 1D diffraction signal, we can use a SpanROI
-            >>> roi = hs.roi.SpanROI(left=1., right=2.)
-            >>> virtual_image = dp.get_integrated_intensity(roi)
+            # For 1D diffraction signal, we can use a SpanROI
+            roi = hs.roi.SpanROI(left=1., right=2.)
+            virtual_image = dp.get_integrated_intensity(roi)
 
         .. code-block:: python
 
-            >>> # For 2D diffraction signal,we can use a CircleROI
-            >>> roi = hs.roi.CircleROI(3, 3, 5)
-            >>> virtual_image = dp.get_integrated_intensity(roi)
+            # For 2D diffraction signal, we can use a CircleROI
+            roi = hs.roi.CircleROI(3, 3, 5)
+            virtual_image = dp.get_integrated_intensity(roi)
 
         """
         dark_field = roi(self, axes=self.axes_manager.signal_axes)
@@ -282,7 +282,7 @@ class CommonDiffraction:
 
         Parameters
         -------------------
-        data: np.array
+        data: ~numpy.ndarray
             The data for the navigation signal.  Should be the same size as the navigation axis.
         name: str
             The name of the axis.

@@ -208,7 +208,7 @@ def make_ellipse_data_points(x, y, a, b, r, nt=20, use_focus=True):
 
     Returns
     -------
-    data : numpy.ndarray
+    data : ~numpy.ndarray
         [[x0, y0], [x1, y1], ...]
 
     Examples
@@ -305,7 +305,7 @@ def get_ellipse_model_ransac_single_frame(
 
     Parameters
     ----------
-    data : numpy.ndarray
+    data : ~numpy.ndarray
         In the form [[x0, y0], [x1, y1], ...]
     xf, yf : scalar, optional
         Default 128
@@ -398,7 +398,7 @@ def get_ellipse_model_ransac(
 
     Parameters
     ----------
-    data : numpy.ndarray
+    data : ~numpy.ndarray
         In the form [[[[x0, y0], [x1, y1], ...]]]
     xf, yf : scalar, optional
         Default 128 center of the diffraction pattern
@@ -423,7 +423,7 @@ def get_ellipse_model_ransac(
 
     Returns
     -------
-    ellipse_array, inlier_array : numpy.ndarray
+    ellipse_array, inlier_array : ~numpy.ndarray
         Model data is accessed in ellipse_array, where each probe position
         (for two axes) contain a list with the ellipse parameters:
         [y, x, semi_len0, semi_len1, rotation]. If no ellipse is found
@@ -476,9 +476,9 @@ def _get_max_positions(signal, mask=None, num_points=5000):
 
     Parameters
     --------------
-    signal : BaseSignal
+    signal : ~hyperspy.api.signals.BaseSignal
         The signal which we want to find the max positions for.
-    mask : np.array
+    mask : ~numpy.ndarray
         A mask to be applied to the data for values to ignore.
     num_points : int
         The number of points to be considered.
@@ -526,9 +526,9 @@ def mask_peak_array(array, mask, invert=False):
 
     Parameters
     ----------
-    array: np.ndarray
+    array: ~numpy.ndarray
         The array of peaks to be masked. Can be ragged or non-ragged.
-    mask: np.ndarray
+    mask: ~numpy.ndarray
         The mask to be applied to the array. If the array is ragged, the mask
         must be ragged as well.
     invert: bool
@@ -556,9 +556,9 @@ def ellipse_to_markers(ellipse_array, points=None, inlier=None):
 
     Parameters
     ----------
-    ellipse_array: np.ndarray
+    ellipse_array: ~numpy.ndarray
         The array of ellipses parameters in the form [x_c, y_c, semi_len0, semi_len1, rotation]
-    points: np.ndarray
+    points: ~numpy.ndarray
         The array of points to be plotted. If None, then no points are plotted.
     inlier:np.ndarray
         The bool array of inlier points. If None, then no points are plotted.
@@ -638,9 +638,9 @@ def determine_ellipse(
 
     Parameters
     -----------
-    signal : Signal2D
+    signal : ~hyperspy.api.signals.Signal2D
         The signal of interest.
-    pos : np.ndarray
+    pos : ~numpy.ndarray
         The positions of the points to be used to determine the ellipse.
     mask : Array-like
         The mask to be applied to the data.  The True values are ignored.
@@ -662,13 +662,13 @@ def determine_ellipse(
         The center of the diffraction pattern.
     affine :
         The affine transformation to make the diffraction pattern circular.
-    params : np.ndarray, optional
+    params : ~numpy.ndarray, optional
         Array ``[x_c, y_c, semi_len0, semi_len1, rotation]`` of the fitted ellipse.
         Only returned when ``return_params=True``.
-    pos : np.ndarray, optional
+    pos : ~numpy.ndarray, optional
         The point positions used for fitting.
         Only returned when ``return_params=True``.
-    inlier : np.ndarray of bool, optional
+    inlier : ~numpy.ndarray of bool, optional
         Boolean mask of inlier points.
         Only returned when ``return_params=True`` and ``use_ransac=True``.
 

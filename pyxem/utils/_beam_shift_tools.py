@@ -125,7 +125,7 @@ def _plane_parameters_to_image(p, xaxis, yaxis):
     ----------
     p : list
         4 values, like [0.1, 0.1, 0.1, 0.1]
-    xaxis, yaxis : array-like
+    xaxis, yaxis : ~numpy.typing.ArrayLike
         List of x- and y-positions. For example via the axes_manager.
         s.axes_manager.signal_axes[0].axis
 

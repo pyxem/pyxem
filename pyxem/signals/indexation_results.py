@@ -56,14 +56,14 @@ def crystal_from_vector_matching(z_matches):
 
     Parameters
     ----------
-    z_matches : numpy.ndarray
+    z_matches : ~numpy.ndarray
         Template matching results in an array of shape (m,5) sorted by
         total_error (ascending) within each phase, with entries
         [phase, R, match_rate, ehkls, total_error]
 
     Returns
     -------
-    results_array : numpy.ndarray
+    results_array : ~numpy.ndarray
         Crystallographic mapping results in an array of shape (3) with entries
         [phase, np.array((z, x, z)), dict(metrics)]
 
@@ -99,12 +99,12 @@ def _get_best_match(z):
 
     Parameters
     ----------
-    z : numpy.ndarray
+    z : ~numpy.ndarray
         array with shape (5,n_matches), the 5 elements are phase, alpha, beta, gamma, score
 
     Returns
     -------
-    z_best : numpy.ndarray
+    z_best : ~numpy.ndarray
         array with shape (5,)
 
     """
@@ -116,7 +116,7 @@ def _get_phase_reliability(z):
 
     Parameters
     ----------
-    z : numpy.ndarray
+    z : ~numpy.ndarray
         array with shape (5,n_matches), the 5 elements are phase, alpha, beta, gamma, score
 
     Returns
@@ -145,7 +145,7 @@ def _get_second_best_phase(z):
 
     Parameters
     ----------
-    z : numpy.ndarray
+    z : ~numpy.ndarray
         array with shape (5,n_matches), the 5 elements are phase, alpha, beta, gamma, score
 
     Returns
@@ -190,13 +190,13 @@ def get_ipf_outline(
 
     Returns
     -------
-    polygon_sector : hs.plot.markers.Polygons
+    polygon_sector : ~hyperspy.api.plot.markers.Polygons
         The outline of the IPF as a marker
-    texts : hs.plot.markers.Texts
+    texts : ~hyperspy.api.plot.markers.Texts
         The text labels for the IPF axes
-    maxes : np.ndarray
+    maxes : ~numpy.ndarray
         The maximum values for the axes
-    mins : np.ndarray
+    mins : ~numpy.ndarray
         The minimum values for the axes
     """
     offset = np.array([offset_x, offset_y])
@@ -250,11 +250,11 @@ def get_ipf_annotation_markers(phase: Phase, offset: float = 0.85, scale: float 
 
     Returns
     -------
-    polygon_sector : hs.plot.markers.Polygons
+    polygon_sector : ~hyperspy.api.plot.markers.Polygons
         The outline of the IPF as a marker
-    texts : hs.plot.markers.Texts
+    texts : ~hyperspy.api.plot.markers.Texts
         The text labels for the IPF axes
-    mesh : hs.plot.markers.Markers
+    mesh : ~hyperspy.api.plot.markers.Markers
         The color mesh for the IPF (using :class:`matplotlib.collections.QuadMesh`)
     """
 
@@ -313,7 +313,7 @@ def vectors_to_single_phase_ipf_markers(
         The vectors to display. These will be projected into the fundamental sector
     phase : Phase
         The phase for the fundamental sector
-    normalized_correrlation : np.ndarray
+    normalized_correrlation : ~numpy.ndarray
         Correlation scores, normalized to lie between 0 and 1.
         Used for alpha for single-color plotting, and for the color map
     offset : float
@@ -457,15 +457,15 @@ def vectors_from_orientation_map(
 
     Parameters
     ----------
-    result : np.ndarray
+    result : ~numpy.ndarray
         The result array from the orientation map
     vectors : DiffractingVector
         The vectors from the simulation
     phases : List of orix.crystal_map.Phase
         The phase array from the simulation
-    phase_index : np.ndarray
+    phase_index : ~numpy.ndarray
         The index of the phase for each vector
-    intensities : np.ndarray
+    intensities : ~numpy.ndarray
         The intensities of the vectors
     n_best_index : int
         The index of the best match to use
@@ -546,7 +546,7 @@ class OrientationMap(DiffractionVectors2D):
     def simulation(self):
         """Simulation object used to generate the orientation map.  This is stored in the metadata
         but can be accessed using the ``.simulation`` attribute. The simulation object is a
-        :class:`diffsims.simulation.Simulation2D` object."""
+        :class:`diffsims.simulations.Simulation2D` object."""
         return self.metadata.get_item("simulation")
 
     @simulation.setter
@@ -584,7 +584,7 @@ class OrientationMap(DiffractionVectors2D):
             to a `CrystalMap` object.
         Returns
         -------
-        orix.Quaternion.Rotation
+        ~orix.quaternion.Rotation
         """
         if self._lazy:
             raise ValueError(
@@ -867,11 +867,11 @@ class OrientationMap(DiffractionVectors2D):
 
         Returns
         -------
-        polygon_sector : hs.plot.markers.Polygons
+        polygon_sector : ~hyperspy.api.plot.markers.Polygons
             The outline of the IPF as a marker
-        texts : hs.plot.markers.Texts
+        texts : ~hyperspy.api.plot.markers.Texts
             The text labels for the IPF axes
-        mesh : hs.plot.markers.Markers
+        mesh : ~hyperspy.api.plot.markers.Markers
             The color mesh for the IPF (using :class:`matplotlib.collections.QuadMesh`)
 
         Notes
@@ -1025,7 +1025,7 @@ class OrientationMap(DiffractionVectors2D):
 
         Returns
         -------
-        all_markers : Sequence[hs.plot.markers.Markers]
+        all_markers : Sequence[~hyperspy.api.plot.markers.Markers]
             A list of markers for each of the n_best solutions
 
         """
@@ -1149,7 +1149,7 @@ class OrientationMap(DiffractionVectors2D):
             Additional keyword arguments to pass to the hyperspy.plot.markers.Points.from_signal function.
         Returns
         -------
-        all_markers : Sequence[hs.plot.markers.Markers]
+        all_markers : Sequence[~hyperspy.api.plot.markers.Markers]
             An list of markers for each of the n_best solutions
 
         """
@@ -1217,7 +1217,7 @@ class OrientationMap(DiffractionVectors2D):
 
         Returns
         -------
-        hs.signals.BaseSignal
+        ~hyperspy.api.signals.Signal2D
         """
         oris = self.to_single_phase_orientations()[:, :, 0]
         ipfcolorkey = IPFColorKeyTSL(oris.symmetry, direction)
@@ -1246,7 +1246,7 @@ class OrientationMap(DiffractionVectors2D):
 
         Returns
         -------
-        hs.signals.BaseSignal
+        ~hyperspy.api.signals.Signal2D
         """
         if not self.simulation.has_multiple_phases:
             raise ValueError("Only a single phase present in simulation")
@@ -1280,7 +1280,7 @@ class OrientationMap(DiffractionVectors2D):
 
         Parameters
         ----------
-        signal : BaseSignal
+        signal : ~hyperspy.api.signals.BaseSignal
             The signal to plot the orientation map over.
         add_vector_markers : bool
             If True, the vector markers will be added to the signal.
@@ -1391,7 +1391,7 @@ class VectorMatchingResults(BaseSignal):
     ----------
     vectors : pyxem.signals.DiffractionVectors
         Diffraction vectors indexed.
-    hkls : BaseSignal
+    hkls : ~hyperspy.api.signals.BaseSignal
         Miller indices associated with each diffraction vector.
     """
 
@@ -1410,7 +1410,7 @@ class VectorMatchingResults(BaseSignal):
 
         Returns
         -------
-        cryst_map : Signal2D
+        cryst_map : ~hyperspy.api.signals.Signal2D
             Crystallographic mapping results containing the best matching phase
             and orientation at each navigation position with associated metrics.
             The Signal at each navigation position is an array of,

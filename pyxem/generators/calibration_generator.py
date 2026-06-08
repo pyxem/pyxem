@@ -134,11 +134,11 @@ class CalibrationGenerator:
 
         Returns
         -------
-        fit_params : np.array()
+        fit_params : ~numpy.ndarray
             Array of fitting parameters. [scale, amplitude, spread,
                                           direct_beam_amplitude, asymmetry,
                                           rotation].
-        affine_matrix : np.array()
+        affine_matrix : ~numpy.ndarray
             Array defining the affine transformation that corrects for lens
             distortions in the diffraction pattern.
 
@@ -433,7 +433,7 @@ class CalibrationGenerator:
 
         Returns
         -------
-        correction_matrix : np.array()
+        correction_matrix : ~numpy.ndarray
             Array defining the affine transformation that corrects for lens
             distortions in the diffraction pattern.
 

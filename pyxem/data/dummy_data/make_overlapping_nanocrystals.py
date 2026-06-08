@@ -407,7 +407,7 @@ def convert_to_by_index(peaks, real_space):
 
     Parameters
     ----------
-    peaks: np.ndarray
+    peaks: ~numpy.ndarray
         The array of vectors
     real_space:
         The number of pixels in the real space image to account for
@@ -437,7 +437,7 @@ def add_disk(image, center, radius, intensity):
 
     Parameters
     ----------
-    image: np.ndarray
+    image: ~numpy.ndarray
         The image to add the disk to
     center:
         The center of the disk

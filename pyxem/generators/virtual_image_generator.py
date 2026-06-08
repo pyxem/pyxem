@@ -37,9 +37,9 @@ class VirtualImageGenerator:
 
     Attributes
     ----------
-    signal : Diffraction2D or subclass
+    signal : ~pyxem.signals.Diffraction2D
         The signal of electron diffraction patterns to be indexed.
-    roi_list: list of roi
+    roi_list : list of ~hyperspy.api.roi.BaseInteractiveROI
         The list of roi used to defined the integration area of the virtual
         images in the signal space.
 
@@ -149,7 +149,7 @@ class VirtualImageGenerator:
 
         Returns
         -------
-        None.
+        None
 
         """
 
@@ -276,7 +276,7 @@ class VirtualDarkFieldGenerator(VirtualImageGenerator):
 
     Attributes
     ----------
-    signal : Diffraction2D of subclass
+    signal : ~pyxem.signals.Diffraction2D
         The signal of diffraction patterns to be indexed.
     vectors: DiffractionVectors
         The vector positions, in calibrated units, at which to position

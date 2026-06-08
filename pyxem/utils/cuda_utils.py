@@ -56,7 +56,7 @@ def to_numpy(array):
         Array to determine whether numpy or cupy should be used
     Returns
     -------
-    array : numpy.ndarray
+    array : ~numpy.ndarray
     """
     if is_cupy_array(array):
         import cupy as cp
@@ -93,7 +93,7 @@ def is_cupy_array(array):
 
     Parameters
     ----------
-    array : array
+    array : ~numpy.ndarray
         The array to determine whether it is a cupy array or not.
     Returns
     -------

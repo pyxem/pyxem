@@ -10,6 +10,10 @@ from os.path import relpath, dirname
 import re
 import sys
 
+# Disable Numba JIT to avoid workqueue threading crashes when Dask workers
+# call Numba from multiple threads during documentation builds.
+os.environ.setdefault("NUMBA_DISABLE_JIT", "1")
+
 from pyxem import release_info
 import pyxem
 import hyperspy.api as hs
@@ -138,6 +142,32 @@ napoleon_use_param = False
 napoleon_use_ivar = True
 nitpicky = True
 
+# Suppress warnings for toctree glob patterns that don't match (e.g., when
+# the pyxem-demos git submodule is not checked out during the build).
+suppress_warnings = ["toc.glob"]
+
+# nitpick_ignore: suppress specific false-positive cross-reference warnings
+# These are either historical refs in CHANGELOG, informal type names in
+# docstrings, or external package types not covered by intersphinx.
+nitpick_ignore = [
+    # CHANGELOG historical refs (removed/renamed API)
+    ("py:meth", "pyxem.signals.Diffraction2D.get_center_beam_position"),
+    ("py:func", "pyxem.utils.plotting.plot_beam_shift_color"),
+    ("py:meth", "pyxem.signals.Diffraction2D.center_of_mass"),
+    ("py:meth", "hyperspy.api.BaseSignal.map"),
+    ("py:class", "pyxem.utils.calibration_utils.Calibration"),
+    ("py:meth", "pyxem.signals.Diffraction2D.get_azimuthal_integral1D"),
+    ("py:class", "pyxem.signals.LabeledDiffractionVectors"),
+    # pint types not in intersphinx
+    ("py:class", "pint.Quantity"),
+]
+
+# nitpick_ignore_regex: suppress warnings matching these regex patterns
+nitpick_ignore_regex = [
+    # hyperspy.signals.* (without api.) - wrong but widely used in old docstrings
+    (r"py:.*", r"hyperspy\.signals\..*"),
+]
+
 # Figure references
 numfig = True
 
@@ -155,7 +185,12 @@ else:
 nbsphinx_execute = "never"  # auto, always, never
 nbsphinx_kernel_name = "python3"
 nbsphinx_allow_errors = True
-exclude_patterns = ["_build", "**.ipynb_checkpoints", "examples/*/*.ipynb"]
+exclude_patterns = [
+    "_build",
+    "**.ipynb_checkpoints",
+    "examples/*/*.ipynb",
+    "examples/*.ipynb",
+]
 
 # sphinxcontrib-bibtex configuration
 bibtex_bibfiles = ["bibliography.bib"]
@@ -173,17 +208,14 @@ sphinx_gallery_conf = {
     "reference_url": {"pyxem": None},
     "show_memory": False,  # not compatible with parallel building
     # number of parallel processes to use for running examples
-    # use 2 as default; for example on GitHub CI they will still be 2 workers available
-    # to run examples using multiprocessing
-    # on readthedocs, set environment variable SPHINX_GALLERY_PARALLEL to the number to 1
-    "parallel": os.getenv(
-        "SPHINX_GALLERY_PARALLEL", 1 if os.environ.get("READTHEDOCS") == "True" else 2
+    # use False as default locally (runs in main process, avoids Numba threading issues)
+    # on CI/ReadTheDocs, set environment variable SPHINX_GALLERY_PARALLEL to an integer
+    "parallel": (
+        int(os.environ["SPHINX_GALLERY_PARALLEL"])
+        if "SPHINX_GALLERY_PARALLEL" in os.environ
+        else (1 if os.environ.get("READTHEDOCS") == "True" else False)
     ),
 }
-autodoc_default_options = {
-    "show-inheritance": True,
-}
-
 graphviz_output_format = "svg"
 
 
@@ -256,6 +288,7 @@ autosummary_imported_members = True
 autodoc_typehints_format = "short"
 autodoc_default_options = {
     "show-inheritance": True,
+    "exclude-members": "trait_added,trait_modified",
 }
 
 autosummary_generate = True

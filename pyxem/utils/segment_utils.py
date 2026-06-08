@@ -42,9 +42,9 @@ def norm_cross_corr(image, template):
 
     Parameters
     ----------
-    image: np.array
+    image: ~numpy.ndarray
         Image
-    template: np.array
+    template: ~numpy.ndarray
         Reference image
 
     Returns
@@ -84,7 +84,7 @@ def separate_watershed(
 
     Parameters
     ----------
-    vdf_temp : np.array
+    vdf_temp : ~numpy.ndarray
         One VDF image.
     min_distance: int
         Minimum distance (in pixels) between markers for them to be
@@ -117,7 +117,7 @@ def separate_watershed(
 
     Returns
     -------
-    sep : np.array
+    sep : ~numpy.ndarray
         Array containing segments from VDF images (i.e. separated
         grains). Shape: (image size x, image size y, number of grains)
 
@@ -307,10 +307,10 @@ def get_gaussian2d(a, xo, yo, x, y, sigma):
         Center of Gaussian on x-axis.
     yo : float
         Center of Gaussian on y-axis.
-    x : array
+    x : ~numpy.ndarray
         Array representing the row indices of the grid the Gaussian
         should be placed on (x-axis).
-    y : array
+    y : ~numpy.ndarray
         Array representing the column indices of the grid the Gaussian
         should be placed on (y-axis).
     sigma : float
@@ -318,7 +318,7 @@ def get_gaussian2d(a, xo, yo, x, y, sigma):
 
     Returns
     -------
-    gaussian : array
+    gaussian : ~numpy.ndarray
         Array with the 2D Gaussian.
     """
 

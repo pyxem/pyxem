@@ -18,6 +18,13 @@
 
 """Utils for calibrating Diffraction Patterns."""
 
+__all__ = [
+    "Calibration",
+    "find_diffraction_calibration",
+    "value2node",
+    "value2standard_units",
+]
+
 import numpy as np
 import pint
 
@@ -121,9 +128,9 @@ class Calibration:
     and the mask to apply to the data for something like a beam stop.
 
     There are 2 ways to set the calibration:
+
     1. You can set the calibration with a known reciprocal space pixel size.  This will assume
        a flat ewald sphere.
-
     2. You can set the calibration directly with a known real pixel size, beam energy/wavelength,
        and detector distance. This is the most accurate method but requires detailed calibration
        information that is not trivial to acquire.  In most cases option 1 is sufficient.
@@ -575,23 +582,27 @@ class Calibration:
 
     @property
     def pixel_extent(self):
-        """Return an array with axes [x/y, left/right, pixel_extent], as follows:
-        [
-            # x axis
+        """
+        Return an array with axes [x/y, left/right, pixel_extent], as follows:
+
+        .. code-block::
+
             [
-                # left
-                [boundary 1, boundary 2 ...],
-                # right
-                [boundary 1, boundary 2 ...],
-            ],
-            # y axis
-            [
-                # left
-                [boundary 1, boundary 2 ...],
-                # right
-                [boundary 1, boundary 2 ...],
-            ],
-        ]
+                # x axis
+                [
+                    # left
+                    [boundary 1, boundary 2 ...],
+                    # right
+                    [boundary 1, boundary 2 ...],
+                ],
+                # y axis
+                [
+                    # left
+                    [boundary 1, boundary 2 ...],
+                    # right
+                    [boundary 1, boundary 2 ...],
+                ],
+            ]
         """
         if self.flat_ewald:
             left_scales = self.scale
@@ -668,11 +679,11 @@ class Calibration:
 
         Returns
         -------
-        indexes: np.ndarray (n, 2)
+        indexes: ~numpy.ndarray (n, 2)
             The indexes of the pixels to integrate flattened
-        factors: np.ndarray (n)
+        factors: ~numpy.ndarray (n)
             The factors(representing the pixel fraction) to multiply each pixel value by
-        factor_slices: np.ndarray (npt+1)
+        factor_slices: ~numpy.ndarray (npt+1)
             The start and end index of the factors for each slice such that for some
             slice i, factors[factor_slices[i]:factor_slices[i+1]] is the factors for that radial slice
         radial_range: tuple
@@ -838,15 +849,15 @@ def find_diffraction_calibration(
     max_excitation_error : float
         Maximum exacitation error.  Default is 0.01.
     kwargs
-        Keyword arguments passed to :meth:`index_dataset_with_template_rotation`.
+        Keyword arguments passed to :func:`~pyxem.utils.indexation_utils.index_dataset_with_template_rotation`.
 
     Returns
     -------
     mean_cal : float
         Mean of calibrations found for each pattern.
-    full_corrlines : numpy.ndarray
+    full_corrlines : ~numpy.ndarray
         Gives the explicit correlation vs calibration values. Shape:(size*2 + 20, 2 , number of patterns)
-    found_cals : numpy.ndarray
+    found_cals : ~numpy.ndarray
         List of optimal calibration values for each pattern. Shape:(number of patterns)
     """
 
@@ -947,11 +958,11 @@ def _calibration_iteration(
     max_excitation_error : float
         Maximum exacitation error.  Default is 0.01.
     kwargs
-        Keyword arguments passed to :meth:`index_dataset_with_template_rotation`.
+        Keyword arguments passed to :func:`~pyxem.utils.indexation_utils.index_dataset_with_template_rotation`.
 
     Returns
     -------
-    corrlines : numpy.ndarray
+    corrlines : ~numpy.ndarray
     """
     corrlines = np.zeros((0, 2, num_patterns))
     temp_line = np.zeros((1, 2, num_patterns))
@@ -1006,11 +1017,11 @@ def _create_check_diflib(
     max_excitation_error : float
         Maximum exacitation error.  Default is 0.01.
     kwargs
-        Keyword arguments passed to :meth:`pyxem.utisl.indexation_utils.index_dataset_with_template_rotation`.
+        Keyword arguments passed to :func:`~pyxem.utils.indexation_utils.index_dataset_with_template_rotation`.
 
     Returns
     -------
-    correlations : numpy.ndarray
+    correlations : ~numpy.ndarray
     """
 
     half_shape = (images.data.shape[-2] // 2, images.data.shape[-1] // 2)

@@ -165,7 +165,7 @@ class ReducedIntensityGenerator1D:
 
         Parameters
         ----------
-        bkgd_pattern : np.array
+        bkgd_pattern : ~numpy.ndarray
             A numpy array of a single line profile of the same resolution
             (same number of pixels) as the radial profile.
         inplace : bool
@@ -189,7 +189,7 @@ class ReducedIntensityGenerator1D:
 
         Parameters
         ----------
-        mask_pattern : np.array
+        mask_pattern : ~numpy.ndarray
             A numpy array line profile of the same resolution
             as the radial profile.
         mask_threshold : int or float
@@ -222,7 +222,7 @@ class ReducedIntensityGenerator1D:
 
         Parameters
         ----------
-        mask_pattern : np.array of 0s and 1s
+        mask_pattern : ~numpy.ndarray of 0s and 1s
             A numpy array line profile of the same resolution as the radial profile.
             Must consist only of zeroes and ones. Ones are kept while zeroes are
             set to zero.

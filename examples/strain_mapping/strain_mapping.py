@@ -2,7 +2,7 @@
 Strain Mapping
 ==============
 
-Strain mapping in pyxem is done by fitting a :class:`~.signals.tensor_field.DisplacementGradientMap` to the data.
+Strain mapping in pyxem is done by fitting a :class:`~pyxem.signals.DisplacementGradientMap` to the data.
 This can be thought of as image distortion around some central point.
 """
 
@@ -11,10 +11,10 @@ import hyperspy.api as hs
 
 
 # %%
-# In this example we will create a simulated strain map using the :meth:`~.data.simulated_strain` function.
+# In this example we will create a simulated strain map using the :func:`~pyxem.data.simulated_strain` function.
 # This just creates a simulated diffraction pattern and applies a simple "strain" to it. In this
 # case using simulated data is slightly easier for demonstration purposes. If you want to use
-# real data the :meth:`~.data.zrnb_precipitate` dataset is a good example of strain from a precipitate.
+# real data the :func:`~pyxem.data.zrnb_precipitate` dataset is a good example of strain from a precipitate.
 
 strained_signal = simulated_strain(
     navigation_shape=(32, 32),
@@ -27,7 +27,7 @@ strained_signal = simulated_strain(
 
 # %%
 # The first thing we want to do is to find peaks within the diffraction pattern. I'd recommend
-# using the :meth:`~.signals.diffraction2d.get_diffraction_vectors` method
+# using the :meth:`~pyxem.signals.Diffraction2D.get_diffraction_vectors` method
 
 strained_signal.calibration.center = (
     None  # First set the center to be (256, 256) or the center of the signal
@@ -36,7 +36,7 @@ template_matched = strained_signal.template_match_disk(disk_r=20, subtract_min=F
 template_matched.plot(vmin=0.4)
 # %%
 # Plotting the template matched signal and setting ``vmin`` is a good way to see what threshold you
-# should use for the :meth:`~.signals.diffraction2d.get_diffraction_vectors` method.
+# should use for the :meth:`~pyxem.signals.Diffraction2D.get_diffraction_vectors` method.
 
 diffraction_vectors = template_matched.get_diffraction_vectors(
     threshold_abs=0.4, min_distance=5
@@ -50,8 +50,8 @@ strained_signal.add_marker(markers)
 # Determining the Strain
 # ----------------------
 # We can just use the first ring of the diffraction pattern to determine the strain. We can do this by
-# using the :meth:`~.signals.DiffractionVectors.filter_magnitude` method. You can also look at the
-# :ref:`filtering vectors <_sphx_glr_examples_vectors_masking_vectors.py>` example to see
+# using the :meth:`~pyxem.signals.DiffractionVectors.filter_magnitude` method. You can also look at the
+# filtering vectors example to see
 # how to select which vectors you want to use more generally. You can also just manually input the un-strained
 # vectors or use simulated/ rotated vectors as well.
 

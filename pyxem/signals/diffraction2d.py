@@ -133,7 +133,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Parameters
         ----------
-        D : array or Signal2D of arrays
+        D : ~numpy.ndarray or Signal2D of arrays
             3x3 np.array (or Signal2D thereof) specifying the affine transform
             to be applied.
         order : 1,2,3,4 or 5
@@ -423,7 +423,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         *args:
             Arguments to be passed to :meth:`hyperspy.api.signals.BaseSignal.map`.
         **kwargs:
-            Keyword arguments to be passed to :meth:`hyperspy.api.signal.BaseSignal.map`.
+            Keyword arguments to be passed to :meth:`hyperspy.api.signals.BaseSignal.map`.
 
         """
         return self.map(
@@ -624,7 +624,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Parameters
         ----------
-        bad_pixel_array : array-like
+        bad_pixel_array : ~numpy.typing.ArrayLike
             List of pixels to correct
         show_progressbar : bool, optional
             Default True
@@ -726,7 +726,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             Additional arguments accepted by :func:`pyxem.utils.diffraction.find_beam_center_blur`,
             :func:`pyxem.utils.diffraction.find_beam_center_interpolate`,
             :func:`pyxem.utils.diffraction.find_beam_offset_cross_correlation`,
-            and :func:`pyxem.signals.diffraction.center_of_mass_from_image`,
+            and :func:`pyxem.utils.diffraction.center_of_mass_from_image`,
 
         Returns
         -------
@@ -1108,7 +1108,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             will compute the result and return a Diffraction2D object.
         kwargs :
             Passed to :func:`pyxem.utils.diffraction.normalize_template_match` or
-            the :func:`hyperspy.api.BaseSignal.map` method.
+            the :meth:`hyperspy.api.signals.BaseSignal.map` method.
 
         Returns
         -------
@@ -1155,7 +1155,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             new signal is returned. Default False.
         kwargs :
             Passed to :func:`pyxem.utils.diffraction.normalize_template_match` or
-            the :func:`hyperspy.api.BaseSignal.map` method.
+            the :meth:`hyperspy.api.signals.BaseSignal.map` method.
 
         Returns
         -------
@@ -1243,7 +1243,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Parameters
         ----------
-        template : numpy.ndarray
+        template : ~numpy.ndarray
             The 2D template to match with the signal.
         inplace : bool, optional
             If True, the data is replaced by the filtered data. If False, a
@@ -1292,7 +1292,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Parameters
         ----------
-        binary_image : numpy.ndarray (2-D NumPy array)
+        binary_image : ~numpy.ndarray (2-D NumPy array)
         lazy_result : bool, default True
             If True, will return a LazyDiffraction2D object. If False,
             will compute the result and return a Diffraction2D object.
@@ -1572,7 +1572,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         ----------
         **kwargs : dict
             Additional keyword arguments to customize the line profile, such as
-            'color', 'linewidth', etc. These will be passed to :class:`~hyperspy.api.roi.Line2D`
+            'color', 'linewidth', etc. These will be passed to :class:`~hyperspy.api.roi.Line2DROI`
         """
         if self._plot is None:
             self.plot()
@@ -1691,7 +1691,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Returns
         -------
-        mask_array : numpy.ndarray
+        mask_array : ~numpy.ndarray
             The True values will be the region between angle0 and angle1.
             The array will have the same dimensions as the signal.
 
@@ -1748,7 +1748,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         Returns
         -------
-        variance : array-like
+        variance : ~numpy.typing.ArrayLike
             Calculate variance as it's own signal
 
         References

@@ -12,7 +12,7 @@
         :toctree:
         :template: custom-attribute-template.rst
         {% for item in attributes %}
-        {% if item.0 != item.upper().0 and item not in inherited_members %}
+        {% if item.0 != item.upper().0 and item not in inherited_members and item not in ['trait_added', 'trait_modified'] %}
         {{ name }}.{{ item }}
         {% endif %}
         {%- endfor %}

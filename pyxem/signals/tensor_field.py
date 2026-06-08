@@ -32,7 +32,7 @@ def _polar_decomposition(image, side):
 
     Parameters
     ----------
-    image : numpy.ndarray
+    image : ~numpy.ndarray
         Matrix on which to form polar decomposition.
     side : str
         'left' or 'right' the side on which to perform polar decomposition.
@@ -51,7 +51,7 @@ def _get_rotation_angle(matrix):
 
     Parameters
     ----------
-    matrix : numpy.ndarray
+    matrix : ~numpy.ndarray
         A rotation matrix.
 
     Returns
@@ -95,7 +95,7 @@ class DisplacementGradientMap(Signal2D):
 
         Returns
         -------
-        strain_results : BaseSignal
+        strain_results : ~hyperspy.api.signals.BaseSignal
             Signal of shape < 4 | , > , navigation order is e11,e22,e12,theta
         """
         if self._lazy:

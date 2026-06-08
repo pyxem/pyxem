@@ -67,7 +67,7 @@ class PDFGenerator1D:
 
         Returns
         -------
-        pdf : PDF1D
+        pdf : ~pyxem.signals.PairDistributionFunction1D
             A signal of pair distribution functions.
         """
         s_scale = self.signal.axes_manager.signal_axes[0].scale

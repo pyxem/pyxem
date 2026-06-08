@@ -63,7 +63,7 @@ def detector_to_fourier(k_xy, wavelength, camera_length):
 
     Parameters
     ----------
-    k_xy : numpy.ndarray
+    k_xy : ~numpy.ndarray
         Cartesian coordinates in detector plane, in reciprocal Ångström.
     wavelength : float
         Electron wavelength in Ångström.
@@ -72,7 +72,7 @@ def detector_to_fourier(k_xy, wavelength, camera_length):
 
     Returns
     -------
-    k : numpy.ndarray
+    k : ~numpy.ndarray
         Array of Cartesian coordinates in reciprocal space relative to [000].
 
     """
@@ -98,12 +98,12 @@ def calculate_norms(z):
 
     Parameters
     ----------
-    z : numpy.ndarray
+    z : ~numpy.ndarray
         Array of cartesian vectors.
 
     Returns
     -------
-    norms : numpy.ndarray
+    norms : ~numpy.ndarray
         Array of vector norms.
     """
     return np.linalg.norm(z, axis=1)
@@ -115,12 +115,12 @@ def calculate_norms_ragged(z):
 
     Parameters
     ----------
-    z : numpy.ndarray
+    z : ~numpy.ndarray
         Array of cartesian vectors.
 
     Returns
     -------
-    norms : numpy.ndarray
+    norms : ~numpy.ndarray
         Array of vector norms.
     """
     norms = []
@@ -142,7 +142,7 @@ def filter_vectors_ragged(z, min_magnitude, max_magnitude, columns=[0, 1]):
 
     Returns
     -------
-    filtered_vectors : numpy.ndarray
+    filtered_vectors : ~numpy.ndarray
         Diffraction vectors within allowed magnitude tolerances.
     """
     # Calculate norms
@@ -168,7 +168,7 @@ def filter_vectors_edge_ragged(z, x_threshold, y_threshold):
 
     Returns
     -------
-    filtered_vectors : numpy.ndarray
+    filtered_vectors : ~numpy.ndarray
         Diffraction vectors within allowed tolerances.
     """
     # Filter x / y coordinates
@@ -184,7 +184,7 @@ def normalize_or_zero(v):
 
     Parameters
     ----------
-    v : numpy.ndarray
+    v : ~numpy.ndarray
         Single vector or array of vectors to be normalized.
     """
     norms = np.linalg.norm(v, axis=-1)
@@ -201,14 +201,14 @@ def get_rotation_matrix_between_vectors(from_v1, from_v2, to_v1, to_v2):
 
     Parameters
     ----------
-    from_v1, from_v2 : numpy.ndarray
+    from_v1, from_v2 : ~numpy.ndarray
         Vector to rotate _from_.
-    to_v1, to_v2 : numpy.ndarray
+    to_v1, to_v2 : ~numpy.ndarray
         Nx3 array of vectors to rotate _to_.
 
     Returns
     -------
-    R : numpy.ndarray
+    R : ~numpy.ndarray
         Nx3x3 list of rotation matrices between the vector pairs.
     """
     # Find normals to rotate around
@@ -282,7 +282,7 @@ def get_npeaks(found_peaks):
 
     Parameters
     ----------
-    found_peaks : numpy.ndarray
+    found_peaks : ~numpy.ndarray
         Array of found peaks.
 
     Returns
@@ -299,13 +299,13 @@ def get_angle_cartesian_vec(a, b):
 
     Parameters
     ----------
-    a, b : numpy.ndarray
+    a, b : ~numpy.ndarray
         The two lists of directions to compute the angle between in Nx3 float
         arrays.
 
     Returns
     -------
-    angles : numpy.ndarray
+    angles : ~numpy.ndarray
         List of angles between `a` and `b` in radians.
     """
     if a.shape != b.shape:
@@ -331,7 +331,7 @@ def get_angle_cartesian(a, b):
 
     Parameters
     ----------
-    a, b : array-like with 3 floats
+    a, b : ~numpy.typing.ArrayLike with 3 floats
         The two directions to compute the angle between.
 
     Returns
@@ -354,10 +354,10 @@ def filter_vectors_near_basis(vectors, basis, columns=[0, 1], distance=None):
 
     Parameters
     ----------
-    vectors: array-like
+    vectors: ~numpy.typing.ArrayLike
         A two dimensional array of vectors where each row identifies a new vector
 
-    basis: array-like
+    basis: ~numpy.typing.ArrayLike
         A two dimensional array of vectors where each row identifies a vector.
 
     columns: list
@@ -365,7 +365,7 @@ def filter_vectors_near_basis(vectors, basis, columns=[0, 1], distance=None):
 
     Returns
     -------
-    closest_vectors: array-like
+    closest_vectors: ~numpy.typing.ArrayLike
         An array of vectors which are the closest to the basis considered.
     """
     new_vectors = vectors[:, columns]
@@ -396,7 +396,7 @@ def _reverse_pos(peaks, ind=2):
 
     Parameters
     ----------
-    peaks : numpy.ndarray
+    peaks : ~numpy.ndarray
         Array of peaks to be reversed.
     ind : int
         The index of the position to be reversed.
@@ -450,7 +450,7 @@ def vectors_to_polar(vectors, columns=None):
 
     Parameters
     ----------
-    vectors : numpy.ndarray
+    vectors : ~numpy.ndarray
         Array of vectors.
     columns:
         The x and y columns to be used to calculate the
@@ -459,7 +459,7 @@ def vectors_to_polar(vectors, columns=None):
 
     Returns
     -------
-    polar_vectors : numpy.ndarray
+    polar_vectors : ~numpy.ndarray
         Array of vectors in polar coordinates.
     """
     if columns is None:
@@ -553,7 +553,7 @@ def get_angles(angles):
 
     Parameters
     ----------
-    angles: numpy.ndarray
+    angles: ~numpy.ndarray
         An array of angles in radians.  This is a 2D array with shape (n, 3) where n is the number
         of combinations and 3 is specific combination of angles to determine the difference between.
 
@@ -584,7 +584,7 @@ def get_filtered_combinations(
 
     Parameters
     ----------
-    pks : numpy.ndarray
+    pks : ~numpy.ndarray
         The diffraction vectors to be analyzed
     num : int
         The number of peaks to be combined
@@ -679,7 +679,7 @@ def get_three_angles(
 
     Parameters
     ----------
-    pks : numpy.ndarray
+    pks : ~numpy.ndarray
         The diffraction vectors to be analyzed
     k_index : int, optional
         The index of the radial component of the diffraction vectors, by default 0
@@ -701,7 +701,7 @@ def get_three_angles(
 
     Returns
     -------
-    three_angles : numpy.ndarray
+    three_angles : ~numpy.ndarray
         An array of angles between three diffraction vectors.  The columns are:
         [k, delta phi, min-angle, intensity, reduced-angle]
     """
@@ -753,7 +753,7 @@ def column_mean(vectors, columns):
 
     Parameters
     ----------
-    vectors: numpy.ndarray
+    vectors: ~numpy.ndarray
         The vectors to be used to calculate the mean
     columns:
         The columns to be used to calculate the mean.
@@ -777,7 +777,7 @@ def vectors2image(
 
     Parameters
     ----------
-    vectors: numpy.ndarray
+    vectors: ~numpy.ndarray
         The vectors to be binned
     image_size  : tuple
         The size of the image to be produced
@@ -812,7 +812,7 @@ def points_to_poly_collection(points, hull_index=(0, 1)):
 
     Parameters
     ----------
-    points: numpy.ndarray
+    points: ~numpy.ndarray
         The points to be used to create the polygon (N x 2)
     hull_index:
         The index of the points to be used to create the polygon. The default is (0, 1) which
@@ -832,7 +832,7 @@ def points_to_polygon(points, num_points=50):
 
     Parameters
     ----------
-    points: numpy.ndarray
+    points: ~numpy.ndarray
         The points to be used to create the polygon (N x 2)
     num_points
         The number of points on each side (top, bottom, left, right) of the polygon

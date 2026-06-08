@@ -33,11 +33,11 @@ class DiffractionVectors1D(DiffractionVectors, Signal1D):
 
     Attributes
     ----------
-    column_scale : np.array()
+    column_scale : ~numpy.ndarray
         The scale for each column in the signal.  For converting the real values
         to pixel values in some image.
 
-    column_offsets : np.array()
+    column_offsets : ~numpy.ndarray
         The offsets for each column in the signal.  For converting the real values
         to pixel values in some image.
 
