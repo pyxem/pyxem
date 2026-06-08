@@ -166,13 +166,8 @@ nitpick_ignore = [
     ("py:class", "array"),
     ("py:class", "array-like"),
     ("py:class", "2-d array"),
-    # External package types not in intersphinx
-    ("py:class", "pint.registry.Quantity"),
-    ("py:class", "pint.registry.Unit"),
+    # pint types not in intersphinx
     ("py:class", "pint.Quantity"),
-    ("py:class", "numpy._typing._array_like._ScalarT"),
-    # scipy internal ref
-    ("py:obj", "least_squares"),
 ]
 
 # nitpick_ignore_regex: suppress warnings matching these regex patterns
