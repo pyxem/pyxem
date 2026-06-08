@@ -30,6 +30,7 @@ import inspect
 from typing import Callable, Optional, Union
 import warnings
 
+
 from pyxem.common import VisibleDeprecationWarning
 
 
@@ -151,3 +152,60 @@ class deprecated_argument:
             return func(*args, **kwargs)
 
         return wrapped
+
+
+class extend_docs:
+    """
+    A simple decorator which allows you to include the parameters for
+    a downstream method in the docstring.
+    """
+
+    def __init__(self, function, method_name=None, remove_first_param=False):
+        """Creates a simple wrapper for extending the docstring of a function based on the
+        underlying method's docstring.
+
+        Parameters
+        ----------
+        function:
+            The function we need to "peek" into to pull the Parameters
+            from the docstring.
+        method_name: str, optional
+            The name of the method passed as the "method" parameter which will be extended.
+        remove_first_param: bool, optional
+            Whether to remove the first parameter from the method's docstring. Useful for
+            removing the array value when using the `map` method.
+        """
+        self.function = function
+        self.method_name = method_name
+        self.remove_first_param = remove_first_param
+
+    def __call__(self, func):
+        @functools.wraps(func)
+        def wrapped(*args, **kwargs):
+            return func(*args, **kwargs)
+
+        wrapped.__doc__ = self._extend_docs(func)
+        return wrapped
+
+    def _extend_docs(self, func):
+        """Extend the docstring of the function with the docstring of the method."""
+        try:
+            from numpydoc.docscrape import NumpyDocString
+        except ImportError:
+            return inspect.getdoc(func)
+
+        main_doc = NumpyDocString(inspect.getdoc(func))
+        extend_doc = NumpyDocString(inspect.getdoc(self.function))
+
+        extend_params = extend_doc["Parameters"]
+        if self.remove_first_param:
+            extend_params = extend_params[1:]
+
+        ext_params = []
+        if self.method_name is not None:
+            for e in extend_params:
+                if e.name not in [p.name for p in main_doc["Parameters"]]:
+                    e.desc.append(f"Passed to the :func:`{self.method_name}` method.")
+                    ext_params.append(e)
+        main_doc["Other Parameters"] = main_doc["Other Parameters"] + ext_params
+        return str(main_doc)

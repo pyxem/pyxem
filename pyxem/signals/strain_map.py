@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+from typing import List, Optional
+
 import numpy as np
 
 from hyperspy.signals import Signal2D
@@ -73,7 +75,7 @@ class StrainMap(Signal2D):
             np.asarray([[0, 1], [-1, 0]]), self.current_basis_x
         )
 
-    def rotate_strain_basis(self, x_new):
+    def rotate_strain_basis(self, x_new: List[float]) -> "StrainMap":
         """Rotates a strain map to a new basis.
 
         Parameters
@@ -133,14 +135,14 @@ class StrainMap(Signal2D):
 
     def plot(
         self,
-        cmap="hot",
-        axes_decor="off",
-        scalebar="all",
-        scalebar_color="black",
-        tight_layout=True,
-        per_row=2,
-        label=None,
-    ):
+        cmap: str = "hot",
+        axes_decor: str = "off",
+        scalebar: str = "all",
+        scalebar_color: str = "black",
+        tight_layout: bool = True,
+        per_row: int = 2,
+        label: Optional[List[str]] = None,
+    ) -> None:
         """Plot the strain map."""
         if label is None:
             label = ["e11", "e22", "e12", "theta"]

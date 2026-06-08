@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 import warnings
+from typing import Union
 
 import numpy as np
 
@@ -49,14 +50,14 @@ class VirtualDarkFieldImage(Signal2D):
 
     def get_vdf_segments(
         self,
-        min_distance=1,
-        min_size=1,
-        max_size=np.inf,
-        max_number_of_grains=np.inf,
-        marker_radius=1,
-        threshold=False,
-        exclude_border=False,
-    ):
+        min_distance: int = 1,
+        min_size: float = 1,
+        max_size: float = np.inf,
+        max_number_of_grains: float = np.inf,
+        marker_radius: float = 1,
+        threshold: bool = False,
+        exclude_border: Union[int, bool] = False,
+    ) -> "VDFSegment":
         """Separate segments from each of the virtual dark field (VDF) images
         using edge-detection by the Sobel transform and the watershed
         segmentation method implemented in scikit-image [1,2]. Obtain a

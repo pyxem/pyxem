@@ -16,12 +16,18 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-from hyperspy.signals import Signal1D
+from typing import TYPE_CHECKING, Optional, Union
+
+from hyperspy.signals import Signal1D, Signal2D
 from pyxem.signals import Diffraction2D
 from hyperspy._signals.lazy import LazySignal
 
+if TYPE_CHECKING:
+    from pyxem.signals.correlation2d import Correlation2D
+
 import numpy as np
 from hyperspy.roi import RectangularROI
+from hyperspy.roi import BaseROI
 
 import dask.array as da
 from dask.graph_manipulation import clone
@@ -50,11 +56,11 @@ class InSituDiffraction2D(Diffraction2D):
 
     _signal_type = "insitu_diffraction"
 
-    def roll_time_axis(self, time_axis):
+    def roll_time_axis(self, time_axis: int) -> "InSituDiffraction2D":
         """Roll time axis to default index (2)"""
         return self.rollaxis(time_axis, 2)
 
-    def get_time_series(self, roi=None, time_axis=2):
+    def get_time_series(self, roi: BaseROI = None, time_axis: int = 2) -> Signal2D:
         """Create a intensity time series from virtual aperture defined by roi.
 
         Parameters
@@ -86,8 +92,12 @@ class InSituDiffraction2D(Diffraction2D):
         return virtual_series
 
     def get_drift_vectors(
-        self, time_axis=2, reference="cascade", sub_pixel_factor=10, **kwargs
-    ):
+        self,
+        time_axis: int = 2,
+        reference: str = "cascade",
+        sub_pixel_factor: float = 10,
+        **kwargs,
+    ) -> Signal1D:
         """Calculate real space drift vectors from time series of images
 
         Parameters
@@ -123,8 +133,12 @@ class InSituDiffraction2D(Diffraction2D):
         return shift_vectors
 
     def correct_real_space_drift(
-        self, shifts=None, time_axis=2, order=1, lazy_result=True
-    ):
+        self,
+        shifts: Signal1D = None,
+        time_axis: int = 2,
+        order: int = 1,
+        lazy_result: bool = True,
+    ) -> "InSituDiffraction2D":
         """
         Perform real space drift registration on the dataset.
 
@@ -210,8 +224,8 @@ class InSituDiffraction2D(Diffraction2D):
         return registered_data
 
     def correct_real_space_drift_fast(
-        self, shifts=None, time_axis=2, order=1, **kwargs
-    ):
+        self, shifts: Signal1D = None, time_axis: int = 2, order: int = 1, **kwargs
+    ) -> "InSituDiffraction2D":
         """
         Perform real space drift registration on the dataset with fast performance
         over spatial axes. If signal is lazy, spatial axes must not be chunked
@@ -284,7 +298,7 @@ class InSituDiffraction2D(Diffraction2D):
             shift2=ys,
             order=order,
             inplace=False,
-            **kwargs
+            **kwargs,
         )
 
         registered_data_t = registered_data.transpose(navigation_axes=[-2, -1, -3])
@@ -294,13 +308,13 @@ class InSituDiffraction2D(Diffraction2D):
 
     def get_g2_2d_kresolved(
         self,
-        time_axis=2,
-        normalization="split",
-        k1bin=1,
-        k2bin=1,
-        tbin=1,
-        resample_time=None,
-    ):
+        time_axis: int = 2,
+        normalization: str = "split",
+        k1bin: int = 1,
+        k2bin: int = 1,
+        tbin: int = 1,
+        resample_time: Optional[Union[int, np.ndarray]] = None,
+    ) -> "Correlation2D":
         """
         Calculate k resolved g2 from in situ diffraction signal
 

@@ -29,6 +29,10 @@ from pyxem.signals import DiffractionVectors1D
 from pyxem.utils._deprecated import deprecated
 from diffsims.utils.sim_utils import get_electron_wavelength
 from scipy.constants import c, e, m_e
+from typing import Optional, Sequence
+
+from hyperspy.signals import Signal2D
+from pyxem.utils._typing import Degrees, Number
 
 
 class BeamShift(DiffractionVectors1D):
@@ -50,10 +54,10 @@ class BeamShift(DiffractionVectors1D):
     def get_linear_plane(
         self,
         mask=None,
-        fit_corners=None,
-        initial_values=None,
-        constrain_magnitude_variance=False,
-    ):
+        fit_corners: Optional[float] = None,
+        initial_values: Optional[np.ndarray] = None,
+        constrain_magnitude_variance: bool = False,
+    ) -> "BeamShift":
         """Fit linear planes to the beam shifts, and returns a BeamShift signal
         with the planes.
 
@@ -167,8 +171,12 @@ class BeamShift(DiffractionVectors1D):
         return s_bs
 
     def get_bivariate_histogram(
-        self, histogram_range=None, masked=None, bins=200, spatial_std=3
-    ):
+        self,
+        histogram_range: Optional[Sequence[float]] = None,
+        masked: Optional[np.ndarray] = None,
+        bins: int = 200,
+        spatial_std: Number = 3,
+    ) -> Signal2D:
         """
         Useful for finding the distribution of the beam shifts.
         Especially useful for magnetic signals, as it can tell us about
@@ -217,21 +225,21 @@ class BeamShift(DiffractionVectors1D):
         return s_hist
 
     @property
-    def beam_energy(self):
+    def beam_energy(self) -> Optional[float]:
         try:
             return self.metadata.get_item("Acquisition_instrument.TEM.beam_energy")
         except KeyError:
             return None
 
     @beam_energy.setter
-    def beam_energy(self, beam_energy):
+    def beam_energy(self, beam_energy: float) -> None:
         self.metadata.set_item("Acquisition_instrument.TEM.beam_energy", beam_energy)
         self.metadata.set_item(
             "Acquisition_instrument.TEM.wavelength",
             get_electron_wavelength(beam_energy),
         )
 
-    def calibrate_electric_shifts(self, thickness):
+    def calibrate_electric_shifts(self, thickness: float) -> "BeamShift":
         """
         Calibrate the shifts into the electric field
 
@@ -270,7 +278,12 @@ class BeamShift(DiffractionVectors1D):
         shifts.metadata.Signal.quantity = "MV/cm"
         return shifts
 
-    def pixels_to_calibrated_units(self, signal_axes=None, inplace=False, **kwargs):
+    def pixels_to_calibrated_units(
+        self,
+        signal_axes: Optional[Sequence] = None,
+        inplace: bool = False,
+        **kwargs,
+    ) -> Optional["BeamShift"]:
         """Convert the beam shifts from pixels to calibrated units using the
         signal axes passed or saved in the metadata.
 
@@ -313,12 +326,12 @@ class BeamShift(DiffractionVectors1D):
             frame_center=frame_centers,
             inplace=inplace,
             show_progressbar=False,
-            **kwargs
+            **kwargs,
         )
         cal_com.units = [s.units for s in signal_axes]
         return cal_com
 
-    def plot_on_signal(self, signal, **kwargs):
+    def plot_on_signal(self, signal: Signal2D, **kwargs) -> None:
         """
         Plot the beam shifts on top of a signal.
 
@@ -360,8 +373,11 @@ class BeamShift(DiffractionVectors1D):
         signal.add_marker(marker)
 
     def get_magnitude_signal(
-        self, autolim=True, autolim_sigma=4, magnitude_limits=None
-    ):
+        self,
+        autolim: bool = True,
+        autolim_sigma: Number = 4,
+        magnitude_limits: Optional[Sequence[float]] = None,
+    ) -> Signal2D:
         """Get beam shift magnitude image visualized as greyscale.
 
         Converts the x and y beam shifts into a magnitude map, showing the
@@ -424,7 +440,12 @@ class BeamShift(DiffractionVectors1D):
         )
         return s_magnitude
 
-    def phase_retrieval(self, method="kottler", mirroring=False, mirror_flip=False):
+    def phase_retrieval(
+        self,
+        method: str = "kottler",
+        mirroring: bool = False,
+        mirror_flip: bool = False,
+    ) -> Signal2D:
         """Retrieve the phase from two orthogonal phase gradients.
 
         Parameters
@@ -560,7 +581,11 @@ class BeamShift(DiffractionVectors1D):
         )
         return signal
 
-    def get_phase_signal(self, rotation=None, add_color_wheel_marker=True):
+    def get_phase_signal(
+        self,
+        rotation: Optional[Degrees] = None,
+        add_color_wheel_marker: bool = True,
+    ) -> Signal2D:
         """Get beam shift phase image visualized using continuous color scale.
 
         Converts the x and y beam shifts into an RGB array, showing the
@@ -627,12 +652,12 @@ class BeamShift(DiffractionVectors1D):
 
     def get_magnitude_phase_signal(
         self,
-        rotation=None,
-        autolim=True,
-        autolim_sigma=4,
-        magnitude_limits=None,
-        add_color_wheel_marker=True,
-    ):
+        rotation: Optional[Degrees] = None,
+        autolim: bool = True,
+        autolim_sigma: Number = 4,
+        magnitude_limits: Optional[Sequence[float]] = None,
+        add_color_wheel_marker: bool = True,
+    ) -> Signal2D:
         """Get beam shift image visualized using continuous color scale.
 
         Converts the x and y beam shifts into an RGB array, showing the
@@ -706,7 +731,7 @@ class BeamShift(DiffractionVectors1D):
             s_rgb.add_marker(color_wheel_marker, permanent=True, plot_marker=False)
         return s_rgb
 
-    def rotate_beam_shifts(self, angle):
+    def rotate_beam_shifts(self, angle: Degrees) -> "BeamShift":
         """Rotate the beam shift vector.
 
         Parameters
@@ -735,7 +760,9 @@ class BeamShift(DiffractionVectors1D):
         s_new = self._deepcopy_with_new_data(np.stack((x_new, y_new), axis=-1))
         return s_new
 
-    def rotate_scan_dimensions(self, angle, reshape=False):
+    def rotate_scan_dimensions(
+        self, angle: Degrees, reshape: bool = False
+    ) -> "BeamShift":
         """Rotate the scan dimensions by angle.
 
         Parameters
