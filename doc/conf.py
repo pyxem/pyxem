@@ -114,9 +114,9 @@ html_theme_options = {
     "show_toc_level": 2,
     "use_edit_page_button": True,
     "announcement": "Check out the new "
-    "<a href='https://pyxem.readthedocs.io/en/latest/examples/index.html'>Examples Gallery!</a> ",
+    "<a href='https://pyxem.org/dev/examples/index.html'>Examples Gallery!</a> ",
     "switcher": {
-        "json_url": "https://pyxem.readthedocs.io/en/latest/_static/switcher.json",
+        "json_url": "https://pyxem.org/dev/_static/switcher.json",
         "version_match": version_match,
     },
     "navbar_start": ["navbar-logo", "version-switcher"],
@@ -133,6 +133,7 @@ html_context = {
 # relative to this directory. They are copied after the builtin static files, so
 # a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
+html_extra_path = ["CNAME"]
 
 # Syntax highlighting
 pygments_style = "friendly"
