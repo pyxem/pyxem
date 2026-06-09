@@ -120,6 +120,7 @@ s1d.sum().plot()
 
 # Work on a spatial subset so this runs quickly in the tutorial.
 subset = s.inav[:, 30:70].deepcopy()
+subset.compute()  # decomposition requires a non-lazy signal
 subset.change_dtype("float64")
 subset.decomposition(normalize_poissonian_noise=True, algorithm="SVD")
 subset.plot_explained_variance_ratio(n=20)
@@ -144,7 +145,7 @@ subset.decomposition(
     algorithm="NMF",
     output_dimension=n_components,
 )
-subset.plot_decomposition_results(n_factors=n_components)
+subset.plot_decomposition_results()
 
 # %%
 # Each NMF factor is a representative diffraction pattern, and each loading map

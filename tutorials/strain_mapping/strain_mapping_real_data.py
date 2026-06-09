@@ -204,8 +204,25 @@ first_ring = diffraction_vectors.filter_magnitude(
 # ``inav[col, row]`` follows HyperSpy display order (col, row).
 # We extract the raw numpy array via ``data[()]`` so that ``get_strain_maps``
 # receives a plain (n_vectors, 2) float array rather than a 0-D object signal.
-ref_col, ref_row = 5, 5
-unstrained_vectors = first_ring.inav[ref_col, ref_row].data[()]
+#
+# Not every scan position will contain detectable first-ring spots, so we
+# search the top-left (matrix) region for the first position with ≥2 vectors.
+nav_shape = first_ring.axes_manager.navigation_shape  # (n_cols, n_rows)
+unstrained_vectors = None
+for ref_col in range(2, min(nav_shape[0] // 2, 20)):
+    for ref_row in range(2, min(nav_shape[1] // 2, 30)):
+        vecs = first_ring.inav[ref_col, ref_row].data[()]
+        if vecs is not None and np.ndim(vecs) == 2 and vecs.shape[0] >= 2:
+            unstrained_vectors = vecs
+            break
+    if unstrained_vectors is not None:
+        break
+
+if unstrained_vectors is None:
+    raise RuntimeError(
+        "No reference position with first-ring vectors found. "
+        "Try reducing min_magnitude or threshold_abs."
+    )
 print(f"Reference vectors at scan position ({ref_col}, {ref_row}):")
 print(unstrained_vectors)
 
