@@ -113,8 +113,8 @@ com.plot()
 #  values for these.
 # For this, we use `threshold_and_mask` on a subset of the dataset.
 
-s_computed = s.compute()
-s_threshold_mask = s_computed.threshold_and_mask(
+s.compute()  # compute() is in-place; s is now a non-lazy signal
+s_threshold_mask = s.threshold_and_mask(
     threshold=1,
     mask=(64, 64, 46),  # x  # y  # radius
 )
