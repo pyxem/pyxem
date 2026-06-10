@@ -39,6 +39,13 @@ print(s)
 print(s.axes_manager)
 
 # %%
+# For tutorial speed we operate on a 32×32 subset of the 128×128 scan.
+# The angular statistics are qualitatively the same on this smaller region.
+
+s = s.inav[:32, :32]
+print("Subset:", s)
+
+# %%
 # Plot a mean diffraction pattern to see the characteristic broad amorphous rings.
 
 s.mean().plot(vmax=2000, cmap="viridis")
