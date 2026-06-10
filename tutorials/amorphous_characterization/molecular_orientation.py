@@ -92,6 +92,10 @@ s.set_signal_type("electron_diffraction")
 s.calibration.center = center[::-1]
 s.calibration.affine = affine
 
+# For tutorial speed, operate on a 25×25 subset of the 75×75 scan.
+# Calibration is derived from the full-dataset mean above, so accuracy is preserved.
+s = s.inav[:25, :25]
+
 s_polar = s.get_azimuthal_integral2d(npt=100, radial_range=(0.2, 0.75), mean=True)
 
 # %%
@@ -102,9 +106,10 @@ pss = s_polar.isig[:, 0.25:0.35].sum(
 # %%
 
 pss.compute()  # We can compute this because it is smaller now that it is 1D
-pss.save(
-    "data/PolarSum.zspy", overwrite=False
-)  # Saving the data for use later (we are going to use some precomputed stuff which is a little larger)
+import os
+
+os.makedirs("data", exist_ok=True)
+pss.save("data/PolarSum.zspy", overwrite=True)
 
 # %%
 # Processing the Polar Data
