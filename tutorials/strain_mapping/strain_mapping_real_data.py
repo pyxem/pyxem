@@ -161,10 +161,10 @@ s.add_marker(markers)
 
 # Plot a histogram of |g| values in a representative pattern.
 all_mags = []
-vdata = diffraction_vectors.data  # ragged object array
+vdata = diffraction_vectors.data  # ragged object array, each element is (n, ≥2)
 for row in vdata.ravel():
     if row is not None and len(row) > 0:
-        mags = np.linalg.norm(row, axis=-1)
+        mags = np.linalg.norm(row[:, :2], axis=-1)  # use kx, ky columns only
         all_mags.extend(mags.tolist())
 
 fig, ax = plt.subplots()
@@ -202,29 +202,14 @@ first_ring = diffraction_vectors.filter_magnitude(
 # Choose a reference in the matrix far from the precipitate.
 # Inspect the VBF to confirm this is in the unstrained matrix region.
 # ``inav[col, row]`` follows HyperSpy display order (col, row).
-# We extract the raw numpy array via ``data[()]`` so that ``get_strain_maps``
-# receives a plain (n_vectors, 2) float array rather than a 0-D object signal.
 #
-# Not every scan position will contain detectable first-ring spots, so we
-# search the top-left (matrix) region for the first position with ≥2 vectors.
-nav_shape = first_ring.axes_manager.navigation_shape  # (n_cols, n_rows)
-unstrained_vectors = None
-for ref_col in range(2, min(nav_shape[0] // 2, 20)):
-    for ref_row in range(2, min(nav_shape[1] // 2, 30)):
-        vecs = first_ring.inav[ref_col, ref_row].data[()]
-        if vecs is not None and np.ndim(vecs) == 2 and vecs.shape[0] >= 2:
-            unstrained_vectors = vecs
-            break
-    if unstrained_vectors is not None:
-        break
-
-if unstrained_vectors is None:
-    raise RuntimeError(
-        "No reference position with first-ring vectors found. "
-        "Try reducing min_magnitude or threshold_abs."
-    )
+# For ragged DiffractionVectors the single-position data is a 1-element
+# object array; use ``.data[0]`` (not ``[()]``) to get the inner 2D array.
+ref_col, ref_row = 5, 5
+unstrained_vectors = first_ring.inav[ref_col, ref_row].data[0]
 print(f"Reference vectors at scan position ({ref_col}, {ref_row}):")
-print(unstrained_vectors)
+print(f"  {len(unstrained_vectors)} vectors, shape: {unstrained_vectors.shape}")
+print(unstrained_vectors[:, :2])  # show kx, ky columns only
 
 # %%
 # Computing the Strain Maps

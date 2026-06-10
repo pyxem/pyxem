@@ -113,8 +113,11 @@ com.plot()
 #  values for these.
 # For this, we use `threshold_and_mask` on a subset of the dataset.
 
-s.compute()  # compute() is in-place; s is now a non-lazy signal
-s_threshold_mask = s.threshold_and_mask(
+# threshold_and_mask is not supported for lazy signals; use a non-lazy copy
+# so that the original lazy s remains unchanged for subsequent operations.
+s_eager = s.copy()
+s_eager.compute()
+s_threshold_mask = s_eager.threshold_and_mask(
     threshold=1,
     mask=(64, 64, 46),  # x  # y  # radius
 )
@@ -132,7 +135,7 @@ com_threshold = s_threshold_mask.get_direct_beam_position(
     method="center_of_mass", half_square_width=40  # in pixels
 )
 
-com_threshold.compute()
+# s_threshold_mask is already non-lazy, so com_threshold is too — no .compute() needed
 com_threshold.plot()
 
 # %%
