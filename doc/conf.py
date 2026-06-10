@@ -87,6 +87,7 @@ linkcheck_ignore = [
     "https://doi.org/10.1016/j.ultramic.2016.12.021",
     "https://stackoverflow.com/questions/18603270/",  # 404 Client Error: Forbidden for url
     "https://scholar.google.com/scholar?q=pyxem",  # 403 Client Error: Forbidden for url
+    "https://pyxem.org/dev/_static/switcher.json",  # not available during PR builds
 ]
 
 
