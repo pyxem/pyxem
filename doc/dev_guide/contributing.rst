@@ -225,18 +225,30 @@ Tips for writing Jupyter notebooks that are meant to be converted to reST text f
   must be added to the gallery in the README.rst to be included in the
   documentation pages.
 
-Switching between Documentation Versions
-----------------------------------------
+Documentation Hosting and Version Switcher
+------------------------------------------
 
-To make switching between documentation versions easier, we have a version switcher
-in the documentation. This switcher is located in the ``doc/_static/switcher.json`` file
-or at https://pyxem.readthedocs.io/en/latest/_static/switcher.json.  Because the switcher
-points to the latest version of the documentation, any update to the documentation will
-be retroactively applied to all previous versions which have the switcher enabled.
+The pyxem documentation is hosted on GitHub Pages at https://pyxem.org.  The URL
+structure is:
 
-To update the switcher, you will need to update the ``doc/_static/switcher.json`` file
-with the new version number. This will ensure that the version switcher in the
-documentation is up to date.
+- ``https://pyxem.org/dev/`` — latest development build (from ``main``)
+- ``https://pyxem.org/stable/`` — latest stable release (copy updated on each tagged release)
+- ``https://pyxem.org/v0.21.0/`` — specific versioned release
+
+For **intersphinx** mappings in other packages, use the stable URL::
+
+    intersphinx_mapping = {
+        "pyxem": ("https://pyxem.org/stable/", None),
+    }
+
+The version switcher dropdown is driven by ``doc/_static/switcher.json``, which is
+served from ``https://pyxem.org/dev/_static/switcher.json``.  Because the switcher
+always loads from the ``dev`` build, any update to this file is retroactively applied
+to all deployed versions that have the switcher enabled.
+
+To update the switcher when making a release, add the new version entry to
+``doc/_static/switcher.json`` before tagging.  The CI will automatically create
+``https://pyxem.org/stable/`` as a copy of the new release docs.
 
 Continuous integration (CI)
 ===========================
@@ -253,9 +265,8 @@ We use `GitHub Actions <https://github.com/pyxem/pyxem/actions>`_ to automatical
 create a new release. Each time a new tag is pushed to the repository, the CI server
 will:
 
-1. Build the documentation.  Each tagged release will be added as a
-   `stable <https://docs.readthedocs.io/en/stable/versions.html>`_ build
-   to `Read the Docs <https://pyxem.readthedocs.io/en/latest/>`_.
+1. Build the documentation and deploy it to ``https://pyxem.org/v<version>/`` and
+   ``https://pyxem.org/stable/`` on GitHub Pages.
 2. Publish a new version of pyxem to `PyPI <https://pypi.org/project/pyxem/>`_.
 3. Create a new `GitHub release <https://github.com/pyxem/pyxem/releases>`_.
 4. Publish a new version of pyxem to `Zenodo <https://zenodo.org/doi/10.5281/zenodo.2649351>`_.
@@ -267,16 +278,14 @@ To make a new release, follow these steps:
    the changes.
 3. Update the list of contributors in both the ``release_info.py`` and ``.zenodo.json``
    files. __ Make sure that the Zenodo file is valid JSON __.
-4. Commit the changes and push them to the repository.
-5. Create a new tag with the "v" + version number (e.g. "v0.16.0") and make a new release on GitHub.
-6. Wait for the CI server to finish the release process.
+4. Add the new version entry to ``doc/_static/switcher.json`` (point its URL to
+   ``https://pyxem.org/stable/`` and mark the previous stable as a plain versioned entry).
+5. Commit the changes and push them to the repository.
+6. Create a new tag with the "v" + version number (e.g. "v0.16.0") and make a new release on GitHub.
+7. Wait for the CI server to finish the release process.
 
 Then you can increase the version number in ``release_info.py`` to the next minor version
 and add a dev suffix (e.g. "0.17.dev0").
-
-After the new version documentation is public. You should update the doc/_static/switcher.json
-file with the new version of the documentation. This will ensure that the version switcher in the
-documentation is up to date.
 
 .. note::
    If any of the steps fail, you can restart the CI server by clicking on the "Re-run

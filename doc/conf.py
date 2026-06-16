@@ -84,6 +84,8 @@ linkcheck_ignore = [
     "https://doi.org/10.1016/j.ultramic.2016.12.021",
     "https://stackoverflow.com/questions/18603270/",  # 404 Client Error: Forbidden for url
     "https://scholar.google.com/scholar?q=pyxem",  # 403 Client Error: Forbidden for url
+    "https://pyxem.org/dev/_static/switcher.json",  # not available during PR builds
+    "https://pyxem.org/stable/",  # populated on tagged releases via create_stable_copy
 ]
 
 
@@ -110,9 +112,9 @@ html_theme_options = {
     "show_toc_level": 2,
     "use_edit_page_button": True,
     "announcement": "Check out the new "
-    "<a href='https://pyxem.readthedocs.io/en/latest/examples/index.html'>Examples Gallery!</a> ",
+    "<a href='https://pyxem.org/dev/examples/index.html'>Examples Gallery!</a> ",
     "switcher": {
-        "json_url": "https://pyxem.readthedocs.io/en/latest/_static/switcher.json",
+        "json_url": "https://pyxem.org/dev/_static/switcher.json",
         "version_match": version_match,
     },
     "navbar_start": ["navbar-logo", "version-switcher"],

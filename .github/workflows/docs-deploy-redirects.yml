@@ -1,0 +1,68 @@
+name: Deploy legacy URL redirects
+
+# Creates HTML redirect pages on gh-pages for old documentation paths
+# that pointed to the ReadTheDocs layout (/en/stable/, /stable/, etc.).
+# Run this manually once after the v0.21.0 migration, and whenever a
+# new stable release is made that changes the redirect target.
+
+on:
+  workflow_dispatch:
+    inputs:
+      stable_version:
+        description: "Stable version to redirect /stable/ to (e.g. v0.21.0)"
+        required: true
+        default: "v0.21.0"
+
+jobs:
+  deploy-redirects:
+    runs-on: ubuntu-latest
+    if: github.repository_owner == 'pyxem'
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+
+      - name: Write redirect pages
+        env:
+          STABLE_VERSION: ${{ github.event.inputs.stable_version }}
+        run: |
+          write_redirect() {
+            local path="$1"
+            local target="$2"
+            mkdir -p "$path"
+            cat > "$path/index.html" <<HTML
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <title>pyxem documentation – redirecting</title>
+            <meta http-equiv="refresh" content="0; url=${target}">
+            <link rel="canonical" href="${target}">
+          </head>
+          <body>
+            <p>This page has moved. If you are not redirected automatically,
+               <a href="${target}">click here</a>.</p>
+          </body>
+          </html>
+          HTML
+          }
+
+          STABLE_URL="https://pyxem.org/${STABLE_VERSION}/"
+
+          write_redirect "stable"    "$STABLE_URL"
+          write_redirect "latest"    "$STABLE_URL"
+          write_redirect "en/stable" "$STABLE_URL"
+          write_redirect "en/latest" "$STABLE_URL"
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add stable/ latest/ en/
+          git diff --cached --quiet && echo "Nothing to commit" || \
+            git commit -m "Add legacy redirect pages for stable/latest/en/* → ${STABLE_VERSION}"
+          git push
