@@ -22,5 +22,5 @@ from pyxem.signals import LazyElectronDiffraction2D
 class TestDecomposition:
     def test_decomposition_class_assignment(self, diffraction_pattern):
         diffraction_pattern = diffraction_pattern.as_lazy()
-        diffraction_pattern.decomposition()
+        diffraction_pattern.decomposition(output_dimension=3)
         assert isinstance(diffraction_pattern, LazyElectronDiffraction2D)

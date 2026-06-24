@@ -23,5 +23,5 @@ class TestDecomposition:
     def test_decomposition_class_assignment(self, electron_diffraction1d):
         s = Diffraction1D(electron_diffraction1d)
         s = s.as_lazy()
-        s.decomposition()
+        s.decomposition(output_dimension=3)
         assert isinstance(s, LazyDiffraction1D)
