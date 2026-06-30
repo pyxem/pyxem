@@ -230,7 +230,7 @@ Switching between Documentation Versions
 
 To make switching between documentation versions easier, we have a version switcher
 in the documentation. This switcher is located in the ``doc/_static/switcher.json`` file
-or at https://pyxem.readthedocs.io/en/latest/_static/switcher.json.  Because the switcher
+or at https://pyxem.org/dev/_static/switcher.json.  Because the switcher
 points to the latest version of the documentation, any update to the documentation will
 be retroactively applied to all previous versions which have the switcher enabled.
 
