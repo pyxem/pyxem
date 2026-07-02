@@ -30,7 +30,6 @@ except ImportError:
     CUPY_INSTALLED = False
     cp = np
 
-
 skip_cupy = pytest.mark.skipif(not CUPY_INSTALLED, reason="cupy is required")
 
 
@@ -84,7 +83,15 @@ def test_template_to_polar_gpu(mock_simulation_gpu, max_r, expected_r):
     [
         (0, None, np.array([3, 5, 8, 7]), np.array([4, 12, 15, 24])),
         (90, None, -np.array([4, 12, 15, 24]), np.array([3, 5, 8, 7])),
-        (90, (7, 7), np.array([]), np.array([])),
+        (90, (7, 7), np.array([]), np.array([])),  # Test window given as a frame
+        (0, (8, 8), np.array([3]), np.array([4])),  # Test window given as a frame
+        (0, 3, np.array([]), np.array([])),  # Test window given as radius
+        (
+            0,
+            np.sqrt(3**2 + 4**2),
+            np.array([3]),
+            np.array([4]),
+        ),  # Test window given as radius
     ],
 )
 def test_get_template_cartesian_coordinates(
