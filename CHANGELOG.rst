@@ -34,7 +34,7 @@ Fixed
 - Add explicit support for python 3.12 and 3.13 and update test matrix. (#1147)
 - Silence axes warning in functions using :meth:`~hyperspy.api.signals.BaseSignal.map`. (#1168)
 - Increase chunk size and add User-Agent header for downloads from Zenodo. (#1180)
-
+- Specify ``output_signal_size`` in functions using :meth:`~hyperspy.api.signals.BaseSignal.map` to avoid unnecessary calculation. (#1169)
 
 Deprecated
 ----------
