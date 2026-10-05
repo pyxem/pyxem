@@ -122,6 +122,12 @@ class BeamShift(DiffractionVectors1D):
             If desirable results are not found, try varying the `initial_values`
             parameter.
 
+        Raises
+        ------
+        ValueError
+            If the fitting points contain NaN or infinite values. Use ``mask``
+            or ``fit_corners`` to exclude these points from the fit.
+
         Examples
         --------
         >>> s = pxm.signals.BeamShift(np.random.randint(0, 99, (100, 120, 2)))
