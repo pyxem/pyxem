@@ -25,6 +25,7 @@ import numpy as np
 
 from pyxem.common import VisibleDeprecationWarning
 import pyxem.data.dummy_data.dummy_data as dd
+import pyxem.utils._beam_shift_tools as bst
 from pyxem.signals import BeamShift, LazyBeamShift, Diffraction2D
 
 
@@ -67,6 +68,51 @@ class TestGetLinearPlane:
         s.data[45:50, 36:41, 1] = -100000
         s_lp = s.get_linear_plane(mask=s_mask)
         assert s_lp.data == approx(s_orig.data, abs=1e-6)
+
+    @pytest.mark.parametrize("value", [np.nan, np.inf, -np.inf])
+    @pytest.mark.parametrize("component", [0, 1])
+    @pytest.mark.parametrize("constrained", [False, True])
+    @pytest.mark.parametrize("mask_type", [None, np.array, Signal2D])
+    def test_nonfinite_values(
+        self, value, component, constrained, mask_type, monkeypatch
+    ):
+        s = BeamShift(np.zeros((30, 40, 2)))
+        s.data[10, 11, component] = value
+        mask = None
+        if mask_type is not None:
+            mask = np.zeros((30, 40), dtype=bool)
+            mask[0, 0] = True
+            mask = mask_type(mask)
+
+        original_solver = bst.opt.leastsq
+
+        def guarded_solver(func, initial_values, args):
+            if not np.isfinite(args).all():
+                pytest.fail("Non-finite fitting points reached the solver")
+            return original_solver(func, initial_values, args=args)
+
+        monkeypatch.setattr(bst.opt, "leastsq", guarded_solver)
+        with pytest.raises(ValueError, match="non-finite"):
+            s.get_linear_plane(mask=mask, constrain_magnitude_variance=constrained)
+
+    @pytest.mark.parametrize("value", [np.nan, np.inf, -np.inf])
+    @pytest.mark.parametrize("constrained", [False, True])
+    @pytest.mark.parametrize("mask_type", [np.array, Signal2D])
+    def test_masked_nonfinite_values(self, value, constrained, mask_type):
+        data = np.indices((30, 40), dtype=float).T * 5
+        s = BeamShift(data.copy())
+        mask = np.zeros(data.shape[:2], dtype=bool)
+        mask[10, 11] = True
+        mask = mask_type(mask)
+        expected = s.get_linear_plane(
+            mask=mask, constrain_magnitude_variance=constrained
+        )
+        s.data[10, 11] = value
+        original = s.data.copy()
+
+        plane = s.get_linear_plane(mask=mask, constrain_magnitude_variance=constrained)
+        np.testing.assert_allclose(plane.data, expected.data, atol=1e-6)
+        np.testing.assert_array_equal(s.data, original)
 
     def test_constrain_magnitude_variance(self):
         p = [0.5] * 6  # Plane parameters
@@ -196,6 +242,40 @@ class TestGetLinearPlane:
 
 
 class TestBeamShiftFitCorners:
+    @pytest.mark.parametrize("value", [np.nan, np.inf, -np.inf])
+    @pytest.mark.parametrize("constrained", [False, True])
+    def test_nonfinite_outside_corners(self, value, constrained):
+        data = np.indices((30, 40), dtype=float).T * 5
+        s = BeamShift(data.copy())
+        expected = s.get_linear_plane(
+            fit_corners=0.1, constrain_magnitude_variance=constrained
+        )
+        s.data[15, 20] = value
+        original = s.data.copy()
+
+        plane = s.get_linear_plane(
+            fit_corners=0.1, constrain_magnitude_variance=constrained
+        )
+        np.testing.assert_allclose(plane.data, expected.data, atol=1e-6)
+        np.testing.assert_array_equal(s.data, original)
+
+    @pytest.mark.parametrize("value", [np.nan, np.inf, -np.inf])
+    @pytest.mark.parametrize("constrained", [False, True])
+    def test_nonfinite_inside_corners(self, value, constrained, monkeypatch):
+        s = BeamShift(np.zeros((30, 40, 2)))
+        s.data[0, 0] = value
+
+        def unexpected_solver(*args, **kwargs):
+            pytest.fail("Non-finite fitting points reached the solver")
+
+        monkeypatch.setattr(
+            "pyxem.utils._beam_shift_tools.opt.leastsq", unexpected_solver
+        )
+        with pytest.raises(ValueError, match="non-finite"):
+            s.get_linear_plane(
+                fit_corners=0.1, constrain_magnitude_variance=constrained
+            )
+
     def test_fit_corners_flat(self):
         data0 = np.ones(shape=(64, 64, 2))
         s0 = BeamShift(data0)

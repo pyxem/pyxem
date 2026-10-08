@@ -162,6 +162,10 @@ def _get_linear_plane_from_signal2d(signal, mask=None, initial_values=None):
             raise ValueError("signal and mask need to have the same shape")
         points = points[np.invert(mask).flatten()]
 
+    if not np.isfinite(points).all():
+        raise ValueError(
+            "Fitting points contain non-finite values. Use a mask to exclude them."
+        )
     p = opt.leastsq(_residuals, initial_values, args=points)[0]
 
     plane = _plane_parameters_to_image(p, xaxis, yaxis)
@@ -191,6 +195,10 @@ def _get_linear_plane_by_minimizing_magnitude_variance(
             raise ValueError("signal and mask need to have the same navigation shape")
         points = points[np.invert(mask).flatten()]
 
+    if not np.isfinite(points).all():
+        raise ValueError(
+            "Fitting points contain non-finite values. Use a mask to exclude them."
+        )
     p = opt.leastsq(_magnitude_deviations, initial_values, args=points)[0]
 
     x, y = np.meshgrid(xaxis, yaxis)
