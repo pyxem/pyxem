@@ -52,9 +52,9 @@ def planted_disks(dtype=np.float32, navigation_shape=(3, 4), size=64, seed=0):
         pattern = np.full((size, size), 5.0)
         for row in range(12, size - 8, 16):
             for column in range(12, size - 8, 16):
-                centre = (row + 0.3 * position[0], column + 0.2 * position[-1])
+                center = (row + 0.3 * position[0], column + 0.2 * position[-1])
                 pattern += 300 * (
-                    (rows - centre[0]) ** 2 + (columns - centre[1]) ** 2 <= 16
+                    (rows - center[0]) ** 2 + (columns - center[1]) ** 2 <= 16
                 )
         data[position] = rng.poisson(pattern)
     return Diffraction2D(data)

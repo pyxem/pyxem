@@ -1509,17 +1509,17 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         ``"neural"`` is SpyDE's neural spot finder. A small U-Net trained to
         find diffraction spots of any size without tuning estimates the disk
         size from the pattern and resamples the pattern to the size it was
-        trained on; its threshold is the network's confidence. Two centre
+        trained on; its threshold is the network's confidence. Two center
         networks then re-place every disk on the raw pattern at native
         resolution: the refine network reads each disk's own window
-        (``refine_centres``), and the Friedel-partner network also reads the
+        (``refine_centers``), and the Friedel-partner network also reads the
         window at the disk's Friedel mirror, which shows the other dynamical
         fill of the same reflection (``friedel_partner``, on disks of 6-16 px
         radius). The vectors have five columns: the two calibrated positions,
         ``intensity`` (the mean of the raw pattern over a small disk around the
         spot), ``confidence`` (the network's, 0-1) and ``sigma`` (the
-        positional uncertainty of the centre, in the units of the positions:
-        the centre networks' own estimate where they placed the disk, else the
+        positional uncertainty of the center, in the units of the positions:
+        the center networks' own estimate where they placed the disk, else the
         counting-noise limit). It requires torch and downloads the weights from
         em-database (``pip install pyxem[neural]``).
 
@@ -1562,10 +1562,11 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
             model : str
                 The detector: ``"anyscale8"`` (default, scale robust),
-                ``"dynamical-mask8"`` (a disk-coverage head that centres
+                ``"dynamical-mask8"`` (a disk-coverage head that centers
                 dynamically filled disks on their aperture), ``"production"``
-                or ``"base16"``.
-            refine_centres : bool
+                or ``"base16"`` (legacy, not on em-database: only from the
+                local weights directory).
+            refine_centers : bool
                 Re-place each disk with the refine network. Default True;
                 skipped below a 5 px spot radius.
             friedel_partner : bool
@@ -1587,7 +1588,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
                 A local detector checkpoint instead of the download. A
                 directory of weight files named by the
                 ``PYXEM_SPOTUNET_WEIGHTS_DIR`` environment variable is used
-                before any download, for the centre networks too.
+                before any download, for the center networks too.
             model_version : str
                 The dated em-database version of the weights.
             device : str
@@ -1600,9 +1601,9 @@ class Diffraction2D(CommonDiffraction, Signal2D):
                 ``"auto"`` to detect a beam stop from a block of patterns.
             mask_dilation : int
                 Pixels by which an ``"auto"`` mask is grown. Default 5.
-            neighbour_refine : bool
+            neighbor_refine : bool
                 On a 2-D scan: keep the spots that recur in at least half of
-                the four neighbouring scan positions.
+                the four neighboring scan positions.
 
         Returns
         -------
@@ -1682,7 +1683,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         finder,
         mask=None,
         navigation_sigma=0.0,
-        neighbour_refine=False,
+        neighbor_refine=False,
         center=None,
         calibration=None,
         column_names=None,
@@ -1699,7 +1700,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             self.axes_manager.navigation_dimension,
             navigation_sigma=navigation_sigma,
             mask=mask,
-            neighbour_refine=neighbour_refine,
+            neighbor_refine=neighbor_refine,
             get_intensity=get_intensity,
         )
         signal_class = LazySignal if self._lazy else BaseSignal
@@ -1727,14 +1728,14 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             units = [str(axis.units) for axis in axes]
         extra_names = ["intensity", "confidence", "sigma"]
         extra_units = ["a.u.", "", units[0]]
-        extra_centre = [0.0, 0.0, 0.0]
+        extra_center = [0.0, 0.0, 0.0]
         extra_calibration = [1.0, 1.0, float(np.mean(calibration[:2]))]
         if not get_intensity:
             extra_names, extra_units = extra_names[1:], extra_units[1:]
-            extra_centre, extra_calibration = extra_centre[1:], extra_calibration[1:]
+            extra_center, extra_calibration = extra_center[1:], extra_calibration[1:]
         vectors = DiffractionVectors.from_peaks(
             peaks,
-            center=list(center[:2]) + extra_centre,
+            center=list(center[:2]) + extra_center,
             calibration=list(calibration[:2]) + extra_calibration,
             column_names=list(column_names[:2]) + extra_names,
             units=list(units[:2]) + extra_units,

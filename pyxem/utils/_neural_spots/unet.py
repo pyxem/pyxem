@@ -23,7 +23,7 @@
 
 Vendored verbatim from the ``yoloDiffraction`` research project
 (``yolodiffraction/model/unet.py``) so SpyDE carries its own copy of the
-inference architecture — DO NOT edit the maths here; it must stay bit-faithful
+inference architecture — DO NOT edit the math here; it must stay bit-faithful
 to the trained checkpoints (train/infer parity).
 
 Output heads (all at input resolution):
@@ -33,7 +33,7 @@ Output heads (all at input resolution):
                at GT spot pixels. This is the subpixel-accuracy core.
   - mask     : optional (``mask_head=True``), 1 channel, the pixel coverage of
                each disk's aperture (sigmoid). Its centroid is the disk's
-               geometric centre wherever the fill sits inside it, which the
+               geometric center wherever the fill sits inside it, which the
                offset head misses on dynamically filled disks (decode.py).
 
 The input is (B, C, H, W). C = number of stacked frames; C=1 is single-frame,

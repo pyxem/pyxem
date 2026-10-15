@@ -138,7 +138,7 @@ def get_diffraction_vectors_aw(obj, **kwargs):
         "navigation_sigma": FloatSliderWidget(
             min=0.0, max=5.0, step=0.1, description="Navigation blur"
         ),
-        "refine_centres": CheckboxWidget(description="Refine centres"),
+        "refine_centers": CheckboxWidget(description="Refine centers"),
         "friedel_partner": CheckboxWidget(description="Friedel partner"),
         "mask_beam_stop": CheckboxWidget(description="Mask beam stop"),
         "mask_dilation": IntSliderWidget(min=0, max=20, description="Beam-stop dilate"),

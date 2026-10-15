@@ -19,39 +19,39 @@
 # Vendored from SpyDE (https://github.com/directelectron/spyde) at 68dfa52038,
 # spyde/models/centre_refine.py; see vendor note in __init__.py.
 
-"""The centre steps: re-place each detected disk on the raw frame at native resolution.
+"""The center steps: re-place each detected disk on the raw frame at native resolution.
 
-The detector finds disks on a rescaled, locally normalised working image, so its
-centre is only as good as that image. Two steps look again at the raw counts:
+The detector finds disks on a rescaled, locally normalized working image, so its
+center is only as good as that image. Two steps look again at the raw counts:
 
-1. **Refine** (:data:`CENTRE_MODEL`, the bundled centre network F5): each disk's
-   own window, from the detector's centre.
+1. **Refine** (:data:`CENTER_MODEL`, the bundled center network F5): each disk's
+   own window, from the detector's center.
 2. **Friedel partner** (:data:`FRIEDEL_MODEL`, P4), on top of the refined
-   centres and optional: each disk's window together with the window at its
+   centers and optional: each disk's window together with the window at its
    Friedel mirror point ``2 x beam - p``, which shows the other dynamical fill
    of the same reflection. It works on spots of 6-16 px radius and leaves
    others where the refine step put them.
 
-Both are network refiners (:mod:`pyxem.utils._neural_spots.centre_network`) applied by
-:func:`refine_centres`, which cuts the windows, hands a chunk's windows to the
-network as one batch, and moves each disk to the refined centre. A refiner is
+Both are network refiners (:mod:`pyxem.utils._neural_spots.center_network`) applied by
+:func:`refine_centers`, which cuts the windows, hands a chunk's windows to the
+network as one batch, and moves each disk to the refined center. A refiner is
 any object with
 
     crop_half_width(spot_radius) -> int
-    refine(crops, centres, spot_radius) -> (centres, sigma)
+    refine(crops, centers, spot_radius) -> (centers, sigma)
 
 ``crops`` is ``(M, S, S)`` float32 raw counts with ``S = 2 * crop_half_width + 1``,
-cut around each centre's nearest pixel; ``centres`` is ``(M, 2)`` ``[y, x]`` in
-crop pixels. It returns the refined ``(M, 2)`` centres in the same crop pixels
+cut around each center's nearest pixel; ``centers`` is ``(M, 2)`` ``[y, x]`` in
+crop pixels. It returns the refined ``(M, 2)`` centers in the same crop pixels
 and an ``(M,)`` positional uncertainty in pixels, or ``None`` when it has none.
 A refiner declines a disk by returning NaN for it. It may carry
-``min_spot_radius`` / ``max_spot_radius``, outside which every centre is kept,
-and ``needs_partner``, which makes :func:`refine_centres` also cut each disk's
+``min_spot_radius`` / ``max_spot_radius``, outside which every center is kept,
+and ``needs_partner``, which makes :func:`refine_centers` also cut each disk's
 Friedel-mirror window.
 
-The step keeps the incoming centre for a declined disk and for any centre that
-moves more than half a spot radius: a refiner that wandered onto a neighbour is
-worse than the centre it replaced.
+The step keeps the incoming center for a declined disk and for any center that
+moves more than half a spot radius: a refiner that wandered onto a neighbor is
+worse than the center it replaced.
 """
 from __future__ import annotations
 
@@ -64,13 +64,13 @@ import numpy as np
 log = logging.getLogger(__name__)
 
 #: The refine step's network, and the Friedel-partner step's (registry ids).
-CENTRE_MODEL = "centre-fast-f5-v1"
-FRIEDEL_MODEL = "centre-partner-p4-v1"
+CENTER_MODEL = "center-fast-f5-v1"
+FRIEDEL_MODEL = "center-partner-p4-v1"
 
 # The largest move a step accepts, as a fraction of the spot radius.
 MAX_SHIFT_FRACTION = 0.5
 
-# Below this spot radius (native px) a refiner keeps the incoming centres unless
+# Below this spot radius (native px) a refiner keeps the incoming centers unless
 # it says otherwise: on disks this small the window holds too few pixels to beat
 # the detector (on SPED-Ag, R ~ 3 px, refining raised the in-grain speckle from
 # 0.036 to 0.047).
@@ -81,11 +81,11 @@ DEFAULT_MIN_SPOT_RADIUS = 5.0
 DEFAULT_BATCH = 4096
 
 
-class CentreRefiner(Protocol):
+class CenterRefiner(Protocol):
     def crop_half_width(self, spot_radius: float) -> int: ...
 
     def refine(
-        self, crops: np.ndarray, centres: np.ndarray, spot_radius: float
+        self, crops: np.ndarray, centers: np.ndarray, spot_radius: float
     ) -> tuple[np.ndarray, Optional[np.ndarray]]: ...
 
 
@@ -101,11 +101,11 @@ def masked_median(values: np.ndarray, mask: np.ndarray) -> np.ndarray:
     return np.where(count > 0, 0.5 * (low.astype(np.float64) + high), 0.0)
 
 
-def _window_indices(centres: np.ndarray, half_width: int, shape):
+def _window_indices(centers: np.ndarray, half_width: int, shape):
     """Rows, columns and inside-mask of the ``2 * half_width + 1`` px windows
-    around each centre's nearest pixel, and the centres in window pixels."""
+    around each center's nearest pixel, and the centers in window pixels."""
     height, width = shape
-    nearest = np.rint(centres).astype(np.intp)
+    nearest = np.rint(centers).astype(np.intp)
     nearest[:, 0] = np.clip(nearest[:, 0], 0, height - 1)
     nearest[:, 1] = np.clip(nearest[:, 1], 0, width - 1)
     offsets = np.arange(-half_width, half_width + 1)
@@ -118,20 +118,20 @@ def _window_indices(centres: np.ndarray, half_width: int, shape):
         np.clip(rows, 0, height - 1),
         np.clip(columns, 0, width - 1),
         inside,
-        centres - (nearest - half_width),
+        centers - (nearest - half_width),
     )
 
 
-def extract_crops(frame: np.ndarray, centres: np.ndarray, half_width: int):
-    """Windows of ``2 * half_width + 1`` px around each centre's nearest pixel,
+def extract_crops(frame: np.ndarray, centers: np.ndarray, half_width: int):
+    """Windows of ``2 * half_width + 1`` px around each center's nearest pixel,
     zero outside the frame. Returns ``(crops, local)``: the ``(M, S, S)`` float32
-    stack and the centres in crop pixels."""
+    stack and the centers in crop pixels."""
     frame = np.asarray(frame, np.float32)
-    centres = np.asarray(centres, np.float64).reshape(-1, 2)
+    centers = np.asarray(centers, np.float64).reshape(-1, 2)
     size = 2 * half_width + 1
-    if len(centres) == 0:
+    if len(centers) == 0:
         return np.zeros((0, size, size), np.float32), np.zeros((0, 2))
-    rows, columns, inside, local = _window_indices(centres, half_width, frame.shape)
+    rows, columns, inside, local = _window_indices(centers, half_width, frame.shape)
     # Gather only the windows. Padding the frame instead copies all of it for
     # every frame, which on 512 x 512 frames cost four times the network.
     crops = frame[rows[:, :, None], columns[:, None, :]]
@@ -139,14 +139,14 @@ def extract_crops(frame: np.ndarray, centres: np.ndarray, half_width: int):
 
 
 def _extract_crops_on_device(
-    stack, frame_of: np.ndarray, centres: np.ndarray, half_width: int
+    stack, frame_of: np.ndarray, centers: np.ndarray, half_width: int
 ):
     """:func:`extract_crops` for a group of frames at once, gathered on the GPU
     from ``stack`` (the group's frames already moved there): the same windows."""
     import torch
 
     device = stack.device
-    rows, columns, inside, local = _window_indices(centres, half_width, stack.shape[1:])
+    rows, columns, inside, local = _window_indices(centers, half_width, stack.shape[1:])
     crops = stack[
         torch.as_tensor(frame_of, device=device)[:, None, None],
         torch.as_tensor(rows, device=device)[:, :, None],
@@ -161,11 +161,11 @@ DEVICE_FRAME_BYTES = 256 * 2**20
 
 
 def frame_beams(positions, frame_shape, spot_radius) -> np.ndarray:
-    """Per frame, the centre of Friedel symmetry of its ``(n, 2)`` centres:
+    """Per frame, the center of Friedel symmetry of its ``(n, 2)`` centers:
     start at the disk nearest the mean of all disks, pair each disk with the
-    one nearest its mirror (within ``max(0.4 R, 2 px)``), re-centre on the mean
+    one nearest its mirror (within ``max(0.4 R, 2 px)``), re-center on the mean
     pair midpoint; three times. A frame with fewer than 4 disks or 2 pairs takes
-    the median of the other frames' beams (descanned data), or the frame centre
+    the median of the other frames' beams (descanned data), or the frame center
     when none has one — so a lone frame in the live preview can fall back
     differently from the same frame inside a chunk."""
     tolerance = max(0.4 * float(spot_radius), 2.0)
@@ -174,10 +174,10 @@ def frame_beams(positions, frame_shape, spot_radius) -> np.ndarray:
         points = np.asarray(points, np.float64).reshape(-1, 2)
         if len(points) < 4:
             continue
-        centre = points[np.argmin(np.hypot(*(points - points.mean(0)).T))]
+        center = points[np.argmin(np.hypot(*(points - points.mean(0)).T))]
         found = False
         for _ in range(3):
-            mirror = 2 * centre - points
+            mirror = 2 * center - points
             distance = np.hypot(
                 mirror[:, None, 0] - points[None, :, 0],
                 mirror[:, None, 1] - points[None, :, 1],
@@ -189,10 +189,10 @@ def frame_beams(positions, frame_shape, spot_radius) -> np.ndarray:
             if paired.sum() < 2:
                 found = False
                 break
-            centre = 0.5 * (points[paired] + points[partner[paired]]).mean(0)
+            center = 0.5 * (points[paired] + points[partner[paired]]).mean(0)
             found = True
         if found:
-            beams[number] = centre
+            beams[number] = center
     if np.isfinite(beams).any():
         fallback = np.nanmedian(beams, 0)
     else:
@@ -200,11 +200,11 @@ def frame_beams(positions, frame_shape, spot_radius) -> np.ndarray:
     return np.where(np.isfinite(beams), beams, fallback)
 
 
-def refine_centres(
+def refine_centers(
     frames: Sequence[np.ndarray],
     positions: Sequence[np.ndarray],
     spot_radius: float,
-    refiner: CentreRefiner,
+    refiner: CenterRefiner,
     batch_size: int = DEFAULT_BATCH,
 ):
     """Refine every frame's ``(n, 2)`` ``[y, x]`` detections in ``frames``.
@@ -249,8 +249,8 @@ def refine_centres(
         frame_of = np.concatenate(
             [np.full(len(points), n) for n, (_, points) in enumerate(pending)]
         )
-        centres = np.concatenate([points_of(i) for i, _ in pending]).astype(np.float64)
-        return _extract_crops_on_device(stack, frame_of, centres, half_width)
+        centers = np.concatenate([points_of(i) for i, _ in pending]).astype(np.float64)
+        return _extract_crops_on_device(stack, frame_of, centers, half_width)
 
     def _flush(pending):
         nonlocal has_sigma
@@ -328,17 +328,17 @@ def _gpu_device(refiner):
 
 
 def load_step(model_id: str, device=None):
-    """The network for one of the centre steps, from the registry; ``None``
+    """The network for one of the center steps, from the registry; ``None``
     with a warning when it cannot load, so detection still completes with the
-    centres it has."""
+    centers it has."""
     from . import weights as registry
 
     try:
         return registry.get_refiner(model_id, device)
     except Exception as error:
         log.warning(
-            "[models] centre network %r unavailable (%s); keeping the "
-            "centres it would have refined",
+            "[models] center network %r unavailable (%s); keeping the "
+            "centers it would have refined",
             model_id,
             error,
         )

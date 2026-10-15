@@ -56,7 +56,7 @@ class DiffractionVectorFinder(t.HasTraits):
     navigation_sigma = t.Range(0.0, 10.0, value=0.0, desc="Navigation blur")
     mask_beam_stop = t.Bool(False, desc="Exclude a beam stop")
     mask_dilation = t.Range(0, 32, value=5, desc="Beam-stop dilation (px)")
-    refine_centres = t.Bool(True, desc="Re-place each disk with the centre network")
+    refine_centers = t.Bool(True, desc="Re-place each disk with the center network")
     friedel_partner = t.Bool(True, desc="Then refine with each disk's Friedel partner")
     show_response = t.Bool(False, desc="Show where the network fired")
     #: Navigation index (array order) of the displayed pattern.
@@ -72,7 +72,7 @@ class DiffractionVectorFinder(t.HasTraits):
         mask_automatic=False,
         mask_dilation=_find_vectors.DEFAULT_MASK_DILATION,
         navigation_sigma=0.0,
-        neighbour_refine=False,
+        neighbor_refine=False,
         center=None,
         calibration=None,
         column_names=None,
@@ -82,7 +82,7 @@ class DiffractionVectorFinder(t.HasTraits):
         super().__init__()
         self.signal = signal
         self.finder = finder
-        self.neighbour_refine = neighbour_refine
+        self.neighbor_refine = neighbor_refine
         self._output_settings = dict(
             center=center,
             calibration=calibration,
@@ -102,7 +102,7 @@ class DiffractionVectorFinder(t.HasTraits):
             threshold=finder.threshold,
             min_distance=finder.min_distance,
             spot_radius=finder.spot_radius or 0.0,
-            refine_centres=finder.refine_centres,
+            refine_centers=finder.refine_centers,
             friedel_partner=finder.friedel_partner,
             navigation_sigma=float(navigation_sigma),
             mask_beam_stop=mask is not None,
@@ -120,7 +120,7 @@ class DiffractionVectorFinder(t.HasTraits):
             "threshold",
             "min_distance",
             "spot_radius",
-            "refine_centres",
+            "refine_centers",
             "friedel_partner",
             "mask_beam_stop",
             "mask_dilation",
@@ -141,7 +141,7 @@ class DiffractionVectorFinder(t.HasTraits):
         self.finder.threshold = float(self.threshold)
         self.finder.min_distance = int(self.min_distance)
         self.finder.spot_radius = float(self.spot_radius) or None
-        self.finder.refine_centres = bool(self.refine_centres)
+        self.finder.refine_centers = bool(self.refine_centers)
         self.finder.friedel_partner = bool(self.friedel_partner)
         return self.finder
 
@@ -178,7 +178,7 @@ class DiffractionVectorFinder(t.HasTraits):
 
     def _read_pattern(self):
         """The pattern at :attr:`position`, navigation-blurred like the full
-        search. Only the neighbourhood the blur reaches is read, so a lazy
+        search. Only the neighborhood the blur reaches is read, so a lazy
         signal computes a handful of patterns rather than a chunk."""
         data = self.signal.data
         position = tuple(self.position)
@@ -199,9 +199,9 @@ class DiffractionVectorFinder(t.HasTraits):
             slab = data[tuple(slice(w.min(), w.max() + 1) for w in window)]
             if hasattr(slab, "compute"):
                 slab = slab.compute()
-            neighbourhood = np.asarray(slab)[np.ix_(*[w - w.min() for w in window])]
+            neighborhood = np.asarray(slab)[np.ix_(*[w - w.min() for w in window])]
             blurred = gaussian_filter(
-                neighbourhood.astype(np.float32),
+                neighborhood.astype(np.float32),
                 sigma=(self.navigation_sigma,) * self._navigation_dimension + (0, 0),
                 mode="reflect",
                 truncate=3.0,
@@ -234,7 +234,7 @@ class DiffractionVectorFinder(t.HasTraits):
             self._update_finder(),
             mask=self.mask,
             navigation_sigma=float(self.navigation_sigma),
-            neighbour_refine=self.neighbour_refine,
+            neighbor_refine=self.neighbor_refine,
             **self._output_settings,
         )
         return self.vectors

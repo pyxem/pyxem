@@ -21,16 +21,16 @@
 
 """On-device (torch) batched equivalents of ``preprocess.py``'s numpy/scipy pipeline.
 
-``detect_batch`` used to normalise / scale / pad every frame on the HOST with
+``detect_batch`` used to normalize / scale / pad every frame on the HOST with
 numpy + scipy regardless of the model device, then transfer the stack to the GPU
 for the forward. That host preprocessing is a FIXED cost that doesn't shrink when
 the forward moves to the GPU, so once the forward is fast it dominates end-to-end
-time (Amdahl): measured ~1 s of CPU normalise for a 256-frame batch vs ~250 ms for
-the MPS forward. These functions do the SAME maths batched on the model device so
+time (Amdahl): measured ~1 s of CPU normalize for a 256-frame batch vs ~250 ms for
+the MPS forward. These functions do the SAME math batched on the model device so
 the whole preprocess → forward → decode pipeline stays on the GPU.
 
 PARITY IS LOAD-BEARING. The checkpoints were trained with ``preprocess.py``'s exact
-maths (see its "DO NOT change the maths" note), so these must match it numerically.
+math (see its "DO NOT change the math" note), so these must match it numerically.
 The couplings that actually bite (and are pinned by ``test_preprocess_torch_parity``):
 
   - Gaussian high-pass: ``scipy.ndimage.gaussian_filter`` defaults to
@@ -64,7 +64,7 @@ from .preprocess import CANONICAL_DIAMETER, DOWNSAMPLE, SCALE_CLIP
 
 
 def _gaussian_kernel1d(sigma: float, radius: int, device, dtype) -> torch.Tensor:
-    """scipy ``_gaussian_kernel1d`` (order 0): normalised ``exp(-x^2/2sigma^2)`` for
+    """scipy ``_gaussian_kernel1d`` (order 0): normalized ``exp(-x^2/2sigma^2)`` for
     ``x in [-radius, radius]``. Symmetric, so correlate (scipy) == convolve (torch)."""
     x = torch.arange(-radius, radius + 1, device=device, dtype=dtype)
     k = torch.exp(-0.5 * (x / float(sigma)) ** 2)
@@ -119,9 +119,9 @@ def normalize_input_batch(
     local: bool = True,
     mad_floor: float | None = None,
 ) -> torch.Tensor:
-    """Batched, on-device ``preprocess.normalize_input`` (log1p + robust standardise,
+    """Batched, on-device ``preprocess.normalize_input`` (log1p + robust standardize,
     optional local-background subtraction). ``x`` is ``(N, H, W)`` float; returns the
-    same shape. Matches the numpy maths (see module docstring), including the
+    same shape. Matches the numpy math (see module docstring), including the
     optional floor on the robust scale (``preprocess.normalize_input``)."""
     x = torch.log1p(x.clamp(min=0))
     if local:
