@@ -1161,7 +1161,11 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         name="lazy_result", alternative="lazy_output", since="0.15.0", removal="1.0.0"
     )
     def template_match_disk(
-        self, disk_r: Number = 4, inplace: bool = False, **kwargs
+        self,
+        disk_r: Number = 4,
+        inplace: bool = False,
+        device: Optional[str] = None,
+        **kwargs,
     ) -> Optional["Diffraction2D"]:
         """Template match the signal dimensions with a disk.
 
@@ -1175,6 +1179,16 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         lazy_output : bool, default True
             If True, will return a LazyDiffraction2D object. If False,
             will compute the result and return a Diffraction2D object.
+        device : str, optional
+            Run the correlation with torch on this device (``"cpu"``,
+            ``"cuda"``, ``"mps"``, or ``"auto"`` for CUDA, then Apple MPS,
+            then the CPU), a chunk of patterns per call, instead of with
+            scikit-image one pattern at a time. The result matches
+            scikit-image to floating-point rounding (about 1e-14 in float64,
+            a few 1e-4 in float32) and is 2-5 times faster; see
+            :func:`pyxem.utils._template_matching.match_template_stack`.
+            Requires torch (``pip install pyxem[neural]``). Default None
+            (scikit-image).
         kwargs :
             Passed to :func:`pyxem.utils.diffraction.normalize_template_match` or
             the :meth:`hyperspy.api.signals.BaseSignal.map` method.
@@ -1198,15 +1212,18 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         """
         disk = morphology.disk(disk_r, self.data.dtype)
-        return self.map(
-            normalize_template_match, template=disk, inplace=inplace, **kwargs
-        )
+        return self._template_match(disk, inplace=inplace, device=device, **kwargs)
 
     @deprecated_argument(
         name="lazy_result", alternative="lazy_output", since="0.15.0", removal="1.0.0"
     )
     def template_match_ring(
-        self, r_inner: Number = 5, r_outer: Number = 7, inplace: bool = False, **kwargs
+        self,
+        r_inner: Number = 5,
+        r_outer: Number = 7,
+        inplace: bool = False,
+        device: Optional[str] = None,
+        **kwargs,
     ) -> Optional["Diffraction2D"]:
         """Template match the signal dimensions with a ring.
 
@@ -1224,6 +1241,16 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         inplace : bool, optional
             If True, the data is replaced by the filtered data. If False, a
             new signal is returned. Default False.
+        device : str, optional
+            Run the correlation with torch on this device (``"cpu"``,
+            ``"cuda"``, ``"mps"``, or ``"auto"`` for CUDA, then Apple MPS,
+            then the CPU), a chunk of patterns per call, instead of with
+            scikit-image one pattern at a time. The result matches
+            scikit-image to floating-point rounding (about 1e-14 in float64,
+            a few 1e-4 in float32) and is 2-5 times faster; see
+            :func:`pyxem.utils._template_matching.match_template_stack`.
+            Requires torch (``pip install pyxem[neural]``). Default None
+            (scikit-image).
         kwargs :
             Passed to :func:`pyxem.utils.diffraction.normalize_template_match` or
             the :meth:`hyperspy.api.signals.BaseSignal.map` method.
@@ -1256,9 +1283,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         ring_inner = morphology.disk(r_inner, dtype=bool)
         ring = morphology.disk(r_outer, dtype=bool)
         ring[edge_slice] = ring[edge_slice] ^ ring_inner
-        return self.map(
-            normalize_template_match, template=ring, inplace=inplace, **kwargs
-        )
+        return self._template_match(ring, inplace=inplace, device=device, **kwargs)
 
     def filter(
         self, func, inplace: bool = False, **kwargs
@@ -1306,7 +1331,11 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             return self._deepcopy_with_new_data(data=new_data)
 
     def template_match(
-        self, template: np.ndarray, inplace: bool = False, **kwargs
+        self,
+        template: np.ndarray,
+        inplace: bool = False,
+        device: Optional[str] = None,
+        **kwargs,
     ) -> Optional["Diffraction2D"]:
         """Template match the signal dimensions with a binary image.
 
@@ -1323,6 +1352,16 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         inplace : bool, optional
             If True, the data is replaced by the filtered data. If False, a
             new signal is returned. Default False.
+        device : str, optional
+            Run the correlation with torch on this device (``"cpu"``,
+            ``"cuda"``, ``"mps"``, or ``"auto"`` for CUDA, then Apple MPS,
+            then the CPU), a chunk of patterns per call, instead of with
+            scikit-image one pattern at a time. The result matches
+            scikit-image to floating-point rounding (about 1e-14 in float64,
+            a few 1e-4 in float32) and is 2-5 times faster; see
+            :func:`pyxem.utils._template_matching.match_template_stack`.
+            Requires torch (``pip install pyxem[neural]``). Default None
+            (scikit-image).
         **kwargs :
             Any additional keyword arguments to be passed to
             :func:`pyxem.utils.diffraction.normalize_template_match`
@@ -1349,9 +1388,55 @@ class Diffraction2D(CommonDiffraction, Signal2D):
 
         """
 
-        return self.map(
-            normalize_template_match, template=template, inplace=inplace, **kwargs
+        return self._template_match(template, inplace=inplace, device=device, **kwargs)
+
+    def _template_match(self, template, inplace=False, device=None, **kwargs):
+        """Apply :func:`~pyxem.utils.diffraction.normalize_template_match` to
+        every pattern: with scikit-image through :meth:`map`, or with
+        ``device`` through the batched torch correlation, building the output
+        the way :meth:`map` does."""
+        if device is None:
+            return self.map(
+                normalize_template_match, template=template, inplace=inplace, **kwargs
+            )
+        from hyperspy.misc.dask_utils import _compute
+
+        from pyxem.utils._template_matching import template_match_array
+
+        correlation_arguments = {
+            key: kwargs.pop(key)
+            for key in ("subtract_min", "pad_input", "mode", "constant_values")
+            if key in kwargs
+        }
+        show_progressbar = kwargs.pop("show_progressbar", None)
+        num_workers = kwargs.pop("num_workers", None)
+        lazy_output = kwargs.pop("lazy_output", None)
+        if kwargs:
+            raise TypeError(
+                f"{sorted(kwargs)} cannot be combined with device={device!r}; "
+                "use device=None for scikit-image's template matching."
+            )
+        if lazy_output is None:
+            lazy_output = self._lazy
+        mapped = template_match_array(
+            self.data,
+            template,
+            device=None if device == "auto" else device,
+            **correlation_arguments,
         )
+        if inplace:
+            self.data = mapped
+            signal = self
+        else:
+            signal = self._deepcopy_with_new_data(mapped)
+        signal._lazy = lazy_output
+        signal.get_dimensions_from_data()
+        signal._assign_subclass()
+        if not lazy_output:
+            signal.data = _compute(
+                signal.data, show_progressbar=show_progressbar, num_workers=num_workers
+            )
+        return None if inplace else signal
 
     @deprecated(since="0.15.0", removal="1.0.0")
     def template_match_with_binary_image(
@@ -1406,9 +1491,29 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         column_names: Optional[tuple] = None,
         units: Optional[tuple] = None,
         get_intensity: bool = True,
+        method: str = "local_max",
+        interactive: bool = False,
+        display: bool = True,
+        toolkit: Optional[str] = None,
         **kwargs,
     ) -> "DiffractionVectors":
-        """Find vectors from the diffraction pattern. Wraps `hyperspy.api.signals.Signal2D.find_peaks`
+        """Find the diffraction vectors in every pattern.
+
+        ``method`` selects the peak finder. ``"neural"`` is pyxem's own; every
+        other method is passed unchanged to
+        :meth:`hyperspy.api.signals.Signal2D.find_peaks` (``"local_max"``,
+        ``"max"``, ``"minmax"``, ``"zaefferer"``, ``"stat"``,
+        ``"laplacian_of_gaussian"``, ``"difference_of_gaussian"``,
+        ``"template_matching"``) together with its keyword arguments.
+
+        ``"neural"`` is a small U-Net (ported from SpyDE) trained to find
+        diffraction spots of any size without tuning: it estimates the disk
+        size from the pattern and resamples each pattern to the size it was
+        trained on. Its threshold is the network's confidence (default 0.3),
+        positions are subpixel, and the intensity column is the mean of the
+        raw pattern over a small disk around each spot. It requires torch, and
+        downloads its weights from em-database (the ``SpotUNetDiffraction``
+        entry) unless ``model_path`` is given (``pip install pyxem[neural]``).
 
         Parameters
         ----------
@@ -1425,213 +1530,127 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             The units of the vectors, if None, will use the units of the
             signal axes
         get_intensity: bool
-            If True, will return the intensity of the peaks as well as the
-            intensity of the peaks. Default True.
+            If True, a third column holds the intensity of each peak.
+            Default True.
+        method: str
+            The peak finder; see above. Default ``"local_max"``.
+        interactive: bool
+            For ``"neural"``: open a widget that tunes the settings on the
+            pattern under a navigator crosshair, and return the
+            :class:`~pyxem.signal_tools.DiffractionVectorFinder` behind it,
+            whose ``compute()`` searches every pattern with the tuned
+            settings. The widget is registered with hyperspy's GUI system
+            for the anywidget toolkit (``pip install pyxem[interactive]``).
+            For hyperspy's methods use ``find_peaks(interactive=True)``.
+        display: bool
+            With ``interactive=True``: display the widget (True), or keep it
+            on the returned finder's ``widgets`` attribute (False).
+        toolkit: str or None
+            With ``interactive=True``: the hyperspy GUI toolkit to use.
         kwargs:
-            Passed to the peak finding function.
-        """
-        from pyxem.signals import DiffractionVectors
+            For a hyperspy method, passed to
+            :meth:`hyperspy.api.signals.Signal2D.find_peaks`. For
+            ``"neural"``:
 
-        vectors = super().find_peaks(
-            interactive=False, get_intensity=get_intensity, **kwargs
-        )
-        vectors = DiffractionVectors.from_peaks(
-            vectors,
-            center=center,
-            calibration=calibration,
-            column_names=column_names,
-            units=units,
-        )
-        return vectors
-
-    def find_vectors(
-        self,
-        method: str = "dog",
-        threshold: Optional[float] = None,
-        min_distance: Optional[int] = None,
-        disk_radius: Union[int, str, None] = None,
-        sigma1: float = 0.8,
-        sigma2: float = 2.0,
-        spot_radius: Optional[float] = None,
-        background_sigma: Union[float, str, None] = "auto",
-        model_path: Optional[str] = None,
-        model_version: Optional[str] = None,
-        device: Optional[str] = None,
-        navigation_sigma: float = 0.0,
-        mask: Union[np.ndarray, str, None] = None,
-        mask_dilation: int = 5,
-        subpixel: bool = True,
-        neighbour_refine: bool = False,
-        interactive: bool = False,
-        center: Optional[tuple] = None,
-        calibration: Optional[tuple] = None,
-        column_names: Optional[tuple] = None,
-        units: Optional[tuple] = None,
-    ) -> "DiffractionVectors":
-        """Find the diffraction spots in every pattern.
-
-        Three detectors are available, each suited to a different kind of
-        data. All of them report subpixel positions and, as the intensity, the
-        mean of the raw pattern over a small disk around each spot, so the
-        result is the same physical quantity whichever is used.
-
-        ``"dog"``
-            A difference-of-Gaussians band-pass. Removes pixel noise and the
-            smooth diffuse background in one pass; best for small, sharp
-            spots. ``threshold`` is a signal-to-noise ratio (default 10).
-        ``"nxcorr"``
-            Window-normalised cross-correlation against a flat disk of
-            ``disk_radius``. Best for disks of a known size, such as
-            precession or convergent-beam data. ``threshold`` is a
-            correlation score in [-1, 1] (default 0.5).
-        ``"neural"``
-            A small U-Net trained to find spots of any size without tuning.
-            It estimates the disk size itself and resamples each pattern to
-            the size it was trained on. ``threshold`` is the network's
-            confidence (default 0.3). Requires ``torch``, and downloads its
-            weights from em-database unless ``model_path`` is given
-            (``pip install pyxem[neural]``).
-
-        Parameters
-        ----------
-        method
-            ``"dog"``, ``"nxcorr"`` or ``"neural"``.
-        threshold
-            Detection threshold; ``None`` uses the method's default.
-        min_distance
-            Minimum separation between spots in pixels; ``None`` uses the
-            method's default (3, 5 and 4 for dog, nxcorr and neural).
-        disk_radius
-            Template radius in pixels for ``"nxcorr"``, or ``"auto"`` to
-            estimate it from the pattern in the middle of the scan. Default 5.
-        sigma1, sigma2
-            The two Gaussian widths in pixels for ``"dog"``: ``sigma1``
-            removes noise, ``sigma2`` the background.
-        spot_radius
-            For ``"neural"``: the spot radius in pixels, overriding the
-            automatic estimate when it gets the size wrong.
-        background_sigma
-            For ``"neural"``: the background-subtraction scale in pixels.
-            ``"auto"`` (default) picks it on three patterns spread across the
-            scan by maximising the network's confidence, and lowers the
-            threshold on faint data when ``threshold`` is not given. ``None``
-            uses a fixed 12 px.
-        model_path
-            For ``"neural"``: a local checkpoint to use instead of downloading
-            one.
-        model_version
-            For ``"neural"``: the dated em-database version of the weights.
-            ``None`` fetches the latest.
-        device
-            For ``"neural"``: the torch device. ``None`` picks CUDA, then
-            Apple MPS, then the CPU.
-        navigation_sigma
-            Gaussian blur in navigation space (in scan positions) before
-            detection. Averaging neighbouring patterns raises the
-            signal-to-noise ratio of a noisy scan.
-        mask
-            Pixels where no spot may be reported, such as a beam stop: a
-            boolean array the shape of one pattern, or ``"auto"`` to detect a
-            beam stop from the average of a block of patterns.
-        mask_dilation
-            Pixels by which an ``"auto"`` mask is grown, so the bright halo
-            hugging the stop edge is excluded too.
-        subpixel
-            Refine positions to subpixel precision (``"dog"`` and
-            ``"nxcorr"``; the neural detector is always subpixel).
-        neighbour_refine
-            For ``"neural"`` on a 2-D scan: keep only the spots that also
-            appear in at least half of the four neighbouring scan positions,
-            weighted by confidence and a soft Friedel-pair check.
-        interactive
-            Return a :class:`~pyxem.utils.find_vectors_gui.FindVectorsExplorer`
-            instead of computing: a widget to tune the parameters on the
-            pattern under a navigator crosshair. Its ``compute()`` runs the
-            search with the tuned parameters. Requires ``anyplotlib`` and
-            ``ipywidgets`` (``pip install pyxem[interactive]``).
-        center, calibration, column_names, units
-            Passed to :meth:`~pyxem.signals.DiffractionVectors.from_peaks`;
-            by default they come from the signal axes.
+            threshold : float
+                The network's confidence threshold. Default 0.3, lowered by
+                the ``background_sigma="auto"`` calibration on faint data.
+            min_distance : int
+                Minimum separation between spots in pixels. Default 4.
+            spot_radius : float
+                Spot radius in pixels, overriding the automatic estimate.
+            background_sigma : float, "auto" or None
+                Background-subtraction scale in pixels. ``"auto"`` (default)
+                tunes it on three patterns spread across the scan; None uses
+                a fixed 12 px.
+            model_path : str
+                A local checkpoint instead of the download.
+            model_version : str
+                The dated em-database version of the weights.
+            device : str
+                The torch device; default CUDA, then Apple MPS, then the CPU.
+            navigation_sigma : float
+                Gaussian blur in navigation space (in scan positions) before
+                detection, to raise the signal-to-noise ratio of a noisy scan.
+            mask : array or "auto"
+                Pixels where no spot may be reported, such as a beam stop, or
+                ``"auto"`` to detect a beam stop from a block of patterns.
+            mask_dilation : int
+                Pixels by which an ``"auto"`` mask is grown. Default 5.
+            neighbour_refine : bool
+                On a 2-D scan: keep the spots that recur in at least half of
+                the four neighbouring scan positions.
 
         Returns
         -------
         DiffractionVectors
-            Ragged vectors, lazy if this signal is lazy, with columns
-            ``[ky, kx, intensity]`` in calibrated units.
+            Ragged vectors, lazy if this signal is lazy. With
+            ``method="neural", interactive=True``, the
+            :class:`~pyxem.signal_tools.DiffractionVectorFinder` instead.
 
         Examples
         --------
         >>> s = pxm.data.tilt_boundary_data()
-        >>> vectors = s.find_vectors(method="dog", threshold=8)
+        >>> s_template = s.template_match_disk(disk_r=5, subtract_min=False)
+        >>> vectors = s_template.get_diffraction_vectors(
+        ...     threshold_abs=0.4, min_distance=5
+        ... )
         """
+        from pyxem.signals import DiffractionVectors
         from pyxem.utils import _find_vectors
 
-        finder = _find_vectors.SpotFinder(
-            method=method,
-            threshold=threshold,
-            min_distance=min_distance,
-            disk_radius=None if disk_radius == "auto" else disk_radius,
-            sigma1=sigma1,
-            sigma2=sigma2,
-            subpixel=subpixel,
-            spot_radius=spot_radius,
-            background_sigma=(
-                None if isinstance(background_sigma, str) else background_sigma
-            ),
-            model_path=model_path,
-            model_version=model_version,
-            device=device,
-        )
-        navigation_dimension = self.axes_manager.navigation_dimension
-        if neighbour_refine and (
-            finder.method != "neural" or navigation_dimension != 2
-        ):
-            raise ValueError(
-                "neighbour_refine is only available for method='neural' on a "
-                "signal with two navigation dimensions."
-            )
-        data = self.data
-        if disk_radius == "auto":
-            from pyxem.utils._spot_finding import estimate_disk_radius
-
-            middle = _find_vectors.sample_patterns(
-                data, navigation_dimension, fractions=(0.5,)
-            )[0]
-            finder.disk_radius = estimate_disk_radius(middle)
-        if isinstance(mask, str):
-            if mask != "auto":
-                raise ValueError(f"mask must be an array, 'auto' or None, not {mask!r}")
-            mask = _find_vectors.automatic_mask(
-                data, navigation_dimension, dilation=mask_dilation
-            )
-        elif mask is not None:
-            mask = np.asarray(mask, dtype=bool)
-            if mask.shape != data.shape[navigation_dimension:]:
-                raise ValueError(
-                    f"mask shape {mask.shape} does not match the pattern shape "
-                    f"{data.shape[navigation_dimension:]}"
-                )
-        if finder.method == "neural" and background_sigma == "auto":
-            calibrated = finder.calibrate(
-                _find_vectors.sample_patterns(data, navigation_dimension)
-            )
-            if threshold is None:
-                finder.threshold = calibrated["threshold"]
-
-        settings = dict(
-            mask=mask,
-            navigation_sigma=navigation_sigma,
-            neighbour_refine=neighbour_refine,
+        output = dict(
             center=center,
             calibration=calibration,
             column_names=column_names,
             units=units,
+            get_intensity=get_intensity,
+        )
+        if method not in _find_vectors.METHODS:
+            if interactive:
+                raise ValueError(
+                    "interactive=True is available for the methods "
+                    f"{_find_vectors.METHODS}; for hyperspy's peak finders use "
+                    "`find_peaks(interactive=True)`."
+                )
+            vectors = super().find_peaks(
+                method=method,
+                interactive=False,
+                get_intensity=get_intensity,
+                **kwargs,
+            )
+            return DiffractionVectors.from_peaks(
+                vectors,
+                center=center,
+                calibration=calibration,
+                column_names=column_names,
+                units=units,
+            )
+
+        finder, settings, mask_options = _find_vectors.resolve_finder(
+            self, method, **kwargs
         )
         if interactive:
-            from pyxem.utils.find_vectors_gui import FindVectorsExplorer
+            from pyxem.signal_tools import (
+                DiffractionVectorFinder,
+                require_anywidget_gui,
+            )
 
-            return FindVectorsExplorer(self, finder, **settings)
-        return self._vectors_from_finder(finder, **settings)
+            if toolkit in (None, "anywidget"):
+                require_anywidget_gui()
+            tool = DiffractionVectorFinder(
+                self,
+                finder,
+                mask_automatic=mask_options["automatic"],
+                mask_dilation=mask_options["dilation"],
+                **settings,
+                **output,
+            )
+            widgets = tool.gui(display=display, toolkit=toolkit)
+            if not display:
+                tool.widgets = widgets
+            return tool
+        return self._vectors_from_finder(finder, **settings, **output)
 
     def _vectors_from_finder(
         self,
@@ -1643,6 +1662,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         calibration=None,
         column_names=None,
         units=None,
+        get_intensity=True,
     ):
         """Run a resolved :class:`~pyxem.utils._find_vectors.SpotFinder`."""
         from pyxem.signals import DiffractionVectors
@@ -1655,6 +1675,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             navigation_sigma=navigation_sigma,
             mask=mask,
             neighbour_refine=neighbour_refine,
+            get_intensity=get_intensity,
         )
         signal_class = LazySignal if self._lazy else BaseSignal
         peaks = signal_class(
