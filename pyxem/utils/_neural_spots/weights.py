@@ -25,7 +25,7 @@ file name the neural spot finder uses is in this module and nowhere else.
 
 A local checkpoint can always be used instead: ``model_path=`` for the
 detector, or a directory holding the files below named by the
-``PYXEM_SPOTUNET_WEIGHTS_DIR`` environment variable, which is looked in first.
+``PYXEM_SPOTNET_WEIGHTS_DIR`` environment variable, which is looked in first.
 """
 
 import os
@@ -33,24 +33,24 @@ import threading
 from pathlib import Path
 
 #: Environment variable naming a local directory of weight files.
-LOCAL_DIRECTORY_VARIABLE = "PYXEM_SPOTUNET_WEIGHTS_DIR"
+LOCAL_DIRECTORY_VARIABLE = "PYXEM_SPOTNET_WEIGHTS_DIR"
 
-#: Detector models (``get_diffraction_vectors(method="neural", model=...)``):
-#: the em-database entry and the file each one is. ``None``: no entry, so the
-#: model is only available from the local directory.
+#: The DE SpotNet detectors (``get_diffraction_vectors(method="neural",
+#: model=...)``): the em-database entry and the file each one is.
 DETECTORS = {
-    "anyscale8": ("SpotUNetDiffraction", "spotunet_anyscale8_peaked_sharpened.pt"),
-    "dynamical-mask8": ("SpotUNetDynamical", "spotunet_dynamical_mask8.pt"),
-    "production": ("SpotUNetProduction", "spotunet_production.pt"),
-    "base16": (None, "spotunet_base16.pt"),
+    "spotnet": ("DE_SpotNet", "de_spotnet.onnx"),
+    "dynamical": ("DE_SpotNet_Dynamical", "de_spotnet_dynamical.onnx"),
+    "production": ("DE_SpotNet_Production", "de_spotnet_production.onnx"),
+    "base16": ("DE_SpotNet_Base16", "de_spotnet_base16.onnx"),
 }
-#: SpyDE's default detector.
-DEFAULT_DETECTOR = "anyscale8"
+#: The default detector, SpyDE's too.
+DEFAULT_DETECTOR = "spotnet"
 
-#: The center steps, by the ids the vendored ``center_refine`` asks for.
+#: The center steps, DE CenterNet (``refine_centers``) and DE FriedelNet
+#: (``friedel_partner``), by the ids ``center_refine`` asks for.
 REFINERS = {
-    "center-fast-f5-v1": ("SpotUNetCenterRefiner", "center_fast_f5.pt"),
-    "center-partner-p4-v1": ("SpotUNetFriedelPartner", "center_partner_p4.pt"),
+    "DE_CenterNet": ("DE_CenterNet", "de_centernet.onnx"),
+    "DE_FriedelNet": ("DE_FriedelNet", "de_friedelnet.onnx"),
 }
 
 _detector_cache = {}
@@ -65,11 +65,6 @@ def _weights_file(entry_name, file_name, version=None):
     directory = os.environ.get(LOCAL_DIRECTORY_VARIABLE)
     if directory and (Path(directory) / file_name).is_file():
         return str(Path(directory) / file_name)
-    if entry_name is None:
-        raise FileNotFoundError(
-            f"{file_name} is not distributed through em-database; put it in a "
-            f"directory named by {LOCAL_DIRECTORY_VARIABLE}."
-        )
     try:
         import emdatabase.data
     except ImportError as error:
@@ -96,12 +91,12 @@ def _weights_file(entry_name, file_name, version=None):
 
 
 def detector_path(model=None, model_path=None, version=None):
-    """Local checkpoint of a detector: ``model_path`` when given, else the
+    """Local ``.onnx`` file of a detector: ``model_path`` when given, else the
     weights of ``model`` (a key of :data:`DETECTORS`)."""
     if model_path is not None:
         path = Path(model_path)
         if not path.is_file():
-            raise FileNotFoundError(f"No spot-detector checkpoint at {path}")
+            raise FileNotFoundError(f"No spot-detector model at {path}")
         return str(path)
     model = model or DEFAULT_DETECTOR
     if model not in DETECTORS:
@@ -110,51 +105,34 @@ def detector_path(model=None, model_path=None, version=None):
     return _weights_file(entry_name, file_name, version)
 
 
-def _device(device):
-    import torch
-
-    from .infer import _default_device
-
-    return torch.device(device) if device is not None else _default_device()
-
-
 def get_model(model=None, model_path=None, version=None, device=None):
-    """The detector as ``(network, device)``, loaded once per process."""
-    from .infer import load_model
+    """The detector (a :class:`.networks.Detector`), loaded once per process
+    for each file and set of execution providers."""
+    from .networks import Detector, providers_for
 
     path = detector_path(model, model_path, version)
-    device = _device(device)
-    key = (path, str(device))
+    providers = providers_for(device)
+    key = (path, tuple(providers))
     with _cache_lock:
         if key not in _detector_cache:
-            _detector_cache[key] = load_model(path, device)
+            _detector_cache[key] = Detector(path, providers)
         return _detector_cache[key]
 
 
 def get_refiner(model_id, device=None):
-    """A center-step network (a key of :data:`REFINERS`), loaded once per process."""
-    from .center_network import load_refiner
+    """A center-step network (a key of :data:`REFINERS`), loaded once per
+    process for each set of execution providers."""
+    from .networks import CenterRefiner, providers_for
 
     entry_name, file_name = REFINERS[model_id]
-    device = _device(device)
-    key = (model_id, str(device))
+    providers = providers_for(device)
+    key = (model_id, tuple(providers))
     with _cache_lock:
         if key not in _refiner_cache:
-            _refiner_cache[key] = load_refiner(
-                _weights_file(entry_name, file_name), device
+            _refiner_cache[key] = CenterRefiner(
+                _weights_file(entry_name, file_name), providers
             )
         return _refiner_cache[key]
-
-
-def demote_cached_models_to_cpu():
-    """After a device failure, move every cached detector to the CPU so the
-    next caller does not select the failed device again."""
-    import torch
-
-    cpu = torch.device("cpu")
-    with _cache_lock:
-        for key, (network, _) in list(_detector_cache.items()):
-            _detector_cache[key] = (network.to(cpu), cpu)
 
 
 def clear_model_cache():

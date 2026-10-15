@@ -16,27 +16,29 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Neural diffraction-spot detector (SpotUNet) and its center networks.
+"""Direct Electron's neural diffraction-spot networks, run with ONNX Runtime:
+the DE SpotNet detectors and the DE CenterNet and DE FriedelNet center
+networks.
 
-``unet``, ``preprocess``, ``preprocess_torch``, ``center``,
-``center_network``, ``center_refine``, ``infer`` and ``refine`` are vendored
-from SpyDE (https://github.com/directelectron/spyde, ``spyde/models/``): the
-architectures, preprocessing and decoding must stay faithful to how the
-checkpoints were trained. Each file is SpyDE's apart from black formatting
-and these rewrites:
+The networks are SpyDE's (https://github.com/directelectron/spyde,
+``spyde/models/`` at 68dfa52038; there the SpotUNet detectors anyscale8,
+dynamical-mask8, production and base16 and the F5 and P4 center networks),
+exported to ONNX with BatchNorm folded in;
+each ``.onnx`` file carries the settings the pipeline needs as metadata. The
+code around them reproduces SpyDE's:
 
-* imports of SpyDE's device lock and model registry point at
-  :mod:`.device_lock` and :mod:`.weights`, and ``SPYDE_`` environment
-  variables are named ``PYXEM_``;
-* names, comments and docstrings use US spelling: SpyDE's ``centre.py``,
-  ``centre_network.py`` and ``centre_refine.py`` are ``center*.py`` here, and
-  every ``centre``, ``neighbour``, ``normalise`` and ``-ise`` is ``center``,
-  ``neighbor``, ``normalize`` and ``-ize``. No checkpoint key is affected.
+* ``preprocess``, ``center_refine`` and ``refine`` are SpyDE's numpy modules,
+  verbatim apart from black formatting, US spelling (SpyDE's ``centre*.py``
+  are ``center*.py`` here; every ``centre``, ``neighbour``, ``normalise`` and
+  ``-ise`` is ``center``, ``neighbor``, ``normalize`` and ``-ize``), ``SPYDE_``
+  environment variables named ``PYXEM_``, the model registry replaced by
+  :mod:`.weights`, and ``center_refine``'s torch GPU window path removed;
+* ``center``, ``networks`` and ``infer`` are numpy ports of SpyDE's torch
+  ``centre``, ``centre_network`` and ``infer``, computed in float32 as the
+  originals are.
 
-Change the math there, not here.
-
-:mod:`.weights` (em-database names and files, model caching) and
-:mod:`.device_lock` are pyxem's. Requires torch.
+Change the math in SpyDE first, then here. :mod:`.weights` (em-database names
+and files, model caching) is pyxem's. Requires onnxruntime.
 """
 
 from .weights import (

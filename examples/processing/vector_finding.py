@@ -113,7 +113,7 @@ if TORCH_INSTALLED:
 # .. code-block:: python
 #
 #     vectors = s.get_diffraction_vectors(method="neural")
-#     vectors = s.get_diffraction_vectors(method="neural", model="dynamical-mask8")
+#     vectors = s.get_diffraction_vectors(method="neural", model="dynamical")
 #
 #     finder = s.get_diffraction_vectors(method="neural", interactive=True)
 #     # ... tune, then
