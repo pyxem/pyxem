@@ -16,15 +16,35 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Neural diffraction-spot detector (SpotUNet).
+"""Neural diffraction-spot detector (SpotUNet) and its centre networks.
 
-A small U-Net with a heat-map head and a subpixel-offset head. The
-architecture, preprocessing and decoding are vendored from SpyDE
-(https://github.com/directelectron/spyde) and must stay faithful to how the
-checkpoints were trained. Requires torch; the weights come from em-database
-(see :mod:`.weights`).
+``unet``, ``preprocess``, ``preprocess_torch``, ``centre``,
+``centre_network``, ``centre_refine``, ``infer`` and ``refine`` are vendored
+from SpyDE (https://github.com/directelectron/spyde, ``spyde/models/``): the
+architectures, preprocessing and decoding must stay faithful to how the
+checkpoints were trained. Each file is SpyDE's apart from black formatting
+and these rewrites: imports of SpyDE's device lock and model registry point
+at :mod:`.device_lock` and :mod:`.weights`, and ``SPYDE_`` environment
+variables are named ``PYXEM_``. Change the maths there, not here.
+
+:mod:`.weights` (em-database names and files, model caching) and
+:mod:`.device_lock` are pyxem's. Requires torch.
 """
 
-from .weights import EMDATABASE_ENTRY, clear_model_cache, get_model, resolve_model_path
+from .weights import (
+    DEFAULT_DETECTOR,
+    DETECTORS,
+    clear_model_cache,
+    detector_path,
+    get_model,
+    get_refiner,
+)
 
-__all__ = ["EMDATABASE_ENTRY", "clear_model_cache", "get_model", "resolve_model_path"]
+__all__ = [
+    "DEFAULT_DETECTOR",
+    "DETECTORS",
+    "clear_model_cache",
+    "detector_path",
+    "get_model",
+    "get_refiner",
+]

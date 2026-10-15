@@ -16,10 +16,13 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+# Vendored from SpyDE (https://github.com/directelectron/spyde) at 68dfa52038,
+# spyde/models/unet.py; see vendor note in __init__.py.
+
 """Small U-Net with heatmap + subpixel-offset heads (CenterNet-style).
 
 Vendored verbatim from the ``yoloDiffraction`` research project
-(``yolodiffraction/model/unet.py``) so pyxem carries its own copy of the
+(``yolodiffraction/model/unet.py``) so SpyDE carries its own copy of the
 inference architecture — DO NOT edit the maths here; it must stay bit-faithful
 to the trained checkpoints (train/infer parity).
 
@@ -28,6 +31,10 @@ Output heads (all at input resolution):
                Gaussian blob at each GT spot (focal/MSE loss).
   - offset   : 2 channels, subpixel (dy, dx) in (-0.5, 0.5], trained with L1 ONLY
                at GT spot pixels. This is the subpixel-accuracy core.
+  - mask     : optional (``mask_head=True``), 1 channel, the pixel coverage of
+               each disk's aperture (sigmoid). Its centroid is the disk's
+               geometric centre wherever the fill sits inside it, which the
+               offset head misses on dynamically filled disks (decode.py).
 
 The input is (B, C, H, W). C = number of stacked frames; C=1 is single-frame,
 C=9 is a 3x3 neighbor stack (multi-frame coupling drops in with no architecture
@@ -63,7 +70,9 @@ class SpotUNet(nn.Module):
     it generalizes to defects, grain boundaries, isolated spots, and amorphous rings.
     """
 
-    def __init__(self, in_ch: int = 1, base: int = 16, levels: int = 2):
+    def __init__(
+        self, in_ch: int = 1, base: int = 16, levels: int = 2, mask_head: bool = False
+    ):
         super().__init__()
         self.levels = levels
         chs = [base * (2**i) for i in range(levels + 1)]
@@ -81,6 +90,7 @@ class SpotUNet(nn.Module):
         self.head_hm = nn.Conv2d(base, 1, 1)
         self.head_off = nn.Conv2d(base, 2, 1)
         nn.init.constant_(self.head_hm.bias, -4.0)
+        self.head_mask = nn.Conv2d(base, 1, 1) if mask_head else None
 
     def forward(self, x):
         feats = []
@@ -94,6 +104,8 @@ class SpotUNet(nn.Module):
             d = dec(torch.cat([up(d), skip], 1))
         hm = self.head_hm(d)
         off = torch.tanh(self.head_off(d)) * 1.6
+        if self.head_mask is not None:
+            return hm, off, self.head_mask(d)
         return hm, off
 
     def num_params(self) -> int:

@@ -81,28 +81,67 @@ def signal():
     return make_signal()
 
 
-@pytest.fixture
-def random_checkpoint(tmp_path):
-    """An untrained SpotUNet whose heat map fires on bright pixels, so the
-    whole pipeline runs without downloading weights."""
+def save_random_detector(path, mask_head=False):
+    """An untrained SpotUNet whose heat map fires on bright pixels."""
     import torch
 
-    from pyxem.utils._neural_spots import clear_model_cache
     from pyxem.utils._neural_spots.unet import SpotUNet
 
     torch.manual_seed(0)
-    model = SpotUNet(in_ch=1, base=4, levels=2)
+    model = SpotUNet(in_ch=1, base=4, levels=2, mask_head=mask_head)
     torch.nn.init.constant_(model.head_hm.bias, 0.0)
-    path = tmp_path / "spotunet.pt"
     torch.save(
         {
             "state_dict": model.state_dict(),
-            "config": {"base": 4, "in_ch": 1, "levels": 2},
+            "base": 4,
+            "in_ch": 1,
+            "levels": 2,
+            "mask_head": int(mask_head),
         },
         path,
     )
+    return str(path)
+
+
+def save_random_centre_networks(directory):
+    """Untrained refine (one channel) and Friedel-partner (two channel) centre
+    networks, under the file names the weights module asks for."""
+    import torch
+
+    from pyxem.utils._neural_spots.centre_network import FastCentreNet
+    from pyxem.utils._neural_spots.weights import REFINERS
+
+    for (_, file_name), channels in zip(REFINERS.values(), (1, 2)):
+        torch.manual_seed(channels)
+        network = FastCentreNet(base=4, levels=2, channels=channels)
+        torch.save(
+            {
+                "state_dict": network.state_dict(),
+                "base": 4,
+                "levels": 2,
+                "depthwise": 0,
+                "sigma_head": 1,
+                "crop_radius": 10.0,
+                "crop_half": 16,
+                # wide enough that the steps run on the test disks
+                "min_spot_radius": 1.0,
+                "max_spot_radius": 64.0,
+            },
+            directory / file_name,
+        )
+
+
+@pytest.fixture
+def random_checkpoint(tmp_path, monkeypatch):
+    """Untrained detector and centre networks, so the whole pipeline runs
+    without downloading weights. Returns the detector checkpoint."""
+    from pyxem.utils._neural_spots import clear_model_cache
+    from pyxem.utils._neural_spots.weights import LOCAL_DIRECTORY_VARIABLE
+
+    save_random_centre_networks(tmp_path)
+    monkeypatch.setenv(LOCAL_DIRECTORY_VARIABLE, str(tmp_path))
     clear_model_cache()
-    yield str(path)
+    yield save_random_detector(tmp_path / "spotunet.pt")
     clear_model_cache()
 
 
@@ -144,7 +183,9 @@ class TestNeural:
         )
         assert isinstance(eager, DiffractionVectors)
         assert eager.data.shape == (4, 5)
-        assert eager.column_names[-1] == "intensity"
+        assert eager.column_names[2:] == ["intensity", "confidence", "sigma"]
+        assert eager.metadata.Peaks.parameters.refine_centres
+        assert eager.metadata.Peaks.parameters.friedel_partner
         assert eager.metadata.Peaks.parameters.method == "neural"
         lazy = LazyDiffraction2D(
             da.from_array(signal.data, chunks=(2, 3, -1, -1))
@@ -172,7 +213,8 @@ class TestNeural:
         vectors = signal.get_diffraction_vectors(
             method="neural", model_path=random_checkpoint, get_intensity=False
         )
-        assert all(peaks.shape[1] == 2 for peaks in vectors.data.ravel())
+        assert all(peaks.shape[1] == 4 for peaks in vectors.data.ravel())
+        assert vectors.column_names[2:] == ["confidence", "sigma"]
 
     def test_lazy_never_computes_the_full_dataset(self, signal, random_checkpoint):
         full_shape = signal.data.shape
@@ -262,31 +304,62 @@ class TestNeural:
         )
         assert vectors.data.shape == (4, 5)
 
-    def test_batch_matches_single_pattern(self, random_checkpoint):
-        from pyxem.utils._neural_spots import get_model
-        from pyxem.utils._neural_spots.inference import detect, detect_batch
+    def test_preview_of_one_pattern_matches_its_stack(self, random_checkpoint):
+        """A pattern's result does not depend on the other patterns computed
+        with it: the rescale comes from the reference, the centre steps cut
+        each disk's own window."""
+        from pyxem.utils._find_vectors import SpotFinder
 
-        model, device = get_model(random_checkpoint, device="cpu")
+        finder = SpotFinder(model_path=random_checkpoint, device="cpu")
         patterns = np.stack([gaussian_pattern(spot_positions(i, 0)) for i in range(3)])
-        for pattern, peaks in zip(patterns, detect_batch(model, patterns, device)):
-            np.testing.assert_allclose(detect(model, pattern, device), peaks)
+        finder.reference = patterns[1]
+        stack = finder.detect_stack(patterns)
+        for pattern, peaks in zip(patterns, stack):
+            np.testing.assert_allclose(finder.detect(pattern)[1], peaks, rtol=1e-6)
 
-    def test_flat_checkpoint_layout(self, signal, tmp_path):
-        import torch
-
-        from pyxem.utils._neural_spots import clear_model_cache
-        from pyxem.utils._neural_spots.unet import SpotUNet
-
-        model = SpotUNet(in_ch=1, base=4, levels=1)
-        path = tmp_path / "flat.pt"
-        torch.save(
-            {"state_dict": model.state_dict(), "base": 4, "in_ch": 1, "levels": 1},
-            path,
+    def test_columns_and_calibration(self, signal, random_checkpoint):
+        for axis in signal.axes_manager.signal_axes:
+            axis.scale = 0.02
+            axis.offset = -PATTERN_SIZE / 2 * 0.02
+            axis.units = "1/nm"
+        settings = dict(method="neural", model_path=random_checkpoint)
+        calibrated = signal.get_diffraction_vectors(**settings).data[1, 2]
+        pixels = signal.get_diffraction_vectors(
+            center=(0, 0), calibration=(1, 1), **settings
+        ).data[1, 2]
+        assert calibrated.shape[1] == 5
+        np.testing.assert_allclose(
+            calibrated[:, :2], (pixels[:, :2] - PATTERN_SIZE / 2) * 0.02, atol=1e-5
         )
-        clear_model_cache()
-        vectors = signal.get_diffraction_vectors(
-            method="neural", model_path=str(path), background_sigma=None
+        # intensity and confidence are not calibrated; sigma is a length
+        np.testing.assert_allclose(calibrated[:, 2:4], pixels[:, 2:4])
+        np.testing.assert_allclose(calibrated[:, 4], pixels[:, 4] * 0.02, rtol=1e-5)
+        assert np.all((pixels[:, 3] > 0) & (pixels[:, 3] <= 1))
+
+    def test_centre_steps(self, signal, random_checkpoint):
+        """The centre steps keep every detection and move none of them by
+        half a spot radius or more."""
+        settings = dict(
+            method="neural",
+            model_path=random_checkpoint,
+            center=(0, 0),
+            calibration=(1, 1),
         )
+        plain = signal.get_diffraction_vectors(refine_centres=False, **settings)
+        refined = signal.get_diffraction_vectors(friedel_partner=False, **settings)
+        both = signal.get_diffraction_vectors(**settings)
+        for position in np.ndindex(4, 5):
+            assert len(plain.data[position]) == len(refined.data[position])
+            assert len(plain.data[position]) == len(both.data[position])
+            for result in (refined, both):
+                shift = np.hypot(
+                    *(result.data[position][:, :2] - plain.data[position][:, :2]).T
+                )
+                assert np.all(shift < 32)
+
+    def test_mask_head_detector(self, signal, random_checkpoint, tmp_path):
+        path = save_random_detector(tmp_path / "masked.pt", mask_head=True)
+        vectors = signal.get_diffraction_vectors(method="neural", model_path=path)
         assert vectors.data.shape == (4, 5)
 
     def test_bad_arguments(self, signal, random_checkpoint):
@@ -302,40 +375,67 @@ class TestNeural:
                 neighbour_refine=True, **settings
             )
 
-    def test_missing_model_explains_how_to_get_one(self, signal):
+    def test_missing_model_explains_how_to_get_one(self, signal, monkeypatch):
         import emdatabase.data
+
+        from pyxem.utils._neural_spots import clear_model_cache
+        from pyxem.utils._neural_spots.weights import LOCAL_DIRECTORY_VARIABLE
+
+        monkeypatch.delenv(LOCAL_DIRECTORY_VARIABLE, raising=False)
+        clear_model_cache()
 
         with mock.patch.object(
             emdatabase.data, "SpotUNetDiffraction", None, create=True
         ):
-            with pytest.raises(ImportError, match="model_path"):
+            with pytest.raises(ImportError, match="PYXEM_SPOTUNET_WEIGHTS_DIR"):
                 signal.get_diffraction_vectors(method="neural")
+        with pytest.raises(ValueError, match="model must be one of"):
+            signal.get_diffraction_vectors(method="neural", model="nonsense")
         with pytest.raises(FileNotFoundError):
             signal.get_diffraction_vectors(method="neural", model_path="missing.pt")
 
 
 @skip_torch
 @pytest.mark.skipif(
-    not os.environ.get("PYXEM_SPOTUNET_WEIGHTS"),
-    reason="set PYXEM_SPOTUNET_WEIGHTS to a trained SpotUNet checkpoint",
+    not os.environ.get("PYXEM_SPOTUNET_WEIGHTS_DIR"),
+    reason="set PYXEM_SPOTUNET_WEIGHTS_DIR to a directory of the trained weights",
 )
-def test_trained_weights_localise_spots():
-    """With real weights every planted spot is found to a fraction of a pixel."""
-    truth = PATTERN_SIZE / 2 + LATTICE + [0.37, -0.21]
-    signal = Diffraction2D(
-        np.stack(
-            [gaussian_pattern(truth, rng=np.random.default_rng(i)) for i in range(3)]
-        )
+@pytest.mark.parametrize("model", ["anyscale8", "dynamical-mask8"])
+def test_trained_weights_localise_disks(model):
+    """With the trained detector and centre networks every planted disk
+    (radius 8, inside the range both centre steps work on) is found to a
+    small fraction of a pixel, confidently, with a small sigma."""
+    from pyxem.utils._neural_spots import clear_model_cache
+
+    clear_model_cache()
+    size = 128
+    rows, columns = np.mgrid[:size, :size]
+    truth = (
+        size / 2
+        + np.array([[i, j] for i in (-1, 0, 1) for j in (-1, 0, 1)], float) * 30
+        + [0.37, -0.21]
     )
-    vectors = signal.get_diffraction_vectors(
-        method="neural",
-        model_path=os.environ["PYXEM_SPOTUNET_WEIGHTS"],
-        center=(0, 0),
-        calibration=(1, 1),
+    patterns = []
+    for seed in range(4):
+        pattern = np.full((size, size), 3.0)
+        for row, column in truth:
+            pattern += 150 * np.clip(8.5 - np.hypot(rows - row, columns - column), 0, 1)
+        patterns.append(np.random.default_rng(seed).poisson(pattern))
+    vectors = Diffraction2D(
+        np.stack(patterns).astype(np.float32)
+    ).get_diffraction_vectors(
+        method="neural", model=model, center=(0, 0), calibration=(1, 1)
     )
     for peaks in vectors.data:
-        _, from_truth = nearest_distances(peaks, truth)
-        assert from_truth.max() < 0.75
+        to_truth, from_truth = nearest_distances(peaks, truth)
+        assert from_truth.max() < 0.1
+        planted = to_truth < 1
+        assert planted.sum() == len(truth)
+        assert np.all(peaks[planted, 3] > 0.5)
+        assert np.all(np.isfinite(peaks[planted, 4]) & (peaks[planted, 4] < 0.5))
+        # anything else found ranks as less certain than every planted disk
+        if (~planted).any():
+            assert peaks[~planted, 4].min() > peaks[planted, 4].max()
 
 
 @pytest.fixture

@@ -42,7 +42,8 @@ class DiffractionVectorFinder(t.HasTraits):
         The pattern at :attr:`position`, navigation-blurred as the full
         search will blur it.
     peaks : numpy.ndarray
-        ``(N, 3)`` ``[row, column, intensity]`` found in :attr:`pattern`.
+        ``(N, 5)`` ``[y, x, intensity, confidence, sigma]`` found in
+        :attr:`pattern`, in pixels.
     response : numpy.ndarray
         Each detection's confidence painted at its pixel.
     vectors : DiffractionVectors or None
@@ -55,6 +56,8 @@ class DiffractionVectorFinder(t.HasTraits):
     navigation_sigma = t.Range(0.0, 10.0, value=0.0, desc="Navigation blur")
     mask_beam_stop = t.Bool(False, desc="Exclude a beam stop")
     mask_dilation = t.Range(0, 32, value=5, desc="Beam-stop dilation (px)")
+    refine_centres = t.Bool(True, desc="Re-place each disk with the centre network")
+    friedel_partner = t.Bool(True, desc="Then refine with each disk's Friedel partner")
     show_response = t.Bool(False, desc="Show where the network fired")
     #: Navigation index (array order) of the displayed pattern.
     position = t.Tuple()
@@ -99,6 +102,8 @@ class DiffractionVectorFinder(t.HasTraits):
             threshold=finder.threshold,
             min_distance=finder.min_distance,
             spot_radius=finder.spot_radius or 0.0,
+            refine_centres=finder.refine_centres,
+            friedel_partner=finder.friedel_partner,
             navigation_sigma=float(navigation_sigma),
             mask_beam_stop=mask is not None,
             mask_dilation=int(mask_dilation),
@@ -115,6 +120,8 @@ class DiffractionVectorFinder(t.HasTraits):
             "threshold",
             "min_distance",
             "spot_radius",
+            "refine_centres",
+            "friedel_partner",
             "mask_beam_stop",
             "mask_dilation",
             "show_response",
@@ -134,6 +141,8 @@ class DiffractionVectorFinder(t.HasTraits):
         self.finder.threshold = float(self.threshold)
         self.finder.min_distance = int(self.min_distance)
         self.finder.spot_radius = float(self.spot_radius) or None
+        self.finder.refine_centres = bool(self.refine_centres)
+        self.finder.friedel_partner = bool(self.friedel_partner)
         return self.finder
 
     @property
