@@ -470,15 +470,38 @@ class TestInteractive:
         offsets = np.asarray(wdict["spot_markers"]._data["offsets"]).reshape(-1, 2)
         np.testing.assert_allclose(offsets, explorer.peaks[:, [1, 0]], atol=1e-4)
 
-    def test_controls_are_linked_to_the_tool(self, explorer):
-        wdict = explorer.widgets["anywidget"]["wdict"]
-        wdict["threshold"].value = 0.99
+    def test_panel_is_linked_to_the_tool(self, explorer):
+        panel = explorer.widgets["anywidget"]["wdict"]["panel"]
+        panel.threshold = 0.99
         assert explorer.threshold == 0.99
         assert explorer.finder.threshold == 0.99
         explorer.min_distance = 7
-        assert wdict["min_distance"].value == 7
-        wdict["show_response"].value = True
-        assert wdict["response_layer"].visible
+        assert panel.min_distance == 7
+        panel.show_response = True
+        assert explorer.widgets["anywidget"]["wdict"]["response_layer"].visible
+        panel.friedel_partner = False
+        assert not explorer.finder.friedel_partner
+        panel.neighbor_refine = True
+        assert explorer.parameters["neighbor_refine"]
+        assert panel.status.endswith(f"spots at {tuple(explorer.position)}")
+        assert panel.neighbor_refine_available
+
+    def test_panel_lists_the_model_and_switches_it(self, explorer, tmp_path):
+        panel = explorer.widgets["anywidget"]["wdict"]["panel"]
+        # a model_path checkpoint is the only model offered
+        assert panel.models == ["spotunet.pt"]
+        assert panel.model == "spotunet.pt"
+        detections = len(explorer.peaks)
+        panel.model = "spotunet.pt"
+        assert len(explorer.peaks) == detections
+
+    def test_panel_buttons(self, explorer):
+        wdict = explorer.widgets["anywidget"]["wdict"]
+        wdict["panel"].compute_clicks += 1
+        assert explorer.vectors is not None
+        assert not wdict["panel"].busy
+        assert wdict["panel"].status.startswith("Computed 20 patterns")
+        wdict["panel"].close_clicks += 1
 
     def test_preview_matches_the_full_search(self, explorer, signal):
         explorer.navigation_sigma = 1.0

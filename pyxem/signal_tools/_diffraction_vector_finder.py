@@ -26,6 +26,12 @@ from scipy.ndimage import gaussian_filter
 from pyxem.utils import _find_vectors
 
 
+def _default_detector():
+    from pyxem.utils._neural_spots import DEFAULT_DETECTOR
+
+    return DEFAULT_DETECTOR
+
+
 @add_gui_method(toolkey="pyxem.Diffraction2D.get_diffraction_vectors")
 class DiffractionVectorFinder(t.HasTraits):
     """The settings of ``get_diffraction_vectors(method="neural")``, tuned on
@@ -50,6 +56,9 @@ class DiffractionVectorFinder(t.HasTraits):
         The result of the last :meth:`compute`.
     """
 
+    #: The detector: a key of the weights module's ``DETECTORS``, or the
+    #: file name of a ``model_path`` checkpoint.
+    model = t.Str(desc="Detector model")
     threshold = t.Range(0.0, 1.0, value=0.3, desc="Network confidence threshold")
     min_distance = t.Range(1, 64, value=4, desc="Minimum spot separation (px)")
     spot_radius = t.Range(0.0, 64.0, value=0.0, desc="Spot radius (px), 0 = auto")
@@ -58,6 +67,8 @@ class DiffractionVectorFinder(t.HasTraits):
     mask_dilation = t.Range(0, 32, value=5, desc="Beam-stop dilation (px)")
     refine_centers = t.Bool(True, desc="Re-place each disk with the center network")
     friedel_partner = t.Bool(True, desc="Then refine with each disk's Friedel partner")
+    #: Applies to :meth:`compute` only: a single pattern has no neighbors.
+    neighbor_refine = t.Bool(False, desc="Keep spots that recur in neighbors")
     show_response = t.Bool(False, desc="Show where the network fired")
     #: Navigation index (array order) of the displayed pattern.
     position = t.Tuple()
@@ -82,7 +93,6 @@ class DiffractionVectorFinder(t.HasTraits):
         super().__init__()
         self.signal = signal
         self.finder = finder
-        self.neighbor_refine = neighbor_refine
         self._output_settings = dict(
             center=center,
             calibration=calibration,
@@ -99,6 +109,12 @@ class DiffractionVectorFinder(t.HasTraits):
         self.response = None
         self._holding = True
         self.trait_set(
+            model=(
+                self.model_names()[0]
+                if finder.model_path
+                else (finder.model_name or _default_detector())
+            ),
+            neighbor_refine=bool(neighbor_refine),
             threshold=finder.threshold,
             min_distance=finder.min_distance,
             spot_radius=finder.spot_radius or 0.0,
@@ -130,6 +146,27 @@ class DiffractionVectorFinder(t.HasTraits):
     def _setting_changed(self, event):
         if not self._holding:
             self.detect()
+
+    @t.observe("model")
+    def _model_changed(self, event):
+        if self._holding:
+            return
+        if self.finder.model_path and event.new == self.model_names()[0]:
+            return
+        self.finder.model_path = None
+        self.finder.model_name = event.new
+        self.detect()
+
+    def model_names(self):
+        """The detectors the GUI offers: a ``model_path`` checkpoint's file
+        name alone, else every detector of the weights module."""
+        if self.finder.model_path:
+            import os
+
+            return [os.path.basename(str(self.finder.model_path))]
+        from pyxem.utils._neural_spots import DETECTORS
+
+        return list(DETECTORS)
 
     @t.observe(["position", "navigation_sigma"])
     def _pattern_changed(self, event):
@@ -167,6 +204,7 @@ class DiffractionVectorFinder(t.HasTraits):
         ``get_diffraction_vectors``."""
         parameters = dict(self._update_finder().parameters)
         parameters["navigation_sigma"] = float(self.navigation_sigma)
+        parameters["neighbor_refine"] = bool(self.neighbor_refine)
         if not self.mask_beam_stop:
             parameters["mask"] = None
         elif self._user_mask is not None:
@@ -234,7 +272,7 @@ class DiffractionVectorFinder(t.HasTraits):
             self._update_finder(),
             mask=self.mask,
             navigation_sigma=float(self.navigation_sigma),
-            neighbor_refine=self.neighbor_refine,
+            neighbor_refine=bool(self.neighbor_refine),
             **self._output_settings,
         )
         return self.vectors
