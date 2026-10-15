@@ -36,6 +36,9 @@ TOLERANCE = {np.dtype(np.float32): 1e-4, np.dtype(np.float64): 1e-10}
 
 
 def devices():
+    # Called while collecting the parametrize lists, before the skip applies.
+    if not TORCH_INSTALLED:
+        return ["cpu"]
     import torch
 
     found = ["cpu"]
