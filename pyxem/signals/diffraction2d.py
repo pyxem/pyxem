@@ -1187,7 +1187,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             scikit-image to floating-point rounding (about 1e-14 in float64,
             a few 1e-4 in float32) and is 2-5 times faster; see
             :func:`pyxem.utils._template_matching.match_template_stack`.
-            Requires torch (``pip install pyxem[neural]``). Default None
+            Requires torch (``pip install pyxem[torch]``). Default None
             (scikit-image).
         kwargs :
             Passed to :func:`pyxem.utils.diffraction.normalize_template_match` or
@@ -1249,7 +1249,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             scikit-image to floating-point rounding (about 1e-14 in float64,
             a few 1e-4 in float32) and is 2-5 times faster; see
             :func:`pyxem.utils._template_matching.match_template_stack`.
-            Requires torch (``pip install pyxem[neural]``). Default None
+            Requires torch (``pip install pyxem[torch]``). Default None
             (scikit-image).
         kwargs :
             Passed to :func:`pyxem.utils.diffraction.normalize_template_match` or
@@ -1360,7 +1360,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             scikit-image to floating-point rounding (about 1e-14 in float64,
             a few 1e-4 in float32) and is 2-5 times faster; see
             :func:`pyxem.utils._template_matching.match_template_stack`.
-            Requires torch (``pip install pyxem[neural]``). Default None
+            Requires torch (``pip install pyxem[torch]``). Default None
             (scikit-image).
         **kwargs :
             Any additional keyword arguments to be passed to
@@ -1506,13 +1506,13 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         ``"laplacian_of_gaussian"``, ``"difference_of_gaussian"``,
         ``"template_matching"``) together with its keyword arguments.
 
-        ``"neural"`` is SpyDE's neural spot finder. A small U-Net trained to
-        find diffraction spots of any size without tuning estimates the disk
-        size from the pattern and resamples the pattern to the size it was
-        trained on; its threshold is the network's confidence. Two center
-        networks then re-place every disk on the raw pattern at native
-        resolution: the refine network reads each disk's own window
-        (``refine_centers``), and the Friedel-partner network also reads the
+        ``"neural"`` is Direct Electron's neural spot finder, from SpyDE. DE
+        SpotNet, a small U-Net trained to find diffraction spots of any size
+        without tuning, estimates the disk size from the pattern and resamples
+        the pattern to the size it was trained on; its threshold is the
+        network's confidence. Two center networks then re-place every disk on
+        the raw pattern at native resolution: DE CenterNet reads each disk's
+        own window (``refine_centers``), and DE FriedelNet also reads the
         window at the disk's Friedel mirror, which shows the other dynamical
         fill of the same reflection (``friedel_partner``, on disks of 6-16 px
         radius). The vectors have five columns: the two calibrated positions,
@@ -1520,7 +1520,7 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         spot), ``confidence`` (the network's, 0-1) and ``sigma`` (the
         positional uncertainty of the center, in the units of the positions:
         the center networks' own estimate where they placed the disk, else the
-        counting-noise limit). It requires torch and downloads the weights from
+        counting-noise limit). It runs on ONNX Runtime and downloads the weights from
         em-database (``pip install pyxem[neural]``).
 
         Parameters
@@ -1561,20 +1561,20 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             ``"neural"``:
 
             model : str
-                The detector: ``"anyscale8"`` (default, scale robust),
-                ``"dynamical-mask8"`` (a disk-coverage head that centers
+                The DE SpotNet detector: ``"spotnet"`` (default, scale
+                robust), ``"dynamical"`` (a disk-coverage head that centers
                 dynamically filled disks on their aperture), ``"production"``
-                or ``"base16"`` (legacy, not on em-database: only from the
-                local weights directory).
+                or ``"base16"`` (legacy).
             refine_centers : bool
-                Re-place each disk with the refine network. Default True;
+                Re-place each disk with DE CenterNet. Default True;
                 skipped below a 5 px spot radius.
             friedel_partner : bool
-                Then refine with each disk's Friedel-mirror window as well.
+                Then refine with DE FriedelNet, which also reads each disk's
+                Friedel-mirror window.
                 Default True; applies to spots of 6-16 px radius.
             threshold : float
                 The network's confidence threshold. Default: the model's own
-                (0.3; 0.2 for ``"dynamical-mask8"``), lowered by the
+                (0.3; 0.2 for ``"dynamical"``), lowered by the
                 ``background_sigma="auto"`` calibration on faint data.
             min_distance : int
                 Minimum separation between spots in pixels. Default 4.
@@ -1587,12 +1587,15 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             model_path : str
                 A local detector checkpoint instead of the download. A
                 directory of weight files named by the
-                ``PYXEM_SPOTUNET_WEIGHTS_DIR`` environment variable is used
+                ``PYXEM_SPOTNET_WEIGHTS_DIR`` environment variable is used
                 before any download, for the center networks too.
             model_version : str
                 The dated em-database version of the weights.
             device : str
-                The torch device; default CUDA, then Apple MPS, then the CPU.
+                Where ONNX Runtime runs the networks: ``"cpu"``, ``"cuda"``,
+                ``"directml"`` or ``"coreml"``, each falling back to the CPU
+                for what it cannot run. Default ``"auto"``: the first of CUDA,
+                DirectML and CoreML that is installed, else the CPU.
             navigation_sigma : float
                 Gaussian blur in navigation space (in scan positions) before
                 detection, to raise the signal-to-noise ratio of a noisy scan.

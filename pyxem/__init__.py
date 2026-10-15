@@ -26,8 +26,9 @@ try:
     CUPY_INSTALLED = True
 except ImportError:
     CUPY_INSTALLED = False
-# Checked without importing: torch takes seconds to import and only the
-# neural spot detector needs it.
+# Checked without importing, which takes seconds: onnxruntime runs the neural
+# spot finder, torch the ``device=`` template matching.
+ONNXRUNTIME_INSTALLED = importlib.util.find_spec("onnxruntime") is not None
 TORCH_INSTALLED = importlib.util.find_spec("torch") is not None
 from pyxem import components
 from pyxem import signals
@@ -46,6 +47,7 @@ __all__ = [
     "signals",
     "data",
     "CUPY_INSTALLED",
+    "ONNXRUNTIME_INSTALLED",
     "TORCH_INSTALLED",
 ]
 

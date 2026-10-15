@@ -19,6 +19,7 @@
 """get_diffraction_vectors(method="neural"), its interactive GUI, and the
 pass-through of every other method to hyperspy's find_peaks."""
 
+import importlib.util
 import os
 from unittest import mock
 
@@ -27,12 +28,15 @@ import numpy as np
 import pytest
 from hyperspy.signals import Signal2D
 
-from pyxem import TORCH_INSTALLED
+from pyxem import ONNXRUNTIME_INSTALLED
 from pyxem.signals import Diffraction2D, DiffractionVectors, LazyDiffraction2D
 from pyxem.signals.diffraction_vectors import LazyDiffractionVectors
 from pyxem.utils import _find_vectors
 
-skip_torch = pytest.mark.skipif(not TORCH_INSTALLED, reason="torch is required")
+skip_onnx = pytest.mark.skipif(
+    not ONNXRUNTIME_INSTALLED or importlib.util.find_spec("onnx") is None,
+    reason="onnxruntime and onnx are required",
+)
 
 PATTERN_SIZE = 64
 LATTICE = np.array([[i, j] for i in (-1, 0, 1) for j in (-1, 0, 1)], float) * 16.0
@@ -81,67 +85,123 @@ def signal():
     return make_signal()
 
 
-def save_random_detector(path, mask_head=False):
-    """An untrained SpotUNet whose heat map fires on bright pixels."""
-    import torch
+def _save_graph(path, nodes, outputs, inputs_shape, metadata, initializers=()):
+    """A tiny ONNX model built directly with onnx.helper (no torch needed)."""
+    from onnx import TensorProto, helper, save
 
-    from pyxem.utils._neural_spots.unet import SpotUNet
-
-    torch.manual_seed(0)
-    model = SpotUNet(in_ch=1, base=4, levels=2, mask_head=mask_head)
-    torch.nn.init.constant_(model.head_hm.bias, 0.0)
-    torch.save(
-        {
-            "state_dict": model.state_dict(),
-            "base": 4,
-            "in_ch": 1,
-            "levels": 2,
-            "mask_head": int(mask_head),
-        },
-        path,
+    graph = helper.make_graph(
+        nodes,
+        "test",
+        [helper.make_tensor_value_info("input", TensorProto.FLOAT, inputs_shape)],
+        [
+            helper.make_tensor_value_info(name, TensorProto.FLOAT, None)
+            for name in outputs
+        ],
+        initializer=list(initializers),
     )
+    model = helper.make_model(graph, opset_imports=[helper.make_opsetid("", 17)])
+    model.ir_version = 8
+    for key, value in metadata.items():
+        entry = model.metadata_props.add()
+        entry.key, entry.value = key, str(value)
+    save(model, str(path))
     return str(path)
 
 
-def save_random_center_networks(directory):
-    """Untrained refine (one channel) and Friedel-partner (two channel) center
-    networks, under the file names the weights module asks for."""
-    import torch
+def _constant(name, value):
+    from onnx import numpy_helper
 
-    from pyxem.utils._neural_spots.center_network import FastCenterNet
+    return numpy_helper.from_array(np.asarray(value, np.float32), name)
+
+
+def save_random_detector(path, mask_head=False):
+    """A stand-in detector: heat-map logits ``x - 20`` of the normalized
+    pattern, so it fires only on the bright spots; zero offsets; with a mask
+    head, mask logits ``x - 10``."""
+    from onnx import helper
+
+    nodes = [
+        helper.make_node("Sub", ["input", "twenty"], ["heatmap_logits"]),
+        helper.make_node("Mul", ["input", "zero"], ["nothing"]),
+        helper.make_node("Concat", ["nothing", "nothing"], ["offset"], axis=1),
+    ]
+    outputs = ["heatmap_logits", "offset"]
+    if mask_head:
+        nodes.append(helper.make_node("Sub", ["input", "ten"], ["mask_logits"]))
+        outputs.append("mask_logits")
+    return _save_graph(
+        path,
+        nodes,
+        outputs,
+        ["batch", 1, "height", "width"],
+        {"levels": 2, "mask_head": int(mask_head), "mad_floor": 0.0, "threshold": 0.3},
+        [_constant("twenty", 20.0), _constant("zero", 0.0)]
+        + ([_constant("ten", 10.0)] if mask_head else []),
+    )
+
+
+def save_random_center_networks(directory):
+    """Stand-in refine (one channel) and Friedel-partner (two channel) center
+    networks, under the file names the weights module asks for: coverage
+    logits ``8 x - 4`` of the window's first channel and a constant sigma."""
+    from onnx import helper
+
     from pyxem.utils._neural_spots.weights import REFINERS
 
     for (_, file_name), channels in zip(REFINERS.values(), (1, 2)):
-        torch.manual_seed(channels)
-        network = FastCenterNet(base=4, levels=2, channels=channels)
-        torch.save(
+        nodes = [
+            helper.make_node(
+                "Slice", ["input", "start", "end", "axis"], ["first_channel"]
+            ),
+            helper.make_node("Mul", ["first_channel", "eight"], ["scaled"]),
+            helper.make_node("Sub", ["scaled", "four"], ["coverage_logits"]),
+            helper.make_node(
+                "ReduceMean", ["input"], ["mean"], axes=[1, 2, 3], keepdims=0
+            ),
+            helper.make_node("Mul", ["mean", "zero"], ["nothing"]),
+            helper.make_node("Add", ["nothing", "log_sigma_value"], ["log_sigma"]),
+        ]
+        from onnx import numpy_helper
+
+        initializers = [
+            numpy_helper.from_array(np.array([0], np.int64), "start"),
+            numpy_helper.from_array(np.array([1], np.int64), "end"),
+            numpy_helper.from_array(np.array([1], np.int64), "axis"),
+            _constant("eight", 8.0),
+            _constant("four", 4.0),
+            _constant("zero", 0.0),
+            _constant("log_sigma_value", np.log(0.05)),
+        ]
+        _save_graph(
+            directory / file_name,
+            nodes,
+            ["coverage_logits", "log_sigma"],
+            ["batch", channels, 36, 36],
             {
-                "state_dict": network.state_dict(),
-                "base": 4,
+                "channels": channels,
                 "levels": 2,
-                "depthwise": 0,
-                "sigma_head": 1,
                 "crop_radius": 10.0,
                 "crop_half": 16,
+                "sigma_scale": 1.0,
                 # wide enough that the steps run on the test disks
                 "min_spot_radius": 1.0,
                 "max_spot_radius": 64.0,
             },
-            directory / file_name,
+            initializers,
         )
 
 
 @pytest.fixture
 def random_checkpoint(tmp_path, monkeypatch):
-    """Untrained detector and center networks, so the whole pipeline runs
-    without downloading weights. Returns the detector checkpoint."""
+    """Stand-in detector and center networks, so the whole pipeline runs
+    without downloading weights. Returns the detector's path."""
     from pyxem.utils._neural_spots import clear_model_cache
     from pyxem.utils._neural_spots.weights import LOCAL_DIRECTORY_VARIABLE
 
     save_random_center_networks(tmp_path)
     monkeypatch.setenv(LOCAL_DIRECTORY_VARIABLE, str(tmp_path))
     clear_model_cache()
-    yield save_random_detector(tmp_path / "spotunet.pt")
+    yield save_random_detector(tmp_path / "spotnet.onnx")
     clear_model_cache()
 
 
@@ -175,7 +235,7 @@ class TestHyperspyMethodsPassThrough:
             signal.get_diffraction_vectors(method="local_max", interactive=True)
 
 
-@skip_torch
+@skip_onnx
 class TestNeural:
     def test_runs_eager_and_lazy_alike(self, signal, random_checkpoint):
         eager = signal.get_diffraction_vectors(
@@ -358,7 +418,7 @@ class TestNeural:
                 assert np.all(shift < 32)
 
     def test_mask_head_detector(self, signal, random_checkpoint, tmp_path):
-        path = save_random_detector(tmp_path / "masked.pt", mask_head=True)
+        path = save_random_detector(tmp_path / "masked.onnx", mask_head=True)
         vectors = signal.get_diffraction_vectors(method="neural", model_path=path)
         assert vectors.data.shape == (4, 5)
 
@@ -384,10 +444,8 @@ class TestNeural:
         monkeypatch.delenv(LOCAL_DIRECTORY_VARIABLE, raising=False)
         clear_model_cache()
 
-        with mock.patch.object(
-            emdatabase.data, "SpotUNetDiffraction", None, create=True
-        ):
-            with pytest.raises(ImportError, match="PYXEM_SPOTUNET_WEIGHTS_DIR"):
+        with mock.patch.object(emdatabase.data, "DE_SpotNet", None, create=True):
+            with pytest.raises(ImportError, match="PYXEM_SPOTNET_WEIGHTS_DIR"):
                 signal.get_diffraction_vectors(method="neural")
         with pytest.raises(ValueError, match="model must be one of"):
             signal.get_diffraction_vectors(method="neural", model="nonsense")
@@ -395,12 +453,12 @@ class TestNeural:
             signal.get_diffraction_vectors(method="neural", model_path="missing.pt")
 
 
-@skip_torch
+@skip_onnx
 @pytest.mark.skipif(
-    not os.environ.get("PYXEM_SPOTUNET_WEIGHTS_DIR"),
-    reason="set PYXEM_SPOTUNET_WEIGHTS_DIR to a directory of the trained weights",
+    not os.environ.get("PYXEM_SPOTNET_WEIGHTS_DIR"),
+    reason="set PYXEM_SPOTNET_WEIGHTS_DIR to a directory of the trained weights",
 )
-@pytest.mark.parametrize("model", ["anyscale8", "dynamical-mask8"])
+@pytest.mark.parametrize("model", ["spotnet", "dynamical"])
 def test_trained_weights_localise_disks(model):
     """With the trained detector and center networks every planted disk
     (radius 8, inside the range both center steps work on) is found to a
@@ -450,7 +508,7 @@ def explorer(signal, random_checkpoint):
     )
 
 
-@skip_torch
+@skip_onnx
 class TestInteractive:
     def test_registered_with_hyperspy(self, explorer):
         from hyperspy.ui_registry import UI_REGISTRY
@@ -489,10 +547,10 @@ class TestInteractive:
     def test_panel_lists_the_model_and_switches_it(self, explorer, tmp_path):
         panel = explorer.widgets["anywidget"]["wdict"]["panel"]
         # a model_path checkpoint is the only model offered
-        assert panel.models == ["spotunet.pt"]
-        assert panel.model == "spotunet.pt"
+        assert panel.models == ["spotnet.onnx"]
+        assert panel.model == "spotnet.onnx"
         detections = len(explorer.peaks)
-        panel.model = "spotunet.pt"
+        panel.model = "spotnet.onnx"
         assert len(explorer.peaks) == detections
 
     def test_panel_buttons(self, explorer):

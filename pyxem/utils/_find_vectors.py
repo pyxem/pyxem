@@ -262,11 +262,11 @@ class SpotFinder:
         refine_centers=True,
         friedel_partner=True,
     ):
-        from pyxem import TORCH_INSTALLED
+        from pyxem import ONNXRUNTIME_INSTALLED
 
-        if not TORCH_INSTALLED:
+        if not ONNXRUNTIME_INSTALLED:
             raise ImportError(
-                "method='neural' requires torch: `pip install pyxem[neural]`."
+                "method='neural' requires onnxruntime: `pip install pyxem[neural]`."
             )
         self.threshold = None if threshold is None else float(threshold)
         self.min_distance = int(min_distance)
@@ -282,7 +282,7 @@ class SpotFinder:
         self.friedel_partner = bool(friedel_partner)
         self.reference = None
         if self.threshold is None:
-            self.threshold = float(getattr(self.model()[0], "default_threshold", 0.3))
+            self.threshold = float(self.model().default_threshold)
 
     @property
     def parameters(self):
@@ -317,14 +317,11 @@ class SpotFinder:
 
     def calibrate(self, sample_patterns):
         """Tune the background sigma (and a weak-data threshold) in place."""
-        from pyxem.utils._neural_spots.device_lock import accelerator_lock
         from pyxem.utils._neural_spots.infer import calibrate
 
-        model, device = self.model()
-        with accelerator_lock(device):
-            result = calibrate(
-                model, sample_patterns, device, spot_diameter=self._spot_diameter()
-            )
+        result = calibrate(
+            self.model(), sample_patterns, spot_diameter=self._spot_diameter()
+        )
         self.background_sigma = result["bg_sigma"]
         return result
 
@@ -334,38 +331,34 @@ class SpotFinder:
         Returns a list of ``(N_i, 5)`` float32
         ``[y, x, intensity, confidence, sigma]``, the same as SpyDE's batch.
         """
-        from pyxem.utils._neural_spots.device_lock import accelerator_lock
         from pyxem.utils._neural_spots.infer import detect_batch
 
         patterns = np.asarray(patterns, dtype=np.float32)
         if len(patterns) == 0:
             return []
         reference = patterns[0] if self.reference is None else self.reference
-        model, device = self.model()
-        with accelerator_lock(device):
-            found = detect_batch(
-                model,
-                np.concatenate([np.asarray(reference, np.float32)[None], patterns]),
-                device,
-                thresh=self.threshold,
-                min_distance=self.min_distance,
-                bg_sigma=self.background_sigma,
-                spot_diameter=self._spot_diameter(),
-                with_width=True,
-            )[1:]
+        found = detect_batch(
+            self.model(),
+            np.concatenate([np.asarray(reference, np.float32)[None], patterns]),
+            thresh=self.threshold,
+            min_distance=self.min_distance,
+            bg_sigma=self.background_sigma,
+            spot_diameter=self._spot_diameter(),
+            with_width=True,
+        )[1:]
         predictions = [
             _drop_masked(np.asarray(p, np.float32).reshape(-1, 4), mask) for p in found
         ]
         counts_radius = _counts_radius(reference, self.spot_radius)
         predictions, refined_sigmas = self._refined(
-            patterns, predictions, counts_radius, device
+            patterns, predictions, counts_radius
         )
         return [
             _peak_records(pattern, prediction, counts_radius, sigma)
             for pattern, prediction, sigma in zip(patterns, predictions, refined_sigmas)
         ]
 
-    def _refined(self, patterns, predictions, spot_radius, device):
+    def _refined(self, patterns, predictions, spot_radius):
         """The center steps over a stack's predictions, one batch per step:
         the refine network, then the Friedel-partner network on its centers.
         Returns the predictions with the refined ``[y, x]`` and, per pattern,
@@ -384,7 +377,7 @@ class SpotFinder:
         sigmas = None
         steps = [CENTER_MODEL] + ([FRIEDEL_MODEL] if self.friedel_partner else [])
         for step in steps:
-            refiner = load_step(step, device)
+            refiner = load_step(step, self.device)
             if refiner is None:
                 continue
             stepped, step_sigmas = refine_centers(
