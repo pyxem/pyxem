@@ -1444,6 +1444,240 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         )
         return vectors
 
+    def find_vectors(
+        self,
+        method: str = "dog",
+        threshold: Optional[float] = None,
+        min_distance: Optional[int] = None,
+        disk_radius: Union[int, str, None] = None,
+        sigma1: float = 0.8,
+        sigma2: float = 2.0,
+        spot_radius: Optional[float] = None,
+        background_sigma: Union[float, str, None] = "auto",
+        model_path: Optional[str] = None,
+        model_version: Optional[str] = None,
+        device: Optional[str] = None,
+        navigation_sigma: float = 0.0,
+        mask: Union[np.ndarray, str, None] = None,
+        mask_dilation: int = 5,
+        subpixel: bool = True,
+        neighbour_refine: bool = False,
+        interactive: bool = False,
+        center: Optional[tuple] = None,
+        calibration: Optional[tuple] = None,
+        column_names: Optional[tuple] = None,
+        units: Optional[tuple] = None,
+    ) -> "DiffractionVectors":
+        """Find the diffraction spots in every pattern.
+
+        Three detectors are available, each suited to a different kind of
+        data. All of them report subpixel positions and, as the intensity, the
+        mean of the raw pattern over a small disk around each spot, so the
+        result is the same physical quantity whichever is used.
+
+        ``"dog"``
+            A difference-of-Gaussians band-pass. Removes pixel noise and the
+            smooth diffuse background in one pass; best for small, sharp
+            spots. ``threshold`` is a signal-to-noise ratio (default 10).
+        ``"nxcorr"``
+            Window-normalised cross-correlation against a flat disk of
+            ``disk_radius``. Best for disks of a known size, such as
+            precession or convergent-beam data. ``threshold`` is a
+            correlation score in [-1, 1] (default 0.5).
+        ``"neural"``
+            A small U-Net trained to find spots of any size without tuning.
+            It estimates the disk size itself and resamples each pattern to
+            the size it was trained on. ``threshold`` is the network's
+            confidence (default 0.3). Requires ``torch``, and downloads its
+            weights from em-database unless ``model_path`` is given
+            (``pip install pyxem[neural]``).
+
+        Parameters
+        ----------
+        method
+            ``"dog"``, ``"nxcorr"`` or ``"neural"``.
+        threshold
+            Detection threshold; ``None`` uses the method's default.
+        min_distance
+            Minimum separation between spots in pixels; ``None`` uses the
+            method's default (3, 5 and 4 for dog, nxcorr and neural).
+        disk_radius
+            Template radius in pixels for ``"nxcorr"``, or ``"auto"`` to
+            estimate it from the pattern in the middle of the scan. Default 5.
+        sigma1, sigma2
+            The two Gaussian widths in pixels for ``"dog"``: ``sigma1``
+            removes noise, ``sigma2`` the background.
+        spot_radius
+            For ``"neural"``: the spot radius in pixels, overriding the
+            automatic estimate when it gets the size wrong.
+        background_sigma
+            For ``"neural"``: the background-subtraction scale in pixels.
+            ``"auto"`` (default) picks it on three patterns spread across the
+            scan by maximising the network's confidence, and lowers the
+            threshold on faint data when ``threshold`` is not given. ``None``
+            uses a fixed 12 px.
+        model_path
+            For ``"neural"``: a local checkpoint to use instead of downloading
+            one.
+        model_version
+            For ``"neural"``: the dated em-database version of the weights.
+            ``None`` fetches the latest.
+        device
+            For ``"neural"``: the torch device. ``None`` picks CUDA, then
+            Apple MPS, then the CPU.
+        navigation_sigma
+            Gaussian blur in navigation space (in scan positions) before
+            detection. Averaging neighbouring patterns raises the
+            signal-to-noise ratio of a noisy scan.
+        mask
+            Pixels where no spot may be reported, such as a beam stop: a
+            boolean array the shape of one pattern, or ``"auto"`` to detect a
+            beam stop from the average of a block of patterns.
+        mask_dilation
+            Pixels by which an ``"auto"`` mask is grown, so the bright halo
+            hugging the stop edge is excluded too.
+        subpixel
+            Refine positions to subpixel precision (``"dog"`` and
+            ``"nxcorr"``; the neural detector is always subpixel).
+        neighbour_refine
+            For ``"neural"`` on a 2-D scan: keep only the spots that also
+            appear in at least half of the four neighbouring scan positions,
+            weighted by confidence and a soft Friedel-pair check.
+        interactive
+            Return a :class:`~pyxem.utils.find_vectors_gui.FindVectorsExplorer`
+            instead of computing: a widget to tune the parameters on the
+            pattern under a navigator crosshair. Its ``compute()`` runs the
+            search with the tuned parameters. Requires ``anyplotlib`` and
+            ``ipywidgets`` (``pip install pyxem[interactive]``).
+        center, calibration, column_names, units
+            Passed to :meth:`~pyxem.signals.DiffractionVectors.from_peaks`;
+            by default they come from the signal axes.
+
+        Returns
+        -------
+        DiffractionVectors
+            Ragged vectors, lazy if this signal is lazy, with columns
+            ``[ky, kx, intensity]`` in calibrated units.
+
+        Examples
+        --------
+        >>> s = pxm.data.tilt_boundary_data()
+        >>> vectors = s.find_vectors(method="dog", threshold=8)
+        """
+        from pyxem.utils import _find_vectors
+
+        finder = _find_vectors.SpotFinder(
+            method=method,
+            threshold=threshold,
+            min_distance=min_distance,
+            disk_radius=None if disk_radius == "auto" else disk_radius,
+            sigma1=sigma1,
+            sigma2=sigma2,
+            subpixel=subpixel,
+            spot_radius=spot_radius,
+            background_sigma=(
+                None if isinstance(background_sigma, str) else background_sigma
+            ),
+            model_path=model_path,
+            model_version=model_version,
+            device=device,
+        )
+        navigation_dimension = self.axes_manager.navigation_dimension
+        if neighbour_refine and (
+            finder.method != "neural" or navigation_dimension != 2
+        ):
+            raise ValueError(
+                "neighbour_refine is only available for method='neural' on a "
+                "signal with two navigation dimensions."
+            )
+        data = self.data
+        if disk_radius == "auto":
+            from pyxem.utils._spot_finding import estimate_disk_radius
+
+            middle = _find_vectors.sample_patterns(
+                data, navigation_dimension, fractions=(0.5,)
+            )[0]
+            finder.disk_radius = estimate_disk_radius(middle)
+        if isinstance(mask, str):
+            if mask != "auto":
+                raise ValueError(f"mask must be an array, 'auto' or None, not {mask!r}")
+            mask = _find_vectors.automatic_mask(
+                data, navigation_dimension, dilation=mask_dilation
+            )
+        elif mask is not None:
+            mask = np.asarray(mask, dtype=bool)
+            if mask.shape != data.shape[navigation_dimension:]:
+                raise ValueError(
+                    f"mask shape {mask.shape} does not match the pattern shape "
+                    f"{data.shape[navigation_dimension:]}"
+                )
+        if finder.method == "neural" and background_sigma == "auto":
+            calibrated = finder.calibrate(
+                _find_vectors.sample_patterns(data, navigation_dimension)
+            )
+            if threshold is None:
+                finder.threshold = calibrated["threshold"]
+
+        settings = dict(
+            mask=mask,
+            navigation_sigma=navigation_sigma,
+            neighbour_refine=neighbour_refine,
+            center=center,
+            calibration=calibration,
+            column_names=column_names,
+            units=units,
+        )
+        if interactive:
+            from pyxem.utils.find_vectors_gui import FindVectorsExplorer
+
+            return FindVectorsExplorer(self, finder, **settings)
+        return self._vectors_from_finder(finder, **settings)
+
+    def _vectors_from_finder(
+        self,
+        finder,
+        mask=None,
+        navigation_sigma=0.0,
+        neighbour_refine=False,
+        center=None,
+        calibration=None,
+        column_names=None,
+        units=None,
+    ):
+        """Run a resolved :class:`~pyxem.utils._find_vectors.SpotFinder`."""
+        from pyxem.signals import DiffractionVectors
+        from pyxem.utils._find_vectors import find_vectors_array
+
+        peaks = find_vectors_array(
+            self.data,
+            finder,
+            self.axes_manager.navigation_dimension,
+            navigation_sigma=navigation_sigma,
+            mask=mask,
+            neighbour_refine=neighbour_refine,
+        )
+        signal_class = LazySignal if self._lazy else BaseSignal
+        peaks = signal_class(
+            peaks,
+            ragged=True,
+            axes=[
+                axis.get_axis_dictionary()
+                for axis in self.axes_manager.navigation_axes[::-1]
+            ],
+        )
+        peaks.metadata.add_node("Peaks")
+        peaks.metadata.Peaks.signal_axes = deepcopy(self.axes_manager.signal_axes)
+        vectors = DiffractionVectors.from_peaks(
+            peaks,
+            center=center,
+            calibration=calibration,
+            column_names=column_names,
+            units=units,
+        )
+        vectors.metadata.add_node("Peaks")
+        vectors.metadata.Peaks.parameters = finder.parameters
+        return vectors
+
     def peak_position_refinement_com(
         self, peak_array, square_size=10, lazy_result=True, show_progressbar=True
     ):
