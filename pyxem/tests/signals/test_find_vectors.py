@@ -235,6 +235,20 @@ class TestHyperspyMethodsPassThrough:
             signal.get_diffraction_vectors(method="local_max", interactive=True)
 
 
+def test_gui_registration_adds_no_empty_toolkit():
+    """pyxem must not register the anywidget toolkit on HyperSpy's behalf:
+    without hyperspy_gui_anywidget, HyperSpy would route its own GUIs (the
+    navigation sliders) to it and fail."""
+    from hyperspy.ui_registry import TOOLKIT_REGISTRY, UI_REGISTRY
+
+    import pyxem.signal_tools  # noqa: F401  registers the toolkey
+
+    installed = importlib.util.find_spec("hyperspy_gui_anywidget") is not None
+    assert ("anywidget" in TOOLKIT_REGISTRY) == installed
+    toolkits = UI_REGISTRY["pyxem.Diffraction2D.get_diffraction_vectors"]
+    assert ("anywidget" in toolkits) == installed
+
+
 @skip_onnx
 class TestNeural:
     def test_runs_eager_and_lazy_alike(self, signal, random_checkpoint):

@@ -16,14 +16,27 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+import importlib.util
 import math
 
 import numpy as np
 import traits.api as t
-from hyperspy.ui_registry import add_gui_method
+from hyperspy.ui_registry import UI_REGISTRY, add_gui_method
 from scipy.ndimage import gaussian_filter
 
 from pyxem.utils import _find_vectors
+
+TOOLKEY = "pyxem.Diffraction2D.get_diffraction_vectors"
+
+# Registered here rather than under `widgets:` in hyperspy_extension.yaml: a
+# widget declared there adds the anywidget toolkit to HyperSpy's registry even
+# when hyperspy_gui_anywidget is missing, and HyperSpy then sends its own GUIs
+# (the navigation sliders of a 3-D navigator) to a toolkit with nothing in it.
+if importlib.util.find_spec("hyperspy_gui_anywidget") is not None:
+    UI_REGISTRY[TOOLKEY]["anywidget"] = {
+        "module": "pyxem.signal_tools.anywidget_gui",
+        "function": "get_diffraction_vectors_aw",
+    }
 
 
 def _default_detector():
@@ -32,7 +45,7 @@ def _default_detector():
     return DEFAULT_DETECTOR
 
 
-@add_gui_method(toolkey="pyxem.Diffraction2D.get_diffraction_vectors")
+@add_gui_method(toolkey=TOOLKEY)
 class DiffractionVectorFinder(t.HasTraits):
     """The settings of ``get_diffraction_vectors(method="neural")``, tuned on
     one pattern at a time.
