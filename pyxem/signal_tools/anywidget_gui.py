@@ -23,22 +23,17 @@ anywidget:``, so ``tool.gui()`` finds them through hyperspy's GUI registry.
 Each builder takes the tool as ``obj`` and returns ``{"widget", "wdict"}``;
 ``add_display_arg`` displays the widget instead when ``display=True``.
 
-The plots are anyplotlib figures; the controls are hyperspy_gui_anywidget's
-widgets, linked to the tool's traits.
+The plots are anyplotlib figures; the controls are pyxem's own anywidget
+panel styled after SpyDE (:mod:`pyxem.signal_tools._panel`), linked to the
+tool's traits.
 """
 
 import numpy as np
-from hyperspy_gui_anywidget.custom_widgets import (
-    ButtonWidget,
-    CheckboxWidget,
-    ContainerWidget,
-    FloatSliderWidget,
-    HTMLWidget,
-    IntSliderWidget,
-)
 from hyperspy_gui_anywidget.utils import add_display_arg
 from ipywidgets import HBox, Layout
 from link_traits import link
+
+from pyxem.signal_tools._panel import FindVectorsPanel
 
 SPOT_COLOR = "#ff3030"
 MASK_COLOR = "#ff8a3d"
@@ -110,7 +105,7 @@ def get_diffraction_vectors_aw(obj, **kwargs):
     import anyplotlib as apl
 
     wdict = {}
-    figure, (navigator_axes, pattern_axes) = apl.subplots(1, 2, figsize=(900, 440))
+    figure, (navigator_axes, pattern_axes) = apl.subplots(1, 2, figsize=(860, 430))
     _add_navigator(obj, navigator_axes, wdict)
 
     pattern_plot = pattern_axes.imshow(obj.pattern, cmap="gray")
@@ -127,33 +122,26 @@ def get_diffraction_vectors_aw(obj, **kwargs):
         linewidths=1.5,
     )
 
-    controls = {
-        "threshold": FloatSliderWidget(
-            min=0.0, max=1.0, step=0.01, description="Threshold"
-        ),
-        "min_distance": IntSliderWidget(min=1, max=30, description="Min distance"),
-        "spot_radius": FloatSliderWidget(
-            min=0.0, max=30.0, step=0.5, description="Spot size (0 = auto)"
-        ),
-        "navigation_sigma": FloatSliderWidget(
-            min=0.0, max=5.0, step=0.1, description="Navigation blur"
-        ),
-        "refine_centers": CheckboxWidget(description="Refine centers"),
-        "friedel_partner": CheckboxWidget(description="Friedel partner"),
-        "mask_beam_stop": CheckboxWidget(description="Mask beam stop"),
-        "mask_dilation": IntSliderWidget(min=0, max=20, description="Beam-stop dilate"),
-        "show_response": CheckboxWidget(description="Show response"),
-    }
-    for name, control in controls.items():
-        link((obj, name), (control, "value"))
-    wdict.update(controls)
-
-    count = HTMLWidget()
-    compute = ButtonWidget(
-        description="Compute", tooltip="Find the vectors in every pattern."
+    panel = FindVectorsPanel(
+        models=obj.model_names(),
+        neighbor_refine_available=obj._navigation_dimension == 2,
+        extra_open=bool(obj.mask_beam_stop),
     )
-    close = ButtonWidget(description="Close", tooltip="Close the widget.")
-    wdict.update(count=count, compute=compute, close=close)
+    linked = [
+        "model",
+        "threshold",
+        "min_distance",
+        "spot_radius",
+        "navigation_sigma",
+        "refine_centers",
+        "friedel_partner",
+        "neighbor_refine",
+        "mask_beam_stop",
+        "mask_dilation",
+        "show_response",
+    ]
+    for name in linked:
+        link((obj, name), (panel, name))
 
     def redraw(event=None):
         if pattern_plot.data.shape != obj.pattern.shape or not np.array_equal(
@@ -171,39 +159,38 @@ def get_diffraction_vectors_aw(obj, **kwargs):
         else:
             response_layer.set(visible=False)
         pattern_plot.set_overlay_mask(obj.mask, color=MASK_COLOR, alpha=0.35)
-        count.value = f"<b>{len(peaks)}</b> spots at {tuple(obj.position)}"
+        panel.status = f"<b>{len(peaks)}</b> spots at {tuple(obj.position)}"
 
     obj.observe(redraw, "detected")
     redraw()
 
     def on_compute(change):
-        count.value = "Computing…"
-        vectors = obj.compute()
-        count.value = f"Computed: {vectors}"
+        panel.busy = True
+        panel.status = "Computing…"
+        try:
+            vectors = obj.compute()
+            if vectors._lazy:
+                vectors.compute(show_progressbar=False)
+            panel.status = f"Computed {vectors.axes_manager.navigation_size} patterns"
+        finally:
+            panel.busy = False
 
     def on_close(change):
-        obj.unobserve(redraw, "detected")
-        if hasattr(widget, "close"):
-            widget.close()
+        obj.observe(redraw, "detected", remove=True)
+        widget.close()
 
-    compute.observe(on_compute, names="clicks")
-    close.observe(on_close, names="clicks")
+    panel.observe(on_compute, names="compute_clicks")
+    panel.observe(on_close, names="close_clicks")
 
-    panel = ContainerWidget(
-        children=[
-            *controls.values(),
-            ContainerWidget(children=[compute, close], layout="horizontal"),
-            count,
-        ],
-        layout="vertical",
+    # Two anywidgets side by side in one box; it wraps, so in a narrow
+    # notebook the panel drops below the figure instead of being clipped.
+    widget = HBox(
+        [figure, panel],
+        layout=Layout(flex_flow="row wrap", align_items="flex-start", gap="8px"),
     )
-    # The figure is an anywidget of its own, so the outer row is a plain
-    # ipywidgets box rather than a flattened container. It wraps, so in a
-    # narrow notebook the controls drop below the figure instead of being
-    # clipped off its right edge.
-    widget = HBox([figure, panel], layout=Layout(flex_flow="row wrap"))
     wdict.update(
         figure=figure,
+        panel=panel,
         pattern_plot=pattern_plot,
         spot_markers=spot_markers,
         response_layer=response_layer,

@@ -121,6 +121,8 @@ setup(
     package_data={
         "": ["LICENSE", "README.rst"],
         "pyxem": ["*.py", "hyperspy_extension.yaml"],
+        # the anywidget front end of the interactive GUIs
+        "pyxem.signal_tools": ["*.js", "*.css"],
     },
     entry_points={"hyperspy.extensions": ["pyxem = pyxem"]},
 )

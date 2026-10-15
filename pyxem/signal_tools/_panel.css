@@ -1,0 +1,142 @@
+/* The find-vectors parameter panel, after SpyDE's Find Vectors wizard
+   (electron/src/renderer/src/components/WizardShell.tsx).
+   Dark: SpyDE's palette (Catppuccin Mocha). Light: Catppuccin Latte. */
+
+.pxm-fv {
+  --pxm-fv-bg: #1e1e2e;
+  --pxm-fv-field: #11111b;
+  --pxm-fv-border: #313244;
+  --pxm-fv-border-strong: #45475a;
+  --pxm-fv-text: #cdd6f4;
+  --pxm-fv-label: #a6adc8;
+  --pxm-fv-muted: #6c7086;
+  --pxm-fv-accent: #89b4fa;
+  --pxm-fv-on-accent: #11111b;
+  --pxm-fv-shadow: rgba(0, 0, 0, 0.55);
+
+  box-sizing: border-box;
+  width: 400px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  background: var(--pxm-fv-bg);
+  color: var(--pxm-fv-text);
+  border: 1px solid var(--pxm-fv-border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px var(--pxm-fv-shadow);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 11px;
+}
+
+.pxm-fv--light {
+  --pxm-fv-bg: #eff1f5;
+  --pxm-fv-field: #ffffff;
+  --pxm-fv-border: #ccd0da;
+  --pxm-fv-border-strong: #bcc0cc;
+  --pxm-fv-text: #4c4f69;
+  --pxm-fv-label: #6c6f85;
+  --pxm-fv-muted: #8c8fa1;
+  --pxm-fv-accent: #1e66f5;
+  --pxm-fv-on-accent: #eff1f5;
+  --pxm-fv-shadow: rgba(76, 79, 105, 0.18);
+}
+
+.pxm-fv * { box-sizing: border-box; }
+
+.pxm-fv-head { display: flex; justify-content: space-between; align-items: center; }
+.pxm-fv-title { font-size: 11px; font-weight: 600; }
+.pxm-fv-x {
+  background: none; border: none; color: var(--pxm-fv-muted);
+  cursor: pointer; font-size: 12px; padding: 0 2px;
+}
+.pxm-fv-hint { font-size: 10px; color: var(--pxm-fv-muted); font-style: italic; }
+
+.pxm-fv-row { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.pxm-fv-row-label { font-size: 10px; color: var(--pxm-fv-label); white-space: nowrap; width: 36px; flex: 0 0 auto; }
+.pxm-fv-grow { flex: 1; min-width: 0; }
+
+.pxm-fv-grid {
+  display: grid; grid-template-columns: 1fr 1fr; column-gap: 10px; row-gap: 6px;
+}
+
+/* label, slider and editable number on one line */
+.pxm-fv-cell { display: flex; align-items: center; gap: 5px; min-width: 0; }
+.pxm-fv-cell-label {
+  font-size: 10px; color: var(--pxm-fv-label); white-space: nowrap; flex: 0 0 58px;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.pxm-fv-cell input[type="range"] { flex: 1; min-width: 30px; accent-color: var(--pxm-fv-accent); margin: 0; }
+.pxm-fv-number {
+  width: 42px; flex: 0 0 auto;
+  background: var(--pxm-fv-field); color: var(--pxm-fv-text);
+  border: 1px solid var(--pxm-fv-border); border-radius: 4px;
+  padding: 2px 4px; font-size: 10px; text-align: right;
+}
+.pxm-fv-number:focus { outline: none; border-color: var(--pxm-fv-accent); }
+/* no spinner: it takes half the box and the slider already steps */
+.pxm-fv-number { -moz-appearance: textfield; appearance: textfield; }
+.pxm-fv-number::-webkit-outer-spin-button,
+.pxm-fv-number::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+.pxm-fv-select {
+  width: 100%;
+  background: var(--pxm-fv-field); color: var(--pxm-fv-text);
+  border: 1px solid var(--pxm-fv-border); border-radius: 4px;
+  padding: 3px 7px; font-size: 11px; cursor: pointer;
+}
+.pxm-fv-select:focus { outline: none; border-color: var(--pxm-fv-border-strong); }
+
+.pxm-fv-check {
+  font-size: 11px; color: var(--pxm-fv-text); display: flex; align-items: center;
+  gap: 6px; cursor: pointer; white-space: nowrap;
+}
+.pxm-fv-check input { accent-color: var(--pxm-fv-accent); margin: 0; }
+.pxm-fv-check--off { opacity: 0.45; cursor: default; }
+
+/* SpyDE's on/off switch, small enough to share a row */
+.pxm-fv-toggle {
+  display: flex; align-items: center; gap: 5px; flex: 0 0 auto;
+  background: none; border: none; padding: 0; color: var(--pxm-fv-label);
+  font-size: 10px; cursor: pointer; white-space: nowrap;
+}
+.pxm-fv-track {
+  position: relative; width: 22px; height: 12px; border-radius: 6px;
+  background: var(--pxm-fv-border); border: 1px solid var(--pxm-fv-border-strong);
+  flex: 0 0 auto; transition: background 0.12s;
+}
+.pxm-fv-knob {
+  position: absolute; top: 1px; left: 1px; width: 8px; height: 8px; border-radius: 4px;
+  background: var(--pxm-fv-label); transition: left 0.12s;
+}
+.pxm-fv-toggle[aria-checked="true"] .pxm-fv-track { background: var(--pxm-fv-accent); border-color: var(--pxm-fv-accent); }
+.pxm-fv-toggle[aria-checked="true"] .pxm-fv-knob { left: 11px; background: var(--pxm-fv-on-accent); }
+
+.pxm-fv-disclosure {
+  border-top: 1px solid var(--pxm-fv-border); padding-top: 4px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.pxm-fv-disclosure-button {
+  display: flex; align-items: center; gap: 4px; background: none; border: none;
+  color: var(--pxm-fv-label); cursor: pointer; font-size: 10px; padding: 0; align-self: flex-start;
+}
+.pxm-fv-chevron { display: inline-block; width: 8px; text-align: center; font-size: 12px; line-height: 1; transition: transform 0.12s; }
+.pxm-fv-disclosure[data-open="true"] .pxm-fv-chevron { transform: rotate(90deg); }
+.pxm-fv-disclosure[data-open="false"] .pxm-fv-page { display: none; }
+.pxm-fv-page { display: flex; flex-direction: column; gap: 6px; padding-top: 2px; }
+
+.pxm-fv-actions { display: flex; gap: 6px; align-items: center; }
+.pxm-fv-primary {
+  background: var(--pxm-fv-accent); color: var(--pxm-fv-on-accent); border: none;
+  border-radius: 5px; padding: 6px 10px; font-size: 12px; font-weight: 600; cursor: pointer;
+}
+.pxm-fv-primary[disabled] { background: var(--pxm-fv-border-strong); color: var(--pxm-fv-label); cursor: progress; }
+.pxm-fv-secondary {
+  background: transparent; border: 1px solid var(--pxm-fv-border); color: var(--pxm-fv-text);
+  border-radius: 5px; padding: 5px 10px; font-size: 12px; cursor: pointer;
+}
+.pxm-fv-status {
+  font-size: 10px; color: var(--pxm-fv-label);
+  border-top: 1px solid var(--pxm-fv-border); padding-top: 4px;
+}
