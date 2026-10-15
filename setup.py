@@ -49,10 +49,19 @@ extra_feature_requirements = {
     "dev": ["black ~= 24.1", "pre-commit >=1.16"],
     "gpu": ["cupy >= 9.0.0"],
     "dask": ["dask-image", "distributed"],
-    # Diffraction2D.find_vectors(method="neural"); the weights come from em-database.
+    # get_diffraction_vectors(method="neural") and template_match_*(device=...);
+    # the neural weights come from em-database.
     "neural": ["torch", "em-database"],
-    # Diffraction2D.find_vectors(interactive=True).
-    "interactive": ["anyplotlib; python_version >= '3.10'", "ipywidgets"],
+    # get_diffraction_vectors(method="neural", interactive=True): hyperspy's
+    # anywidget GUI toolkit (hyperspy 2.5) with anyplotlib plots.
+    "interactive": [
+        "torch",
+        "em-database",
+        "hyperspy >= 2.5.0",
+        "hyperspy_gui_anywidget",
+        "anyplotlib; python_version >= '3.10'",
+        "link_traits",
+    ],
 }
 
 
