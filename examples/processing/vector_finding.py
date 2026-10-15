@@ -81,3 +81,41 @@ s.add_marker(markers3)
 # %%
 
 # sphinx_gallery_thumbnail_number = 3
+
+# %%
+# Faster Template Matching
+# ========================
+#
+# With torch installed, ``device="auto"`` (or ``"cpu"``, ``"cuda"``,
+# ``"mps"``) correlates a whole chunk of patterns per call instead of one
+# pattern at a time. The result is the same as scikit-image's to
+# floating-point rounding.
+
+from pyxem import TORCH_INSTALLED
+
+if TORCH_INSTALLED:
+    temp_fast = s.template_match_disk(disk_r=5, subtract_min=False, device="auto")
+    print(abs(temp_fast.data - temp.data).max())
+
+# %%
+# Neural Spot Finding
+# ===================
+#
+# ``method="neural"`` finds spots with a small U-Net trained to detect
+# diffraction spots of any size without tuning; it estimates the disk size
+# itself. Two center networks then re-place each disk on the raw pattern, and
+# every vector carries the network's ``confidence`` and a positional ``sigma``.
+# It needs ``pip install pyxem[neural]`` and downloads its weights from
+# em-database. In a notebook, ``interactive=True`` opens a widget to tune the
+# settings on the pattern under a navigator crosshair
+# (``pip install pyxem[interactive]``).
+#
+# .. code-block:: python
+#
+#     vectors = s.get_diffraction_vectors(method="neural")
+#     vectors = s.get_diffraction_vectors(method="neural", model="dynamical")
+#
+#     finder = s.get_diffraction_vectors(method="neural", interactive=True)
+#     # ... tune, then
+#     vectors = finder.compute()
+#     finder.parameters  # the settings, to reuse in a script
