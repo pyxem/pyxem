@@ -17,6 +17,7 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
+import importlib.util
 import logging
 
 try:
@@ -25,6 +26,9 @@ try:
     CUPY_INSTALLED = True
 except ImportError:
     CUPY_INSTALLED = False
+# Checked without importing: torch takes seconds to import and only the
+# neural spot detector needs it.
+TORCH_INSTALLED = importlib.util.find_spec("torch") is not None
 from pyxem import components
 from pyxem import signals
 from pyxem import generators
@@ -42,6 +46,7 @@ __all__ = [
     "signals",
     "data",
     "CUPY_INSTALLED",
+    "TORCH_INSTALLED",
 ]
 
 __version__ = release_info.version
