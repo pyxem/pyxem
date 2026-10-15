@@ -18,6 +18,7 @@ Added
 - Add :meth:`pyxem.signals.BeamShift.plot_on_signal` function to visualise beam position on signal plot. (#1148)
 - Add ``subpixel`` precision for ``"blur"`` method in :meth:`pyxem.signals.Diffraction2D.get_direct_beam_position`. (#1148)
 - Add Gaussian prefiltering in navigation space in :meth:`pyxem.signals.Diffraction2D.get_direct_beam_position`. (#1148)
+- Add :meth:`pyxem.signals.Diffraction2D.find_vectors`, a spot finder with three detectors ported from SpyDE: a difference-of-Gaussians band-pass (``"dog"``), window-normalised cross-correlation against a disk (``"nxcorr"``) and a neural U-Net detector (``"neural"``, needs ``pyxem[neural]``; weights distributed through em-database). Supports navigation-space blurring, beam-stop masks, lazy signals, and an ``interactive=True`` anyplotlib widget for tuning on single patterns (needs ``pyxem[interactive]``).
 
 Changed
 -------

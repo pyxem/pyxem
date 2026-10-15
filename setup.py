@@ -49,6 +49,10 @@ extra_feature_requirements = {
     "dev": ["black ~= 24.1", "pre-commit >=1.16"],
     "gpu": ["cupy >= 9.0.0"],
     "dask": ["dask-image", "distributed"],
+    # Diffraction2D.find_vectors(method="neural"); the weights come from em-database.
+    "neural": ["torch", "em-database"],
+    # Diffraction2D.find_vectors(interactive=True).
+    "interactive": ["anyplotlib; python_version >= '3.10'", "ipywidgets"],
 }
 
 
