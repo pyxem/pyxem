@@ -103,7 +103,9 @@ if TORCH_INSTALLED:
 #
 # ``method="neural"`` finds spots with a small U-Net trained to detect
 # diffraction spots of any size without tuning; it estimates the disk size
-# itself. It needs ``pip install pyxem[neural]`` and downloads its weights from
+# itself. Two centre networks then re-place each disk on the raw pattern, and
+# every vector carries the network's ``confidence`` and a positional ``sigma``.
+# It needs ``pip install pyxem[neural]`` and downloads its weights from
 # em-database. In a notebook, ``interactive=True`` opens a widget to tune the
 # settings on the pattern under a navigator crosshair
 # (``pip install pyxem[interactive]``).
@@ -111,6 +113,7 @@ if TORCH_INSTALLED:
 # .. code-block:: python
 #
 #     vectors = s.get_diffraction_vectors(method="neural")
+#     vectors = s.get_diffraction_vectors(method="neural", model="dynamical-mask8")
 #
 #     finder = s.get_diffraction_vectors(method="neural", interactive=True)
 #     # ... tune, then

@@ -1506,14 +1506,22 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         ``"laplacian_of_gaussian"``, ``"difference_of_gaussian"``,
         ``"template_matching"``) together with its keyword arguments.
 
-        ``"neural"`` is a small U-Net (ported from SpyDE) trained to find
-        diffraction spots of any size without tuning: it estimates the disk
-        size from the pattern and resamples each pattern to the size it was
-        trained on. Its threshold is the network's confidence (default 0.3),
-        positions are subpixel, and the intensity column is the mean of the
-        raw pattern over a small disk around each spot. It requires torch, and
-        downloads its weights from em-database (the ``SpotUNetDiffraction``
-        entry) unless ``model_path`` is given (``pip install pyxem[neural]``).
+        ``"neural"`` is SpyDE's neural spot finder. A small U-Net trained to
+        find diffraction spots of any size without tuning estimates the disk
+        size from the pattern and resamples the pattern to the size it was
+        trained on; its threshold is the network's confidence. Two centre
+        networks then re-place every disk on the raw pattern at native
+        resolution: the refine network reads each disk's own window
+        (``refine_centres``), and the Friedel-partner network also reads the
+        window at the disk's Friedel mirror, which shows the other dynamical
+        fill of the same reflection (``friedel_partner``, on disks of 6-16 px
+        radius). The vectors have five columns: the two calibrated positions,
+        ``intensity`` (the mean of the raw pattern over a small disk around the
+        spot), ``confidence`` (the network's, 0-1) and ``sigma`` (the
+        positional uncertainty of the centre, in the units of the positions:
+        the centre networks' own estimate where they placed the disk, else the
+        counting-noise limit). It requires torch and downloads the weights from
+        em-database (``pip install pyxem[neural]``).
 
         Parameters
         ----------
@@ -1552,9 +1560,21 @@ class Diffraction2D(CommonDiffraction, Signal2D):
             :meth:`hyperspy.api.signals.Signal2D.find_peaks`. For
             ``"neural"``:
 
+            model : str
+                The detector: ``"anyscale8"`` (default, scale robust),
+                ``"dynamical-mask8"`` (a disk-coverage head that centres
+                dynamically filled disks on their aperture), ``"production"``
+                or ``"base16"``.
+            refine_centres : bool
+                Re-place each disk with the refine network. Default True;
+                skipped below a 5 px spot radius.
+            friedel_partner : bool
+                Then refine with each disk's Friedel-mirror window as well.
+                Default True; applies to spots of 6-16 px radius.
             threshold : float
-                The network's confidence threshold. Default 0.3, lowered by
-                the ``background_sigma="auto"`` calibration on faint data.
+                The network's confidence threshold. Default: the model's own
+                (0.3; 0.2 for ``"dynamical-mask8"``), lowered by the
+                ``background_sigma="auto"`` calibration on faint data.
             min_distance : int
                 Minimum separation between spots in pixels. Default 4.
             spot_radius : float
@@ -1564,7 +1584,10 @@ class Diffraction2D(CommonDiffraction, Signal2D):
                 tunes it on three patterns spread across the scan; None uses
                 a fixed 12 px.
             model_path : str
-                A local checkpoint instead of the download.
+                A local detector checkpoint instead of the download. A
+                directory of weight files named by the
+                ``PYXEM_SPOTUNET_WEIGHTS_DIR`` environment variable is used
+                before any download, for the centre networks too.
             model_version : str
                 The dated em-database version of the weights.
             device : str
@@ -1584,7 +1607,9 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         Returns
         -------
         DiffractionVectors
-            Ragged vectors, lazy if this signal is lazy. With
+            Ragged vectors, lazy if this signal is lazy. With ``"neural"``
+            the columns are ``[ky, kx, intensity, confidence, sigma]``
+            (``intensity`` dropped when ``get_intensity=False``). With
             ``method="neural", interactive=True``, the
             :class:`~pyxem.signal_tools.DiffractionVectorFinder` instead.
 
@@ -1686,15 +1711,35 @@ class Diffraction2D(CommonDiffraction, Signal2D):
                 for axis in self.axes_manager.navigation_axes[::-1]
             ],
         )
-        peaks.metadata.add_node("Peaks")
-        peaks.metadata.Peaks.signal_axes = deepcopy(self.axes_manager.signal_axes)
+        # The two position columns are calibrated exactly as from_peaks
+        # calibrates them; sigma is a length, so it takes the scale but no
+        # offset; intensity and confidence are left as they are.
+        axes = self.axes_manager.signal_axes[::-1]
+        if center is None:
+            center = [-axis.offset / axis.scale for axis in axes]
+        if calibration is None:
+            calibration = [axis.scale for axis in axes]
+        elif not isiterable(calibration):
+            calibration = [calibration, calibration]
+        if column_names is None:
+            column_names = [str(axis.name) for axis in axes]
+        if units is None:
+            units = [str(axis.units) for axis in axes]
+        extra_names = ["intensity", "confidence", "sigma"]
+        extra_units = ["a.u.", "", units[0]]
+        extra_centre = [0.0, 0.0, 0.0]
+        extra_calibration = [1.0, 1.0, float(np.mean(calibration[:2]))]
+        if not get_intensity:
+            extra_names, extra_units = extra_names[1:], extra_units[1:]
+            extra_centre, extra_calibration = extra_centre[1:], extra_calibration[1:]
         vectors = DiffractionVectors.from_peaks(
             peaks,
-            center=center,
-            calibration=calibration,
-            column_names=column_names,
-            units=units,
+            center=list(center[:2]) + extra_centre,
+            calibration=list(calibration[:2]) + extra_calibration,
+            column_names=list(column_names[:2]) + extra_names,
+            units=list(units[:2]) + extra_units,
         )
+        vectors.has_intensity = get_intensity
         vectors.metadata.add_node("Peaks")
         vectors.metadata.Peaks.parameters = finder.parameters
         return vectors

@@ -43,7 +43,6 @@ METHOD_NEURAL = "neural"
 #: The ``get_diffraction_vectors`` methods this module handles; every other
 #: method goes to hyperspy's ``find_peaks``.
 METHODS = (METHOD_NEURAL,)
-DEFAULT_THRESHOLD = 0.3
 DEFAULT_MIN_DISTANCE = 4
 DEFAULT_MASK_DILATION = 5
 #: Navigation chunk side used when an in-memory signal is processed.
@@ -51,22 +50,24 @@ EAGER_NAVIGATION_CHUNK = 32
 #: Radius over which a detection's intensity is averaged.
 INTENSITY_RADIUS = 5.0
 
+#: Column indices kept with and without ``get_intensity``.
+OUTPUT_COLUMNS = {True: [0, 1, 2, 3, 4], False: [0, 1, 3, 4]}
+
 #: Keyword arguments of ``get_diffraction_vectors`` that configure the finder.
 FINDER_ARGUMENTS = (
     "threshold",
     "min_distance",
     "spot_radius",
     "background_sigma",
+    "model",
     "model_path",
     "model_version",
     "device",
+    "refine_centres",
+    "friedel_partner",
 )
 #: Keyword arguments that configure how the finder runs over the dataset.
 RUN_ARGUMENTS = ("navigation_sigma", "mask", "mask_dilation", "neighbour_refine")
-
-
-def empty_peaks():
-    return np.zeros((0, 3), dtype=np.float32)
 
 
 def disk_mean_intensity(pattern, rows, columns, radius):
@@ -140,11 +141,100 @@ def _nearest_pixels(peaks, shape):
 
 
 def _drop_masked(peaks, mask):
-    peaks = np.asarray(peaks, dtype=np.float32).reshape(-1, 3)
     if mask is None or len(peaks) == 0 or not mask.any():
         return peaks
     rows, columns = _nearest_pixels(peaks, mask.shape)
     return peaks[~mask[rows, columns]]
+
+
+#: Columns of every detection: position, the raw disk-mean intensity, the
+#: network's confidence and the centre's positional uncertainty (pixels).
+PEAK_COLUMNS = ("y", "x", "intensity", "confidence", "sigma")
+
+
+def empty_peaks():
+    return np.zeros((0, len(PEAK_COLUMNS)), dtype=np.float32)
+
+
+def _masked_median(values, mask):
+    from pyxem.utils._neural_spots.centre_refine import masked_median
+
+    return masked_median(values, mask)
+
+
+def _counts_radius(reference, spot_radius):
+    """Radius (px) of the aperture a disk's counts are read in for its sigma:
+    the given spot radius, else the autocorrelation disk-size estimate the
+    network scales by."""
+    if spot_radius:
+        return float(spot_radius)
+    from pyxem.utils._neural_spots.preprocess import estimate_disk_diameter
+
+    diameter = estimate_disk_diameter(np.asarray(reference, np.float32))
+    if not np.isfinite(diameter):
+        return INTENSITY_RADIUS
+    return float(np.clip(0.5 * diameter, 2.0, 64.0))
+
+
+def _disk_counts(pattern, positions, radius):
+    """Background-subtracted counts inside ``radius`` of each ``(y, x)``, and
+    the background per pixel (median of the ring 1-4 px outside the disk)."""
+    outer = radius + 4.0
+    half = int(np.ceil(outer)) + 1
+    padded = np.pad(np.asarray(pattern, np.float32), half, mode="edge")
+    rows = np.rint(positions[:, 0]).astype(np.intp)
+    columns = np.rint(positions[:, 1]).astype(np.intp)
+    steps = np.arange(-half, half + 1)
+    grid_rows = np.clip(
+        (rows[:, None] + half + steps[None, :])[:, :, None], 0, padded.shape[0] - 1
+    )
+    grid_columns = np.clip(
+        (columns[:, None] + half + steps[None, :])[:, None, :], 0, padded.shape[1] - 1
+    )
+    windows = padded[grid_rows, grid_columns]
+    offset_rows = (rows[:, None] + steps[None, :])[:, :, None] - positions[
+        :, 0, None, None
+    ]
+    offset_columns = (columns[:, None] + steps[None, :])[:, None, :] - positions[
+        :, 1, None, None
+    ]
+    distance = np.sqrt(offset_rows**2 + offset_columns**2)
+    ring = (distance > radius + 1.0) & (distance <= outer)
+    background = _masked_median(
+        windows.reshape(len(positions), -1), ring.reshape(len(positions), -1)
+    )
+    signal = ((windows - background[:, None, None]) * (distance <= radius)).sum((1, 2))
+    return signal, background
+
+
+def _peak_records(pattern, predictions, counts_radius, refined_sigma=None):
+    """The network's ``(N, 4)`` ``[y, x, confidence, width]`` -> ``(N, 5)``
+    ``[y, x, intensity, confidence, sigma]``.
+
+    ``refined_sigma`` is the centre steps' own uncertainty (NaN where they
+    kept a disk); when they ran it is the sigma column, else the counting
+    noise limit is. The two are never mixed in one pattern: the counting
+    limit is tens of times smaller, so a disk the steps declined would
+    outweigh every disk they placed.
+    """
+    from pyxem.utils._neural_spots.centre import positional_sigma
+
+    if len(predictions) == 0:
+        return empty_peaks()
+    pattern = np.asarray(pattern, np.float32)
+    positions = predictions[:, :2]
+    intensity = disk_mean_intensity(
+        pattern, positions[:, 0], positions[:, 1], INTENSITY_RADIUS
+    )
+    if refined_sigma is not None:
+        sigma = refined_sigma
+    else:
+        sigma = positional_sigma(
+            predictions[:, 3], *_disk_counts(pattern, positions, counts_radius)
+        )
+    return np.column_stack([positions, intensity, predictions[:, 2], sigma]).astype(
+        np.float32
+    )
 
 
 class SpotFinder:
@@ -152,17 +242,25 @@ class SpotFinder:
 
     Parameters are the ``method="neural"`` keyword arguments of
     :meth:`pyxem.signals.Diffraction2D.get_diffraction_vectors`.
+
+    Every pattern of a dataset is rescaled by the disk size of one
+    :attr:`reference` pattern (as SpyDE's batch resolves it from a chunk's
+    first pattern), so the result of a pattern does not depend on which
+    chunk, or which preview, it is computed in.
     """
 
     def __init__(
         self,
-        threshold=DEFAULT_THRESHOLD,
+        threshold=None,
         min_distance=DEFAULT_MIN_DISTANCE,
         spot_radius=None,
         background_sigma=None,
+        model=None,
         model_path=None,
         model_version=None,
         device=None,
+        refine_centres=True,
+        friedel_partner=True,
     ):
         from pyxem import TORCH_INSTALLED
 
@@ -170,96 +268,167 @@ class SpotFinder:
             raise ImportError(
                 "method='neural' requires torch: `pip install pyxem[neural]`."
             )
-        self.threshold = float(threshold)
+        self.threshold = None if threshold is None else float(threshold)
         self.min_distance = int(min_distance)
         self.spot_radius = float(spot_radius) if spot_radius else None
         self.background_sigma = (
             None if background_sigma is None else float(background_sigma)
         )
+        self.model_name = model
         self.model_path = model_path
         self.model_version = model_version
         self.device = device
+        self.refine_centres = bool(refine_centres)
+        self.friedel_partner = bool(friedel_partner)
+        self.reference = None
+        if self.threshold is None:
+            self.threshold = float(getattr(self.model()[0], "default_threshold", 0.3))
 
     @property
     def parameters(self):
         return {
             "method": METHOD_NEURAL,
+            "model": self.model_name or _default_detector(),
             "threshold": self.threshold,
             "min_distance": self.min_distance,
             "spot_radius": self.spot_radius,
             "background_sigma": self.background_sigma,
+            "refine_centres": self.refine_centres,
+            "friedel_partner": self.friedel_partner,
         }
 
     def marker_radius(self):
         """Radius in pixels at which a detection is drawn."""
-        return self.spot_radius or INTENSITY_RADIUS
+        if self.spot_radius:
+            return self.spot_radius
+        if self.reference is not None:
+            return _counts_radius(self.reference, None)
+        return INTENSITY_RADIUS
 
     def model(self):
         from pyxem.utils._neural_spots import get_model
 
-        return get_model(self.model_path, self.model_version, self.device)
+        return get_model(
+            self.model_name, self.model_path, self.model_version, self.device
+        )
 
     def _spot_diameter(self):
         return 2.0 * self.spot_radius if self.spot_radius else None
 
     def calibrate(self, sample_patterns):
         """Tune the background sigma (and a weak-data threshold) in place."""
-        from pyxem.utils._neural_spots.inference import calibrate
+        from pyxem.utils._neural_spots.device_lock import accelerator_lock
+        from pyxem.utils._neural_spots.infer import calibrate
 
         model, device = self.model()
-        result = calibrate(
-            model, sample_patterns, device, spot_diameter=self._spot_diameter()
-        )
-        self.background_sigma = result["background_sigma"]
+        with accelerator_lock(device):
+            result = calibrate(
+                model, sample_patterns, device, spot_diameter=self._spot_diameter()
+            )
+        self.background_sigma = result["bg_sigma"]
         return result
 
     def detect_stack(self, patterns, mask=None):
         """Detect spots in a ``(N, rows, columns)`` stack.
 
-        The third column is the network's confidence; :meth:`with_intensity`
-        replaces it by the intensity.
+        Returns a list of ``(N_i, 5)`` float32
+        ``[y, x, intensity, confidence, sigma]``, the same as SpyDE's batch.
         """
-        from pyxem.utils._neural_spots.inference import detect_batch
+        from pyxem.utils._neural_spots.device_lock import accelerator_lock
+        from pyxem.utils._neural_spots.infer import detect_batch
 
+        patterns = np.asarray(patterns, dtype=np.float32)
+        if len(patterns) == 0:
+            return []
+        reference = patterns[0] if self.reference is None else self.reference
         model, device = self.model()
-        found = detect_batch(
-            model,
-            patterns,
-            device,
-            threshold=self.threshold,
-            min_distance=self.min_distance,
-            background_sigma=self.background_sigma,
-            spot_diameter=self._spot_diameter(),
+        with accelerator_lock(device):
+            found = detect_batch(
+                model,
+                np.concatenate([np.asarray(reference, np.float32)[None], patterns]),
+                device,
+                thresh=self.threshold,
+                min_distance=self.min_distance,
+                bg_sigma=self.background_sigma,
+                spot_diameter=self._spot_diameter(),
+                with_width=True,
+            )[1:]
+        predictions = [
+            _drop_masked(np.asarray(p, np.float32).reshape(-1, 4), mask) for p in found
+        ]
+        counts_radius = _counts_radius(reference, self.spot_radius)
+        predictions, refined_sigmas = self._refined(
+            patterns, predictions, counts_radius, device
         )
-        return [_drop_masked(peaks, mask) for peaks in found]
+        return [
+            _peak_records(pattern, prediction, counts_radius, sigma)
+            for pattern, prediction, sigma in zip(patterns, predictions, refined_sigmas)
+        ]
+
+    def _refined(self, patterns, predictions, spot_radius, device):
+        """The centre steps over a stack's predictions, one batch per step:
+        the refine network, then the Friedel-partner network on its centres.
+        Returns the predictions with the refined ``[y, x]`` and, per pattern,
+        the uncertainty of the last step that moved each disk (None with no
+        step)."""
+        from pyxem.utils._neural_spots.centre_refine import (
+            CENTRE_MODEL,
+            FRIEDEL_MODEL,
+            load_step,
+            refine_centres,
+        )
+
+        if not self.refine_centres:
+            return predictions, [None] * len(predictions)
+        positions = [p[:, :2] for p in predictions]
+        sigmas = None
+        steps = [CENTRE_MODEL] + ([FRIEDEL_MODEL] if self.friedel_partner else [])
+        for step in steps:
+            refiner = load_step(step, device)
+            if refiner is None:
+                continue
+            stepped, step_sigmas = refine_centres(
+                patterns, positions, spot_radius, refiner
+            )
+            if step_sigmas is not None:
+                if sigmas is None:
+                    sigmas = step_sigmas
+                else:
+                    # A disk this step kept (NaN) keeps the earlier uncertainty.
+                    sigmas = [
+                        np.where(np.isnan(current), previous, current)
+                        for previous, current in zip(sigmas, step_sigmas)
+                    ]
+            positions = stepped
+        if sigmas is None:
+            sigmas = [None] * len(predictions)
+        refined = []
+        for prediction, position in zip(predictions, positions):
+            prediction = prediction.copy()
+            prediction[:, :2] = position
+            refined.append(prediction)
+        return refined, sigmas
 
     def detect(self, pattern, mask=None):
         """Detect spots in one pattern.
 
         Returns ``(response, peaks)``: an image with each detection's
         confidence painted at its pixel (the network returns no dense map),
-        and ``(N, 3)`` float32 ``[row, column, intensity]``.
+        and ``(N, 5)`` float32 ``[y, x, intensity, confidence, sigma]``.
         """
         pattern = np.asarray(pattern, dtype=np.float32)
-        confident = self.detect_stack(pattern[None], mask)[0]
+        peaks = self.detect_stack(pattern[None], mask)[0]
         response = np.zeros(pattern.shape, dtype=np.float32)
-        if len(confident):
-            rows, columns = _nearest_pixels(confident, pattern.shape)
-            response[rows, columns] = confident[:, 2]
-        return response, self.with_intensity(pattern, confident)
+        if len(peaks):
+            rows, columns = _nearest_pixels(peaks, pattern.shape)
+            response[rows, columns] = peaks[:, 3]
+        return response, peaks
 
-    @staticmethod
-    def with_intensity(pattern, peaks):
-        """Replace the confidence column by the disk-mean intensity."""
-        if len(peaks) == 0:
-            return empty_peaks()
-        intensity = disk_mean_intensity(
-            np.asarray(pattern, dtype=np.float32),
-            peaks[:, 0],
-            peaks[:, 1],
-            INTENSITY_RADIUS,
-        )
-        return np.column_stack([peaks[:, :2], intensity]).astype(np.float32)
+
+def _default_detector():
+    from pyxem.utils._neural_spots import DEFAULT_DETECTOR
+
+    return DEFAULT_DETECTOR
 
 
 def navigation_depth(navigation_sigma, neighbour_refine=False):
@@ -280,8 +449,8 @@ def _find_vectors_block(
     """Detect every pattern of one navigation block padded by ``depth``.
 
     Returns an object array over the trimmed navigation shape whose elements
-    are ``(N, 3)`` float32 ``[row, column, intensity]``, or ``(N, 2)``
-    without ``get_intensity``.
+    are float32 ``[y, x, intensity, confidence, sigma]`` rows (without the
+    intensity when not ``get_intensity``).
     """
     block = np.asarray(block, dtype=np.float32)
     if navigation_sigma > 0:
@@ -299,10 +468,9 @@ def _find_vectors_block(
 
     indices = np.arange(len(patterns)).reshape(navigation_shape)[trimmed]
     output = np.empty(indices.shape, dtype=object)
-    columns = slice(None) if get_intensity else slice(0, 2)
+    columns = OUTPUT_COLUMNS[get_intensity]
     for position, index in np.ndenumerate(indices):
-        peaks = finder.with_intensity(patterns[index], found[index])
-        output[position] = peaks[:, columns]
+        output[position] = found[index][:, columns]
     return output
 
 
@@ -323,9 +491,12 @@ def _refine_with_neighbours(found, navigation_shape, pattern_shape):
                 found[grid[row + dr, column + dc]]
                 for dr, dc in ((-1, 0), (1, 0), (0, -1), (0, 1))
             ]
-            refined[grid[row, column]] = refine(
-                found[grid[row, column]],
-                neighbours,
+            peaks = found[grid[row, column]]
+            if len(peaks) == 0:
+                continue
+            kept = refine(
+                peaks[:, :3],
+                [neighbour[:, :3] for neighbour in neighbours],
                 frame_shape=pattern_shape,
                 w_conf=0.2,
                 w_persist=1.0,
@@ -333,7 +504,22 @@ def _refine_with_neighbours(found, navigation_shape, pattern_shape):
                 keep_score=0.55,
                 min_persist=0.5,
             )
+            refined[grid[row, column]] = _with_source_columns(kept, peaks)
     return refined
+
+
+def _with_source_columns(kept, peaks):
+    """``refine`` works on ``[y, x, score]`` and may merge near-duplicates, so
+    its rows are not a subset of ``peaks``: carry the confidence and sigma over
+    from the nearest original detection."""
+    kept = np.asarray(kept, np.float32).reshape(-1, 3)
+    if len(kept) == 0:
+        return np.zeros((0, peaks.shape[1]), np.float32)
+    distance = np.hypot(
+        kept[:, None, 0] - peaks[None, :, 0], kept[:, None, 1] - peaks[None, :, 1]
+    )
+    source = peaks[distance.argmin(1)]
+    return np.column_stack([kept, source[:, 3:]]).astype(np.float32)
 
 
 def find_vectors_array(
@@ -436,8 +622,9 @@ def automatic_mask(data, navigation_dimension, dilation=DEFAULT_MASK_DILATION):
 
 def resolve_finder(signal, method, **kwargs):
     """Build the :class:`SpotFinder` and run settings ``get_diffraction_vectors``
-    asked for, resolving the automatic choices (beam-stop mask, background
-    sigma) on a few patterns of ``signal``.
+    asked for, resolving the automatic choices (the reference pattern that
+    fixes the rescale, beam-stop mask, background sigma) on a few patterns of
+    ``signal``.
 
     Returns ``(finder, settings, mask_options)``: ``settings`` holds
     ``mask``, ``navigation_sigma`` and ``neighbour_refine``; ``mask_options``
@@ -485,10 +672,13 @@ def resolve_finder(signal, method, **kwargs):
                 f"{data.shape[navigation_dimension:]}"
             )
 
+    samples = sample_patterns(data, navigation_dimension)
+    # The middle sample fixes the disk-size rescale for every pattern.
+    finder.reference = samples[1] if len(samples) > 1 else samples[0]
     if background_sigma == "auto":
-        calibrated = finder.calibrate(sample_patterns(data, navigation_dimension))
+        calibrated = finder.calibrate(samples)
         if "threshold" not in finder_arguments:
-            finder.threshold = calibrated["threshold"]
+            finder.threshold = calibrated["thresh"]
 
     settings = dict(
         mask=mask,

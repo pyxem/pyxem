@@ -16,6 +16,9 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+# Vendored from SpyDE (https://github.com/directelectron/spyde) at 68dfa52038,
+# spyde/models/refine.py; see vendor note in __init__.py.
+
 """Stage-2 refinement: reduce a greedy low-threshold candidate list to real vectors.
 
 Propose-then-refine (owner design): stage 1 over-detects at a LOW confidence

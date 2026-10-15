@@ -16,11 +16,14 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+# Vendored from SpyDE (https://github.com/directelectron/spyde) at 68dfa52038,
+# spyde/models/preprocess.py; see vendor note in __init__.py.
+
 """Input normalization + automatic, parameter-free disk-size scale normalization.
 
 Vendored verbatim from the ``yoloDiffraction`` research project
 (``normalize_input`` from ``yolodiffraction/data/dataset.py`` and the scale-norm
-helpers from ``yolodiffraction/data/scale_norm.py``) so pyxem preprocesses model
+helpers from ``yolodiffraction/data/scale_norm.py``) so SpyDE preprocesses model
 inputs EXACTLY as the checkpoints were trained — DO NOT change the maths here
 (train/infer parity).
 
@@ -34,7 +37,7 @@ diameter.
 Usage at inference:
     diam = estimate_disk_diameter(frame)
     scaled, factor = scale_to_canonical(frame, diam)        # disks -> ~CANONICAL px
-    # run model on `scaled`, then map predicted positions back with /factor
+    # run model on `scaled`, then map predicted positions back (infer._to_frame_coordinates)
 """
 from __future__ import annotations
 
@@ -60,7 +63,10 @@ SCALE_CLIP = (0.3, 3.0)
 
 
 def normalize_input(
-    frame: np.ndarray, local: bool = True, bg_sigma: float = 12.0
+    frame: np.ndarray,
+    local: bool = True,
+    bg_sigma: float = 12.0,
+    mad_floor: float | None = None,
 ) -> np.ndarray:
     """log1p + robust standardization. Shared train+infer.
 
@@ -72,6 +78,12 @@ def normalize_input(
     normalization. This makes a spot a local bump above ITS surroundings regardless
     of a spatially-varying diffuse background across the FOV (the hard case). bg_sigma
     should be a few times the disk size so it removes background, not the spots.
+
+    ``mad_floor`` bounds the robust scale from below. On sparse counted frames (most
+    pixels zero) the median absolute deviation is ~0, so single counts become 1e5-1e6
+    units and a network fires on every one of them. Real 4D-STEM data measures
+    0.13-2.0, so a floor of 0.05 never binds there. A model trained with a floor
+    declares it in its checkpoint; ``None`` keeps the original maths.
     """
     x = np.log1p(np.clip(frame, 0, None).astype(np.float32))
     if local:
@@ -79,8 +91,10 @@ def normalize_input(
 
         x = x - gaussian_filter(x, bg_sigma)
     med = np.median(x)
-    mad = np.median(np.abs(x - med)) + 1e-6
-    return (x - med) / (1.4826 * mad)
+    scale = 1.4826 * (np.median(np.abs(x - med)) + 1e-6)
+    if mad_floor is not None:
+        scale = max(scale, mad_floor)
+    return (x - med) / scale
 
 
 def estimate_disk_diameter(frame: np.ndarray, hp_sigma: float = 20.0) -> float:
@@ -139,8 +153,8 @@ def scale_to_canonical(
     """Resample ``frame`` so its disks land at ~``target`` px. Returns
     (scaled, factor), bounded by SCALE_CLIP (see the constants above for why the
     old upsample-only policy was wrong). A predicted position p in the scaled
-    frame maps back as p / factor. ``diameter`` may be passed to reuse one
-    estimate across a stack."""
+    frame maps back as p * (n - 1) / (out - 1), see infer._to_frame_coordinates.
+    ``diameter`` may be passed to reuse one estimate across a stack."""
     from scipy.ndimage import zoom
 
     if diameter is None:
