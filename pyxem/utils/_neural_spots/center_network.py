@@ -19,21 +19,21 @@
 # Vendored from SpyDE (https://github.com/directelectron/spyde) at 68dfa52038,
 # spyde/models/centre_network.py; see vendor note in __init__.py.
 
-"""The centre networks: segment the disk in a raw window, take the segment's centroid.
+"""The center networks: segment the disk in a raw window, take the segment's centroid.
 
-A small U-Net turns a normalised window into a disk-coverage map, and the
-centre is that map's centroid. A convolution moves with the disk, so the centre
+A small U-Net turns a normalized window into a disk-coverage map, and the
+center is that map's centroid. A convolution moves with the disk, so the center
 does too, and the centroid can never leave the disk the way a regressed offset
 can. A sigma head — a linear layer on the mean-pooled bottleneck — predicts the
-log of the centre's standard deviation.
+log of the center's standard deviation.
 
 The refine step's network (F5) reads one channel, the disk's own window. The
 Friedel-partner network (P4) reads two: the second is the window at the disk's
-mirror point ``2 x beam - p``, sampled and normalised like the first and
+mirror point ``2 x beam - p``, sampled and normalized like the first and
 rotated 180 degrees, so both channels show the same offset with the two
 different dynamical fills of ``g`` and ``-g``. The channel count is read from
 the checkpoint's first convolution; a two-channel network sets
-``needs_partner`` and :func:`~pyxem.utils._neural_spots.centre_refine.refine_centres` cuts
+``needs_partner`` and :func:`~pyxem.utils._neural_spots.center_refine.refine_centers` cuts
 the mirror windows.
 
 Checkpoint contract (``torch.load(weights_only=True)``): ``state_dict`` plus the
@@ -46,16 +46,16 @@ Input contract, all relative to the spot radius ``R`` in native pixels:
 
 * the window is resampled (bilinear, zeros outside the frame) so the disk spans
   ``crop_radius`` window pixels: a ``(2 * crop_half + 1)²`` grid at
-  ``R / crop_radius`` native px per step, centred on the current centre;
-* normalisation: subtract the mean over the annulus ``annulus[0]-annulus[1] x
+  ``R / crop_radius`` native px per step, centered on the current center;
+* normalization: subtract the mean over the annulus ``annulus[0]-annulus[1] x
   crop_half`` (default 0.78-1.0), divide by ``|mean inside crop_radius -
   background|`` (at least 1e-3), clamp to [-4, 8].
 
-Inference: a second pass re-crops at the refined centre for the disks the first
+Inference: a second pass re-crops at the refined center for the disks the first
 moved by more than ``recrop_over x R`` (0.15). Sigma is ``exp(log_sigma) x
-sigma_scale x R / crop_radius``; it ranks centres well, but its absolute scale
+sigma_scale x R / crop_radius``; it ranks centers well, but its absolute scale
 is uncertain to about 2x, so use it to rank or weight vectors, not as a
-calibrated error bar. A disk is declined (NaN, so the incoming centre is kept)
+calibrated error bar. A disk is declined (NaN, so the incoming center is kept)
 when it moved half a spot radius or more, when its coverage is under a fifth of
 the expected disk, or when its sigma is ``max_sigma_fraction`` (0.25) of the
 spot radius or more. Outside ``min_spot_radius``-``max_spot_radius`` the step
@@ -70,8 +70,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .centre import coverage_centroid
-from .centre_refine import DEFAULT_MIN_SPOT_RADIUS, MAX_SHIFT_FRACTION
+from .center import coverage_centroid
+from .center_refine import DEFAULT_MIN_SPOT_RADIUS, MAX_SHIFT_FRACTION
 
 DEFAULT_CROP_RADIUS = 10.0
 DEFAULT_CROP_HALF = 16
@@ -115,9 +115,9 @@ def _block(channels_in, channels_out, depthwise):
     )
 
 
-class FastCentreNet(nn.Module):
+class FastCenterNet(nn.Module):
     """U-Net with ``levels`` poolings: coverage logits and, with a sigma head,
-    the log of the centre's standard deviation in window pixels. Layer names
+    the log of the center's standard deviation in window pixels. Layer names
     are the checkpoint's state-dict keys; do not rename them."""
 
     def __init__(
@@ -181,8 +181,8 @@ class FastCentreNet(nn.Module):
 
 
 class NetworkRefiner:
-    """A :class:`~pyxem.utils._neural_spots.centre_refine.CentreRefiner` backed by a
-    :class:`FastCentreNet` with a sigma head."""
+    """A :class:`~pyxem.utils._neural_spots.center_refine.CenterRefiner` backed by a
+    :class:`FastCenterNet` with a sigma head."""
 
     def __init__(
         self,
@@ -215,7 +215,7 @@ class NetworkRefiner:
 
     def crop_half_width(self, spot_radius: float) -> int:
         # The resampled grid reaches crop_half / crop_radius radii from the
-        # centre, which sits up to half a pixel off the window centre and, on a
+        # center, which sits up to half a pixel off the window center and, on a
         # re-crop pass, may have moved by up to the largest accepted shift.
         # One more pixel keeps the bilinear samples inside the window.
         reach = self.crop_half / self.crop_radius * float(spot_radius)
@@ -228,11 +228,11 @@ class NetworkRefiner:
             -self.crop_half, self.crop_half + 1, device=self.device, dtype=torch.float32
         )
 
-    def _resample(self, crops, centres, step):
+    def _resample(self, crops, centers, step):
         size = crops.shape[-1]
         offsets = self._offsets()
-        rows = centres[:, 0, None] + offsets[None] * step  # (M, S') window px
-        columns = centres[:, 1, None] + offsets[None] * step
+        rows = centers[:, 0, None] + offsets[None] * step  # (M, S') window px
+        columns = centers[:, 1, None] + offsets[None] * step
         samples = rows.shape[1]
         grid = torch.stack(
             [
@@ -249,7 +249,7 @@ class NetworkRefiner:
             align_corners=True,
         )
 
-    def _normalise(self, sampled):
+    def _normalize(self, sampled):
         count = sampled.shape[0]
         offsets = self._offsets()
         distance = torch.sqrt(offsets[:, None] ** 2 + offsets[None] ** 2).reshape(-1)
@@ -268,10 +268,10 @@ class NetworkRefiner:
         )
 
     def _coverage_centroid(self, logits):
-        """The coverage map's centroid, as an offset from the window centre."""
+        """The coverage map's centroid, as an offset from the window center."""
         offsets = self._offsets()
         start = torch.zeros(logits.shape[0], device=logits.device)
-        centre_y, centre_x, area = coverage_centroid(
+        center_y, center_x, area = coverage_centroid(
             torch.sigmoid(logits[:, 0]),
             offsets[None, :, None],
             offsets[None, None, :],
@@ -279,18 +279,18 @@ class NetworkRefiner:
             start.clone(),
             self.crop_radius,
         )
-        return torch.stack([centre_y, centre_x], 1), area
+        return torch.stack([center_y, center_x], 1), area
 
-    def _pass(self, crops, centre, step, partner=None):
-        """One pass at ``centre``: the new centre, coverage area and sigma
+    def _pass(self, crops, center, step, partner=None):
+        """One pass at ``center``: the new center, coverage area and sigma
         (native px). ``partner`` is ``(mirror windows, mirror point)`` for a
         partner network: that window, sampled the same way and rotated 180
         degrees, is the second channel."""
-        sampled = self._normalise(self._resample(crops, centre, step))
+        sampled = self._normalize(self._resample(crops, center, step))
         if partner is not None:
-            partner_crops, partner_centre = partner
-            mirror = self._normalise(
-                self._resample(partner_crops, partner_centre, step)
+            partner_crops, partner_center = partner
+            mirror = self._normalize(
+                self._resample(partner_crops, partner_center, step)
             )
             sampled = torch.cat([sampled, mirror.flip(-1, -2)], 1)
         logits, log_sigmas = [], []
@@ -300,11 +300,11 @@ class NetworkRefiner:
             log_sigmas.append(log_sigma)
         offset, area = self._coverage_centroid(torch.cat(logits))
         sigma = torch.exp(torch.cat(log_sigmas)) * step * self.sigma_scale
-        return centre + offset * step, area, sigma
+        return center + offset * step, area, sigma
 
     @torch.no_grad()
     def refine(
-        self, crops, centres, spot_radius, partner_crops=None, partner_centres=None
+        self, crops, centers, spot_radius, partner_crops=None, partner_centers=None
     ):
         """The refiner interface; a partner network also takes each disk's
         mirror window and the mirror point in that window's pixels."""
@@ -314,50 +314,50 @@ class NetworkRefiner:
             return np.zeros((0, 2)), np.zeros(0, np.float32)
         if self.needs_partner and partner_crops is None:
             raise ValueError(
-                "this centre network needs each disk's Friedel-mirror window"
+                "this center network needs each disk's Friedel-mirror window"
             )
         radius = float(spot_radius)
         step = radius / self.crop_radius
         with accelerator_lock(self.device):
             crop_tensor = _as_device_tensor(crops, self.device)
-            seeds = torch.as_tensor(np.asarray(centres, np.float32), device=self.device)
+            seeds = torch.as_tensor(np.asarray(centers, np.float32), device=self.device)
             partner = None
             if self.needs_partner:
                 partner_tensor = _as_device_tensor(partner_crops, self.device)
                 mirror_seeds = torch.as_tensor(
-                    np.asarray(partner_centres, np.float32), device=self.device
+                    np.asarray(partner_centers, np.float32), device=self.device
                 )
                 partner = (partner_tensor, mirror_seeds)
-            centre, area, sigma = self._pass(crop_tensor, seeds, step, partner)
+            center, area, sigma = self._pass(crop_tensor, seeds, step, partner)
             for _ in range(1, self.passes):
-                again = (centre - seeds).norm(dim=1) > self.recrop_over * radius
+                again = (center - seeds).norm(dim=1) > self.recrop_over * radius
                 if not again.any():
                     break
-                # a partner window follows the mirror of the moved centre
+                # a partner window follows the mirror of the moved center
                 moved_partner = (
                     None
                     if partner is None
                     else (
                         partner_tensor[again],
-                        mirror_seeds[again] - (centre[again] - seeds[again]),
+                        mirror_seeds[again] - (center[again] - seeds[again]),
                     )
                 )
                 moved, moved_area, moved_sigma = self._pass(
-                    crop_tensor[again], centre[again], step, moved_partner
+                    crop_tensor[again], center[again], step, moved_partner
                 )
-                centre[again], area[again], sigma[again] = (
+                center[again], area[again], sigma[again] = (
                     moved,
                     moved_area,
                     moved_sigma,
                 )
             declined = (
-                ((centre - seeds).norm(dim=1) >= MAX_SHIFT_FRACTION * radius)
+                ((center - seeds).norm(dim=1) >= MAX_SHIFT_FRACTION * radius)
                 | (area <= 0.2 * math.pi * self.crop_radius**2)
                 | (sigma >= self.max_sigma_fraction * radius)
             )
-            centre[declined] = float("nan")
+            center[declined] = float("nan")
             sigma[declined] = float("nan")
-            result = centre.double().cpu().numpy()
+            result = center.double().cpu().numpy()
             sigma = sigma.float().cpu().numpy()
         return result, sigma
 
@@ -376,7 +376,7 @@ def input_channels(state_dict) -> int:
     for key in ("encoders.0.0.weight", "encoders.0.0.0.weight"):
         if key in state_dict:
             return int(state_dict[key].shape[1])
-    raise ValueError("no first convolution in this centre network's state dict")
+    raise ValueError("no first convolution in this center network's state dict")
 
 
 def load_refiner(path, device, arch: dict | None = None, contract: dict | None = None):
@@ -395,7 +395,7 @@ def load_refiner(path, device, arch: dict | None = None, contract: dict | None =
         return contract.get(key, checkpoint.get(key, default))
 
     channels = input_channels(checkpoint["state_dict"])
-    net = FastCentreNet(
+    net = FastCenterNet(
         int(setting("base", 8)),
         int(setting("levels", 2)),
         bool(setting("depthwise", 0)),
@@ -403,7 +403,7 @@ def load_refiner(path, device, arch: dict | None = None, contract: dict | None =
         channels=channels,
     )
     if net.sigma_head is None:
-        raise ValueError("a centre network needs a sigma head")
+        raise ValueError("a center network needs a sigma head")
     net.load_state_dict(checkpoint["state_dict"])
     with accelerator_lock(device):
         net = net.to(device).eval()

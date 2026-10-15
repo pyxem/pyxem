@@ -20,9 +20,9 @@
 over every pattern of a dataset.
 
 The dataset is processed one navigation chunk at a time. Each chunk is padded
-in navigation space (so the optional navigation blur and the neighbour check
+in navigation space (so the optional navigation blur and the neighbor check
 see across chunk seams), blurred, detected, and trimmed back. The full dataset
-is never materialised: a lazy signal only ever computes one padded chunk.
+is never materialized: a lazy signal only ever computes one padded chunk.
 
 Every detection's intensity is the mean of the raw pattern over a small disk
 around it, not the network's confidence. A beam stop is a rejection region,
@@ -63,18 +63,18 @@ FINDER_ARGUMENTS = (
     "model_path",
     "model_version",
     "device",
-    "refine_centres",
+    "refine_centers",
     "friedel_partner",
 )
 #: Keyword arguments that configure how the finder runs over the dataset.
-RUN_ARGUMENTS = ("navigation_sigma", "mask", "mask_dilation", "neighbour_refine")
+RUN_ARGUMENTS = ("navigation_sigma", "mask", "mask_dilation", "neighbor_refine")
 
 
 def disk_mean_intensity(pattern, rows, columns, radius):
     """Mean of ``pattern`` over a disk of ``radius`` px around each position.
 
     A single-pixel sample is dominated by shot noise and by where the subpixel
-    centre happened to land, which bands an intensity-weighted virtual image;
+    center happened to land, which bands an intensity-weighted virtual image;
     the disk mean tracks the true spot brightness.
     """
     rows = np.asarray(rows, dtype=np.float64)
@@ -148,7 +148,7 @@ def _drop_masked(peaks, mask):
 
 
 #: Columns of every detection: position, the raw disk-mean intensity, the
-#: network's confidence and the centre's positional uncertainty (pixels).
+#: network's confidence and the center's positional uncertainty (pixels).
 PEAK_COLUMNS = ("y", "x", "intensity", "confidence", "sigma")
 
 
@@ -157,7 +157,7 @@ def empty_peaks():
 
 
 def _masked_median(values, mask):
-    from pyxem.utils._neural_spots.centre_refine import masked_median
+    from pyxem.utils._neural_spots.center_refine import masked_median
 
     return masked_median(values, mask)
 
@@ -211,13 +211,13 @@ def _peak_records(pattern, predictions, counts_radius, refined_sigma=None):
     """The network's ``(N, 4)`` ``[y, x, confidence, width]`` -> ``(N, 5)``
     ``[y, x, intensity, confidence, sigma]``.
 
-    ``refined_sigma`` is the centre steps' own uncertainty (NaN where they
+    ``refined_sigma`` is the center steps' own uncertainty (NaN where they
     kept a disk); when they ran it is the sigma column, else the counting
     noise limit is. The two are never mixed in one pattern: the counting
     limit is tens of times smaller, so a disk the steps declined would
     outweigh every disk they placed.
     """
-    from pyxem.utils._neural_spots.centre import positional_sigma
+    from pyxem.utils._neural_spots.center import positional_sigma
 
     if len(predictions) == 0:
         return empty_peaks()
@@ -259,7 +259,7 @@ class SpotFinder:
         model_path=None,
         model_version=None,
         device=None,
-        refine_centres=True,
+        refine_centers=True,
         friedel_partner=True,
     ):
         from pyxem import TORCH_INSTALLED
@@ -278,7 +278,7 @@ class SpotFinder:
         self.model_path = model_path
         self.model_version = model_version
         self.device = device
-        self.refine_centres = bool(refine_centres)
+        self.refine_centers = bool(refine_centers)
         self.friedel_partner = bool(friedel_partner)
         self.reference = None
         if self.threshold is None:
@@ -293,7 +293,7 @@ class SpotFinder:
             "min_distance": self.min_distance,
             "spot_radius": self.spot_radius,
             "background_sigma": self.background_sigma,
-            "refine_centres": self.refine_centres,
+            "refine_centers": self.refine_centers,
             "friedel_partner": self.friedel_partner,
         }
 
@@ -366,28 +366,28 @@ class SpotFinder:
         ]
 
     def _refined(self, patterns, predictions, spot_radius, device):
-        """The centre steps over a stack's predictions, one batch per step:
-        the refine network, then the Friedel-partner network on its centres.
+        """The center steps over a stack's predictions, one batch per step:
+        the refine network, then the Friedel-partner network on its centers.
         Returns the predictions with the refined ``[y, x]`` and, per pattern,
         the uncertainty of the last step that moved each disk (None with no
         step)."""
-        from pyxem.utils._neural_spots.centre_refine import (
-            CENTRE_MODEL,
+        from pyxem.utils._neural_spots.center_refine import (
+            CENTER_MODEL,
             FRIEDEL_MODEL,
             load_step,
-            refine_centres,
+            refine_centers,
         )
 
-        if not self.refine_centres:
+        if not self.refine_centers:
             return predictions, [None] * len(predictions)
         positions = [p[:, :2] for p in predictions]
         sigmas = None
-        steps = [CENTRE_MODEL] + ([FRIEDEL_MODEL] if self.friedel_partner else [])
+        steps = [CENTER_MODEL] + ([FRIEDEL_MODEL] if self.friedel_partner else [])
         for step in steps:
             refiner = load_step(step, device)
             if refiner is None:
                 continue
-            stepped, step_sigmas = refine_centres(
+            stepped, step_sigmas = refine_centers(
                 patterns, positions, spot_radius, refiner
             )
             if step_sigmas is not None:
@@ -431,9 +431,9 @@ def _default_detector():
     return DEFAULT_DETECTOR
 
 
-def navigation_depth(navigation_sigma, neighbour_refine=False):
+def navigation_depth(navigation_sigma, neighbor_refine=False):
     depth = int(math.ceil(3 * navigation_sigma)) if navigation_sigma > 0 else 0
-    return max(depth, 1) if neighbour_refine else depth
+    return max(depth, 1) if neighbor_refine else depth
 
 
 def _find_vectors_block(
@@ -443,7 +443,7 @@ def _find_vectors_block(
     navigation_sigma,
     depth,
     mask,
-    neighbour_refine,
+    neighbor_refine,
     get_intensity,
 ):
     """Detect every pattern of one navigation block padded by ``depth``.
@@ -463,8 +463,8 @@ def _find_vectors_block(
     found = finder.detect_stack(patterns, mask)
     trimmed = tuple(slice(depth, size - depth) for size in navigation_shape)
 
-    if neighbour_refine:
-        found = _refine_with_neighbours(found, navigation_shape, patterns.shape[1:])
+    if neighbor_refine:
+        found = _refine_with_neighbors(found, navigation_shape, patterns.shape[1:])
 
     indices = np.arange(len(patterns)).reshape(navigation_shape)[trimmed]
     output = np.empty(indices.shape, dtype=object)
@@ -474,11 +474,11 @@ def _find_vectors_block(
     return output
 
 
-def _refine_with_neighbours(found, navigation_shape, pattern_shape):
-    """Keep the candidates that recur in neighbouring scan positions.
+def _refine_with_neighbors(found, navigation_shape, pattern_shape):
+    """Keep the candidates that recur in neighboring scan positions.
 
     Only the trimmed interior is refined, so every refined position has all
-    four neighbours in the padded block.
+    four neighbors in the padded block.
     """
     from pyxem.utils._neural_spots.refine import refine
 
@@ -487,7 +487,7 @@ def _refine_with_neighbours(found, navigation_shape, pattern_shape):
     refined = list(found)
     for row in range(1, rows - 1):
         for column in range(1, columns - 1):
-            neighbours = [
+            neighbors = [
                 found[grid[row + dr, column + dc]]
                 for dr, dc in ((-1, 0), (1, 0), (0, -1), (0, 1))
             ]
@@ -496,7 +496,7 @@ def _refine_with_neighbours(found, navigation_shape, pattern_shape):
                 continue
             kept = refine(
                 peaks[:, :3],
-                [neighbour[:, :3] for neighbour in neighbours],
+                [neighbor[:, :3] for neighbor in neighbors],
                 frame_shape=pattern_shape,
                 w_conf=0.2,
                 w_persist=1.0,
@@ -528,7 +528,7 @@ def find_vectors_array(
     navigation_dimension,
     navigation_sigma=0.0,
     mask=None,
-    neighbour_refine=False,
+    neighbor_refine=False,
     get_intensity=True,
 ):
     """Run ``finder`` over every pattern of ``data``.
@@ -546,7 +546,7 @@ def find_vectors_array(
         # A detector needs whole patterns; only the two signal axes are merged.
         data = data.rechunk({navigation_dimension: -1, navigation_dimension + 1: -1})
 
-    depth = navigation_depth(navigation_sigma, neighbour_refine)
+    depth = navigation_depth(navigation_sigma, neighbor_refine)
     navigation_chunks = data.chunks[:navigation_dimension]
     if depth:
         # Every chunk must be at least as deep as the padding it lends.
@@ -570,7 +570,7 @@ def find_vectors_array(
         navigation_sigma=float(navigation_sigma),
         depth=depth,
         mask=mask,
-        neighbour_refine=neighbour_refine,
+        neighbor_refine=neighbor_refine,
         get_intensity=get_intensity,
         drop_axis=(navigation_dimension, navigation_dimension + 1),
         chunks=navigation_chunks,
@@ -627,7 +627,7 @@ def resolve_finder(signal, method, **kwargs):
     ``signal``.
 
     Returns ``(finder, settings, mask_options)``: ``settings`` holds
-    ``mask``, ``navigation_sigma`` and ``neighbour_refine``; ``mask_options``
+    ``mask``, ``navigation_sigma`` and ``neighbor_refine``; ``mask_options``
     says whether the mask was detected automatically and with what dilation,
     so an interactive tool can re-dilate it.
     """
@@ -646,10 +646,10 @@ def resolve_finder(signal, method, **kwargs):
         **finder_arguments,
     )
     navigation_dimension = signal.axes_manager.navigation_dimension
-    neighbour_refine = bool(kwargs.get("neighbour_refine", False))
-    if neighbour_refine and navigation_dimension != 2:
+    neighbor_refine = bool(kwargs.get("neighbor_refine", False))
+    if neighbor_refine and navigation_dimension != 2:
         raise ValueError(
-            "neighbour_refine needs a signal with two navigation dimensions."
+            "neighbor_refine needs a signal with two navigation dimensions."
         )
     data = signal.data
 
@@ -683,6 +683,6 @@ def resolve_finder(signal, method, **kwargs):
     settings = dict(
         mask=mask,
         navigation_sigma=float(kwargs.get("navigation_sigma", 0.0)),
-        neighbour_refine=neighbour_refine,
+        neighbor_refine=neighbor_refine,
     )
     return finder, settings, mask_options

@@ -26,7 +26,7 @@ threshold (high recall); stage 2 here encodes the physical constraints to reject
 false positives while keeping faint real peaks:
   - PERSISTENCE: real peaks recur in adjacent real-space scan positions.
   - OVERLAP MERGE: collapse double-detections of the same spot.
-  - FRIEDEL (soft): peaks with a +g/-g partner about the centre score higher
+  - FRIEDEL (soft): peaks with a +g/-g partner about the center score higher
     (a soft prior — amorphous/disordered legitimately breaks Friedel, so NOT a
     hard filter).
 Each candidate gets a score combining model confidence + these signals; a final
@@ -66,7 +66,7 @@ def merge_overlaps(peaks, min_sep=3.0):
 
 
 def persistence_score(peaks, neighbor_peaks, tol=3.0):
-    """Per-peak fraction of scan neighbours that contain a matching peak (0..1)."""
+    """Per-peak fraction of scan neighbors that contain a matching peak (0..1)."""
     peaks = np.asarray(peaks, np.float64)
     if len(peaks) == 0 or not neighbor_peaks:
         return np.zeros(len(peaks))
@@ -96,7 +96,7 @@ def friedel_score(peaks, center, tol=3.0, min_radius=8.0):
     r = np.linalg.norm(rel, axis=1)
     for i, p in enumerate(peaks):
         if r[i] < min_radius:
-            out[i] = 1.0  # central spots: don't penalise
+            out[i] = 1.0  # central spots: don't penalize
             continue
         mirror = center - rel[i]
         d = np.hypot(peaks[:, 0] - mirror[0], peaks[:, 1] - mirror[1])
@@ -124,7 +124,7 @@ def refine(
     (conf is the candidate's own column-2 score, assumed ~0..1). Persistence is the
     dominant term (the strongest real/FP discriminator). Keep candidates whose
     combined score >= ``keep_score``. If ``min_persist`` is set, ALSO require at least
-    that persistence fraction (a hard floor; e.g. 0.5 = seen in >=half the neighbours).
+    that persistence fraction (a hard floor; e.g. 0.5 = seen in >=half the neighbors).
     """
     peaks = np.asarray(peaks, np.float32).reshape(-1, 3)
     if len(peaks) == 0:
@@ -132,7 +132,7 @@ def refine(
     peaks = merge_overlaps(peaks, min_sep)
     pers = persistence_score(peaks, neighbor_peaks, persist_tol)
     if center is None and frame_shape is not None:
-        # brightest peak near frame centre = direct beam
+        # brightest peak near frame center = direct beam
         mid = np.array(frame_shape[:2]) / 2.0
         near = (
             np.hypot(peaks[:, 0] - mid[0], peaks[:, 1] - mid[1]) < 0.2 * frame_shape[0]

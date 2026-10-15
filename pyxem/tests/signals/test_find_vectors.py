@@ -43,10 +43,10 @@ def spot_positions(row, column):
     return PATTERN_SIZE / 2 + LATTICE + [0.13 * row + 0.21, 0.17 * column - 0.31]
 
 
-def gaussian_pattern(centres, sigma=1.5, amplitude=500.0, background=5.0, rng=None):
+def gaussian_pattern(centers, sigma=1.5, amplitude=500.0, background=5.0, rng=None):
     rows, columns = np.mgrid[:PATTERN_SIZE, :PATTERN_SIZE]
     pattern = np.full((PATTERN_SIZE, PATTERN_SIZE), background)
-    for row, column in centres:
+    for row, column in centers:
         pattern += amplitude * np.exp(
             -((rows - row) ** 2 + (columns - column) ** 2) / (2 * sigma**2)
         )
@@ -103,17 +103,17 @@ def save_random_detector(path, mask_head=False):
     return str(path)
 
 
-def save_random_centre_networks(directory):
-    """Untrained refine (one channel) and Friedel-partner (two channel) centre
+def save_random_center_networks(directory):
+    """Untrained refine (one channel) and Friedel-partner (two channel) center
     networks, under the file names the weights module asks for."""
     import torch
 
-    from pyxem.utils._neural_spots.centre_network import FastCentreNet
+    from pyxem.utils._neural_spots.center_network import FastCenterNet
     from pyxem.utils._neural_spots.weights import REFINERS
 
     for (_, file_name), channels in zip(REFINERS.values(), (1, 2)):
         torch.manual_seed(channels)
-        network = FastCentreNet(base=4, levels=2, channels=channels)
+        network = FastCenterNet(base=4, levels=2, channels=channels)
         torch.save(
             {
                 "state_dict": network.state_dict(),
@@ -133,12 +133,12 @@ def save_random_centre_networks(directory):
 
 @pytest.fixture
 def random_checkpoint(tmp_path, monkeypatch):
-    """Untrained detector and centre networks, so the whole pipeline runs
+    """Untrained detector and center networks, so the whole pipeline runs
     without downloading weights. Returns the detector checkpoint."""
     from pyxem.utils._neural_spots import clear_model_cache
     from pyxem.utils._neural_spots.weights import LOCAL_DIRECTORY_VARIABLE
 
-    save_random_centre_networks(tmp_path)
+    save_random_center_networks(tmp_path)
     monkeypatch.setenv(LOCAL_DIRECTORY_VARIABLE, str(tmp_path))
     clear_model_cache()
     yield save_random_detector(tmp_path / "spotunet.pt")
@@ -184,7 +184,7 @@ class TestNeural:
         assert isinstance(eager, DiffractionVectors)
         assert eager.data.shape == (4, 5)
         assert eager.column_names[2:] == ["intensity", "confidence", "sigma"]
-        assert eager.metadata.Peaks.parameters.refine_centres
+        assert eager.metadata.Peaks.parameters.refine_centers
         assert eager.metadata.Peaks.parameters.friedel_partner
         assert eager.metadata.Peaks.parameters.method == "neural"
         lazy = LazyDiffraction2D(
@@ -298,15 +298,15 @@ class TestNeural:
         )
         assert vectors.data.shape == (6,)
 
-    def test_neighbour_refine(self, signal, random_checkpoint):
+    def test_neighbor_refine(self, signal, random_checkpoint):
         vectors = signal.get_diffraction_vectors(
-            method="neural", model_path=random_checkpoint, neighbour_refine=True
+            method="neural", model_path=random_checkpoint, neighbor_refine=True
         )
         assert vectors.data.shape == (4, 5)
 
     def test_preview_of_one_pattern_matches_its_stack(self, random_checkpoint):
         """A pattern's result does not depend on the other patterns computed
-        with it: the rescale comes from the reference, the centre steps cut
+        with it: the rescale comes from the reference, the center steps cut
         each disk's own window."""
         from pyxem.utils._find_vectors import SpotFinder
 
@@ -336,8 +336,8 @@ class TestNeural:
         np.testing.assert_allclose(calibrated[:, 4], pixels[:, 4] * 0.02, rtol=1e-5)
         assert np.all((pixels[:, 3] > 0) & (pixels[:, 3] <= 1))
 
-    def test_centre_steps(self, signal, random_checkpoint):
-        """The centre steps keep every detection and move none of them by
+    def test_center_steps(self, signal, random_checkpoint):
+        """The center steps keep every detection and move none of them by
         half a spot radius or more."""
         settings = dict(
             method="neural",
@@ -345,7 +345,7 @@ class TestNeural:
             center=(0, 0),
             calibration=(1, 1),
         )
-        plain = signal.get_diffraction_vectors(refine_centres=False, **settings)
+        plain = signal.get_diffraction_vectors(refine_centers=False, **settings)
         refined = signal.get_diffraction_vectors(friedel_partner=False, **settings)
         both = signal.get_diffraction_vectors(**settings)
         for position in np.ndindex(4, 5):
@@ -370,9 +370,9 @@ class TestNeural:
             signal.get_diffraction_vectors(mask="sometimes", **settings)
         with pytest.raises(ValueError, match="mask shape"):
             signal.get_diffraction_vectors(mask=np.zeros((3, 3), bool), **settings)
-        with pytest.raises(ValueError, match="neighbour_refine"):
+        with pytest.raises(ValueError, match="neighbor_refine"):
             Diffraction2D(signal.data[0]).get_diffraction_vectors(
-                neighbour_refine=True, **settings
+                neighbor_refine=True, **settings
             )
 
     def test_missing_model_explains_how_to_get_one(self, signal, monkeypatch):
@@ -402,8 +402,8 @@ class TestNeural:
 )
 @pytest.mark.parametrize("model", ["anyscale8", "dynamical-mask8"])
 def test_trained_weights_localise_disks(model):
-    """With the trained detector and centre networks every planted disk
-    (radius 8, inside the range both centre steps work on) is found to a
+    """With the trained detector and center networks every planted disk
+    (radius 8, inside the range both center steps work on) is found to a
     small fraction of a pixel, confidently, with a small sigma."""
     from pyxem.utils._neural_spots import clear_model_cache
 

@@ -19,14 +19,14 @@
 # Vendored from SpyDE (https://github.com/directelectron/spyde) at 68dfa52038,
 # spyde/models/centre.py; see vendor note in __init__.py.
 
-"""Where a detected disk's centre is, and how well that is known.
+"""Where a detected disk's center is, and how well that is known.
 
-The centre is the network's own decode: the heatmap's maximum pixel plus the
+The center is the network's own decode: the heatmap's maximum pixel plus the
 offset head, exactly the vendored ``decode.decode_batch``. A model with a mask
 head, which predicts how much of each pixel the disk's aperture covers, then
 moves that position to the centroid of the predicted coverage
-(:func:`mask_centroid`): the aperture's centre, however the intensity is
-distributed inside it. The centre networks (:mod:`.centre_network`) take the
+(:func:`mask_centroid`): the aperture's center, however the intensity is
+distributed inside it. The center networks (:mod:`.center_network`) take the
 same :func:`coverage_centroid` of their own coverage map.
 
 Each detection also gets:
@@ -47,42 +47,42 @@ import torch.nn.functional as F
 
 
 def coverage_centroid(
-    coverage, rows, columns, centre_y, centre_x, radius: float, iterations: int = 2
+    coverage, rows, columns, center_y, center_x, radius: float, iterations: int = 2
 ):
-    """The centroid of a disk-coverage map (0..1) around each starting centre.
+    """The centroid of a disk-coverage map (0..1) around each starting center.
 
     ``coverage`` is ``(M, S, S)``; ``rows`` and ``columns`` are the coordinates
-    of its pixels, broadcastable to ``(M, S, 1)`` and ``(M, 1, S)``; ``centre_y``
-    and ``centre_x`` are ``(M,)`` starting centres in the same coordinates. The
+    of its pixels, broadcastable to ``(M, S, 1)`` and ``(M, 1, S)``; ``center_y``
+    and ``center_x`` are ``(M,)`` starting centers in the same coordinates. The
     window is a soft disk (1 px ramp), so the centroid moves continuously with
     the start: the first pass reaches ``1.3 * radius + 1.5``, the next the
-    radius the coverage itself implies (area / pi) plus 2, centred on the
-    previous centroid. A window with no coverage keeps its centre. Returns the
-    centres and the covered area, each ``(M,)``."""
-    window = torch.full_like(centre_y, 1.3 * radius + 1.5)
-    area = torch.zeros_like(centre_y)
+    radius the coverage itself implies (area / pi) plus 2, centered on the
+    previous centroid. A window with no coverage keeps its center. Returns the
+    centers and the covered area, each ``(M,)``."""
+    window = torch.full_like(center_y, 1.3 * radius + 1.5)
+    area = torch.zeros_like(center_y)
     for _ in range(iterations):
         distance = torch.sqrt(
-            (rows - centre_y[:, None, None]) ** 2
-            + (columns - centre_x[:, None, None]) ** 2
+            (rows - center_y[:, None, None]) ** 2
+            + (columns - center_x[:, None, None]) ** 2
         )
         weight = (window[:, None, None] - distance + 0.5).clamp(0, 1) * coverage
         area = weight.sum((1, 2))
         found = area > 1e-3
-        centre_y = torch.where(
-            found, (weight * rows).sum((1, 2)) / area.clamp_min(1e-6), centre_y
+        center_y = torch.where(
+            found, (weight * rows).sum((1, 2)) / area.clamp_min(1e-6), center_y
         )
-        centre_x = torch.where(
-            found, (weight * columns).sum((1, 2)) / area.clamp_min(1e-6), centre_x
+        center_x = torch.where(
+            found, (weight * columns).sum((1, 2)) / area.clamp_min(1e-6), center_x
         )
         window = torch.sqrt(area / math.pi) + 2.0
-    return centre_y, centre_x, area
+    return center_y, center_x, area
 
 
 def mask_centroid(mask_logits, batch, y, x, radius, iterations=2):
     """:func:`coverage_centroid` of a mask head's ``(B, 1, H, W)`` output
     around each seed ``(batch, y, x)`` (working px), ``radius`` the expected
-    disk radius. Returns the centred ``(y, x)`` and the covered area, each ``(M,)``."""
+    disk radius. Returns the centered ``(y, x)`` and the covered area, each ``(M,)``."""
     coverage = torch.sigmoid(mask_logits)
     _, _, height, width = coverage.shape
     half = int(np.ceil(1.6 * radius + 3))
@@ -112,19 +112,19 @@ def mask_centroid(mask_logits, batch, y, x, radius, iterations=2):
     )
 
 
-def _centre_on_mask(mask_logits, batch, y, x, radius):
+def _center_on_mask(mask_logits, batch, y, x, radius):
     """Move each offset-head position to its mask centroid, unless the mask there is
     too small to be a disk (< 15 % of the expected area) or its centroid lands more
-    than 1.5 px away (a neighbour's mask, or no mask at all)."""
-    centre_y, centre_x, area = mask_centroid(mask_logits, batch, y, x, radius)
-    trusted = (torch.hypot(centre_y - y, centre_x - x) < 1.5) & (
+    than 1.5 px away (a neighbor's mask, or no mask at all)."""
+    center_y, center_x, area = mask_centroid(mask_logits, batch, y, x, radius)
+    trusted = (torch.hypot(center_y - y, center_x - x) < 1.5) & (
         area > 0.15 * np.pi * radius**2
     )
-    return torch.where(trusted, centre_y, y), torch.where(trusted, centre_x, x)
+    return torch.where(trusted, center_y, y), torch.where(trusted, center_x, x)
 
 
 @torch.no_grad()
-def decode_batch_centres(
+def decode_batch_centers(
     hm_logits,
     off,
     thresh=0.3,
@@ -140,7 +140,7 @@ def decode_batch_centres(
     max-pool, same threshold, argmax pixel + offset head). ``radius`` (working
     px) is the window the response width is taken over — the disk's own radius.
     ``mask_logits`` (a mask-head model's third output) moves each position to
-    its mask centroid (:func:`_centre_on_mask`), with ``mask_radius`` the
+    its mask centroid (:func:`_center_on_mask`), with ``mask_radius`` the
     expected disk radius in working px."""
     hm = torch.sigmoid(hm_logits)
     B, _, H, W = hm.shape
@@ -175,21 +175,21 @@ def decode_batch_centres(
     y = ys.float() + off[b, 0, ys, xs]
     x = xs.float() + off[b, 1, ys, xs]
     if mask_logits is not None:
-        y, x = _centre_on_mask(mask_logits, b, y, x, mask_radius)
+        y, x = _center_on_mask(mask_logits, b, y, x, mask_radius)
     return torch.stack([b.float(), y, x, confidence, width], 1)
 
 
 def positional_sigma(width_px, signal, background_per_px, pixel=1.0):
-    """One standard deviation of a centre, in detector pixels.
+    """One standard deviation of a center, in detector pixels.
 
-    The localisation-precision formula for a spot of standard deviation ``s``
+    The localization-precision formula for a spot of standard deviation ``s``
     measured with ``N`` signal counts over a background of ``b²`` counts per
     pixel, pixel size ``a`` (Thompson, Larson & Webb, Biophys. J. 82, 2775 (2002)):
 
         sigma² = (s² + a²/12) / N  +  8 π s⁴ b² / (a² N²)
 
     Here ``s`` is the width of the network's response to the disk (``width`` from
-    :func:`decode_batch_centres`, in detector pixels), ``N`` the disk's
+    :func:`decode_batch_centers`, in detector pixels), ``N`` the disk's
     background-subtracted counts and ``b²`` its local background level (Poisson,
     so the variance equals the mean). A bright, sharp disk gets a small sigma; a
     faint or diffuse one a large sigma. NaN where the disk has no net signal."""

@@ -18,13 +18,13 @@
 
 """Where the trained weights come from, and loading them once per process.
 
-The weights are not shipped with pyxem. They are distributed through
-em-database (https://github.com/electronmicroscopy/emdatabase), one entry per
-model family; every name and file the neural spot finder uses is in this
-module and nowhere else.
+The weights are not shipped with pyxem. Each model is its own em-database
+entry (https://github.com/electronmicroscopy/emdatabase), which pins it by
+dated version and checks it against its md5 on download. Every entry and
+file name the neural spot finder uses is in this module and nowhere else.
 
-A local checkpoint can always be used instead of a download: ``model_path=``
-for the detector, or a directory holding any of the files below named by the
+A local checkpoint can always be used instead: ``model_path=`` for the
+detector, or a directory holding the files below named by the
 ``PYXEM_SPOTUNET_WEIGHTS_DIR`` environment variable, which is looked in first.
 """
 
@@ -35,26 +35,22 @@ from pathlib import Path
 #: Environment variable naming a local directory of weight files.
 LOCAL_DIRECTORY_VARIABLE = "PYXEM_SPOTUNET_WEIGHTS_DIR"
 
-#: em-database entry of each model family.
-DETECTOR_ENTRY = "SpotUNetDiffraction"
-CENTRE_REFINER_ENTRY = "SpotUNetCentreRefiner"
-FRIEDEL_PARTNER_ENTRY = "SpotUNetFriedelPartner"
-
-#: Detector models (``get_diffraction_vectors(method="neural", model=...)``)
-#: and the file each one is published as in the detector family.
+#: Detector models (``get_diffraction_vectors(method="neural", model=...)``):
+#: the em-database entry and the file each one is. ``None``: no entry, so the
+#: model is only available from the local directory.
 DETECTORS = {
-    "anyscale8": "spotunet_anyscale8_peaked_sharpened.pt",
-    "dynamical-mask8": "spotunet_dynamical_mask8.pt",
-    "production": "spotunet_production.pt",
-    "base16": "spotunet_base16.pt",
+    "anyscale8": ("SpotUNetDiffraction", "spotunet_anyscale8_peaked_sharpened.pt"),
+    "dynamical-mask8": ("SpotUNetDynamical", "spotunet_dynamical_mask8.pt"),
+    "production": ("SpotUNetProduction", "spotunet_production.pt"),
+    "base16": (None, "spotunet_base16.pt"),
 }
 #: SpyDE's default detector.
 DEFAULT_DETECTOR = "anyscale8"
 
-#: The centre steps, by the ids the vendored ``centre_refine`` asks for.
+#: The center steps, by the ids the vendored ``center_refine`` asks for.
 REFINERS = {
-    "centre-fast-f5-v1": (CENTRE_REFINER_ENTRY, "centre_fast_f5.pt"),
-    "centre-partner-p4-v1": (FRIEDEL_PARTNER_ENTRY, "centre_partner_p4.pt"),
+    "center-fast-f5-v1": ("SpotUNetCenterRefiner", "center_fast_f5.pt"),
+    "center-partner-p4-v1": ("SpotUNetFriedelPartner", "center_partner_p4.pt"),
 }
 
 _detector_cache = {}
@@ -62,22 +58,25 @@ _refiner_cache = {}
 _cache_lock = threading.Lock()
 
 
-def _download(entry_name, file_name, version=None):
-    """A local path to ``file_name`` of the em-database entry ``entry_name``.
-
-    An entry publishes one file. The other detector files sit in the same
-    record, so they are fetched from the entry's source directory.
-    """
+def _weights_file(entry_name, file_name, version=None):
+    """A local path to ``file_name``: from the local directory when it is
+    there, else the md5-checked download of the em-database entry
+    ``entry_name``, which must publish exactly that file."""
     directory = os.environ.get(LOCAL_DIRECTORY_VARIABLE)
     if directory and (Path(directory) / file_name).is_file():
         return str(Path(directory) / file_name)
+    if entry_name is None:
+        raise FileNotFoundError(
+            f"{file_name} is not distributed through em-database; put it in a "
+            f"directory named by {LOCAL_DIRECTORY_VARIABLE}."
+        )
     try:
         import emdatabase.data
     except ImportError as error:
         raise ImportError(
             "The neural spot finder downloads its weights with em-database. "
             "Install it with `pip install em-database` (or `pip install "
-            f"pyxem[neural]`), or put the weight files in a directory named by "
+            "pyxem[neural]`), or put the weight files in a directory named by "
             f"{LOCAL_DIRECTORY_VARIABLE}."
         ) from error
     entry_class = getattr(emdatabase.data, entry_name, None)
@@ -88,21 +87,17 @@ def _download(entry_name, file_name, version=None):
             f"{LOCAL_DIRECTORY_VARIABLE}."
         )
     entry = entry_class()
-    if entry.file == file_name:
-        return str(entry.download(version=version, background=False))
-    import pooch
-
-    return pooch.retrieve(
-        f"{entry.source}/{file_name}",
-        known_hash=None,
-        fname=file_name,
-        path=pooch.os_cache("pyxem") / "neural_spots",
-    )
+    if entry.file != file_name:
+        raise ValueError(
+            f"em-database entry `{entry_name}` publishes {entry.file}, not "
+            f"{file_name}; this pyxem expects {file_name}."
+        )
+    return str(entry.download(version=version, background=False))
 
 
 def detector_path(model=None, model_path=None, version=None):
     """Local checkpoint of a detector: ``model_path`` when given, else the
-    download of ``model`` (a key of :data:`DETECTORS`)."""
+    weights of ``model`` (a key of :data:`DETECTORS`)."""
     if model_path is not None:
         path = Path(model_path)
         if not path.is_file():
@@ -111,7 +106,8 @@ def detector_path(model=None, model_path=None, version=None):
     model = model or DEFAULT_DETECTOR
     if model not in DETECTORS:
         raise ValueError(f"model must be one of {sorted(DETECTORS)}, not {model!r}")
-    return _download(DETECTOR_ENTRY, DETECTORS[model], version)
+    entry_name, file_name = DETECTORS[model]
+    return _weights_file(entry_name, file_name, version)
 
 
 def _device(device):
@@ -136,15 +132,17 @@ def get_model(model=None, model_path=None, version=None, device=None):
 
 
 def get_refiner(model_id, device=None):
-    """A centre-step network (a key of :data:`REFINERS`), loaded once per process."""
-    from .centre_network import load_refiner
+    """A center-step network (a key of :data:`REFINERS`), loaded once per process."""
+    from .center_network import load_refiner
 
     entry_name, file_name = REFINERS[model_id]
     device = _device(device)
     key = (model_id, str(device))
     with _cache_lock:
         if key not in _refiner_cache:
-            _refiner_cache[key] = load_refiner(_download(entry_name, file_name), device)
+            _refiner_cache[key] = load_refiner(
+                _weights_file(entry_name, file_name), device
+            )
         return _refiner_cache[key]
 
 

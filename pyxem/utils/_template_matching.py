@@ -16,11 +16,11 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Normalised cross-correlation of a whole stack of patterns at once.
+"""Normalized cross-correlation of a whole stack of patterns at once.
 
 :func:`match_template_stack` computes exactly what
 :func:`skimage.feature.match_template` computes for each pattern (Lewis's
-fast normalised cross-correlation: one FFT correlation, window statistics
+fast normalized cross-correlation: one FFT correlation, window statistics
 from integral images, zero padding by the template size), but for a stack of
 patterns in one call: the template's transform is computed once and the
 pattern transforms are batched through torch, on the CPU (all cores in one
@@ -92,7 +92,7 @@ def match_template_stack(
     constant_values=0,
     device=None,
 ):
-    """Normalised cross-correlation of every pattern in ``stack`` with ``template``.
+    """Normalized cross-correlation of every pattern in ``stack`` with ``template``.
 
     Equivalent to ``np.stack([skimage.feature.match_template(p, template,
     pad_input, mode, constant_values) for p in stack])``.

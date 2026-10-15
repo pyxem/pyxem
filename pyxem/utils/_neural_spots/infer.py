@@ -25,7 +25,7 @@
 project (``yolodiffraction/model/infer.py``), rewired to import from the sibling
 modules in this package. ``detect_batch`` is new to SpyDE: it runs a whole stack
 of frames through one forward pass (the batched path the 4D-STEM chunk compute
-needs), decoding GPU-resident (``centre.decode_batch_centres``).
+needs), decoding GPU-resident (``center.decode_batch_centers``).
 
 The full single-frame pipeline a user runs needs no parameters: disk size is
 estimated automatically and the frame rescaled to the canonical size before the
@@ -40,7 +40,7 @@ import sys
 import numpy as np
 import torch
 
-from .centre import decode_batch_centres
+from .center import decode_batch_centers
 from .preprocess import (
     CANONICAL_DIAMETER,
     estimate_disk_diameter,
@@ -74,7 +74,7 @@ log = logging.getLogger(__name__)
 # The layered safety nets (MPS fallback env, catchable-error CPU retry, device
 # serialization, worker-death → CPU demotion) all still apply. On non-Mac (CUDA)
 # this gate is IRRELEVANT — ``mps_batch_allowed`` only reads the env on darwin;
-# CUDA behaviour is completely unchanged.
+# CUDA behavior is completely unchanged.
 def _is_mac() -> bool:
     return sys.platform == "darwin"
 
@@ -97,7 +97,7 @@ def mps_batch_allowed() -> bool:
 def enable_mps_cpu_fallback() -> None:
     """Set ``PYTORCH_ENABLE_MPS_FALLBACK=1`` on Mac so an unsupported MPS op (e.g.
     a ConvTranspose gap in a given torch build) transparently runs on CPU per-op
-    instead of raising or aborting. MUST be called BEFORE torch initialises MPS
+    instead of raising or aborting. MUST be called BEFORE torch initializes MPS
     (i.e. before the first MPS tensor/op) to take effect — so this is invoked at
     process startup (main process and every worker). No-op off Mac; idempotent."""
     if not _is_mac():
@@ -133,7 +133,7 @@ def load_model(ckpt_path, device=None, arch: dict | None = None):
     ``mask_head``).
 
     The operating point a model was trained for travels with it, read from the
-    checkpoint onto the model: ``mad_floor`` (floor on the normalisation scale, None
+    checkpoint onto the model: ``mad_floor`` (floor on the normalization scale, None
     for the older models) and ``default_threshold`` (the heatmap threshold
     ``calibrate`` starts from, 0.3 unless the checkpoint says otherwise; set so that
     models run at a comparable false-positive rate)."""
@@ -228,7 +228,7 @@ def _big_disk_params(md: int, bg_sigma: float | None, work_diam: float):
     """Resolve the NMS window + background sigma for the working disk size.
 
     Canonical-size data (work_diam <= 20) is untouched, so existing (production-
-    model) behaviour is unchanged; this only engages on big disks where the fixed
+    model) behavior is unchanged; this only engages on big disks where the fixed
     values were wrong two ways (measured in yoloDiffraction, 24-96px disks):
       - a fixed ~4px NMS window fires a CLOUD of detections across one broad disk
         -> md ~ 0.55*diameter collapses it to ONE (center err <1.3px);
@@ -248,7 +248,7 @@ def _big_disk_params(md: int, bg_sigma: float | None, work_diam: float):
 def auto_bg_sigma(
     model, work: np.ndarray, device, candidates=(4, 5, 6, 8, 10, 12, 16, 20)
 ) -> tuple[float, float]:
-    """Pick the local-norm ``bg_sigma`` that MAXIMISES the model's heatmap confidence.
+    """Pick the local-norm ``bg_sigma`` that MAXIMIZES the model's heatmap confidence.
 
     The model's own peak confidence is a reliable, hands-off signal for how well the
     diffuse background was removed (confidence has a clean maximum vs bg_sigma). Used
@@ -279,7 +279,7 @@ def _to_frame_coordinates(peaks: np.ndarray, frame_shape, factor: float) -> np.n
     """Map peak ``(y, x)`` from the rescaled working frame back to the frame.
 
     The rescale (``scipy.ndimage.zoom(order=1)`` and its torch twin) aligns the
-    first and last pixel centres, so working pixel ``i`` sits at frame position
+    first and last pixel centers, so working pixel ``i`` sits at frame position
     ``i * (n - 1) / (out - 1)`` with ``out = round(n * factor)`` -- not at
     ``i / factor``. The two differ by the rounding of the output size: a uniform
     scale error of up to ~0.6 %, invisible in relative strain but a bias of that
@@ -296,7 +296,7 @@ def _to_frame_coordinates(peaks: np.ndarray, frame_shape, factor: float) -> np.n
 
 def _width_radius(work_diam: float, md: int) -> float:
     """Window the response width is taken over (working px): the disk's radius,
-    but never past the NMS distance, so a neighbouring disk's response is not
+    but never past the NMS distance, so a neighboring disk's response is not
     averaged in."""
     r = (
         0.5 * float(work_diam)
@@ -307,7 +307,7 @@ def _width_radius(work_diam: float, md: int) -> float:
 
 
 def _frame_rows(res, frame_shape, factor: float, with_width: bool) -> np.ndarray:
-    """``decode_batch_centres`` rows of one frame -> ``[y, x, score(, width)]``
+    """``decode_batch_centers`` rows of one frame -> ``[y, x, score(, width)]``
     in original-frame pixels."""
     res = res.detach().cpu().numpy() if hasattr(res, "detach") else np.asarray(res)
     cols = [1, 2, 3, 4] if with_width else [1, 2, 3]
@@ -358,7 +358,7 @@ def detect(
     nrm = _pad_to_multiple(nrm, levels)
     x = torch.from_numpy(nrm[None, None]).to(device)
     outputs = model(x)
-    res = decode_batch_centres(
+    res = decode_batch_centers(
         outputs[0],
         outputs[1],
         thresh=thresh,
@@ -375,7 +375,7 @@ def _neural_sub_batch_size() -> int:
     forward pass over a whole nav chunk (1000+ frames) allocates activations for
     every frame at once — tens of GB for a big U-Net. Looping in fixed sub-batches
     bounds peak activation memory to O(K) instead of O(N) while keeping identical
-    results (the loop is purely a memory/throughput knob; the per-frame maths is
+    results (the loop is purely a memory/throughput knob; the per-frame math is
     unchanged). ``PYXEM_NEURAL_BATCH`` overrides the default; parsed once per call,
     clamped >= 1."""
     import os
@@ -397,7 +397,7 @@ def _forward_with_cpu_retry(model, device, x):
     Returns ``(outputs, model, device)`` — the model's output tuple (heatmap,
     offsets, and the mask for a mask-head model) and the (possibly CPU-moved)
     model+device the caller must use for the REST of this call. On CUDA/CPU the
-    retry path never triggers, so behaviour there is unchanged."""
+    retry path never triggers, so behavior there is unchanged."""
     xd = x.to(device)
     try:
         return model(xd), model, device
@@ -430,7 +430,7 @@ def _forward_with_cpu_retry(model, device, x):
 
 
 def _gpu_prep_enabled() -> bool:
-    """Whether ``detect_batch`` preprocesses (normalise/scale/pad) ON the model
+    """Whether ``detect_batch`` preprocesses (normalize/scale/pad) ON the model
     device instead of on the host. Default ON — it removes the fixed host-numpy
     floor that otherwise dominates end-to-end time once the forward is on the GPU
     (Amdahl; see ``preprocess_torch``). ``PYXEM_NEURAL_GPU_PREP=0`` forces the host
@@ -453,7 +453,7 @@ def _build_input_stack(
     mad_floor: float | None = None,
 ):
     """Preprocess ``frames`` ((N,H,W)) into the padded ``(N,1,H',W')`` U-Net input
-    tensor: scale → normalise → pad-to-multiple.
+    tensor: scale → normalize → pad-to-multiple.
 
     On a GPU device (cuda/mps) with GPU-prep enabled this runs entirely ON the
     device via ``preprocess_torch`` (numerically matched to the numpy reference —
@@ -509,12 +509,12 @@ def detect_batch(
     """Detect spots in a STACK of frames in one forward pass.
 
     ``with_width`` as in :func:`detect`; the decode is the same, so the batch and
-    the single-frame preview give the same centres.
+    the single-frame preview give the same centers.
 
     ``frames`` is an (N,H,W) array (or a sequence of (H,W) arrays). Returns a list
     of N (Ni,3) [y,x,score] arrays in ORIGINAL frame coordinates — the same per-frame
     contract as ``detect``, but the model runs once on the whole batch and decoding
-    stays GPU-resident (``centre.decode_batch_centres``).
+    stays GPU-resident (``center.decode_batch_centers``).
 
     All frames in a scan share the same physical disk size, so ``shared_scale``
     (default) estimates the scale factor ONCE from the first frame and applies it
@@ -529,7 +529,7 @@ def detect_batch(
     outside the sub-batch loop) so results are bit-identical to a single pass;
     only the forward+decode is chunked.
 
-    Preprocessing (normalise/scale/pad) runs ON the model device when it's a GPU
+    Preprocessing (normalize/scale/pad) runs ON the model device when it's a GPU
     (``_build_input_stack`` → ``preprocess_torch``), so nothing but the raw frames
     crosses the bus; on CPU it uses the numpy/scipy reference. Both produce the same
     result (parity-tested), so switching devices never changes the peaks.
@@ -586,7 +586,7 @@ def detect_batch(
         outputs, cur_model, cur_device = _forward_with_cpu_retry(
             cur_model, cur_device, chunk
         )
-        res = decode_batch_centres(
+        res = decode_batch_centers(
             outputs[0],
             outputs[1],
             thresh=thresh,
@@ -619,9 +619,9 @@ def calibrate(
     """Calibration step (run ONCE on a few representative frames before a full scan).
 
     All frames in a 4D-STEM scan share the same physical disk size and background
-    character, so we optimise the dataset-dependent knobs ONCE here and reuse them
-    across the whole scan (cheap + hands-off). Optimises:
-      - ``bg_sigma``: confidence-maximising local-norm high-pass scale (handles
+    character, so we optimize the dataset-dependent knobs ONCE here and reuse them
+    across the whole scan (cheap + hands-off). Optimizes:
+      - ``bg_sigma``: confidence-maximizing local-norm high-pass scale (handles
         diffuse / beam-stop backgrounds without manual tuning).
       - ``scale_factor``: the disk-size -> canonical upscale (so tiny disks like
         SPED-Ag are seen at the trained size).

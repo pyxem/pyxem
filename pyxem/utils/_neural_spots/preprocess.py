@@ -24,7 +24,7 @@
 Vendored verbatim from the ``yoloDiffraction`` research project
 (``normalize_input`` from ``yolodiffraction/data/dataset.py`` and the scale-norm
 helpers from ``yolodiffraction/data/scale_norm.py``) so SpyDE preprocesses model
-inputs EXACTLY as the checkpoints were trained — DO NOT change the maths here
+inputs EXACTLY as the checkpoints were trained — DO NOT change the math here
 (train/infer parity).
 
 Within a dataset all diffraction disks are the same physical size (the central
@@ -83,7 +83,7 @@ def normalize_input(
     pixels zero) the median absolute deviation is ~0, so single counts become 1e5-1e6
     units and a network fires on every one of them. Real 4D-STEM data measures
     0.13-2.0, so a floor of 0.05 never binds there. A model trained with a floor
-    declares it in its checkpoint; ``None`` keeps the original maths.
+    declares it in its checkpoint; ``None`` keeps the original math.
     """
     x = np.log1p(np.clip(frame, 0, None).astype(np.float32))
     if local:
@@ -118,9 +118,9 @@ def estimate_disk_diameter(frame: np.ndarray, hp_sigma: float = 20.0) -> float:
     if peak <= 0:
         return CANONICAL_DIAMETER
 
-    def half_max_width(profile, centre):
+    def half_max_width(profile, center):
         """Width of the central peak where it falls below half its maximum."""
-        left = right = centre
+        left = right = center
         while left > 0 and profile[left] > 0.5:
             left -= 1
         while right < profile.size - 1 and profile[right] > 0.5:
