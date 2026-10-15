@@ -459,7 +459,7 @@ class TestNeural:
     reason="set PYXEM_SPOTNET_WEIGHTS_DIR to a directory of the trained weights",
 )
 @pytest.mark.parametrize("model", ["spotnet", "dynamical"])
-def test_trained_weights_localise_disks(model):
+def test_trained_weights_localize_disks(model):
     """With the trained detector and center networks every planted disk
     (radius 8, inside the range both center steps work on) is found to a
     small fraction of a pixel, confidently, with a small sigma."""
