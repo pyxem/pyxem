@@ -18,7 +18,8 @@ Added
 - Add :meth:`pyxem.signals.BeamShift.plot_on_signal` function to visualise beam position on signal plot. (#1148)
 - Add ``subpixel`` precision for ``"blur"`` method in :meth:`pyxem.signals.Diffraction2D.get_direct_beam_position`. (#1148)
 - Add Gaussian prefiltering in navigation space in :meth:`pyxem.signals.Diffraction2D.get_direct_beam_position`. (#1148)
-- Add :meth:`pyxem.signals.Diffraction2D.find_vectors`, a spot finder with three detectors ported from SpyDE: a difference-of-Gaussians band-pass (``"dog"``), window-normalised cross-correlation against a disk (``"nxcorr"``) and a neural U-Net detector (``"neural"``, needs ``pyxem[neural]``; weights distributed through em-database). Supports navigation-space blurring, beam-stop masks, lazy signals, and an ``interactive=True`` anyplotlib widget for tuning on single patterns (needs ``pyxem[interactive]``).
+- Add ``method="neural"`` to :meth:`pyxem.signals.Diffraction2D.get_diffraction_vectors`: a U-Net spot detector ported from SpyDE that finds diffraction spots of any size without tuning (needs ``pyxem[neural]``; weights distributed through em-database). Supports navigation-space blurring, beam-stop masks and lazy signals. ``interactive=True`` opens an anywidget GUI registered through hyperspy's GUI system (needs ``pyxem[interactive]``).
+- Add ``device`` to :meth:`pyxem.signals.Diffraction2D.template_match_disk`, :meth:`~pyxem.signals.Diffraction2D.template_match_ring` and :meth:`~pyxem.signals.Diffraction2D.template_match`: the normalised cross-correlation runs batched in torch on the CPU or a GPU, 2-5 times faster, with the same result as scikit-image to floating-point rounding.
 
 Changed
 -------
