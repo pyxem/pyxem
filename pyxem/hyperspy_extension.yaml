@@ -286,3 +286,12 @@ components1D:
     ScatteringFitComponentXTables:
       module: pyxem.components.scattering_fit_component_xtables
       class: ScatteringFitComponentXTables
+
+GUI:
+  toolkeys:
+    - pyxem.Diffraction2D.get_diffraction_vectors
+  widgets:
+    anywidget:
+      pyxem.Diffraction2D.get_diffraction_vectors:
+        module: pyxem.signal_tools.anywidget_gui
+        function: get_diffraction_vectors_aw

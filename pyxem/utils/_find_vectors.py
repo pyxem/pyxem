@@ -16,194 +16,121 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Running a spot detector over every pattern of a dataset.
+"""``get_diffraction_vectors(method="neural")``: the neural spot detector run
+over every pattern of a dataset.
 
 The dataset is processed one navigation chunk at a time. Each chunk is padded
 in navigation space (so the optional navigation blur and the neighbour check
 see across chunk seams), blurred, detected, and trimmed back. The full dataset
 is never materialised: a lazy signal only ever computes one padded chunk.
+
+Every detection's intensity is the mean of the raw pattern over a small disk
+around it, not the network's confidence. A beam stop is a rejection region,
+not an image edit: filling the masked pixels would make a sharp edge that the
+detector fires on, so detections inside the mask are dropped instead.
+
+Ported from SpyDE (https://github.com/directelectron/spyde).
 """
 
 import math
 
 import dask.array as da
-from dask.array.overlap import ensure_minimum_chunksize
 import numpy as np
-from scipy.ndimage import gaussian_filter
+from dask.array.overlap import ensure_minimum_chunksize
+from scipy.ndimage import gaussian_filter, maximum_filter
 
-from pyxem.utils import _spot_finding as spots
-
+METHOD_NEURAL = "neural"
+#: The ``get_diffraction_vectors`` methods this module handles; every other
+#: method goes to hyperspy's ``find_peaks``.
+METHODS = (METHOD_NEURAL,)
+DEFAULT_THRESHOLD = 0.3
+DEFAULT_MIN_DISTANCE = 4
+DEFAULT_MASK_DILATION = 5
 #: Navigation chunk side used when an in-memory signal is processed.
 EAGER_NAVIGATION_CHUNK = 32
-#: Radius over which a neural detection's intensity is averaged.
-NEURAL_INTENSITY_RADIUS = 5.0
+#: Radius over which a detection's intensity is averaged.
+INTENSITY_RADIUS = 5.0
+
+#: Keyword arguments of ``get_diffraction_vectors`` that configure the finder.
+FINDER_ARGUMENTS = (
+    "threshold",
+    "min_distance",
+    "spot_radius",
+    "background_sigma",
+    "model_path",
+    "model_version",
+    "device",
+)
+#: Keyword arguments that configure how the finder runs over the dataset.
+RUN_ARGUMENTS = ("navigation_sigma", "mask", "mask_dilation", "neighbour_refine")
 
 
-class SpotFinder:
-    """One detection method with its parameters resolved.
+def empty_peaks():
+    return np.zeros((0, 3), dtype=np.float32)
 
-    Parameters are the keyword arguments of
-    :meth:`pyxem.signals.Diffraction2D.find_vectors`; ``None`` means the
-    method's default.
+
+def disk_mean_intensity(pattern, rows, columns, radius):
+    """Mean of ``pattern`` over a disk of ``radius`` px around each position.
+
+    A single-pixel sample is dominated by shot noise and by where the subpixel
+    centre happened to land, which bands an intensity-weighted virtual image;
+    the disk mean tracks the true spot brightness.
     """
+    rows = np.asarray(rows, dtype=np.float64)
+    columns = np.asarray(columns, dtype=np.float64)
+    radius = int(max(1, round(float(radius))))
+    if rows.size == 0:
+        return np.zeros(0, dtype=np.float32)
+    height, width = pattern.shape
+    offset_rows, offset_columns = np.mgrid[-radius : radius + 1, -radius : radius + 1]
+    inside = offset_rows**2 + offset_columns**2 <= radius**2
+    sample_rows = np.rint(rows).astype(np.intp)[:, None] + offset_rows[inside][None]
+    sample_columns = (
+        np.rint(columns).astype(np.intp)[:, None] + offset_columns[inside][None]
+    )
+    valid = (
+        (sample_rows >= 0)
+        & (sample_rows < height)
+        & (sample_columns >= 0)
+        & (sample_columns < width)
+    )
+    samples = pattern.astype(np.float32, copy=False)[
+        np.clip(sample_rows, 0, height - 1), np.clip(sample_columns, 0, width - 1)
+    ]
+    samples = np.where(valid, samples, np.nan)
+    with np.errstate(invalid="ignore"):
+        mean = np.nanmean(samples, axis=1)
+    return np.nan_to_num(mean, nan=0.0).astype(np.float32)
 
-    def __init__(
-        self,
-        method="dog",
-        threshold=None,
-        min_distance=None,
-        disk_radius=None,
-        sigma1=spots.DEFAULT_SIGMA1,
-        sigma2=spots.DEFAULT_SIGMA2,
-        subpixel=True,
-        spot_radius=None,
-        background_sigma=None,
-        model_path=None,
-        model_version=None,
-        device=None,
-    ):
-        method = str(method).lower()
-        if method not in spots.METHODS:
-            raise ValueError(f"method must be one of {spots.METHODS}, not {method!r}")
-        if method == spots.METHOD_NEURAL:
-            from pyxem import TORCH_INSTALLED
 
-            if not TORCH_INSTALLED:
-                raise ImportError(
-                    "method='neural' requires torch: `pip install pyxem[neural]`."
-                )
-        self.method = method
-        self.threshold = float(
-            spots.DEFAULT_THRESHOLD[method] if threshold is None else threshold
-        )
-        self.min_distance = int(
-            spots.DEFAULT_MIN_DISTANCE[method] if min_distance is None else min_distance
-        )
-        self.disk_radius = int(
-            spots.DEFAULT_DISK_RADIUS if disk_radius is None else disk_radius
-        )
-        self.sigma1 = float(sigma1)
-        self.sigma2 = float(sigma2)
-        self.subpixel = bool(subpixel)
-        self.spot_radius = None if not spot_radius else float(spot_radius)
-        self.background_sigma = (
-            None if background_sigma is None else float(background_sigma)
-        )
-        self.model_path = model_path
-        self.model_version = model_version
-        self.device = device
+def dilate_mask(mask, pixels):
+    """Grow a boolean mask by ``pixels`` in every direction."""
+    if mask is None or pixels <= 0:
+        return mask
+    return maximum_filter(mask.astype(np.uint8), size=2 * int(pixels) + 1) > 0
 
-    @property
-    def parameters(self):
-        return {
-            "method": self.method,
-            "threshold": self.threshold,
-            "min_distance": self.min_distance,
-            "disk_radius": self.disk_radius,
-            "sigma1": self.sigma1,
-            "sigma2": self.sigma2,
-            "subpixel": self.subpixel,
-            "spot_radius": self.spot_radius,
-            "background_sigma": self.background_sigma,
-        }
 
-    def marker_radius(self):
-        """Radius in pixels at which a detection is drawn."""
-        if self.method == spots.METHOD_NXCORR:
-            return float(self.disk_radius)
-        if self.method == spots.METHOD_DOG:
-            return math.sqrt(2) * self.sigma2
-        return self.spot_radius or NEURAL_INTENSITY_RADIUS
+def detect_beam_stop(mean_pattern, fraction=0.15, dilation=DEFAULT_MASK_DILATION):
+    """Find a beam stop in a scan-averaged pattern.
 
-    def model(self):
-        from pyxem.utils._neural_spots import get_model
+    A beam stop is a stable, connected low-intensity region in the average
+    pattern. It is thresholded at ``fraction`` of the mean and then dilated:
+    the brightest feature in a beam-stopped pattern is the halo hugging the
+    stop edge, so the mask has to reach a few pixels past the geometric stop.
 
-        return get_model(self.model_path, self.model_version, self.device)
-
-    def calibrate(self, sample_patterns):
-        """Tune the neural background sigma (and a weak-data threshold) in place."""
-        from pyxem.utils._neural_spots.inference import calibrate
-
-        model, device = self.model()
-        result = calibrate(
-            model, sample_patterns, device, spot_diameter=self._spot_diameter()
-        )
-        self.background_sigma = result["background_sigma"]
-        return result
-
-    def _spot_diameter(self):
-        return 2.0 * self.spot_radius if self.spot_radius else None
-
-    def detect(self, pattern, mask=None):
-        """Detect spots in one pattern.
-
-        Returns ``(response, peaks)``: the detector's transformed image and
-        ``(N, 3)`` float32 ``[row, column, intensity]``.
-        """
-        pattern = np.asarray(pattern, dtype=np.float32)
-        if self.method == spots.METHOD_NXCORR:
-            return spots.find_spots_nxcorr(
-                pattern,
-                self.disk_radius,
-                self.threshold,
-                self.min_distance,
-                subpixel=self.subpixel,
-                mask=mask,
-            )
-        if self.method == spots.METHOD_DOG:
-            return spots.find_spots_dog(
-                pattern,
-                self.sigma1,
-                self.sigma2,
-                self.threshold,
-                self.min_distance,
-                subpixel=self.subpixel,
-                mask=mask,
-            )
-        confident = self.detect_stack(pattern[None], mask)[0]
-        # The network returns no dense map; paint each detection's confidence
-        # at its pixel so the response still shows where it fired.
-        response = np.zeros(pattern.shape, dtype=np.float32)
-        if len(confident):
-            rows, columns = _nearest_pixels(confident, pattern.shape)
-            response[rows, columns] = confident[:, 2]
-        return response, self.with_intensity(pattern, confident)
-
-    def detect_stack(self, patterns, mask=None):
-        """Detect spots in a ``(N, rows, columns)`` stack.
-
-        For the neural method the third column is the network's confidence;
-        pass the result through :meth:`with_intensity` to get intensities.
-        """
-        if self.method != spots.METHOD_NEURAL:
-            return [self.detect(pattern, mask)[1] for pattern in patterns]
-        from pyxem.utils._neural_spots.inference import detect_batch
-
-        model, device = self.model()
-        found = detect_batch(
-            model,
-            patterns,
-            device,
-            threshold=self.threshold,
-            min_distance=self.min_distance,
-            background_sigma=self.background_sigma,
-            spot_diameter=self._spot_diameter(),
-        )
-        return [_drop_masked(peaks, mask) for peaks in found]
-
-    def with_intensity(self, pattern, peaks):
-        """Replace a neural confidence column by the disk-mean intensity."""
-        if self.method != spots.METHOD_NEURAL:
-            return peaks
-        if len(peaks) == 0:
-            return spots.empty_peaks()
-        intensity = spots.disk_mean_intensity(
-            np.asarray(pattern, dtype=np.float32),
-            peaks[:, 0],
-            peaks[:, 1],
-            NEURAL_INTENSITY_RADIUS,
-        )
-        return np.column_stack([peaks[:, :2], intensity]).astype(np.float32)
+    Returns a boolean mask, or ``None`` when no plausible stop is found.
+    """
+    mean_pattern = np.asarray(mean_pattern, dtype=np.float64)
+    if mean_pattern.ndim != 2 or mean_pattern.size == 0:
+        return None
+    mean_value = float(mean_pattern.mean())
+    if mean_value <= 0:
+        return None
+    mask = mean_pattern < mean_value * fraction
+    # Almost nothing means no stop; almost everything means a blank pattern.
+    if not 0.001 <= mask.mean() <= 0.45:
+        return None
+    return dilate_mask(mask, dilation)
 
 
 def _nearest_pixels(peaks, shape):
@@ -220,6 +147,121 @@ def _drop_masked(peaks, mask):
     return peaks[~mask[rows, columns]]
 
 
+class SpotFinder:
+    """The neural spot detector with its settings resolved.
+
+    Parameters are the ``method="neural"`` keyword arguments of
+    :meth:`pyxem.signals.Diffraction2D.get_diffraction_vectors`.
+    """
+
+    def __init__(
+        self,
+        threshold=DEFAULT_THRESHOLD,
+        min_distance=DEFAULT_MIN_DISTANCE,
+        spot_radius=None,
+        background_sigma=None,
+        model_path=None,
+        model_version=None,
+        device=None,
+    ):
+        from pyxem import TORCH_INSTALLED
+
+        if not TORCH_INSTALLED:
+            raise ImportError(
+                "method='neural' requires torch: `pip install pyxem[neural]`."
+            )
+        self.threshold = float(threshold)
+        self.min_distance = int(min_distance)
+        self.spot_radius = float(spot_radius) if spot_radius else None
+        self.background_sigma = (
+            None if background_sigma is None else float(background_sigma)
+        )
+        self.model_path = model_path
+        self.model_version = model_version
+        self.device = device
+
+    @property
+    def parameters(self):
+        return {
+            "method": METHOD_NEURAL,
+            "threshold": self.threshold,
+            "min_distance": self.min_distance,
+            "spot_radius": self.spot_radius,
+            "background_sigma": self.background_sigma,
+        }
+
+    def marker_radius(self):
+        """Radius in pixels at which a detection is drawn."""
+        return self.spot_radius or INTENSITY_RADIUS
+
+    def model(self):
+        from pyxem.utils._neural_spots import get_model
+
+        return get_model(self.model_path, self.model_version, self.device)
+
+    def _spot_diameter(self):
+        return 2.0 * self.spot_radius if self.spot_radius else None
+
+    def calibrate(self, sample_patterns):
+        """Tune the background sigma (and a weak-data threshold) in place."""
+        from pyxem.utils._neural_spots.inference import calibrate
+
+        model, device = self.model()
+        result = calibrate(
+            model, sample_patterns, device, spot_diameter=self._spot_diameter()
+        )
+        self.background_sigma = result["background_sigma"]
+        return result
+
+    def detect_stack(self, patterns, mask=None):
+        """Detect spots in a ``(N, rows, columns)`` stack.
+
+        The third column is the network's confidence; :meth:`with_intensity`
+        replaces it by the intensity.
+        """
+        from pyxem.utils._neural_spots.inference import detect_batch
+
+        model, device = self.model()
+        found = detect_batch(
+            model,
+            patterns,
+            device,
+            threshold=self.threshold,
+            min_distance=self.min_distance,
+            background_sigma=self.background_sigma,
+            spot_diameter=self._spot_diameter(),
+        )
+        return [_drop_masked(peaks, mask) for peaks in found]
+
+    def detect(self, pattern, mask=None):
+        """Detect spots in one pattern.
+
+        Returns ``(response, peaks)``: an image with each detection's
+        confidence painted at its pixel (the network returns no dense map),
+        and ``(N, 3)`` float32 ``[row, column, intensity]``.
+        """
+        pattern = np.asarray(pattern, dtype=np.float32)
+        confident = self.detect_stack(pattern[None], mask)[0]
+        response = np.zeros(pattern.shape, dtype=np.float32)
+        if len(confident):
+            rows, columns = _nearest_pixels(confident, pattern.shape)
+            response[rows, columns] = confident[:, 2]
+        return response, self.with_intensity(pattern, confident)
+
+    @staticmethod
+    def with_intensity(pattern, peaks):
+        """Replace the confidence column by the disk-mean intensity."""
+        if len(peaks) == 0:
+            return empty_peaks()
+        intensity = disk_mean_intensity(
+            np.asarray(pattern, dtype=np.float32),
+            peaks[:, 0],
+            peaks[:, 1],
+            INTENSITY_RADIUS,
+        )
+        return np.column_stack([peaks[:, :2], intensity]).astype(np.float32)
+
+
 def navigation_depth(navigation_sigma, neighbour_refine=False):
     depth = int(math.ceil(3 * navigation_sigma)) if navigation_sigma > 0 else 0
     return max(depth, 1) if neighbour_refine else depth
@@ -233,11 +275,13 @@ def _find_vectors_block(
     depth,
     mask,
     neighbour_refine,
+    get_intensity,
 ):
     """Detect every pattern of one navigation block padded by ``depth``.
 
     Returns an object array over the trimmed navigation shape whose elements
-    are ``(N, 3)`` float32 ``[row, column, intensity]``.
+    are ``(N, 3)`` float32 ``[row, column, intensity]``, or ``(N, 2)``
+    without ``get_intensity``.
     """
     block = np.asarray(block, dtype=np.float32)
     if navigation_sigma > 0:
@@ -255,8 +299,10 @@ def _find_vectors_block(
 
     indices = np.arange(len(patterns)).reshape(navigation_shape)[trimmed]
     output = np.empty(indices.shape, dtype=object)
+    columns = slice(None) if get_intensity else slice(0, 2)
     for position, index in np.ndenumerate(indices):
-        output[position] = finder.with_intensity(patterns[index], found[index])
+        peaks = finder.with_intensity(patterns[index], found[index])
+        output[position] = peaks[:, columns]
     return output
 
 
@@ -297,6 +343,7 @@ def find_vectors_array(
     navigation_sigma=0.0,
     mask=None,
     neighbour_refine=False,
+    get_intensity=True,
 ):
     """Run ``finder`` over every pattern of ``data``.
 
@@ -338,6 +385,7 @@ def find_vectors_array(
         depth=depth,
         mask=mask,
         neighbour_refine=neighbour_refine,
+        get_intensity=get_intensity,
         drop_axis=(navigation_dimension, navigation_dimension + 1),
         chunks=navigation_chunks,
         dtype=object,
@@ -364,7 +412,7 @@ def sample_patterns(data, navigation_dimension, fractions=(0.25, 0.5, 0.75)):
     return patterns
 
 
-def automatic_mask(data, navigation_dimension, dilation=spots.DEFAULT_MASK_DILATION):
+def automatic_mask(data, navigation_dimension, dilation=DEFAULT_MASK_DILATION):
     """Detect a beam stop from the mean of one block of up to 64 patterns.
 
     A beam stop does not move across a scan, so one contiguous block (one
@@ -380,7 +428,71 @@ def automatic_mask(data, navigation_dimension, dilation=spots.DEFAULT_MASK_DILAT
     else:
         block = data[(slice(0, side),) * navigation_dimension]
     block = np.asarray(block, dtype=np.float64)
-    return spots.detect_beam_stop(
+    return detect_beam_stop(
         block.reshape((-1,) + block.shape[navigation_dimension:]).mean(axis=0),
         dilation=dilation,
     )
+
+
+def resolve_finder(signal, method, **kwargs):
+    """Build the :class:`SpotFinder` and run settings ``get_diffraction_vectors``
+    asked for, resolving the automatic choices (beam-stop mask, background
+    sigma) on a few patterns of ``signal``.
+
+    Returns ``(finder, settings, mask_options)``: ``settings`` holds
+    ``mask``, ``navigation_sigma`` and ``neighbour_refine``; ``mask_options``
+    says whether the mask was detected automatically and with what dilation,
+    so an interactive tool can re-dilate it.
+    """
+    unknown = set(kwargs) - set(FINDER_ARGUMENTS) - set(RUN_ARGUMENTS)
+    if unknown:
+        raise TypeError(
+            f"get_diffraction_vectors(method={method!r}) got unexpected keyword "
+            f"arguments {sorted(unknown)}"
+        )
+    finder_arguments = {k: kwargs[k] for k in FINDER_ARGUMENTS if k in kwargs}
+    background_sigma = finder_arguments.pop("background_sigma", "auto")
+    finder = SpotFinder(
+        background_sigma=(
+            None if isinstance(background_sigma, str) else background_sigma
+        ),
+        **finder_arguments,
+    )
+    navigation_dimension = signal.axes_manager.navigation_dimension
+    neighbour_refine = bool(kwargs.get("neighbour_refine", False))
+    if neighbour_refine and navigation_dimension != 2:
+        raise ValueError(
+            "neighbour_refine needs a signal with two navigation dimensions."
+        )
+    data = signal.data
+
+    mask = kwargs.get("mask")
+    mask_options = dict(
+        automatic=isinstance(mask, str),
+        dilation=int(kwargs.get("mask_dilation", DEFAULT_MASK_DILATION)),
+    )
+    if isinstance(mask, str):
+        if mask != "auto":
+            raise ValueError(f"mask must be an array, 'auto' or None, not {mask!r}")
+        mask = automatic_mask(
+            data, navigation_dimension, dilation=mask_options["dilation"]
+        )
+    elif mask is not None:
+        mask = np.asarray(mask, dtype=bool)
+        if mask.shape != data.shape[navigation_dimension:]:
+            raise ValueError(
+                f"mask shape {mask.shape} does not match the pattern shape "
+                f"{data.shape[navigation_dimension:]}"
+            )
+
+    if background_sigma == "auto":
+        calibrated = finder.calibrate(sample_patterns(data, navigation_dimension))
+        if "threshold" not in finder_arguments:
+            finder.threshold = calibrated["threshold"]
+
+    settings = dict(
+        mask=mask,
+        navigation_sigma=float(kwargs.get("navigation_sigma", 0.0)),
+        neighbour_refine=neighbour_refine,
+    )
+    return finder, settings, mask_options
