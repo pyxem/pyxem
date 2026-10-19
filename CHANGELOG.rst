@@ -34,7 +34,7 @@ Fixed
 - Add explicit support for python 3.12 and 3.13 and update test matrix. (#1147)
 - Silence axes warning in functions using :meth:`~hyperspy.api.signals.BaseSignal.map`. (#1168)
 - Increase chunk size and add User-Agent header for downloads from Zenodo. (#1180)
-- Temporarily cap ``numpy < 2.5`` because ``scikit-image`` 0.26 ellipse fitting fails with numpy 2.5 (scikit-image#8235), and fix duplicated markers in the vector slicing example that failed with hyperspy 2.5. (#1195)
+- Temporarily cap ``numpy < 2.5`` because ``scikit-image`` 0.26 ellipse fitting fails with numpy 2.5 (scikit-image#8235), and fix duplicated markers in the vector slicing example that failed with hyperspy 2.5 and broken links in the contributing guide. (#1195)
 
 
 Deprecated

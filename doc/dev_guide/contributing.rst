@@ -230,7 +230,7 @@ Switching between Documentation Versions
 
 To make switching between documentation versions easier, we have a version switcher
 in the documentation. This switcher is located in the ``doc/_static/switcher.json`` file
-or at https://pyxem.readthedocs.io/en/latest/_static/switcher.json.  Because the switcher
+or at https://pyxem.org/dev/_static/switcher.json.  Because the switcher
 points to the latest version of the documentation, any update to the documentation will
 be retroactively applied to all previous versions which have the switcher enabled.
 
@@ -244,7 +244,7 @@ Continuous integration (CI)
 We use `GitHub Actions <https://github.com/pyxem/pyxem/actions>`_ to ensure that pyxem
 can be installed on Windows, macOS and Linux (Ubuntu). After a successful installation,
 the CI server runs the tests. After the tests return no errors, code coverage is
-reported to `Coveralls <https://coveralls.io/github/pyxem/pyxem?branch=main>`_.
+reported to `Codecov <https://app.codecov.io/gh/pyxem/pyxem>`_.
 
 Making a release
 ================
