@@ -93,7 +93,7 @@ setup(
         "lmfit          >= 1.0.0",  # support for recent version of numpy
         "matplotlib     >= 3.7.5",
         "numba",
-        "numpy          >= 1.23.0",  # Needed for numpy.typing
+        "numpy          >= 1.23.0, < 2.5",  # numpy.typing; <2.5 until scikit-image 0.27 (scikit-image#8235)
         "orix           >= 0.12.1",
         "pooch",
         "psutil",
