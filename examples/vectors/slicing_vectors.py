@@ -49,7 +49,6 @@ slic_vectors = vectors.ivec[:, vect_magnitudes < 20].to_markers(
 )
 s.plot()
 s.add_marker([all_vectors, slic_vectors])
-s.add_marker([all_vectors, slic_vectors])
 # %%
 
 
@@ -57,7 +56,6 @@ slic_vectors = (vectors.ivec[:, vectors.ivec["intensity"] < 0.5]).to_markers(
     color="w", sizes=5, alpha=0.5
 )
 s.plot()
-s.add_marker([all_vectors, slic_vectors])
 s.add_marker([all_vectors, slic_vectors])
 
 # %%
