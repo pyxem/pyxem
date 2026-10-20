@@ -97,6 +97,10 @@ def is_ellipse_good(
     ...         ellipse_model=model, data=None, xf=30, yf=50, rf_lim=5)
 
     """
+    # A failed fit is returned as a falsy FailedEstimation, which ransac
+    # passes here unchecked when refitting the final inliers
+    if not ellipse_model:
+        return False
     xc, yc = ellipse_model.center
     a, b = ellipse_model.axis_lengths
     r = ellipse_model.theta

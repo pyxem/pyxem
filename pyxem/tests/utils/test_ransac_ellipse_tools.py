@@ -157,6 +157,15 @@ class TestIsEllipseGood:
         )
         assert is_good == out
 
+    def test_failed_estimation(self):
+        # Fewer than 5 points gives a FailedEstimation instead of a model
+        model = EllipseModel.from_estimate(np.zeros((3, 2)))
+        assert not model
+        is_good = ret.is_ellipse_good(
+            ellipse_model=model, data=None, xf=0, yf=0, rf_lim=5
+        )
+        assert not is_good
+
 
 class TestMakeEllipseDataPoints:
     def test_simple(self):
