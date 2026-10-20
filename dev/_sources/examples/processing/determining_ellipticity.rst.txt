@@ -181,8 +181,8 @@ can force the ellipse to fit the first ring by masking the zero beam.
 
  .. code-block:: none
 
-      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 735.33it/s]
-      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 1508.20it/s]
+      0%|          | 0/2 [00:00<?, ?it/s]     50%|█████     | 1/2 [00:00<00:00,  8.11it/s]    100%|██████████| 2/2 [00:00<00:00, 16.18it/s]
+      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 2407.06it/s]
 
     [<Axes: title={'center': 'azimuthal unwrapped'}, xlabel='Radians axis (Rad)', ylabel='Radius axis (k_nm^-1)'>, <Axes: title={'center': 'corrected'}, xlabel='kx axis (k_nm^-1)', ylabel='ky axis (k_nm^-1)'>]
 
@@ -297,10 +297,10 @@ Finding the peaks
 
  .. code-block:: none
 
-      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 123.29it/s]
-      0%|          | 0/2 [00:00<?, ?it/s]     50%|█████     | 1/2 [00:00<00:00,  2.77it/s]    100%|██████████| 2/2 [00:00<00:00,  5.53it/s]
-      0%|          | 0/6 [00:00<?, ?it/s]    100%|██████████| 6/6 [00:00<00:00, 422.67it/s]
-      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 299.17it/s]
+      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 280.53it/s]
+      0%|          | 0/2 [00:00<?, ?it/s]     50%|█████     | 1/2 [00:00<00:00,  5.11it/s]    100%|██████████| 2/2 [00:00<00:00, 10.20it/s]
+      0%|          | 0/6 [00:00<?, ?it/s]    100%|██████████| 6/6 [00:00<00:00, 889.09it/s]
+      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 765.17it/s]
 
 
 
@@ -308,7 +308,7 @@ Finding the peaks
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 4.095 seconds)
+   **Total running time of the script:** (0 minutes 5.177 seconds)
 
 
 .. _sphx_glr_download_examples_processing_determining_ellipticity.py:

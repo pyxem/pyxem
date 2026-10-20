@@ -86,10 +86,13 @@ Correlation2D
         
         
         
+        
         Correlation2D.get_summed_angular_power
         
         
         Correlation2D.get_symmetry_coefficient
+        
+        
         
         
         

@@ -109,6 +109,7 @@ OrientationMap
         
         
         
+        
         OrientationMap.get_simulation_arrays
         
         
@@ -149,7 +150,9 @@ OrientationMap
         
         
         
+        
         OrientationMap.plot_over_signal
+        
         
         
         

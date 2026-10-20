@@ -49,7 +49,7 @@ the longer Demo Notebooks.
 
  .. code-block:: none
 
-      0%|          | 0/76 [00:00<?, ?it/s]     43%|████▎     | 33/76 [00:00<00:00, 327.58it/s]     87%|████████▋ | 66/76 [00:00<00:00, 310.93it/s]    100%|██████████| 76/76 [00:00<00:00, 294.64it/s]
+      0%|          | 0/76 [00:00<?, ?it/s]     95%|█████████▍| 72/76 [00:00<00:00, 637.90it/s]    100%|██████████| 76/76 [00:00<00:00, 647.02it/s]
 
 
 
@@ -154,7 +154,7 @@ Since each probe position is a vector, we can plot the magnitude and phase (dire
 
  .. code-block:: none
 
-      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 3313.04it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 5494.86it/s]
 
 
 
@@ -265,7 +265,7 @@ using matplotlib. This is useful for creating publication-ready figures.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 2.758 seconds)
+   **Total running time of the script:** (0 minutes 1.743 seconds)
 
 
 .. _sphx_glr_download_examples_dpc_magnetic_dpc.py:

@@ -82,7 +82,10 @@ Correlation1D
         
         
         
+        
         Correlation1D.get_symmetry_coefficient
+        
+        
         
         
         

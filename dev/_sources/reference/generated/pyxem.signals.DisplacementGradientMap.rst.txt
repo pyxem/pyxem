@@ -80,7 +80,10 @@ DisplacementGradientMap
         
         
         
+        
         DisplacementGradientMap.get_strain_maps
+        
+        
         
         
         

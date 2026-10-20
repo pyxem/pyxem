@@ -42,7 +42,7 @@ Making a Dummy Dataset with a Zero Beam that systematically deviates from the ce
 
  .. code-block:: none
 
-      0%|          | 0/76 [00:00<?, ?it/s]    100%|██████████| 76/76 [00:00<00:00, 859.43it/s]
+      0%|          | 0/76 [00:00<?, ?it/s]    100%|██████████| 76/76 [00:00<00:00, 1750.75it/s]
 
 
 
@@ -75,7 +75,7 @@ The zero beam position can be obtained using the :meth:`~pyxem.signals.Diffracti
 
  .. code-block:: none
 
-      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 686.03it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 1314.21it/s]
 
     [<Axes: title={'center': 'x-shift'}, xlabel='x axis (px)', ylabel='y axis (px)'>, <Axes: title={'center': 'y-shift'}, xlabel='x axis (px)', ylabel='y axis (px)'>]
 
@@ -119,7 +119,7 @@ To visualize the zero beam position, we can plot the beam position on the origin
 
  .. code-block:: none
 
-      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 8001.10it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 14581.42it/s]
 
 
 
@@ -189,7 +189,7 @@ and the non-centered one, to compare them.
 
  .. code-block:: none
 
-      0%|          | 0/76 [00:00<?, ?it/s]    100%|██████████| 76/76 [00:00<00:00, 841.59it/s]
+      0%|          | 0/76 [00:00<?, ?it/s]    100%|██████████| 76/76 [00:00<00:00, 1806.98it/s]
 
     [<Axes: title={'center': 'Original'}, xlabel='kx axis (px)', ylabel='ky axis (px)'>, <Axes: title={'center': 'Centered'}, xlabel='kx axis (px)', ylabel='ky axis (px)'>]
 
@@ -227,7 +227,7 @@ domains for good performance.
 
  .. code-block:: none
 
-      0%|          | 0/76 [00:00<?, ?it/s]    100%|██████████| 76/76 [00:00<00:00, 924.57it/s]
+      0%|          | 0/76 [00:00<?, ?it/s]    100%|██████████| 76/76 [00:00<00:00, 1814.89it/s]
 
 
 
@@ -274,7 +274,7 @@ we can center the direct beam as normal.
 
  .. code-block:: none
 
-      0%|          | 0/76 [00:00<?, ?it/s]    100%|██████████| 76/76 [00:00<00:00, 858.34it/s]
+      0%|          | 0/76 [00:00<?, ?it/s]    100%|██████████| 76/76 [00:00<00:00, 1835.78it/s]
 
 
 
@@ -314,7 +314,7 @@ from the original shifts.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 2.577 seconds)
+   **Total running time of the script:** (0 minutes 1.748 seconds)
 
 
 .. _sphx_glr_download_examples_processing_centering_the_zero_beam.py:

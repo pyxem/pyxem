@@ -83,7 +83,10 @@ VirtualDarkFieldImage
         
         
         
+        
         VirtualDarkFieldImage.get_vdf_segments
+        
+        
         
         
         

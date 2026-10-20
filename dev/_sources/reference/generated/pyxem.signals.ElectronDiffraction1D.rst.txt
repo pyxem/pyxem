@@ -101,6 +101,7 @@ ElectronDiffraction1D
         
         
         
+        
         ElectronDiffraction1D.model2camera_length
         
         
@@ -108,6 +109,8 @@ ElectronDiffraction1D
         
         
         ElectronDiffraction1D.model_simulation1d
+        
+        
         
         
         

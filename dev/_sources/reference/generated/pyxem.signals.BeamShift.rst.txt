@@ -138,6 +138,7 @@ BeamShift
         
         
         
+        
         BeamShift.make_linear_plane
         
         
@@ -176,7 +177,9 @@ BeamShift
         
         
         
+        
         BeamShift.plot_on_signal
+        
         
         
         

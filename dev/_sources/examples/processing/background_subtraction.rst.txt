@@ -68,16 +68,16 @@ example is shown in the 'Filtering Data'-example.
 
  .. code-block:: none
 
-      0%|          | 0/51 [00:00<?, ?it/s]     10%|▉         | 5/51 [00:00<00:00, 47.98it/s]     39%|███▉      | 20/51 [00:00<00:00, 105.72it/s]     65%|██████▍   | 33/51 [00:00<00:00, 98.09it/s]      84%|████████▍ | 43/51 [00:00<00:00, 98.35it/s]    100%|██████████| 51/51 [00:00<00:00, 105.89it/s]
-    /opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/site-packages/pyxem/utils/_background_subtraction.py:99: FutureWarning: `square` is deprecated since version 0.25 and will be removed in version 0.27. Use `skimage.morphology.footprint_rectangle` instead.
+      0%|          | 0/51 [00:00<?, ?it/s]     33%|███▎      | 17/51 [00:00<00:00, 137.69it/s]     80%|████████  | 41/51 [00:00<00:00, 168.21it/s]    100%|██████████| 51/51 [00:00<00:00, 182.95it/s]
+    /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/pyxem/utils/_background_subtraction.py:99: FutureWarning: `square` is deprecated since version 0.25 and will be removed in version 0.27. Use `skimage.morphology.footprint_rectangle` instead.
       regional_filter(frame / max_value, **kwargs), footprint=square(3)
-    /opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/site-packages/hyperspy/misc/_dask_utils.py:152: UserWarning: Possible precision loss converting image of type float32 to uint8 as required by rank filters. Convert manually using skimage.util.img_as_ubyte to silence this warning.
+    /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/hyperspy/misc/_dask_utils.py:152: UserWarning: Possible precision loss converting image of type float32 to uint8 as required by rank filters. Convert manually using skimage.util.img_as_ubyte to silence this warning.
       output = function(test_data, **kwargs)
-      0%|          | 0/51 [00:00<?, ?it/s]/opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/site-packages/pyxem/utils/_background_subtraction.py:99: FutureWarning: `square` is deprecated since version 0.25 and will be removed in version 0.27. Use `skimage.morphology.footprint_rectangle` instead.
+      0%|          | 0/51 [00:00<?, ?it/s]/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/pyxem/utils/_background_subtraction.py:99: FutureWarning: `square` is deprecated since version 0.25 and will be removed in version 0.27. Use `skimage.morphology.footprint_rectangle` instead.
       regional_filter(frame / max_value, **kwargs), footprint=square(3)
-    /opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/site-packages/hyperspy/misc/_dask_utils.py:75: UserWarning: Possible precision loss converting image of type float32 to uint8 as required by rank filters. Convert manually using skimage.util.img_as_ubyte to silence this warning.
+    /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/hyperspy/misc/_dask_utils.py:75: UserWarning: Possible precision loss converting image of type float32 to uint8 as required by rank filters. Convert manually using skimage.util.img_as_ubyte to silence this warning.
       output_array[islice] = function(data[islice], **kwargs)
-      2%|▏         | 1/51 [00:00<00:07,  6.61it/s]     18%|█▊        | 9/51 [00:00<00:01, 26.77it/s]     33%|███▎      | 17/51 [00:00<00:00, 35.96it/s]     45%|████▌     | 23/51 [00:00<00:00, 41.29it/s]     57%|█████▋    | 29/51 [00:00<00:00, 38.36it/s]     73%|███████▎  | 37/51 [00:01<00:00, 39.98it/s]     84%|████████▍ | 43/51 [00:01<00:00, 43.51it/s]     96%|█████████▌| 49/51 [00:01<00:00, 47.42it/s]    100%|██████████| 51/51 [00:01<00:00, 41.64it/s]
+     18%|█▊        | 9/51 [00:00<00:00, 52.45it/s]     49%|████▉     | 25/51 [00:00<00:00, 75.82it/s]     80%|████████  | 41/51 [00:00<00:00, 84.55it/s]    100%|██████████| 51/51 [00:00<00:00, 89.19it/s]
 
     [<Axes: title={'center': 'Original'}, xlabel='kx axis (px)', ylabel='ky axis (px)'>, <Axes: title={'center': 'Difference of Gaussians'}, xlabel='kx axis (px)', ylabel='ky axis (px)'>, <Axes: title={'center': 'H-Dome'}, xlabel='kx axis (px)', ylabel='ky axis (px)'>]
 
@@ -152,9 +152,9 @@ Transform to polar coordinates
 
  .. code-block:: none
 
-      0%|          | 0/26 [00:00<?, ?it/s]      4%|▍         | 1/26 [00:02<01:13,  2.93s/it]     50%|█████     | 13/26 [00:03<00:02,  5.87it/s]     96%|█████████▌| 25/26 [00:03<00:00, 12.86it/s]    100%|██████████| 26/26 [00:03<00:00,  8.23it/s]
-      0%|          | 0/51 [00:00<?, ?it/s]     69%|██████▊   | 35/51 [00:00<00:00, 316.18it/s]    100%|██████████| 51/51 [00:00<00:00, 368.69it/s]
-      0%|          | 0/51 [00:00<?, ?it/s]      2%|▏         | 1/51 [00:00<00:08,  5.80it/s]     18%|█▊        | 9/51 [00:00<00:01, 30.35it/s]     33%|███▎      | 17/51 [00:00<00:00, 34.48it/s]     49%|████▉     | 25/51 [00:00<00:00, 37.83it/s]     65%|██████▍   | 33/51 [00:00<00:00, 38.79it/s]     80%|████████  | 41/51 [00:01<00:00, 40.65it/s]    100%|██████████| 51/51 [00:01<00:00, 44.16it/s]
+      0%|          | 0/26 [00:00<?, ?it/s]      4%|▍         | 1/26 [00:04<01:42,  4.11s/it]      8%|▊         | 2/26 [00:04<00:42,  1.77s/it]     12%|█▏        | 3/26 [00:04<00:23,  1.02s/it]     19%|█▉        | 5/26 [00:08<00:32,  1.55s/it]     23%|██▎       | 6/26 [00:08<00:23,  1.19s/it]     31%|███       | 8/26 [00:08<00:12,  1.43it/s]     35%|███▍      | 9/26 [00:12<00:24,  1.41s/it]     38%|███▊      | 10/26 [00:12<00:18,  1.15s/it]     42%|████▏     | 11/26 [00:13<00:13,  1.12it/s]     46%|████▌     | 12/26 [00:13<00:10,  1.30it/s]     50%|█████     | 13/26 [00:16<00:19,  1.53s/it]     58%|█████▊    | 15/26 [00:17<00:10,  1.07it/s]     62%|██████▏   | 16/26 [00:17<00:08,  1.15it/s]     65%|██████▌   | 17/26 [00:21<00:12,  1.43s/it]     69%|██████▉   | 18/26 [00:21<00:08,  1.09s/it]     73%|███████▎  | 19/26 [00:21<00:06,  1.08it/s]     77%|███████▋  | 20/26 [00:22<00:05,  1.11it/s]     81%|████████  | 21/26 [00:25<00:07,  1.50s/it]     85%|████████▍ | 22/26 [00:25<00:04,  1.14s/it]     88%|████████▊ | 23/26 [00:25<00:02,  1.17it/s]     92%|█████████▏| 24/26 [00:26<00:01,  1.42it/s]     96%|█████████▌| 25/26 [00:27<00:00,  1.37it/s]    100%|██████████| 26/26 [00:27<00:00,  1.04s/it]
+      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 1132.39it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]     18%|█▊        | 9/51 [00:00<00:00, 55.17it/s]     49%|████▉     | 25/51 [00:00<00:00, 79.68it/s]     76%|███████▋  | 39/51 [00:00<00:00, 97.17it/s]    100%|██████████| 51/51 [00:00<00:00, 98.18it/s]
 
     [<Axes: title={'center': 'Original (polar)'}, xlabel='Radians axis (Rad)', ylabel='Radius axis (px)'>, <Axes: title={'center': 'Radial Median'}, xlabel='Radians axis (Rad)', ylabel='Radius axis (px)'>, <Axes: title={'center': 'Radial Percentile'}, xlabel='Radians axis (Rad)', ylabel='Radius axis (px)'>]
 
@@ -163,7 +163,7 @@ Transform to polar coordinates
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 7.257 seconds)
+   **Total running time of the script:** (0 minutes 35.538 seconds)
 
 
 .. _sphx_glr_download_examples_processing_background_subtraction.py:

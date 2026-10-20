@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:02.758** total execution time for 2 files **from examples/dpc**:
+**00:04.293** total execution time for 2 files **from examples/dpc**:
 
 .. container::
 
@@ -32,9 +32,9 @@ Computation times
    * - Example
      - Time
      - Mem (MB)
-   * - :ref:`sphx_glr_examples_dpc_magnetic_dpc.py` (``magnetic_dpc.py``)
-     - 00:02.758
-     - 0.0
    * - :ref:`sphx_glr_examples_dpc_electric_field_dpc.py` (``electric_field_dpc.py``)
-     - 00:00.000
+     - 00:02.550
+     - 0.0
+   * - :ref:`sphx_glr_examples_dpc_magnetic_dpc.py` (``magnetic_dpc.py``)
+     - 00:01.743
      - 0.0

@@ -117,6 +117,7 @@ LabeledDiffractionVectors2D
         
         
         
+        
         LabeledDiffractionVectors2D.map_vectors
         
         
@@ -142,6 +143,8 @@ LabeledDiffractionVectors2D
         
         
         LabeledDiffractionVectors2D.plot_clustered
+        
+        
         
         
         

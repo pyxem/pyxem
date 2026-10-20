@@ -139,6 +139,7 @@ DiffractionVectors
         DiffractionVectors.get_pixel_vectors
         
         
+        
         DiffractionVectors.get_strain_maps
         
         
@@ -177,10 +178,12 @@ DiffractionVectors
         
         
         
+        
         DiffractionVectors.plot_diffraction_vectors
         
         
         DiffractionVectors.plot_diffraction_vectors_on_signal
+        
         
         
         

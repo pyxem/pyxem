@@ -137,6 +137,7 @@ Diffraction2D
         
         
         
+        
         Diffraction2D.get_variance
         
         
@@ -170,6 +171,8 @@ Diffraction2D
         
         
         Diffraction2D.plot
+        
+        
         
         
         

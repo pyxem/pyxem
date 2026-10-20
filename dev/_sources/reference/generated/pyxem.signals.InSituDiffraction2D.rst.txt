@@ -113,7 +113,10 @@ InSituDiffraction2D
         
         
         
+        
         InSituDiffraction2D.get_time_series
+        
+        
         
         
         
