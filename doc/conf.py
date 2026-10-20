@@ -60,7 +60,6 @@ extensions = [
     "sphinx_codeautolink",
     "sphinx_gallery.gen_gallery",
     "sphinx_copybutton",
-    "nbsphinx",
 ]
 
 # Create links to references within pyxem's documentation to these packages.
@@ -88,6 +87,7 @@ linkcheck_ignore = [
     "https://doi.org/10.1016/j.ultramic.2016.12.021",
     "https://stackoverflow.com/questions/18603270/",  # 404 Client Error: Forbidden for url
     "https://scholar.google.com/scholar?q=pyxem",  # 403 Client Error: Forbidden for url
+    "https://pyxem.org/dev/_static/switcher.json",  # not available during PR builds
 ]
 
 
@@ -172,20 +172,6 @@ nitpick_ignore_regex = [
 # Figure references
 numfig = True
 
-# nbsphinx configuration
-# Taken from nbsphinx' own nbsphinx configuration file, with slight
-# modification to point nbviewer and Binder to the GitHub master links
-# when the documentation is launched from a pyxem version with
-# "dev" in the version.
-if "dev" in version:
-    release_version = "master"
-else:
-    release_version = "v" + version
-
-# https://nbsphinx.readthedocs.io/en/0.8.0/never-execute.html
-nbsphinx_execute = "never"  # auto, always, never
-nbsphinx_kernel_name = "python3"
-nbsphinx_allow_errors = True
 exclude_patterns = [
     "_build",
     "**.ipynb_checkpoints",
@@ -202,8 +188,11 @@ bibtex_bibfiles = ["bibliography.bib"]
 sphinx_gallery_conf = {
     "backreferences_dir": "reference/generated",
     "doc_module": ("pyxem",),
-    "examples_dirs": "../examples",  # path to your example scripts
-    "gallery_dirs": "examples",  # path to where to save gallery generated output
+    "examples_dirs": ["../examples", "../tutorials"],  # path to your example scripts
+    "gallery_dirs": [
+        "examples",
+        "tutorials",
+    ],  # path to where to save gallery generated output
     "filename_pattern": "^((?!sgskip).)*$",  # pattern to define which will be executed
     "ignore_pattern": "_sgskip.py",  # pattern to define which will not be executed
     "reference_url": {"pyxem": None},
