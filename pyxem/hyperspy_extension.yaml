@@ -286,3 +286,10 @@ components1D:
     ScatteringFitComponentXTables:
       module: pyxem.components.scattering_fit_component_xtables
       class: ScatteringFitComponentXTables
+
+GUI:
+  # The anywidget widget for this toolkey is registered in
+  # pyxem/signal_tools/_diffraction_vector_finder.py, only when
+  # hyperspy_gui_anywidget is installed.
+  toolkeys:
+    - pyxem.Diffraction2D.get_diffraction_vectors
