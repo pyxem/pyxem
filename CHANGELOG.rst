@@ -30,6 +30,7 @@ Changed
 
 Fixed
 -----
+- Raise an error when :meth:`~pyxem.signals.BeamShift.get_linear_plane` fits unmasked NaN or infinite values, instead of silently returning incorrect planes. (#1095)
 - Fix :func:`~pyxem.utils.ransac_ellipse_tools.determine_ellipse` packing ellipse parameters into a single ``params`` array when ``return_params=True``, so the return signature matches ``(center, affine, params, pos[, inlier])`` as expected by callers. (#1185)
 - Add explicit support for python 3.12 and 3.13 and update test matrix. (#1147)
 - Silence axes warning in functions using :meth:`~hyperspy.api.signals.BaseSignal.map`. (#1168)
