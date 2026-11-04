@@ -97,6 +97,11 @@ class DisplacementGradientMap(Signal2D):
         """Obtain strain maps from the displacement gradient tensor at each
         navigation position in the small strain approximation.
 
+        The tensor is measured in reciprocal space. The in-plane block of
+        its right-polar stretch is inverted, and the identity is then
+        subtracted, so the normal and shear components are real-space
+        strains. The rotation angle comes from the same polar decomposition.
+
         Returns
         -------
         strain_results : ~hyperspy.api.signals.BaseSignal
@@ -106,10 +111,17 @@ class DisplacementGradientMap(Signal2D):
             self.compute()
         R, U = self.polar_decomposition()
 
-        e11 = np.reciprocal(U.isig[0, 0].T) - 1
-        e12 = U.isig[0, 1].T
-        # e21 = U.isig[1, 0].T # Same as e12
-        e22 = np.reciprocal(U.isig[1, 1].T) - 1
+        # Right-polar stretch of the reciprocal transformation. Invert the
+        # in-plane block; an element-wise reciprocal is only valid when the
+        # shear components are zero.
+        u11 = U.isig[0, 0].T
+        u12 = U.isig[0, 1].T
+        u21 = U.isig[1, 0].T
+        u22 = U.isig[1, 1].T
+        determinant = u11 * u22 - u12 * u21
+        e11 = u22 / determinant - 1
+        e22 = u11 / determinant - 1
+        e12 = -u12 / determinant
         theta = R.map(_get_rotation_angle, inplace=False, silence_warnings=True)
         theta = theta.transpose(2)
         strain_results = stack([e11, e22, e12, theta])

@@ -30,6 +30,7 @@ Changed
 
 Fixed
 -----
+- Fix :meth:`~pyxem.signals.tensor_field.DisplacementGradientMap.get_strain_maps` when the reciprocal-space stretch has shear. The in-plane block is inverted before the real-space strain components are read, instead of taking an element-wise reciprocal of the diagonal and copying the reciprocal shear. See issue #1192.
 - Fix :func:`~pyxem.utils.ransac_ellipse_tools.determine_ellipse` packing ellipse parameters into a single ``params`` array when ``return_params=True``, so the return signature matches ``(center, affine, params, pos[, inlier])`` as expected by callers. (#1185)
 - Add explicit support for python 3.12 and 3.13 and update test matrix. (#1147)
 - Silence axes warning in functions using :meth:`~hyperspy.api.signals.BaseSignal.map`. (#1168)
