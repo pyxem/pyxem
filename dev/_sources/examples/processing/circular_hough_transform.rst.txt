@@ -102,7 +102,7 @@ outlines of the disks.  This is basically a 1st diriviative in reciporical space
 
  .. code-block:: none
 
-      0%|          | 0/51 [00:00<?, ?it/s]     65%|██████▍   | 33/51 [00:00<00:00, 310.35it/s]    100%|██████████| 51/51 [00:00<00:00, 348.62it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]     45%|████▌     | 23/51 [00:00<00:00, 228.60it/s]     96%|█████████▌| 49/51 [00:00<00:00, 226.93it/s]    100%|██████████| 51/51 [00:00<00:00, 234.28it/s]
 
 
 
@@ -154,7 +154,7 @@ have multiple radii but that will return multiple signals for each radii
 
  .. code-block:: none
 
-      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 2574.93it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 1394.31it/s]
 
 
 
@@ -201,9 +201,9 @@ Finding peaks is fairly easy from this point and uses the ``get_diffraction_vect
 
  .. code-block:: none
 
-      0%|          | 0/51 [00:00<?, ?it/s]     49%|████▉     | 25/51 [00:00<00:00, 222.47it/s]    100%|██████████| 51/51 [00:00<00:00, 281.63it/s]
-      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 15050.27it/s]
-      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 17797.61it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]     25%|██▌       | 13/51 [00:00<00:00, 124.83it/s]     57%|█████▋    | 29/51 [00:00<00:00, 138.50it/s]     88%|████████▊ | 45/51 [00:00<00:00, 147.34it/s]    100%|██████████| 51/51 [00:00<00:00, 156.97it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 8094.97it/s]
+      0%|          | 0/51 [00:00<?, ?it/s]    100%|██████████| 51/51 [00:00<00:00, 9011.65it/s]
 
 
 
@@ -215,7 +215,7 @@ sphinx_gallery_thumbnail_number = 6
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 1.210 seconds)
+   **Total running time of the script:** (0 minutes 2.004 seconds)
 
 
 .. _sphx_glr_download_examples_processing_circular_hough_transform.py:

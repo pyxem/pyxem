@@ -26,8 +26,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d75fae25" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
@@ -40,10 +40,10 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../_static/scripts/fontawesome.js?digest=18bd87630a240e9c25be"></script>
+  <script defer src="../../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
     <script src="../../_static/documentation_options.js?v=88e4c0c0"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
@@ -55,7 +55,7 @@
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'examples/processing/determining_ellipticity';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.23.0';
+        DOCUMENTATION_OPTIONS.theme_version = '0.24.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://pyxem.org/dev/_static/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.21';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
@@ -121,7 +121,7 @@
   
     <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
     <span class="fa-solid fa-bars"></span>
   </button>
   
@@ -252,14 +252,14 @@
 
 <div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
   <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
-    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
   </button>
   <ul class="dropdown-menu dropdown-menu-end">
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
   </ul>
 </div></div>
       
@@ -294,7 +294,7 @@
   
 
   
-    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page" aria-expanded="false" aria-controls="pst-secondary-sidebar-modal">
       <span class="fa-solid fa-outdent"></span>
     </button>
   
@@ -308,7 +308,7 @@
       
       
       
-      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
       <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
 
@@ -386,14 +386,14 @@
 
 <div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
   <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
-    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
   </button>
   <ul class="dropdown-menu dropdown-menu-end">
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
   </ul>
 </div></div>
         
@@ -972,7 +972,7 @@
     
     <li class="breadcrumb-item breadcrumb-home">
       <a href="../../index.html" class="nav-link" aria-label="Home">
-        <i class="fa-solid fa-home"></i>
+        <i class="fa-solid fa-house"></i>
       </a>
     </li>
     
@@ -1023,20 +1023,20 @@ to download the full example code.</p>
 </span><span class="kn">import</span><span class="w"> </span><span class="nn">pyxem</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pxm</span><span class="w">
 </span><span class="kn">import</span><span class="w"> </span><span class="nn">pyxem</span><span class="nn">.</span><span class="nn">utils</span><span class="nn">.</span><span class="nn">ransac_ellipse_tools</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ret</span><span class="w">
 </span><span class="kn">import</span><span class="w"> </span><span class="nn">hyperspy</span><span class="nn">.</span><span class="nn">api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">hs</span><span class="w">
-</span><span class="kn">from</span><span class="w"> </span><span class="nn">skimage</span><span class="w"> </span><span class="kn">import</span> <span class="n">morphology</span><span class="w">
+</span><span class="kn">from</span><span class="w"> </span><a class="sphinx-codeautolink-a" href="https://scikit-image.org/docs/stable/api/skimage.html#module-skimage"><span class="nn">skimage</span></a><span class="w"> </span><span class="kn">import</span> <a class="sphinx-codeautolink-a" href="https://scikit-image.org/docs/stable/api/skimage.morphology.html#module-skimage.morphology" title="skimage.morphology"><span class="n">morphology</span></a><span class="w">
 </span><span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="nn">.</span><span class="nn">signal</span><span class="w"> </span><span class="kn">import</span> <a class="sphx-glr-backref-module-scipy-signal sphx-glr-backref-type-py-function reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.convolve2d.html#scipy.signal.convolve2d" title="scipy.signal.convolve2d"><span class="n">convolve2d</span></a><span class="w">
 </span><span class="kn">from</span><span class="w"> </span><span class="nn">pyxem</span><span class="nn">.</span><span class="nn">signals</span><span class="nn">.</span><span class="nn">diffraction2d</span><span class="w"> </span><span class="kn">import</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D"><span class="n">Diffraction2D</span></a><span class="w">
-</span><span class="kn">import</span><span class="w"> </span><span class="nn">math</span><span class="w">
-</span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/math.html#module-math"><span class="nn">math</span></a><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/index.html#module-numpy"><span class="nn">numpy</span></a><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span><span class="w">
 </span><span class="w">
 </span><span class="n">test_data</span> <span class="o">=</span> <span class="n">mdtd</span><span class="o">.</span><span class="n">MakeTestData</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="w">
 </span><span class="n">test_data</span><span class="o">.</span><span class="n">add_disk</span><span class="p">(</span><span class="n">x0</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">y0</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="int"><span class="n">r</span></a><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">intensity</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span><span class="w">
 </span><span class="n">test_data</span><span class="o">.</span><span class="n">add_ring_ellipse</span><span class="p">(</span><span class="n">x0</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">y0</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">semi_len0</span><span class="o">=</span><span class="mi">63</span><span class="p">,</span> <span class="n">semi_len1</span><span class="o">=</span><span class="mi">70</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">45</span><span class="p">)</span><span class="w">
 </span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D"><span class="n">s</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.ElectronDiffraction2D.html#pyxem.signals.ElectronDiffraction2D" title="pyxem.signals.ElectronDiffraction2D"><span class="n">test_data</span><span class="o">.</span><span class="n">signal</span></a><span class="w">
-</span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D"><span class="n">s</span></a><span class="o">.</span><span class="n">set_signal_type</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">electron_diffraction</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D"><span class="n">s</span></a><span class="o">.</span><span class="n">set_signal_type</span><span class="p">(</span><span class="s2">"</span><span class="s2">electron_diffraction</span><span class="s2">"</span><span class="p">)</span><span class="w">
 </span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.plot.html#pyxem.signals.Diffraction2D.plot" title="pyxem.signals.Diffraction2D.plot"><span class="n">s</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="p">)</span><span class="w">
 </span></pre></div></div>
-<img src="../../_images/sphx_glr_determining_ellipticity_001.png" srcset="../../_images/sphx_glr_determining_ellipticity_001.png" alt="Signal" class = "sphx-glr-single-img"/><section id="using-ransac-ellipse-determination">
+<img alt="Signal" class="sphx-glr-single-img" src="../../_images/sphx_glr_determining_ellipticity_001.png" srcset="../../_images/sphx_glr_determining_ellipticity_001.png"/><section id="using-ransac-ellipse-determination">
 <h2>Using RANSAC Ellipse Determination<a class="headerlink" href="#using-ransac-ellipse-determination" title="Link to this heading">#</a></h2>
 <p>The RANSAC algorithm is a robust method for fitting an ellipse to points with outliers. Here we
 use it to determine the elliptic distortion of the diffraction pattern and exclude the zero
@@ -1055,7 +1055,7 @@ mask parameter.</p>
 </span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D"><span class="n">s</span></a><span class="o">.</span><span class="n">add_marker</span><span class="p">(</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="tuple"><span class="n">el</span></a><span class="p">,</span> <span class="n">plot_marker</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="w">
 </span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D"><span class="n">s</span></a><span class="o">.</span><span class="n">add_marker</span><span class="p">(</span><a class="sphx-glr-backref-module-hyperspy-drawing-_markers-points sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.plot/markers.html#hyperspy.api.plot.markers.Points" title="hyperspy.drawing._markers.points.Points"><span class="n">out_points</span></a><span class="p">,</span> <span class="n">plot_marker</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="w">
 </span></pre></div></div>
-<img src="../../_images/sphx_glr_determining_ellipticity_002.png" srcset="../../_images/sphx_glr_determining_ellipticity_002.png" alt="Signal" class = "sphx-glr-single-img"/></section>
+<img alt="Signal" class="sphx-glr-single-img" src="../../_images/sphx_glr_determining_ellipticity_002.png" srcset="../../_images/sphx_glr_determining_ellipticity_002.png"/></section>
 <section id="using-manual-ellipse-determination">
 <h2>Using Manual Ellipse Determination<a class="headerlink" href="#using-manual-ellipse-determination" title="Link to this heading">#</a></h2>
 <p>Sometimes it is useful to force the ellipse to fit certain points.  For example, here we
@@ -1078,7 +1078,7 @@ can force the ellipse to fit the first ring by masking the zero beam.</p>
 </span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D"><span class="n">s</span></a><span class="o">.</span><span class="n">add_marker</span><span class="p">(</span><a class="sphx-glr-backref-module-hyperspy-drawing-_markers-points sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.plot/markers.html#hyperspy.api.plot.markers.Points" title="hyperspy.drawing._markers.points.Points"><span class="n">in_points</span></a><span class="p">,</span> <span class="n">plot_marker</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="w">
 </span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D"><span class="n">s</span></a><span class="o">.</span><span class="n">add_marker</span><span class="p">(</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="tuple"><span class="n">el</span></a><span class="p">,</span> <span class="n">plot_marker</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="w">
 </span></pre></div></div>
-<img src="../../_images/sphx_glr_determining_ellipticity_003.png" srcset="../../_images/sphx_glr_determining_ellipticity_003.png" alt="Signal" class = "sphx-glr-single-img"/><div class="highlight-Python notranslate"><div class="highlight"><pre><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-property reference internal" href="../../reference/generated/pyxem.signals.CommonDiffraction.unit.html#pyxem.signals.CommonDiffraction.unit" title="pyxem.signals.CommonDiffraction.unit"><span class="n">s</span><span class="o">.</span><span class="n">unit</span></a> <span class="o">=</span> <span class="s2">&quot;</span><span class="s2">k_nm^-1</span><span class="s2">&quot;</span><span class="w">
+<img alt="Signal" class="sphx-glr-single-img" src="../../_images/sphx_glr_determining_ellipticity_003.png" srcset="../../_images/sphx_glr_determining_ellipticity_003.png"/><div class="highlight-Python notranslate"><div class="highlight"><pre><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-property reference internal" href="../../reference/generated/pyxem.signals.CommonDiffraction.unit.html#pyxem.signals.CommonDiffraction.unit" title="pyxem.signals.CommonDiffraction.unit"><span class="n">s</span><span class="o">.</span><span class="n">unit</span></a> <span class="o">=</span> <span class="s2">"</span><span class="s2">k_nm^-1</span><span class="s2">"</span><span class="w">
 </span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D"><span class="n">s</span><span class="o">.</span><span class="n">beam_energy</span></a> <span class="o">=</span> <span class="mi">200</span><span class="w">
 </span><a class="sphx-glr-backref-module-pyxem-utils-calibration sphx-glr-backref-type-py-property reference internal" href="../../reference/generated/pyxem.utils.calibration.Calibration.affine.html#pyxem.utils.calibration.Calibration.affine" title="pyxem.utils.calibration.Calibration.affine"><span class="n">s</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">affine</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">affine</span></a><span class="w">
 </span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.PolarDiffraction2D.html#pyxem.signals.PolarDiffraction2D" title="pyxem.signals.PolarDiffraction2D"><span class="n">az</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.get_azimuthal_integral2d.html#pyxem.signals.Diffraction2D.get_azimuthal_integral2d" title="pyxem.signals.Diffraction2D.get_azimuthal_integral2d"><span class="n">s</span><span class="o">.</span><span class="n">get_azimuthal_integral2d</span></a><span class="p">(</span><span class="n">npt</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="w">
@@ -1086,17 +1086,17 @@ can force the ellipse to fit the first ring by masking the zero beam.</p>
 </span><span class="w">
 </span><a class="sphx-glr-backref-module-hyperspy-api-plot sphx-glr-backref-type-py-function reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.plot/index.html#hyperspy.api.plot.plot_images" title="hyperspy.api.plot.plot_images"><span class="n">hs</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_images</span></a><span class="p">(</span><span class="w">
 </span>    <span class="p">[</span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.PolarDiffraction2D.html#pyxem.signals.PolarDiffraction2D" title="pyxem.signals.PolarDiffraction2D"><span class="n">az</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.ElectronDiffraction2D.html#pyxem.signals.ElectronDiffraction2D" title="pyxem.signals.ElectronDiffraction2D"><span class="n">corr</span></a><span class="p">]</span><span class="p">,</span><span class="w">
-</span>    <span class="n">label</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;</span><span class="s2">azimuthal unwrapped</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="s2">corrected</span><span class="s2">&quot;</span><span class="p">]</span><span class="p">,</span><span class="w">
+</span>    <span class="n">label</span><span class="o">=</span><span class="p">[</span><span class="s2">"</span><span class="s2">azimuthal unwrapped</span><span class="s2">"</span><span class="p">,</span> <span class="s2">"</span><span class="s2">corrected</span><span class="s2">"</span><span class="p">]</span><span class="p">,</span><span class="w">
 </span>    <span class="n">tight_layout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="w">
 </span>    <span class="n">colorbar</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="w">
 </span><span class="p">)</span><span class="w">
 </span></pre></div></div>
-<img src="../../_images/sphx_glr_determining_ellipticity_004.png" srcset="../../_images/sphx_glr_determining_ellipticity_004.png" alt="azimuthal unwrapped, corrected" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/2 [00:00&lt;?, ?it/s]
- 50%|█████     | 1/2 [00:00&lt;00:00,  8.11it/s]
-100%|██████████| 2/2 [00:00&lt;00:00, 16.18it/s]
+<img alt="azimuthal unwrapped, corrected" class="sphx-glr-single-img" src="../../_images/sphx_glr_determining_ellipticity_004.png" srcset="../../_images/sphx_glr_determining_ellipticity_004.png"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/2 [00:00&lt;?, ?it/s]
+ 50%|█████     | 1/2 [00:00&lt;00:00,  4.18it/s]
+100%|██████████| 2/2 [00:00&lt;00:00,  8.34it/s]
 
   0%|          | 0/2 [00:00&lt;?, ?it/s]
-100%|██████████| 2/2 [00:00&lt;00:00, 2407.06it/s]
+100%|██████████| 2/2 [00:00&lt;00:00, 1380.39it/s]
 
 [&lt;Axes: title={'center': 'azimuthal unwrapped'}, xlabel='Radians axis (Rad)', ylabel='Radius axis (k_nm^-1)'&gt;, &lt;Axes: title={'center': 'corrected'}, xlabel='kx axis (k_nm^-1)', ylabel='ky axis (k_nm^-1)'&gt;]
 </pre></div>
@@ -1111,9 +1111,9 @@ making a test elliptical diffraction pattern</p>
 </span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">data_points</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-pyxem-utils-ransac_ellipse_tools sphx-glr-backref-type-py-function reference internal" href="../../reference/generated/pyxem.utils.ransac_ellipse_tools.make_ellipse_data_points.html#pyxem.utils.ransac_ellipse_tools.make_ellipse_data_points" title="pyxem.utils.ransac_ellipse_tools.make_ellipse_data_points"><span class="n">ret</span><span class="o">.</span><span class="n">make_ellipse_data_points</span></a><span class="p">(</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="int"><span class="n">xf</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="int"><span class="n">yf</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="int"><span class="n">a</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="int"><span class="n">b</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="int"><span class="n">r</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="int"><span class="n">nt</span></a><span class="p">)</span><span class="w">
 </span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">image</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.zeros.html#numpy.zeros" title="numpy.zeros"><span class="n">np</span><span class="o">.</span><span class="n">zeros</span></a><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">210</span><span class="p">)</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float32" title="numpy.float32"><span class="n">np</span><span class="o">.</span><span class="n">float32</span></a><span class="p">)</span><span class="w">
 </span><span class="k">for</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float64" title="numpy.float64"><span class="n">x</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float64" title="numpy.float64"><span class="n">y</span></a> <span class="ow">in</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">data_points</span></a><span class="p">:</span><span class="w">
-</span>    <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">image</span></a><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float64" title="numpy.float64"><span class="n">x</span></a><span class="p">)</span><span class="p">)</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float64" title="numpy.float64"><span class="n">y</span></a><span class="p">)</span><span class="p">)</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">image</span></a><span class="p">[</span><a class="sphinx-codeautolink-a" href="https://docs.python.org/3/builtins/functions.html#int"><span class="nb">int</span></a><span class="p">(</span><a class="sphinx-codeautolink-a" href="https://docs.python.org/3/builtins/functions.html#round"><span class="nb">round</span></a><span class="p">(</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float64" title="numpy.float64"><span class="n">x</span></a><span class="p">)</span><span class="p">)</span><span class="p">,</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/builtins/functions.html#int"><span class="nb">int</span></a><span class="p">(</span><a class="sphinx-codeautolink-a" href="https://docs.python.org/3/builtins/functions.html#round"><span class="nb">round</span></a><span class="p">(</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float64" title="numpy.float64"><span class="n">y</span></a><span class="p">)</span><span class="p">)</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span><span class="w">
 </span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">disk</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-skimage-morphology sphx-glr-backref-type-py-function reference external" href="https://scikit-image.org/docs/stable/api/skimage.morphology.html#skimage.morphology.disk" title="skimage.morphology.disk"><span class="n">morphology</span><span class="o">.</span><span class="n">disk</span></a><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.uint16" title="numpy.uint16"><span class="n">np</span><span class="o">.</span><span class="n">uint16</span></a><span class="p">)</span><span class="w">
-</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">image</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-scipy-signal sphx-glr-backref-type-py-function reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.convolve2d.html#scipy.signal.convolve2d" title="scipy.signal.convolve2d"><span class="n">convolve2d</span></a><span class="p">(</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">image</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">disk</span></a><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">same</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">image</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-scipy-signal sphx-glr-backref-type-py-function reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.convolve2d.html#scipy.signal.convolve2d" title="scipy.signal.convolve2d"><span class="n">convolve2d</span></a><span class="p">(</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">image</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">disk</span></a><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"</span><span class="s2">same</span><span class="s2">"</span><span class="p">)</span><span class="w">
 </span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">data</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.zeros.html#numpy.zeros" title="numpy.zeros"><span class="n">np</span><span class="o">.</span><span class="n">zeros</span></a><span class="p">(</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">210</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float32" title="numpy.float32"><span class="n">np</span><span class="o">.</span><span class="n">float32</span></a><span class="p">)</span><span class="w">
 </span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">data</span></a><span class="p">[</span><span class="p">:</span><span class="p">,</span> <span class="p">:</span><span class="p">]</span> <span class="o">=</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">image</span><span class="o">.</span><span class="n">T</span></a><span class="w">
 </span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D"><span class="n">s</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D"><span class="n">Diffraction2D</span></a><span class="p">(</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">data</span></a><span class="p">)</span><span class="w">
@@ -1121,7 +1121,7 @@ making a test elliptical diffraction pattern</p>
 <p>Finding the peaks</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D"><span class="n">s_t</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.template_match_disk.html#pyxem.signals.Diffraction2D.template_match_disk" title="pyxem.signals.Diffraction2D.template_match_disk"><span class="n">s</span><span class="o">.</span><span class="n">template_match_disk</span></a><span class="p">(</span><span class="n">disk_r</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span><span class="w">
 </span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">peak_array</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D"><span class="n">s_t</span></a><span class="o">.</span><span class="n">find_peaks</span><span class="p">(</span><span class="w">
-</span>    <span class="n">method</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">difference_of_gaussian</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="n">method</span><span class="o">=</span><span class="s2">"</span><span class="s2">difference_of_gaussian</span><span class="s2">"</span><span class="p">,</span><span class="w">
 </span>    <span class="n">threshold</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span><span class="w">
 </span>    <span class="n">lazy_output</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="w">
 </span>    <span class="n">interactive</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="w">
@@ -1135,8 +1135,8 @@ making a test elliptical diffraction pattern</p>
 </span>    <a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="int"><span class="n">yf</span></a><span class="o">=</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="int"><span class="n">yf</span></a><span class="p">,</span>  <span class="c1"># center y</span><span class="w">
 </span>    <a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="int"><span class="n">xf</span></a><span class="o">=</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="int"><span class="n">xf</span></a><span class="p">,</span>  <span class="c1"># center x</span><span class="w">
 </span>    <span class="n">rf_lim</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>  <span class="c1"># max center error</span><span class="w">
-</span>    <span class="n">semi_len_min</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="int"><span class="n">a</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="int"><span class="n">b</span></a><span class="p">)</span> <span class="o">-</span> <span class="mi">5</span><span class="p">,</span>  <span class="c1"># min semi-len</span><span class="w">
-</span>    <span class="n">semi_len_max</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="int"><span class="n">a</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="int"><span class="n">b</span></a><span class="p">)</span> <span class="o">+</span> <span class="mi">5</span><span class="p">,</span>  <span class="c1"># max semi-len</span><span class="w">
+</span>    <span class="n">semi_len_min</span><span class="o">=</span><a class="sphinx-codeautolink-a" href="https://docs.python.org/3/builtins/functions.html#min"><span class="nb">min</span></a><span class="p">(</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="int"><span class="n">a</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="int"><span class="n">b</span></a><span class="p">)</span> <span class="o">-</span> <span class="mi">5</span><span class="p">,</span>  <span class="c1"># min semi-len</span><span class="w">
+</span>    <span class="n">semi_len_max</span><span class="o">=</span><a class="sphinx-codeautolink-a" href="https://docs.python.org/3/builtins/functions.html#max"><span class="nb">max</span></a><span class="p">(</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="int"><span class="n">a</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="int"><span class="n">b</span></a><span class="p">)</span> <span class="o">+</span> <span class="mi">5</span><span class="p">,</span>  <span class="c1"># max semi-len</span><span class="w">
 </span>    <span class="n">semi_len_ratio_lim</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>  <span class="c1"># max semi-len ratio</span><span class="w">
 </span>    <span class="n">max_trials</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span><span class="w">
 </span>    <span class="n">min_samples</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>  <span class="c1"># min inliers to fit</span><span class="w">
@@ -1150,26 +1150,26 @@ making a test elliptical diffraction pattern</p>
 </span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.plot.html#pyxem.signals.Diffraction2D.plot" title="pyxem.signals.Diffraction2D.plot"><span class="n">tr</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="p">)</span><span class="w">
 </span></pre></div></div>
 <ul class="sphx-glr-horizontal">
-<li><img src="../../_images/sphx_glr_determining_ellipticity_005.png" srcset="../../_images/sphx_glr_determining_ellipticity_005.png" alt="determining ellipticity" class = "sphx-glr-multi-img"/></li>
-<li><img src="../../_images/sphx_glr_determining_ellipticity_006.png" srcset="../../_images/sphx_glr_determining_ellipticity_006.png" alt="Signal" class = "sphx-glr-multi-img"/></li>
-<li><img src="../../_images/sphx_glr_determining_ellipticity_007.png" srcset="../../_images/sphx_glr_determining_ellipticity_007.png" alt="determining ellipticity" class = "sphx-glr-multi-img"/></li>
-<li><img src="../../_images/sphx_glr_determining_ellipticity_008.png" srcset="../../_images/sphx_glr_determining_ellipticity_008.png" alt="Signal" class = "sphx-glr-multi-img"/></li>
+<li><img alt="determining ellipticity" class="sphx-glr-multi-img" src="../../_images/sphx_glr_determining_ellipticity_005.png" srcset="../../_images/sphx_glr_determining_ellipticity_005.png"/></li>
+<li><img alt="Signal" class="sphx-glr-multi-img" src="../../_images/sphx_glr_determining_ellipticity_006.png" srcset="../../_images/sphx_glr_determining_ellipticity_006.png"/></li>
+<li><img alt="determining ellipticity" class="sphx-glr-multi-img" src="../../_images/sphx_glr_determining_ellipticity_007.png" srcset="../../_images/sphx_glr_determining_ellipticity_007.png"/></li>
+<li><img alt="Signal" class="sphx-glr-multi-img" src="../../_images/sphx_glr_determining_ellipticity_008.png" srcset="../../_images/sphx_glr_determining_ellipticity_008.png"/></li>
 </ul>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/2 [00:00&lt;?, ?it/s]
-100%|██████████| 2/2 [00:00&lt;00:00, 280.53it/s]
+100%|██████████| 2/2 [00:00&lt;00:00, 132.86it/s]
 
   0%|          | 0/2 [00:00&lt;?, ?it/s]
- 50%|█████     | 1/2 [00:00&lt;00:00,  5.11it/s]
-100%|██████████| 2/2 [00:00&lt;00:00, 10.20it/s]
+ 50%|█████     | 1/2 [00:00&lt;00:00,  2.89it/s]
+100%|██████████| 2/2 [00:00&lt;00:00,  5.78it/s]
 
   0%|          | 0/6 [00:00&lt;?, ?it/s]
-100%|██████████| 6/6 [00:00&lt;00:00, 889.09it/s]
+100%|██████████| 6/6 [00:00&lt;00:00, 280.38it/s]
 
   0%|          | 0/2 [00:00&lt;?, ?it/s]
-100%|██████████| 2/2 [00:00&lt;00:00, 765.17it/s]
+100%|██████████| 2/2 [00:00&lt;00:00, 253.16it/s]
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 5.177 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 8.849 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-processing-determining-ellipticity-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/29afd33e63144c5952a2d371430b3428/determining_ellipticity.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">determining_ellipticity.ipynb</span></code></a></p>
@@ -1220,7 +1220,7 @@ making a test elliptical diffraction pattern</p>
             
             
               
-                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <dialog id="pst-secondary-sidebar-modal" tabindex="-1"></dialog>
                 <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
 
@@ -1276,8 +1276,8 @@ making a test elliptical diffraction pattern</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1310,7 +1310,7 @@ making a test elliptical diffraction pattern</p>
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.23.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.24.0.
 </p></div>
       
     </div>

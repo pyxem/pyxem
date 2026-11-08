@@ -26,8 +26,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d75fae25" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
@@ -40,10 +40,10 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../_static/scripts/fontawesome.js?digest=18bd87630a240e9c25be"></script>
+  <script defer src="../../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
     <script src="../../_static/documentation_options.js?v=88e4c0c0"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
@@ -55,7 +55,7 @@
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'examples/processing/background_subtraction';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.23.0';
+        DOCUMENTATION_OPTIONS.theme_version = '0.24.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://pyxem.org/dev/_static/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.21';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
@@ -121,7 +121,7 @@
   
     <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
     <span class="fa-solid fa-bars"></span>
   </button>
   
@@ -252,14 +252,14 @@
 
 <div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
   <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
-    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
   </button>
   <ul class="dropdown-menu dropdown-menu-end">
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
   </ul>
 </div></div>
       
@@ -294,7 +294,7 @@
   
 
   
-    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page" aria-expanded="false" aria-controls="pst-secondary-sidebar-modal">
       <span class="fa-solid fa-outdent"></span>
     </button>
   
@@ -308,7 +308,7 @@
       
       
       
-      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
       <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
 
@@ -386,14 +386,14 @@
 
 <div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
   <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
-    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
   </button>
   <ul class="dropdown-menu dropdown-menu-end">
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
   </ul>
 </div></div>
         
@@ -972,7 +972,7 @@
     
     <li class="breadcrumb-item breadcrumb-home">
       <a href="../../index.html" class="nav-link" aria-label="Home">
-        <i class="fa-solid fa-home"></i>
+        <i class="fa-solid fa-house"></i>
       </a>
     </li>
     
@@ -1018,42 +1018,46 @@ example is shown in the ‘Filtering Data’-example.</p>
 </span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D"><span class="n">s</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-pyxem-data sphx-glr-backref-type-py-function reference internal" href="../../reference/generated/pyxem.data.tilt_boundary_data.html#pyxem.data.tilt_boundary_data" title="pyxem.data.tilt_boundary_data"><span class="n">pxm</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">tilt_boundary_data</span></a><span class="p">(</span><span class="p">)</span><span class="w">
 </span><span class="w">
 </span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D"><span class="n">s_filtered</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.subtract_diffraction_background.html#pyxem.signals.Diffraction2D.subtract_diffraction_background" title="pyxem.signals.Diffraction2D.subtract_diffraction_background"><span class="n">s</span><span class="o">.</span><span class="n">subtract_diffraction_background</span></a><span class="p">(</span><span class="w">
-</span>    <span class="s2">&quot;</span><span class="s2">difference of gaussians</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="s2">"</span><span class="s2">difference of gaussians</span><span class="s2">"</span><span class="p">,</span><span class="w">
 </span>    <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="w">
 </span>    <span class="n">min_sigma</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span><span class="w">
 </span>    <span class="n">max_sigma</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span><span class="w">
 </span><span class="p">)</span><span class="w">
 </span><span class="w">
-</span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D"><span class="n">s_filtered_h</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.subtract_diffraction_background.html#pyxem.signals.Diffraction2D.subtract_diffraction_background" title="pyxem.signals.Diffraction2D.subtract_diffraction_background"><span class="n">s</span><span class="o">.</span><span class="n">subtract_diffraction_background</span></a><span class="p">(</span><span class="s2">&quot;</span><span class="s2">h-dome</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D"><span class="n">s_filtered_h</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.subtract_diffraction_background.html#pyxem.signals.Diffraction2D.subtract_diffraction_background" title="pyxem.signals.Diffraction2D.subtract_diffraction_background"><span class="n">s</span><span class="o">.</span><span class="n">subtract_diffraction_background</span></a><span class="p">(</span><span class="s2">"</span><span class="s2">h-dome</span><span class="s2">"</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span><span class="w">
 </span><span class="w">
 </span><span class="w">
 </span><a class="sphx-glr-backref-module-hyperspy-api-plot sphx-glr-backref-type-py-function reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.plot/index.html#hyperspy.api.plot.plot_images" title="hyperspy.api.plot.plot_images"><span class="n">hs</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_images</span></a><span class="p">(</span><span class="w">
 </span>    <span class="p">[</span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D"><span class="n">s</span></a><span class="o">.</span><span class="n">inav</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span><span class="p">,</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D"><span class="n">s_filtered</span></a><span class="o">.</span><span class="n">inav</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span><span class="p">,</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D"><span class="n">s_filtered_h</span></a><span class="o">.</span><span class="n">inav</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span><span class="p">]</span><span class="p">,</span><span class="w">
-</span>    <span class="n">label</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;</span><span class="s2">Original</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="s2">Difference of Gaussians</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="s2">H-Dome</span><span class="s2">&quot;</span><span class="p">]</span><span class="p">,</span><span class="w">
+</span>    <span class="n">label</span><span class="o">=</span><span class="p">[</span><span class="s2">"</span><span class="s2">Original</span><span class="s2">"</span><span class="p">,</span> <span class="s2">"</span><span class="s2">Difference of Gaussians</span><span class="s2">"</span><span class="p">,</span> <span class="s2">"</span><span class="s2">H-Dome</span><span class="s2">"</span><span class="p">]</span><span class="p">,</span><span class="w">
 </span>    <span class="n">tight_layout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="w">
-</span>    <span class="n">norm</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">symlog</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
-</span>    <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">viridis</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="n">norm</span><span class="o">=</span><span class="s2">"</span><span class="s2">symlog</span><span class="s2">"</span><span class="p">,</span><span class="w">
+</span>    <span class="n">cmap</span><span class="o">=</span><span class="s2">"</span><span class="s2">viridis</span><span class="s2">"</span><span class="p">,</span><span class="w">
 </span>    <span class="n">colorbar</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="w">
 </span><span class="p">)</span><span class="w">
 </span></pre></div></div>
-<img src="../../_images/sphx_glr_background_subtraction_001.png" srcset="../../_images/sphx_glr_background_subtraction_001.png" alt="Original, Difference of Gaussians, H-Dome" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/51 [00:00&lt;?, ?it/s]
- 33%|███▎      | 17/51 [00:00&lt;00:00, 137.69it/s]
- 80%|████████  | 41/51 [00:00&lt;00:00, 168.21it/s]
-100%|██████████| 51/51 [00:00&lt;00:00, 182.95it/s]
-/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/pyxem/utils/_background_subtraction.py:99: FutureWarning: `square` is deprecated since version 0.25 and will be removed in version 0.27. Use `skimage.morphology.footprint_rectangle` instead.
+<img alt="Original, Difference of Gaussians, H-Dome" class="sphx-glr-single-img" src="../../_images/sphx_glr_background_subtraction_001.png" srcset="../../_images/sphx_glr_background_subtraction_001.png"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/51 [00:00&lt;?, ?it/s]
+ 18%|█▊        | 9/51 [00:00&lt;00:00, 85.21it/s]
+ 49%|████▉     | 25/51 [00:00&lt;00:00, 123.20it/s]
+ 80%|████████  | 41/51 [00:00&lt;00:00, 136.47it/s]
+100%|██████████| 51/51 [00:00&lt;00:00, 142.02it/s]
+/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/site-packages/pyxem/utils/_background_subtraction.py:99: FutureWarning: `square` is deprecated since version 0.25 and will be removed in version 0.27. Use `skimage.morphology.footprint_rectangle` instead.
   regional_filter(frame / max_value, **kwargs), footprint=square(3)
-/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/hyperspy/misc/_dask_utils.py:152: UserWarning: Possible precision loss converting image of type float32 to uint8 as required by rank filters. Convert manually using skimage.util.img_as_ubyte to silence this warning.
+/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/site-packages/hyperspy/misc/_dask_utils.py:152: UserWarning: Possible precision loss converting image of type float32 to uint8 as required by rank filters. Convert manually using skimage.util.img_as_ubyte to silence this warning.
   output = function(test_data, **kwargs)
 
-  0%|          | 0/51 [00:00&lt;?, ?it/s]/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/pyxem/utils/_background_subtraction.py:99: FutureWarning: `square` is deprecated since version 0.25 and will be removed in version 0.27. Use `skimage.morphology.footprint_rectangle` instead.
+  0%|          | 0/51 [00:00&lt;?, ?it/s]/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/site-packages/pyxem/utils/_background_subtraction.py:99: FutureWarning: `square` is deprecated since version 0.25 and will be removed in version 0.27. Use `skimage.morphology.footprint_rectangle` instead.
   regional_filter(frame / max_value, **kwargs), footprint=square(3)
-/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/hyperspy/misc/_dask_utils.py:75: UserWarning: Possible precision loss converting image of type float32 to uint8 as required by rank filters. Convert manually using skimage.util.img_as_ubyte to silence this warning.
+/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/site-packages/hyperspy/misc/_dask_utils.py:75: UserWarning: Possible precision loss converting image of type float32 to uint8 as required by rank filters. Convert manually using skimage.util.img_as_ubyte to silence this warning.
   output_array[islice] = function(data[islice], **kwargs)
 
- 18%|█▊        | 9/51 [00:00&lt;00:00, 52.45it/s]
- 49%|████▉     | 25/51 [00:00&lt;00:00, 75.82it/s]
- 80%|████████  | 41/51 [00:00&lt;00:00, 84.55it/s]
-100%|██████████| 51/51 [00:00&lt;00:00, 89.19it/s]
+  2%|▏         | 1/51 [00:00&lt;00:07,  6.65it/s]
+ 18%|█▊        | 9/51 [00:00&lt;00:01, 33.83it/s]
+ 33%|███▎      | 17/51 [00:00&lt;00:00, 42.70it/s]
+ 49%|████▉     | 25/51 [00:00&lt;00:00, 47.12it/s]
+ 65%|██████▍   | 33/51 [00:00&lt;00:00, 49.60it/s]
+ 80%|████████  | 41/51 [00:00&lt;00:00, 50.88it/s]
+100%|██████████| 51/51 [00:00&lt;00:00, 51.31it/s]
 
 [&lt;Axes: title={'center': 'Original'}, xlabel='kx axis (px)', ylabel='ky axis (px)'&gt;, &lt;Axes: title={'center': 'Difference of Gaussians'}, xlabel='kx axis (px)', ylabel='ky axis (px)'&gt;, &lt;Axes: title={'center': 'H-Dome'}, xlabel='kx axis (px)', ylabel='ky axis (px)'&gt;]
 </pre></div>
@@ -1070,63 +1074,64 @@ i.e. the middle of the image</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.PolarDiffraction2D.html#pyxem.signals.PolarDiffraction2D" title="pyxem.signals.PolarDiffraction2D"><span class="n">s_polar</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.get_azimuthal_integral2d.html#pyxem.signals.Diffraction2D.get_azimuthal_integral2d" title="pyxem.signals.Diffraction2D.get_azimuthal_integral2d"><span class="n">s</span><span class="o">.</span><span class="n">get_azimuthal_integral2d</span></a><span class="p">(</span><span class="n">npt</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="w">
 </span><span class="w">
 </span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.PolarDiffraction2D.html#pyxem.signals.PolarDiffraction2D" title="pyxem.signals.PolarDiffraction2D"><span class="n">s_polar_filtered</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method reference internal" href="../../reference/generated/pyxem.signals.PolarDiffraction2D.subtract_diffraction_background.html#pyxem.signals.PolarDiffraction2D.subtract_diffraction_background" title="pyxem.signals.PolarDiffraction2D.subtract_diffraction_background"><span class="n">s_polar</span><span class="o">.</span><span class="n">subtract_diffraction_background</span></a><span class="p">(</span><span class="w">
-</span>    <span class="s2">&quot;</span><span class="s2">radial median</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="s2">"</span><span class="s2">radial median</span><span class="s2">"</span><span class="p">,</span><span class="w">
 </span>    <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="w">
 </span><span class="p">)</span><span class="w">
 </span><span class="w">
 </span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.PolarDiffraction2D.html#pyxem.signals.PolarDiffraction2D" title="pyxem.signals.PolarDiffraction2D"><span class="n">s_polar_filtered2</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method reference internal" href="../../reference/generated/pyxem.signals.PolarDiffraction2D.subtract_diffraction_background.html#pyxem.signals.PolarDiffraction2D.subtract_diffraction_background" title="pyxem.signals.PolarDiffraction2D.subtract_diffraction_background"><span class="n">s_polar</span><span class="o">.</span><span class="n">subtract_diffraction_background</span></a><span class="p">(</span><span class="w">
-</span>    <span class="s2">&quot;</span><span class="s2">radial percentile</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="s2">"</span><span class="s2">radial percentile</span><span class="s2">"</span><span class="p">,</span><span class="w">
 </span>    <span class="n">percentile</span><span class="o">=</span><span class="mi">70</span><span class="p">,</span><span class="w">
 </span>    <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="w">
 </span><span class="p">)</span><span class="w">
 </span><span class="w">
 </span><a class="sphx-glr-backref-module-hyperspy-api-plot sphx-glr-backref-type-py-function reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.plot/index.html#hyperspy.api.plot.plot_images" title="hyperspy.api.plot.plot_images"><span class="n">hs</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_images</span></a><span class="p">(</span><span class="w">
 </span>    <span class="p">[</span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.PolarDiffraction2D.html#pyxem.signals.PolarDiffraction2D" title="pyxem.signals.PolarDiffraction2D"><span class="n">s_polar</span></a><span class="o">.</span><span class="n">inav</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span><span class="p">,</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.PolarDiffraction2D.html#pyxem.signals.PolarDiffraction2D" title="pyxem.signals.PolarDiffraction2D"><span class="n">s_polar_filtered</span></a><span class="o">.</span><span class="n">inav</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span><span class="p">,</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.PolarDiffraction2D.html#pyxem.signals.PolarDiffraction2D" title="pyxem.signals.PolarDiffraction2D"><span class="n">s_polar_filtered2</span></a><span class="o">.</span><span class="n">inav</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span><span class="p">]</span><span class="p">,</span><span class="w">
-</span>    <span class="n">label</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;</span><span class="s2">Original (polar)</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="s2">Radial Median</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="s2">Radial Percentile</span><span class="s2">&quot;</span><span class="p">]</span><span class="p">,</span><span class="w">
+</span>    <span class="n">label</span><span class="o">=</span><span class="p">[</span><span class="s2">"</span><span class="s2">Original (polar)</span><span class="s2">"</span><span class="p">,</span> <span class="s2">"</span><span class="s2">Radial Median</span><span class="s2">"</span><span class="p">,</span> <span class="s2">"</span><span class="s2">Radial Percentile</span><span class="s2">"</span><span class="p">]</span><span class="p">,</span><span class="w">
 </span>    <span class="n">tight_layout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="w">
-</span>    <span class="n">norm</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">symlog</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
-</span>    <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">viridis</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="n">norm</span><span class="o">=</span><span class="s2">"</span><span class="s2">symlog</span><span class="s2">"</span><span class="p">,</span><span class="w">
+</span>    <span class="n">cmap</span><span class="o">=</span><span class="s2">"</span><span class="s2">viridis</span><span class="s2">"</span><span class="p">,</span><span class="w">
 </span>    <span class="n">colorbar</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="w">
 </span><span class="p">)</span><span class="w">
 </span></pre></div></div>
-<img src="../../_images/sphx_glr_background_subtraction_002.png" srcset="../../_images/sphx_glr_background_subtraction_002.png" alt="Original (polar), Radial Median, Radial Percentile" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/26 [00:00&lt;?, ?it/s]
-  4%|▍         | 1/26 [00:04&lt;01:42,  4.11s/it]
-  8%|▊         | 2/26 [00:04&lt;00:42,  1.77s/it]
- 12%|█▏        | 3/26 [00:04&lt;00:23,  1.02s/it]
- 19%|█▉        | 5/26 [00:08&lt;00:32,  1.55s/it]
- 23%|██▎       | 6/26 [00:08&lt;00:23,  1.19s/it]
- 31%|███       | 8/26 [00:08&lt;00:12,  1.43it/s]
- 35%|███▍      | 9/26 [00:12&lt;00:24,  1.41s/it]
- 38%|███▊      | 10/26 [00:12&lt;00:18,  1.15s/it]
- 42%|████▏     | 11/26 [00:13&lt;00:13,  1.12it/s]
- 46%|████▌     | 12/26 [00:13&lt;00:10,  1.30it/s]
- 50%|█████     | 13/26 [00:16&lt;00:19,  1.53s/it]
- 58%|█████▊    | 15/26 [00:17&lt;00:10,  1.07it/s]
- 62%|██████▏   | 16/26 [00:17&lt;00:08,  1.15it/s]
- 65%|██████▌   | 17/26 [00:21&lt;00:12,  1.43s/it]
- 69%|██████▉   | 18/26 [00:21&lt;00:08,  1.09s/it]
- 73%|███████▎  | 19/26 [00:21&lt;00:06,  1.08it/s]
- 77%|███████▋  | 20/26 [00:22&lt;00:05,  1.11it/s]
- 81%|████████  | 21/26 [00:25&lt;00:07,  1.50s/it]
- 85%|████████▍ | 22/26 [00:25&lt;00:04,  1.14s/it]
- 88%|████████▊ | 23/26 [00:25&lt;00:02,  1.17it/s]
- 92%|█████████▏| 24/26 [00:26&lt;00:01,  1.42it/s]
- 96%|█████████▌| 25/26 [00:27&lt;00:00,  1.37it/s]
-100%|██████████| 26/26 [00:27&lt;00:00,  1.04s/it]
+<img alt="Original (polar), Radial Median, Radial Percentile" class="sphx-glr-single-img" src="../../_images/sphx_glr_background_subtraction_002.png" srcset="../../_images/sphx_glr_background_subtraction_002.png"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/26 [00:00&lt;?, ?it/s]
+  4%|▍         | 1/26 [00:08&lt;03:22,  8.10s/it]
+  8%|▊         | 2/26 [00:08&lt;01:25,  3.56s/it]
+ 12%|█▏        | 3/26 [00:08&lt;00:48,  2.12s/it]
+ 19%|█▉        | 5/26 [00:16&lt;01:07,  3.20s/it]
+ 27%|██▋       | 7/26 [00:17&lt;00:34,  1.82s/it]
+ 31%|███       | 8/26 [00:17&lt;00:26,  1.49s/it]
+ 35%|███▍      | 9/26 [00:25&lt;00:52,  3.11s/it]
+ 42%|████▏     | 11/26 [00:25&lt;00:28,  1.87s/it]
+ 46%|████▌     | 12/26 [00:26&lt;00:22,  1.64s/it]
+ 50%|█████     | 13/26 [00:34&lt;00:40,  3.08s/it]
+ 58%|█████▊    | 15/26 [00:34&lt;00:20,  1.86s/it]
+ 62%|██████▏   | 16/26 [00:35&lt;00:16,  1.61s/it]
+ 65%|██████▌   | 17/26 [00:42&lt;00:28,  3.13s/it]
+ 73%|███████▎  | 19/26 [00:43&lt;00:13,  1.90s/it]
+ 77%|███████▋  | 20/26 [00:43&lt;00:09,  1.60s/it]
+ 81%|████████  | 21/26 [00:51&lt;00:15,  3.05s/it]
+ 85%|████████▍ | 22/26 [00:51&lt;00:09,  2.33s/it]
+ 88%|████████▊ | 23/26 [00:51&lt;00:05,  1.76s/it]
+ 92%|█████████▏| 24/26 [00:52&lt;00:02,  1.33s/it]
+ 96%|█████████▌| 25/26 [00:53&lt;00:01,  1.48s/it]
+100%|██████████| 26/26 [00:53&lt;00:00,  2.07s/it]
 
   0%|          | 0/51 [00:00&lt;?, ?it/s]
-100%|██████████| 51/51 [00:00&lt;00:00, 1132.39it/s]
+100%|██████████| 51/51 [00:00&lt;00:00, 551.90it/s]
 
   0%|          | 0/51 [00:00&lt;?, ?it/s]
- 18%|█▊        | 9/51 [00:00&lt;00:00, 55.17it/s]
- 49%|████▉     | 25/51 [00:00&lt;00:00, 79.68it/s]
- 76%|███████▋  | 39/51 [00:00&lt;00:00, 97.17it/s]
-100%|██████████| 51/51 [00:00&lt;00:00, 98.18it/s]
+  2%|▏         | 1/51 [00:00&lt;00:08,  5.59it/s]
+ 18%|█▊        | 9/51 [00:00&lt;00:01, 27.34it/s]
+ 33%|███▎      | 17/51 [00:00&lt;00:00, 34.68it/s]
+ 49%|████▉     | 25/51 [00:00&lt;00:00, 37.77it/s]
+ 65%|██████▍   | 33/51 [00:00&lt;00:00, 39.83it/s]
+ 80%|████████  | 41/51 [00:01&lt;00:00, 40.43it/s]
+100%|██████████| 51/51 [00:01&lt;00:00, 43.66it/s]
 
 [&lt;Axes: title={'center': 'Original (polar)'}, xlabel='Radians axis (Rad)', ylabel='Radius axis (px)'&gt;, &lt;Axes: title={'center': 'Radial Median'}, xlabel='Radians axis (Rad)', ylabel='Radius axis (px)'&gt;, &lt;Axes: title={'center': 'Radial Percentile'}, xlabel='Radians axis (Rad)', ylabel='Radius axis (px)'&gt;]
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 35.538 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (1 minutes 8.544 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-processing-background-subtraction-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/b5372b91a2516ad65ca1133b08691f2a/background_subtraction.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">background_subtraction.ipynb</span></code></a></p>
@@ -1177,7 +1182,7 @@ i.e. the middle of the image</p>
             
             
               
-                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <dialog id="pst-secondary-sidebar-modal" tabindex="-1"></dialog>
                 <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
 
@@ -1231,8 +1236,8 @@ i.e. the middle of the image</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1265,7 +1270,7 @@ i.e. the middle of the image</p>
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.23.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.24.0.
 </p></div>
       
     </div>

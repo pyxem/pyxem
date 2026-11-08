@@ -26,8 +26,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d75fae25" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
@@ -40,10 +40,10 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../_static/scripts/fontawesome.js?digest=18bd87630a240e9c25be"></script>
+  <script defer src="../../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
     <script src="../../_static/documentation_options.js?v=88e4c0c0"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
@@ -57,7 +57,7 @@
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'examples/dpc/electric_field_dpc';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.23.0';
+        DOCUMENTATION_OPTIONS.theme_version = '0.24.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://pyxem.org/dev/_static/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.21';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
@@ -123,7 +123,7 @@
   
     <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
     <span class="fa-solid fa-bars"></span>
   </button>
   
@@ -254,14 +254,14 @@
 
 <div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
   <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
-    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
   </button>
   <ul class="dropdown-menu dropdown-menu-end">
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
   </ul>
 </div></div>
       
@@ -296,7 +296,7 @@
   
 
   
-    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page" aria-expanded="false" aria-controls="pst-secondary-sidebar-modal">
       <span class="fa-solid fa-outdent"></span>
     </button>
   
@@ -310,7 +310,7 @@
       
       
       
-      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
       <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
 
@@ -388,14 +388,14 @@
 
 <div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
   <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
-    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
   </button>
   <ul class="dropdown-menu dropdown-menu-end">
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
   </ul>
 </div></div>
         
@@ -974,7 +974,7 @@
     
     <li class="breadcrumb-item breadcrumb-home">
       <a href="../../index.html" class="nav-link" aria-label="Home">
-        <i class="fa-solid fa-home"></i>
+        <i class="fa-solid fa-house"></i>
       </a>
     </li>
     
@@ -1034,17 +1034,18 @@ Electric Field Mapping.</p>
 </span><span class="kn">import</span><span class="w"> </span><span class="nn">hyperspy</span><span class="nn">.</span><span class="nn">api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">hs</span><span class="w">
 </span><span class="w">
 </span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction1D.html#pyxem.signals.Diffraction1D" title="pyxem.signals.Diffraction1D"><span class="n">s</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-pyxem-data sphx-glr-backref-type-py-function reference internal" href="../../reference/generated/pyxem.data.simulated_pn_junction.html#pyxem.data.simulated_pn_junction" title="pyxem.data.simulated_pn_junction"><span class="n">simulated_pn_junction</span></a><span class="p">(</span><span class="p">)</span><span class="w">
-</span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction1D.html#pyxem.signals.Diffraction1D" title="pyxem.signals.Diffraction1D"><span class="n">s</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">convert_signal_units</span></a><span class="p">(</span><span class="s2">&quot;</span><span class="s2">mrad</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
-</span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.BeamShift.html#pyxem.signals.BeamShift" title="pyxem.signals.BeamShift"><span class="n">com</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction1D.html#pyxem.signals.Diffraction1D" title="pyxem.signals.Diffraction1D"><span class="n">s</span><span class="o">.</span><span class="n">get_direct_beam_position</span></a><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">center_of_mass</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction1D.html#pyxem.signals.Diffraction1D" title="pyxem.signals.Diffraction1D"><span class="n">s</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">convert_signal_units</span></a><span class="p">(</span><span class="s2">"</span><span class="s2">mrad</span><span class="s2">"</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.BeamShift.html#pyxem.signals.BeamShift" title="pyxem.signals.BeamShift"><span class="n">com</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction1D.html#pyxem.signals.Diffraction1D" title="pyxem.signals.Diffraction1D"><span class="n">s</span><span class="o">.</span><span class="n">get_direct_beam_position</span></a><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">"</span><span class="s2">center_of_mass</span><span class="s2">"</span><span class="p">)</span><span class="w">
 </span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.BeamShift.html#pyxem.signals.BeamShift" title="pyxem.signals.BeamShift"><span class="n">cal</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method reference internal" href="../../reference/generated/pyxem.signals.BeamShift.pixels_to_calibrated_units.html#pyxem.signals.BeamShift.pixels_to_calibrated_units" title="pyxem.signals.BeamShift.pixels_to_calibrated_units"><span class="n">com</span><span class="o">.</span><span class="n">pixels_to_calibrated_units</span></a><span class="p">(</span><span class="p">)</span><span class="w">
 </span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.BeamShift.html#pyxem.signals.BeamShift" title="pyxem.signals.BeamShift"><span class="n">ecal</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method reference internal" href="../../reference/generated/pyxem.signals.BeamShift.calibrate_electric_shifts.html#pyxem.signals.BeamShift.calibrate_electric_shifts" title="pyxem.signals.BeamShift.calibrate_electric_shifts"><span class="n">cal</span><span class="o">.</span><span class="n">calibrate_electric_shifts</span></a><span class="p">(</span><span class="n">thickness</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span><span class="w">
 </span><span class="w">
 </span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method reference internal" href="../../reference/generated/pyxem.signals.DiffractionVectors1D.plot.html#pyxem.signals.DiffractionVectors1D.plot" title="pyxem.signals.DiffractionVectors1D.plot"><span class="n">ecal</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="p">)</span><span class="w">
 </span></pre></div></div>
-<img src="../../_images/sphx_glr_electric_field_dpc_001.png" srcset="../../_images/sphx_glr_electric_field_dpc_001.png" alt="x-shift, y-shift" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/31 [00:00&lt;?, ?it/s]
- 29%|██▉       | 9/31 [00:00&lt;00:00, 64.15it/s]
- 68%|██████▊   | 21/31 [00:00&lt;00:00, 76.64it/s]
-100%|██████████| 31/31 [00:00&lt;00:00, 83.71it/s]
+<img alt="x-shift, y-shift" class="sphx-glr-single-img" src="../../_images/sphx_glr_electric_field_dpc_001.png" srcset="../../_images/sphx_glr_electric_field_dpc_001.png"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/31 [00:00&lt;?, ?it/s]
+ 29%|██▉       | 9/31 [00:00&lt;00:00, 36.99it/s]
+ 68%|██████▊   | 21/31 [00:00&lt;00:00, 44.93it/s]
+ 94%|█████████▎| 29/31 [00:00&lt;00:00, 49.04it/s]
+100%|██████████| 31/31 [00:00&lt;00:00, 49.56it/s]
 
 [&lt;Axes: title={'center': 'x-shift'}, xlabel='x axis (nm)', ylabel='y axis (nm)'&gt;, &lt;Axes: title={'center': 'y-shift'}, xlabel='x axis (nm)', ylabel='y axis (nm)'&gt;]
 </pre></div>
@@ -1055,7 +1056,7 @@ scan x and y axes. If they are not, you can use the <cite>rotate_beam_shifts</ci
 <div class="highlight-Python notranslate"><div class="highlight"><pre><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.BeamShift.html#pyxem.signals.BeamShift" title="pyxem.signals.BeamShift"><span class="n">rotated</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method reference internal" href="../../reference/generated/pyxem.signals.BeamShift.rotate_beam_shifts.html#pyxem.signals.BeamShift.rotate_beam_shifts" title="pyxem.signals.BeamShift.rotate_beam_shifts"><span class="n">ecal</span><span class="o">.</span><span class="n">rotate_beam_shifts</span></a><span class="p">(</span><span class="n">angle</span><span class="o">=</span><span class="mi">45</span><span class="p">)</span>  <span class="c1"># Rotate the beam shifts by 45 degrees</span><span class="w">
 </span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method reference internal" href="../../reference/generated/pyxem.signals.DiffractionVectors1D.plot.html#pyxem.signals.DiffractionVectors1D.plot" title="pyxem.signals.DiffractionVectors1D.plot"><span class="n">rotated</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="p">)</span><span class="w">
 </span></pre></div></div>
-<img src="../../_images/sphx_glr_electric_field_dpc_002.png" srcset="../../_images/sphx_glr_electric_field_dpc_002.png" alt="x-shift, y-shift" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[&lt;Axes: title={'center': 'x-shift'}, xlabel='x axis (nm)', ylabel='y axis (nm)'&gt;, &lt;Axes: title={'center': 'y-shift'}, xlabel='x axis (nm)', ylabel='y axis (nm)'&gt;]
+<img alt="x-shift, y-shift" class="sphx-glr-single-img" src="../../_images/sphx_glr_electric_field_dpc_002.png" srcset="../../_images/sphx_glr_electric_field_dpc_002.png"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[&lt;Axes: title={'center': 'x-shift'}, xlabel='x axis (nm)', ylabel='y axis (nm)'&gt;, &lt;Axes: title={'center': 'y-shift'}, xlabel='x axis (nm)', ylabel='y axis (nm)'&gt;]
 </pre></div>
 </div>
 </section>
@@ -1075,20 +1076,20 @@ hyperspy’s interactive tools.</p>
 </span><a class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.figure.SubFigure.html#matplotlib.figure.SubFigure" title="matplotlib.figure.SubFigure"><span class="n">sub3</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-method reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.figure.Figure.add_subfigure.html#matplotlib.figure.Figure.add_subfigure" title="matplotlib.figure.Figure.add_subfigure"><span class="n">fig</span><span class="o">.</span><span class="n">add_subfigure</span></a><span class="p">(</span><a class="sphx-glr-backref-module-matplotlib-gridspec sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.gridspec.GridSpec.html#matplotlib.gridspec.GridSpec" title="matplotlib.gridspec.GridSpec"><span class="n">gs</span></a><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">6</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span><span class="p">]</span><span class="p">)</span><span class="w">
 </span><a class="sphx-glr-backref-module-hyperspy-_signals-signal2d sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.signals/Signal2D.html#hyperspy.api.signals.Signal2D" title="hyperspy._signals.signal2d.Signal2D"><span class="n">rot_signal</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method reference internal" href="../../reference/generated/pyxem.signals.BeamShift.get_magnitude_phase_signal.html#pyxem.signals.BeamShift.get_magnitude_phase_signal" title="pyxem.signals.BeamShift.get_magnitude_phase_signal"><span class="n">rotated</span><span class="o">.</span><span class="n">get_magnitude_phase_signal</span></a><span class="p">(</span><span class="n">add_color_wheel_marker</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="w">
 </span><span class="w">
-</span><a class="sphx-glr-backref-module-hyperspy-_signals-signal2d sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.signals/Signal2D.html#hyperspy.api.signals.Signal2D" title="hyperspy._signals.signal2d.Signal2D"><span class="n">rot_signal</span></a><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">General</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="s2">Mag. + Phase</span><span class="s2">&quot;</span><span class="w">
+</span><a class="sphx-glr-backref-module-hyperspy-_signals-signal2d sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.signals/Signal2D.html#hyperspy.api.signals.Signal2D" title="hyperspy._signals.signal2d.Signal2D"><span class="n">rot_signal</span></a><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">General</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s2">"</span><span class="s2">Mag. + Phase</span><span class="s2">"</span><span class="w">
 </span><a class="sphx-glr-backref-module-hyperspy-roi sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.roi.html#hyperspy.api.roi.Line2DROI" title="hyperspy.roi.Line2DROI"><span class="n">line</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-hyperspy-roi sphx-glr-backref-type-py-class reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.roi.html#hyperspy.api.roi.Line2DROI" title="hyperspy.roi.Line2DROI"><span class="n">hs</span><span class="o">.</span><span class="n">roi</span><span class="o">.</span><span class="n">Line2DROI</span></a><span class="p">(</span><span class="n">x1</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">y1</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">x2</span><span class="o">=</span><span class="mi">27</span><span class="p">,</span> <span class="n">y2</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span><span class="w">
 </span><span class="w">
 </span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction1D.html#pyxem.signals.Diffraction1D" title="pyxem.signals.Diffraction1D"><span class="n">E_x</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-hyperspy-roi sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.roi.html#hyperspy.api.roi.Line2DROI" title="hyperspy.roi.Line2DROI"><span class="n">line</span></a><span class="p">(</span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.BeamShift.html#pyxem.signals.BeamShift" title="pyxem.signals.BeamShift"><span class="n">rotated</span></a><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="p">)</span><span class="o">.</span><span class="n">isig</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="w">
 </span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction1D.html#pyxem.signals.Diffraction1D" title="pyxem.signals.Diffraction1D"><span class="n">E_y</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-hyperspy-roi sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.roi.html#hyperspy.api.roi.Line2DROI" title="hyperspy.roi.Line2DROI"><span class="n">line</span></a><span class="p">(</span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.BeamShift.html#pyxem.signals.BeamShift" title="pyxem.signals.BeamShift"><span class="n">rotated</span></a><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="p">)</span><span class="o">.</span><span class="n">isig</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="w">
-</span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction1D.html#pyxem.signals.Diffraction1D" title="pyxem.signals.Diffraction1D"><span class="n">E_x</span></a><span class="o">.</span><span class="n">set_signal_type</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">diffraction</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
-</span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction1D.html#pyxem.signals.Diffraction1D" title="pyxem.signals.Diffraction1D"><span class="n">E_y</span></a><span class="o">.</span><span class="n">set_signal_type</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">diffraction</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction1D.html#pyxem.signals.Diffraction1D" title="pyxem.signals.Diffraction1D"><span class="n">E_x</span></a><span class="o">.</span><span class="n">set_signal_type</span><span class="p">(</span><span class="s2">"</span><span class="s2">diffraction</span><span class="s2">"</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction1D.html#pyxem.signals.Diffraction1D" title="pyxem.signals.Diffraction1D"><span class="n">E_y</span></a><span class="o">.</span><span class="n">set_signal_type</span><span class="p">(</span><span class="s2">"</span><span class="s2">diffraction</span><span class="s2">"</span><span class="p">)</span><span class="w">
 </span><span class="w">
-</span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction1D.html#pyxem.signals.Diffraction1D" title="pyxem.signals.Diffraction1D"><span class="n">E_x</span></a><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">General</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="s2">$E_x$</span><span class="s2">&quot;</span><span class="w">
-</span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction1D.html#pyxem.signals.Diffraction1D" title="pyxem.signals.Diffraction1D"><span class="n">E_y</span></a><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">General</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="s2">$E_y$</span><span class="s2">&quot;</span><span class="w">
+</span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction1D.html#pyxem.signals.Diffraction1D" title="pyxem.signals.Diffraction1D"><span class="n">E_x</span></a><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">General</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s2">"</span><span class="s2">$E_x$</span><span class="s2">"</span><span class="w">
+</span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction1D.html#pyxem.signals.Diffraction1D" title="pyxem.signals.Diffraction1D"><span class="n">E_y</span></a><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">General</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s2">"</span><span class="s2">$E_y$</span><span class="s2">"</span><span class="w">
 </span><span class="w">
 </span><span class="w">
-</span><a class="sphx-glr-backref-module-hyperspy-axes sphx-glr-backref-type-py-property reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/base_classes/axes.html#hyperspy.axes.AxesManager.signal_axes" title="hyperspy.axes.AxesManager.signal_axes"><span class="n">E_x</span><span class="o">.</span><span class="n">axes_manager</span><span class="o">.</span><span class="n">signal_axes</span></a><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="s2">$Distance$</span><span class="s2">&quot;</span><span class="w">
-</span><a class="sphx-glr-backref-module-hyperspy-axes sphx-glr-backref-type-py-property reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/base_classes/axes.html#hyperspy.axes.AxesManager.signal_axes" title="hyperspy.axes.AxesManager.signal_axes"><span class="n">E_y</span><span class="o">.</span><span class="n">axes_manager</span><span class="o">.</span><span class="n">signal_axes</span></a><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="s2">$Distance$</span><span class="s2">&quot;</span><span class="w">
+</span><a class="sphx-glr-backref-module-hyperspy-axes sphx-glr-backref-type-py-property reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/base_classes/axes.html#hyperspy.axes.AxesManager.signal_axes" title="hyperspy.axes.AxesManager.signal_axes"><span class="n">E_x</span><span class="o">.</span><span class="n">axes_manager</span><span class="o">.</span><span class="n">signal_axes</span></a><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">"</span><span class="s2">$Distance$</span><span class="s2">"</span><span class="w">
+</span><a class="sphx-glr-backref-module-hyperspy-axes sphx-glr-backref-type-py-property reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/base_classes/axes.html#hyperspy.axes.AxesManager.signal_axes" title="hyperspy.axes.AxesManager.signal_axes"><span class="n">E_y</span><span class="o">.</span><span class="n">axes_manager</span><span class="o">.</span><span class="n">signal_axes</span></a><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">"</span><span class="s2">$Distance$</span><span class="s2">"</span><span class="w">
 </span><span class="w">
 </span><a class="sphx-glr-backref-module-hyperspy-_signals-signal2d sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.signals/Signal2D.html#hyperspy.api.signals.Signal2D" title="hyperspy._signals.signal2d.Signal2D"><span class="n">rot_signal</span></a><span class="o">.</span><span class="n">plot</span><span class="p">(</span><a class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.figure.Figure.html#matplotlib.figure.Figure" title="matplotlib.figure.Figure"><span class="n">fig</span></a><span class="o">=</span><a class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.figure.SubFigure.html#matplotlib.figure.SubFigure" title="matplotlib.figure.SubFigure"><span class="n">sub1</span></a><span class="p">)</span><span class="w">
 </span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction1D.html#pyxem.signals.Diffraction1D" title="pyxem.signals.Diffraction1D"><span class="n">E_x</span></a><span class="o">.</span><span class="n">plot</span><span class="p">(</span><a class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.figure.Figure.html#matplotlib.figure.Figure" title="matplotlib.figure.Figure"><span class="n">fig</span></a><span class="o">=</span><a class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.figure.SubFigure.html#matplotlib.figure.SubFigure" title="matplotlib.figure.SubFigure"><span class="n">sub2</span></a><span class="p">)</span><span class="w">
@@ -1107,7 +1108,7 @@ hyperspy’s interactive tools.</p>
 </span><span class="w">
 </span><span class="w">
 </span><span class="c1"># Connect the slices</span><span class="w">
-</span><span class="k">for</span> <a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="int"><span class="n">i</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction1D.html#pyxem.signals.Diffraction1D" title="pyxem.signals.Diffraction1D"><span class="n">s</span></a> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="p">[</span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction1D.html#pyxem.signals.Diffraction1D" title="pyxem.signals.Diffraction1D"><span class="n">E_x</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction1D.html#pyxem.signals.Diffraction1D" title="pyxem.signals.Diffraction1D"><span class="n">E_y</span></a><span class="p">]</span><span class="p">)</span><span class="p">:</span><span class="w">
+</span><span class="k">for</span> <a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="int"><span class="n">i</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction1D.html#pyxem.signals.Diffraction1D" title="pyxem.signals.Diffraction1D"><span class="n">s</span></a> <span class="ow">in</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/builtins/functions.html#enumerate"><span class="nb">enumerate</span></a><span class="p">(</span><span class="p">[</span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction1D.html#pyxem.signals.Diffraction1D" title="pyxem.signals.Diffraction1D"><span class="n">E_x</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction1D.html#pyxem.signals.Diffraction1D" title="pyxem.signals.Diffraction1D"><span class="n">E_y</span></a><span class="p">]</span><span class="p">)</span><span class="p">:</span><span class="w">
 </span>    <a class="sphx-glr-backref-module-hyperspy-api sphx-glr-backref-type-py-function reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.html#hyperspy.api.interactive" title="hyperspy.api.interactive"><span class="n">hs</span><span class="o">.</span><span class="n">interactive</span></a><span class="p">(</span><span class="w">
 </span>        <span class="n">get_profile</span><span class="p">,</span><span class="w">
 </span>        <span class="n">out</span><span class="o">=</span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction1D.html#pyxem.signals.Diffraction1D" title="pyxem.signals.Diffraction1D"><span class="n">s</span></a><span class="p">,</span><span class="w">
@@ -1118,11 +1119,11 @@ hyperspy’s interactive tools.</p>
 </span><span class="w">
 </span><a class="sphx-glr-backref-module-hyperspy-roi sphx-glr-backref-type-py-method reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/base_classes/roi.html#hyperspy.roi.BaseInteractiveROI.add_widget" title="hyperspy.roi.BaseInteractiveROI.add_widget"><span class="n">line</span><span class="o">.</span><span class="n">add_widget</span></a><span class="p">(</span><a class="sphx-glr-backref-module-hyperspy-_signals-signal2d sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.signals/Signal2D.html#hyperspy.api.signals.Signal2D" title="hyperspy._signals.signal2d.Signal2D"><span class="n">rot_signal</span></a><span class="p">)</span><span class="w">
 </span></pre></div></div>
-<img src="../../_images/sphx_glr_electric_field_dpc_003.png" srcset="../../_images/sphx_glr_electric_field_dpc_003.png" alt="Mag. + Phase Signal, $E_x$ Signal, $E_y$ Signal" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;hyperspy.drawing._widgets.line2d.Line2DWidget object at 0x7fd987c46960&gt;
+<img alt="Mag. + Phase Signal, $E_x$ Signal, $E_y$ Signal" class="sphx-glr-single-img" src="../../_images/sphx_glr_electric_field_dpc_003.png" srcset="../../_images/sphx_glr_electric_field_dpc_003.png"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;hyperspy.drawing._widgets.line2d.Line2DWidget object at 0x75ec443ee960&gt;
 </pre></div>
 </div>
 <p>sphinx_gallery_thumbnail_number = 5</p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 2.550 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 3.799 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-dpc-electric-field-dpc-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/df07a892326f7355c24c32c5cb78dff1/electric_field_dpc.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">electric_field_dpc.ipynb</span></code></a></p>
@@ -1172,7 +1173,7 @@ hyperspy’s interactive tools.</p>
             
             
               
-                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <dialog id="pst-secondary-sidebar-modal" tabindex="-1"></dialog>
                 <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
 
@@ -1228,8 +1229,8 @@ hyperspy’s interactive tools.</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1262,7 +1263,7 @@ hyperspy’s interactive tools.</p>
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.23.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.24.0.
 </p></div>
       
     </div>

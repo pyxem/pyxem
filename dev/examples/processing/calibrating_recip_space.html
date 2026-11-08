@@ -26,8 +26,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d75fae25" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
@@ -40,10 +40,10 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../_static/scripts/fontawesome.js?digest=18bd87630a240e9c25be"></script>
+  <script defer src="../../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
     <script src="../../_static/documentation_options.js?v=88e4c0c0"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
@@ -55,7 +55,7 @@
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'examples/processing/calibrating_recip_space';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.23.0';
+        DOCUMENTATION_OPTIONS.theme_version = '0.24.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://pyxem.org/dev/_static/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.21';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
@@ -121,7 +121,7 @@
   
     <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
     <span class="fa-solid fa-bars"></span>
   </button>
   
@@ -252,14 +252,14 @@
 
 <div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
   <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
-    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
   </button>
   <ul class="dropdown-menu dropdown-menu-end">
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
   </ul>
 </div></div>
       
@@ -294,7 +294,7 @@
   
 
   
-    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page" aria-expanded="false" aria-controls="pst-secondary-sidebar-modal">
       <span class="fa-solid fa-outdent"></span>
     </button>
   
@@ -308,7 +308,7 @@
       
       
       
-      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
       <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
 
@@ -386,14 +386,14 @@
 
 <div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
   <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
-    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
   </button>
   <ul class="dropdown-menu dropdown-menu-end">
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
   </ul>
 </div></div>
         
@@ -972,7 +972,7 @@
     
     <li class="breadcrumb-item breadcrumb-home">
       <a href="../../index.html" class="nav-link" aria-label="Home">
-        <i class="fa-solid fa-home"></i>
+        <i class="fa-solid fa-house"></i>
       </a>
     </li>
     
@@ -1017,7 +1017,7 @@ any questions.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span class="kn">from</span><span class="w"> </span><span class="nn">diffsims</span><span class="nn">.</span><span class="nn">generators</span><span class="nn">.</span><span class="nn">simulation_generator</span><span class="w"> </span><span class="kn">import</span> <a class="sphx-glr-backref-module-diffsims-generators-simulation_generator sphx-glr-backref-type-py-class reference external" href="https://diffsims.readthedocs.io/en/stable/reference/generated/diffsims.generators.simulation_generator.SimulationGenerator.html#diffsims.generators.simulation_generator.SimulationGenerator" title="diffsims.generators.simulation_generator.SimulationGenerator"><span class="n">SimulationGenerator</span></a><span class="w">
 </span><span class="kn">import</span><span class="w"> </span><span class="nn">pyxem</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pxm</span><span class="w">
 </span><span class="kn">import</span><span class="w"> </span><span class="nn">hyperspy</span><span class="nn">.</span><span class="nn">api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">hs</span><span class="w">
-</span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/index.html#module-numpy"><span class="nn">numpy</span></a><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span><span class="w">
 </span><span class="kn">from</span><span class="w"> </span><span class="nn">diffsims</span><span class="nn">.</span><span class="nn">utils</span><span class="nn">.</span><span class="nn">sim_utils</span><span class="w"> </span><span class="kn">import</span> <a class="sphx-glr-backref-module-diffsims-utils-sim_utils sphx-glr-backref-type-py-function reference external" href="https://diffsims.readthedocs.io/en/stable/reference/generated/diffsims.utils.sim_utils.get_electron_wavelength.html#diffsims.utils.sim_utils.get_electron_wavelength" title="diffsims.utils.sim_utils.get_electron_wavelength"><span class="n">get_electron_wavelength</span></a><span class="w">
 </span><span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="nn">.</span><span class="nn">optimize</span><span class="w"> </span><span class="kn">import</span> <a class="sphx-glr-backref-module-scipy-optimize sphx-glr-backref-type-py-function reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.curve_fit.html#scipy.optimize.curve_fit" title="scipy.optimize.curve_fit"><span class="n">curve_fit</span></a><span class="w">
 </span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="nn">.</span><span class="nn">pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span><span class="w">
@@ -1025,21 +1025,21 @@ any questions.</p>
 </span><span class="w">
 </span><span class="c1"># Load the data and the cif file</span><span class="w">
 </span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.ElectronDiffraction2D.html#pyxem.signals.ElectronDiffraction2D" title="pyxem.signals.ElectronDiffraction2D"><span class="n">au_dpeg</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-pyxem-data sphx-glr-backref-type-py-function reference internal" href="../../reference/generated/pyxem.data.au_grating_20cm.html#pyxem.data.au_grating_20cm" title="pyxem.data.au_grating_20cm"><span class="n">pxm</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">au_grating_20cm</span></a><span class="p">(</span><span class="w">
-</span>    <span class="n">allow_download</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">signal_type</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">electron_diffraction</span><span class="s2">&quot;</span><span class="w">
+</span>    <span class="n">allow_download</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">signal_type</span><span class="o">=</span><span class="s2">"</span><span class="s2">electron_diffraction</span><span class="s2">"</span><span class="w">
 </span><span class="p">)</span><span class="w">
 </span><a class="sphx-glr-backref-module-orix-crystal_map sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://orix.readthedocs.io/en/stable/reference/generated/orix.crystal_map.Phase.html#orix.crystal_map.Phase" title="orix.crystal_map.Phase"><span class="n">gold_phase</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-pyxem-data sphx-glr-backref-type-py-function reference internal" href="../../reference/generated/pyxem.data.au_phase.html#pyxem.data.au_phase" title="pyxem.data.au_phase"><span class="n">pxm</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">au_phase</span></a><span class="p">(</span><span class="n">allow_download</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># Orix.CrystalMap.Phase object</span><span class="w">
 </span></pre></div></div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|                                               | 0.00/263k [00:00&lt;?, ?B/s]
-  6%|██▎                                   | 16.4k/263k [00:00&lt;00:02, 96.0kB/s]
- 16%|██████                                 | 41.0k/263k [00:00&lt;00:01, 135kB/s]
- 42%|████████████████▊                       | 111k/263k [00:00&lt;00:00, 266kB/s]
- 81%|████████████████████████████████▍       | 213k/263k [00:00&lt;00:00, 394kB/s]
+  5%|█▊                                    | 12.3k/263k [00:00&lt;00:02, 91.8kB/s]
+ 16%|██████                                 | 41.0k/263k [00:00&lt;00:01, 183kB/s]
+ 41%|████████████████▏                       | 106k/263k [00:00&lt;00:00, 363kB/s]
+ 87%|██████████████████████████████████▉     | 229k/263k [00:00&lt;00:00, 522kB/s]
   0%|                                               | 0.00/263k [00:00&lt;?, ?B/s]
-100%|███████████████████████████████████████| 263k/263k [00:00&lt;00:00, 2.66GB/s]
+100%|███████████████████████████████████████| 263k/263k [00:00&lt;00:00, 1.37GB/s]
 
   0%|                                              | 0.00/4.58k [00:00&lt;?, ?B/s]
   0%|                                              | 0.00/4.58k [00:00&lt;?, ?B/s]
-100%|█████████████████████████████████████| 4.58k/4.58k [00:00&lt;00:00, 20.7MB/s]
+100%|█████████████████████████████████████| 4.58k/4.58k [00:00&lt;00:00, 25.0MB/s]
 </pre></div>
 </div>
 <section id="create-a-simulation-generator">
@@ -1072,16 +1072,16 @@ scale or the camera length.</p>
 </span>    <span class="n">physical_pixel_size</span><span class="o">=</span><span class="mf">5.5e-5</span><span class="p">,</span><span class="w">
 </span><span class="p">)</span><span class="w">
 </span><span class="w">
-</span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">Theta Scale: </span><span class="s2">&quot;</span><span class="p">,</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float64" title="numpy.float64"><span class="n">theta_scale</span></a><span class="p">,</span> <span class="s2">&quot;</span><span class="s2"> Rad</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
-</span><span class="nb">print</span><span class="p">(</span><span class="w">
-</span>    <span class="s2">&quot;</span><span class="s2">Camera Length: </span><span class="s2">&quot;</span><span class="p">,</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float64" title="numpy.float64"><span class="n">camera_length</span></a> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="s2">&quot;</span><span class="s2"> cm</span><span class="s2">&quot;</span><span class="w">
+</span><a class="sphinx-codeautolink-a" href="https://docs.python.org/3/builtins/functions.html#print"><span class="nb">print</span></a><span class="p">(</span><span class="s2">"</span><span class="s2">Theta Scale: </span><span class="s2">"</span><span class="p">,</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float64" title="numpy.float64"><span class="n">theta_scale</span></a><span class="p">,</span> <span class="s2">"</span><span class="s2"> Rad</span><span class="s2">"</span><span class="p">)</span><span class="w">
+</span><a class="sphinx-codeautolink-a" href="https://docs.python.org/3/builtins/functions.html#print"><span class="nb">print</span></a><span class="p">(</span><span class="w">
+</span>    <span class="s2">"</span><span class="s2">Camera Length: </span><span class="s2">"</span><span class="p">,</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float64" title="numpy.float64"><span class="n">camera_length</span></a> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="s2">"</span><span class="s2"> cm</span><span class="s2">"</span><span class="w">
 </span><span class="p">)</span>  <span class="c1"># Camera length of 21.287cm (vs 20cm from the microscope)</span><span class="w">
 </span><a class="sphx-glr-backref-module-hyperspy-models-model1d sphx-glr-backref-type-py-method reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/base_classes/model/model1d.html#hyperspy.models.model1d.Model1D.plot" title="hyperspy.models.model1d.Model1D.plot"><span class="n">diffraction_model</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">plot_components</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="w">
 </span></pre></div></div>
-<img src="../../_images/sphx_glr_calibrating_recip_space_001.png" srcset="../../_images/sphx_glr_calibrating_recip_space_001.png" alt="Signal" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/2 [00:00&lt;?, ?it/s]
-100%|██████████| 2/2 [00:00&lt;00:00, 42.88it/s]
-Theta Scale:  0.000254876916706314  Rad
-Camera Length:  21.579042747288163  cm
+<img alt="Signal" class="sphx-glr-single-img" src="../../_images/sphx_glr_calibrating_recip_space_001.png" srcset="../../_images/sphx_glr_calibrating_recip_space_001.png"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/2 [00:00&lt;?, ?it/s]
+100%|██████████| 2/2 [00:00&lt;00:00, 20.92it/s]
+Theta Scale:  0.00025453039905591417  Rad
+Camera Length:  21.608420454399063  cm
 </pre></div>
 </div>
 </section>
@@ -1091,7 +1091,7 @@ Camera Length:  21.579042747288163  cm
 </span>    <span class="p">[</span><span class="w">
 </span>        <span class="n">c</span><span class="o">.</span><span class="n">centre</span><span class="o">.</span><span class="n">value</span><span class="w">
 </span>        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <a class="sphx-glr-backref-module-hyperspy-models-model1d sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/base_classes/model/model1d.html#hyperspy.models.model1d.Model1D" title="hyperspy.models.model1d.Model1D"><span class="n">diffraction_model</span></a><span class="w">
-</span>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <a class="sphx-glr-backref-module-hyperspy-_components-gaussian sphx-glr-backref-type-py-class reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.model/components1D.html#hyperspy.api.model.components1D.Gaussian" title="hyperspy._components.gaussian.Gaussian"><span class="n">hs</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">components1D</span><span class="o">.</span><span class="n">Gaussian</span></a><span class="p">)</span><span class="w">
+</span>        <span class="k">if</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/builtins/functions.html#isinstance"><span class="nb">isinstance</span></a><span class="p">(</span><span class="n">c</span><span class="p">,</span> <a class="sphx-glr-backref-module-hyperspy-_components-gaussian sphx-glr-backref-type-py-class reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.model/components1D.html#hyperspy.api.model.components1D.Gaussian" title="hyperspy._components.gaussian.Gaussian"><span class="n">hs</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">components1D</span><span class="o">.</span><span class="n">Gaussian</span></a><span class="p">)</span><span class="w">
 </span>    <span class="p">]</span><span class="w">
 </span><span class="p">)</span><span class="w">
 </span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="float"><span class="n">wavelength</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-diffsims-utils-sim_utils sphx-glr-backref-type-py-function reference external" href="https://diffsims.readthedocs.io/en/stable/reference/generated/diffsims.utils.sim_utils.get_electron_wavelength.html#diffsims.utils.sim_utils.get_electron_wavelength" title="diffsims.utils.sim_utils.get_electron_wavelength"><span class="n">get_electron_wavelength</span></a><span class="p">(</span><span class="mi">200</span><span class="p">)</span><span class="w">
@@ -1110,16 +1110,16 @@ Camera Length:  21.579042747288163  cm
 </span><a class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.figure.Figure.html#matplotlib.figure.Figure" title="matplotlib.figure.Figure"><span class="n">fig</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="matplotlib.axes.Axes"><span class="n">axs</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplots.html#matplotlib.pyplot.subplots" title="matplotlib.pyplot.subplots"><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span></a><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="w">
 </span><a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.scatter.html#matplotlib.axes.Axes.scatter" title="matplotlib.axes.Axes.scatter"><span class="n">axs</span><span class="o">.</span><span class="n">scatter</span></a><span class="p">(</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">centers</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">angles</span></a> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span><span class="w">
 </span><a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.plot.html#matplotlib.axes.Axes.plot" title="matplotlib.axes.Axes.plot"><span class="n">axs</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.sort.html#numpy.sort" title="numpy.sort"><span class="n">np</span><span class="o">.</span><span class="n">sort</span></a><span class="p">(</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">centers</span></a><span class="p">)</span><span class="p">,</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.sort.html#numpy.sort" title="numpy.sort"><span class="n">np</span><span class="o">.</span><span class="n">sort</span></a><span class="p">(</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">centers</span></a><span class="p">)</span> <span class="o">*</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float64" title="numpy.float64"><span class="n">scale</span></a> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span><span class="w">
-</span><a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_ylabel.html#matplotlib.axes.Axes.set_ylabel" title="matplotlib.axes.Axes.set_ylabel"><span class="n">axs</span><span class="o">.</span><span class="n">set_ylabel</span></a><span class="p">(</span><span class="s2">&quot;</span><span class="s2">Angle, mrad</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
-</span><a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_xlabel.html#matplotlib.axes.Axes.set_xlabel" title="matplotlib.axes.Axes.set_xlabel"><span class="n">axs</span><span class="o">.</span><span class="n">set_xlabel</span></a><span class="p">(</span><span class="s2">&quot;</span><span class="s2">Detector Pixels</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
-</span><a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.annotate.html#matplotlib.axes.Axes.annotate" title="matplotlib.axes.Axes.annotate"><span class="n">axs</span><span class="o">.</span><span class="n">annotate</span></a><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="s2">Slope: </span><span class="si">{</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float64" title="numpy.float64"><span class="n">scale</span></a><span class="o">*</span><span class="mi">1000</span><span class="si">:</span><span class="s2">.2</span><span class="si">}</span><span class="s2"> mrad/pixel</span><span class="s2">&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">)</span><span class="p">,</span> <span class="n">xycoords</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">axes fraction</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_ylabel.html#matplotlib.axes.Axes.set_ylabel" title="matplotlib.axes.Axes.set_ylabel"><span class="n">axs</span><span class="o">.</span><span class="n">set_ylabel</span></a><span class="p">(</span><span class="s2">"</span><span class="s2">Angle, mrad</span><span class="s2">"</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_xlabel.html#matplotlib.axes.Axes.set_xlabel" title="matplotlib.axes.Axes.set_xlabel"><span class="n">axs</span><span class="o">.</span><span class="n">set_xlabel</span></a><span class="p">(</span><span class="s2">"</span><span class="s2">Detector Pixels</span><span class="s2">"</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.annotate.html#matplotlib.axes.Axes.annotate" title="matplotlib.axes.Axes.annotate"><span class="n">axs</span><span class="o">.</span><span class="n">annotate</span></a><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="s2">Slope: </span><span class="si">{</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float64" title="numpy.float64"><span class="n">scale</span></a><span class="o">*</span><span class="mi">1000</span><span class="si">:</span><span class="s2">.2</span><span class="si">}</span><span class="s2"> mrad/pixel</span><span class="s2">"</span><span class="p">,</span> <span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">)</span><span class="p">,</span> <span class="n">xycoords</span><span class="o">=</span><span class="s2">"</span><span class="s2">axes fraction</span><span class="s2">"</span><span class="p">)</span><span class="w">
 </span><a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.annotate.html#matplotlib.axes.Axes.annotate" title="matplotlib.axes.Axes.annotate"><span class="n">axs</span><span class="o">.</span><span class="n">annotate</span></a><span class="p">(</span><span class="w">
-</span>    <span class="sa">f</span><span class="s2">&quot;</span><span class="s2">Camera Length: </span><span class="si">{</span><span class="mf">5.5E-5</span><span class="o">/</span><span class="w"> </span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ufunc.html#numpy.ufunc" title="numpy.ufunc"><span class="n">np</span><span class="o">.</span><span class="n">tan</span></a><span class="p">(</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float64" title="numpy.float64"><span class="n">scale</span></a><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.4</span><span class="si">}</span><span class="s2">cm</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="sa">f</span><span class="s2">"</span><span class="s2">Camera Length: </span><span class="si">{</span><span class="mf">5.5E-5</span><span class="o">/</span><span class="w"> </span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ufunc.html#numpy.ufunc" title="numpy.ufunc"><span class="n">np</span><span class="o">.</span><span class="n">tan</span></a><span class="p">(</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float64" title="numpy.float64"><span class="n">scale</span></a><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.4</span><span class="si">}</span><span class="s2">cm</span><span class="s2">"</span><span class="p">,</span><span class="w">
 </span>    <span class="p">(</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span><span class="p">,</span><span class="w">
-</span>    <span class="n">xycoords</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">axes fraction</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="n">xycoords</span><span class="o">=</span><span class="s2">"</span><span class="s2">axes fraction</span><span class="s2">"</span><span class="p">,</span><span class="w">
 </span><span class="p">)</span><span class="w">
 </span></pre></div></div>
-<img src="../../_images/sphx_glr_calibrating_recip_space_002.png" srcset="../../_images/sphx_glr_calibrating_recip_space_002.png" alt="calibrating recip space" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Text(0.05, 0.5, 'Camera Length: 21.58cm')
+<img alt="calibrating recip space" class="sphx-glr-single-img" src="../../_images/sphx_glr_calibrating_recip_space_002.png" srcset="../../_images/sphx_glr_calibrating_recip_space_002.png"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Text(0.05, 0.5, 'Camera Length: 21.61cm')
 </pre></div>
 </div>
 </section>
@@ -1131,10 +1131,10 @@ length to the data and plot the result.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><a class="sphx-glr-backref-module-pyxem-utils-calibration sphx-glr-backref-type-py-method reference internal" href="../../reference/generated/pyxem.utils.calibration.Calibration.detector.html#pyxem.utils.calibration.Calibration.detector" title="pyxem.utils.calibration.Calibration.detector"><span class="n">au_dpeg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">detector</span></a><span class="p">(</span><span class="w">
 </span>    <span class="n">pixel_size</span><span class="o">=</span><span class="mf">5.5e-5</span><span class="p">,</span> <span class="n">detector_distance</span><span class="o">=</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float64" title="numpy.float64"><span class="n">camera_length</span></a><span class="p">,</span> <span class="n">beam_energy</span><span class="o">=</span><span class="mi">200</span><span class="w">
 </span><span class="p">)</span><span class="w">
-</span><span class="nb">print</span><span class="p">(</span><a class="sphx-glr-backref-module-hyperspy-axes sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/base_classes/axes.html#hyperspy.axes.AxesManager" title="hyperspy.axes.AxesManager"><span class="n">au_dpeg</span><span class="o">.</span><span class="n">axes_manager</span></a><span class="p">)</span>  <span class="c1"># non uniform axes</span><span class="w">
-</span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.plot.html#pyxem.signals.Diffraction2D.plot" title="pyxem.signals.Diffraction2D.plot"><span class="n">au_dpeg</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">vmax</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">99th</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># non uniform axes</span><span class="w">
+</span><a class="sphinx-codeautolink-a" href="https://docs.python.org/3/builtins/functions.html#print"><span class="nb">print</span></a><span class="p">(</span><a class="sphx-glr-backref-module-hyperspy-axes sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/base_classes/axes.html#hyperspy.axes.AxesManager" title="hyperspy.axes.AxesManager"><span class="n">au_dpeg</span><span class="o">.</span><span class="n">axes_manager</span></a><span class="p">)</span>  <span class="c1"># non uniform axes</span><span class="w">
+</span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.plot.html#pyxem.signals.Diffraction2D.plot" title="pyxem.signals.Diffraction2D.plot"><span class="n">au_dpeg</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">vmax</span><span class="o">=</span><span class="s2">"</span><span class="s2">99th</span><span class="s2">"</span><span class="p">)</span>  <span class="c1"># non uniform axes</span><span class="w">
 </span></pre></div></div>
-<img src="../../_images/sphx_glr_calibrating_recip_space_003.png" srcset="../../_images/sphx_glr_calibrating_recip_space_003.png" alt="au_xgrating_20cm Signal" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;Axes manager, axes: (|256, 256)&gt;
+<img alt="au_xgrating_20cm Signal" class="sphx-glr-single-img" src="../../_images/sphx_glr_calibrating_recip_space_003.png" srcset="../../_images/sphx_glr_calibrating_recip_space_003.png"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;Axes manager, axes: (|256, 256)&gt;
 Signal axes:
 +----------------------+----------+-------------+-------------+-------------+
 |         Name         |   size   |    offset   |    scale    |    units    |
@@ -1154,34 +1154,35 @@ accounts for the ewald sphere now and uses the non uniform axes.</p>
 </span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">x</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.array.html#numpy.array" title="numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">(</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">sim1d</span><span class="o">.</span><span class="n">reciprocal_spacing</span></a><span class="p">)</span> <span class="o">*</span> <span class="mi">10</span><span class="w">
 </span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="list"><span class="n">y</span></a> <span class="o">=</span> <span class="p">[</span><span class="w">
 </span>    <span class="mf">0.5</span><span class="p">,</span><span class="w">
-</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">x</span></a><span class="p">)</span><span class="w">
+</span><span class="p">]</span> <span class="o">*</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/builtins/functions.html#len"><span class="nb">len</span></a><span class="p">(</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">x</span></a><span class="p">)</span><span class="w">
 </span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="list"><span class="n">y0</span></a> <span class="o">=</span> <span class="p">[</span><span class="w">
 </span>    <span class="mi">0</span><span class="p">,</span><span class="w">
-</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">x</span></a><span class="p">)</span><span class="w">
+</span><span class="p">]</span> <span class="o">*</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/builtins/functions.html#len"><span class="nb">len</span></a><span class="p">(</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">x</span></a><span class="p">)</span><span class="w">
 </span><span class="w">
-</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="list"><span class="n">hkl</span></a> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">h</span><span class="p">)</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">sim1d</span><span class="o">.</span><span class="n">hkl</span></a><span class="p">]</span><span class="w">
+</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="list"><span class="n">hkl</span></a> <span class="o">=</span> <span class="p">[</span><a class="sphinx-codeautolink-a" href="https://docs.python.org/3/builtins/stdtypes.html#str"><span class="nb">str</span></a><span class="p">(</span><span class="n">h</span><span class="p">)</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">sim1d</span><span class="o">.</span><span class="n">hkl</span></a><span class="p">]</span><span class="w">
 </span><span class="w">
 </span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">offsets</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.vstack.html#numpy.vstack" title="numpy.vstack"><span class="n">np</span><span class="o">.</span><span class="n">vstack</span></a><span class="p">(</span><span class="p">(</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">x</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="list"><span class="n">y</span></a><span class="p">)</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="w">
 </span><a class="sphx-glr-backref-module-hyperspy-drawing-_markers-texts sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.plot/markers.html#hyperspy.api.plot.markers.Texts" title="hyperspy.drawing._markers.texts.Texts"><span class="n">t</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-hyperspy-drawing-_markers-texts sphx-glr-backref-type-py-class reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.plot/markers.html#hyperspy.api.plot.markers.Texts" title="hyperspy.drawing._markers.texts.Texts"><span class="n">hs</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">markers</span><span class="o">.</span><span class="n">Texts</span></a><span class="p">(</span><span class="w">
 </span>    <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">offsets</span></a><span class="p">,</span><span class="w">
 </span>    <span class="n">texts</span><span class="o">=</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="list"><span class="n">hkl</span></a><span class="p">,</span><span class="w">
-</span>    <span class="n">offset_transform</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">relative</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
-</span>    <span class="n">horizontalalignment</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">left</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
-</span>    <span class="n">verticalalignment</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">bottom</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="n">offset_transform</span><span class="o">=</span><span class="s2">"</span><span class="s2">relative</span><span class="s2">"</span><span class="p">,</span><span class="w">
+</span>    <span class="n">horizontalalignment</span><span class="o">=</span><span class="s2">"</span><span class="s2">left</span><span class="s2">"</span><span class="p">,</span><span class="w">
+</span>    <span class="n">verticalalignment</span><span class="o">=</span><span class="s2">"</span><span class="s2">bottom</span><span class="s2">"</span><span class="p">,</span><span class="w">
 </span>    <span class="n">rotation</span><span class="o">=</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="float"><span class="n">np</span><span class="o">.</span><span class="n">pi</span></a> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span><span class="w">
-</span>    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">k</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="n">color</span><span class="o">=</span><span class="s2">"</span><span class="s2">k</span><span class="s2">"</span><span class="p">,</span><span class="w">
 </span><span class="p">)</span><span class="w">
 </span><span class="w">
 </span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.ElectronDiffraction1D.html#pyxem.signals.ElectronDiffraction1D" title="pyxem.signals.ElectronDiffraction1D"><span class="n">calibrated_azim</span></a><span class="o">.</span><span class="n">add_marker</span><span class="p">(</span><a class="sphx-glr-backref-module-hyperspy-drawing-_markers-texts sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.plot/markers.html#hyperspy.api.plot.markers.Texts" title="hyperspy.drawing._markers.texts.Texts"><span class="n">t</span></a><span class="p">)</span><span class="w">
 </span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="list"><span class="n">lines</span></a> <span class="o">=</span> <span class="p">[</span><span class="p">[</span><span class="p">[</span><span class="n">l</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="p">,</span> <span class="p">[</span><span class="n">l</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="p">]</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">x</span></a><span class="p">]</span><span class="w">
-</span><a class="sphx-glr-backref-module-hyperspy-drawing-_markers-lines sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.plot/markers.html#hyperspy.api.plot.markers.Lines" title="hyperspy.drawing._markers.lines.Lines"><span class="n">v</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-hyperspy-drawing-_markers-lines sphx-glr-backref-type-py-class reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.plot/markers.html#hyperspy.api.plot.markers.Lines" title="hyperspy.drawing._markers.lines.Lines"><span class="n">hs</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">markers</span><span class="o">.</span><span class="n">Lines</span></a><span class="p">(</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="list"><span class="n">lines</span></a><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">relative</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">--</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-hyperspy-drawing-_markers-lines sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.plot/markers.html#hyperspy.api.plot.markers.Lines" title="hyperspy.drawing._markers.lines.Lines"><span class="n">v</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-hyperspy-drawing-_markers-lines sphx-glr-backref-type-py-class reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.plot/markers.html#hyperspy.api.plot.markers.Lines" title="hyperspy.drawing._markers.lines.Lines"><span class="n">hs</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">markers</span><span class="o">.</span><span class="n">Lines</span></a><span class="p">(</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="list"><span class="n">lines</span></a><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="s2">"</span><span class="s2">relative</span><span class="s2">"</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">"</span><span class="s2">--</span><span class="s2">"</span><span class="p">)</span><span class="w">
 </span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.ElectronDiffraction1D.html#pyxem.signals.ElectronDiffraction1D" title="pyxem.signals.ElectronDiffraction1D"><span class="n">calibrated_azim</span></a><span class="o">.</span><span class="n">add_marker</span><span class="p">(</span><a class="sphx-glr-backref-module-hyperspy-drawing-_markers-lines sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.plot/markers.html#hyperspy.api.plot.markers.Lines" title="hyperspy.drawing._markers.lines.Lines"><span class="n">v</span></a><span class="p">)</span><span class="w">
 </span></pre></div></div>
-<img src="../../_images/sphx_glr_calibrating_recip_space_004.png" srcset="../../_images/sphx_glr_calibrating_recip_space_004.png" alt="Signal" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/2 [00:00&lt;?, ?it/s]
-100%|██████████| 2/2 [00:00&lt;00:00, 36.11it/s]
+<img alt="Signal" class="sphx-glr-single-img" src="../../_images/sphx_glr_calibrating_recip_space_004.png" srcset="../../_images/sphx_glr_calibrating_recip_space_004.png"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/2 [00:00&lt;?, ?it/s]
+ 50%|█████     | 1/2 [00:00&lt;00:00,  9.78it/s]
+100%|██████████| 2/2 [00:00&lt;00:00, 19.48it/s]
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 25.347 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 41.351 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-processing-calibrating-recip-space-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/860ad19db53a28ccf3a9b5bab4a18bfd/calibrating_recip_space.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">calibrating_recip_space.ipynb</span></code></a></p>
@@ -1232,7 +1233,7 @@ accounts for the ewald sphere now and uses the non uniform axes.</p>
             
             
               
-                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <dialog id="pst-secondary-sidebar-modal" tabindex="-1"></dialog>
                 <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
 
@@ -1290,8 +1291,8 @@ accounts for the ewald sphere now and uses the non uniform axes.</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1324,7 +1325,7 @@ accounts for the ewald sphere now and uses the non uniform axes.</p>
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.23.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.24.0.
 </p></div>
       
     </div>

@@ -26,8 +26,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d75fae25" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
@@ -40,10 +40,10 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../_static/scripts/fontawesome.js?digest=18bd87630a240e9c25be"></script>
+  <script defer src="../../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
     <script src="../../_static/documentation_options.js?v=88e4c0c0"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
@@ -55,7 +55,7 @@
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'examples/processing/azimuthal_integration';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.23.0';
+        DOCUMENTATION_OPTIONS.theme_version = '0.24.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://pyxem.org/dev/_static/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.21';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
@@ -121,7 +121,7 @@
   
     <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
     <span class="fa-solid fa-bars"></span>
   </button>
   
@@ -252,14 +252,14 @@
 
 <div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
   <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
-    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
   </button>
   <ul class="dropdown-menu dropdown-menu-end">
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
   </ul>
 </div></div>
       
@@ -294,7 +294,7 @@
   
 
   
-    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page" aria-expanded="false" aria-controls="pst-secondary-sidebar-modal">
       <span class="fa-solid fa-outdent"></span>
     </button>
   
@@ -308,7 +308,7 @@
       
       
       
-      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
       <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
 
@@ -386,14 +386,14 @@
 
 <div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
   <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
-    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
   </button>
   <ul class="dropdown-menu dropdown-menu-end">
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
   </ul>
 </div></div>
         
@@ -972,7 +972,7 @@
     
     <li class="breadcrumb-item breadcrumb-home">
       <a href="../../index.html" class="nav-link" aria-label="Home">
-        <i class="fa-solid fa-home"></i>
+        <i class="fa-solid fa-house"></i>
       </a>
     </li>
     
@@ -1015,30 +1015,35 @@ a <cite>Diffraction1D</cite> or <cite>Polar2D</cite> signal.  In each case the t
 pattern is preserved.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span class="kn">import</span><span class="w"> </span><span class="nn">pyxem</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pxm</span><span class="w">
 </span><span class="kn">import</span><span class="w"> </span><span class="nn">hyperspy</span><span class="nn">.</span><span class="nn">api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">hs</span><span class="w">
-</span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/index.html#module-numpy"><span class="nn">numpy</span></a><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span><span class="w">
 </span><span class="w">
 </span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D"><span class="n">s</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-pyxem-data sphx-glr-backref-type-py-function reference internal" href="../../reference/generated/pyxem.data.tilt_boundary_data.html#pyxem.data.tilt_boundary_data" title="pyxem.data.tilt_boundary_data"><span class="n">pxm</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">tilt_boundary_data</span></a><span class="p">(</span><span class="p">)</span><span class="w">
 </span><a class="sphx-glr-backref-module-pyxem-utils-calibration sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.utils.calibration.Calibration.html#pyxem.utils.calibration.Calibration" title="pyxem.utils.calibration.Calibration"><span class="n">s</span><span class="o">.</span><span class="n">calibration</span></a><span class="p">(</span><span class="w">
 </span>    <span class="n">center</span><span class="o">=</span><span class="kc">None</span><span class="w">
 </span><span class="p">)</span>  <span class="c1"># set the center to None to use center of the diffraction patterns</span><span class="w">
-</span><a class="sphx-glr-backref-module-pyxem-utils-calibration sphx-glr-backref-type-py-property reference internal" href="../../reference/generated/pyxem.utils.calibration.Calibration.units.html#pyxem.utils.calibration.Calibration.units" title="pyxem.utils.calibration.Calibration.units"><span class="n">s</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">units</span></a> <span class="o">=</span> <span class="s2">&quot;</span><span class="s2">/AA^</span><span class="s2">{</span><span class="s2">-1}</span><span class="s2">&quot;</span><span class="w">
+</span><a class="sphx-glr-backref-module-pyxem-utils-calibration sphx-glr-backref-type-py-property reference internal" href="../../reference/generated/pyxem.utils.calibration.Calibration.units.html#pyxem.utils.calibration.Calibration.units" title="pyxem.utils.calibration.Calibration.units"><span class="n">s</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">units</span></a> <span class="o">=</span> <span class="s2">"</span><span class="s2">/AA^</span><span class="s2">{</span><span class="s2">-1}</span><span class="s2">"</span><span class="w">
 </span><a class="sphx-glr-backref-module-pyxem-utils-calibration sphx-glr-backref-type-py-property reference internal" href="../../reference/generated/pyxem.utils.calibration.Calibration.scale.html#pyxem.utils.calibration.Calibration.scale" title="pyxem.utils.calibration.Calibration.scale"><span class="n">s</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">scale</span></a> <span class="o">=</span> <span class="mf">0.03</span>  <span class="c1"># To angstroms</span><span class="w">
 </span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction1D.html#pyxem.signals.Diffraction1D" title="pyxem.signals.Diffraction1D"><span class="n">s1d</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.get_azimuthal_integral1d.html#pyxem.signals.Diffraction2D.get_azimuthal_integral1d" title="pyxem.signals.Diffraction2D.get_azimuthal_integral1d"><span class="n">s</span><span class="o">.</span><span class="n">get_azimuthal_integral1d</span></a><span class="p">(</span><span class="n">npt</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="w">
 </span><span class="w">
 </span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction1D.html#pyxem.signals.Diffraction1D" title="pyxem.signals.Diffraction1D"><span class="n">s1d</span></a><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="p">)</span><span class="w">
 </span></pre></div></div>
-<img src="../../_images/sphx_glr_azimuthal_integration_001.png" srcset="../../_images/sphx_glr_azimuthal_integration_001.png" alt="Signal" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/26 [00:00&lt;?, ?it/s]
-  4%|▍         | 1/26 [00:00&lt;00:13,  1.89it/s]
- 19%|█▉        | 5/26 [00:01&lt;00:04,  5.25it/s]
- 35%|███▍      | 9/26 [00:01&lt;00:02,  7.77it/s]
- 42%|████▏     | 11/26 [00:01&lt;00:02,  6.36it/s]
- 54%|█████▍    | 14/26 [00:02&lt;00:01,  7.24it/s]
- 65%|██████▌   | 17/26 [00:02&lt;00:01,  8.12it/s]
- 73%|███████▎  | 19/26 [00:02&lt;00:00,  7.35it/s]
- 81%|████████  | 21/26 [00:02&lt;00:00,  8.20it/s]
- 88%|████████▊ | 23/26 [00:03&lt;00:00,  7.93it/s]
- 96%|█████████▌| 25/26 [00:03&lt;00:00,  9.42it/s]
-100%|██████████| 26/26 [00:03&lt;00:00,  7.80it/s]
+<img alt="Signal" class="sphx-glr-single-img" src="../../_images/sphx_glr_azimuthal_integration_001.png" srcset="../../_images/sphx_glr_azimuthal_integration_001.png"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/26 [00:00&lt;?, ?it/s]
+  4%|▍         | 1/26 [00:00&lt;00:13,  1.91it/s]
+ 12%|█▏        | 3/26 [00:01&lt;00:08,  2.64it/s]
+ 15%|█▌        | 4/26 [00:01&lt;00:06,  3.29it/s]
+ 19%|█▉        | 5/26 [00:01&lt;00:08,  2.58it/s]
+ 23%|██▎       | 6/26 [00:02&lt;00:06,  3.02it/s]
+ 27%|██▋       | 7/26 [00:02&lt;00:05,  3.60it/s]
+ 31%|███       | 8/26 [00:02&lt;00:06,  2.89it/s]
+ 38%|███▊      | 10/26 [00:03&lt;00:05,  2.99it/s]
+ 50%|█████     | 13/26 [00:04&lt;00:04,  3.18it/s]
+ 62%|██████▏   | 16/26 [00:04&lt;00:02,  3.92it/s]
+ 69%|██████▉   | 18/26 [00:05&lt;00:01,  4.40it/s]
+ 77%|███████▋  | 20/26 [00:05&lt;00:01,  3.52it/s]
+ 85%|████████▍ | 22/26 [00:06&lt;00:00,  4.42it/s]
+ 88%|████████▊ | 23/26 [00:06&lt;00:00,  4.72it/s]
+ 92%|█████████▏| 24/26 [00:06&lt;00:00,  4.41it/s]
+100%|██████████| 26/26 [00:06&lt;00:00,  3.91it/s]
 </pre></div>
 </div>
 <p>Aside: Actual Implementation
@@ -1052,38 +1057,38 @@ for each radial bin.</p>
 </span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">cp</span></a> <span class="o">=</span> <span class="n">_get_control_points</span><span class="p">(</span><span class="w">
 </span>    <span class="mi">10</span><span class="p">,</span> <span class="n">npt_azim</span><span class="o">=</span><span class="mi">72</span><span class="p">,</span> <span class="n">radial_range</span><span class="o">=</span><span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span><span class="p">,</span> <span class="n">azimuthal_range</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="float"><span class="n">np</span><span class="o">.</span><span class="n">pi</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="float"><span class="n">np</span><span class="o">.</span><span class="n">pi</span></a><span class="p">)</span><span class="p">,</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">affine</span></a><span class="o">=</span><span class="kc">None</span><span class="w">
 </span><span class="p">)</span><span class="p">[</span><span class="p">:</span><span class="p">,</span> <span class="p">:</span><span class="p">,</span> <span class="p">:</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="w">
-</span><a class="sphx-glr-backref-module-hyperspy-drawing-_markers-polygons sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.plot/markers.html#hyperspy.api.plot.markers.Polygons" title="hyperspy.drawing._markers.polygons.Polygons"><span class="n">poly</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-hyperspy-drawing-_markers-polygons sphx-glr-backref-type-py-class reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.plot/markers.html#hyperspy.api.plot.markers.Polygons" title="hyperspy.drawing._markers.polygons.Polygons"><span class="n">hs</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">markers</span><span class="o">.</span><span class="n">Polygons</span></a><span class="p">(</span><span class="n">verts</span><span class="o">=</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">cp</span></a><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">w</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">none</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-hyperspy-drawing-_markers-polygons sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.plot/markers.html#hyperspy.api.plot.markers.Polygons" title="hyperspy.drawing._markers.polygons.Polygons"><span class="n">poly</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-hyperspy-drawing-_markers-polygons sphx-glr-backref-type-py-class reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.plot/markers.html#hyperspy.api.plot.markers.Polygons" title="hyperspy.drawing._markers.polygons.Polygons"><span class="n">hs</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">markers</span><span class="o">.</span><span class="n">Polygons</span></a><span class="p">(</span><span class="n">verts</span><span class="o">=</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">cp</span></a><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s2">"</span><span class="s2">w</span><span class="s2">"</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s2">"</span><span class="s2">none</span><span class="s2">"</span><span class="p">)</span><span class="w">
 </span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.plot.html#pyxem.signals.Diffraction2D.plot" title="pyxem.signals.Diffraction2D.plot"><span class="n">s</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="p">)</span><span class="w">
 </span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D"><span class="n">s</span></a><span class="o">.</span><span class="n">add_marker</span><span class="p">(</span><a class="sphx-glr-backref-module-hyperspy-drawing-_markers-polygons sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.plot/markers.html#hyperspy.api.plot.markers.Polygons" title="hyperspy.drawing._markers.polygons.Polygons"><span class="n">poly</span></a><span class="p">)</span><span class="w">
 </span></pre></div></div>
 <ul class="sphx-glr-horizontal">
-<li><img src="../../_images/sphx_glr_azimuthal_integration_002.png" srcset="../../_images/sphx_glr_azimuthal_integration_002.png" alt="azimuthal integration" class = "sphx-glr-multi-img"/></li>
-<li><img src="../../_images/sphx_glr_azimuthal_integration_003.png" srcset="../../_images/sphx_glr_azimuthal_integration_003.png" alt="Signal" class = "sphx-glr-multi-img"/></li>
+<li><img alt="azimuthal integration" class="sphx-glr-multi-img" src="../../_images/sphx_glr_azimuthal_integration_002.png" srcset="../../_images/sphx_glr_azimuthal_integration_002.png"/></li>
+<li><img alt="Signal" class="sphx-glr-multi-img" src="../../_images/sphx_glr_azimuthal_integration_003.png" srcset="../../_images/sphx_glr_azimuthal_integration_003.png"/></li>
 </ul>
 <p>Similarly, the <cite>get_azimuthal_integral2d</cite> method will return a <cite>Polar2D</cite> signal.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.PolarDiffraction2D.html#pyxem.signals.PolarDiffraction2D" title="pyxem.signals.PolarDiffraction2D"><span class="n">s_polar</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.get_azimuthal_integral2d.html#pyxem.signals.Diffraction2D.get_azimuthal_integral2d" title="pyxem.signals.Diffraction2D.get_azimuthal_integral2d"><span class="n">s</span><span class="o">.</span><span class="n">get_azimuthal_integral2d</span></a><span class="p">(</span><span class="n">npt</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">npt_azim</span><span class="o">=</span><span class="mi">360</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="w">
 </span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.PolarDiffraction2D.html#pyxem.signals.PolarDiffraction2D" title="pyxem.signals.PolarDiffraction2D"><span class="n">s_polar</span></a><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="p">)</span><span class="w">
 </span></pre></div></div>
-<img src="../../_images/sphx_glr_azimuthal_integration_004.png" srcset="../../_images/sphx_glr_azimuthal_integration_004.png" alt="Signal" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/26 [00:00&lt;?, ?it/s]
-  4%|▍         | 1/26 [00:02&lt;00:55,  2.21s/it]
- 19%|█▉        | 5/26 [00:04&lt;00:16,  1.31it/s]
- 23%|██▎       | 6/26 [00:04&lt;00:12,  1.64it/s]
- 27%|██▋       | 7/26 [00:04&lt;00:09,  2.01it/s]
- 31%|███       | 8/26 [00:04&lt;00:07,  2.50it/s]
- 35%|███▍      | 9/26 [00:06&lt;00:13,  1.29it/s]
- 42%|████▏     | 11/26 [00:06&lt;00:07,  1.94it/s]
- 46%|████▌     | 12/26 [00:07&lt;00:06,  2.14it/s]
- 50%|█████     | 13/26 [00:08&lt;00:09,  1.41it/s]
- 54%|█████▍    | 14/26 [00:08&lt;00:06,  1.78it/s]
- 58%|█████▊    | 15/26 [00:09&lt;00:05,  1.86it/s]
- 62%|██████▏   | 16/26 [00:09&lt;00:04,  2.34it/s]
- 65%|██████▌   | 17/26 [00:10&lt;00:06,  1.35it/s]
- 73%|███████▎  | 19/26 [00:11&lt;00:03,  1.84it/s]
- 81%|████████  | 21/26 [00:13&lt;00:03,  1.52it/s]
- 85%|████████▍ | 22/26 [00:13&lt;00:02,  1.68it/s]
- 88%|████████▊ | 23/26 [00:13&lt;00:01,  1.93it/s]
- 96%|█████████▌| 25/26 [00:14&lt;00:00,  2.55it/s]
-100%|██████████| 26/26 [00:14&lt;00:00,  1.84it/s]
+<img alt="Signal" class="sphx-glr-single-img" src="../../_images/sphx_glr_azimuthal_integration_004.png" srcset="../../_images/sphx_glr_azimuthal_integration_004.png"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/26 [00:00&lt;?, ?it/s]
+  4%|▍         | 1/26 [00:04&lt;01:45,  4.21s/it]
+ 12%|█▏        | 3/26 [00:04&lt;00:26,  1.17s/it]
+ 15%|█▌        | 4/26 [00:04&lt;00:20,  1.07it/s]
+ 19%|█▉        | 5/26 [00:08&lt;00:39,  1.88s/it]
+ 27%|██▋       | 7/26 [00:08&lt;00:19,  1.03s/it]
+ 35%|███▍      | 9/26 [00:13&lt;00:24,  1.44s/it]
+ 42%|████▏     | 11/26 [00:13&lt;00:14,  1.05it/s]
+ 46%|████▌     | 12/26 [00:13&lt;00:10,  1.28it/s]
+ 50%|█████     | 13/26 [00:17&lt;00:19,  1.52s/it]
+ 54%|█████▍    | 14/26 [00:17&lt;00:14,  1.20s/it]
+ 58%|█████▊    | 15/26 [00:17&lt;00:10,  1.09it/s]
+ 62%|██████▏   | 16/26 [00:17&lt;00:07,  1.40it/s]
+ 65%|██████▌   | 17/26 [00:21&lt;00:14,  1.59s/it]
+ 69%|██████▉   | 18/26 [00:22&lt;00:09,  1.25s/it]
+ 77%|███████▋  | 20/26 [00:22&lt;00:04,  1.37it/s]
+ 81%|████████  | 21/26 [00:26&lt;00:07,  1.49s/it]
+ 85%|████████▍ | 22/26 [00:26&lt;00:04,  1.21s/it]
+ 96%|█████████▌| 25/26 [00:27&lt;00:00,  1.33it/s]
+100%|██████████| 26/26 [00:27&lt;00:00,  1.06s/it]
 </pre></div>
 </div>
 <p>There are also other things you can account for with azimuthal integration, such as the
@@ -1102,7 +1107,7 @@ assumptions should apply for each case, but it would be good to test!</p>
 </span>    <span class="n">detector_distance</span><span class="o">=</span><span class="mf">0.125</span><span class="p">,</span><span class="w">
 </span>    <span class="n">beam_energy</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span><span class="w">
 </span>    <span class="n">center</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="w">
-</span>    <span class="n">units</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">k_A^-1</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="n">units</span><span class="o">=</span><span class="s2">"</span><span class="s2">k_A^-1</span><span class="s2">"</span><span class="p">,</span><span class="w">
 </span><span class="p">)</span>  <span class="c1"># set the center= None to use the center of the diffraction patterns</span><span class="w">
 </span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction1D.html#pyxem.signals.Diffraction1D" title="pyxem.signals.Diffraction1D"><span class="n">s1d_200</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.get_azimuthal_integral1d.html#pyxem.signals.Diffraction2D.get_azimuthal_integral1d" title="pyxem.signals.Diffraction2D.get_azimuthal_integral1d"><span class="n">s</span><span class="o">.</span><span class="n">get_azimuthal_integral1d</span></a><span class="p">(</span><span class="n">npt</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="w">
 </span><a class="sphx-glr-backref-module-pyxem-utils-calibration sphx-glr-backref-type-py-method reference internal" href="../../reference/generated/pyxem.utils.calibration.Calibration.detector.html#pyxem.utils.calibration.Calibration.detector" title="pyxem.utils.calibration.Calibration.detector"><span class="n">s</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">detector</span></a><span class="p">(</span><span class="w">
@@ -1110,41 +1115,52 @@ assumptions should apply for each case, but it would be good to test!</p>
 </span>    <span class="n">detector_distance</span><span class="o">=</span><span class="mf">0.075</span><span class="p">,</span><span class="w">
 </span>    <span class="n">beam_energy</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span><span class="w">
 </span>    <span class="n">center</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="w">
-</span>    <span class="n">units</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">k_A^-1</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="n">units</span><span class="o">=</span><span class="s2">"</span><span class="s2">k_A^-1</span><span class="s2">"</span><span class="p">,</span><span class="w">
 </span><span class="p">)</span>  <span class="c1"># These are just made up pixel sizes and detector distances for illustration</span><span class="w">
 </span><span class="w">
 </span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction1D.html#pyxem.signals.Diffraction1D" title="pyxem.signals.Diffraction1D"><span class="n">s1d_80</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.get_azimuthal_integral1d.html#pyxem.signals.Diffraction2D.get_azimuthal_integral1d" title="pyxem.signals.Diffraction2D.get_azimuthal_integral1d"><span class="n">s</span><span class="o">.</span><span class="n">get_azimuthal_integral1d</span></a><span class="p">(</span><span class="n">npt</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="w">
 </span><span class="w">
 </span><a class="sphx-glr-backref-module-hyperspy-api-plot sphx-glr-backref-type-py-function reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.plot/index.html#hyperspy.api.plot.plot_spectra" title="hyperspy.api.plot.plot_spectra"><span class="n">hs</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_spectra</span></a><span class="p">(</span><span class="w">
 </span>    <span class="p">[</span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction1D.html#pyxem.signals.Diffraction1D" title="pyxem.signals.Diffraction1D"><span class="n">s1d</span></a><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="p">)</span><span class="p">,</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction1D.html#pyxem.signals.Diffraction1D" title="pyxem.signals.Diffraction1D"><span class="n">s1d_200</span></a><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="p">)</span><span class="p">,</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction1D.html#pyxem.signals.Diffraction1D" title="pyxem.signals.Diffraction1D"><span class="n">s1d_80</span></a><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="p">)</span><span class="p">]</span><span class="p">,</span><span class="w">
-</span>    <span class="n">legend</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;</span><span class="s2">Flat Ewald Sphere Assumption</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="s2">200keV Corrected</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="s2">80keV Corrected</span><span class="s2">&quot;</span><span class="p">]</span><span class="p">,</span><span class="w">
+</span>    <span class="n">legend</span><span class="o">=</span><span class="p">[</span><span class="s2">"</span><span class="s2">Flat Ewald Sphere Assumption</span><span class="s2">"</span><span class="p">,</span> <span class="s2">"</span><span class="s2">200keV Corrected</span><span class="s2">"</span><span class="p">,</span> <span class="s2">"</span><span class="s2">80keV Corrected</span><span class="s2">"</span><span class="p">]</span><span class="p">,</span><span class="w">
 </span><span class="p">)</span><span class="w">
 </span></pre></div></div>
-<img src="../../_images/sphx_glr_azimuthal_integration_005.png" srcset="../../_images/sphx_glr_azimuthal_integration_005.png" alt="azimuthal integration" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/26 [00:00&lt;?, ?it/s]
-  4%|▍         | 1/26 [00:00&lt;00:14,  1.74it/s]
- 19%|█▉        | 5/26 [00:00&lt;00:03,  6.01it/s]
- 27%|██▋       | 7/26 [00:01&lt;00:02,  7.23it/s]
- 35%|███▍      | 9/26 [00:01&lt;00:02,  7.02it/s]
- 42%|████▏     | 11/26 [00:01&lt;00:02,  5.43it/s]
- 58%|█████▊    | 15/26 [00:02&lt;00:01,  6.34it/s]
- 73%|███████▎  | 19/26 [00:03&lt;00:01,  6.72it/s]
- 88%|████████▊ | 23/26 [00:03&lt;00:00,  8.33it/s]
- 96%|█████████▌| 25/26 [00:03&lt;00:00,  9.11it/s]
-100%|██████████| 26/26 [00:03&lt;00:00,  7.50it/s]
+<img alt="azimuthal integration" class="sphx-glr-single-img" src="../../_images/sphx_glr_azimuthal_integration_005.png" srcset="../../_images/sphx_glr_azimuthal_integration_005.png"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/26 [00:00&lt;?, ?it/s]
+  4%|▍         | 1/26 [00:00&lt;00:18,  1.36it/s]
+  8%|▊         | 2/26 [00:01&lt;00:12,  1.98it/s]
+ 12%|█▏        | 3/26 [00:01&lt;00:08,  2.61it/s]
+ 15%|█▌        | 4/26 [00:01&lt;00:08,  2.74it/s]
+ 19%|█▉        | 5/26 [00:01&lt;00:07,  2.97it/s]
+ 23%|██▎       | 6/26 [00:02&lt;00:05,  3.41it/s]
+ 31%|███       | 8/26 [00:02&lt;00:04,  4.32it/s]
+ 38%|███▊      | 10/26 [00:03&lt;00:03,  4.04it/s]
+ 46%|████▌     | 12/26 [00:03&lt;00:03,  3.50it/s]
+ 54%|█████▍    | 14/26 [00:04&lt;00:02,  4.11it/s]
+ 62%|██████▏   | 16/26 [00:04&lt;00:02,  3.64it/s]
+ 65%|██████▌   | 17/26 [00:04&lt;00:02,  3.72it/s]
+ 69%|██████▉   | 18/26 [00:05&lt;00:02,  3.60it/s]
+ 77%|███████▋  | 20/26 [00:05&lt;00:01,  4.34it/s]
+ 85%|████████▍ | 22/26 [00:06&lt;00:00,  4.17it/s]
+ 88%|████████▊ | 23/26 [00:06&lt;00:00,  4.70it/s]
+ 92%|█████████▏| 24/26 [00:06&lt;00:00,  4.49it/s]
+100%|██████████| 26/26 [00:06&lt;00:00,  4.00it/s]
 
   0%|          | 0/26 [00:00&lt;?, ?it/s]
-  4%|▍         | 1/26 [00:00&lt;00:10,  2.30it/s]
- 19%|█▉        | 5/26 [00:00&lt;00:03,  5.52it/s]
- 27%|██▋       | 7/26 [00:01&lt;00:02,  7.30it/s]
- 35%|███▍      | 9/26 [00:01&lt;00:02,  6.10it/s]
- 50%|█████     | 13/26 [00:02&lt;00:01,  7.01it/s]
- 58%|█████▊    | 15/26 [00:02&lt;00:01,  8.10it/s]
- 65%|██████▌   | 17/26 [00:02&lt;00:01,  8.05it/s]
- 69%|██████▉   | 18/26 [00:02&lt;00:01,  7.55it/s]
- 77%|███████▋  | 20/26 [00:02&lt;00:00,  6.72it/s]
- 88%|████████▊ | 23/26 [00:03&lt;00:00,  8.55it/s]
- 92%|█████████▏| 24/26 [00:03&lt;00:00,  8.57it/s]
-100%|██████████| 26/26 [00:03&lt;00:00,  7.80it/s]
+  4%|▍         | 1/26 [00:01&lt;00:25,  1.01s/it]
+ 19%|█▉        | 5/26 [00:01&lt;00:05,  3.87it/s]
+ 27%|██▋       | 7/26 [00:02&lt;00:05,  3.79it/s]
+ 35%|███▍      | 9/26 [00:02&lt;00:04,  3.46it/s]
+ 42%|████▏     | 11/26 [00:02&lt;00:03,  4.49it/s]
+ 46%|████▌     | 12/26 [00:03&lt;00:04,  3.36it/s]
+ 54%|█████▍    | 14/26 [00:03&lt;00:03,  3.94it/s]
+ 62%|██████▏   | 16/26 [00:04&lt;00:02,  3.80it/s]
+ 65%|██████▌   | 17/26 [00:04&lt;00:02,  3.50it/s]
+ 69%|██████▉   | 18/26 [00:05&lt;00:02,  3.66it/s]
+ 73%|███████▎  | 19/26 [00:05&lt;00:02,  3.38it/s]
+ 81%|████████  | 21/26 [00:05&lt;00:01,  4.04it/s]
+ 85%|████████▍ | 22/26 [00:06&lt;00:01,  3.86it/s]
+ 88%|████████▊ | 23/26 [00:06&lt;00:00,  3.61it/s]
+100%|██████████| 26/26 [00:06&lt;00:00,  4.06it/s]
 
 &lt;Axes: xlabel='Radius (k_A^-1)', ylabel='Intensity'&gt;
 </pre></div>
@@ -1160,24 +1176,27 @@ transformation to the diffraction patterns before azimuthal integration.  This c
 </span><a class="sphx-glr-backref-module-pyxem-utils-calibration sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.utils.calibration.Calibration.html#pyxem.utils.calibration.Calibration" title="pyxem.utils.calibration.Calibration"><span class="n">s</span><span class="o">.</span><span class="n">calibration</span></a><span class="p">(</span><a class="sphx-glr-backref-module-hyperspy-_signals-signal2d sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.signals/Signal2D.html#hyperspy.api.signals.Signal2D" title="hyperspy._signals.signal2d.Signal2D"><span class="n">mask</span></a><span class="o">=</span><a class="sphx-glr-backref-module-hyperspy-_signals-signal2d sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.signals/Signal2D.html#hyperspy.api.signals.Signal2D" title="hyperspy._signals.signal2d.Signal2D"><span class="n">mask</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">affine</span></a><span class="o">=</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">affine</span></a><span class="p">)</span><span class="w">
 </span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-method reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.get_azimuthal_integral2d.html#pyxem.signals.Diffraction2D.get_azimuthal_integral2d" title="pyxem.signals.Diffraction2D.get_azimuthal_integral2d"><span class="n">s</span><span class="o">.</span><span class="n">get_azimuthal_integral2d</span></a><span class="p">(</span><span class="n">npt</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">npt_azim</span><span class="o">=</span><span class="mi">360</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="p">)</span><span class="w">
 </span></pre></div></div>
-<img src="../../_images/sphx_glr_azimuthal_integration_006.png" srcset="../../_images/sphx_glr_azimuthal_integration_006.png" alt="Signal" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/26 [00:00&lt;?, ?it/s]
-  4%|▍         | 1/26 [00:02&lt;00:53,  2.12s/it]
- 15%|█▌        | 4/26 [00:02&lt;00:10,  2.18it/s]
- 19%|█▉        | 5/26 [00:04&lt;00:17,  1.22it/s]
- 23%|██▎       | 6/26 [00:04&lt;00:13,  1.54it/s]
- 27%|██▋       | 7/26 [00:04&lt;00:09,  1.96it/s]
- 31%|███       | 8/26 [00:04&lt;00:07,  2.56it/s]
- 35%|███▍      | 9/26 [00:06&lt;00:13,  1.22it/s]
- 42%|████▏     | 11/26 [00:06&lt;00:07,  1.94it/s]
- 50%|█████     | 13/26 [00:08&lt;00:08,  1.51it/s]
- 58%|█████▊    | 15/26 [00:08&lt;00:05,  2.06it/s]
- 65%|██████▌   | 17/26 [00:10&lt;00:05,  1.65it/s]
- 69%|██████▉   | 18/26 [00:10&lt;00:04,  1.75it/s]
- 81%|████████  | 21/26 [00:12&lt;00:02,  1.69it/s]
- 85%|████████▍ | 22/26 [00:13&lt;00:02,  1.87it/s]
- 92%|█████████▏| 24/26 [00:13&lt;00:00,  2.66it/s]
- 96%|█████████▌| 25/26 [00:13&lt;00:00,  2.61it/s]
-100%|██████████| 26/26 [00:13&lt;00:00,  1.91it/s]
+<img alt="Signal" class="sphx-glr-single-img" src="../../_images/sphx_glr_azimuthal_integration_006.png" srcset="../../_images/sphx_glr_azimuthal_integration_006.png"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/26 [00:00&lt;?, ?it/s]
+  4%|▍         | 1/26 [00:04&lt;01:42,  4.10s/it]
+  8%|▊         | 2/26 [00:04&lt;00:46,  1.94s/it]
+ 19%|█▉        | 5/26 [00:08&lt;00:30,  1.45s/it]
+ 23%|██▎       | 6/26 [00:08&lt;00:24,  1.22s/it]
+ 31%|███       | 8/26 [00:09&lt;00:15,  1.20it/s]
+ 35%|███▍      | 9/26 [00:12&lt;00:23,  1.40s/it]
+ 38%|███▊      | 10/26 [00:13&lt;00:18,  1.14s/it]
+ 42%|████▏     | 11/26 [00:13&lt;00:13,  1.09it/s]
+ 46%|████▌     | 12/26 [00:13&lt;00:11,  1.20it/s]
+ 50%|█████     | 13/26 [00:17&lt;00:19,  1.51s/it]
+ 54%|█████▍    | 14/26 [00:17&lt;00:13,  1.15s/it]
+ 58%|█████▊    | 15/26 [00:17&lt;00:10,  1.08it/s]
+ 62%|██████▏   | 16/26 [00:18&lt;00:07,  1.30it/s]
+ 65%|██████▌   | 17/26 [00:21&lt;00:14,  1.57s/it]
+ 73%|███████▎  | 19/26 [00:22&lt;00:07,  1.02s/it]
+ 81%|████████  | 21/26 [00:26&lt;00:06,  1.32s/it]
+ 85%|████████▍ | 22/26 [00:26&lt;00:04,  1.06s/it]
+ 88%|████████▊ | 23/26 [00:26&lt;00:02,  1.06it/s]
+ 96%|█████████▌| 25/26 [00:27&lt;00:00,  1.35it/s]
+100%|██████████| 26/26 [00:27&lt;00:00,  1.06s/it]
 </pre></div>
 </div>
 <p>The <cite>azimuth_range</cite>-argument lets you choose what angular range to calculate the azimuthal integral for.
@@ -1192,97 +1211,112 @@ The range can be increasing, decreasing, and does not need to be a multiple of p
 </span><span class="w">
 </span><a class="sphx-glr-backref-module-hyperspy-api-plot sphx-glr-backref-type-py-function reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.plot/index.html#hyperspy.api.plot.plot_images" title="hyperspy.api.plot.plot_images"><span class="n">hs</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_images</span></a><span class="p">(</span><span class="w">
 </span>    <span class="p">[</span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.PolarDiffraction2D.html#pyxem.signals.PolarDiffraction2D" title="pyxem.signals.PolarDiffraction2D"><span class="n">pol1</span></a><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="p">)</span><span class="p">,</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.PolarDiffraction2D.html#pyxem.signals.PolarDiffraction2D" title="pyxem.signals.PolarDiffraction2D"><span class="n">pol2</span></a><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="p">)</span><span class="p">,</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.PolarDiffraction2D.html#pyxem.signals.PolarDiffraction2D" title="pyxem.signals.PolarDiffraction2D"><span class="n">pol3</span></a><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="p">)</span><span class="p">,</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.PolarDiffraction2D.html#pyxem.signals.PolarDiffraction2D" title="pyxem.signals.PolarDiffraction2D"><span class="n">pol4</span></a><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="p">)</span><span class="p">]</span><span class="p">,</span><span class="w">
-</span>    <span class="n">label</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;</span><span class="s2">(-pi, pi) default</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="s2">(0, 1)</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="s2">(0, 4pi)</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="s2">(pi, 0)</span><span class="s2">&quot;</span><span class="p">]</span><span class="p">,</span><span class="w">
-</span>    <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">viridis</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="n">label</span><span class="o">=</span><span class="p">[</span><span class="s2">"</span><span class="s2">(-pi, pi) default</span><span class="s2">"</span><span class="p">,</span> <span class="s2">"</span><span class="s2">(0, 1)</span><span class="s2">"</span><span class="p">,</span> <span class="s2">"</span><span class="s2">(0, 4pi)</span><span class="s2">"</span><span class="p">,</span> <span class="s2">"</span><span class="s2">(pi, 0)</span><span class="s2">"</span><span class="p">]</span><span class="p">,</span><span class="w">
+</span>    <span class="n">cmap</span><span class="o">=</span><span class="s2">"</span><span class="s2">viridis</span><span class="s2">"</span><span class="p">,</span><span class="w">
 </span>    <span class="n">tight_layout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="w">
 </span>    <span class="n">colorbar</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="w">
 </span><span class="p">)</span><span class="w">
 </span></pre></div></div>
-<img src="../../_images/sphx_glr_azimuthal_integration_007.png" srcset="../../_images/sphx_glr_azimuthal_integration_007.png" alt="(-pi, pi) default, (0, 1), (0, 4pi), (pi, 0)" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/26 [00:00&lt;?, ?it/s]
-  4%|▍         | 1/26 [00:02&lt;00:50,  2.04s/it]
-  8%|▊         | 2/26 [00:02&lt;00:23,  1.03it/s]
- 19%|█▉        | 5/26 [00:04&lt;00:15,  1.39it/s]
- 23%|██▎       | 6/26 [00:04&lt;00:12,  1.57it/s]
- 35%|███▍      | 9/26 [00:06&lt;00:10,  1.69it/s]
- 38%|███▊      | 10/26 [00:06&lt;00:08,  1.89it/s]
- 42%|████▏     | 11/26 [00:06&lt;00:07,  2.12it/s]
- 46%|████▌     | 12/26 [00:07&lt;00:06,  2.20it/s]
- 50%|█████     | 13/26 [00:08&lt;00:08,  1.46it/s]
- 58%|█████▊    | 15/26 [00:08&lt;00:05,  2.12it/s]
- 62%|██████▏   | 16/26 [00:09&lt;00:04,  2.12it/s]
- 65%|██████▌   | 17/26 [00:10&lt;00:06,  1.39it/s]
- 73%|███████▎  | 19/26 [00:10&lt;00:03,  2.18it/s]
- 77%|███████▋  | 20/26 [00:11&lt;00:02,  2.07it/s]
- 81%|████████  | 21/26 [00:12&lt;00:03,  1.42it/s]
- 85%|████████▍ | 22/26 [00:13&lt;00:02,  1.82it/s]
- 88%|████████▊ | 23/26 [00:13&lt;00:01,  2.19it/s]
- 92%|█████████▏| 24/26 [00:13&lt;00:00,  2.55it/s]
- 96%|█████████▌| 25/26 [00:13&lt;00:00,  2.65it/s]
-100%|██████████| 26/26 [00:13&lt;00:00,  1.88it/s]
+<img alt="(-pi, pi) default, (0, 1), (0, 4pi), (pi, 0)" class="sphx-glr-single-img" src="../../_images/sphx_glr_azimuthal_integration_007.png" srcset="../../_images/sphx_glr_azimuthal_integration_007.png"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/26 [00:00&lt;?, ?it/s]
+  4%|▍         | 1/26 [00:04&lt;01:47,  4.29s/it]
+ 12%|█▏        | 3/26 [00:04&lt;00:27,  1.19s/it]
+ 15%|█▌        | 4/26 [00:04&lt;00:17,  1.23it/s]
+ 19%|█▉        | 5/26 [00:08&lt;00:38,  1.82s/it]
+ 23%|██▎       | 6/26 [00:08&lt;00:27,  1.37s/it]
+ 31%|███       | 8/26 [00:09&lt;00:13,  1.29it/s]
+ 35%|███▍      | 9/26 [00:12&lt;00:25,  1.51s/it]
+ 38%|███▊      | 10/26 [00:13&lt;00:19,  1.22s/it]
+ 42%|████▏     | 11/26 [00:13&lt;00:14,  1.03it/s]
+ 50%|█████     | 13/26 [00:17&lt;00:17,  1.36s/it]
+ 58%|█████▊    | 15/26 [00:18&lt;00:11,  1.00s/it]
+ 65%|██████▌   | 17/26 [00:21&lt;00:11,  1.24s/it]
+ 69%|██████▉   | 18/26 [00:22&lt;00:08,  1.11s/it]
+ 73%|███████▎  | 19/26 [00:22&lt;00:06,  1.01it/s]
+ 81%|████████  | 21/26 [00:25&lt;00:06,  1.22s/it]
+ 85%|████████▍ | 22/26 [00:26&lt;00:04,  1.07s/it]
+ 88%|████████▊ | 23/26 [00:26&lt;00:02,  1.05it/s]
+ 92%|█████████▏| 24/26 [00:26&lt;00:01,  1.35it/s]
+ 96%|█████████▌| 25/26 [00:27&lt;00:00,  1.36it/s]
+100%|██████████| 26/26 [00:27&lt;00:00,  1.07s/it]
 
   0%|          | 0/26 [00:00&lt;?, ?it/s]
-  4%|▍         | 1/26 [00:02&lt;00:54,  2.18s/it]
- 12%|█▏        | 3/26 [00:02&lt;00:13,  1.65it/s]
- 19%|█▉        | 5/26 [00:04&lt;00:17,  1.21it/s]
- 31%|███       | 8/26 [00:04&lt;00:07,  2.41it/s]
- 38%|███▊      | 10/26 [00:06&lt;00:10,  1.58it/s]
- 46%|████▌     | 12/26 [00:06&lt;00:06,  2.19it/s]
- 50%|█████     | 13/26 [00:08&lt;00:09,  1.36it/s]
- 58%|█████▊    | 15/26 [00:09&lt;00:05,  1.91it/s]
- 65%|██████▌   | 17/26 [00:10&lt;00:05,  1.55it/s]
- 69%|██████▉   | 18/26 [00:11&lt;00:04,  1.73it/s]
- 73%|███████▎  | 19/26 [00:11&lt;00:03,  2.03it/s]
- 81%|████████  | 21/26 [00:13&lt;00:03,  1.53it/s]
- 85%|████████▍ | 22/26 [00:13&lt;00:02,  1.83it/s]
- 88%|████████▊ | 23/26 [00:13&lt;00:01,  2.17it/s]
- 96%|█████████▌| 25/26 [00:13&lt;00:00,  2.71it/s]
-100%|██████████| 26/26 [00:13&lt;00:00,  1.87it/s]
-
-  0%|          | 0/26 [00:00&lt;?, ?it/s]
-  4%|▍         | 1/26 [00:04&lt;01:49,  4.39s/it]
- 12%|█▏        | 3/26 [00:04&lt;00:27,  1.18s/it]
- 19%|█▉        | 5/26 [00:08&lt;00:34,  1.64s/it]
- 27%|██▋       | 7/26 [00:08&lt;00:18,  1.04it/s]
- 35%|███▍      | 9/26 [00:12&lt;00:23,  1.39s/it]
- 42%|████▏     | 11/26 [00:13&lt;00:14,  1.04it/s]
- 46%|████▌     | 12/26 [00:13&lt;00:11,  1.17it/s]
- 50%|█████     | 13/26 [00:17&lt;00:18,  1.44s/it]
- 54%|█████▍    | 14/26 [00:17&lt;00:14,  1.17s/it]
- 62%|██████▏   | 16/26 [00:18&lt;00:08,  1.21it/s]
- 65%|██████▌   | 17/26 [00:21&lt;00:11,  1.33s/it]
- 69%|██████▉   | 18/26 [00:22&lt;00:09,  1.23s/it]
- 77%|███████▋  | 20/26 [00:22&lt;00:05,  1.14it/s]
- 81%|████████  | 21/26 [00:25&lt;00:06,  1.23s/it]
- 85%|████████▍ | 22/26 [00:26&lt;00:04,  1.22s/it]
+  4%|▍         | 1/26 [00:04&lt;01:49,  4.36s/it]
+ 15%|█▌        | 4/26 [00:04&lt;00:18,  1.16it/s]
+ 23%|██▎       | 6/26 [00:08&lt;00:27,  1.40s/it]
+ 27%|██▋       | 7/26 [00:08&lt;00:20,  1.10s/it]
+ 31%|███       | 8/26 [00:09&lt;00:16,  1.07it/s]
+ 35%|███▍      | 9/26 [00:12&lt;00:28,  1.67s/it]
+ 38%|███▊      | 10/26 [00:13&lt;00:20,  1.27s/it]
+ 46%|████▌     | 12/26 [00:14&lt;00:12,  1.09it/s]
+ 50%|█████     | 13/26 [00:17&lt;00:18,  1.46s/it]
+ 54%|█████▍    | 14/26 [00:17&lt;00:14,  1.21s/it]
+ 58%|█████▊    | 15/26 [00:18&lt;00:10,  1.04it/s]
+ 62%|██████▏   | 16/26 [00:18&lt;00:08,  1.19it/s]
+ 65%|██████▌   | 17/26 [00:21&lt;00:13,  1.52s/it]
+ 69%|██████▉   | 18/26 [00:22&lt;00:09,  1.21s/it]
+ 73%|███████▎  | 19/26 [00:22&lt;00:06,  1.10it/s]
+ 77%|███████▋  | 20/26 [00:23&lt;00:05,  1.19it/s]
+ 81%|████████  | 21/26 [00:26&lt;00:07,  1.46s/it]
+ 85%|████████▍ | 22/26 [00:26&lt;00:04,  1.15s/it]
  88%|████████▊ | 23/26 [00:26&lt;00:02,  1.07it/s]
- 92%|█████████▏| 24/26 [00:26&lt;00:01,  1.28it/s]
- 96%|█████████▌| 25/26 [00:27&lt;00:00,  1.39it/s]
-100%|██████████| 26/26 [00:27&lt;00:00,  1.06s/it]
+ 92%|█████████▏| 24/26 [00:27&lt;00:01,  1.36it/s]
+ 96%|█████████▌| 25/26 [00:27&lt;00:00,  1.36it/s]
+100%|██████████| 26/26 [00:27&lt;00:00,  1.07s/it]
 
   0%|          | 0/26 [00:00&lt;?, ?it/s]
-  4%|▍         | 1/26 [00:02&lt;00:50,  2.02s/it]
-  8%|▊         | 2/26 [00:02&lt;00:22,  1.09it/s]
- 12%|█▏        | 3/26 [00:02&lt;00:13,  1.66it/s]
- 15%|█▌        | 4/26 [00:02&lt;00:09,  2.41it/s]
- 19%|█▉        | 5/26 [00:04&lt;00:18,  1.12it/s]
- 27%|██▋       | 7/26 [00:04&lt;00:09,  1.94it/s]
- 31%|███       | 8/26 [00:04&lt;00:07,  2.25it/s]
- 35%|███▍      | 9/26 [00:06&lt;00:14,  1.21it/s]
- 46%|████▌     | 12/26 [00:06&lt;00:06,  2.28it/s]
- 50%|█████     | 13/26 [00:08&lt;00:09,  1.38it/s]
- 58%|█████▊    | 15/26 [00:09&lt;00:05,  1.93it/s]
- 65%|██████▌   | 17/26 [00:11&lt;00:06,  1.50it/s]
- 73%|███████▎  | 19/26 [00:11&lt;00:03,  2.05it/s]
- 77%|███████▋  | 20/26 [00:11&lt;00:02,  2.29it/s]
- 81%|████████  | 21/26 [00:13&lt;00:03,  1.36it/s]
- 88%|████████▊ | 23/26 [00:13&lt;00:01,  2.06it/s]
- 96%|█████████▌| 25/26 [00:13&lt;00:00,  2.47it/s]
-100%|██████████| 26/26 [00:13&lt;00:00,  1.86it/s]
+  4%|▍         | 1/26 [00:08&lt;03:35,  8.62s/it]
+  8%|▊         | 2/26 [00:08&lt;01:27,  3.63s/it]
+ 12%|█▏        | 3/26 [00:09&lt;00:48,  2.12s/it]
+ 19%|█▉        | 5/26 [00:17&lt;01:08,  3.25s/it]
+ 23%|██▎       | 6/26 [00:17&lt;00:48,  2.42s/it]
+ 27%|██▋       | 7/26 [00:18&lt;00:34,  1.82s/it]
+ 31%|███       | 8/26 [00:18&lt;00:24,  1.36s/it]
+ 35%|███▍      | 9/26 [00:25&lt;00:54,  3.20s/it]
+ 38%|███▊      | 10/26 [00:26&lt;00:41,  2.57s/it]
+ 42%|████▏     | 11/26 [00:27&lt;00:28,  1.89s/it]
+ 46%|████▌     | 12/26 [00:27&lt;00:20,  1.45s/it]
+ 50%|█████     | 13/26 [00:34&lt;00:40,  3.11s/it]
+ 54%|█████▍    | 14/26 [00:36&lt;00:31,  2.61s/it]
+ 62%|██████▏   | 16/26 [00:36&lt;00:14,  1.49s/it]
+ 65%|██████▌   | 17/26 [00:42&lt;00:24,  2.74s/it]
+ 69%|██████▉   | 18/26 [00:44&lt;00:19,  2.40s/it]
+ 73%|███████▎  | 19/26 [00:45&lt;00:14,  2.06s/it]
+ 77%|███████▋  | 20/26 [00:45&lt;00:09,  1.60s/it]
+ 81%|████████  | 21/26 [00:52&lt;00:14,  2.86s/it]
+ 85%|████████▍ | 22/26 [00:53&lt;00:09,  2.40s/it]
+ 88%|████████▊ | 23/26 [00:54&lt;00:05,  1.94s/it]
+ 92%|█████████▏| 24/26 [00:54&lt;00:02,  1.46s/it]
+ 96%|█████████▌| 25/26 [00:55&lt;00:01,  1.45s/it]
+100%|██████████| 26/26 [00:55&lt;00:00,  2.15s/it]
+
+  0%|          | 0/26 [00:00&lt;?, ?it/s]
+  4%|▍         | 1/26 [00:04&lt;01:44,  4.18s/it]
+ 12%|█▏        | 3/26 [00:04&lt;00:27,  1.20s/it]
+ 15%|█▌        | 4/26 [00:04&lt;00:18,  1.18it/s]
+ 19%|█▉        | 5/26 [00:08&lt;00:38,  1.84s/it]
+ 27%|██▋       | 7/26 [00:09&lt;00:20,  1.07s/it]
+ 31%|███       | 8/26 [00:09&lt;00:15,  1.18it/s]
+ 35%|███▍      | 9/26 [00:12&lt;00:26,  1.56s/it]
+ 38%|███▊      | 10/26 [00:13&lt;00:20,  1.31s/it]
+ 46%|████▌     | 12/26 [00:13&lt;00:11,  1.21it/s]
+ 50%|█████     | 13/26 [00:17&lt;00:18,  1.40s/it]
+ 54%|█████▍    | 14/26 [00:17&lt;00:15,  1.25s/it]
+ 58%|█████▊    | 15/26 [00:18&lt;00:10,  1.04it/s]
+ 62%|██████▏   | 16/26 [00:18&lt;00:07,  1.32it/s]
+ 65%|██████▌   | 17/26 [00:21&lt;00:13,  1.51s/it]
+ 69%|██████▉   | 18/26 [00:22&lt;00:10,  1.26s/it]
+ 73%|███████▎  | 19/26 [00:22&lt;00:06,  1.08it/s]
+ 77%|███████▋  | 20/26 [00:22&lt;00:04,  1.31it/s]
+ 81%|████████  | 21/26 [00:26&lt;00:07,  1.56s/it]
+ 85%|████████▍ | 22/26 [00:26&lt;00:04,  1.20s/it]
+ 88%|████████▊ | 23/26 [00:26&lt;00:02,  1.09it/s]
+ 96%|█████████▌| 25/26 [00:27&lt;00:00,  1.40it/s]
+100%|██████████| 26/26 [00:27&lt;00:00,  1.07s/it]
 
 [&lt;Axes: title={'center': '(-pi, pi) default'}, xlabel='Radians axis (Rad)', ylabel='Radius axis (k_A^-1)'&gt;, &lt;Axes: title={'center': '(0, 1)'}, xlabel='Radians axis (Rad)', ylabel='Radius axis (k_A^-1)'&gt;, &lt;Axes: title={'center': '(0, 4pi)'}, xlabel='Radians axis (Rad)', ylabel='Radius axis (k_A^-1)'&gt;, &lt;Axes: title={'center': '(pi, 0)'}, xlabel='Radians axis (Rad)', ylabel='Radius axis (k_A^-1)'&gt;]
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (2 minutes 52.013 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (5 minutes 24.011 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-processing-azimuthal-integration-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/c2c8767352005adbfb22222ef3e5a504/azimuthal_integration.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">azimuthal_integration.ipynb</span></code></a></p>
@@ -1332,7 +1366,7 @@ The range can be increasing, decreasing, and does not need to be a multiple of p
             
             
               
-                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <dialog id="pst-secondary-sidebar-modal" tabindex="-1"></dialog>
                 <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
 
@@ -1374,8 +1408,8 @@ The range can be increasing, decreasing, and does not need to be a multiple of p
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1408,7 +1442,7 @@ The range can be increasing, decreasing, and does not need to be a multiple of p
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.23.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.24.0.
 </p></div>
       
     </div>

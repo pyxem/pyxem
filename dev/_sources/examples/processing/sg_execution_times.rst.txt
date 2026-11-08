@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**04:15.503** total execution time for 9 files **from examples/processing**:
+**07:52.448** total execution time for 9 files **from examples/processing**:
 
 .. container::
 
@@ -33,29 +33,29 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_examples_processing_azimuthal_integration.py` (``azimuthal_integration.py``)
-     - 02:52.013
+     - 05:24.011
      - 0.0
    * - :ref:`sphx_glr_examples_processing_background_subtraction.py` (``background_subtraction.py``)
-     - 00:35.538
+     - 01:08.544
      - 0.0
    * - :ref:`sphx_glr_examples_processing_calibrating_recip_space.py` (``calibrating_recip_space.py``)
-     - 00:25.347
+     - 00:41.351
      - 0.0
    * - :ref:`sphx_glr_examples_processing_vector_finding.py` (``vector_finding.py``)
-     - 00:08.748
+     - 00:15.682
      - 0.0
    * - :ref:`sphx_glr_examples_processing_determining_ellipticity.py` (``determining_ellipticity.py``)
-     - 00:05.177
+     - 00:08.849
      - 0.0
    * - :ref:`sphx_glr_examples_processing_template_matching.py` (``template_matching.py``)
-     - 00:04.934
+     - 00:07.729
      - 0.0
    * - :ref:`sphx_glr_examples_processing_centering_the_zero_beam.py` (``centering_the_zero_beam.py``)
-     - 00:01.748
+     - 00:02.922
      - 0.0
    * - :ref:`sphx_glr_examples_processing_circular_hough_transform.py` (``circular_hough_transform.py``)
-     - 00:01.210
+     - 00:02.004
      - 0.0
    * - :ref:`sphx_glr_examples_processing_filtering_data.py` (``filtering_data.py``)
-     - 00:00.788
+     - 00:01.357
      - 0.0

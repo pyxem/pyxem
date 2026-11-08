@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:11.249** total execution time for 4 files **from examples/virtual_imaging**:
+**00:19.185** total execution time for 4 files **from examples/virtual_imaging**:
 
 .. container::
 
@@ -33,14 +33,14 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_examples_virtual_imaging_interactive_virtual_images.py` (``interactive_virtual_images.py``)
-     - 00:05.293
+     - 00:09.137
      - 0.0
    * - :ref:`sphx_glr_examples_virtual_imaging_other_virtual_imaging.py` (``other_virtual_imaging.py``)
-     - 00:03.753
+     - 00:06.242
      - 0.0
    * - :ref:`sphx_glr_examples_virtual_imaging_creating_virtual_images_from_vectors.py` (``creating_virtual_images_from_vectors.py``)
-     - 00:01.447
+     - 00:02.539
      - 0.0
    * - :ref:`sphx_glr_examples_virtual_imaging_creating_a_segmented_detector.py` (``creating_a_segmented_detector.py``)
-     - 00:00.756
+     - 00:01.267
      - 0.0

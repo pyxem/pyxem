@@ -26,8 +26,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d75fae25" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
@@ -40,10 +40,10 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../_static/scripts/fontawesome.js?digest=18bd87630a240e9c25be"></script>
+  <script defer src="../../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
     <script src="../../_static/documentation_options.js?v=88e4c0c0"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
@@ -55,7 +55,7 @@
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'examples/processing/template_matching';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.23.0';
+        DOCUMENTATION_OPTIONS.theme_version = '0.24.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://pyxem.org/dev/_static/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.21';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
@@ -121,7 +121,7 @@
   
     <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
     <span class="fa-solid fa-bars"></span>
   </button>
   
@@ -252,14 +252,14 @@
 
 <div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
   <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
-    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
   </button>
   <ul class="dropdown-menu dropdown-menu-end">
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
   </ul>
 </div></div>
       
@@ -294,7 +294,7 @@
   
 
   
-    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page" aria-expanded="false" aria-controls="pst-secondary-sidebar-modal">
       <span class="fa-solid fa-outdent"></span>
     </button>
   
@@ -308,7 +308,7 @@
       
       
       
-      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
       <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
 
@@ -386,14 +386,14 @@
 
 <div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
   <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
-    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
   </button>
   <ul class="dropdown-menu dropdown-menu-end">
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
   </ul>
 </div></div>
         
@@ -972,7 +972,7 @@
     
     <li class="breadcrumb-item breadcrumb-home">
       <a href="../../index.html" class="nav-link" aria-label="Home">
-        <i class="fa-solid fa-home"></i>
+        <i class="fa-solid fa-house"></i>
       </a>
     </li>
     
@@ -1009,7 +1009,7 @@ to download the full example code.</p>
 <section class="sphx-glr-example-title" id="template-matching">
 <span id="sphx-glr-examples-processing-template-matching-py"></span><h1>Template Matching<a class="headerlink" href="#template-matching" title="Link to this heading">#</a></h1>
 <p>This example shows how the template matching is done in pyxem to find peaks in a diffraction pattern.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span><span class="w">
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="kn">import</span><span class="w"> </span><a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/index.html#module-numpy"><span class="nn">numpy</span></a><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span><span class="w">
 </span><span class="kn">import</span><span class="w"> </span><span class="nn">hyperspy</span><span class="nn">.</span><span class="nn">api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">hs</span><span class="w">
 </span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="nn">.</span><span class="nn">pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span><span class="w">
 </span><span class="kn">from</span><span class="w"> </span><span class="nn">skimage</span><span class="nn">.</span><span class="nn">morphology</span><span class="w"> </span><span class="kn">import</span> <a class="sphx-glr-backref-module-skimage-morphology sphx-glr-backref-type-py-function reference external" href="https://scikit-image.org/docs/stable/api/skimage.morphology.html#skimage.morphology.disk" title="skimage.morphology.disk"><span class="n">disk</span></a><span class="w">
@@ -1044,23 +1044,26 @@ wrong shape, the behavior can be unexpected.</p>
 </span>        <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D"><span class="n">template_padded</span></a><span class="o">.</span><span class="n">inav</span><span class="p">[</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="tuple"><span class="n">ind</span></a><span class="p">]</span><span class="p">,</span><span class="w">
 </span>        <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D"><span class="n">template_padded_large</span></a><span class="o">.</span><span class="n">inav</span><span class="p">[</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="tuple"><span class="n">ind</span></a><span class="p">]</span><span class="p">,</span><span class="w">
 </span>    <span class="p">]</span><span class="p">,</span><span class="w">
-</span>    <span class="n">label</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;</span><span class="s2">Signal</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="s2">Normal Window</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="s2">Large Window</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="s2">Very Large Window</span><span class="s2">&quot;</span><span class="p">]</span><span class="p">,</span><span class="w">
+</span>    <span class="n">label</span><span class="o">=</span><span class="p">[</span><span class="s2">"</span><span class="s2">Signal</span><span class="s2">"</span><span class="p">,</span> <span class="s2">"</span><span class="s2">Normal Window</span><span class="s2">"</span><span class="p">,</span> <span class="s2">"</span><span class="s2">Large Window</span><span class="s2">"</span><span class="p">,</span> <span class="s2">"</span><span class="s2">Very Large Window</span><span class="s2">"</span><span class="p">]</span><span class="p">,</span><span class="w">
 </span>    <span class="n">tight_layout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="w">
 </span>    <span class="n">per_row</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="w">
 </span><span class="p">)</span><span class="w">
 </span></pre></div></div>
-<img src="../../_images/sphx_glr_template_matching_001.png" srcset="../../_images/sphx_glr_template_matching_001.png" alt="Signal, Normal Window, Large Window, Very Large Window" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/51 [00:00&lt;?, ?it/s]
- 65%|██████▍   | 33/51 [00:00&lt;00:00, 276.98it/s]
-100%|██████████| 51/51 [00:00&lt;00:00, 332.29it/s]
+<img alt="Signal, Normal Window, Large Window, Very Large Window" class="sphx-glr-single-img" src="../../_images/sphx_glr_template_matching_001.png" srcset="../../_images/sphx_glr_template_matching_001.png"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/51 [00:00&lt;?, ?it/s]
+ 33%|███▎      | 17/51 [00:00&lt;00:00, 142.84it/s]
+ 80%|████████  | 41/51 [00:00&lt;00:00, 179.24it/s]
+100%|██████████| 51/51 [00:00&lt;00:00, 201.71it/s]
 
   0%|          | 0/51 [00:00&lt;?, ?it/s]
- 49%|████▉     | 25/51 [00:00&lt;00:00, 243.46it/s]
-100%|██████████| 51/51 [00:00&lt;00:00, 299.38it/s]
+ 33%|███▎      | 17/51 [00:00&lt;00:00, 140.48it/s]
+ 80%|████████  | 41/51 [00:00&lt;00:00, 174.64it/s]
+100%|██████████| 51/51 [00:00&lt;00:00, 194.81it/s]
 
   0%|          | 0/51 [00:00&lt;?, ?it/s]
- 33%|███▎      | 17/51 [00:00&lt;00:00, 160.42it/s]
- 80%|████████  | 41/51 [00:00&lt;00:00, 190.62it/s]
-100%|██████████| 51/51 [00:00&lt;00:00, 211.00it/s]
+ 18%|█▊        | 9/51 [00:00&lt;00:00, 82.45it/s]
+ 49%|████▉     | 25/51 [00:00&lt;00:00, 121.51it/s]
+ 80%|████████  | 41/51 [00:00&lt;00:00, 133.40it/s]
+100%|██████████| 51/51 [00:00&lt;00:00, 144.55it/s]
 
 [&lt;Axes: title={'center': 'Signal'}, xlabel='kx axis (px)', ylabel='ky axis (px)'&gt;, &lt;Axes: title={'center': 'Normal Window'}, xlabel='kx axis (px)', ylabel='ky axis (px)'&gt;, &lt;Axes: title={'center': 'Large Window'}, xlabel='kx axis (px)', ylabel='ky axis (px)'&gt;, &lt;Axes: title={'center': 'Very Large Window'}, xlabel='kx axis (px)', ylabel='ky axis (px)'&gt;]
 </pre></div>
@@ -1107,54 +1110,64 @@ effect of the imposed square window. This can be seen in the intensity of the di
 </span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="tuple"><span class="n">ind</span></a> <span class="o">=</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span><span class="w">
 </span><a class="sphx-glr-backref-module-hyperspy-api-plot sphx-glr-backref-type-py-function reference external" href="https://hyperspy.org/hyperspy-doc/current/reference/api.plot/index.html#hyperspy.api.plot.plot_images" title="hyperspy.api.plot.plot_images"><span class="n">hs</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_images</span></a><span class="p">(</span><span class="w">
 </span>    <span class="p">[</span><a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D"><span class="n">amorphous_data</span></a><span class="o">.</span><span class="n">inav</span><span class="p">[</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="tuple"><span class="n">ind</span></a><span class="p">]</span><span class="p">,</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D"><span class="n">template_normal</span></a><span class="o">.</span><span class="n">inav</span><span class="p">[</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="tuple"><span class="n">ind</span></a><span class="p">]</span><span class="p">,</span> <a class="sphx-glr-backref-module-pyxem-signals sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../reference/generated/pyxem.signals.Diffraction2D.html#pyxem.signals.Diffraction2D" title="pyxem.signals.Diffraction2D"><span class="n">template_circular</span></a><span class="o">.</span><span class="n">inav</span><span class="p">[</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="tuple"><span class="n">ind</span></a><span class="p">]</span><span class="p">]</span><span class="p">,</span><span class="w">
-</span>    <span class="n">label</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;</span><span class="s2">Signal</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="s2">Square Window</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="s2">Circular Window</span><span class="s2">&quot;</span><span class="p">]</span><span class="p">,</span><span class="w">
+</span>    <span class="n">label</span><span class="o">=</span><span class="p">[</span><span class="s2">"</span><span class="s2">Signal</span><span class="s2">"</span><span class="p">,</span> <span class="s2">"</span><span class="s2">Square Window</span><span class="s2">"</span><span class="p">,</span> <span class="s2">"</span><span class="s2">Circular Window</span><span class="s2">"</span><span class="p">]</span><span class="p">,</span><span class="w">
 </span>    <span class="n">tight_layout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="w">
 </span>    <span class="n">per_row</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span><span class="w">
 </span>    <span class="n">vmin</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">]</span><span class="p">,</span><span class="w">
 </span>    <span class="n">fig</span><span class="o">=</span><a class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.figure.Figure.html#matplotlib.figure.Figure" title="matplotlib.figure.Figure"><span class="n">f</span></a><span class="p">,</span><span class="w">
 </span><span class="p">)</span><span class="w">
 </span></pre></div></div>
-<img src="../../_images/sphx_glr_template_matching_002.png" srcset="../../_images/sphx_glr_template_matching_002.png" alt="Signal, Square Window, Circular Window" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Make test data:   0%|          | 0/100 [00:00&lt;?, ?it/s]
-Make test data:   4%|▍         | 4/100 [00:00&lt;00:02, 35.14it/s]
-Make test data:   8%|▊         | 8/100 [00:00&lt;00:02, 35.50it/s]
-Make test data:  12%|█▏        | 12/100 [00:00&lt;00:02, 35.29it/s]
-Make test data:  16%|█▌        | 16/100 [00:00&lt;00:02, 35.57it/s]
-Make test data:  20%|██        | 20/100 [00:00&lt;00:02, 35.20it/s]
-Make test data:  24%|██▍       | 24/100 [00:00&lt;00:02, 35.13it/s]
-Make test data:  28%|██▊       | 28/100 [00:00&lt;00:02, 35.06it/s]
-Make test data:  32%|███▏      | 32/100 [00:00&lt;00:01, 35.19it/s]
-Make test data:  36%|███▌      | 36/100 [00:01&lt;00:01, 35.73it/s]
-Make test data:  40%|████      | 40/100 [00:01&lt;00:01, 35.91it/s]
-Make test data:  44%|████▍     | 44/100 [00:01&lt;00:01, 35.58it/s]
-Make test data:  48%|████▊     | 48/100 [00:01&lt;00:01, 35.33it/s]
-Make test data:  52%|█████▏    | 52/100 [00:01&lt;00:01, 35.33it/s]
-Make test data:  56%|█████▌    | 56/100 [00:01&lt;00:01, 35.19it/s]
-Make test data:  60%|██████    | 60/100 [00:01&lt;00:01, 34.75it/s]
-Make test data:  64%|██████▍   | 64/100 [00:01&lt;00:01, 34.82it/s]
-Make test data:  68%|██████▊   | 68/100 [00:01&lt;00:00, 35.06it/s]
-Make test data:  72%|███████▏  | 72/100 [00:02&lt;00:00, 35.24it/s]
-Make test data:  76%|███████▌  | 76/100 [00:02&lt;00:01, 19.24it/s]
-Make test data:  80%|████████  | 80/100 [00:02&lt;00:00, 22.33it/s]
-Make test data:  84%|████████▍ | 84/100 [00:02&lt;00:00, 24.95it/s]
-Make test data:  88%|████████▊ | 88/100 [00:02&lt;00:00, 27.17it/s]
-Make test data:  92%|█████████▏| 92/100 [00:02&lt;00:00, 29.18it/s]
-Make test data:  96%|█████████▌| 96/100 [00:03&lt;00:00, 30.69it/s]
-Make test data: 100%|██████████| 100/100 [00:03&lt;00:00, 31.98it/s]
-Make test data: 100%|██████████| 100/100 [00:03&lt;00:00, 31.69it/s]
+<img alt="Signal, Square Window, Circular Window" class="sphx-glr-single-img" src="../../_images/sphx_glr_template_matching_002.png" srcset="../../_images/sphx_glr_template_matching_002.png"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Make test data:   0%|          | 0/100 [00:00&lt;?, ?it/s]
+Make test data:   3%|▎         | 3/100 [00:00&lt;00:04, 21.40it/s]
+Make test data:   6%|▌         | 6/100 [00:00&lt;00:04, 21.80it/s]
+Make test data:   9%|▉         | 9/100 [00:00&lt;00:04, 21.89it/s]
+Make test data:  12%|█▏        | 12/100 [00:00&lt;00:04, 21.81it/s]
+Make test data:  15%|█▌        | 15/100 [00:00&lt;00:03, 21.85it/s]
+Make test data:  18%|█▊        | 18/100 [00:00&lt;00:03, 21.89it/s]
+Make test data:  21%|██        | 21/100 [00:00&lt;00:03, 21.74it/s]
+Make test data:  24%|██▍       | 24/100 [00:01&lt;00:03, 21.79it/s]
+Make test data:  27%|██▋       | 27/100 [00:01&lt;00:03, 21.85it/s]
+Make test data:  30%|███       | 30/100 [00:01&lt;00:03, 21.73it/s]
+Make test data:  33%|███▎      | 33/100 [00:01&lt;00:03, 21.78it/s]
+Make test data:  36%|███▌      | 36/100 [00:01&lt;00:02, 21.81it/s]
+Make test data:  39%|███▉      | 39/100 [00:01&lt;00:02, 21.72it/s]
+Make test data:  42%|████▏     | 42/100 [00:01&lt;00:02, 21.70it/s]
+Make test data:  45%|████▌     | 45/100 [00:02&lt;00:02, 21.75it/s]
+Make test data:  48%|████▊     | 48/100 [00:02&lt;00:02, 21.70it/s]
+Make test data:  51%|█████     | 51/100 [00:02&lt;00:02, 21.77it/s]
+Make test data:  54%|█████▍    | 54/100 [00:02&lt;00:02, 21.82it/s]
+Make test data:  57%|█████▋    | 57/100 [00:02&lt;00:01, 21.71it/s]
+Make test data:  60%|██████    | 60/100 [00:02&lt;00:01, 21.73it/s]
+Make test data:  63%|██████▎   | 63/100 [00:02&lt;00:01, 21.73it/s]
+Make test data:  66%|██████▌   | 66/100 [00:03&lt;00:01, 21.62it/s]
+Make test data:  69%|██████▉   | 69/100 [00:03&lt;00:01, 21.63it/s]
+Make test data:  72%|███████▏  | 72/100 [00:03&lt;00:01, 21.53it/s]
+Make test data:  75%|███████▌  | 75/100 [00:03&lt;00:01, 13.86it/s]
+Make test data:  78%|███████▊  | 78/100 [00:03&lt;00:01, 15.60it/s]
+Make test data:  81%|████████  | 81/100 [00:03&lt;00:01, 17.04it/s]
+Make test data:  84%|████████▍ | 84/100 [00:04&lt;00:00, 18.16it/s]
+Make test data:  87%|████████▋ | 87/100 [00:04&lt;00:00, 19.13it/s]
+Make test data:  90%|█████████ | 90/100 [00:04&lt;00:00, 19.78it/s]
+Make test data:  93%|█████████▎| 93/100 [00:04&lt;00:00, 20.17it/s]
+Make test data:  96%|█████████▌| 96/100 [00:04&lt;00:00, 20.52it/s]
+Make test data:  99%|█████████▉| 99/100 [00:04&lt;00:00, 20.73it/s]
+Make test data: 100%|██████████| 100/100 [00:04&lt;00:00, 20.52it/s]
 
   0%|          | 0/51 [00:00&lt;?, ?it/s]
- 49%|████▉     | 25/51 [00:00&lt;00:00, 236.92it/s]
-100%|██████████| 51/51 [00:00&lt;00:00, 288.36it/s]
+ 33%|███▎      | 17/51 [00:00&lt;00:00, 140.26it/s]
+ 80%|████████  | 41/51 [00:00&lt;00:00, 168.91it/s]
+100%|██████████| 51/51 [00:00&lt;00:00, 184.38it/s]
 
   0%|          | 0/51 [00:00&lt;?, ?it/s]
- 45%|████▌     | 23/51 [00:00&lt;00:00, 227.30it/s]
- 96%|█████████▌| 49/51 [00:00&lt;00:00, 243.56it/s]
-100%|██████████| 51/51 [00:00&lt;00:00, 244.74it/s]
+ 18%|█▊        | 9/51 [00:00&lt;00:00, 85.12it/s]
+ 49%|████▉     | 25/51 [00:00&lt;00:00, 122.22it/s]
+ 80%|████████  | 41/51 [00:00&lt;00:00, 133.81it/s]
+100%|██████████| 51/51 [00:00&lt;00:00, 139.64it/s]
 
 [&lt;Axes: title={'center': 'Signal'}, xlabel='kx axis (px)', ylabel='ky axis (px)'&gt;, &lt;Axes: title={'center': 'Square Window'}, xlabel='kx axis (px)', ylabel='ky axis (px)'&gt;, &lt;Axes: title={'center': 'Circular Window'}, xlabel='kx axis (px)', ylabel='ky axis (px)'&gt;]
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 4.934 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 7.729 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-processing-template-matching-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/f13c95209c33a1e21e494c1045badd42/template_matching.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">template_matching.ipynb</span></code></a></p>
@@ -1204,7 +1217,7 @@ Make test data: 100%|██████████| 100/100 [00:03&lt;00:00, 31
             
             
               
-                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <dialog id="pst-secondary-sidebar-modal" tabindex="-1"></dialog>
                 <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
 
@@ -1261,8 +1274,8 @@ Make test data: 100%|██████████| 100/100 [00:03&lt;00:00, 31
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1295,7 +1308,7 @@ Make test data: 100%|██████████| 100/100 [00:03&lt;00:00, 31
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.23.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.24.0.
 </p></div>
       
     </div>

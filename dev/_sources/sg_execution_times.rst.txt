@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**16:19.292** total execution time for 32 files **from all galleries**:
+**25:03.626** total execution time for 32 files **from all galleries**:
 
 .. container::
 
@@ -32,99 +32,99 @@ Computation times
    * - Example
      - Time
      - Mem (MB)
-   * - :ref:`sphx_glr_examples_standards_flat_ewalds_sphere_assumption.py` (``../examples/standards/flat_ewalds_sphere_assumption.py``)
-     - 03:40.924
-     - 0.0
    * - :ref:`sphx_glr_examples_orientation_mapping_multi_phase_orientation.py` (``../examples/orientation_mapping/multi_phase_orientation.py``)
-     - 03:16.058
+     - 05:59.918
      - 0.0
    * - :ref:`sphx_glr_examples_processing_azimuthal_integration.py` (``../examples/processing/azimuthal_integration.py``)
-     - 02:52.013
+     - 05:24.011
+     - 0.0
+   * - :ref:`sphx_glr_examples_standards_flat_ewalds_sphere_assumption.py` (``../examples/standards/flat_ewalds_sphere_assumption.py``)
+     - 04:11.092
      - 0.0
    * - :ref:`sphx_glr_examples_amorphous_characterization_FEM.py` (``../examples/amorphous_characterization/FEM.py``)
-     - 01:30.299
+     - 02:03.053
      - 0.0
    * - :ref:`sphx_glr_examples_vectors_glass_symmetry.py` (``../examples/vectors/glass_symmetry.py``)
-     - 01:05.529
-     - 0.0
-   * - :ref:`sphx_glr_examples_loading_data_loading_mrc_files.py` (``../examples/loading_data/loading_mrc_files.py``)
-     - 00:40.822
+     - 01:21.573
      - 0.0
    * - :ref:`sphx_glr_examples_processing_background_subtraction.py` (``../examples/processing/background_subtraction.py``)
-     - 00:35.538
+     - 01:08.544
      - 0.0
    * - :ref:`sphx_glr_examples_vectors_clustering_vectors.py` (``../examples/vectors/clustering_vectors.py``)
-     - 00:27.555
+     - 00:46.310
      - 0.0
    * - :ref:`sphx_glr_examples_processing_calibrating_recip_space.py` (``../examples/processing/calibrating_recip_space.py``)
-     - 00:25.347
+     - 00:41.351
+     - 0.0
+   * - :ref:`sphx_glr_examples_loading_data_loading_mrc_files.py` (``../examples/loading_data/loading_mrc_files.py``)
+     - 00:32.570
      - 0.0
    * - :ref:`sphx_glr_examples_strain_mapping_strain_mapping.py` (``../examples/strain_mapping/strain_mapping.py``)
-     - 00:21.909
+     - 00:30.924
      - 0.0
    * - :ref:`sphx_glr_examples_orientation_mapping_single_phase_orientation.py` (``../examples/orientation_mapping/single_phase_orientation.py``)
-     - 00:16.871
+     - 00:30.882
      - 0.0
    * - :ref:`sphx_glr_examples_processing_vector_finding.py` (``../examples/processing/vector_finding.py``)
-     - 00:08.748
+     - 00:15.682
      - 0.0
    * - :ref:`sphx_glr_examples_orientation_mapping_on_zone_orientation.py` (``../examples/orientation_mapping/on_zone_orientation.py``)
-     - 00:08.685
+     - 00:15.573
      - 0.0
    * - :ref:`sphx_glr_examples_plotting_interactive_line_profile.py` (``../examples/plotting/interactive_line_profile.py``)
-     - 00:05.548
-     - 0.0
-   * - :ref:`sphx_glr_examples_loading_data_setting_scales_and_metadata.py` (``../examples/loading_data/setting_scales_and_metadata.py``)
-     - 00:05.406
+     - 00:09.566
      - 0.0
    * - :ref:`sphx_glr_examples_virtual_imaging_interactive_virtual_images.py` (``../examples/virtual_imaging/interactive_virtual_images.py``)
-     - 00:05.293
+     - 00:09.137
+     - 0.0
+   * - :ref:`sphx_glr_examples_loading_data_setting_scales_and_metadata.py` (``../examples/loading_data/setting_scales_and_metadata.py``)
+     - 00:09.121
      - 0.0
    * - :ref:`sphx_glr_examples_processing_determining_ellipticity.py` (``../examples/processing/determining_ellipticity.py``)
-     - 00:05.177
+     - 00:08.849
      - 0.0
    * - :ref:`sphx_glr_examples_processing_template_matching.py` (``../examples/processing/template_matching.py``)
-     - 00:04.934
+     - 00:07.729
      - 0.0
    * - :ref:`sphx_glr_examples_virtual_imaging_other_virtual_imaging.py` (``../examples/virtual_imaging/other_virtual_imaging.py``)
-     - 00:03.753
-     - 0.0
-   * - :ref:`sphx_glr_examples_dpc_electric_field_dpc.py` (``../examples/dpc/electric_field_dpc.py``)
-     - 00:02.550
+     - 00:06.242
      - 0.0
    * - :ref:`sphx_glr_examples_vectors_slicing_vectors.py` (``../examples/vectors/slicing_vectors.py``)
-     - 00:02.354
+     - 00:03.866
      - 0.0
-   * - :ref:`sphx_glr_examples_vectors_masking_vectors.py` (``../examples/vectors/masking_vectors.py``)
-     - 00:01.920
+   * - :ref:`sphx_glr_examples_dpc_electric_field_dpc.py` (``../examples/dpc/electric_field_dpc.py``)
+     - 00:03.799
      - 0.0
    * - :ref:`sphx_glr_examples_standards_pixel_coodinates.py` (``../examples/standards/pixel_coodinates.py``)
-     - 00:01.844
+     - 00:03.352
+     - 0.0
+   * - :ref:`sphx_glr_examples_vectors_masking_vectors.py` (``../examples/vectors/masking_vectors.py``)
+     - 00:03.326
      - 0.0
    * - :ref:`sphx_glr_examples_processing_centering_the_zero_beam.py` (``../examples/processing/centering_the_zero_beam.py``)
-     - 00:01.748
+     - 00:02.922
      - 0.0
    * - :ref:`sphx_glr_examples_dpc_magnetic_dpc.py` (``../examples/dpc/magnetic_dpc.py``)
-     - 00:01.743
+     - 00:02.668
      - 0.0
    * - :ref:`sphx_glr_examples_virtual_imaging_creating_virtual_images_from_vectors.py` (``../examples/virtual_imaging/creating_virtual_images_from_vectors.py``)
-     - 00:01.447
+     - 00:02.539
      - 0.0
    * - :ref:`sphx_glr_examples_processing_circular_hough_transform.py` (``../examples/processing/circular_hough_transform.py``)
-     - 00:01.210
-     - 0.0
-   * - :ref:`sphx_glr_examples_plotting_fast_plotting_tricks.py` (``../examples/plotting/fast_plotting_tricks.py``)
-     - 00:01.018
+     - 00:02.004
      - 0.0
    * - :ref:`sphx_glr_examples_plotting_plotting_a_diffraction_pattern.py` (``../examples/plotting/plotting_a_diffraction_pattern.py``)
-     - 00:00.967
+     - 00:01.754
+     - 0.0
+   * - :ref:`sphx_glr_examples_plotting_fast_plotting_tricks.py` (``../examples/plotting/fast_plotting_tricks.py``)
+     - 00:01.637
      - 0.0
    * - :ref:`sphx_glr_examples_processing_filtering_data.py` (``../examples/processing/filtering_data.py``)
-     - 00:00.788
+     - 00:01.357
      - 0.0
    * - :ref:`sphx_glr_examples_virtual_imaging_creating_a_segmented_detector.py` (``../examples/virtual_imaging/creating_a_segmented_detector.py``)
-     - 00:00.756
+     - 00:01.267
      - 0.0
    * - :ref:`sphx_glr_examples_plotting_plotting_different_units.py` (``../examples/plotting/plotting_different_units.py``)
-     - 00:00.538
+     - 00:01.010
      - 0.0

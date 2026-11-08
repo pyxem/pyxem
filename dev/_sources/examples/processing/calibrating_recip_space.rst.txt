@@ -57,8 +57,8 @@ any questions.
 
  .. code-block:: none
 
-      0%|                                               | 0.00/263k [00:00<?, ?B/s]      6%|██▎                                   | 16.4k/263k [00:00<00:02, 96.0kB/s]     16%|██████                                 | 41.0k/263k [00:00<00:01, 135kB/s]     42%|████████████████▊                       | 111k/263k [00:00<00:00, 266kB/s]     81%|████████████████████████████████▍       | 213k/263k [00:00<00:00, 394kB/s]      0%|                                               | 0.00/263k [00:00<?, ?B/s]    100%|███████████████████████████████████████| 263k/263k [00:00<00:00, 2.66GB/s]
-      0%|                                              | 0.00/4.58k [00:00<?, ?B/s]      0%|                                              | 0.00/4.58k [00:00<?, ?B/s]    100%|█████████████████████████████████████| 4.58k/4.58k [00:00<00:00, 20.7MB/s]
+      0%|                                               | 0.00/263k [00:00<?, ?B/s]      5%|█▊                                    | 12.3k/263k [00:00<00:02, 91.8kB/s]     16%|██████                                 | 41.0k/263k [00:00<00:01, 183kB/s]     41%|████████████████▏                       | 106k/263k [00:00<00:00, 363kB/s]     87%|██████████████████████████████████▉     | 229k/263k [00:00<00:00, 522kB/s]      0%|                                               | 0.00/263k [00:00<?, ?B/s]    100%|███████████████████████████████████████| 263k/263k [00:00<00:00, 1.37GB/s]
+      0%|                                              | 0.00/4.58k [00:00<?, ?B/s]      0%|                                              | 0.00/4.58k [00:00<?, ?B/s]    100%|█████████████████████████████████████| 4.58k/4.58k [00:00<00:00, 25.0MB/s]
 
 
 
@@ -133,9 +133,9 @@ scale or the camera length.
 
  .. code-block:: none
 
-      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 42.88it/s]
-    Theta Scale:  0.000254876916706314  Rad
-    Camera Length:  21.579042747288163  cm
+      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 20.92it/s]
+    Theta Scale:  0.00025453039905591417  Rad
+    Camera Length:  21.608420454399063  cm
 
 
 
@@ -197,7 +197,7 @@ Aside: Showing how the Camera Length and scale is caluclated:
  .. code-block:: none
 
 
-    Text(0.05, 0.5, 'Camera Length: 21.58cm')
+    Text(0.05, 0.5, 'Camera Length: 21.61cm')
 
 
 
@@ -297,7 +297,7 @@ accounts for the ewald sphere now and uses the non uniform axes.
 
  .. code-block:: none
 
-      0%|          | 0/2 [00:00<?, ?it/s]    100%|██████████| 2/2 [00:00<00:00, 36.11it/s]
+      0%|          | 0/2 [00:00<?, ?it/s]     50%|█████     | 1/2 [00:00<00:00,  9.78it/s]    100%|██████████| 2/2 [00:00<00:00, 19.48it/s]
 
 
 
@@ -305,7 +305,7 @@ accounts for the ewald sphere now and uses the non uniform axes.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 25.347 seconds)
+   **Total running time of the script:** (0 minutes 41.351 seconds)
 
 
 .. _sphx_glr_download_examples_processing_calibrating_recip_space.py:
