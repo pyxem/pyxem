@@ -152,6 +152,32 @@ class TestDisplacementGradientMap:
             strain_map.inav[0].isig[0, 0].data[0], -1.0166666 + 1, decimal=2
         )
 
+    @pytest.mark.parametrize(
+        "e11_true, e22_true, e12_true",
+        [(0.02, 0.03, 0.05), (0.02, -0.01, 0.0), (-0.04, 0.01, -0.02)],
+    )
+    def test_real_space_strain_with_shear(self, e11_true, e22_true, e12_true):
+        """Shear must come from the inverse of the reciprocal stretch.
+
+        An element-wise reciprocal of the diagonal, leaving the reciprocal
+        shear in place, recovers these real-space components only when the
+        shear is zero.
+        """
+        deformation = np.array(
+            [[1 + e11_true, e12_true], [e12_true, 1 + e22_true]], dtype=float
+        )
+        unstrained = np.array(
+            [[1.0, 0.0], [0.0, 1.0], [-1.0, 0.0], [0.0, -1.0]], dtype=float
+        )
+        strained = unstrained @ np.linalg.inv(deformation)
+        deformed = hs.signals.Signal2D(np.asarray([[strained]]))
+        strain_map = get_DisplacementGradientMap(deformed, unstrained).get_strain_maps()
+        e11, e22, e12, theta = strain_map.data[:, 0, 0]
+        np.testing.assert_allclose(e11, e11_true, atol=1e-8)
+        np.testing.assert_allclose(e22, e22_true, atol=1e-8)
+        np.testing.assert_allclose(e12, e12_true, atol=1e-8)
+        np.testing.assert_allclose(theta, 0.0, atol=1e-8)
+
 
 """ Each of these basis should return the same results, in an xy basis"""
 
