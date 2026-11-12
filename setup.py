@@ -49,6 +49,20 @@ extra_feature_requirements = {
     "dev": ["black ~= 24.1", "pre-commit >=1.16"],
     "gpu": ["cupy >= 9.0.0"],
     "dask": ["dask-image", "distributed"],
+    # get_diffraction_vectors(method="neural"); the weights come from em-database.
+    "neural": ["onnxruntime", "em-database"],
+    # get_diffraction_vectors(method="neural", interactive=True): hyperspy's
+    # anywidget GUI toolkit (hyperspy 2.5) with anyplotlib plots.
+    "interactive": [
+        "onnxruntime",
+        "em-database",
+        "hyperspy >= 2.5.0",
+        "hyperspy_gui_anywidget",
+        "anyplotlib; python_version >= '3.10'",
+        "link_traits",
+    ],
+    # template_match_disk / _ring / template_match(device=...).
+    "torch": ["torch"],
 }
 
 
@@ -108,6 +122,8 @@ setup(
     package_data={
         "": ["LICENSE", "README.rst"],
         "pyxem": ["*.py", "hyperspy_extension.yaml"],
+        # the anywidget front end of the interactive GUIs
+        "pyxem.signal_tools": ["*.js", "*.css"],
     },
     entry_points={"hyperspy.extensions": ["pyxem = pyxem"]},
 )

@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+import importlib.util
 import os
 from tempfile import TemporaryDirectory
 import pytest
@@ -23,6 +24,14 @@ import numpy
 import matplotlib.pyplot as plt
 import hyperspy.api as hs
 import pyxem as pxm
+
+# The anywidget GUI modules import their optional dependencies at module level,
+# so the doctest pass must not collect them when those are not installed.
+collect_ignore = []
+if importlib.util.find_spec("anywidget") is None:
+    collect_ignore.append("signal_tools/_panel.py")
+if importlib.util.find_spec("hyperspy_gui_anywidget") is None:
+    collect_ignore.append("signal_tools/anywidget_gui.py")
 
 
 @pytest.fixture(autouse=True)

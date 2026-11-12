@@ -1,0 +1,291 @@
+# -*- coding: utf-8 -*-
+# Copyright 2016-2025 The pyXem developers
+#
+# This file is part of pyXem.
+#
+# pyXem is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# pyXem is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+
+import importlib.util
+import math
+
+import numpy as np
+import traits.api as t
+from hyperspy.ui_registry import UI_REGISTRY, add_gui_method
+from scipy.ndimage import gaussian_filter
+
+from pyxem.utils import _find_vectors
+
+TOOLKEY = "pyxem.Diffraction2D.get_diffraction_vectors"
+
+# Registered here rather than under `widgets:` in hyperspy_extension.yaml: a
+# widget declared there adds the anywidget toolkit to HyperSpy's registry even
+# when hyperspy_gui_anywidget is missing, and HyperSpy then sends its own GUIs
+# (the navigation sliders of a 3-D navigator) to a toolkit with nothing in it.
+if importlib.util.find_spec("hyperspy_gui_anywidget") is not None:
+    UI_REGISTRY[TOOLKEY]["anywidget"] = {
+        "module": "pyxem.signal_tools.anywidget_gui",
+        "function": "get_diffraction_vectors_aw",
+    }
+
+
+def _default_detector():
+    from pyxem.utils._neural_spots import DEFAULT_DETECTOR
+
+    return DEFAULT_DETECTOR
+
+
+@add_gui_method(toolkey=TOOLKEY)
+class DiffractionVectorFinder(t.HasTraits):
+    """The settings of ``get_diffraction_vectors(method="neural")``, tuned on
+    one pattern at a time.
+
+    Created by ``get_diffraction_vectors(method="neural", interactive=True)``,
+    which also opens its GUI. Every change of a setting or of
+    :attr:`position` re-runs the detector on the pattern at that position;
+    :meth:`compute` then searches every pattern with the settings as left.
+
+    Attributes
+    ----------
+    pattern : numpy.ndarray
+        The pattern at :attr:`position`, navigation-blurred as the full
+        search will blur it.
+    peaks : numpy.ndarray
+        ``(N, 5)`` ``[y, x, intensity, confidence, sigma]`` found in
+        :attr:`pattern`, in pixels.
+    response : numpy.ndarray
+        Each detection's confidence painted at its pixel.
+    vectors : DiffractionVectors or None
+        The result of the last :meth:`compute`.
+    """
+
+    #: The detector: a key of the weights module's ``DETECTORS``, or the
+    #: file name of a ``model_path`` checkpoint.
+    model = t.Str(desc="Detector model")
+    threshold = t.Range(0.0, 1.0, value=0.3, desc="Network confidence threshold")
+    min_distance = t.Range(1, 64, value=4, desc="Minimum spot separation (px)")
+    spot_radius = t.Range(0.0, 64.0, value=0.0, desc="Spot radius (px), 0 = auto")
+    navigation_sigma = t.Range(0.0, 10.0, value=0.0, desc="Navigation blur")
+    mask_beam_stop = t.Bool(False, desc="Exclude a beam stop")
+    mask_dilation = t.Range(0, 32, value=5, desc="Beam-stop dilation (px)")
+    refine_centers = t.Bool(True, desc="Re-place each disk with the center network")
+    friedel_partner = t.Bool(True, desc="Then refine with each disk's Friedel partner")
+    #: Applies to :meth:`compute` only: a single pattern has no neighbors.
+    neighbor_refine = t.Bool(False, desc="Keep spots that recur in neighbors")
+    show_response = t.Bool(False, desc="Show where the network fired")
+    #: Navigation index (array order) of the displayed pattern.
+    position = t.Tuple()
+    #: Fired after every detection, for a GUI to redraw.
+    detected = t.Event()
+
+    def __init__(
+        self,
+        signal,
+        finder,
+        mask=None,
+        mask_automatic=False,
+        mask_dilation=_find_vectors.DEFAULT_MASK_DILATION,
+        navigation_sigma=0.0,
+        neighbor_refine=False,
+        center=None,
+        calibration=None,
+        column_names=None,
+        units=None,
+        get_intensity=True,
+    ):
+        super().__init__()
+        self.signal = signal
+        self.finder = finder
+        self._output_settings = dict(
+            center=center,
+            calibration=calibration,
+            column_names=column_names,
+            units=units,
+            get_intensity=get_intensity,
+        )
+        self._navigation_dimension = signal.axes_manager.navigation_dimension
+        self._user_mask = None if mask_automatic else mask
+        self._detected_stop = None
+        self.vectors = None
+        self.widgets = None
+        self.peaks = _find_vectors.empty_peaks()
+        self.response = None
+        self._holding = True
+        self.trait_set(
+            model=(
+                self.model_names()[0]
+                if finder.model_path
+                else (finder.model_name or _default_detector())
+            ),
+            neighbor_refine=bool(neighbor_refine),
+            threshold=finder.threshold,
+            min_distance=finder.min_distance,
+            spot_radius=finder.spot_radius or 0.0,
+            refine_centers=finder.refine_centers,
+            friedel_partner=finder.friedel_partner,
+            navigation_sigma=float(navigation_sigma),
+            mask_beam_stop=mask is not None,
+            mask_dilation=int(mask_dilation),
+            position=tuple(
+                size // 2 for size in signal.data.shape[: self._navigation_dimension]
+            ),
+        )
+        self._holding = False
+        self.pattern = self._read_pattern()
+        self.detect()
+
+    @t.observe(
+        [
+            "threshold",
+            "min_distance",
+            "spot_radius",
+            "refine_centers",
+            "friedel_partner",
+            "mask_beam_stop",
+            "mask_dilation",
+            "show_response",
+        ]
+    )
+    def _setting_changed(self, event):
+        if not self._holding:
+            self.detect()
+
+    @t.observe("model")
+    def _model_changed(self, event):
+        if self._holding:
+            return
+        if self.finder.model_path and event.new == self.model_names()[0]:
+            return
+        self.finder.model_path = None
+        self.finder.model_name = event.new
+        self.detect()
+
+    def model_names(self):
+        """The detectors the GUI offers: a ``model_path`` checkpoint's file
+        name alone, else every detector of the weights module."""
+        if self.finder.model_path:
+            import os
+
+            return [os.path.basename(str(self.finder.model_path))]
+        from pyxem.utils._neural_spots import DETECTORS
+
+        return list(DETECTORS)
+
+    @t.observe(["position", "navigation_sigma"])
+    def _pattern_changed(self, event):
+        if not self._holding:
+            self.pattern = self._read_pattern()
+            self.detect()
+
+    def _update_finder(self):
+        self.finder.threshold = float(self.threshold)
+        self.finder.min_distance = int(self.min_distance)
+        self.finder.spot_radius = float(self.spot_radius) or None
+        self.finder.refine_centers = bool(self.refine_centers)
+        self.finder.friedel_partner = bool(self.friedel_partner)
+        return self.finder
+
+    @property
+    def mask(self):
+        """The beam-stop mask in use, or None."""
+        if not self.mask_beam_stop:
+            return None
+        if self._user_mask is not None:
+            return self._user_mask
+        if self._detected_stop is None:
+            stop = _find_vectors.automatic_mask(
+                self.signal.data, self._navigation_dimension, dilation=0
+            )
+            self._detected_stop = False if stop is None else stop
+        if self._detected_stop is False:
+            return None
+        return _find_vectors.dilate_mask(self._detected_stop, self.mask_dilation)
+
+    @property
+    def parameters(self):
+        """The current settings, as keyword arguments for
+        ``get_diffraction_vectors``."""
+        parameters = dict(self._update_finder().parameters)
+        parameters["navigation_sigma"] = float(self.navigation_sigma)
+        parameters["neighbor_refine"] = bool(self.neighbor_refine)
+        if not self.mask_beam_stop:
+            parameters["mask"] = None
+        elif self._user_mask is not None:
+            parameters["mask"] = self._user_mask
+        else:
+            parameters["mask"] = "auto"
+            parameters["mask_dilation"] = int(self.mask_dilation)
+        return parameters
+
+    def _read_pattern(self):
+        """The pattern at :attr:`position`, navigation-blurred like the full
+        search. Only the neighborhood the blur reaches is read, so a lazy
+        signal computes a handful of patterns rather than a chunk."""
+        data = self.signal.data
+        position = tuple(self.position)
+        if self._navigation_dimension == 0:
+            pattern = data
+        elif self.navigation_sigma <= 0:
+            pattern = data[position]
+        else:
+            reach = int(math.ceil(3 * self.navigation_sigma))
+            window = []
+            for axis, index in enumerate(position):
+                size = data.shape[axis]
+                offsets = np.arange(index - reach, index + reach + 1)
+                # Half-sample symmetric reflection, as the full search pads.
+                offsets = np.where(offsets < 0, -offsets - 1, offsets)
+                offsets = np.where(offsets >= size, 2 * size - offsets - 1, offsets)
+                window.append(np.clip(offsets, 0, size - 1))
+            slab = data[tuple(slice(w.min(), w.max() + 1) for w in window)]
+            if hasattr(slab, "compute"):
+                slab = slab.compute()
+            neighborhood = np.asarray(slab)[np.ix_(*[w - w.min() for w in window])]
+            blurred = gaussian_filter(
+                neighborhood.astype(np.float32),
+                sigma=(self.navigation_sigma,) * self._navigation_dimension + (0, 0),
+                mode="reflect",
+                truncate=3.0,
+            )
+            pattern = blurred[(reach,) * self._navigation_dimension]
+        if hasattr(pattern, "compute"):
+            pattern = pattern.compute()
+        return np.asarray(pattern, dtype=np.float32)
+
+    def detect(self):
+        """Re-run the detector on :attr:`pattern`."""
+        self.response, self.peaks = self._update_finder().detect(
+            self.pattern, mask=self.mask
+        )
+        self.detected = True
+
+    def marker_radius(self):
+        """Radius in pixels at which a detected spot is drawn."""
+        return self._update_finder().marker_radius()
+
+    def compute(self):
+        """Find the vectors in every pattern with the current settings.
+
+        Returns
+        -------
+        DiffractionVectors
+            Lazy if the signal is lazy; also kept on :attr:`vectors`.
+        """
+        self.vectors = self.signal._vectors_from_finder(
+            self._update_finder(),
+            mask=self.mask,
+            navigation_sigma=float(self.navigation_sigma),
+            neighbor_refine=bool(self.neighbor_refine),
+            **self._output_settings,
+        )
+        return self.vectors
