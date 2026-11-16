@@ -37,6 +37,7 @@ extra_feature_requirements = {
         "pydata-sphinx-theme",
         "hyperspy_gui_ipywidgets    >= 2.0",
         "dask-image",
+        "graphviz",
     ],
     "tests": [
         "pytest     >= 5.0",
