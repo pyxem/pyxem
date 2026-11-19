@@ -15,7 +15,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
-from copy import deepcopy
 from typing import Optional, Sequence, Tuple, TYPE_CHECKING, Union
 
 from pyxem.utils._typing import Degrees, Number
@@ -34,7 +33,7 @@ from hyperspy.signals import Signal2D, BaseSignal
 from hyperspy._signals.lazy import LazySignal
 from hyperspy.misc.utils import isiterable
 from importlib import import_module
-from hyperspy.axes import UniformDataAxis
+from hyperspy.axes import AxesManager, UniformDataAxis
 
 from pyxem.signals import (
     CommonDiffraction,
@@ -984,7 +983,13 @@ class Diffraction2D(CommonDiffraction, Signal2D):
         shifts.column_names = ["x-shift", "y-shift"]
         shifts.units = ["px", "px"]  # shifts are in pixels
         shifts.metadata.add_node("Shifts")  # add information about the signal Axes
-        shifts.metadata.Shifts.signal_axes = deepcopy(self.axes_manager.signal_axes)
+        # HyperSpy serializes an AxesManager. It takes axes in array (y, x) order.
+        shifts.metadata.Shifts.signal_axes = AxesManager(
+            [
+                axis.get_axis_dictionary()
+                for axis in reversed(self.axes_manager.signal_axes)
+            ]
+        )
         return shifts
 
     @deprecated_argument(
