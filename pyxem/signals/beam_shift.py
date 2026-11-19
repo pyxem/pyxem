@@ -20,7 +20,7 @@
 import numpy as np
 from scipy.ndimage import rotate
 from hyperspy._signals.lazy import LazySignal
-from hyperspy.axes import UniformDataAxis
+from hyperspy.axes import AxesManager, UniformDataAxis
 import hyperspy.api as hs
 
 import pyxem.utils._beam_shift_tools as bst
@@ -306,6 +306,8 @@ class BeamShift(DiffractionVectors1D):
                 raise ValueError(
                     "No signal axes found in metadata. Please provide signal_axes."
                 )
+        if isinstance(signal_axes, AxesManager):
+            signal_axes = signal_axes.signal_axes
         signal_axes = [
             s.convert_to_uniform_axis() if not isinstance(s, UniformDataAxis) else s
             for s in signal_axes

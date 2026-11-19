@@ -571,6 +571,31 @@ class TestAzimuthalIntegrator:
         ai = ones.ai
 
 
+@pytest.mark.parametrize("extension", ["hspy", "zspy"])
+@pytest.mark.parametrize("lazy", [False, True])
+def test_save_beam_shifts_preserves_calibration(tmp_path, extension, lazy):
+    data = np.zeros((2, 3, 6, 8))
+    data[..., 2, 5] = 1
+    diffraction = Diffraction2D(data)
+    if lazy:
+        diffraction = diffraction.as_lazy()
+
+    x_axis, y_axis = diffraction.axes_manager.signal_axes
+    x_axis.scale, x_axis.offset, x_axis.units = 0.15, -0.4, "mrad"
+    y_axis.scale, y_axis.offset, y_axis.units = 0.28, 0.7, "mrad"
+    shifts = diffraction.get_direct_beam_position(method="center_of_mass")
+    expected = shifts.pixels_to_calibrated_units(signal_axes=(x_axis, y_axis))
+
+    path = tmp_path / f"beam_shifts.{extension}"
+    shifts.save(path)
+    restored = hs.load(path)
+    calibrated = restored.pixels_to_calibrated_units()
+
+    np.testing.assert_array_equal(restored.data, shifts.data)
+    np.testing.assert_allclose(calibrated.data, expected.data)
+    assert calibrated.units == expected.units
+
+
 class TestGetDirectBeamPosition:
     def setup_method(self):
         px, py, dx, dy = 15, 10, 20, 26
